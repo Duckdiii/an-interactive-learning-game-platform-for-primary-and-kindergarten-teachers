@@ -1,0 +1,41 @@
+# === Environment / secrets ===
+.env
+.env.local
+.env.*.local
+application-local.yml
+
+# === Node / Frontend ===
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# === Java / Maven / Spring Boot Backend ===
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.iml
+*.ipr
+*.iws
+
+# === IDE ===
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Logs ===
+*.log
+logs/
