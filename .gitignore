@@ -39,6 +39,3 @@ Thumbs.db
 # === Logs ===
 *.log
 logs/
-
-# === Local AI agent instructions (not shared via repo) ===
-CLAUDE.md
