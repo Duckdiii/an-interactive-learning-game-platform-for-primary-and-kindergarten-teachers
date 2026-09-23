@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: aigame-backend
+
+  datasource:
+    # Supabase (managed PostgreSQL) — use Session Pooler or Direct Connection.
+    # Do NOT use the Transaction Pooler (port 6543): it is not compatible with
+    # Hibernate's prepared statement caching.
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      # Supabase free tier caps concurrent connections, keep the pool small.
+      maximum-pool-size: 5
+
+  jpa:
+    hibernate:
+      # Schema is managed by Flyway, never let Hibernate auto-generate DDL.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
