@@ -36,7 +36,7 @@ public abstract class GameSession {
     private Game game;
 
     // Composition: GameSession ◆ 0..* Participant (tổ chức). Participant chết theo phiên.
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "session_id", nullable = false)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "game_session_id", nullable = false)
     private List<Participant> participants = new ArrayList<>();
 }

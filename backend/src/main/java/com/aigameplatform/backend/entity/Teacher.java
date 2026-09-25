@@ -31,7 +31,7 @@ public class Teacher {
     private String passwordHash;
 
     // Aggregation: Teacher 1 - 1..* Classroom. Không cascade, Classroom có vòng đời độc lập.
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")
     private List<Classroom> classrooms = new ArrayList<>();
 }

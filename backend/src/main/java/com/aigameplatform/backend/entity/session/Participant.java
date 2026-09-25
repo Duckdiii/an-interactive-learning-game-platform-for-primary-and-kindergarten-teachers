@@ -25,7 +25,7 @@ public class Participant {
     private int score;
 
     // Composition: Participant ◆ 0..* PlayInteractionDetail (tương tác). Chết theo Participant.
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "participant_id", nullable = false)
     private List<PlayInteractionDetail> playInteractionDetails = new ArrayList<>();
 

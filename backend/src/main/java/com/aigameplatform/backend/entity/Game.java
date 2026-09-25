@@ -48,7 +48,7 @@ public class Game {
     private GameStatus status = GameStatus.DRAFT;
 
     // Composition: Game ◆ 1..* QuestionGame. Câu hỏi chết theo Game.
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "game_id", nullable = false)
     @OrderBy("itemIndex ASC")
     private List<QuestionGame> questions = new ArrayList<>();

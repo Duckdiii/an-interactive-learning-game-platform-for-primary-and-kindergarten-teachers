@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.entity.question;
 
+import com.aigameplatform.backend.entity.EditLog;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +18,15 @@ public abstract class QuestionGame {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    protected String id;
 
-    private int itemIndex;
+    protected int itemIndex;
 
-    private int timeLimit;
+    protected int timeLimit;
 
-    private int point;
+    protected int point;
+
+    // Association: QuestionGame 1 - 0..* EditLog. EditLog giữ khóa ngoại (mappedBy), không cascade.
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
+    protected List<EditLog> editLogs = new ArrayList<>();
 }

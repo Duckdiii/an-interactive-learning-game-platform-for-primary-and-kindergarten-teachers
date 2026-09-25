@@ -16,7 +16,7 @@ import lombok.Setter;
 public class TeamSession extends TeacherSession {
 
     // Composition: TeamSession ◆ 2..* Team. Team chết theo phiên.
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "team_session_id", nullable = false)
     private List<Team> teams = new ArrayList<>();
 

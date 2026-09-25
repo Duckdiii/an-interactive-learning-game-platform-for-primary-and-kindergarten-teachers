@@ -19,6 +19,6 @@ public class OddOneOutQuestion extends QuestionGame {
     @OrderColumn(name = "item_order")
     @Column(name = "item_value")
     private List<String> items = new ArrayList<>();
-
+    
     private String oddOneOutId;
 }

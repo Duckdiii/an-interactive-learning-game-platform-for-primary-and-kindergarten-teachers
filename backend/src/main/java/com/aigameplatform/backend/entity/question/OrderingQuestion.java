@@ -14,9 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderingQuestion extends QuestionGame {
 
-    // Composition: OrderingQuestion ◆ 2..* OrderStep. Bước chết theo câu hỏi.
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "question_id", nullable = false)
+    // Aggregation: OrderingQuestion ◇ 2..* OrderStep. Không cascade, OrderStep có vòng đời độc lập.
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id")
     @OrderBy("correctPosition ASC")
     private List<OrderStep> steps = new ArrayList<>();
 }

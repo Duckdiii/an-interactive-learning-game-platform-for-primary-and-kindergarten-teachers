@@ -26,7 +26,7 @@ public class PlayInteractionDetail {
 
     private int durationSeconds;
 
-    // Association: mỗi tương tác trỏ tới đúng 1 câu hỏi.
+    // Aggregation: PlayInteractionDetail ◇ 1 QuestionGame. Không cascade, câu hỏi có vòng đời độc lập.
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "question_id")
     private QuestionGame question;
