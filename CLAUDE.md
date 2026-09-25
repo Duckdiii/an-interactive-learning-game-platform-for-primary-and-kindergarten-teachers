@@ -16,7 +16,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 
 ## Backend (`backend/`)
 
-- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction}`, `service/{strategy,validation,factory}`, `repository`, `controller`, `dto/{request,response}`, `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
+- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction,enums}` (entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`), `service/{strategy,validation,factory}`, `repository`, `controller`, `dto/{request,response}`, `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
 - **Schema do Flyway quản lý** — `jpa.hibernate.ddl-auto` luôn là `validate`, không được đổi sang `update`/`create`. Mọi thay đổi schema phải viết migration mới trong `src/main/resources/db/migration/` theo thứ tự version tăng dần (`V1__...sql`, `V2__...sql`), không sửa lại migration đã tồn tại.
 - Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
 - Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
@@ -77,7 +77,7 @@ Link doc: TODO — dán 3 link Claude Docs vào đây. Trước khi sinh code li
 - Mỗi khi bạn (agent) sinh hoặc sửa code/nội dung đáng kể trong repo (tính năng, module, config, migration, test...), phải thêm 1 dòng vào bảng trong `ai-usage-log.md` ở root trước khi báo hoàn thành. Không cần log cho thay đổi nhỏ như sửa typo hay format.
 - Điền theo đúng quy ước ở đầu `ai-usage-log.md`: STT tiếp theo, ngày, công cụ AI kèm phiên bản model của bạn, mức độ đóng góp (`Sinh mới` / `Sửa - refactor` / `Gợi ý`), module kèm đường dẫn file chính, tóm tắt prompt của user, và kết quả kiểm chứng đã chạy (build/test).
 - Nếu trong quá trình làm bạn gặp lỗi/ảo giác của chính mình rồi tự sửa, ghi vào cột "Lỗi / Ảo giác AI & Cách xử lý". Không bịa lỗi nếu không có.
-- Cột "Người thực hiện" và "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`), agent không tự đoán.
+- Cột "Người thực hiện": ghi tên người đang ra lệnh cho agent, lấy từ `git config user.name` (chạy lệnh này để biết, không tự đoán). Cột "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`).
 - Không tự commit. Cột "Mã Commit SHA" ghi `TODO` để user cập nhật sau khi commit; nhắc user làm việc này trong câu báo cáo cuối.
 
 ## Trước khi báo hoàn thành

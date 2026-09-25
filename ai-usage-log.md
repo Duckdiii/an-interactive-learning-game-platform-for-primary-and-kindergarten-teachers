@@ -16,7 +16,7 @@
 
 | STT | Ngày | Người thực hiện | Công cụ AI (phiên bản) | Mức độ AI đóng góp | Phạm vi / Module | Câu lệnh chính (Main Prompt) | Mã Commit SHA | Sinh viên tinh chỉnh / Tối ưu | Người review / Cách kiểm chứng | Lỗi / Ảo giác AI & Cách xử lý |
 | :---: | :---: | :--- | :--- | :---: | :--- | :--- | :---: | :--- | :--- | :--- |
-| 1 | | | | | | | | | | |
+| 1 | 2026-09-25 | Nguyễn Đức Duy | Claude Sonnet 5 | Sinh mới | Entity theo class diagram — `backend/src/main/java/com/aigameplatform/backend/entity/**` | Gửi ảnh class diagram và yêu cầu AI nêu kế hoạch code trước, sau đó code toàn bộ entity theo sơ đồ (các enum, `Teacher`, `Classroom`, `Game`, `EditLog`, nhánh `QuestionGame` 10 loại câu hỏi + `OrderStep`, nhánh `GameSession` + `Team`/`Participant`, `PlayInteractionDetail`). Ràng buộc đã chốt: `id` kiểu String; `PlayInteractionDetail` giữ 1 class như sơ đồ; các trường list giữ đúng như sơ đồ; giữ cột `password` và thêm `passwordHash` cho `Teacher`; 1 `Team` chứa 1 hoặc nhiều `Participant`, mỗi `Participant` thuộc 1 `Team`; thư mục `entity/enums` cho enum; thể hiện rõ association / aggregation / composition trong code (cascade, orphanRemoval, JoinColumn); chưa viết migration, chưa chạy với DB, không push | TODO | TODO | Đã chạy `./mvnw compile` thành công; chưa validate với DB/Flyway | Không có |
 
 ## Case study lỗi / ảo giác của AI
 
