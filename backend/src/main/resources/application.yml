@@ -25,6 +25,10 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    # Supabase's "public" schema is never empty, so Flyway needs a baseline.
+    # baseline-version 0 makes sure V1 and V2 are still applied.
+    baseline-on-migrate: true
+    baseline-version: 0
 
 server:
   port: 8080
