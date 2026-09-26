@@ -248,6 +248,8 @@ Trả lời: `answer` (so sánh sau khi chuẩn hóa chữ hoa/thường và kho
 | 2. Logic | Luật cứng theo bảng ở mục 5 | Chuỗi validator (`AbstractGameValidator`) |
 | 3. An toàn | Từ cấm học đường + OpenAI Moderation cho mọi trường văn bản | Danh sách từ cấm trong bộ nhớ + API (mock khi test) |
 
+- Luật chung của Lớp 2 (ngoài luật riêng từng loại ở mục 5): `id` các màn không trùng; không chuỗi nào rỗng hoặc chỉ gồm khoảng trắng; `id` đáp án/phần tử dạng chữ (QUIZ, ODD_ONE_OUT) phải theo vị trí `a`, `b`, `c`...; nội dung các lựa chọn/phần tử cùng danh sách không được trùng nhau (so sánh không phân biệt hoa thường và khoảng trắng thừa, giữ nguyên dấu tiếng Việt). Riêng ORDERING: `correctPosition` trong khoảng 1..n và không trùng; DRAG_DROP: nhãn vùng thả không trùng; WORD_SCRAMBLE: `scrambledLetters` là hoán vị đúng các chữ cái của `correctWord` và khác thứ tự gốc.
+- SPOT_THE_TARGET không có luật riêng ở Lớp 2. Việc bắt buộc có `hitRegion` chỉ kiểm khi **xuất bản**, không kiểm khi sinh hay lưu bản nháp.
 - Nếu Lớp 1 hoặc 2 lỗi: tự gọi lại LLM tối đa **2 lần**, đính kèm thông báo lỗi cụ thể (có vị trí) để AI sửa.
 - Vẫn lỗi: trả `504 AI_GENERATION_TIMEOUT` theo REST API Contract. Không nạp game mẫu.
 - Lớp 3 phát hiện nội dung không an toàn: `422 UNSAFE_CONTENT`.
