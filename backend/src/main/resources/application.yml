@@ -36,3 +36,15 @@ server:
 app:
   cors:
     allowed-origins: http://localhost:5173
+  jwt:
+    # HS256 signing key, at least 32 bytes. Provide it via the JWT_SECRET environment variable.
+    secret: ${JWT_SECRET}
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-hours: 24
+  auth:
+    refresh-cookie:
+      name: refresh_token
+      path: /api/auth
+      same-site: Strict
+      # Secure cookies need HTTPS in production; browsers still accept them on http://localhost.
+      secure: ${COOKIE_SECURE:true}
