@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0.0",
+  "gameType": "AUDIO_VISUAL_MATCH",
+  "metadata": {
+    "title": "Ví dụ AUDIO_VISUAL_MATCH",
+    "subject": "MATH",
+    "gradeLevel": "GRADE_1",
+    "topic": "Chủ đề mẫu"
+  },
+  "gameplaySettings": {
+    "hitboxScale": 1.5
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "timeLimitSeconds": 20,
+      "points": 10,
+      "audioText": "Quả táo",
+      "audioUrl": "https://audio.example.com/qua-tao.mp3",
+      "correct": {
+        "visualPrompt": "apple",
+        "imageUrl": "https://images.example.com/apple.jpg"
+      },
+      "distractors": [
+        {
+          "visualPrompt": "banana"
+        },
+        {
+          "visualPrompt": "orange"
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "timeLimitSeconds": 20,
+      "points": 10,
+      "audioText": "Con mèo",
+      "correct": {
+        "visualPrompt": "cat"
+      },
+      "distractors": [
+        {
+          "visualPrompt": "dog"
+        }
+      ]
+    }
+  ]
+}

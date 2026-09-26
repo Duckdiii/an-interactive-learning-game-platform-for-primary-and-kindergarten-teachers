@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "gameType": "ORDERING",
+  "metadata": {
+    "title": "Ví dụ ORDERING",
+    "subject": "MATH",
+    "gradeLevel": "GRADE_1",
+    "topic": "Chủ đề mẫu"
+  },
+  "gameplaySettings": {
+    "hitboxScale": 1.5
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "timeLimitSeconds": 60,
+      "points": 20,
+      "audioText": "Sắp xếp các bước trồng cây",
+      "steps": [
+        {
+          "id": "s1",
+          "text": "Gieo hạt",
+          "correctPosition": 1
+        },
+        {
+          "id": "s2",
+          "text": "Tưới nước",
+          "correctPosition": 2
+        },
+        {
+          "id": "s3",
+          "text": "Cây lớn lên",
+          "correctPosition": 3
+        }
+      ]
+    }
+  ]
+}

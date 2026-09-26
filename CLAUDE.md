@@ -16,7 +16,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 
 ## Backend (`backend/`)
 
-- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction,enums}` (`entity/question/embedded` chứa các thành phần nhúng như cặp, vùng thả; entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`), `service/{strategy,validation,factory}`, `repository`, `controller`, `dto/{request,response}`, `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
+- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction,enums}` (`entity/question/embedded` chứa các thành phần nhúng như cặp, vùng thả; entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`), `service/{strategy,validation,factory}`, `repository`, `controller`, `dto/{request,response,dsl}` (`dto/dsl` là các record của Game JSON DSL), `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
 - **Schema do Flyway quản lý** — `jpa.hibernate.ddl-auto` luôn là `validate`, không được đổi sang `update`/`create`. Mọi thay đổi schema phải viết migration mới trong `src/main/resources/db/migration/` theo thứ tự version tăng dần (`V1__...sql`, `V2__...sql`), không sửa lại migration đã tồn tại.
 - Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
 - Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
@@ -50,7 +50,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 
 ## Contract đã freeze — mọi thay đổi field/endpoint phải đồng bộ cả Backend, Frontend và doc
 
-- JSON DSL Schema v1.0.0 (cấu trúc field `QuestionGame` cho từng loại game)
+- JSON DSL Schema v1.0.0 (cấu trúc field `QuestionGame` cho từng loại game). Đặc tả: `docs/game-json-dsl-v1.0.0.md`; JSON Schema: `backend/src/main/resources/schema/game-dsl/1.0.0/*.schema.json` (mỗi loại game một file, tự chứa); record Java: `dto/dsl`. Sửa DSL phải sửa đồng bộ cả ba nơi và cập nhật test `GameDslSchemaTest`.
 - REST API Contract v1.0.0 (endpoint, response envelope `{success, data}` / `{success, error}`, error code)
 - WebSocket Message Format v1.0.0 (`/topic/session/{sessionId}/...`, `/app/session/{sessionId}/...`)
 
