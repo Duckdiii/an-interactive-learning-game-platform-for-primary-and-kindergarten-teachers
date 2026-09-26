@@ -1,0 +1,26 @@
+{
+  "id": "00000000-0000-4000-8000-000000000002",
+  "title": "Đếm các con vật",
+  "gameType": "QUIZ",
+  "questionNum": 1,
+  "grade": "KINDERGARTEN",
+  "subject": "MATH",
+  "shareCode": "SAMPLE02",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000000201",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "text": "Có 2 con mèo và thêm 1 con mèo. Có tất cả bao nhiêu con mèo?",
+      "options": [
+        "2",
+        "3",
+        "4"
+      ],
+      "correctIndex": 1
+    }
+  ]
+}
