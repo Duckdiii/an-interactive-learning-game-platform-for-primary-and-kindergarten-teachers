@@ -73,7 +73,7 @@ Các ví dụ chỉ trình bày một phần tử của `questions[]`, ở dạn
 |---|---|
 | `questionText` | Câu hỏi |
 | `visualPrompt` | (tùy chọn) ảnh minh họa |
-| `options[{id, text, visualPrompt?}]` | 2–4 đáp án |
+| `options[{id, text}]` | 2–4 đáp án (chỉ có chữ ở v1.0.0) |
 | `correctOptionId` **[ĐA]** | `id` của đáp án đúng |
 
 Layer 2: đúng 1 đáp án đúng; `correctOptionId` thuộc `options`; `text` không trùng nhau.
@@ -107,7 +107,7 @@ Trả lời: `selectedOptionId` (id lựa chọn do Backend cấp khi phục v�
 
 | Trường | Ghi chú |
 |---|---|
-| `items[{id, text?, visualPrompt?}]` | 3–5 phần tử |
+| `items[{id, text}]` | 3–5 phần tử (chỉ có chữ ở v1.0.0) |
 | `oddOneOutId` **[ĐA]** | `id` của phần tử khác loại |
 
 Layer 2: `oddOneOutId` thuộc `items`; các phần tử không trùng nhau.
@@ -264,7 +264,7 @@ Trả lời: `answer` (so sánh sau khi chuẩn hóa chữ hoa/thường và kho
 | SPOT_THE_TARGET | Vùng bấm đổi sang số thực 0–1, cho phép rỗng; thêm `target_description` |
 | AUDIO_VISUAL_MATCH, VISUAL_CLOZE | Thêm bảng `distractors` |
 | QUIZ, ODD_ONE_OUT | Không đổi cột. `id` đáp án là `a`, `b`, `c`... suy ra từ vị trí; `correctIndex` giữ nguyên |
-| Media | Thêm `visual_prompt`, `audio_text` |
+| Media | `question_games` có thêm `audio_text`, `audio_url`, `visual_prompt`, `image_url` dùng chung cho mọi loại (ảnh nền/ảnh minh họa của SPOT_THE_TARGET, VISUAL_CLOZE, QUIZ, WORD_SCRAMBLE nằm ở đây); `order_steps` có thêm `visual_prompt`, `image_url` |
 
 Class diagram phải cập nhật tương ứng.
 
@@ -272,6 +272,7 @@ Class diagram phải cập nhật tương ứng.
 
 - **Bản dành cho học sinh** và endpoint riêng: bỏ các trường [ĐA], Backend cấp lại id lựa chọn (đã xáo) khi phục vụ để không lộ đáp án qua thứ tự hay `pairId`.
 - Chấm điểm từng phần.
+- Hình minh họa cho từng đáp án của QUIZ và từng phần tử của ODD_ONE_OUT (hiện chỉ có chữ).
 - Công cụ tự sinh type TypeScript từ JSON Schema.
 - Bộ chuyển đổi (Adapter) tương thích ngược khi có v1.1.0 trở đi.
 

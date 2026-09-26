@@ -20,5 +20,9 @@ public class OrderStep {
 
     private String text;
 
+    private String visualPrompt;
+
+    private String imageUrl;
+
     private int correctPosition;
 }
