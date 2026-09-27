@@ -16,7 +16,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 
 ## Backend (`backend/`)
 
-- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction}`, `service/{strategy,validation,factory}`, `repository`, `controller`, `dto/{request,response}`, `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
+- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction,enums}` (entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`), `service/{strategy,validation,factory}`, `repository`, `controller`, `dto/{request,response}`, `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
 - **Schema do Flyway quản lý** — `jpa.hibernate.ddl-auto` luôn là `validate`, không được đổi sang `update`/`create`. Mọi thay đổi schema phải viết migration mới trong `src/main/resources/db/migration/` theo thứ tự version tăng dần (`V1__...sql`, `V2__...sql`), không sửa lại migration đã tồn tại.
 - Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
 - Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
@@ -67,6 +67,31 @@ Link doc: TODO — dán 3 link Claude Docs vào đây. Trước khi sinh code li
 - Audio prompt luôn có nút "nghe lại" không giới hạn số lần.
 - Renderer mới phải hỗ trợ prop `previewMode` (dùng cho Workspace Editor live preview).
 
+## Nguyên tắc thiết kế: OOP, SOLID, GRASP
+
+Áp dụng cho cả code mới lẫn khi sửa code cũ. Khi có nguyên tắc mâu thuẫn với "Kiến trúc domain đã chốt", ưu tiên kiến trúc đã chốt và báo user.
+
+**OOP**
+- **Đóng gói**: field `private` (hoặc `protected` nếu class diagram ghi `#`), truy cập qua getter/setter hoặc method nghiệp vụ. Không mở public field.
+- **Kế thừa** chỉ khi quan hệ là "is-a" thật (ví dụ `QuizQuestion` là một `QuestionGame`). Ưu tiên composition khi chỉ để tái sử dụng code.
+- **Đa hình**: gọi qua kiểu cha/interface, không dùng chuỗi `if/switch` theo `gameType` để rẽ nhánh hành vi. Thêm game type mới phải là thêm class mới, không sửa nhiều chỗ.
+- **Trừu tượng**: `abstract`/interface cho khái niệm chung; lớp bên ngoài chỉ phụ thuộc vào phần public là "hợp đồng".
+
+**SOLID**
+- **S** (Single Responsibility): mỗi class một lý do để thay đổi. Controller chỉ nhận request/trả response, logic nghiệp vụ ở `service`, truy cập dữ liệu ở `repository`. Entity không chứa logic gọi API ngoài hay validate JSON.
+- **O** (Open/Closed): mở rộng bằng class mới (Strategy, Factory, Validator mới), không sửa code đã chạy ổn để thêm case.
+- **L** (Liskov): class con thay được class cha mà không đổi ý nghĩa. Không override để ném `UnsupportedOperationException` (ngoại lệ duy nhất: khung `TODO` tạm thời đã ghi rõ trong `service/strategy`).
+- **I** (Interface Segregation): interface nhỏ, đúng vai trò; không ép class cài method không dùng.
+- **D** (Dependency Inversion): phụ thuộc vào abstraction, inject qua constructor (Spring DI). Không `new` service/repository trong code nghiệp vụ; API ngoài (Gemini, TTS, Moderation) đi qua interface để mock được khi test.
+
+**GRASP**
+- **Information Expert**: đặt hành vi ở class đang giữ dữ liệu cần thiết.
+- **Creator**: class nào chứa/sở hữu đối tượng thì chịu trách nhiệm tạo nó (khớp với composition trong class diagram, và các Factory đã chốt).
+- **Controller**: lớp REST controller/WebSocket handler chỉ điều phối, ủy quyền cho service.
+- **Low Coupling / High Cohesion**: ít phụ thuộc chéo giữa package, mỗi class gắn với một mục đích rõ.
+- **Polymorphism, Pure Fabrication, Indirection, Protected Variations**: dùng Strategy, Factory, Registry đã chốt để cô lập điểm thay đổi (loại game, nhà cung cấp AI).
+- Không thêm tầng trừu tượng "phòng xa" khi chưa có nhu cầu thật; chỉ tách khi thấy lặp lại hoặc điểm thay đổi rõ ràng.
+
 ## Testing & ngôn ngữ
 
 - Unit test phần gọi API ngoài (Gemini, OpenAI Moderation, Google TTS) phải **mock**, không gọi API thật trong test (tránh tốn tiền/quota của team).
@@ -77,7 +102,7 @@ Link doc: TODO — dán 3 link Claude Docs vào đây. Trước khi sinh code li
 - Mỗi khi bạn (agent) sinh hoặc sửa code/nội dung đáng kể trong repo (tính năng, module, config, migration, test...), phải thêm 1 dòng vào bảng trong `ai-usage-log.md` ở root trước khi báo hoàn thành. Không cần log cho thay đổi nhỏ như sửa typo hay format.
 - Điền theo đúng quy ước ở đầu `ai-usage-log.md`: STT tiếp theo, ngày, công cụ AI kèm phiên bản model của bạn, mức độ đóng góp (`Sinh mới` / `Sửa - refactor` / `Gợi ý`), module kèm đường dẫn file chính, tóm tắt prompt của user, và kết quả kiểm chứng đã chạy (build/test).
 - Nếu trong quá trình làm bạn gặp lỗi/ảo giác của chính mình rồi tự sửa, ghi vào cột "Lỗi / Ảo giác AI & Cách xử lý". Không bịa lỗi nếu không có.
-- Cột "Người thực hiện" và "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`), agent không tự đoán.
+- Cột "Người thực hiện": ghi tên người đang ra lệnh cho agent, lấy từ `git config user.name` (chạy lệnh này để biết, không tự đoán). Cột "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`).
 - Không tự commit. Cột "Mã Commit SHA" ghi `TODO` để user cập nhật sau khi commit; nhắc user làm việc này trong câu báo cáo cuối.
 
 ## Trước khi báo hoàn thành
