@@ -38,8 +38,14 @@ export default function LoginPage() {
       const { teacher, accessToken, refreshToken } = await loginTeacher(form)
       login(teacher, accessToken, refreshToken)
       navigate(ROUTES.dashboard, { replace: true })
-    } catch {
-      setErrorMessage('Email hoặc mật khẩu không đúng')
+    } catch (error) {
+      const isAuthFailure =
+        axios.isAxiosError(error) && error.response?.status === 401
+      setErrorMessage(
+        isAuthFailure
+          ? 'Email hoặc mật khẩu không đúng'
+          : parseApiError(error, 'Không thể đăng nhập lúc này').message,
+      )
     } finally {
       setIsSubmitting(false)
     }
