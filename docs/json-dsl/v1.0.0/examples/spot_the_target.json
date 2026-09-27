@@ -1,0 +1,23 @@
+{
+  "id": "00000000-0000-4000-8000-000000000010",
+  "title": "Tìm con mèo trong vườn",
+  "gameType": "SPOT_THE_TARGET",
+  "questionNum": 1,
+  "grade": "KINDERGARTEN",
+  "subject": "VIETNAMESE",
+  "shareCode": "SAMPLE10",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000001001",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "backgroundImageUrl": "https://example.com/assets/garden-800x600.png",
+      "hitRegionX": 240,
+      "hitRegionY": 180,
+      "hitRegionRadius": 48
+    }
+  ]
+}
