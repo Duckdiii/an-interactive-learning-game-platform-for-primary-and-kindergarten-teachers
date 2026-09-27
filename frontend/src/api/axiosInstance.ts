@@ -134,7 +134,17 @@ axiosInstance.interceptors.response.use(
       return axiosInstance(originalRequest)
     } catch (refreshError) {
       rejectPendingRequests(refreshError)
-      expireSession()
+      const status = axios.isAxiosError(refreshError)
+        ? refreshError.response?.status
+        : undefined
+      const isCredentialFailure =
+        !axios.isAxiosError(refreshError) ||
+        status === 400 ||
+        status === 401 ||
+        status === 403
+      if (isCredentialFailure) {
+        expireSession()
+      }
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false
