@@ -146,11 +146,14 @@ alter table drag_drop_items
     foreign key (question_id)
     references drag_drop_questions (id);
 
--- Rows without a target zone cannot form a valid item (target_zone_id is required), so they are not copied.
+-- Every legacy row with any content is copied. A row without a target zone still gets zone z1 (label left empty)
+-- so the item keeps its data; the teacher fills in the zone label later.
 insert into drag_drop_zones (zone_order, zone_id, question_id, label)
-    select 0, 'z1', id, target_zone from drag_drop_questions where target_zone is not null;
+    select 0, 'z1', id, target_zone from drag_drop_questions
+    where target_zone is not null or item is not null or item_image_url is not null;
 insert into drag_drop_items (item_order, item_id, question_id, target_zone_id, text, image_url)
-    select 0, 'i1', id, 'z1', item, item_image_url from drag_drop_questions where target_zone is not null;
+    select 0, 'i1', id, 'z1', item, item_image_url from drag_drop_questions
+    where target_zone is not null or item is not null or item_image_url is not null;
 
 alter table drag_drop_questions drop column item;
 alter table drag_drop_questions drop column item_image_url;
