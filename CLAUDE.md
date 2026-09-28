@@ -16,7 +16,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 
 ## Backend (`backend/`)
 
-- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction,enums}` (`entity/question/embedded` chứa các thành phần nhúng như cặp, vùng thả; entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`), `service/{strategy,validation,factory}` (`service/validation/rule` chứa luật Layer 2 của từng loại game, `service/validation/safety` chứa phần kiểm duyệt an toàn Layer 3: danh sách từ cấm và client OpenAI Moderation), `repository`, `controller`, `dto/{request,response,dsl}` (`dto/dsl` là các record của Game JSON DSL), `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
+- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction,enums}` (`entity/question/embedded` chứa các thành phần nhúng như cặp, vùng thả; entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`), `service/{strategy,validation,factory,generation}` (`service/generation` chứa bộ điều phối sinh game bằng AI: cổng `GameContentGenerator` (bản cài đặt Gemini/LangChain4j đặt ở đây), vòng thử lại có phản hồi lỗi; (`service/validation/rule` chứa luật Layer 2 của từng loại game, `service/validation/safety` chứa phần kiểm duyệt an toàn Layer 3: danh sách từ cấm và client OpenAI Moderation), `repository`, `controller`, `dto/{request,response,dsl}` (`dto/dsl` là các record của Game JSON DSL), `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
 - **Schema do Flyway quản lý** — `jpa.hibernate.ddl-auto` luôn là `validate`, không được đổi sang `update`/`create`. Mọi thay đổi schema phải viết migration mới trong `src/main/resources/db/migration/` theo thứ tự version tăng dần (`V1__...sql`, `V2__...sql`), không sửa lại migration đã tồn tại.
 - Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
 - Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
@@ -50,7 +50,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 
 ## Contract đã freeze — mọi thay đổi field/endpoint phải đồng bộ cả Backend, Frontend và doc
 
-- JSON DSL Schema v1.0.0 (cấu trúc field `QuestionGame` cho từng loại game). Đặc tả: `docs/game-json-dsl-v1.0.0.md`; JSON Schema: `backend/src/main/resources/schema/game-dsl/1.0.0/*.schema.json` (mỗi loại game một file, tự chứa); record Java: `dto/dsl`. Sửa DSL phải sửa đồng bộ cả ba nơi và cập nhật test `GameDslSchemaTest`. "Dạng đầu ra của AI" (đơn giản hơn, dùng làm Structured Outputs): schema `backend/src/main/resources/schema/game-ai-output/1.0.0/*.schema.json`, record `dto/dsl/ai`, kiểm tra bằng `service/validation/ai/AiOutputValidator`; sửa thì cập nhật test `AiOutputValidatorTest`.
+- JSON DSL Schema v1.0.0 (cấu trúc field `QuestionGame` cho từng loại game). Đặc tả: `docs/game-json-dsl-v1.0.0.md`; JSON Schema: `backend/src/main/resources/schema/game-dsl/1.0.0/*.schema.json` (mỗi loại game một file, tự chứa); record Java: `dto/dsl`. Kiểu TypeScript: `frontend/src/types/game-dsl.types.ts`. Sửa DSL phải sửa đồng bộ cả bốn nơi và cập nhật test `GameDslSchemaTest`. "Dạng đầu ra của AI" (đơn giản hơn, dùng làm Structured Outputs): schema `backend/src/main/resources/schema/game-ai-output/1.0.0/*.schema.json`, record `dto/dsl/ai`, kiểm tra bằng `service/validation/ai/AiOutputValidator`; sửa thì cập nhật test `AiOutputValidatorTest`.
 - REST API Contract v1.0.0 (endpoint, response envelope `{success, data}` / `{success, error}`, error code)
 - WebSocket Message Format v1.0.0 (`/topic/session/{sessionId}/...`, `/app/session/{sessionId}/...`)
 
@@ -100,8 +100,9 @@ Link doc: TODO — dán 3 link Claude Docs vào đây. Trước khi sinh code li
 ## Ghi log sử dụng AI (bắt buộc)
 
 - Mỗi khi bạn (agent) sinh hoặc sửa code/nội dung đáng kể trong repo (tính năng, module, config, migration, test...), phải thêm 1 dòng vào bảng trong `ai-usage-log.md` ở root trước khi báo hoàn thành. Không cần log cho thay đổi nhỏ như sửa typo hay format.
-- Điền theo đúng quy ước ở đầu `ai-usage-log.md`: STT tiếp theo, ngày, công cụ AI kèm phiên bản model của bạn, mức độ đóng góp (`Sinh mới` / `Sửa - refactor` / `Gợi ý`), module kèm đường dẫn file chính, tóm tắt prompt của user, và kết quả kiểm chứng đã chạy (build/test).
-- Nếu trong quá trình làm bạn gặp lỗi/ảo giác của chính mình rồi tự sửa, ghi vào cột "Lỗi / Ảo giác AI & Cách xử lý". Không bịa lỗi nếu không có.
+- Điền theo đúng quy ước ở đầu `ai-usage-log.md`: STT tiếp theo, ngày, công cụ AI kèm phiên bản model của bạn, mức độ đóng góp (`Sinh mới` / `Sửa - refactor` / `Gợi ý`), module kèm đường dẫn file chính, prompt của user, và kết quả kiểm chứng đã chạy (build/test).
+- Cột "Câu lệnh chính": trình bày theo cấu trúc Bối cảnh / Mục tiêu / Ràng buộc và quyết định của user / Cách làm việc / Kiểm chứng, dựa đúng trên những gì user đã yêu cầu (không thêm thắt, không bịa yêu cầu); xuống dòng trong ô bằng `<br>`.
+- Cột "Lỗi / Ảo giác AI & Cách xử lý": chỉ ghi lỗi của chính bạn (sai, ảo giác, bỏ sót, giả định sai) rồi tự sửa. Không ghi lỗi của user hay việc chưa làm được. Không có lỗi thì ghi "Không có lỗi của AI được ghi nhận ở phần này." và không bịa lỗi.
 - Cột "Người thực hiện": ghi tên người đang ra lệnh cho agent, lấy từ `git config user.name` (chạy lệnh này để biết, không tự đoán). Cột "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`).
 - Không tự commit. Cột "Mã Commit SHA" ghi `TODO` để user cập nhật sau khi commit; nhắc user làm việc này trong câu báo cáo cuối.
 
