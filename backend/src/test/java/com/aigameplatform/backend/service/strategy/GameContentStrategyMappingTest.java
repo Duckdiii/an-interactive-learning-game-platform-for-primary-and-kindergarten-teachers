@@ -1,0 +1,317 @@
+package com.aigameplatform.backend.service.strategy;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.aigameplatform.backend.dto.dsl.GameDsl;
+import com.aigameplatform.backend.dto.dsl.OrderStepDsl;
+import com.aigameplatform.backend.dto.dsl.OrderingGameDsl;
+import com.aigameplatform.backend.dto.dsl.OrderingQuestionDsl;
+import com.aigameplatform.backend.dto.dsl.QuizGameDsl;
+import com.aigameplatform.backend.dto.dsl.SpotTheTargetQuestionDsl;
+import com.aigameplatform.backend.dto.dsl.ai.AiGameOutput;
+import com.aigameplatform.backend.entity.Game;
+import com.aigameplatform.backend.entity.enums.GameType;
+import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.entity.question.OddOneOutQuestion;
+import com.aigameplatform.backend.entity.question.OrderStep;
+import com.aigameplatform.backend.entity.question.OrderingQuestion;
+import com.aigameplatform.backend.entity.question.QuestionGame;
+import com.aigameplatform.backend.entity.question.QuizQuestion;
+import com.aigameplatform.backend.entity.question.SpotTheTargetQuestion;
+import com.aigameplatform.backend.service.factory.AudioVisualMatchGameDslFactory;
+import com.aigameplatform.backend.service.factory.DragDropGameDslFactory;
+import com.aigameplatform.backend.service.factory.GameDslFactoryRegistry;
+import com.aigameplatform.backend.service.factory.GameDslRequest;
+import com.aigameplatform.backend.service.factory.MatchingGameDslFactory;
+import com.aigameplatform.backend.service.factory.MemoryCardGameDslFactory;
+import com.aigameplatform.backend.service.factory.OddOneOutGameDslFactory;
+import com.aigameplatform.backend.service.factory.OrderingGameDslFactory;
+import com.aigameplatform.backend.service.factory.QuizGameDslFactory;
+import com.aigameplatform.backend.service.factory.SpotTheTargetGameDslFactory;
+import com.aigameplatform.backend.service.factory.VisualClozeGameDslFactory;
+import com.aigameplatform.backend.service.factory.WordScrambleGameDslFactory;
+import com.aigameplatform.backend.service.validation.AbstractGameValidator;
+import com.aigameplatform.backend.service.validation.BusinessRuleGameValidator;
+import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import com.aigameplatform.backend.service.validation.GameValidationService;
+import com.aigameplatform.backend.service.validation.SchemaGameValidator;
+import com.aigameplatform.backend.service.validation.ValidationReport;
+import com.aigameplatform.backend.service.validation.ai.AiOutputValidator;
+import com.aigameplatform.backend.service.validation.rule.AbstractGameRule;
+import com.aigameplatform.backend.service.validation.rule.AudioVisualMatchRule;
+import com.aigameplatform.backend.service.validation.rule.DragDropRule;
+import com.aigameplatform.backend.service.validation.rule.MatchingRule;
+import com.aigameplatform.backend.service.validation.rule.MemoryCardRule;
+import com.aigameplatform.backend.service.validation.rule.OddOneOutRule;
+import com.aigameplatform.backend.service.validation.rule.OrderingRule;
+import com.aigameplatform.backend.service.validation.rule.QuizRule;
+import com.aigameplatform.backend.service.validation.rule.VisualClozeRule;
+import com.aigameplatform.backend.service.validation.rule.WordScrambleRule;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.random.RandomGenerator;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
+/** Ánh xạ hai chiều Game DSL và entity của 10 loại game, không cần DB. */
+class GameContentStrategyMappingTest {
+
+    private static final JsonMapper MAPPER = JsonMapper.builder().build();
+    private static final GameDslRequest REQUEST = new GameDslRequest("Chủ đề mẫu", Subject.MATH, GradeLevel.GRADE_2);
+
+    private static final Map<GameType, GameContentStrategy<?, ?>> STRATEGIES = Map.of(
+            GameType.QUIZ, new QuizGameStrategy(),
+            GameType.AUDIO_VISUAL_MATCH, new AudioVisualMatchGameStrategy(),
+            GameType.ODD_ONE_OUT, new OddOneOutGameStrategy(),
+            GameType.SPOT_THE_TARGET, new SpotTheTargetGameStrategy(),
+            GameType.WORD_SCRAMBLE, new WordScrambleGameStrategy(),
+            GameType.MATCHING, new MatchingGameStrategy(),
+            GameType.MEMORY_CARD, new MemoryCardGameStrategy(),
+            GameType.DRAG_DROP, new DragDropGameStrategy(),
+            GameType.ORDERING, new OrderingGameStrategy(),
+            GameType.VISUAL_CLOZE, new VisualClozeGameStrategy());
+
+    private static final GameValidationService LAYERS_1_AND_2 = new GameValidationService(List.<AbstractGameValidator>of(
+            new SchemaGameValidator(new GameDslSchemaRegistry(), MAPPER),
+            new BusinessRuleGameValidator(List.<AbstractGameRule<?, ?>>of(new QuizRule(), new AudioVisualMatchRule(),
+                    new OddOneOutRule(), new WordScrambleRule(), new MatchingRule(), new MemoryCardRule(),
+                    new DragDropRule(), new OrderingRule(), new VisualClozeRule()))), MAPPER);
+
+    private static String resource(String folder, GameType type) throws IOException {
+        String file = type.name().toLowerCase().replace('_', '-');
+        try (InputStream in = GameContentStrategyMappingTest.class.getResourceAsStream(folder + file + ".json")) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private static Game gameOf(GameType type, List<QuestionGame> questions) {
+        Game game = new Game();
+        game.setTitle("Tên game");
+        game.setGameType(type);
+        game.setSubject(Subject.MATH);
+        game.setGrade(GradeLevel.GRADE_2);
+        game.setQuestions(questions);
+        return game;
+    }
+
+    private static GameDslFactoryRegistry registry(RandomGenerator random) {
+        return new GameDslFactoryRegistry(List.of(
+                new QuizGameDslFactory(random), new AudioVisualMatchGameDslFactory(random),
+                new OddOneOutGameDslFactory(random), new SpotTheTargetGameDslFactory(random),
+                new WordScrambleGameDslFactory(random), new MatchingGameDslFactory(random),
+                new MemoryCardGameDslFactory(random), new DragDropGameDslFactory(random),
+                new OrderingGameDslFactory(random), new VisualClozeGameDslFactory(random)));
+    }
+
+    /** Ordering không lưu thứ tự hiển thị nên so sánh không phụ thuộc thứ tự bước. */
+    private static void assertSameQuestions(GameType type, JsonNode expected, JsonNode actual) {
+        if (type != GameType.ORDERING) {
+            assertThat(actual).isEqualTo(expected);
+            return;
+        }
+        assertThat(actual.size()).isEqualTo(expected.size());
+        for (int i = 0; i < expected.size(); i++) {
+            assertThat(stepsByPosition(actual.get(i))).isEqualTo(stepsByPosition(expected.get(i)));
+        }
+    }
+
+    private static List<String> stepsByPosition(JsonNode question) {
+        String[] byPosition = new String[question.get("steps").size()];
+        for (JsonNode step : question.get("steps")) {
+            byPosition[step.get("correctPosition").asInt() - 1] = step.get("text").asString();
+        }
+        return List.of(byPosition);
+    }
+
+    // ---- DSL -> entity ----
+
+    @ParameterizedTest
+    @EnumSource(GameType.class)
+    void everyExampleBecomesEntitiesOfTheRightType(GameType type) throws IOException {
+        List<QuestionGame> questions = STRATEGIES.get(type).parseToQuestions(resource("/dsl-examples/", type));
+
+        assertThat(questions).isNotEmpty();
+        for (int i = 0; i < questions.size(); i++) {
+            assertThat(questions.get(i).getItemIndex()).isEqualTo(i);
+            assertThat(questions.get(i).getTimeLimit()).isPositive();
+            assertThat(questions.get(i).getPoint()).isPositive();
+            assertThat(questions.get(i).getId()).as("id do Hibernate sinh").isNull();
+        }
+    }
+
+    @Test
+    void quizKeepsTheCorrectAnswerAsAnIndexEvenWhenIdsAreNotInOrder() throws IOException {
+        String json = resource("/dsl-examples/", GameType.QUIZ)
+                .replace("\"correctOptionId\": \"a\"", "\"correctOptionId\": \"b\"");
+
+        QuizQuestion question = (QuizQuestion) new QuizGameStrategy().parseToQuestions(json).get(0);
+
+        assertThat(question.getCorrectIndex()).isEqualTo(1);
+        assertThat(question.getOptions()).hasSizeGreaterThan(1);
+    }
+
+    @Test
+    void anAnswerIdOutsideTheOptionsIsRejected() throws IOException {
+        String json = resource("/dsl-examples/", GameType.QUIZ)
+                .replace("\"correctOptionId\": \"a\"", "\"correctOptionId\": \"z\"");
+
+        assertThatThrownBy(() -> new QuizGameStrategy().parseToQuestions(json))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("'z'");
+    }
+
+    @Test
+    void oddOneOutKeepsItsIdAndItemTexts() throws IOException {
+        OddOneOutQuestion question = (OddOneOutQuestion) new OddOneOutGameStrategy()
+                .parseToQuestions(resource("/dsl-examples/", GameType.ODD_ONE_OUT)).get(0);
+
+        assertThat(question.getItems()).isNotEmpty();
+        assertThat(question.getOddOneOutId()).isNotBlank();
+    }
+
+    @Test
+    void aSpotQuestionWithoutHitRegionStaysWithoutOne() {
+        String json = "{\"schemaVersion\":\"1.0.0\",\"gameType\":\"SPOT_THE_TARGET\",\"metadata\":{\"title\":\"t\","
+                + "\"subject\":\"MATH\",\"gradeLevel\":\"GRADE_1\",\"topic\":\"t\"},\"gameplaySettings\":"
+                + "{\"hitboxScale\":1.5},\"questions\":[{\"id\":\"q1\",\"timeLimitSeconds\":45,\"points\":10,"
+                + "\"visualPrompt\":\"garden\",\"targetDescription\":\"the cat\"}]}";
+        SpotTheTargetGameStrategy strategy = new SpotTheTargetGameStrategy();
+
+        SpotTheTargetQuestion entity = (SpotTheTargetQuestion) strategy.parseToQuestions(json).get(0);
+        SpotTheTargetQuestionDsl back = strategy.toQuestionDsls(List.of(entity)).get(0);
+
+        assertThat(entity.getHitRegionX()).isNull();
+        assertThat(back.hitRegion()).isNull();
+        assertThat(back.targetDescription()).isEqualTo("the cat");
+    }
+
+    @Test
+    void aFullParsedDslCanBeUsedDirectly() throws IOException {
+        GameDsl game = MAPPER.readValue(resource("/dsl-examples/", GameType.QUIZ), GameDsl.class);
+
+        assertThat(new QuizGameStrategy().parseToQuestions(game)).hasSameSizeAs(game.questions());
+    }
+
+    @Test
+    void aStrategyRejectsGamesOfAnotherType() throws IOException {
+        String quiz = resource("/dsl-examples/", GameType.QUIZ);
+
+        assertThatThrownBy(() -> new OrderingGameStrategy().parseToQuestions(quiz))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("ORDERING");
+    }
+
+    @Test
+    void textThatIsNotADslIsRejectedWithAClearMessage() {
+        assertThatThrownBy(() -> new QuizGameStrategy().parseToQuestions("không phải json"))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Game DSL");
+    }
+
+    // ---- entity -> DSL ----
+
+    @ParameterizedTest
+    @EnumSource(GameType.class)
+    void examplesSurviveTheRoundTripThroughEntities(GameType type) throws IOException {
+        String raw = resource("/dsl-examples/", type);
+        GameContentStrategy<?, ?> strategy = STRATEGIES.get(type);
+
+        GameDsl back = strategy.toGameDsl(gameOf(type, strategy.parseToQuestions(raw)));
+
+        assertSameQuestions(type, MAPPER.readTree(raw).get("questions"), MAPPER.valueToTree(back).get("questions"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(GameType.class)
+    void gamesBuiltByTheFactoriesSurviveTheRoundTripAndStayValid(GameType type) throws IOException {
+        AiGameOutput output = new AiOutputValidator(MAPPER).validate(type, resource("/ai-output-examples/", type)).output();
+        GameContentStrategy<?, ?> strategy = STRATEGIES.get(type);
+
+        for (long seed = 0; seed < 100; seed++) {
+            GameDsl created = registry(new Random(seed)).create(type, output, REQUEST);
+            JsonNode createdJson = MAPPER.valueToTree(created);
+
+            GameDsl back = strategy.toGameDsl(gameOf(type, strategy.parseToQuestions(MAPPER.writeValueAsString(created))));
+
+            assertSameQuestions(type, createdJson.get("questions"), MAPPER.valueToTree(back).get("questions"));
+            ValidationReport report = LAYERS_1_AND_2.validate(MAPPER.valueToTree(back));
+            assertThat(report.errors()).as("%s, hạt giống %d", type, seed).isEmpty();
+        }
+    }
+
+    @Test
+    void theEnvelopeIsRebuiltFromTheGame() throws IOException {
+        Game game = gameOf(GameType.QUIZ, new QuizGameStrategy().parseToQuestions(resource("/dsl-examples/", GameType.QUIZ)));
+        game.setGrade(GradeLevel.KINDERGARTEN);
+
+        QuizGameDsl dsl = (QuizGameDsl) new QuizGameStrategy().toGameDsl(game);
+
+        assertThat(dsl.schemaVersion()).isEqualTo("1.0.0");
+        assertThat(dsl.metadata().title()).isEqualTo("Tên game");
+        assertThat(dsl.metadata().gradeLevel()).isEqualTo(GradeLevel.KINDERGARTEN);
+        assertThat(dsl.gameplaySettings().hitboxScale()).isEqualTo(1.5);
+    }
+
+    @Test
+    void aSavedQuestionKeepsItsRealIdAndAnUnsavedOneGetsAPositionalId() throws IOException {
+        List<QuestionGame> questions = new QuizGameStrategy().parseToQuestions(resource("/dsl-examples/", GameType.QUIZ));
+        questions.get(0).setId("uuid-1");
+        QuizGameStrategy strategy = new QuizGameStrategy();
+
+        List<String> ids = new ArrayList<>();
+        strategy.toQuestionDsls(questions).forEach(q -> ids.add(q.id()));
+
+        assertThat(ids.get(0)).isEqualTo("uuid-1");
+        if (ids.size() > 1) {
+            assertThat(ids.get(1)).isEqualTo("q2");
+        }
+    }
+
+    @Test
+    void orderingIsNeverShownInTheCorrectOrderAndUsesSavedStepIds() {
+        OrderingQuestion question = new OrderingQuestion();
+        List<OrderStep> steps = new ArrayList<>();
+        for (int position = 1; position <= 4; position++) {
+            OrderStep step = new OrderStep();
+            step.setStepId("step-" + position);
+            step.setText("Bước " + position);
+            step.setCorrectPosition(position);
+            steps.add(step);
+        }
+        question.setSteps(steps);
+
+        OrderingQuestionDsl dsl = new OrderingGameStrategy().toQuestionDsls(List.of(question)).get(0);
+
+        assertThat(dsl.steps()).extracting(OrderStepDsl::correctPosition).isNotEqualTo(List.of(1, 2, 3, 4));
+        assertThat(dsl.steps()).extracting(OrderStepDsl::correctPosition).containsExactlyInAnyOrder(1, 2, 3, 4);
+        assertThat(dsl.steps()).extracting(OrderStepDsl::id).containsExactlyInAnyOrder("step-1", "step-2", "step-3", "step-4");
+    }
+
+    @Test
+    void aStrategyRejectsQuestionsOfAnotherType() {
+        assertThatThrownBy(() -> new QuizGameStrategy().toQuestionDsls(List.of(new OrderingQuestion())))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("QuizQuestion");
+    }
+
+    @Test
+    void aStrategyRejectsAGameOfAnotherType() {
+        Game game = gameOf(GameType.ORDERING, List.of());
+
+        assertThatThrownBy(() -> new QuizGameStrategy().toGameDsl(game))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("QUIZ");
+    }
+
+    @Test
+    void theOrderingGameDslKeepsItsType() {
+        OrderingGameDsl dsl = (OrderingGameDsl) new OrderingGameStrategy().toGameDsl(gameOf(GameType.ORDERING, List.of()));
+
+        assertThat(dsl.gameType()).isEqualTo(GameType.ORDERING);
+    }
+}
