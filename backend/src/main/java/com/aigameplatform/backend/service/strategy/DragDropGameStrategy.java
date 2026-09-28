@@ -15,7 +15,9 @@ import com.aigameplatform.backend.entity.question.embedded.DropZone;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DragDropGameStrategy extends GameContentStrategy<DragDropQuestionDsl, DragDropQuestion> {
 
     public DragDropGameStrategy() {

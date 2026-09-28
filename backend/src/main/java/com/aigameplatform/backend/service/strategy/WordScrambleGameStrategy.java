@@ -11,7 +11,9 @@ import com.aigameplatform.backend.entity.question.WordScrambleQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
+@Component
 public class WordScrambleGameStrategy extends GameContentStrategy<WordScrambleQuestionDsl, WordScrambleQuestion> {
 
     public WordScrambleGameStrategy() {

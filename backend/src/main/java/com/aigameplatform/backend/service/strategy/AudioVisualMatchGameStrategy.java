@@ -11,7 +11,9 @@ import com.aigameplatform.backend.entity.question.AudioVisualMatchQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AudioVisualMatchGameStrategy
         extends GameContentStrategy<AudioVisualMatchQuestionDsl, AudioVisualMatchQuestion> {
 

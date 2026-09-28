@@ -11,7 +11,9 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.question.SpotTheTargetQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SpotTheTargetGameStrategy extends GameContentStrategy<SpotTheTargetQuestionDsl, SpotTheTargetQuestion> {
 
     public SpotTheTargetGameStrategy() {
