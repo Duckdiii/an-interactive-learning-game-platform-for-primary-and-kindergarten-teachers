@@ -31,7 +31,7 @@ public class SafetyGameValidator extends AbstractGameValidator {
     public SafetyGameValidator(
             BlockedWordList blockedWords,
             ContentModerationClient moderationClient,
-            @Value("${app.moderation.required:false}") boolean moderationRequired) {
+            @Value("${app.moderation.required:true}") boolean moderationRequired) {
         this.blockedWords = blockedWords;
         this.moderationClient = moderationClient;
         if (!moderationClient.isConfigured()) {
