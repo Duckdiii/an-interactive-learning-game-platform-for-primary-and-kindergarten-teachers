@@ -20,6 +20,26 @@ Tài liệu này là hợp đồng dữ liệu giữa AI (sinh nội dung), Back
 
 Giáo viên chỉnh sửa (`PUT`) gửi lại dạng hoàn chỉnh, và Backend chạy lại đủ 3 lớp kiểm duyệt.
 
+### Dạng đầu ra của AI (Game AI Output v1.0.0)
+
+- Gốc chỉ có `{ "questions": [...] }`: loại game, khối lớp, chủ đề đã biết từ yêu cầu nên AI không lặp lại. Không có vỏ, không có `id`, `points`, `timeLimitSeconds`, `hitboxScale`, `imageUrl`, `audioUrl`, `scrambledLetters`.
+- Chọn đáp án bằng **chỉ số** (bắt đầu từ 0) thay cho id, theo phong cách của spike Gemini cho Quiz (`text`, `options`, `correctIndex`).
+- Schema: `backend/src/main/resources/schema/game-ai-output/1.0.0/*.schema.json` (tự chứa, chỉ dùng từ khóa đơn giản để LLM chấp nhận); record Java: `dto/dsl/ai`; `GameContentStrategy.getStructuredSchema()` trả schema này (đã bỏ `$schema` và `title`).
+- Kiểm tra bằng `AiOutputValidator`: đúng schema, rồi các chỉ số phải nằm trong phạm vi (`correctIndex`, `oddOneOutIndex`, `zoneIndex`), lỗi báo kèm vị trí để gửi lại cho AI.
+
+| Loại game | Mỗi màn chơi gồm |
+|---|---|
+| QUIZ | `text`, `options` (2–4), `correctIndex`; tùy chọn `visualPrompt`, `audioText` |
+| AUDIO_VISUAL_MATCH | `audioText`, `correct{visualPrompt}`, `distractors[{visualPrompt}]` (1–3) |
+| ODD_ONE_OUT | `items` (3–5 chuỗi), `oddOneOutIndex`; tùy chọn `audioText` |
+| SPOT_THE_TARGET | `visualPrompt`, `targetDescription`; tùy chọn `audioText` (vùng bấm do giáo viên chọn) |
+| WORD_SCRAMBLE | `correctWord`; tùy chọn `visualPrompt`, `audioText` |
+| MATCHING | `pairs[{left{text,visualPrompt?}, right{text,visualPrompt?}}]` (3–6) |
+| MEMORY_CARD | `pairs[{visualPrompt, text?}]` (2–8) |
+| DRAG_DROP | `dropZones[{label}]` (2–4), `items[{text, visualPrompt?, zoneIndex}]` (3–8) |
+| ORDERING | `steps[{text, visualPrompt?}]` (2–6) **liệt kê theo thứ tự đúng**, Backend tự xáo và gán `correctPosition` |
+| VISUAL_CLOZE | `sentenceTemplate`, `visualPrompt`, `correctAnswer`, `distractors` (1–3 chuỗi) |
+
 ## 3. Vỏ chung (Envelope)
 
 ```json

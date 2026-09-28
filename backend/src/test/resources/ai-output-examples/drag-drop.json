@@ -1,0 +1,32 @@
+{
+  "questions": [
+    {
+      "audioText": "Xếp vào đúng rổ",
+      "dropZones": [
+        {
+          "label": "Trái cây"
+        },
+        {
+          "label": "Đồ chơi"
+        }
+      ],
+      "items": [
+        {
+          "text": "táo",
+          "visualPrompt": "apple",
+          "zoneIndex": 0
+        },
+        {
+          "text": "gấu bông",
+          "visualPrompt": "teddy bear",
+          "zoneIndex": 1
+        },
+        {
+          "text": "chuối",
+          "visualPrompt": "banana",
+          "zoneIndex": 0
+        }
+      ]
+    }
+  ]
+}
