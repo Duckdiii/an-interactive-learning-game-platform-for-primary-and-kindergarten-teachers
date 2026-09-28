@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "gameType": "SPOT_THE_TARGET",
+  "metadata": {
+    "title": "Ví dụ SPOT_THE_TARGET",
+    "subject": "MATH",
+    "gradeLevel": "GRADE_1",
+    "topic": "Chủ đề mẫu"
+  },
+  "gameplaySettings": {
+    "hitboxScale": 1.5
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "timeLimitSeconds": 45,
+      "points": 10,
+      "audioText": "Tìm con mèo",
+      "visualPrompt": "a garden with a cat",
+      "imageUrl": "https://images.example.com/garden-cat.jpg",
+      "targetDescription": "con mèo",
+      "hitRegion": {
+        "x": 0.62,
+        "y": 0.41,
+        "radius": 0.08
+      }
+    },
+    {
+      "id": "q2",
+      "timeLimitSeconds": 45,
+      "points": 10,
+      "visualPrompt": "a farm with a cow",
+      "targetDescription": "con bò"
+    }
+  ]
+}

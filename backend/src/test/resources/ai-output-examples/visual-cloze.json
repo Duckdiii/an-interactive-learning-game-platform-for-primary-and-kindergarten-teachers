@@ -1,0 +1,14 @@
+{
+  "questions": [
+    {
+      "sentenceTemplate": "Con ___ kêu meo meo.",
+      "visualPrompt": "a cat",
+      "correctAnswer": "mèo",
+      "distractors": [
+        "chó",
+        "gà"
+      ],
+      "audioText": "Con gì kêu meo meo?"
+    }
+  ]
+}

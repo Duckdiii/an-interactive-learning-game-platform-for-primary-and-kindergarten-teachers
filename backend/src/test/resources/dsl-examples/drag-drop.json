@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0.0",
+  "gameType": "DRAG_DROP",
+  "metadata": {
+    "title": "Ví dụ DRAG_DROP",
+    "subject": "MATH",
+    "gradeLevel": "GRADE_1",
+    "topic": "Chủ đề mẫu"
+  },
+  "gameplaySettings": {
+    "hitboxScale": 1.5
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "timeLimitSeconds": 60,
+      "points": 20,
+      "audioText": "Xếp vào đúng rổ",
+      "dropZones": [
+        {
+          "id": "z1",
+          "label": "Trái cây"
+        },
+        {
+          "id": "z2",
+          "label": "Đồ chơi"
+        }
+      ],
+      "items": [
+        {
+          "id": "i1",
+          "text": "táo",
+          "visualPrompt": "apple",
+          "targetZoneId": "z1"
+        },
+        {
+          "id": "i2",
+          "text": "gấu bông",
+          "visualPrompt": "teddy bear",
+          "targetZoneId": "z2"
+        },
+        {
+          "id": "i3",
+          "text": "chuối",
+          "visualPrompt": "banana",
+          "targetZoneId": "z1"
+        }
+      ]
+    }
+  ]
+}

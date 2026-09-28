@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Game DSL v1.0.0 - MEMORY_CARD",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "gameType",
+    "metadata",
+    "gameplaySettings",
+    "questions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "gameType": {
+      "const": "MEMORY_CARD"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "subject",
+        "gradeLevel",
+        "topic"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "subject": {
+          "type": "string",
+          "enum": [
+            "MATH",
+            "VIETNAMESE",
+            "ENGLISH"
+          ]
+        },
+        "gradeLevel": {
+          "type": "string",
+          "enum": [
+            "KINDERGARTEN",
+            "GRADE_1",
+            "GRADE_2",
+            "GRADE_3",
+            "GRADE_4",
+            "GRADE_5"
+          ]
+        },
+        "topic": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "gameplaySettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hitboxScale"
+      ],
+      "properties": {
+        "hitboxScale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 3
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/question"
+      }
+    }
+  },
+  "$defs": {
+    "side": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "visualPrompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "imageUrl": {
+          "type": "string",
+          "maxLength": 2048
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "text"
+          ]
+        },
+        {
+          "required": [
+            "visualPrompt"
+          ]
+        }
+      ]
+    },
+    "pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pairId",
+        "content"
+      ],
+      "properties": {
+        "pairId": {
+          "type": "string",
+          "pattern": "^p[0-9]+$"
+        },
+        "content": {
+          "$ref": "#/$defs/side"
+        }
+      }
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "timeLimitSeconds",
+        "points",
+        "pairs"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^q[0-9]+$"
+        },
+        "timeLimitSeconds": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 600
+        },
+        "points": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "audioText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "audioUrl": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "visualPrompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "imageUrl": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "pairs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/pair"
+          }
+        }
+      }
+    }
+  }
+}

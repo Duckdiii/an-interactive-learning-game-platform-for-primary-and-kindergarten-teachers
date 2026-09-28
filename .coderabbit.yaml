@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://www.coderabbit.ai/integrations/schema.v2.json
+#
+# Cấu hình CodeRabbit cho đồ án AI-Game Platform (backend Spring Boot, frontend React).
+# Tài liệu: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: "vi-VN"
+
+reviews:
+  # chill: review nhẹ nhàng, chỉ nêu những điểm đáng chú ý, không spam comment vụn vặt.
+  profile: "chill"
+
+  auto_review:
+    enabled: true
+    # Không review PR ở trạng thái draft.
+    drafts: false
+
+  # Bỏ qua các thư mục sinh ra hoặc thư viện bên thứ ba, không cần review.
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/build/**"
+    - "!**/dist/**"
+    - "!**/target/**"
+    - "!**/.git/**"
+
+  path_instructions:
+    - path: "**/*.java"
+      instructions: |
+        Đây là backend Java Spring Boot (REST API). Khi review, hãy kiểm tra:
+        - Kiến trúc phân lớp Controller -> Service -> Repository phải rõ ràng. Controller không chứa business
+          logic, chỉ nhận request, gọi Service và trả response; logic nghiệp vụ phải nằm ở Service.
+        - Input phải được validate bằng @Valid cùng DTO (kèm các annotation ràng buộc). Không nhận trực tiếp
+          Entity làm request body và không trả trực tiếp Entity ra response.
+        - Không hardcode connection string, secret key, API key, mật khẩu trong code. Phải đọc từ
+          application.properties/application.yml hoặc biến môi trường.
+        - Exception phải được xử lý rõ ràng bằng @ControllerAdvice/@ExceptionHandler. Không để lộ stack trace
+          hay thông điệp nội bộ (SQL, đường dẫn, tên class) ra response cho client.
+        - Đặt tên rõ nghĩa bằng tiếng Anh, đúng chuẩn Java: camelCase cho biến và method, PascalCase cho
+          class, UPPER_SNAKE_CASE cho hằng số.
+        - Repository chỉ truy cập dữ liệu, Service chỉ chứa nghiệp vụ, Controller chỉ điều phối. Chỉ ra chỗ
+          nào lẫn lộn trách nhiệm giữa các lớp.
+
+    - path: "**/*.jsx"
+      instructions: &react_instructions |
+        Đây là frontend React. Khi review, hãy kiểm tra:
+        - Component đặt tên PascalCase và tên file trùng với tên component.
+        - Custom hook phải bắt đầu bằng "use" (ví dụ useAuth).
+        - Không gọi API trực tiếp trong component. Tách riêng sang lớp service/api (ví dụ thư mục api/) và
+          để component chỉ gọi hàm đó.
+        - Tránh hardcode chuỗi hiển thị cho người dùng nếu dự án có hỗ trợ đa ngôn ngữ.
+        - Mọi thao tác bất đồng bộ (gọi API) phải xử lý đủ loading state và error state, không để giao diện
+          trống hoặc treo khi đang tải hay khi lỗi.
+
+    - path: "**/*.tsx"
+      instructions: *react_instructions

@@ -1,0 +1,16 @@
+{
+  "questions": [
+    {
+      "audioText": "Tìm các thẻ giống nhau",
+      "pairs": [
+        {
+          "visualPrompt": "apple"
+        },
+        {
+          "visualPrompt": "banana",
+          "text": "chuối"
+        }
+      ]
+    }
+  ]
+}

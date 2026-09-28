@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "gameType": "WORD_SCRAMBLE",
+  "metadata": {
+    "title": "Ví dụ WORD_SCRAMBLE",
+    "subject": "MATH",
+    "gradeLevel": "GRADE_1",
+    "topic": "Chủ đề mẫu"
+  },
+  "gameplaySettings": {
+    "hitboxScale": 1.5
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "timeLimitSeconds": 40,
+      "points": 10,
+      "audioText": "Sắp xếp thành con vật",
+      "visualPrompt": "cow",
+      "correctWord": "BÒ",
+      "scrambledLetters": [
+        "Ò",
+        "B"
+      ]
+    },
+    {
+      "id": "q2",
+      "timeLimitSeconds": 40,
+      "points": 10,
+      "correctWord": "MÈO",
+      "scrambledLetters": [
+        "O",
+        "M",
+        "È"
+      ]
+    }
+  ]
+}
