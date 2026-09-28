@@ -36,3 +36,12 @@ server:
 app:
   cors:
     allowed-origins: http://localhost:5173
+  moderation:
+    # true: app từ chối khởi động nếu chưa có OPENAI_API_KEY (nên bật khi triển khai).
+    required: ${MODERATION_REQUIRED:false}
+    blocked-words-location: classpath:moderation/blocked-words-vi.txt
+    openai:
+      base-url: https://api.openai.com
+      api-key: ${OPENAI_API_KEY:}
+      model: omni-moderation-latest
+      timeout-seconds: 10

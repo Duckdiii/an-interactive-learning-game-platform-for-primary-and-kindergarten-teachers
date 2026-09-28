@@ -1,0 +1,43 @@
+# Danh sách từ cấm học đường (bản khởi đầu, cả nhóm cần rà soát và bổ sung).
+# Mỗi dòng một từ hoặc cụm từ; dòng bắt đầu bằng # là chú thích. Không phân biệt hoa thường.
+# Khớp theo ranh giới từ và PHẢI đúng dấu tiếng Việt ("cứt" bị chặn, "cứu" thì không).
+# Cố ý không đưa vào các từ có nghĩa bình thường trong bài học: "con chó", "dâm bụt", "giết", "dm", "ass", "cave"...
+# Có thể trỏ tới file khác bằng app.moderation.blocked-words-location (ví dụ file:/duong/dan/blocked-words.txt).
+
+# Tục tĩu tiếng Việt
+địt
+đụ
+lồn
+cặc
+buồi
+đéo
+đmm
+đm
+vcl
+cứt
+đĩ
+điếm
+chó đẻ
+mẹ mày
+thằng ngu
+con đĩ
+
+# Tình dục, chất cấm
+khiêu dâm
+mại dâm
+làm tình
+ma túy
+cần sa
+heroin
+cocaine
+thuốc lắc
+
+# Tiếng Anh
+fuck
+fucking
+shit
+bitch
+asshole
+porn
+pornography
+sex

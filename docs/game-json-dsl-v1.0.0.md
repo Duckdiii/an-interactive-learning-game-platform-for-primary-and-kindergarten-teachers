@@ -252,7 +252,7 @@ Trả lời: `answer` (so sánh sau khi chuẩn hóa chữ hoa/thường và kho
 - SPOT_THE_TARGET không có luật riêng ở Lớp 2. Việc bắt buộc có `hitRegion` chỉ kiểm khi **xuất bản**, không kiểm khi sinh hay lưu bản nháp.
 - Nếu Lớp 1 hoặc 2 lỗi: tự gọi lại LLM tối đa **2 lần**, đính kèm thông báo lỗi cụ thể (có vị trí) để AI sửa.
 - Vẫn lỗi: trả `504 AI_GENERATION_TIMEOUT` theo REST API Contract. Không nạp game mẫu.
-- Lớp 3 phát hiện nội dung không an toàn: `422 UNSAFE_CONTENT`.
+- Lớp 3 phát hiện nội dung không an toàn: `422 UNSAFE_CONTENT`, **không** cho AI sinh lại (sinh lại cùng chủ đề dễ lặp lại nội dung xấu). Cách hoạt động: gom mọi đoạn chữ trong game (bỏ id, URL, giá trị kỹ thuật; `visualPrompt` được kiểm vì nó quyết định ảnh lấy về), đối chiếu danh sách từ cấm (`moderation/blocked-words-vi.txt`, khớp theo ranh giới từ và đúng dấu) rồi mới gửi một lần lên OpenAI Moderation (chia lô 20 đoạn). Từ cấm phát hiện được thì không gọi API. Thiếu `OPENAI_API_KEY` thì chỉ dùng danh sách từ cấm (bật `MODERATION_REQUIRED=true` để bắt buộc có key khi triển khai). Nếu OpenAI lỗi hoặc hết thời gian thì **chặn** (loại lỗi `UNAVAILABLE`, báo thử lại sau) chứ không coi là an toàn.
 - Mỗi Strategy (`QuizGameStrategy`...) cung cấp schema riêng cho loại game của nó và hàm `parseToQuestions`. Strategy **không** chứa logic kiểm duyệt.
 
 ## 8. Ánh xạ sang entity và thay đổi database (migration V4)
