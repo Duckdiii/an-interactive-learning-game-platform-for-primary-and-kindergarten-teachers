@@ -21,6 +21,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 - Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
 - Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
 - Dùng Lombok cho entity/DTO thay vì viết getter/setter tay.
+- Kiểm duyệt an toàn (Layer 3): môi trường triển khai thật phải đặt `MODERATION_REQUIRED=true` cùng `OPENAI_API_KEY` (thiếu key thì app không khởi động). Thiếu key chỉ được chấp nhận khi chạy thử ở máy cá nhân, khi đó chỉ dùng danh sách từ cấm.
 
 ## Frontend (`frontend/`)
 
