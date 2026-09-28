@@ -45,3 +45,7 @@ app:
       api-key: ${OPENAI_API_KEY:}
       model: omni-moderation-latest
       timeout-seconds: 10
+  ai:
+    gemini:
+      api-key: ${GEMINI_API_KEY:}
+      model: ${GEMINI_MODEL:}

@@ -1,0 +1,22 @@
+{
+  "id": "00000000-0000-4000-8000-000000000008",
+  "title": "Điền từ theo hình",
+  "gameType": "VISUAL_CLOZE",
+  "questionNum": 1,
+  "grade": "KINDERGARTEN",
+  "subject": "VIETNAMESE",
+  "shareCode": "SAMPLE08",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000000801",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "sentenceTemplate": "Con {{blank}} đang bơi.",
+      "imageUrl": "https://example.com/assets/fish.png",
+      "correctAnswer": "cá"
+    }
+  ]
+}
