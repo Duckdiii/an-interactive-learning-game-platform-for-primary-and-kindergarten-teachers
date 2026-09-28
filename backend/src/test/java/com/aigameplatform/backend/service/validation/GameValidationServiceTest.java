@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -19,7 +20,7 @@ class GameValidationServiceTest {
     private static final GameDslSchemaRegistry REGISTRY = new GameDslSchemaRegistry();
 
     private static String exampleText(GameType type) throws IOException {
-        String file = type.name().toLowerCase().replace('_', '-');
+        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = GameValidationServiceTest.class.getResourceAsStream("/dsl-examples/" + file + ".json")) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }

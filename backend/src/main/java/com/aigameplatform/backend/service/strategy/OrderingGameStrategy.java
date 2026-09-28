@@ -62,8 +62,8 @@ public class OrderingGameStrategy extends GameContentStrategy<OrderingQuestionDs
         List<OrderStepDsl> display = new ArrayList<>();
         for (int i = 0; i < sorted.size(); i++) {
             OrderStep step = sorted.get((i + 1) % sorted.size());
-            String stepId = step.getStepId() != null ? step.getStepId() : Ids.numbered("s", i);
-            display.add(new OrderStepDsl(stepId, step.getText(), step.getVisualPrompt(), step.getImageUrl(),
+            // Id bước theo vị trí hiển thị (s1, s2...) vì schema chỉ nhận dạng này.
+            display.add(new OrderStepDsl(Ids.numbered("s", i), step.getText(), step.getVisualPrompt(), step.getImageUrl(),
                     step.getCorrectPosition()));
         }
         return new OrderingQuestionDsl(questionId, entity.getTimeLimit(), entity.getPoint(), entity.getAudioText(),

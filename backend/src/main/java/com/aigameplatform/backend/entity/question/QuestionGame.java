@@ -30,10 +30,12 @@ public abstract class QuestionGame {
     // (TTS, Pexels). Ảnh minh họa hoặc ảnh nền dùng chung imageUrl.
     protected String audioText;
 
+    @Column(length = 2048)
     protected String audioUrl;
 
     protected String visualPrompt;
 
+    @Column(length = 2048)
     protected String imageUrl;
 
     // Association: QuestionGame 1 - 0..* EditLog. EditLog giữ khóa ngoại (mappedBy), không cascade.

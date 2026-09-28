@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.entity.question.embedded;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,5 +15,6 @@ public class ImageChoice {
 
     private String visualPrompt;
 
+    @Column(length = 2048)
     private String imageUrl;
 }

@@ -54,8 +54,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.random.RandomGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -88,7 +90,7 @@ class GameContentStrategyMappingTest {
                     new DragDropRule(), new OrderingRule(), new VisualClozeRule()))), MAPPER);
 
     private static String resource(String folder, GameType type) throws IOException {
-        String file = type.name().toLowerCase().replace('_', '-');
+        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = GameContentStrategyMappingTest.class.getResourceAsStream(folder + file + ".json")) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
@@ -259,23 +261,26 @@ class GameContentStrategyMappingTest {
         assertThat(dsl.gameplaySettings().hitboxScale()).isEqualTo(1.5);
     }
 
-    @Test
-    void aSavedQuestionKeepsItsRealIdAndAnUnsavedOneGetsAPositionalId() throws IOException {
-        List<QuestionGame> questions = new QuizGameStrategy().parseToQuestions(resource("/dsl-examples/", GameType.QUIZ));
-        questions.get(0).setId("uuid-1");
-        QuizGameStrategy strategy = new QuizGameStrategy();
-
-        List<String> ids = new ArrayList<>();
-        strategy.toQuestionDsls(questions).forEach(q -> ids.add(q.id()));
-
-        assertThat(ids.get(0)).isEqualTo("uuid-1");
-        if (ids.size() > 1) {
-            assertThat(ids.get(1)).isEqualTo("q2");
+    @ParameterizedTest
+    @EnumSource(GameType.class)
+    void savedEntitiesWithDatabaseIdsStillGiveAValidDslWithPositionalIds(GameType type) throws IOException {
+        GameContentStrategy<?, ?> strategy = STRATEGIES.get(type);
+        List<QuestionGame> questions = strategy.parseToQuestions(resource("/dsl-examples/", type));
+        for (QuestionGame question : questions) {
+            question.setId(UUID.randomUUID().toString());
+            if (question instanceof OrderingQuestion ordering) {
+                ordering.getSteps().forEach(step -> step.setStepId(UUID.randomUUID().toString()));
+            }
         }
+
+        GameDsl dsl = strategy.toGameDsl(gameOf(type, questions));
+
+        assertThat(LAYERS_1_AND_2.validate(MAPPER.valueToTree(dsl)).errors()).isEmpty();
+        assertThat(dsl.questions().get(0).id()).isEqualTo("q1");
     }
 
     @Test
-    void orderingIsNeverShownInTheCorrectOrderAndUsesSavedStepIds() {
+    void orderingIsNeverShownInTheCorrectOrderAndUsesPositionalStepIds() {
         OrderingQuestion question = new OrderingQuestion();
         List<OrderStep> steps = new ArrayList<>();
         for (int position = 1; position <= 4; position++) {
@@ -291,7 +296,7 @@ class GameContentStrategyMappingTest {
 
         assertThat(dsl.steps()).extracting(OrderStepDsl::correctPosition).isNotEqualTo(List.of(1, 2, 3, 4));
         assertThat(dsl.steps()).extracting(OrderStepDsl::correctPosition).containsExactlyInAnyOrder(1, 2, 3, 4);
-        assertThat(dsl.steps()).extracting(OrderStepDsl::id).containsExactlyInAnyOrder("step-1", "step-2", "step-3", "step-4");
+        assertThat(dsl.steps()).extracting(OrderStepDsl::id).containsExactly("s1", "s2", "s3", "s4");
     }
 
     @Test

@@ -10,6 +10,7 @@ import com.networknt.schema.SpecificationVersion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class GameDslSchemaTest {
             GameType.VISUAL_CLOZE, VisualClozeGameDsl.class);
 
     private static String fileName(GameType type) {
-        return type.name().toLowerCase().replace('_', '-');
+        return type.name().toLowerCase(Locale.ROOT).replace('_', '-');
     }
 
     private static Schema schemaOf(GameType type) throws IOException {

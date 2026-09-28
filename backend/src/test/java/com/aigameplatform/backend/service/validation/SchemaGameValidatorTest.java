@@ -8,6 +8,7 @@ import com.aigameplatform.backend.entity.enums.GameType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -24,7 +25,7 @@ class SchemaGameValidatorTest {
     private final SchemaGameValidator validator = new SchemaGameValidator(REGISTRY, MAPPER);
 
     private static ObjectNode example(GameType type) throws IOException {
-        String file = type.name().toLowerCase().replace('_', '-');
+        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = SchemaGameValidatorTest.class.getResourceAsStream("/dsl-examples/" + file + ".json")) {
             return (ObjectNode) MAPPER.readTree(in);
         }

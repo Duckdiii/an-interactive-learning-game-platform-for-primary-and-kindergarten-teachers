@@ -19,6 +19,7 @@ public class DraggableItem {
 
     private String visualPrompt;
 
+    @Column(length = 2048)
     private String imageUrl;
 
     // Đáp án: id của DropZone mà vật này thuộc về.

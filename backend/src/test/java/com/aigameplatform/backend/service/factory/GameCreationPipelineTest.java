@@ -29,6 +29,7 @@ import com.aigameplatform.backend.service.validation.safety.OpenAiModerationClie
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -78,7 +79,7 @@ class GameCreationPipelineTest {
     private JsonMapper mapper;
 
     private static String rawAiOutput(GameType type) throws IOException {
-        String file = type.name().toLowerCase().replace('_', '-');
+        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = GameCreationPipelineTest.class.getResourceAsStream("/ai-output-examples/" + file + ".json")) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }

@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
@@ -150,7 +151,7 @@ class GameGenerationServiceTest {
     }
 
     private static String validOutput(GameType type) throws IOException {
-        String file = type.name().toLowerCase().replace('_', '-');
+        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = GameGenerationServiceTest.class.getResourceAsStream("/ai-output-examples/" + file + ".json")) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }

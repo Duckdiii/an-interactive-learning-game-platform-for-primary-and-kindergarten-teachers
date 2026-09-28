@@ -56,6 +56,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -92,7 +93,7 @@ class GameDslFactoryTest {
     }
 
     private static AiGameOutput aiOutput(GameType type) throws IOException {
-        String file = type.name().toLowerCase().replace('_', '-');
+        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = GameDslFactoryTest.class.getResourceAsStream("/ai-output-examples/" + file + ".json")) {
             return AI_VALIDATOR.validate(type, new String(in.readAllBytes(), StandardCharsets.UTF_8)).output();
         }

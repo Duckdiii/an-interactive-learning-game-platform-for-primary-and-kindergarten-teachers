@@ -128,8 +128,8 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
                 throw new IllegalArgumentException("Game " + getSupportedType() + " cần câu hỏi kiểu "
                         + entityType.getSimpleName() + ", nhưng nhận được " + question.getClass().getSimpleName());
             }
-            String questionId = question.getId() != null ? question.getId() : Ids.numbered("q", i);
-            result.add(toDsl(entityType.cast(question), questionId));
+            // Id trong DSL theo vị trí (q1, q2...) vì schema chỉ nhận dạng này; id lưu trong DB (UUID) không đưa vào DSL.
+            result.add(toDsl(entityType.cast(question), Ids.numbered("q", i)));
         }
         return result;
     }

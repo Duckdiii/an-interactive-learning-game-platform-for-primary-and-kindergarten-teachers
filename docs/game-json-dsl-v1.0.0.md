@@ -288,6 +288,10 @@ Trả lời: `answer` (so sánh sau khi chuẩn hóa chữ hoa/thường và kho
 | QUIZ, ODD_ONE_OUT | Không đổi cột. `id` đáp án là `a`, `b`, `c`... suy ra từ vị trí; `correctIndex` giữ nguyên |
 | Media | `question_games` có thêm `audio_text`, `audio_url`, `visual_prompt`, `image_url` dùng chung cho mọi loại (ảnh nền/ảnh minh họa của SPOT_THE_TARGET, VISUAL_CLOZE, QUIZ, WORD_SCRAMBLE nằm ở đây); `order_steps` có thêm `visual_prompt`, `image_url` |
 
+| Dữ liệu cũ | V4 chuyển dữ liệu cũ sang chỗ mới trước khi bỏ cột: `ELEMENTARY` thành `GRADE_1`; URL âm thanh/ảnh sang `question_games`; MATCHING, MEMORY_CARD, DRAG_DROP cũ (một cặp hoặc một vật) thành màn chơi có đúng một cặp hoặc một vùng và một vật. Vùng bấm cũ của SPOT_THE_TARGET lưu bằng số nguyên (pixel) nên không đổi được sang tỉ lệ 0–1: các dòng cũ thành bản nháp để giáo viên chọn lại vùng |
+| Độ dài cột URL | `audio_url`, `image_url` và các cột URL của lựa chọn dùng `varchar(2048)`, khớp `maxLength` của schema |
+| Id trong DSL | Id trong DSL luôn theo vị trí (`q1`, `s1`...) đúng pattern của schema; id lưu trong database (UUID) không đưa vào DSL |
+
 Class diagram phải cập nhật tương ứng.
 
 ## 9. Việc để sau (chưa thuộc v1.0.0)

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.EnumMap;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +38,7 @@ public class GameDslSchemaRegistry {
     }
 
     private static Schema load(SchemaRegistry registry, GameType type) {
-        String resource = SCHEMA_PATH + type.name().toLowerCase().replace('_', '-') + ".schema.json";
+        String resource = SCHEMA_PATH + type.name().toLowerCase(Locale.ROOT).replace('_', '-') + ".schema.json";
         try (InputStream in = GameDslSchemaRegistry.class.getResourceAsStream(resource)) {
             if (in == null) {
                 throw new IllegalStateException("Thiếu JSON Schema: " + resource);

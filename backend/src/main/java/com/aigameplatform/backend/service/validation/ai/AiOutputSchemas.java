@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import tools.jackson.databind.json.JsonMapper;
@@ -38,7 +39,7 @@ public final class AiOutputSchemas {
     }
 
     private static String load(GameType type) {
-        String resource = PATH + type.name().toLowerCase().replace('_', '-') + ".schema.json";
+        String resource = PATH + type.name().toLowerCase(Locale.ROOT).replace('_', '-') + ".schema.json";
         try (InputStream in = AiOutputSchemas.class.getResourceAsStream(resource)) {
             if (in == null) {
                 throw new IllegalStateException("Thiếu JSON Schema đầu ra của AI: " + resource);

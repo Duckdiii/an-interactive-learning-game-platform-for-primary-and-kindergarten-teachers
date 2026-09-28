@@ -28,7 +28,7 @@ public class AudioVisualMatchQuestion extends QuestionGame {
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "visualPrompt", column = @Column(name = "correct_visual_prompt")),
-        @AttributeOverride(name = "imageUrl", column = @Column(name = "correct_image_url"))
+        @AttributeOverride(name = "imageUrl", column = @Column(name = "correct_image_url", length = 2048))
     })
     private ImageChoice correct;
 

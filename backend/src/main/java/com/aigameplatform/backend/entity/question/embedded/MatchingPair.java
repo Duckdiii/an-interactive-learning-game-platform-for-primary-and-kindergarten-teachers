@@ -22,7 +22,7 @@ public class MatchingPair {
     @AttributeOverrides({
         @AttributeOverride(name = "text", column = @Column(name = "left_text")),
         @AttributeOverride(name = "visualPrompt", column = @Column(name = "left_visual_prompt")),
-        @AttributeOverride(name = "imageUrl", column = @Column(name = "left_image_url"))
+        @AttributeOverride(name = "imageUrl", column = @Column(name = "left_image_url", length = 2048))
     })
     private PairSide left;
 
@@ -30,7 +30,7 @@ public class MatchingPair {
     @AttributeOverrides({
         @AttributeOverride(name = "text", column = @Column(name = "right_text")),
         @AttributeOverride(name = "visualPrompt", column = @Column(name = "right_visual_prompt")),
-        @AttributeOverride(name = "imageUrl", column = @Column(name = "right_image_url"))
+        @AttributeOverride(name = "imageUrl", column = @Column(name = "right_image_url", length = 2048))
     })
     private PairSide right;
 }

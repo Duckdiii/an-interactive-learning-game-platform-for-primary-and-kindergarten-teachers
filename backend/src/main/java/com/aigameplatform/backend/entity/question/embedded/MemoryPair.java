@@ -23,7 +23,7 @@ public class MemoryPair {
     @AttributeOverrides({
         @AttributeOverride(name = "text", column = @Column(name = "content_text")),
         @AttributeOverride(name = "visualPrompt", column = @Column(name = "content_visual_prompt")),
-        @AttributeOverride(name = "imageUrl", column = @Column(name = "content_image_url"))
+        @AttributeOverride(name = "imageUrl", column = @Column(name = "content_image_url", length = 2048))
     })
     private PairSide content;
 }

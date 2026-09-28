@@ -17,6 +17,7 @@ import com.aigameplatform.backend.service.validation.rule.WordScrambleRule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,7 +42,7 @@ class BusinessRuleGameValidatorTest {
             List.of(new SchemaGameValidator(REGISTRY, MAPPER), new BusinessRuleGameValidator(allRules())), MAPPER);
 
     private static ObjectNode example(GameType type) throws IOException {
-        String file = type.name().toLowerCase().replace('_', '-');
+        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = BusinessRuleGameValidatorTest.class.getResourceAsStream("/dsl-examples/" + file + ".json")) {
             return (ObjectNode) MAPPER.readTree(in);
         }

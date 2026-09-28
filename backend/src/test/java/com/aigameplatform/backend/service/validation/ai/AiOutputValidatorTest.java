@@ -18,6 +18,7 @@ import com.aigameplatform.backend.service.validation.ValidationError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,7 +46,7 @@ class AiOutputValidatorTest {
     private final AiOutputValidator validator = new AiOutputValidator(MAPPER);
 
     private static String exampleText(GameType type) throws IOException {
-        String file = type.name().toLowerCase().replace('_', '-');
+        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = AiOutputValidatorTest.class.getResourceAsStream("/ai-output-examples/" + file + ".json")) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
