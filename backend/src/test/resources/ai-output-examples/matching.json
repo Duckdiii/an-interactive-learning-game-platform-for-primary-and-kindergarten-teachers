@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "audioText": "Nối từ với nghĩa",
+      "pairs": [
+        {
+          "left": {
+            "text": "apple",
+            "visualPrompt": "apple"
+          },
+          "right": {
+            "text": "táo"
+          }
+        },
+        {
+          "left": {
+            "text": "dog"
+          },
+          "right": {
+            "text": "chó"
+          }
+        },
+        {
+          "left": {
+            "text": "cat"
+          },
+          "right": {
+            "text": "mèo"
+          }
+        }
+      ]
+    }
+  ]
+}

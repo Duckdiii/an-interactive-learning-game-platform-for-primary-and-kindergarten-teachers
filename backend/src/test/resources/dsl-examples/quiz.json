@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "gameType": "QUIZ",
+  "metadata": {
+    "title": "Ví dụ QUIZ",
+    "subject": "MATH",
+    "gradeLevel": "GRADE_1",
+    "topic": "Chủ đề mẫu"
+  },
+  "gameplaySettings": {
+    "hitboxScale": 1.5
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "timeLimitSeconds": 30,
+      "points": 10,
+      "audioText": "Có mấy con mèo?",
+      "visualPrompt": "three cats",
+      "imageUrl": "https://images.example.com/three-cats.jpg",
+      "questionText": "Có mấy con mèo?",
+      "options": [
+        {
+          "id": "a",
+          "text": "2"
+        },
+        {
+          "id": "b",
+          "text": "3"
+        },
+        {
+          "id": "c",
+          "text": "4"
+        }
+      ],
+      "correctOptionId": "b"
+    },
+    {
+      "id": "q2",
+      "timeLimitSeconds": 30,
+      "points": 10,
+      "questionText": "Có mấy con chó?",
+      "options": [
+        {
+          "id": "a",
+          "text": "1"
+        },
+        {
+          "id": "b",
+          "text": "5"
+        }
+      ],
+      "correctOptionId": "a"
+    }
+  ]
+}

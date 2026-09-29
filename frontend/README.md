@@ -1,32 +1,25 @@
-# React + TypeScript + Vite
+# AI Game Platform Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + TypeScript + Vite frontend shell for the AI Game Platform.
 
-Currently, two official plugins are available:
+## Scripts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `npm run dev` - start local development server.
+- `npm run build` - type-check and build production assets.
+- `npm run lint` - run Oxlint.
 
-## React Compiler
+## Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `src/App.tsx` - route tree only.
+- `src/providers/` - app-wide providers such as auth, router, and query client.
+- `src/layouts/` - shared page shells for auth screens and app screens.
+- `src/pages/` - route-level pages such as Login, Dashboard, and Workspace Editor.
+- `src/components/` - reusable UI components such as Button and LoadingSpinner.
+- `src/components/ui/` - page-level presentational helpers.
+- `src/context/` - Context API providers and context objects.
+- `src/hooks/` - reusable hooks. Use `useAuth()` for session access.
+- `src/types/` - shared TypeScript types.
+- `src/utils/` - shared helpers.
+- `src/api/axiosInstance.ts` - shared API client for backend calls.
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Keep business logic out of route files until the backend/API contracts are ready.

@@ -1,0 +1,31 @@
+{
+  "id": "00000000-0000-4000-8000-000000000004",
+  "title": "Đưa con vật về nhà",
+  "gameType": "DRAG_DROP",
+  "questionNum": 2,
+  "grade": "KINDERGARTEN",
+  "subject": "VIETNAMESE",
+  "shareCode": "SAMPLE04",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000000401",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "item": "Con cá",
+      "itemImageUrl": "https://example.com/assets/fish.png",
+      "targetZone": "ao"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000402",
+      "itemIndex": 1,
+      "timeLimit": 30,
+      "point": 10,
+      "item": "Con chim",
+      "itemImageUrl": "https://example.com/assets/bird.png",
+      "targetZone": "to-chim"
+    }
+  ]
+}

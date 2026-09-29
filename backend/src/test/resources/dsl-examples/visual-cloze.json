@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "gameType": "VISUAL_CLOZE",
+  "metadata": {
+    "title": "Ví dụ VISUAL_CLOZE",
+    "subject": "MATH",
+    "gradeLevel": "GRADE_1",
+    "topic": "Chủ đề mẫu"
+  },
+  "gameplaySettings": {
+    "hitboxScale": 1.5
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "timeLimitSeconds": 30,
+      "points": 10,
+      "audioText": "Con gì kêu meo meo?",
+      "visualPrompt": "a cat",
+      "imageUrl": "https://images.example.com/cat.jpg",
+      "sentenceTemplate": "Con ___ kêu meo meo.",
+      "correctAnswer": "mèo",
+      "distractors": [
+        "chó",
+        "gà"
+      ]
+    }
+  ]
+}
