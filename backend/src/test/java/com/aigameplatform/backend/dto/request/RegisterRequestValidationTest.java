@@ -62,6 +62,16 @@ class RegisterRequestValidationTest {
     }
 
     @Test
+    void rejectsAPasswordWithinSeventyTwoCharactersButOverSeventyTwoUtf8Bytes() {
+        // "ệ" chiếm 3 byte UTF-8 nhưng chỉ 1 ký tự Java, nên 72 ký tự này vượt quá 72 byte mà @Pattern không bắt được.
+        String password = "Abcdef1!" + "ệ".repeat(64);
+
+        assertThat(password).hasSize(72);
+        assertThat(password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length).isGreaterThan(72);
+        assertThat(invalidFields(new RegisterRequest("A", "a@school.edu.vn", password))).containsExactly("password");
+    }
+
+    @Test
     void rejectsBlankNameAndInvalidEmail() {
         assertThat(invalidFields(new RegisterRequest(" ", "not-an-email", "Abcdef1!")))
                 .containsExactlyInAnyOrder("fullName", "email");
