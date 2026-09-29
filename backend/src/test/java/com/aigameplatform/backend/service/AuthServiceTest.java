@@ -185,6 +185,7 @@ class AuthServiceTest {
     @Test
     void refreshRotatesTokenInTheSameFamily() {
         RefreshToken stored = storedToken("old-token", "family-1", nowUtc().plusHours(1), false);
+        when(refreshTokenRepository.findFamilyIdByTokenHash(codec.hash("old-token"))).thenReturn(Optional.of("family-1"));
         when(refreshTokenRepository.findByTokenHash(codec.hash("old-token"))).thenReturn(Optional.of(stored));
 
         AuthResult result = service.refresh("old-token");
@@ -195,15 +196,19 @@ class AuthServiceTest {
         assertThat(captor.getValue().getFamilyId()).isEqualTo("family-1");
         assertThat(result.refreshToken()).isNotEqualTo("old-token");
         assertThat(jwtService.parseAccessToken(result.response().accessToken()).sessionId()).isEqualTo("family-1");
-        // Khóa family phải được lấy trước khi đọc lại token, để chặn race với một request khác của cùng family.
+        // Khóa family phải được lấy trước khi đọc lại token (findByTokenHash khóa dòng), để không thể deadlock
+        // với logout() (khóa family trước, rồi mới khóa dòng khi chạy revokeFamily).
         InOrder order = inOrder(refreshTokenRepository);
+        order.verify(refreshTokenRepository).findFamilyIdByTokenHash(codec.hash("old-token"));
         order.verify(refreshTokenRepository).lockFamily("family-1");
+        order.verify(refreshTokenRepository).findByTokenHash(codec.hash("old-token"));
         order.verify(refreshTokenRepository).save(any());
     }
 
     @Test
     void refreshWithRevokedTokenRevokesTheWholeFamily() {
         RefreshToken stored = storedToken("used-token", "family-1", nowUtc().plusHours(1), true);
+        when(refreshTokenRepository.findFamilyIdByTokenHash(codec.hash("used-token"))).thenReturn(Optional.of("family-1"));
         when(refreshTokenRepository.findByTokenHash(codec.hash("used-token"))).thenReturn(Optional.of(stored));
 
         assertThatThrownBy(() -> service.refresh("used-token"))
@@ -220,6 +225,7 @@ class AuthServiceTest {
     @Test
     void refreshRejectsExpiredToken() {
         RefreshToken stored = storedToken("old-token", "family-1", nowUtc().minusMinutes(1), false);
+        when(refreshTokenRepository.findFamilyIdByTokenHash(codec.hash("old-token"))).thenReturn(Optional.of("family-1"));
         when(refreshTokenRepository.findByTokenHash(codec.hash("old-token"))).thenReturn(Optional.of(stored));
 
         assertThatThrownBy(() -> service.refresh("old-token")).isInstanceOf(ApiException.class);
@@ -230,17 +236,19 @@ class AuthServiceTest {
 
     @Test
     void refreshRejectsUnknownToken() {
-        when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.empty());
+        when(refreshTokenRepository.findFamilyIdByTokenHash(anyString())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.refresh("unknown"))
                 .isInstanceOfSatisfying(ApiException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
+        verify(refreshTokenRepository, never()).lockFamily(anyString());
     }
 
     @Test
     void refreshRejectsMissingToken() {
         assertThatThrownBy(() -> service.refresh(null)).isInstanceOf(ApiException.class);
         assertThatThrownBy(() -> service.refresh("  ")).isInstanceOf(ApiException.class);
+        verify(refreshTokenRepository, never()).findFamilyIdByTokenHash(anyString());
         verify(refreshTokenRepository, never()).findByTokenHash(anyString());
     }
 

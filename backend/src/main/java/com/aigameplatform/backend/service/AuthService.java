@@ -97,9 +97,10 @@ public class AuthService {
             throw new ApiException(ErrorCode.UNAUTHORIZED, INVALID_REFRESH_TOKEN);
         }
         String tokenHash = refreshTokenCodec.hash(rawRefreshToken);
-        String familyId = refreshTokenRepository.findByTokenHash(tokenHash)
-                .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED, INVALID_REFRESH_TOKEN))
-                .getFamilyId();
+        // Đọc familyId bằng truy vấn không khóa dòng: khóa dòng ở bước này rồi mới chờ lockFamily(...) có thể
+        // deadlock với logout() (khóa family trước, rồi mới cần khóa dòng khi chạy revokeFamily).
+        String familyId = refreshTokenRepository.findFamilyIdByTokenHash(tokenHash)
+                .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED, INVALID_REFRESH_TOKEN));
         // Khóa cả family trong suốt giao dịch: một request xoay vòng hợp lệ khác, hoặc một request khác phát
         // hiện dùng lại token của cùng family, phải đợi giao dịch này commit trước khi đọc/sửa tiếp. Nếu không,
         // token mới có thể được tạo ra ngay sau khi family vừa bị coi là lộ và bị thu hồi toàn bộ.
