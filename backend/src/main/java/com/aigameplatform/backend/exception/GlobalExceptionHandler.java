@@ -49,9 +49,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
         ErrorCode code = codeFor(statusCode);
-        String message = code == ErrorCode.NOT_FOUND ? "Không tìm thấy tài nguyên" : "Yêu cầu không hợp lệ";
         return ResponseEntity.status(statusCode).headers(headers)
-                .body(ApiResponse.fail(code.name(), message));
+                .body(ApiResponse.fail(code.name(), messageFor(code)));
     }
 
     private static ErrorCode codeFor(HttpStatusCode status) {
@@ -59,5 +58,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             return ErrorCode.NOT_FOUND;
         }
         return status.is5xxServerError() ? ErrorCode.INTERNAL_ERROR : ErrorCode.VALIDATION_ERROR;
+    }
+
+    // 5xx (ví dụ timeout của xử lý bất đồng bộ trong Spring MVC) không phải lỗi của client, nên không được
+    // ghi là "yêu cầu không hợp lệ".
+    private static String messageFor(ErrorCode code) {
+        return switch (code) {
+            case NOT_FOUND -> "Không tìm thấy tài nguyên";
+            case INTERNAL_ERROR -> "Lỗi hệ thống, vui lòng thử lại sau";
+            default -> "Yêu cầu không hợp lệ";
+        };
     }
 }
