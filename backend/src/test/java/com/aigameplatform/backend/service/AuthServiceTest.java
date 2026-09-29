@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -193,6 +195,10 @@ class AuthServiceTest {
         assertThat(captor.getValue().getFamilyId()).isEqualTo("family-1");
         assertThat(result.refreshToken()).isNotEqualTo("old-token");
         assertThat(jwtService.parseAccessToken(result.response().accessToken()).sessionId()).isEqualTo("family-1");
+        // Khóa family phải được lấy trước khi đọc lại token, để chặn race với một request khác của cùng family.
+        InOrder order = inOrder(refreshTokenRepository);
+        order.verify(refreshTokenRepository).lockFamily("family-1");
+        order.verify(refreshTokenRepository).save(any());
     }
 
     @Test
@@ -206,6 +212,9 @@ class AuthServiceTest {
 
         verify(refreshTokenRepository).revokeFamily("family-1", nowUtc());
         verify(refreshTokenRepository, never()).save(any());
+        InOrder order = inOrder(refreshTokenRepository);
+        order.verify(refreshTokenRepository).lockFamily("family-1");
+        order.verify(refreshTokenRepository).revokeFamily("family-1", nowUtc());
     }
 
     @Test
@@ -242,5 +251,14 @@ class AuthServiceTest {
         service.logout("family-1");
 
         verify(refreshTokenRepository).revokeFamily("family-1", nowUtc());
+    }
+
+    @Test
+    void logoutLocksTheFamilyBeforeRevokingIt() {
+        service.logout("family-1");
+
+        InOrder order = inOrder(refreshTokenRepository);
+        order.verify(refreshTokenRepository).lockFamily("family-1");
+        order.verify(refreshTokenRepository).revokeFamily("family-1", nowUtc());
     }
 }

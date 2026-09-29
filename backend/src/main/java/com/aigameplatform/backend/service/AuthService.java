@@ -96,9 +96,18 @@ public class AuthService {
         if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
             throw new ApiException(ErrorCode.UNAUTHORIZED, INVALID_REFRESH_TOKEN);
         }
+        String tokenHash = refreshTokenCodec.hash(rawRefreshToken);
+        String familyId = refreshTokenRepository.findByTokenHash(tokenHash)
+                .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED, INVALID_REFRESH_TOKEN))
+                .getFamilyId();
+        // Khóa cả family trong suốt giao dịch: một request xoay vòng hợp lệ khác, hoặc một request khác phát
+        // hiện dùng lại token của cùng family, phải đợi giao dịch này commit trước khi đọc/sửa tiếp. Nếu không,
+        // token mới có thể được tạo ra ngay sau khi family vừa bị coi là lộ và bị thu hồi toàn bộ.
+        refreshTokenRepository.lockFamily(familyId);
+
         LocalDateTime now = LocalDateTime.now(clock);
-        RefreshToken stored = refreshTokenRepository
-                .findByTokenHash(refreshTokenCodec.hash(rawRefreshToken))
+        // Đọc lại sau khi có khóa: trạng thái có thể đã đổi trong lúc chờ khóa.
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(tokenHash)
                 .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED, INVALID_REFRESH_TOKEN));
 
         if (stored.isRevoked()) {
@@ -116,6 +125,9 @@ public class AuthService {
 
     @Transactional
     public void logout(String sessionId) {
+        // Cùng lý do với refresh(): khóa family trước khi thu hồi, để không có token nào đang được tạo ra
+        // (bởi một refresh() khác của cùng family) lọt qua sau khi logout() đã quét xong.
+        refreshTokenRepository.lockFamily(sessionId);
         refreshTokenRepository.revokeFamily(sessionId, LocalDateTime.now(clock));
     }
 

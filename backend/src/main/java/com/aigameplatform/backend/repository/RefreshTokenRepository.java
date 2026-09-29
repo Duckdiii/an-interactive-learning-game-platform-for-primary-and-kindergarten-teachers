@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, String> {
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, String>, RefreshTokenRepositoryCustom {
 
     // Khóa dòng để hai request refresh đồng thời cùng một token không cùng xoay vòng thành công.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
