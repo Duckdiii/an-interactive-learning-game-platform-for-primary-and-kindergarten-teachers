@@ -12,6 +12,7 @@ import com.aigameplatform.backend.entity.question.OrderStep;
 import com.aigameplatform.backend.entity.question.OrderingQuestion;
 import com.aigameplatform.backend.service.factory.Ids;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import tools.jackson.databind.json.JsonMapper;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,8 +21,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderingGameStrategy extends GameContentStrategy<OrderingQuestionDsl, OrderingQuestion> {
 
-    public OrderingGameStrategy() {
-        super(OrderingQuestionDsl.class, OrderingQuestion.class);
+    public OrderingGameStrategy(JsonMapper jsonMapper) {
+        super(OrderingQuestionDsl.class, OrderingQuestion.class, jsonMapper);
     }
 
     @Override

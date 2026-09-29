@@ -11,6 +11,7 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.question.MemoryCardQuestion;
 import com.aigameplatform.backend.entity.question.embedded.MemoryPair;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import tools.jackson.databind.json.JsonMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -18,8 +19,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MemoryCardGameStrategy extends GameContentStrategy<MemoryCardQuestionDsl, MemoryCardQuestion> {
 
-    public MemoryCardGameStrategy() {
-        super(MemoryCardQuestionDsl.class, MemoryCardQuestion.class);
+    public MemoryCardGameStrategy(JsonMapper jsonMapper) {
+        super(MemoryCardQuestionDsl.class, MemoryCardQuestion.class, jsonMapper);
     }
 
     @Override

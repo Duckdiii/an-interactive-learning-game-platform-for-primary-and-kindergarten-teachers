@@ -10,6 +10,7 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.question.QuizQuestion;
 import com.aigameplatform.backend.service.factory.Ids;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import tools.jackson.databind.json.JsonMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuizGameStrategy extends GameContentStrategy<QuizQuestionDsl, QuizQuestion> {
 
-    public QuizGameStrategy() {
-        super(QuizQuestionDsl.class, QuizQuestion.class);
+    public QuizGameStrategy(JsonMapper jsonMapper) {
+        super(QuizQuestionDsl.class, QuizQuestion.class, jsonMapper);
     }
 
     @Override

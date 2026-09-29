@@ -13,6 +13,7 @@ import com.aigameplatform.backend.entity.question.DragDropQuestion;
 import com.aigameplatform.backend.entity.question.embedded.DraggableItem;
 import com.aigameplatform.backend.entity.question.embedded.DropZone;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import tools.jackson.databind.json.JsonMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -20,8 +21,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class DragDropGameStrategy extends GameContentStrategy<DragDropQuestionDsl, DragDropQuestion> {
 
-    public DragDropGameStrategy() {
-        super(DragDropQuestionDsl.class, DragDropQuestion.class);
+    public DragDropGameStrategy(JsonMapper jsonMapper) {
+        super(DragDropQuestionDsl.class, DragDropQuestion.class, jsonMapper);
     }
 
     @Override

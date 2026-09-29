@@ -9,6 +9,7 @@ import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.question.AudioVisualMatchQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import tools.jackson.databind.json.JsonMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,8 @@ import org.springframework.stereotype.Component;
 public class AudioVisualMatchGameStrategy
         extends GameContentStrategy<AudioVisualMatchQuestionDsl, AudioVisualMatchQuestion> {
 
-    public AudioVisualMatchGameStrategy() {
-        super(AudioVisualMatchQuestionDsl.class, AudioVisualMatchQuestion.class);
+    public AudioVisualMatchGameStrategy(JsonMapper jsonMapper) {
+        super(AudioVisualMatchQuestionDsl.class, AudioVisualMatchQuestion.class, jsonMapper);
     }
 
     @Override

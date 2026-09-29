@@ -72,16 +72,16 @@ class GameContentStrategyMappingTest {
     private static final GameDslRequest REQUEST = new GameDslRequest("Chủ đề mẫu", Subject.MATH, GradeLevel.GRADE_2);
 
     private static final Map<GameType, GameContentStrategy<?, ?>> STRATEGIES = Map.of(
-            GameType.QUIZ, new QuizGameStrategy(),
-            GameType.AUDIO_VISUAL_MATCH, new AudioVisualMatchGameStrategy(),
-            GameType.ODD_ONE_OUT, new OddOneOutGameStrategy(),
-            GameType.SPOT_THE_TARGET, new SpotTheTargetGameStrategy(),
-            GameType.WORD_SCRAMBLE, new WordScrambleGameStrategy(),
-            GameType.MATCHING, new MatchingGameStrategy(),
-            GameType.MEMORY_CARD, new MemoryCardGameStrategy(),
-            GameType.DRAG_DROP, new DragDropGameStrategy(),
-            GameType.ORDERING, new OrderingGameStrategy(),
-            GameType.VISUAL_CLOZE, new VisualClozeGameStrategy());
+            GameType.QUIZ, new QuizGameStrategy(MAPPER),
+            GameType.AUDIO_VISUAL_MATCH, new AudioVisualMatchGameStrategy(MAPPER),
+            GameType.ODD_ONE_OUT, new OddOneOutGameStrategy(MAPPER),
+            GameType.SPOT_THE_TARGET, new SpotTheTargetGameStrategy(MAPPER),
+            GameType.WORD_SCRAMBLE, new WordScrambleGameStrategy(MAPPER),
+            GameType.MATCHING, new MatchingGameStrategy(MAPPER),
+            GameType.MEMORY_CARD, new MemoryCardGameStrategy(MAPPER),
+            GameType.DRAG_DROP, new DragDropGameStrategy(MAPPER),
+            GameType.ORDERING, new OrderingGameStrategy(MAPPER),
+            GameType.VISUAL_CLOZE, new VisualClozeGameStrategy(MAPPER));
 
     private static final GameValidationService LAYERS_1_AND_2 = new GameValidationService(List.<AbstractGameValidator>of(
             new SchemaGameValidator(new GameDslSchemaRegistry(), MAPPER),
@@ -156,7 +156,7 @@ class GameContentStrategyMappingTest {
         String json = resource("/dsl-examples/", GameType.QUIZ)
                 .replace("\"correctOptionId\": \"a\"", "\"correctOptionId\": \"b\"");
 
-        QuizQuestion question = (QuizQuestion) new QuizGameStrategy().parseToQuestions(json).get(0);
+        QuizQuestion question = (QuizQuestion) new QuizGameStrategy(MAPPER).parseToQuestions(json).get(0);
 
         assertThat(question.getCorrectIndex()).isEqualTo(1);
         assertThat(question.getOptions()).hasSizeGreaterThan(1);
@@ -167,13 +167,13 @@ class GameContentStrategyMappingTest {
         String json = resource("/dsl-examples/", GameType.QUIZ)
                 .replace("\"correctOptionId\": \"a\"", "\"correctOptionId\": \"z\"");
 
-        assertThatThrownBy(() -> new QuizGameStrategy().parseToQuestions(json))
+        assertThatThrownBy(() -> new QuizGameStrategy(MAPPER).parseToQuestions(json))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("'z'");
     }
 
     @Test
     void oddOneOutKeepsItsIdAndItemTexts() throws IOException {
-        OddOneOutQuestion question = (OddOneOutQuestion) new OddOneOutGameStrategy()
+        OddOneOutQuestion question = (OddOneOutQuestion) new OddOneOutGameStrategy(MAPPER)
                 .parseToQuestions(resource("/dsl-examples/", GameType.ODD_ONE_OUT)).get(0);
 
         assertThat(question.getItems()).isNotEmpty();
@@ -186,7 +186,7 @@ class GameContentStrategyMappingTest {
                 + "\"subject\":\"MATH\",\"gradeLevel\":\"GRADE_1\",\"topic\":\"t\"},\"gameplaySettings\":"
                 + "{\"hitboxScale\":1.5},\"questions\":[{\"id\":\"q1\",\"timeLimitSeconds\":45,\"points\":10,"
                 + "\"visualPrompt\":\"garden\",\"targetDescription\":\"the cat\"}]}";
-        SpotTheTargetGameStrategy strategy = new SpotTheTargetGameStrategy();
+        SpotTheTargetGameStrategy strategy = new SpotTheTargetGameStrategy(MAPPER);
 
         SpotTheTargetQuestion entity = (SpotTheTargetQuestion) strategy.parseToQuestions(json).get(0);
         SpotTheTargetQuestionDsl back = strategy.toQuestionDsls(List.of(entity)).get(0);
@@ -200,20 +200,20 @@ class GameContentStrategyMappingTest {
     void aFullParsedDslCanBeUsedDirectly() throws IOException {
         GameDsl game = MAPPER.readValue(resource("/dsl-examples/", GameType.QUIZ), GameDsl.class);
 
-        assertThat(new QuizGameStrategy().parseToQuestions(game)).hasSameSizeAs(game.questions());
+        assertThat(new QuizGameStrategy(MAPPER).parseToQuestions(game)).hasSameSizeAs(game.questions());
     }
 
     @Test
     void aStrategyRejectsGamesOfAnotherType() throws IOException {
         String quiz = resource("/dsl-examples/", GameType.QUIZ);
 
-        assertThatThrownBy(() -> new OrderingGameStrategy().parseToQuestions(quiz))
+        assertThatThrownBy(() -> new OrderingGameStrategy(MAPPER).parseToQuestions(quiz))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("ORDERING");
     }
 
     @Test
     void textThatIsNotADslIsRejectedWithAClearMessage() {
-        assertThatThrownBy(() -> new QuizGameStrategy().parseToQuestions("không phải json"))
+        assertThatThrownBy(() -> new QuizGameStrategy(MAPPER).parseToQuestions("không phải json"))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Game DSL");
     }
 
@@ -250,10 +250,10 @@ class GameContentStrategyMappingTest {
 
     @Test
     void theEnvelopeIsRebuiltFromTheGame() throws IOException {
-        Game game = gameOf(GameType.QUIZ, new QuizGameStrategy().parseToQuestions(resource("/dsl-examples/", GameType.QUIZ)));
+        Game game = gameOf(GameType.QUIZ, new QuizGameStrategy(MAPPER).parseToQuestions(resource("/dsl-examples/", GameType.QUIZ)));
         game.setGrade(GradeLevel.KINDERGARTEN);
 
-        QuizGameDsl dsl = (QuizGameDsl) new QuizGameStrategy().toGameDsl(game);
+        QuizGameDsl dsl = (QuizGameDsl) new QuizGameStrategy(MAPPER).toGameDsl(game);
 
         assertThat(dsl.schemaVersion()).isEqualTo("1.0.0");
         assertThat(dsl.metadata().title()).isEqualTo("Tên game");
@@ -292,7 +292,7 @@ class GameContentStrategyMappingTest {
         }
         question.setSteps(steps);
 
-        OrderingQuestionDsl dsl = new OrderingGameStrategy().toQuestionDsls(List.of(question)).get(0);
+        OrderingQuestionDsl dsl = new OrderingGameStrategy(MAPPER).toQuestionDsls(List.of(question)).get(0);
 
         assertThat(dsl.steps()).extracting(OrderStepDsl::correctPosition).isNotEqualTo(List.of(1, 2, 3, 4));
         assertThat(dsl.steps()).extracting(OrderStepDsl::correctPosition).containsExactlyInAnyOrder(1, 2, 3, 4);
@@ -301,7 +301,7 @@ class GameContentStrategyMappingTest {
 
     @Test
     void aStrategyRejectsQuestionsOfAnotherType() {
-        assertThatThrownBy(() -> new QuizGameStrategy().toQuestionDsls(List.of(new OrderingQuestion())))
+        assertThatThrownBy(() -> new QuizGameStrategy(MAPPER).toQuestionDsls(List.of(new OrderingQuestion())))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("QuizQuestion");
     }
 
@@ -309,13 +309,13 @@ class GameContentStrategyMappingTest {
     void aStrategyRejectsAGameOfAnotherType() {
         Game game = gameOf(GameType.ORDERING, List.of());
 
-        assertThatThrownBy(() -> new QuizGameStrategy().toGameDsl(game))
+        assertThatThrownBy(() -> new QuizGameStrategy(MAPPER).toGameDsl(game))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("QUIZ");
     }
 
     @Test
     void theOrderingGameDslKeepsItsType() {
-        OrderingGameDsl dsl = (OrderingGameDsl) new OrderingGameStrategy().toGameDsl(gameOf(GameType.ORDERING, List.of()));
+        OrderingGameDsl dsl = (OrderingGameDsl) new OrderingGameStrategy(MAPPER).toGameDsl(gameOf(GameType.ORDERING, List.of()));
 
         assertThat(dsl.gameType()).isEqualTo(GameType.ORDERING);
     }

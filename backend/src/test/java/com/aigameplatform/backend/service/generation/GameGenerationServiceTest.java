@@ -132,10 +132,10 @@ class GameGenerationServiceTest {
         Random random = new Random(7);
         return new GameGenerationService(beans.getBeanProvider(GameContentGenerator.class),
                 new GameContentStrategyRegistry(List.<GameContentStrategy<?, ?>>of(
-                        new QuizGameStrategy(), new AudioVisualMatchGameStrategy(), new OddOneOutGameStrategy(),
-                        new SpotTheTargetGameStrategy(), new WordScrambleGameStrategy(), new MatchingGameStrategy(),
-                        new MemoryCardGameStrategy(), new DragDropGameStrategy(), new OrderingGameStrategy(),
-                        new VisualClozeGameStrategy())),
+                        new QuizGameStrategy(MAPPER), new AudioVisualMatchGameStrategy(MAPPER), new OddOneOutGameStrategy(MAPPER),
+                        new SpotTheTargetGameStrategy(MAPPER), new WordScrambleGameStrategy(MAPPER), new MatchingGameStrategy(MAPPER),
+                        new MemoryCardGameStrategy(MAPPER), new DragDropGameStrategy(MAPPER), new OrderingGameStrategy(MAPPER),
+                        new VisualClozeGameStrategy(MAPPER))),
                 new AiOutputValidator(MAPPER),
                 new GameDslFactoryRegistry(List.of(
                         new QuizGameDslFactory(random), new AudioVisualMatchGameDslFactory(random),
@@ -183,7 +183,7 @@ class GameGenerationServiceTest {
         assertThat(first.topic()).isEqualTo("Đếm con vật");
         assertThat(first.subject()).isEqualTo(Subject.MATH);
         assertThat(first.gradeLevel()).isEqualTo(GradeLevel.GRADE_1);
-        assertThat(first.structuredSchema()).isEqualTo(new QuizGameStrategy().getStructuredSchema());
+        assertThat(first.structuredSchema()).isEqualTo(new QuizGameStrategy(MAPPER).getStructuredSchema());
         assertThat(first.previousOutput()).isNull();
         assertThat(first.previousErrors()).isEmpty();
     }

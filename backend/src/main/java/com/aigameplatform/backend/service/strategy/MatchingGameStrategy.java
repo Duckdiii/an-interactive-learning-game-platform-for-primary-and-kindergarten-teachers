@@ -11,6 +11,7 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.question.MatchingQuestion;
 import com.aigameplatform.backend.entity.question.embedded.MatchingPair;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import tools.jackson.databind.json.JsonMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -18,8 +19,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MatchingGameStrategy extends GameContentStrategy<MatchingQuestionDsl, MatchingQuestion> {
 
-    public MatchingGameStrategy() {
-        super(MatchingQuestionDsl.class, MatchingQuestion.class);
+    public MatchingGameStrategy(JsonMapper jsonMapper) {
+        super(MatchingQuestionDsl.class, MatchingQuestion.class, jsonMapper);
     }
 
     @Override

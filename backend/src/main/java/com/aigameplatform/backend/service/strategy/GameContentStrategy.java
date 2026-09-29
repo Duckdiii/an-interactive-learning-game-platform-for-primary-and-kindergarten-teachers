@@ -30,8 +30,6 @@ import tools.jackson.databind.json.JsonMapper;
 @Setter
 public abstract class GameContentStrategy<D extends QuestionDsl, E extends QuestionGame> {
 
-    private static final JsonMapper MAPPER = JsonMapper.builder().build();
-
     protected String id;
 
     protected String promptTemplate;
@@ -46,9 +44,16 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     @Setter(AccessLevel.NONE)
     private final Class<E> entityType;
 
-    protected GameContentStrategy(Class<D> dslType, Class<E> entityType) {
+    // Tiêm qua constructor (Spring quản lý) thay vì tự new JsonMapper: dùng chung cấu hình Jackson với
+    // AiOutputValidator, GameValidationService... để hành vi đọc JSON nhất quán trong toàn bộ ứng dụng.
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private final JsonMapper jsonMapper;
+
+    protected GameContentStrategy(Class<D> dslType, Class<E> entityType, JsonMapper jsonMapper) {
         this.dslType = dslType;
         this.entityType = entityType;
+        this.jsonMapper = jsonMapper;
     }
 
     public String buildPrompt(String topic, GradeLevel grade) {
@@ -76,7 +81,7 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     public List<QuestionGame> parseToQuestions(String rawJson) {
         GameDsl game;
         try {
-            game = MAPPER.readValue(rawJson, GameDsl.class);
+            game = jsonMapper.readValue(rawJson, GameDsl.class);
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Không đọc được Game DSL: " + e.getOriginalMessage(), e);
         }

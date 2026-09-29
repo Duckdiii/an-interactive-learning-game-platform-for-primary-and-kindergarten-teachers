@@ -13,10 +13,10 @@ class GameContentStrategyTest {
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     private static final List<GameContentStrategy> STRATEGIES = List.of(
-            new QuizGameStrategy(), new AudioVisualMatchGameStrategy(), new OddOneOutGameStrategy(),
-            new SpotTheTargetGameStrategy(), new WordScrambleGameStrategy(), new MatchingGameStrategy(),
-            new MemoryCardGameStrategy(), new DragDropGameStrategy(), new OrderingGameStrategy(),
-            new VisualClozeGameStrategy());
+            new QuizGameStrategy(MAPPER), new AudioVisualMatchGameStrategy(MAPPER), new OddOneOutGameStrategy(MAPPER),
+            new SpotTheTargetGameStrategy(MAPPER), new WordScrambleGameStrategy(MAPPER), new MatchingGameStrategy(MAPPER),
+            new MemoryCardGameStrategy(MAPPER), new DragDropGameStrategy(MAPPER), new OrderingGameStrategy(MAPPER),
+            new VisualClozeGameStrategy(MAPPER));
 
     @Test
     void thereIsExactlyOneStrategyPerGameType() {
@@ -38,7 +38,7 @@ class GameContentStrategyTest {
 
     @Test
     void theQuizSchemaAsksForTheGeminiSpikeShape() {
-        JsonNode question = MAPPER.readTree(new QuizGameStrategy().getStructuredSchema())
+        JsonNode question = MAPPER.readTree(new QuizGameStrategy(MAPPER).getStructuredSchema())
                 .get("properties").get("questions").get("items");
 
         assertThat(question.get("required")).extracting(JsonNode::asString).containsExactly("text", "options", "correctIndex");
@@ -48,7 +48,7 @@ class GameContentStrategyTest {
 
     @Test
     void anExplicitlyAssignedSchemaStillWins() {
-        GameContentStrategy strategy = new QuizGameStrategy();
+        GameContentStrategy strategy = new QuizGameStrategy(MAPPER);
         strategy.setJsonSchemaDefinition("{\"custom\":true}");
 
         assertThat(strategy.getStructuredSchema()).isEqualTo("{\"custom\":true}");

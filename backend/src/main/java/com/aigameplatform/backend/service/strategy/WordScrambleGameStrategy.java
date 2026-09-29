@@ -9,6 +9,7 @@ import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.question.WordScrambleQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import tools.jackson.databind.json.JsonMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class WordScrambleGameStrategy extends GameContentStrategy<WordScrambleQuestionDsl, WordScrambleQuestion> {
 
-    public WordScrambleGameStrategy() {
-        super(WordScrambleQuestionDsl.class, WordScrambleQuestion.class);
+    public WordScrambleGameStrategy(JsonMapper jsonMapper) {
+        super(WordScrambleQuestionDsl.class, WordScrambleQuestion.class, jsonMapper);
     }
 
     @Override
