@@ -1,7 +1,7 @@
 package com.aigameplatform.backend.service.strategy;
 
-import com.aigameplatform.backend.dto.response.QuizAiContentDraft;
-import com.aigameplatform.backend.dto.response.QuizAiQuestionDraft;
+import com.aigameplatform.backend.dto.dsl.ai.QuizAiOutput;
+import com.aigameplatform.backend.dto.dsl.ai.QuizAiQuestion;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import dev.langchain4j.model.chat.ChatModel;
 import java.util.HashSet;
@@ -19,7 +19,7 @@ public class QuizSpikeContentService {
     private final ChatModel model;
     private final ObjectMapper objectMapper;
 
-    public List<QuizAiQuestionDraft> generate(String topic, GradeLevel grade) {
+    public List<QuizAiQuestion> generate(String topic, GradeLevel grade) {
         return parseSpikeResult(generateRaw(topic, grade));
     }
 
@@ -47,7 +47,7 @@ public class QuizSpikeContentService {
         return model.chat(prompt);
     }
 
-    public List<QuizAiQuestionDraft> parseSpikeResult(String rawJson) {
+    public List<QuizAiQuestion> parseSpikeResult(String rawJson) {
         try {
             JsonNode root = objectMapper.readTree(rawJson);
             if (root == null || !root.isObject() || root.size() != 1
@@ -76,8 +76,8 @@ public class QuizSpikeContentService {
                     throw new IllegalArgumentException("Question " + i + " needs correctIndex from 0 to 3");
                 }
             }
-            QuizAiContentDraft content = objectMapper.readValue(rawJson, QuizAiContentDraft.class);
-            return List.copyOf(content.getQuestions());
+            QuizAiOutput content = objectMapper.readValue(rawJson, QuizAiOutput.class);
+            return List.copyOf(content.questions());
         } catch (IllegalArgumentException exception) {
             throw exception;
         } catch (RuntimeException exception) {

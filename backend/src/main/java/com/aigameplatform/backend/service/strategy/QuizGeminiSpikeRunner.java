@@ -1,7 +1,7 @@
 package com.aigameplatform.backend.service.strategy;
 
+import com.aigameplatform.backend.dto.dsl.ai.QuizAiQuestion;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
-import com.aigameplatform.backend.dto.response.QuizAiQuestionDraft;
 import dev.langchain4j.exception.AuthenticationException;
 import dev.langchain4j.exception.HttpException;
 import dev.langchain4j.exception.RateLimitException;
@@ -133,14 +133,14 @@ public final class QuizGeminiSpikeRunner {
         return exception instanceof IllegalArgumentException ? "INVALID_OUTPUT" : "OTHER_ERROR";
     }
 
-    private static void printQuestions(List<QuizAiQuestionDraft> questions) {
+    private static void printQuestions(List<QuizAiQuestion> questions) {
         for (int i = 0; i < questions.size(); i++) {
             var question = questions.get(i);
-            System.out.printf("%d. %s%n", i + 1, question.getText());
-            for (int j = 0; j < question.getOptions().size(); j++) {
-                System.out.printf("  %d: %s%n", j, question.getOptions().get(j));
+            System.out.printf("%d. %s%n", i + 1, question.text());
+            for (int j = 0; j < question.options().size(); j++) {
+                System.out.printf("  %d: %s%n", j, question.options().get(j));
             }
-            System.out.printf("  correctIndex: %d%n", question.getCorrectIndex());
+            System.out.printf("  correctIndex: %d%n", question.correctIndex());
         }
     }
 }

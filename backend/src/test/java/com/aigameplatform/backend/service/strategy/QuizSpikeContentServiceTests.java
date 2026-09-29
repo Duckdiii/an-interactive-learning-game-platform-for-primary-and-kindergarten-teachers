@@ -26,7 +26,7 @@ class QuizSpikeContentServiceTests {
     void acceptsFourQuestionsWithFourStringOptionsAndZeroBasedAnswer() {
         var questions = service.parseSpikeResult(json(4, 3, 4));
         assertEquals(4, questions.size());
-        assertEquals(3, questions.get(0).getCorrectIndex());
+        assertEquals(3, questions.get(0).correctIndex());
     }
 
     @Test
