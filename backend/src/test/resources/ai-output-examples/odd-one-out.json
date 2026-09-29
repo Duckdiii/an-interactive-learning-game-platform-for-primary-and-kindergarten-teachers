@@ -1,0 +1,22 @@
+{
+  "questions": [
+    {
+      "items": [
+        "mèo",
+        "chó",
+        "thỏ",
+        "xe hơi"
+      ],
+      "oddOneOutIndex": 3,
+      "audioText": "Con nào khác loại?"
+    },
+    {
+      "items": [
+        "táo",
+        "chuối",
+        "ghế"
+      ],
+      "oddOneOutIndex": 2
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "title": "Ghép từ với nghĩa",
+  "gameType": "MATCHING",
+  "questionNum": 2,
+  "grade": "KINDERGARTEN",
+  "subject": "ENGLISH",
+  "shareCode": "SAMPLE01",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000000101",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "word": "cat",
+      "meaning": "con mèo",
+      "imageUrl": "https://example.com/assets/cat.png"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000102",
+      "itemIndex": 1,
+      "timeLimit": 30,
+      "point": 10,
+      "word": "dog",
+      "meaning": "con chó",
+      "imageUrl": "https://example.com/assets/dog.png"
+    }
+  ]
+}

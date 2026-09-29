@@ -43,6 +43,10 @@ public class Game {
 
     private String version;
 
+    // Phiên bản Game JSON DSL mà game này tuân theo, để chọn bộ chuyển đổi tương thích khi có phiên bản mới.
+    @Column(nullable = false, length = 20)
+    private String schemaVersion = "1.0.0";
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GameStatus status = GameStatus.DRAFT;

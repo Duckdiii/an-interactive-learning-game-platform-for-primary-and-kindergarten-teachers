@@ -1,0 +1,49 @@
+{
+  "id": "00000000-0000-4000-8000-000000000003",
+  "title": "Tìm hai thẻ giống nhau",
+  "gameType": "MEMORY_CARD",
+  "questionNum": 4,
+  "grade": "KINDERGARTEN",
+  "subject": "ENGLISH",
+  "shareCode": "SAMPLE03",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000000301",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "pairId": "cat",
+      "content": "cat",
+      "imageUrl": "https://example.com/assets/cat.png"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000302",
+      "itemIndex": 1,
+      "timeLimit": 30,
+      "point": 10,
+      "pairId": "cat",
+      "content": "cat",
+      "imageUrl": "https://example.com/assets/cat.png"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000303",
+      "itemIndex": 2,
+      "timeLimit": 30,
+      "point": 10,
+      "pairId": "dog",
+      "content": "dog",
+      "imageUrl": "https://example.com/assets/dog.png"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000304",
+      "itemIndex": 3,
+      "timeLimit": 30,
+      "point": 10,
+      "pairId": "dog",
+      "content": "dog",
+      "imageUrl": "https://example.com/assets/dog.png"
+    }
+  ]
+}

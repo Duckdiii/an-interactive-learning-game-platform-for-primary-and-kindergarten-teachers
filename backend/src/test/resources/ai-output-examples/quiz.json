@@ -1,0 +1,23 @@
+{
+  "questions": [
+    {
+      "text": "Có mấy con mèo?",
+      "options": [
+        "2",
+        "3",
+        "4"
+      ],
+      "correctIndex": 1,
+      "visualPrompt": "three cats",
+      "audioText": "Có mấy con mèo?"
+    },
+    {
+      "text": "Có mấy con chó?",
+      "options": [
+        "1",
+        "5"
+      ],
+      "correctIndex": 0
+    }
+  ]
+}

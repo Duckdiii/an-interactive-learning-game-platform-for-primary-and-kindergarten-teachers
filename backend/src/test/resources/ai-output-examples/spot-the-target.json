@@ -1,0 +1,13 @@
+{
+  "questions": [
+    {
+      "visualPrompt": "a garden with a cat",
+      "targetDescription": "con mèo",
+      "audioText": "Tìm con mèo"
+    },
+    {
+      "visualPrompt": "a farm with a cow",
+      "targetDescription": "con bò"
+    }
+  ]
+}

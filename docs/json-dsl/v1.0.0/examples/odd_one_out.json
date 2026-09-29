@@ -1,0 +1,26 @@
+{
+  "id": "00000000-0000-4000-8000-000000000007",
+  "title": "Tìm vật khác nhóm",
+  "gameType": "ODD_ONE_OUT",
+  "questionNum": 1,
+  "grade": "KINDERGARTEN",
+  "subject": "VIETNAMESE",
+  "shareCode": "SAMPLE07",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000000701",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "items": [
+        "meo",
+        "cho",
+        "ca",
+        "xe-dap"
+      ],
+      "oddOneOutId": "xe-dap"
+    }
+  ]
+}

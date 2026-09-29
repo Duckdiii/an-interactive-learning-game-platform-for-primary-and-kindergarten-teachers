@@ -1,0 +1,25 @@
+{
+  "id": "00000000-0000-4000-8000-000000000006",
+  "title": "Ghép chữ thành từ",
+  "gameType": "WORD_SCRAMBLE",
+  "questionNum": 1,
+  "grade": "KINDERGARTEN",
+  "subject": "ENGLISH",
+  "shareCode": "SAMPLE06",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000000601",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "scrambledLetters": [
+        "t",
+        "c",
+        "a"
+      ],
+      "correctWord": "cat"
+    }
+  ]
+}

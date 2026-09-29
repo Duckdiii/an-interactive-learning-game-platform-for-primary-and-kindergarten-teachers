@@ -48,3 +48,17 @@ app:
       same-site: Strict
       # Secure cookies need HTTPS in production; browsers still accept them on http://localhost.
       secure: ${COOKIE_SECURE:true}
+  moderation:
+    # Mặc định true: app từ chối khởi động nếu chưa có OPENAI_API_KEY, để không lỡ chạy với kiểm duyệt yếu.
+    # Chỉ đặt MODERATION_REQUIRED=false khi chạy thử ở máy cá nhân (khi đó chỉ dùng danh sách từ cấm).
+    required: ${MODERATION_REQUIRED:true}
+    blocked-words-location: classpath:moderation/blocked-words-vi.txt
+    openai:
+      base-url: https://api.openai.com
+      api-key: ${OPENAI_API_KEY:}
+      model: omni-moderation-latest
+      timeout-seconds: 10
+  ai:
+    gemini:
+      api-key: ${GEMINI_API_KEY:}
+      model: ${GEMINI_MODEL:}

@@ -1,0 +1,36 @@
+{
+  "id": "00000000-0000-4000-8000-000000000005",
+  "title": "Sắp xếp số tăng dần",
+  "gameType": "ORDERING",
+  "questionNum": 1,
+  "grade": "KINDERGARTEN",
+  "subject": "MATH",
+  "shareCode": "SAMPLE05",
+  "version": "1.0.0",
+  "status": "DRAFT",
+  "questions": [
+    {
+      "id": "10000000-0000-4000-8000-000000000501",
+      "itemIndex": 0,
+      "timeLimit": 30,
+      "point": 10,
+      "steps": [
+        {
+          "stepId": "11111111-1111-4111-8111-111111111111",
+          "text": "1",
+          "correctPosition": 0
+        },
+        {
+          "stepId": "22222222-2222-4222-8222-222222222222",
+          "text": "2",
+          "correctPosition": 1
+        },
+        {
+          "stepId": "33333333-3333-4333-8333-333333333333",
+          "text": "3",
+          "correctPosition": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "questions": [
+    {
+      "audioText": "Quả táo",
+      "correct": {
+        "visualPrompt": "apple"
+      },
+      "distractors": [
+        {
+          "visualPrompt": "banana"
+        },
+        {
+          "visualPrompt": "orange"
+        }
+      ]
+    },
+    {
+      "audioText": "Con mèo",
+      "correct": {
+        "visualPrompt": "cat"
+      },
+      "distractors": [
+        {
+          "visualPrompt": "dog"
+        }
+      ]
+    }
+  ]
+}

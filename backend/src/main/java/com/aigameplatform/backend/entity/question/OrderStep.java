@@ -20,5 +20,10 @@ public class OrderStep {
 
     private String text;
 
+    private String visualPrompt;
+
+    @Column(length = 2048)
+    private String imageUrl;
+
     private int correctPosition;
 }

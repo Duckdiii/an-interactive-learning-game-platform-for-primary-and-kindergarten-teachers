@@ -1,8 +1,8 @@
 package com.aigameplatform.backend.entity.question;
 
-import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,11 +14,16 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SpotTheTargetQuestion extends QuestionGame {
 
-    private String backgroundImageUrl;
+    // AI chỉ mô tả vật cần tìm; ảnh nền nằm ở visualPrompt/imageUrl của QuestionGame.
+    private String targetDescription;
 
-    private int hitRegionX;
+    // Vùng đúng (đáp án), tỉ lệ 0-1 so với ảnh. null khi còn là bản nháp, giáo viên chạm ảnh để chọn.
+    @Column(name = "hit_region_x")
+    private Double hitRegionX;
 
-    private int hitRegionY;
+    @Column(name = "hit_region_y")
+    private Double hitRegionY;
 
-    private int hitRegionRadius;
+    @Column(name = "hit_region_radius")
+    private Double hitRegionRadius;
 }
