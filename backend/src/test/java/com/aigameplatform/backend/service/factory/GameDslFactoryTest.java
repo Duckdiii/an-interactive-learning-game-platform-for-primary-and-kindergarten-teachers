@@ -30,33 +30,17 @@ import com.aigameplatform.backend.dto.dsl.ai.WordScrambleAiQuestion;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
-import com.aigameplatform.backend.service.validation.AbstractGameValidator;
-import com.aigameplatform.backend.service.validation.BusinessRuleGameValidator;
-import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import com.aigameplatform.backend.service.validation.GameValidationService;
-import com.aigameplatform.backend.service.validation.SchemaGameValidator;
+import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
 import com.aigameplatform.backend.service.validation.ValidationReport;
 import com.aigameplatform.backend.service.validation.ai.AiOutputValidator;
-import com.aigameplatform.backend.service.validation.rule.AbstractGameRule;
-import com.aigameplatform.backend.service.validation.rule.AudioVisualMatchRule;
-import com.aigameplatform.backend.service.validation.rule.DragDropRule;
-import com.aigameplatform.backend.service.validation.rule.MatchingRule;
-import com.aigameplatform.backend.service.validation.rule.MemoryCardRule;
-import com.aigameplatform.backend.service.validation.rule.OddOneOutRule;
-import com.aigameplatform.backend.service.validation.rule.OrderingRule;
-import com.aigameplatform.backend.service.validation.rule.QuizRule;
-import com.aigameplatform.backend.service.validation.rule.VisualClozeRule;
-import com.aigameplatform.backend.service.validation.rule.WordScrambleRule;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -70,33 +54,18 @@ import tools.jackson.databind.json.JsonMapper;
 class GameDslFactoryTest {
 
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
-    private static final GameDslSchemaRegistry SCHEMAS = new GameDslSchemaRegistry();
     private static final AiOutputValidator AI_VALIDATOR = new AiOutputValidator(MAPPER);
     private static final GameDslRequest REQUEST = new GameDslRequest("Đếm con vật", Subject.MATH, GradeLevel.GRADE_1);
     private static final int SEEDS = 200;
 
-    private static final GameValidationService LAYERS_1_AND_2 = new GameValidationService(List.<AbstractGameValidator>of(
-            new SchemaGameValidator(SCHEMAS, MAPPER), new BusinessRuleGameValidator(rules())), MAPPER);
-
-    private static List<AbstractGameRule<?, ?>> rules() {
-        return List.of(new QuizRule(), new AudioVisualMatchRule(), new OddOneOutRule(), new WordScrambleRule(),
-                new MatchingRule(), new MemoryCardRule(), new DragDropRule(), new OrderingRule(), new VisualClozeRule());
-    }
+    private static final GameValidationService LAYERS_1_AND_2 = GameTestFixtures.schemaAndBusinessRuleValidation(MAPPER);
 
     private static GameDslFactoryRegistry registry(RandomGenerator random) {
-        return new GameDslFactoryRegistry(List.of(
-                new QuizGameDslFactory(random), new AudioVisualMatchGameDslFactory(random),
-                new OddOneOutGameDslFactory(random), new SpotTheTargetGameDslFactory(random),
-                new WordScrambleGameDslFactory(random), new MatchingGameDslFactory(random),
-                new MemoryCardGameDslFactory(random), new DragDropGameDslFactory(random),
-                new OrderingGameDslFactory(random), new VisualClozeGameDslFactory(random)));
+        return GameTestFixtures.factoryRegistry(random);
     }
 
     private static AiGameOutput aiOutput(GameType type) throws IOException {
-        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
-        try (InputStream in = GameDslFactoryTest.class.getResourceAsStream("/ai-output-examples/" + file + ".json")) {
-            return AI_VALIDATOR.validate(type, new String(in.readAllBytes(), StandardCharsets.UTF_8)).output();
-        }
+        return AI_VALIDATOR.validate(type, GameTestFixtures.resource("/ai-output-examples/", type)).output();
     }
 
     private static GameDsl create(GameType type, long seed) throws IOException {

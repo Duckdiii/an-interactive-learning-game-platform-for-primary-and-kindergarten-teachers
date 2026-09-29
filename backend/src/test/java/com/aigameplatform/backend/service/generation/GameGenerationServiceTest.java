@@ -9,59 +9,25 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.exception.AiGenerationTimeoutException;
 import com.aigameplatform.backend.exception.UnsafeContentException;
-import com.aigameplatform.backend.service.factory.AudioVisualMatchGameDslFactory;
-import com.aigameplatform.backend.service.factory.DragDropGameDslFactory;
-import com.aigameplatform.backend.service.factory.GameDslFactoryRegistry;
 import com.aigameplatform.backend.service.factory.GameDslRequest;
-import com.aigameplatform.backend.service.factory.MatchingGameDslFactory;
-import com.aigameplatform.backend.service.factory.MemoryCardGameDslFactory;
-import com.aigameplatform.backend.service.factory.OddOneOutGameDslFactory;
-import com.aigameplatform.backend.service.factory.OrderingGameDslFactory;
-import com.aigameplatform.backend.service.factory.QuizGameDslFactory;
-import com.aigameplatform.backend.service.factory.SpotTheTargetGameDslFactory;
-import com.aigameplatform.backend.service.factory.VisualClozeGameDslFactory;
 import com.aigameplatform.backend.service.factory.WordScrambleGameDslFactory;
-import com.aigameplatform.backend.service.strategy.AudioVisualMatchGameStrategy;
-import com.aigameplatform.backend.service.strategy.DragDropGameStrategy;
-import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
-import com.aigameplatform.backend.service.strategy.MatchingGameStrategy;
-import com.aigameplatform.backend.service.strategy.MemoryCardGameStrategy;
-import com.aigameplatform.backend.service.strategy.OddOneOutGameStrategy;
-import com.aigameplatform.backend.service.strategy.OrderingGameStrategy;
+import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
 import com.aigameplatform.backend.service.strategy.QuizGameStrategy;
-import com.aigameplatform.backend.service.strategy.SpotTheTargetGameStrategy;
-import com.aigameplatform.backend.service.strategy.VisualClozeGameStrategy;
 import com.aigameplatform.backend.service.strategy.WordScrambleGameStrategy;
 import com.aigameplatform.backend.service.validation.AbstractGameValidator;
-import com.aigameplatform.backend.service.validation.BusinessRuleGameValidator;
-import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import com.aigameplatform.backend.service.validation.GameValidationService;
 import com.aigameplatform.backend.service.validation.SafetyGameValidator;
-import com.aigameplatform.backend.service.validation.SchemaGameValidator;
 import com.aigameplatform.backend.service.validation.ai.AiOutputValidator;
-import com.aigameplatform.backend.service.validation.rule.AbstractGameRule;
-import com.aigameplatform.backend.service.validation.rule.AudioVisualMatchRule;
-import com.aigameplatform.backend.service.validation.rule.DragDropRule;
-import com.aigameplatform.backend.service.validation.rule.MatchingRule;
-import com.aigameplatform.backend.service.validation.rule.MemoryCardRule;
-import com.aigameplatform.backend.service.validation.rule.OddOneOutRule;
-import com.aigameplatform.backend.service.validation.rule.OrderingRule;
-import com.aigameplatform.backend.service.validation.rule.QuizRule;
-import com.aigameplatform.backend.service.validation.rule.VisualClozeRule;
-import com.aigameplatform.backend.service.validation.rule.WordScrambleRule;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.service.validation.safety.ContentModerationClient;
 import com.aigameplatform.backend.service.validation.safety.ModerationResult;
 import com.aigameplatform.backend.service.validation.safety.ModerationUnavailableException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Queue;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
@@ -122,27 +88,15 @@ class GameGenerationServiceTest {
         if (generator != null) {
             beans.registerSingleton("generator", generator);
         }
-        GameValidationService validation = new GameValidationService(List.<AbstractGameValidator>of(
-                new SchemaGameValidator(new GameDslSchemaRegistry(), MAPPER),
-                new BusinessRuleGameValidator(List.<AbstractGameRule<?, ?>>of(new QuizRule(),
-                        new AudioVisualMatchRule(), new OddOneOutRule(), new WordScrambleRule(), new MatchingRule(),
-                        new MemoryCardRule(), new DragDropRule(), new OrderingRule(), new VisualClozeRule())),
-                new SafetyGameValidator(new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")),
-                        moderation, false)), MAPPER);
+        List<AbstractGameValidator> validators = new ArrayList<>(GameTestFixtures.schemaAndBusinessRuleValidators(MAPPER));
+        validators.add(new SafetyGameValidator(
+                new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")), moderation, false));
+        GameValidationService validation = new GameValidationService(validators, MAPPER);
         Random random = new Random(7);
         return new GameGenerationService(beans.getBeanProvider(GameContentGenerator.class),
-                new GameContentStrategyRegistry(List.<GameContentStrategy<?, ?>>of(
-                        new QuizGameStrategy(MAPPER), new AudioVisualMatchGameStrategy(MAPPER), new OddOneOutGameStrategy(MAPPER),
-                        new SpotTheTargetGameStrategy(MAPPER), new WordScrambleGameStrategy(MAPPER), new MatchingGameStrategy(MAPPER),
-                        new MemoryCardGameStrategy(MAPPER), new DragDropGameStrategy(MAPPER), new OrderingGameStrategy(MAPPER),
-                        new VisualClozeGameStrategy(MAPPER))),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)),
                 new AiOutputValidator(MAPPER),
-                new GameDslFactoryRegistry(List.of(
-                        new QuizGameDslFactory(random), new AudioVisualMatchGameDslFactory(random),
-                        new OddOneOutGameDslFactory(random), new SpotTheTargetGameDslFactory(random),
-                        new WordScrambleGameDslFactory(random), new MatchingGameDslFactory(random),
-                        new MemoryCardGameDslFactory(random), new DragDropGameDslFactory(random),
-                        new OrderingGameDslFactory(random), new VisualClozeGameDslFactory(random))),
+                GameTestFixtures.factoryRegistry(random),
                 validation, MAPPER, maxRetries);
     }
 
@@ -151,10 +105,7 @@ class GameGenerationServiceTest {
     }
 
     private static String validOutput(GameType type) throws IOException {
-        String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
-        try (InputStream in = GameGenerationServiceTest.class.getResourceAsStream("/ai-output-examples/" + file + ".json")) {
-            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
-        }
+        return GameTestFixtures.resource("/ai-output-examples/", type);
     }
 
     // ---- thành công ----
