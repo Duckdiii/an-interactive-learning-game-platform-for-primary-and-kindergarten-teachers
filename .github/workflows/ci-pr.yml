@@ -1,7 +1,7 @@
 # ci-pr: chạy trên mỗi PR nhắm vào main. 3 job độc lập, chạy song song.
 # - backend-test: 447 unit test + AigameBackendApplicationTests (khởi động thật, chạy Flyway trên Supabase thật
 #   của dự án — cần 5 secret bên dưới) + JaCoCo (chặn nếu LINE coverage < 70%, xem backend/pom.xml).
-# - frontend-build: lint (oxlint) + build (gồm type-check TypeScript).
+# - frontend-build: lint (oxlint) + test (Vitest) + build (gồm type-check TypeScript).
 # - secret-scan: Gitleaks quét toàn bộ diff của PR, tìm secret bị commit nhầm.
 #
 # Còn thiếu so với sơ đồ CI/CD gốc (để làm sau, cần thêm tài khoản/hạ tầng):
@@ -64,6 +64,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: npm run test
       - run: npm run build
 
   secret-scan:
