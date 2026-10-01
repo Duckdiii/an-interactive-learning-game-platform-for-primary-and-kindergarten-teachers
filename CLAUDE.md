@@ -66,7 +66,7 @@ Link doc: TODO — dán 3 link Claude Docs vào đây. Trước khi sinh code li
 - Touch target tối thiểu 64px.
 - Trả lời sai: KHÔNG dùng màu đỏ gắt/rung mạnh/âm thanh phạt. Dùng phản hồi nhẹ nhàng (rung nhẹ, âm thanh trung tính) và ưu tiên chỉ luôn đáp án đúng để trẻ học được.
 - Audio prompt luôn có nút "nghe lại" không giới hạn số lần.
-- Renderer mới phải hỗ trợ prop `previewMode` (dùng cho Workspace Editor live preview).
+- Renderer mới phải hỗ trợ prop `mode: 'preview' | 'play' | 'review'` (`preview` cho Workspace Editor live preview tự so đáp án cục bộ; `play` cho học sinh chơi thật, không tự lộ đáp án đúng, báo kết quả lên component cha qua callback; `review` xem lại câu đã trả lời, khoá sẵn, nhận thêm prop `selectedOptionId` cho biết đáp án đã chọn trước đó).
 
 ## Nguyên tắc thiết kế: OOP, SOLID, GRASP
 

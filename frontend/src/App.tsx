@@ -9,12 +9,18 @@ import RegisterPage from './pages/RegisterPage'
 import Workspace from './pages/Workspace'
 import WorkspaceEditor from './pages/WorkspaceEditor'
 import NotFound from './pages/NotFound'
+import CanvasSandbox from './pages/dev/CanvasSandbox'
 import { ROUTES } from './routes/paths'
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to={ROUTES.login} replace />} />
+      {/* Chỉ tồn tại ở bản dev (import.meta.env.DEV=false khi `npm run build`) — route tạm để
+          test Canvas Engine bằng fixture, xoá khi nối renderer vào WorkspaceEditor/GamePlayer thật. */}
+      {import.meta.env.DEV && (
+        <Route path="/dev/canvas-sandbox" element={<CanvasSandbox />} />
+      )}
 
       <Route element={<AuthLayout />}>
         <Route path={ROUTES.login} element={<LoginPage />} />
