@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Group, Image as KonvaImage, Layer, Rect, Text } from 'react-konva'
 import { Howl } from 'howler'
 import useImage from 'use-image'
@@ -59,8 +59,17 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
     setRevealCorrect(next.revealCorrect)
   }
 
+  // Đếm số lần "thế hệ" (tăng mỗi lần đổi câu/mode) để huỷ kết quả `onAnswered` cũ nếu nó resolve
+  // sau khi đã chuyển sang câu khác — tránh áp nhầm feedback của câu trước vào câu đang hiển thị.
+  // Đặt trong effect (chạy sau khi render commit), không mutate ref ngay trong lúc render.
+  const generationRef = useRef(0)
+  useEffect(() => {
+    generationRef.current += 1
+  }, [resetKey])
+
   const handleSelect = async (optionId: string) => {
     if (locked) return
+    const myGeneration = generationRef.current
     setChosenId(optionId)
     setLocked(true)
 
@@ -74,10 +83,18 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
 
     // mode === 'play': Backend chấm đúng/sai thật qua component cha; không tự so đáp án ở đây
     // để tránh dựa vào correctOptionId có thể đã lộ trong payload gửi xuống.
-    const result = await onAnswered?.(optionId)
-    if (typeof result === 'boolean') {
-      setRevealCorrect(true)
-      showFeedback(result)
+    try {
+      const result = await onAnswered?.(optionId)
+      if (generationRef.current !== myGeneration) return // đã đổi câu/mode, bỏ qua kết quả cũ
+      if (typeof result === 'boolean') {
+        setRevealCorrect(true)
+        showFeedback(result)
+      }
+    } catch (error) {
+      if (generationRef.current !== myGeneration) return
+      console.error('QuizRenderer: onAnswered bị lỗi, mở khoá lại để thử lại', error)
+      setChosenId(null)
+      setLocked(false)
     }
   }
 

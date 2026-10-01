@@ -16,8 +16,11 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to={ROUTES.login} replace />} />
-      {/* TODO: route tạm để test Canvas Engine bằng fixture, xoá khi nối renderer vào WorkspaceEditor/GamePlayer thật. */}
-      <Route path="/dev/canvas-sandbox" element={<CanvasSandbox />} />
+      {/* Chỉ tồn tại ở bản dev (import.meta.env.DEV=false khi `npm run build`) — route tạm để
+          test Canvas Engine bằng fixture, xoá khi nối renderer vào WorkspaceEditor/GamePlayer thật. */}
+      {import.meta.env.DEV && (
+        <Route path="/dev/canvas-sandbox" element={<CanvasSandbox />} />
+      )}
 
       <Route element={<AuthLayout />}>
         <Route path={ROUTES.login} element={<LoginPage />} />
