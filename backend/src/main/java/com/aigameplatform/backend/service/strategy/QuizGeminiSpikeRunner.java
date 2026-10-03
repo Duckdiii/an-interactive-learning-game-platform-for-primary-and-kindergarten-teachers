@@ -27,9 +27,16 @@ import tools.jackson.databind.ObjectMapper;
 
 public final class QuizGeminiSpikeRunner {
 
+    /** Prevents creating instances of this command-line utility. */
     private QuizGeminiSpikeRunner() {
     }
 
+    /**
+     * Runs one initial generation or the sequential measurement mode selected by the CLI arguments.
+     *
+     * @param args CLI mode, topic, and supported grade, or the UTF-8 output check
+     * @throws IOException if the JSONL result cannot be written
+     */
     public static void main(String[] args) throws IOException {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
         if (args.length == 1 && "--check-utf8".equals(args[0])) {
@@ -62,6 +69,7 @@ public final class QuizGeminiSpikeRunner {
 
         AtomicReference<String> rawResponse = new AtomicReference<>();
         ChatModelListener responseCapture = new ChatModelListener() {
+            /** Retains the provider response so a later parse failure can still be recorded. */
             @Override
             public void onResponse(dev.langchain4j.model.chat.listener.ChatModelResponseContext context) {
                 if (context.chatResponse().aiMessage() != null) {
@@ -99,6 +107,21 @@ public final class QuizGeminiSpikeRunner {
         }
     }
 
+    /**
+     * Invokes the generator once, validates and prints a successful response, then appends its record.
+     *
+     * @param service generator and local validator
+     * @param objectMapper JSONL serializer
+     * @param rawResponse listener capture for responses that fail parsing
+     * @param output JSONL file to append
+     * @param modelName configured Gemini model identifier
+     * @param topic requested quiz topic
+     * @param grade supported learner grade
+     * @param phase initial or measurement label
+     * @param attempt one-based attempt number
+     * @return classified result category
+     * @throws IOException if the attempt record cannot be written
+     */
     private static String runAttempt(QuizSpikeContentService service, ObjectMapper objectMapper,
                                      AtomicReference<String> rawResponse,
                                      Path output, String modelName, String topic, GradeLevel grade,
@@ -149,6 +172,7 @@ public final class QuizGeminiSpikeRunner {
         return category;
     }
 
+    /** Maps provider and local validation exceptions to stable artifact categories. */
     private static String classify(RuntimeException exception) {
         for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
             if (cause instanceof AuthenticationException) {
@@ -181,6 +205,7 @@ public final class QuizGeminiSpikeRunner {
         return "OTHER_ERROR";
     }
 
+    /** Prints each question, its ordered options, and its zero-based correct answer index. */
     private static void printQuestions(List<QuizAiQuestion> questions) {
         for (int i = 0; i < questions.size(); i++) {
             var question = questions.get(i);

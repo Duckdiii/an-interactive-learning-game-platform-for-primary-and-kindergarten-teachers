@@ -20,9 +20,11 @@ final class QuizSpikeSchema {
     private static final String RESOURCE = "/schema/game-ai-output/1.0.0/quiz.schema.json";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    /** Prevents creating instances of this schema utility. */
     private QuizSpikeSchema() {
     }
 
+    /** Loads the shared QUIZ schema and applies the spike's fixed 4-by-4 bounds. */
     static Definition definition() {
         try (InputStream input = QuizSpikeSchema.class.getResourceAsStream(RESOURCE)) {
             if (input == null) {
@@ -44,6 +46,7 @@ final class QuizSpikeSchema {
         }
     }
 
+    /** Builds native JSON response-format parameters from the derived schema. */
     static ChatRequestParameters requestParameters() {
         Definition definition = definition();
         ResponseFormat format = ResponseFormat.builder()
@@ -55,6 +58,7 @@ final class QuizSpikeSchema {
         return ChatRequestParameters.builder().responseFormat(format).build();
     }
 
+    /** Computes the lowercase hexadecimal SHA-256 digest of a schema string. */
     private static String sha256(String value) {
         try {
             return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
@@ -64,6 +68,7 @@ final class QuizSpikeSchema {
         }
     }
 
+    /** Stores the serialized schema sent to the model and its digest for experiment records. */
     record Definition(String rawSchema, String sha256) {
     }
 }

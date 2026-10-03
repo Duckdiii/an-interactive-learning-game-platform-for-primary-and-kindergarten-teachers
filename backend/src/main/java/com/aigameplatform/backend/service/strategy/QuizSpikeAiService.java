@@ -18,6 +18,7 @@ import dev.langchain4j.service.V;
         """)
 interface QuizSpikeAiService {
 
+    /** Generates structured quiz content using the supplied request parameters and topic. */
     @UserMessage("Chủ đề: {{topic}}. Cấp học: KINDERGARTEN (trẻ 5–6 tuổi).")
     Result<QuizAiOutput> generate(
             @V("topic") String topic,

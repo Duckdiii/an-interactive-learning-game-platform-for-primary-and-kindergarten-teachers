@@ -20,10 +20,12 @@ public class QuizSpikeContentService {
     private final QuizSpikeAiService aiService;
     private final ObjectMapper objectMapper;
 
+    /** Creates an AI Service-backed generator around the configured chat model. */
     public QuizSpikeContentService(ChatModel model, ObjectMapper objectMapper) {
         this(AiServices.builder(QuizSpikeAiService.class).chatModel(model).build(), objectMapper);
     }
 
+    /** Generates and validates one quiz result for the supported grade. */
     public QuizSpikeResult generate(String topic, GradeLevel grade) {
         validateRequest(topic, grade);
         Result<QuizAiOutput> result = aiService.generate(topic, QuizSpikeSchema.requestParameters());
@@ -34,6 +36,7 @@ public class QuizSpikeContentService {
         return new QuizSpikeResult(output, rawOutput);
     }
 
+    /** Rejects missing request data and grades that the current prompt does not support. */
     private void validateRequest(String topic, GradeLevel grade) {
         if (topic == null || topic.isBlank() || grade == null) {
             throw new IllegalArgumentException("Topic and grade are required");
@@ -45,6 +48,14 @@ public class QuizSpikeContentService {
         }
     }
 
+    /**
+     * Parses model JSON into the shared AI DTO after checking its raw JSON shape and spike criteria.
+     *
+     * @param rawJson model response text
+     * @return immutable list of validated questions
+     * @throws QuizSpikeStructureException when the JSON does not match the output structure
+     * @throws QuizSpikeCriteriaException when the output violates spike-specific constraints
+     */
     public List<QuizAiQuestion> parseSpikeResult(String rawJson) {
         try {
             validateRawJson(rawJson);
@@ -58,6 +69,7 @@ public class QuizSpikeContentService {
         }
     }
 
+    /** Checks required fields, JSON types, and allowed properties before DTO mapping. */
     private void validateRawJson(String rawJson) {
         var root = objectMapper.readTree(rawJson);
         if (root == null || !root.isObject() || root.size() != 1 || !root.path("questions").isArray()) {
@@ -84,6 +96,7 @@ public class QuizSpikeContentService {
         }
     }
 
+    /** Enforces the four-question, four-option, range, and text-length spike requirements. */
     private void validateSpikeOutput(QuizAiOutput output) {
         if (output == null || output.questions() == null || output.questions().size() != 4) {
             throw new QuizSpikeCriteriaException("Spike requires exactly 4 questions");

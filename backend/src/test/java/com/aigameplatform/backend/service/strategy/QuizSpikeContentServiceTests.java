@@ -24,6 +24,7 @@ class QuizSpikeContentServiceTests {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final QuizSpikeContentService parser = new QuizSpikeContentService(mock(ChatModel.class), objectMapper);
 
+    /** Verifies contract parsing preserves optional fields. */
     @Test
     void parsesContractOutputAndAllowsOptionalFields() {
         String json = json(4, 3, 4).replace("\"correctIndex\":3", "\"correctIndex\":3,\"audioText\":\"Nghe câu hỏi\"");
@@ -33,6 +34,7 @@ class QuizSpikeContentServiceTests {
         assertEquals("Nghe câu hỏi", questions.getFirst().audioText());
     }
 
+    /** Verifies malformed structure and invalid spike criteria use distinct exceptions. */
     @Test
     void rejectsStructuralAndSpikeCriteriaErrorsSeparately() {
         assertThrows(QuizSpikeCriteriaException.class, () -> parser.parseSpikeResult(json(3, 0, 4)));
@@ -47,6 +49,7 @@ class QuizSpikeContentServiceTests {
         assertThrows(QuizSpikeStructureException.class, () -> parser.parseSpikeResult("{not-json"));
     }
 
+    /** Verifies choices must be distinct counting numbers and optional text cannot be blank. */
     @Test
     void rejectsDuplicateAndNonCountingOptions() {
         assertThrows(QuizSpikeCriteriaException.class,
@@ -57,6 +60,7 @@ class QuizSpikeContentServiceTests {
                 () -> parser.parseSpikeResult(json(4, 0, 4).replace("\"correctIndex\":0", "\"correctIndex\":0,\"audioText\":\"\"")));
     }
 
+    /** Verifies the AI Service request carries the derived schema and returns raw response text. */
     @Test
     void aiServicesRequestContainsDerivedNativeJsonSchemaAndReturnsRawResponse() {
         ChatModel model = mock(ChatModel.class);
@@ -84,6 +88,7 @@ class QuizSpikeContentServiceTests {
         assertEquals(3, schema.path("properties").path("questions").path("items").path("required").size());
     }
 
+    /** Verifies unsupported grades fail before the model call and model failures are not retried. */
     @Test
     void unsupportedGradeIsRejectedBeforeModelCallAndAiServiceDoesNotRetry() {
         ChatModel model = mock(ChatModel.class);
@@ -98,6 +103,7 @@ class QuizSpikeContentServiceTests {
         verify(model).chat(any(ChatRequest.class));
     }
 
+    /** Verifies the spike schema is derived deterministically and retains optional contract fields. */
     @Test
     void spikeSchemaIsDerivedFromProductionSchemaAndHashIsStable() {
         var first = QuizSpikeSchema.definition();
@@ -109,6 +115,7 @@ class QuizSpikeContentServiceTests {
         assertTrue(List.of(GradeLevel.values()).contains(GradeLevel.KINDERGARTEN));
     }
 
+    /** Builds a compact quiz response fixture with the requested counts and answer index. */
     private String json(int count, int correctIndex, int optionCount) {
         String options = optionCount == 4 ? "[\"1\",\"2\",\"3\",\"4\"]" : "[\"1\",\"2\",\"3\"]";
         String question = "{\"text\":\"Câu hỏi?\",\"options\":" + options
