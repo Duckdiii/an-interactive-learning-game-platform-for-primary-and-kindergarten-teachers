@@ -1,0 +1,59 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    branches: [main]
+    # Chỉ review 1 lần khi mở PR / khi PR draft chuyển sang ready để tiết kiệm quota.
+    types: [opened, ready_for_review]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Bỏ qua PR draft.
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Hãy review pull request này của dự án Spring Boot (backend) + React (frontend).
+            Đọc CLAUDE.md ở gốc repo để nắm kiến trúc và quy ước đã chốt.
+
+            Tập trung vào:
+            - Logic nghiệp vụ: sai điều kiện, thiếu xử lý trường hợp biên, race condition.
+            - Bảo mật: xác thực/phân quyền, lộ secret, injection, dữ liệu nhạy cảm trong log/response.
+            - N+1 query và truy vấn JPA kém hiệu quả (fetch type, thiếu fetch join/EntityGraph).
+            - Transaction: ranh giới @Transactional sai chỗ, thiếu rollback, self-invocation.
+            - Xử lý exception: nuốt lỗi, sai mã lỗi/response envelope, rò rỉ stack trace.
+            - Kiến trúc: vi phạm phân lớp Controller -> Service -> Repository và các pattern đã chốt.
+
+            KHÔNG comment về format code hay đặt tên (đã có CodeRabbit lo).
+            Chỉ comment khi có vấn đề thật sự; nếu không có vấn đề thì không comment inline.
+
+            Cách đăng kết quả:
+            - Dùng `mcp__github_inline_comment__create_inline_comment` (với `confirmed: true`) cho từng vấn đề gắn với dòng code cụ thể.
+            - Cuối cùng đăng ĐÚNG 1 comment tổng kết bằng `gh pr comment` (tiếng Việt, ngắn gọn: các vấn đề chính theo mức độ, hoặc "không phát hiện vấn đề đáng kể").
+            - Chỉ đăng comment lên GitHub, không trả lời bằng văn bản thường.
+
+          claude_args: |
+            --max-turns 8
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
