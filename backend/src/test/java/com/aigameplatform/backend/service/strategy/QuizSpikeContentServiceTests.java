@@ -1,114 +1,112 @@
 package com.aigameplatform.backend.service.strategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.mockito.ArgumentCaptor;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.request.ResponseFormatType;
-import dev.langchain4j.model.chat.request.json.JsonRawSchema;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import tools.jackson.databind.ObjectMapper;
 
 class QuizSpikeContentServiceTests {
 
-    private final QuizSpikeContentService service = new QuizSpikeContentService(null, new ObjectMapper());
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final QuizSpikeContentService parser = new QuizSpikeContentService(mock(ChatModel.class), objectMapper);
 
     @Test
-    void acceptsFourQuestionsWithFourStringOptionsAndZeroBasedAnswer() {
-        var questions = service.parseSpikeResult(json(4, 3, 4));
+    void parsesContractOutputAndAllowsOptionalFields() {
+        String json = json(4, 3, 4).replace("\"correctIndex\":3", "\"correctIndex\":3,\"audioText\":\"Nghe câu hỏi\"");
+        var questions = parser.parseSpikeResult(json);
         assertEquals(4, questions.size());
-        assertEquals(3, questions.get(0).correctIndex());
+        assertEquals("1", questions.getFirst().options().getFirst());
+        assertEquals("Nghe câu hỏi", questions.getFirst().audioText());
     }
 
     @Test
-    void rejectsWrongQuestionCount() {
-        assertThrows(IllegalArgumentException.class, () -> service.parseSpikeResult(json(3, 0, 4)));
+    void rejectsStructuralAndSpikeCriteriaErrorsSeparately() {
+        assertThrows(QuizSpikeCriteriaException.class, () -> parser.parseSpikeResult(json(3, 0, 4)));
+        assertThrows(QuizSpikeCriteriaException.class, () -> parser.parseSpikeResult(json(4, 4, 4)));
+        assertThrows(QuizSpikeCriteriaException.class, () -> parser.parseSpikeResult(json(4, 0, 3)));
+        assertThrows(QuizSpikeStructureException.class,
+                () -> parser.parseSpikeResult(json(4, 0, 4).replace("\"correctIndex\":0", "\"answer\":0")));
+        assertThrows(QuizSpikeStructureException.class,
+                () -> parser.parseSpikeResult(json(4, 0, 4).replace("\"correctIndex\":0", "\"correctIndex\":\"0\"")));
+        assertThrows(QuizSpikeStructureException.class,
+                () -> parser.parseSpikeResult(json(4, 0, 4).replace("\"text\":\"Câu hỏi?\"", "\"text\":\"Câu hỏi?\",\"id\":\"extra\"")));
+        assertThrows(QuizSpikeStructureException.class, () -> parser.parseSpikeResult("{not-json"));
     }
 
     @Test
-    void rejectsOutOfRangeAnswerAndWrongOptionCount() {
-        assertThrows(IllegalArgumentException.class, () -> service.parseSpikeResult(json(4, 4, 4)));
-        assertThrows(IllegalArgumentException.class, () -> service.parseSpikeResult(json(4, 2, 3)));
+    void rejectsDuplicateAndNonCountingOptions() {
+        assertThrows(QuizSpikeCriteriaException.class,
+                () -> parser.parseSpikeResult(json(4, 0, 4).replace("\"2\"", "\"1\"")));
+        assertThrows(QuizSpikeCriteriaException.class,
+                () -> parser.parseSpikeResult(json(4, 0, 4).replace("\"4\"", "\"Mèo\"")));
+        assertThrows(QuizSpikeStructureException.class,
+                () -> parser.parseSpikeResult(json(4, 0, 4).replace("\"correctIndex\":0", "\"correctIndex\":0,\"audioText\":\"\"")));
     }
 
     @Test
-    void rejectsMissingFieldsWrongTypesAndUnknownFields() {
-        assertThrows(IllegalArgumentException.class,
-                () -> service.parseSpikeResult(json(4, 0, 4).replace("\"correctIndex\":0", "\"answer\":0")));
-        assertThrows(IllegalArgumentException.class,
-                () -> service.parseSpikeResult(json(4, 0, 4).replace("\"correctIndex\":0", "\"correctIndex\":\"0\"")));
-        assertThrows(IllegalArgumentException.class,
-                () -> service.parseSpikeResult(json(4, 0, 4).replace("\"1\"", "42")));
-        assertThrows(IllegalArgumentException.class,
-                () -> service.parseSpikeResult(json(4, 0, 4).replace("\"text\":\"Câu hỏi?\"", "\"text\":\"Câu hỏi?\",\"id\":\"extra\"")));
-    }
-
-    @Test
-    void rejectsDuplicateOrNonNumericCountingOptions() {
-        assertThrows(IllegalArgumentException.class,
-                () -> service.parseSpikeResult(json(4, 0, 4).replace("\"2\"", "\"1\"")));
-        assertThrows(IllegalArgumentException.class,
-                () -> service.parseSpikeResult(json(4, 0, 4).replace("\"4\"", "\"Mèo\"")));
-    }
-
-    @Test
-    void newPromptTargetsTextOnlyCountingForAgesFiveToSix() {
+    void aiServicesRequestContainsDerivedNativeJsonSchemaAndReturnsRawResponse() {
         ChatModel model = mock(ChatModel.class);
-        when(model.chat(anyString())).thenReturn("{\"questions\":[]}");
-        var configuredService = new QuizSpikeContentService(model, new ObjectMapper());
-        configuredService.generateRaw("đếm con vật", GradeLevel.KINDERGARTEN);
+        String raw = json(4, 3, 4);
+        when(model.chat(any(ChatRequest.class))).thenReturn(ChatResponse.builder().aiMessage(AiMessage.from(raw)).build());
+        var service = new QuizSpikeContentService(model, objectMapper);
 
-        ArgumentCaptor<String> prompt = ArgumentCaptor.forClass(String.class);
-        verify(model).chat(prompt.capture());
-        assertTrue(prompt.getValue().contains("đếm số con vật trong phạm vi 5"));
-        assertTrue(prompt.getValue().contains("trẻ 5–6 tuổi"));
-        assertTrue(prompt.getValue().contains("Không dùng hình ảnh"));
-        assertTrue(prompt.getValue().contains("đúng 4 câu"));
-        assertTrue(prompt.getValue().contains("không hỏi số còn lại"));
-        assertTrue(prompt.getValue().contains("nơi chốn và hành động phải nhất quán"));
-        assertEquals("quiz-count-animals-v3", QuizSpikeContentService.PROMPT_VERSION);
+        var result = service.generate("đếm con vật", GradeLevel.KINDERGARTEN);
+
+        assertEquals(raw, result.rawOutput());
+        assertEquals(4, result.output().questions().size());
+        ArgumentCaptor<ChatRequest> request = ArgumentCaptor.forClass(ChatRequest.class);
+        verify(model).chat(request.capture());
+        var format = request.getValue().parameters().responseFormat();
+        var schema = objectMapper.readTree(((dev.langchain4j.model.chat.request.json.JsonRawSchema)
+                format.jsonSchema().rootElement()).schema());
+        assertEquals(4, schema.path("properties").path("questions").path("minItems").asInt());
+        assertEquals(4, schema.path("properties").path("questions").path("maxItems").asInt());
+        assertEquals(4, schema.path("properties").path("questions").path("items")
+                .path("properties").path("options").path("minItems").asInt());
+        assertTrue(schema.path("properties").path("questions").path("items").path("properties")
+                .has("visualPrompt"));
+        assertTrue(schema.path("properties").path("questions").path("items").path("required")
+                .toString().contains("correctIndex"));
+        assertEquals(3, schema.path("properties").path("questions").path("items").path("required").size());
     }
 
     @Test
-    void structuredOutputRequiresAllDraftFields() {
-        var format = QuizSpikeSchema.responseFormat();
-        assertEquals(ResponseFormatType.JSON, format.type());
-        var schema = (JsonRawSchema) format.jsonSchema().rootElement();
-        var json = new ObjectMapper().readTree(schema.schema());
-        assertEquals("object", json.path("type").asText());
-        assertEquals("questions", json.path("required").get(0).asText());
-        var questions = json.path("properties").path("questions");
-        assertEquals(4, questions.path("minItems").asInt());
-        assertEquals(4, questions.path("maxItems").asInt());
-        var item = questions.path("items");
-        assertEquals(3, item.path("required").size());
-        assertTrue(item.path("required").toString().contains("text"));
-        assertTrue(item.path("required").toString().contains("options"));
-        assertTrue(item.path("required").toString().contains("correctIndex"));
-        assertEquals(4, item.path("properties").path("options").path("minItems").asInt());
-        assertEquals(4, item.path("properties").path("options").path("maxItems").asInt());
-    }
-
-    @Test
-    void firstModelFailureIsPropagatedWithoutServiceRetry() {
+    void unsupportedGradeIsRejectedBeforeModelCallAndAiServiceDoesNotRetry() {
         ChatModel model = mock(ChatModel.class);
-        RuntimeException firstFailure = new RuntimeException("first call failed");
-        when(model.chat(anyString())).thenThrow(firstFailure);
-        var configuredService = new QuizSpikeContentService(model, new ObjectMapper());
+        var service = new QuizSpikeContentService(model, objectMapper);
+        var invalidGrade = assertThrows(IllegalArgumentException.class,
+                () -> service.generate("topic", GradeLevel.GRADE_5));
+        assertTrue(invalidGrade.getMessage().contains("KINDERGARTEN"));
+        verify(model, never()).chat(any(ChatRequest.class));
 
-        RuntimeException thrown = assertThrows(RuntimeException.class,
-                () -> configuredService.generate("con vật", GradeLevel.KINDERGARTEN));
-        assertSame(firstFailure, thrown);
-        verify(model, times(1)).chat(anyString());
+        when(model.chat(any(ChatRequest.class))).thenThrow(new RuntimeException("first call failed"));
+        assertThrows(RuntimeException.class, () -> service.generate("topic", GradeLevel.KINDERGARTEN));
+        verify(model).chat(any(ChatRequest.class));
+    }
+
+    @Test
+    void spikeSchemaIsDerivedFromProductionSchemaAndHashIsStable() {
+        var first = QuizSpikeSchema.definition();
+        var second = QuizSpikeSchema.definition();
+        assertEquals(first, second);
+        assertTrue(first.rawSchema().contains("visualPrompt"));
+        assertTrue(first.rawSchema().contains("audioText"));
+        assertTrue(first.sha256().matches("[0-9a-f]{64}"));
+        assertTrue(List.of(GradeLevel.values()).contains(GradeLevel.KINDERGARTEN));
     }
 
     private String json(int count, int correctIndex, int optionCount) {

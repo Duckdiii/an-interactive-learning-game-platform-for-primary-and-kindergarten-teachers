@@ -2,6 +2,7 @@ package com.aigameplatform.backend.service.strategy;
 
 import com.aigameplatform.backend.dto.dsl.ai.QuizAiQuestion;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.exception.AuthenticationException;
 import dev.langchain4j.exception.HttpException;
 import dev.langchain4j.exception.RateLimitException;
@@ -19,6 +20,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import dev.langchain4j.model.chat.listener.ChatModelListener;
 import tools.jackson.databind.ObjectMapper;
 
 public final class QuizGeminiSpikeRunner {
@@ -34,7 +38,21 @@ public final class QuizGeminiSpikeRunner {
         }
         if (args.length < 3 || !("--initial".equals(args[0]) || "--measure".equals(args[0]))) {
             throw new IllegalArgumentException(
-                    "Usage: QuizGeminiSpikeRunner --check-utf8 | <--initial|--measure> <topic> <KINDERGARTEN|ELEMENTARY>");
+                    "Usage: QuizGeminiSpikeRunner --check-utf8 | <--initial|--measure> <topic> <KINDERGARTEN|GRADE_1|GRADE_2|GRADE_3|GRADE_4|GRADE_5>");
+        }
+        String topic = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
+        GradeLevel grade;
+        try {
+            grade = GradeLevel.valueOf(args[args.length - 1]);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Invalid grade. Valid values: "
+                    + String.join(", ", Arrays.stream(GradeLevel.values()).map(Enum::name).toList()));
+        }
+        if (grade != GradeLevel.KINDERGARTEN) {
+            throw new IllegalArgumentException("This prompt currently supports KINDERGARTEN only; received " + grade);
+        }
+        if (topic.isBlank()) {
+            throw new IllegalArgumentException("Topic is required");
         }
         String apiKey = System.getenv("GEMINI_API_KEY");
         String modelName = System.getenv("GEMINI_MODEL");
@@ -42,31 +60,39 @@ public final class QuizGeminiSpikeRunner {
             throw new IllegalStateException("Set GEMINI_API_KEY and GEMINI_MODEL before running the spike");
         }
 
+        AtomicReference<String> rawResponse = new AtomicReference<>();
+        ChatModelListener responseCapture = new ChatModelListener() {
+            @Override
+            public void onResponse(dev.langchain4j.model.chat.listener.ChatModelResponseContext context) {
+                if (context.chatResponse().aiMessage() != null) {
+                    rawResponse.set(context.chatResponse().aiMessage().text());
+                }
+            }
+        };
         var model = GoogleAiGeminiChatModel.builder()
                 .apiKey(apiKey)
                 .modelName(modelName)
-                .responseFormat(QuizSpikeSchema.responseFormat())
+                .supportedCapabilities(Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA))
+                .listeners(List.of(responseCapture))
                 .maxRetries(0)
                 .build();
         var objectMapper = new ObjectMapper();
         var service = new QuizSpikeContentService(model, objectMapper);
         String phase = "--initial".equals(args[0]) ? "initial" : "measurement";
-        String topic = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
-        GradeLevel grade = GradeLevel.valueOf(args[args.length - 1]);
         Path output = Path.of("target", "quiz-spike", phase + "-" + DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")
                 .withZone(ZoneOffset.UTC).format(Instant.now()) + ".jsonl");
         Files.createDirectories(output.getParent());
         System.out.println("Result file: " + output.toAbsolutePath());
 
         if ("initial".equals(phase)) {
-            String category = runAttempt(service, objectMapper, output, modelName, topic, grade, phase, 1);
+            String category = runAttempt(service, objectMapper, rawResponse, output, modelName, topic, grade, phase, 1);
             if (!"SUCCESS".equals(category)) {
                 throw new IllegalStateException("Initial attempt failed: " + category);
             }
             return;
         }
         for (int attempt = 1; attempt <= 10; attempt++) {
-            String category = runAttempt(service, objectMapper, output, modelName, topic, grade, phase, attempt);
+            String category = runAttempt(service, objectMapper, rawResponse, output, modelName, topic, grade, phase, attempt);
             if (List.of("AUTHENTICATION", "PERMISSION", "QUOTA").contains(category)) {
                 throw new IllegalStateException("Stopped measurement after " + category + " error");
             }
@@ -74,29 +100,43 @@ public final class QuizGeminiSpikeRunner {
     }
 
     private static String runAttempt(QuizSpikeContentService service, ObjectMapper objectMapper,
+                                     AtomicReference<String> rawResponse,
                                      Path output, String modelName, String topic, GradeLevel grade,
                                      String phase, int attempt)
             throws IOException {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("phase", phase);
         result.put("attempt", attempt);
-        result.put("startedAt", Instant.now().toString());
+        String timestamp = Instant.now().toString();
+        result.put("startedAt", timestamp);
+        result.put("timestamp", timestamp);
         result.put("model", modelName);
         result.put("topic", topic);
         result.put("grade", grade.name());
         result.put("promptVersion", QuizSpikeContentService.PROMPT_VERSION);
+        QuizSpikeSchema.Definition schema = QuizSpikeSchema.definition();
+        result.put("schemaVersion", QuizSpikeSchema.VERSION);
+        result.put("schemaSha256", schema.sha256());
+        result.put("langchain4jVersion", "1.20.1");
+        result.put("maxRetries", 0);
+        result.put("latencyDefinition", "time around AI Service invocation and local validation; excludes startup and file write");
         long started = System.nanoTime();
+        rawResponse.set(null);
         String raw = null;
         String category;
         try {
-            raw = service.generateRaw(topic, grade);
-            var questions = service.parseSpikeResult(raw);
+            var generated = service.generate(topic, grade);
+            raw = generated.rawOutput();
+            var questions = generated.output().questions();
             category = "SUCCESS";
             result.put("questions", questions);
             printQuestions(questions);
         } catch (RuntimeException exception) {
             category = classify(exception);
             result.put("errorClass", exception.getClass().getSimpleName());
+            if (raw == null) {
+                raw = rawResponse.get();
+            }
         }
         result.put("latencyMs", (System.nanoTime() - started) / 1_000_000);
         result.put("category", category);
@@ -129,8 +169,16 @@ public final class QuizGeminiSpikeRunner {
                 }
                 return "HTTP_" + httpException.statusCode();
             }
+            if (cause instanceof QuizSpikeCriteriaException) {
+                return "SPIKE_CRITERIA";
+            }
+            if (cause instanceof QuizSpikeStructureException
+                    || cause.getClass().getSimpleName().contains("Parsing")
+                    || cause.getClass().getSimpleName().contains("Deserialization")) {
+                return "STRUCTURE";
+            }
         }
-        return exception instanceof IllegalArgumentException ? "INVALID_OUTPUT" : "OTHER_ERROR";
+        return "OTHER_ERROR";
     }
 
     private static void printQuestions(List<QuizAiQuestion> questions) {
