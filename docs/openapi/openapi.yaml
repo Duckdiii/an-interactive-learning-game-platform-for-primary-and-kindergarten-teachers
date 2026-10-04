@@ -8,7 +8,7 @@ info:
     Bản máy đọc được của `REST API Contract v1.1.0` (thiết kế trước, code theo sau).
 
     **Trạng thái tài liệu:** NHÁP, đang viết dần theo nhóm endpoint.
-    Đã có: quy ước chung và nhóm **Auth**. Chưa có: Games, Media, Sessions, Admin.
+    Đã có: quy ước chung, nhóm **Auth** và nhóm **Games**. Chưa có: Media, Sessions, Admin.
 
     **Quy ước đánh dấu** (extension `x-status` trên từng operation):
     - `implemented`: Backend đã cài đúng như mô tả.
@@ -31,6 +31,11 @@ servers:
 tags:
   - name: Auth
     description: Đăng ký, đăng nhập, làm mới token, đăng xuất, quên mật khẩu (UC-01, UC-15).
+  - name: Games
+    description: |
+      AI sinh game, kho học liệu, Workspace Editor, xuất bản (UC-02, 04, 05, 06, 07). Chỉ dành cho
+      giáo viên (`ROLE_TEACHER`) và chỉ truy cập được game của chính mình (game của người khác trả 403).
+      Toàn bộ nhóm này **chưa cài** ở Backend (`x-status: planned`).
 
 paths:
   /auth/register:
@@ -251,6 +256,362 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /games/generate:
+    post:
+      tags: [Games]
+      operationId: generateGame
+      summary: AI sinh game (UC-02)
+      description: |
+        Nhận `application/json`, hoặc `multipart/form-data` khi đính kèm tệp giáo án.
+        Phải có **ít nhất một** trong `idea`, `file`, `randomTopic`; thiếu cả ba thì 400
+        "Vui lòng nhập ý tưởng hoặc tải giáo án". Có `idea` và `file` cùng lúc thì dùng cả hai.
+        `metadata.topic` và `metadata.title` do hệ thống rút ra từ ý tưởng.
+
+        Kết quả là `GameResponse` với `status: DRAFT` (đã lưu vào kho học liệu), đã qua đủ 3 lớp
+        kiểm duyệt, media đã gắn (`imageUrl` từ Pexels, `audioUrl` từ TTS) khi có thể.
+
+        **Tiến trình (NFR-01):** nếu gửi `Accept: text/event-stream`, response là luồng SSE thay cho
+        JSON: sự kiện `progress` (`{ "step", "percent" }`, `step` thuộc `ANALYZING, VALIDATING,
+        FETCHING_IMAGES, GENERATING_AUDIO, SAVING`), rồi kết thúc bằng một sự kiện `result`
+        (dữ liệu `GameResponse`) hoặc `error` (`{ "code", "message" }`). `EventSource` không gửi được
+        POST nên Frontend dùng `fetch` đọc luồng. Thứ tự cài đặt: bản JSON đồng bộ trước, SSE sau cùng.
+
+        Xử lý có thể mất vài giây đến vài chục giây; Frontend đặt timeout riêng lớn hơn mặc định.
+        Giới hạn 10 yêu cầu mỗi phút mỗi người dùng (NFR-04).
+      x-status: planned
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateGameRequest'
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/GenerateGameRequest'
+                - type: object
+                  properties:
+                    file:
+                      type: string
+                      format: binary
+                      description: Giáo án `.docx` hoặc `.pdf`, tối đa 10MB (FLD-04).
+            encoding:
+              voice:
+                contentType: application/json
+      responses:
+        '200':
+          description: |
+            Game đã sinh. Với `Accept: text/event-stream` là luồng SSE (xem mô tả endpoint).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameResult'
+            text/event-stream:
+              schema:
+                type: string
+                description: Các sự kiện SSE `progress`, rồi `result` hoặc `error`.
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+
+  /games:
+    get:
+      tags: [Games]
+      operationId: listGames
+      summary: Dashboard, danh sách game của giáo viên đang đăng nhập
+      description: Sắp xếp `updatedAt` giảm dần. Chưa phân trang.
+      x-status: planned
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            $ref: '#/components/schemas/Subject'
+        - name: gradeLevel
+          in: query
+          schema:
+            $ref: '#/components/schemas/GradeLevel'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/GameStatus'
+      responses:
+        '200':
+          description: Mảng `GameSummary` (không kèm `questions[]`).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GameSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /games/{gameId}:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [Games]
+      operationId: getGame
+      summary: Mở Workspace Editor
+      x-status: planned
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GameSuccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Games]
+      operationId: updateGame
+      summary: Lưu bản nháp / chỉnh sửa thủ công (UC-04, UC-05)
+      description: |
+        Body là **chỉ phần envelope DSL**. Id lấy từ đường dẫn; `gameId, status, updatedAt` do server
+        quản. `gameType` không đổi được.
+
+        Backend chạy lại đủ 3 lớp kiểm duyệt trước khi lưu, tự ghi `EditLog` (người sửa là giáo viên)
+        và tự so sánh với bản cũ để biết trường nào bị sửa (phục vụ KPI-03, không cần endpoint riêng).
+        Lưu bản nháp **không** bắt buộc đủ `hitRegion` của SPOT_THE_TARGET (nới lỏng so với JSON
+        Schema DSL, chỉ bắt buộc khi xuất bản).
+
+        Game đang `PUBLISHED` vẫn giữ `PUBLISHED`. **Nếu game đang có phiên chưa kết thúc**
+        (`WAITING`, `ACTIVE` hoặc `PAUSED`) thì bị từ chối 409 `CONFLICT`.
+      x-status: planned
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameEnvelope'
+      responses:
+        '200':
+          $ref: '#/components/responses/GameSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Games]
+      operationId: deleteGame
+      summary: Xoá game
+      description: Bị từ chối 409 `CONFLICT` nếu game đang có phiên chưa kết thúc.
+      x-status: planned
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Đã xoá, không có body.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /games/{gameId}/publish:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [Games]
+      operationId: publishGame
+      summary: Xuất bản (UC-07)
+      description: |
+        Body tuỳ chọn. Nếu gửi envelope DSL như `PUT`, Backend **lưu nội dung mới nhất rồi xuất bản
+        trong một thao tác** (UC-07 luồng chính, UC-04 4c); không gửi body thì xuất bản bản đã lưu.
+
+        `shareCode` gồm 6 ký tự chữ và số, giữ nguyên khi xuất bản lại. Gọi lại khi đã `PUBLISHED`
+        vẫn trả 200. Frontend vẽ mã QR từ `shareUrl` bằng `qrcode.react`.
+
+        400 khi dữ liệu chưa hợp lệ (câu chưa có đáp án đúng, cấu trúc chưa hoàn chỉnh) hoặc game
+        SPOT_THE_TARGET còn câu chưa có `hitRegion` (UC-07 2c). 500 khi không lưu được hoặc không tạo
+        được mã chia sẻ (UC-07 2a, 2b): game không chuyển sang `PUBLISHED`.
+      x-status: planned
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameEnvelope'
+      responses:
+        '200':
+          description: Đã xuất bản.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/PublishResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /games/{gameId}/regenerate:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [Games]
+      operationId: regenerateGame
+      summary: Làm lại toàn bộ trò chơi (UC-06 4a)
+      description: |
+        Giữ nguyên `gameId`, **thay toàn bộ `questions[]` và lưu**, `status` đặt về `DRAFT`. Giáo viên
+        chọn chức năng này là chủ ý bỏ nội dung đang có. Bị từ chối 409 `CONFLICT` nếu game đang có phiên
+        chưa kết thúc. Hỗ trợ `Accept: text/event-stream` như `generate`. Giới hạn 10 yêu cầu mỗi phút.
+      x-status: planned
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idea:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+                feedback:
+                  type: string
+                  maxLength: 500
+                  description: Định hướng điều chỉnh tổng thể, ví dụ "quá khó".
+      responses:
+        '200':
+          $ref: '#/components/responses/GameSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+
+  /games/{gameId}/questions/{questionId}/regenerate:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - $ref: '#/components/parameters/QuestionId'
+    post:
+      tags: [Games]
+      operationId: regenerateQuestion
+      summary: Làm lại một thẻ câu hỏi (UC-06 4b, FLD-14)
+      description: |
+        Trả câu mới theo DSL, giữ nguyên `id` của thẻ, đã qua kiểm duyệt, có ảnh và giọng đọc.
+        **Endpoint không tự lưu**: Frontend ghép câu mới vào bản đang soạn rồi lưu bằng `PUT` khi giáo
+        viên bấm "Lưu bản nháp". Cách này bảo toàn chỉnh sửa tay chưa lưu ở các thẻ khác.
+        Giới hạn 10 yêu cầu mỗi phút.
+      x-status: planned
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                feedback:
+                  type: string
+                  maxLength: 500
+                  examples: [làm cho câu hỏi dễ hơn]
+      responses:
+        '200':
+          description: Câu mới (chưa lưu).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [question, gameType]
+                    properties:
+                      question:
+                        $ref: '#/components/schemas/Question'
+                      gameType:
+                        $ref: '#/components/schemas/GameType'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -274,6 +635,23 @@ components:
         | `SameSite` | `Strict` |
         | `Path` | `/api/auth` |
         | Thời hạn | 24 giờ (30 ngày nếu `rememberMe`) |
+
+  parameters:
+    GameId:
+      name: gameId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    QuestionId:
+      name: questionId
+      in: path
+      required: true
+      description: Id câu hỏi theo DSL (`q1`, `q2`...).
+      schema:
+        type: string
+        examples: [q1]
 
   headers:
     RetryAfter:
@@ -324,6 +702,54 @@ components:
       description: |
         `UNAUTHORIZED`: thiếu hoặc hết hạn access token; sai email/mật khẩu; refresh token không
         hợp lệ hoặc đã bị thu hồi.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    GameSuccess:
+      description: '`GameResponse` đầy đủ (dạng dành cho giáo viên, có trường đáp án).'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GameResult'
+    Forbidden:
+      description: |
+        `FORBIDDEN`: sai vai trò, hoặc tài nguyên thuộc người khác.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: '`NOT_FOUND`: game/phiên/mã không tồn tại.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: |
+        `CONFLICT`: xung đột trạng thái nghiệp vụ, ví dụ game đang có phiên chưa kết thúc
+        (`WAITING`, `ACTIVE`, `PAUSED`): "Game đang có phiên chơi diễn ra, hãy kết thúc phiên trước khi sửa".
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnprocessableContent:
+      description: |
+        Một trong các mã 422:
+        - `UNSAFE_CONTENT`: ý tưởng, giáo án, nội dung AI sinh ra hoặc nội dung sửa tay không an toàn.
+          Backend **không** tự sinh lại; khi sửa tay thì giữ nguyên bản cũ.
+        - `FILE_TOO_LARGE_OR_INVALID_FORMAT`: tệp giáo án sai định dạng hoặc quá 10MB.
+        - `CONTENT_NOT_AGE_APPROPRIATE`: kiến thức chưa phù hợp lứa tuổi (UC-02 4a);
+          `error.details.suggestions` là mảng gợi ý, ví dụ
+          `[ { "type": "CHANGE_GRADE", "gradeLevel": "GRADE_4" }, { "type": "CHANGE_TOPIC", "idea": "..." } ]`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    AiTimeout:
+      description: |
+        `AI_GENERATION_TIMEOUT`: dịch vụ AI timeout sau khi Backend đã gọi lại tối đa 2 lần.
+        Frontend giữ lại ý tưởng đã nhập để thử lại không phải nhập lại.
       content:
         application/json:
           schema:
@@ -514,3 +940,223 @@ components:
           examples: [900]
         teacher:
           $ref: '#/components/schemas/TeacherInfo'
+
+    Subject:
+      type: string
+      enum: [MATH, VIETNAMESE, ENGLISH]
+
+    GradeLevel:
+      type: string
+      enum: [KINDERGARTEN, GRADE_1, GRADE_2, GRADE_3, GRADE_4, GRADE_5]
+
+    GameType:
+      type: string
+      enum:
+        - QUIZ
+        - AUDIO_VISUAL_MATCH
+        - ODD_ONE_OUT
+        - SPOT_THE_TARGET
+        - WORD_SCRAMBLE
+        - MATCHING
+        - MEMORY_CARD
+        - DRAG_DROP
+        - ORDERING
+        - VISUAL_CLOZE
+
+    GameStatus:
+      type: string
+      enum: [DRAFT, PUBLISHED]
+
+    Voice:
+      type: object
+      description: Giọng đọc (FLD-12). Mặc định Bắc/Nữ.
+      properties:
+        region:
+          type: string
+          enum: [NORTH, CENTRAL, SOUTH]
+          default: NORTH
+        gender:
+          type: string
+          enum: [MALE, FEMALE]
+          default: FEMALE
+
+    GenerateGameRequest:
+      type: object
+      required: [subject, gradeLevel]
+      description: |
+        Phải có ít nhất một trong `idea`, `randomTopic` (hoặc `file` khi dùng multipart); Backend
+        kiểm tra điều này (không biểu diễn bằng `anyOf` vì tệp nằm ngoài schema JSON).
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        gradeLevel:
+          $ref: '#/components/schemas/GradeLevel'
+        idea:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          description: Mô tả ý tưởng (FLD-03).
+          examples: [Trò chơi đếm số lượng con vật cho học sinh lớp 1]
+        randomTopic:
+          type: boolean
+          description: |
+            `true` khi giáo viên chỉ chọn khối lớp và môn rồi bấm "Tạo ngẫu nhiên" (UC-02 3b);
+            server tự đề xuất chủ đề phù hợp lứa tuổi.
+        gameType:
+          $ref: '#/components/schemas/GameType'
+        voice:
+          $ref: '#/components/schemas/Voice'
+
+    # --- DSL v1.0.0 (nguồn sự thật: JSON Schema trong backend, mỗi loại game một file) ---
+
+    GameEnvelope:
+      description: |
+        Envelope DSL v1.0.0, chọn nhánh theo `gameType`. Tham chiếu thẳng các JSON Schema của Backend
+        (`backend/src/main/resources/schema/game-dsl/1.0.0/*.schema.json`) để không viết hai lần.
+        Dùng làm body của `PUT /games/{gameId}` và `POST /games/{gameId}/publish`.
+      oneOf:
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/quiz.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/audio-visual-match.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/odd-one-out.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/spot-the-target.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/word-scramble.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/matching.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/memory-card.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/drag-drop.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/ordering.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/visual-cloze.schema.json'
+
+    Question:
+      description: Một câu hỏi theo DSL v1.0.0, cấu trúc phụ thuộc `gameType` (dạng đầy đủ cho giáo viên).
+      oneOf:
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/quiz.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/audio-visual-match.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/odd-one-out.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/spot-the-target.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/word-scramble.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/matching.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/memory-card.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/drag-drop.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/ordering.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/visual-cloze.schema.json#/$defs/question'
+
+    GameResponse:
+      type: object
+      required:
+        - gameId
+        - status
+        - updatedAt
+        - schemaVersion
+        - gameType
+        - metadata
+        - gameplaySettings
+        - questions
+      description: |
+        Envelope DSL cộng ba trường quản lý ở ngoài cùng (`gameId, status, updatedAt`). Với bản nháp
+        SPOT_THE_TARGET, `hitRegion` của câu hỏi có thể vắng mặt (giáo viên chạm ảnh để chọn sau).
+        Dạng dành cho học sinh (bỏ đáp án, đã xáo) sẽ mô tả ở nhóm Sessions.
+      properties:
+        gameId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/GameStatus'
+        updatedAt:
+          type: string
+          format: date-time
+        schemaVersion:
+          const: '1.0.0'
+        gameType:
+          $ref: '#/components/schemas/GameType'
+        metadata:
+          type: object
+          required: [title, subject, gradeLevel, topic]
+          properties:
+            title:
+              type: string
+              minLength: 1
+              maxLength: 100
+            subject:
+              $ref: '#/components/schemas/Subject'
+            gradeLevel:
+              $ref: '#/components/schemas/GradeLevel'
+            topic:
+              type: string
+              minLength: 1
+              maxLength: 200
+        gameplaySettings:
+          type: object
+          required: [hitboxScale]
+          properties:
+            hitboxScale:
+              type: number
+              exclusiveMinimum: 0
+              maximum: 3
+              examples: [1.5]
+        questions:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/Question'
+
+    GameResult:
+      type: object
+      required: [success, data]
+      properties:
+        success: { const: true }
+        data:
+          $ref: '#/components/schemas/GameResponse'
+
+    GameSummary:
+      type: object
+      description: Rút gọn, KHÔNG kèm `questions[]`.
+      required: [gameId, title, gameType, subject, gradeLevel, status, updatedAt]
+      properties:
+        gameId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          description: Lấy từ `metadata.title`.
+        gameType:
+          $ref: '#/components/schemas/GameType'
+        subject:
+          $ref: '#/components/schemas/Subject'
+        gradeLevel:
+          $ref: '#/components/schemas/GradeLevel'
+        status:
+          $ref: '#/components/schemas/GameStatus'
+        shareCode:
+          type: [string, 'null']
+          description: 6 ký tự chữ và số; `null` khi game còn `DRAFT`.
+          examples: [A3F9K2]
+        shareUrl:
+          type: [string, 'null']
+          format: uri
+          description: '`null` khi game còn `DRAFT`.'
+        thumbnailUrl:
+          type: [string, 'null']
+          format: uri
+          description: |
+            Backend suy ra từ `imageUrl` của câu hỏi đầu tiên; `null` nếu câu đó không có ảnh
+            (Frontend hiển thị biểu tượng theo `gameType`).
+        updatedAt:
+          type: string
+          format: date-time
+
+    PublishResult:
+      type: object
+      required: [gameId, status, shareCode, shareUrl]
+      properties:
+        gameId:
+          type: string
+          format: uuid
+        status:
+          const: PUBLISHED
+        shareCode:
+          type: string
+          examples: [A3F9K2]
+        shareUrl:
+          type: string
+          format: uri
