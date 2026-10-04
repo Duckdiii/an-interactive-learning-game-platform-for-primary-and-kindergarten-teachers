@@ -1,0 +1,516 @@
+openapi: 3.1.0
+
+info:
+  title: AI-Game Platform REST API
+  version: 1.1.0
+  summary: Hợp đồng REST API giữa Backend (Spring Boot) và Frontend (React).
+  description: |
+    Bản máy đọc được của `REST API Contract v1.1.0` (thiết kế trước, code theo sau).
+
+    **Trạng thái tài liệu:** NHÁP, đang viết dần theo nhóm endpoint.
+    Đã có: quy ước chung và nhóm **Auth**. Chưa có: Games, Media, Sessions, Admin.
+
+    **Quy ước đánh dấu** (extension `x-status` trên từng operation):
+    - `implemented`: Backend đã cài đúng như mô tả.
+    - `extended-pending`: endpoint đã có nhưng phần mở rộng trong mô tả chưa cài.
+    - `planned`: chưa cài, hai phía code song song theo đúng mô tả.
+
+    **Response envelope:** mọi response JSON đều có dạng `{ "success": true, "data": ... }`
+    hoặc `{ "success": false, "error": { "code", "message", "details?" } }`.
+    Các endpoint trả 204 không có body.
+
+    **Học sinh (public):** sau khi vào phiên, mọi request gửi header `X-Participant-Id`
+    (sẽ mô tả ở nhóm Sessions).
+  contact:
+    name: Nhóm đồ án AI-Game Platform
+
+servers:
+  - url: http://localhost:8080/api
+    description: Môi trường dev
+
+tags:
+  - name: Auth
+    description: Đăng ký, đăng nhập, làm mới token, đăng xuất, quên mật khẩu (UC-01, UC-15).
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      operationId: register
+      summary: Đăng ký tài khoản giáo viên
+      description: |
+        Tài khoản đăng ký luôn là `ROLE_TEACHER`. Tài khoản quản trị viên do hệ thống
+        cấp sẵn từ biến môi trường `ADMIN_EMAIL` và `ADMIN_PASSWORD`, không đăng ký qua API này.
+
+        Phần mở rộng chưa cài ở Backend: `school` và `acceptedPolicy` (UC-01 4c).
+      x-status: extended-pending
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Tạo tài khoản thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/RegisterResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: login
+      summary: Đăng nhập
+      description: |
+        Trả `accessToken` trong body. **Refresh token không nằm trong body**, được đặt vào cookie
+        HttpOnly `refresh_token` qua header `Set-Cookie` (xem mục *Cookie refresh token* ở dưới).
+
+        `rememberMe: true` kéo dài refresh token và cookie lên 30 ngày (mặc định 24 giờ).
+
+        > **Sẽ đổi ở Frontend:** code Frontend hiện còn theo contract v1.0.0 (đọc `refreshToken`
+        > từ body và dùng `AuthUser.id`). Cần chuyển sang cookie và `teacherId`.
+
+        Phần mở rộng chưa cài: `rememberMe`, `role` trong `teacher`, lỗi `ACCOUNT_LOCKED`,
+        `LOGIN_TEMPORARILY_LOCKED`.
+      x-status: extended-pending
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: |
+            `ACCOUNT_LOCKED`: tài khoản bị quản trị viên khoá. Chỉ trả khi **mật khẩu đúng**
+            (tránh dò email có tồn tại hay không).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: |
+            `LOGIN_TEMPORARILY_LOCKED`: đăng nhập sai quá 5 lần liên tiếp, khoá 15 phút.
+          headers:
+            Retry-After:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      operationId: refreshToken
+      summary: Làm mới access token
+      description: |
+        Không có body, không cần `Authorization`. Trình duyệt tự gửi cookie `refresh_token`
+        (Frontend bật `withCredentials: true`).
+
+        Response giống `/auth/login`, kèm `Set-Cookie` với refresh token mới (rotation: token cũ
+        bị vô hiệu). Nếu refresh token **cũ đã bị dùng rồi** được dùng lại (dấu hiệu bị lộ),
+        Backend thu hồi cả chuỗi token cùng phiên đăng nhập.
+      x-status: implemented
+      security:
+        - refreshCookie: []
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthSuccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: '`ACCOUNT_LOCKED`: tài khoản vừa bị khoá.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logout
+      summary: Đăng xuất
+      description: Thu hồi refresh token hiện tại và xoá cookie (`Set-Cookie` với `Max-Age=0`).
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Đã đăng xuất, không có body.
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/ClearRefreshCookie'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      operationId: forgotPassword
+      summary: Yêu cầu liên kết đặt lại mật khẩu
+      description: |
+        Response **luôn giống nhau** dù email có tồn tại hay không (tránh dò tài khoản).
+        Nếu email tồn tại, Backend gửi thư chứa liên kết `https://<frontend>/reset-password?token=...`;
+        token dùng một lần, hết hạn sau 30 phút, lưu dạng băm. Giới hạn 3 yêu cầu mỗi giờ mỗi email.
+
+        Môi trường dev: Backend in liên kết ra log thay vì gửi email (tuyệt đối không bật khi
+        triển khai thật). Cấu hình SMTP lấy từ biến môi trường.
+      x-status: planned
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  maxLength: 255
+                  examples: [a@school.edu.vn]
+      responses:
+        '200':
+          description: Đã tiếp nhận yêu cầu.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [message]
+                    properties:
+                      message:
+                        type: string
+                        examples: [Nếu email tồn tại, liên kết đặt lại mật khẩu đã được gửi.]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      operationId: resetPassword
+      summary: Đặt lại mật khẩu bằng token
+      description: |
+        Thành công thì thu hồi mọi refresh token của tài khoản và xoá bộ đếm đăng nhập sai.
+        Lỗi 400 khi liên kết hết hạn/không hợp lệ, hoặc mật khẩu mới không đạt yêu cầu.
+      x-status: planned
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token:
+                  type: string
+                  description: Token nhận từ liên kết trong email.
+                newPassword:
+                  $ref: '#/components/schemas/Password'
+      responses:
+        '204':
+          description: Đã đặt lại mật khẩu, không có body.
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Access token (hết hạn sau 900 giây). JWT mang claim vai trò: `ROLE_TEACHER` cho mọi
+        endpoint ngoài `/admin`, `ROLE_ADMIN` cho `/admin/**`. Sai vai trò trả 403 `FORBIDDEN`.
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+      description: |
+        Cookie HttpOnly do Backend đặt khi login/refresh. JavaScript không đọc được.
+
+        | Thuộc tính | Giá trị |
+        |---|---|
+        | `HttpOnly` | Có |
+        | `Secure` | Theo môi trường (`COOKIE_SECURE`, mặc định `true`) |
+        | `SameSite` | `Strict` |
+        | `Path` | `/api/auth` |
+        | Thời hạn | 24 giờ (30 ngày nếu `rememberMe`) |
+
+  headers:
+    RetryAfter:
+      description: Số giây cần chờ trước khi thử lại; Frontend hiển thị đếm ngược.
+      schema:
+        type: integer
+        minimum: 1
+    SetRefreshCookie:
+      description: |
+        `refresh_token=<token>; HttpOnly; SameSite=Strict; Path=/api/auth; Max-Age=<giây>`
+        (thêm `Secure` theo cấu hình môi trường).
+      schema:
+        type: string
+    ClearRefreshCookie:
+      description: '`refresh_token=; HttpOnly; SameSite=Strict; Path=/api/auth; Max-Age=0`'
+      schema:
+        type: string
+
+  responses:
+    AuthSuccess:
+      description: Thành công; refresh token nằm ở cookie, không nằm trong body.
+      headers:
+        Set-Cookie:
+          $ref: '#/components/headers/SetRefreshCookie'
+        Cache-Control:
+          description: Luôn là `no-store`.
+          schema:
+            type: string
+            examples: [no-store]
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [success, data]
+            properties:
+              success: { const: true }
+              data:
+                $ref: '#/components/schemas/AuthData'
+    ValidationError:
+      description: |
+        `VALIDATION_ERROR`: request sai định dạng hoặc vi phạm ràng buộc. `error.details.fields`
+        liệt kê lỗi theo từng trường khi có.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: |
+        `UNAUTHORIZED`: thiếu hoặc hết hạn access token; sai email/mật khẩu; refresh token không
+        hợp lệ hoặc đã bị thu hồi.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: '`RATE_LIMITED`: vượt giới hạn tần suất.'
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: '`INTERNAL_ERROR`: luôn trả thông điệp chung, không lộ chi tiết hệ thống.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorCode:
+      type: string
+      description: |
+        | code | HTTP | Trạng thái | Khi nào dùng |
+        |---|---|---|---|
+        | `VALIDATION_ERROR` | 400 | đã cài | Request sai định dạng hoặc vi phạm ràng buộc (kể cả email đã đăng ký) |
+        | `UNAUTHORIZED` | 401 | đã cài | Thiếu/hết hạn access token; sai email hoặc mật khẩu; refresh token không hợp lệ |
+        | `FORBIDDEN` | 403 | đã cài | Sai vai trò, tài nguyên của người khác |
+        | `NOT_FOUND` | 404 | đã cài | Game/session/mã không tồn tại |
+        | `FILE_TOO_LARGE_OR_INVALID_FORMAT` | 422 | đã cài | Sai định dạng hoặc dung lượng tệp |
+        | `UNSAFE_CONTENT` | 422 | đã cài | Nội dung không an toàn |
+        | `AI_GENERATION_TIMEOUT` | 504 | đã cài | Dịch vụ AI timeout sau khi retry |
+        | `INTERNAL_ERROR` | 500 | đã cài | Lỗi không xác định |
+        | `CONFLICT` | 409 | chưa cài | Xung đột trạng thái nghiệp vụ |
+        | `RATE_LIMITED` | 429 | chưa cài | Vượt giới hạn tần suất; kèm `Retry-After` |
+        | `ACCOUNT_LOCKED` | 403 | chưa cài | Tài khoản bị quản trị viên khoá |
+        | `LOGIN_TEMPORARILY_LOCKED` | 429 | chưa cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
+        | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |
+      enum:
+        - VALIDATION_ERROR
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - FILE_TOO_LARGE_OR_INVALID_FORMAT
+        - UNSAFE_CONTENT
+        - AI_GENERATION_TIMEOUT
+        - INTERNAL_ERROR
+        - CONFLICT
+        - RATE_LIMITED
+        - ACCOUNT_LOCKED
+        - LOGIN_TEMPORARILY_LOCKED
+        - CONTENT_NOT_AGE_APPROPRIATE
+
+    ErrorBody:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+          description: Câu tiếng Việt sẵn sàng hiển thị cho người dùng.
+          examples: [Dữ liệu không hợp lệ]
+        details:
+          type: object
+          description: Tuỳ chọn, bỏ qua khi không có.
+          properties:
+            fields:
+              type: array
+              description: Lỗi theo từng trường.
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                    examples: [email]
+                  message:
+                    type: string
+                    examples: [Email không hợp lệ]
+            suggestions:
+              type: array
+              description: Gợi ý điều chỉnh nội dung (chỉ với `CONTENT_NOT_AGE_APPROPRIATE`).
+              items:
+                type: object
+
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success: { const: false }
+        error:
+          $ref: '#/components/schemas/ErrorBody'
+
+    Password:
+      type: string
+      format: password
+      minLength: 8
+      maxLength: 72
+      description: |
+        8 đến 72 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt; tối đa 72 byte UTF-8.
+      examples: [Abcd@1234]
+
+    Role:
+      type: string
+      enum: [ROLE_TEACHER, ROLE_ADMIN]
+
+    RegisterRequest:
+      type: object
+      required: [fullName, email, password, acceptedPolicy]
+      properties:
+        fullName:
+          type: string
+          maxLength: 255
+          examples: [Nguyễn Văn A]
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          examples: [a@school.edu.vn]
+        password:
+          $ref: '#/components/schemas/Password'
+        school:
+          type: string
+          maxLength: 255
+          description: Tuỳ chọn (chờ nhóm xác nhận; entity `Teacher` chưa có trường này).
+          examples: [Trường Tiểu học ABC]
+        acceptedPolicy:
+          type: boolean
+          const: true
+          description: Phải là `true` (UC-01 4c, đã đọc chính sách bảo vệ dữ liệu cá nhân).
+
+    RegisterResult:
+      type: object
+      required: [teacherId, email]
+      properties:
+        teacherId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        rememberMe:
+          type: boolean
+          default: false
+          description: Kéo dài refresh token và cookie lên 30 ngày.
+
+    TeacherInfo:
+      type: object
+      required: [teacherId, fullName, email, role]
+      description: |
+        Khoá được giữ tên `teacher` để không phá code đã cài, kể cả khi người dùng là quản trị
+        viên (`role` cho biết vai trò, Frontend chuyển màn hình chính theo `role`).
+      properties:
+        teacherId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+
+    AuthData:
+      type: object
+      required: [accessToken, expiresIn, teacher]
+      properties:
+        accessToken:
+          type: string
+          description: JWT.
+        expiresIn:
+          type: integer
+          description: Thời hạn access token, tính bằng giây.
+          examples: [900]
+        teacher:
+          $ref: '#/components/schemas/TeacherInfo'
