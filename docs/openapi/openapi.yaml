@@ -8,7 +8,7 @@ info:
     Bản máy đọc được của `REST API Contract v1.1.0` (thiết kế trước, code theo sau).
 
     **Trạng thái tài liệu:** NHÁP, đang viết dần theo nhóm endpoint.
-    Đã có: quy ước chung, **Auth**, **Games**, **Media**, **Sessions/Play**. Chưa có: Admin.
+    Đã có đủ các nhóm: quy ước chung, **Auth**, **Games**, **Media**, **Sessions/Play**, **Admin**.
 
     **Quy ước đánh dấu** (extension `x-status` trên từng operation):
     - `implemented`: Backend đã cài đúng như mô tả.
@@ -50,6 +50,13 @@ tags:
       cho học sinh khác** (bảng xếp hạng và sự kiện WebSocket cho học sinh chỉ có hạng, biệt danh, điểm,
       đội); chỉ truyền qua header trên HTTPS; Backend kiểm tra `participantId` thuộc đúng phiên và phiên
       `ACTIVE` mới cho nộp câu trả lời. Hệ thống chỉ lưu biệt danh, không lưu thông tin nhận dạng (NFR-02).
+  - name: Admin
+    description: |
+      Quản trị viên (`ROLE_ADMIN`; sai vai trò trả 403) và **mọi thao tác được ghi vào Audit Log**.
+      Triển khai hai đợt, đánh dấu bằng `x-phase`:
+      - **Đợt (a)** nền tảng và bảo mật: vai trò `ROLE_ADMIN` trong JWT, quản lý giáo viên, Audit Log.
+      - **Đợt (b)** vận hành và AI: chi phí và trạng thái dịch vụ, cấu hình bộ não AI, từ cấm.
+      Tài khoản quản trị viên do hệ thống cấp sẵn từ `ADMIN_EMAIL` và `ADMIN_PASSWORD`.
   - name: Realtime
     description: |
       **WebSocket không nằm trong OpenAPI.** Sự kiện realtime đi qua STOMP over SockJS broker
@@ -1437,6 +1444,526 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /admin/teachers:
+    get:
+      tags: [Admin]
+      operationId: adminListTeachers
+      summary: Danh sách giáo viên (UC-13)
+      description: '`search` khớp tên hoặc email. Phân trang.'
+      x-status: planned
+      x-phase: a
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/TeacherAccountStatus'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Trang giáo viên.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/PageInfo'
+                      - type: object
+                        required: [items]
+                        properties:
+                          items:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/AdminTeacher'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Admin]
+      operationId: adminCreateTeacher
+      summary: Thêm giáo viên (UC-13)
+      description: |
+        Email trùng trả 400 "Email này đã tồn tại trong hệ thống." (UC-13 4a). Dữ liệu sai trả 400 kèm
+        `error.details.fields` để Frontend đánh dấu trường lỗi (UC-13 4b). Lỗi lưu trả 500 và giữ nguyên
+        trạng thái (UC-13 4c).
+      x-status: planned
+      x-phase: a
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateTeacherRequest'
+      responses:
+        '201':
+          description: Đã thêm giáo viên.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/AdminTeacher'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/teachers/{teacherId}:
+    parameters:
+      - $ref: '#/components/parameters/TeacherId'
+    get:
+      tags: [Admin]
+      operationId: adminGetTeacher
+      summary: Chi tiết một giáo viên
+      x-status: planned
+      x-phase: a
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/AdminTeacherSuccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Admin]
+      operationId: adminUpdateTeacher
+      summary: Sửa thông tin giáo viên
+      description: Chỉ sửa `fullName`, `school`; không đổi email.
+      x-status: planned
+      x-phase: a
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  maxLength: 255
+                school:
+                  type: string
+                  maxLength: 255
+      responses:
+        '200':
+          $ref: '#/components/responses/AdminTeacherSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/teachers/{teacherId}/lock:
+    parameters:
+      - $ref: '#/components/parameters/TeacherId'
+    post:
+      tags: [Admin]
+      operationId: adminLockTeacher
+      summary: Khoá tài khoản giáo viên
+      description: |
+        `status` thành `LOCKED` và thu hồi mọi refresh token. Gọi lại vẫn trả 200. Không cho quản trị
+        viên tự khoá chính mình (400, đề xuất).
+      x-status: planned
+      x-phase: a
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/TeacherStatusSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/teachers/{teacherId}/unlock:
+    parameters:
+      - $ref: '#/components/parameters/TeacherId'
+    post:
+      tags: [Admin]
+      operationId: adminUnlockTeacher
+      summary: Mở khoá tài khoản giáo viên
+      description: '`status` thành `ACTIVE`. Gọi lại vẫn trả 200.'
+      x-status: planned
+      x-phase: a
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/TeacherStatusSuccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/audit-logs:
+    get:
+      tags: [Admin]
+      operationId: adminListAuditLogs
+      summary: Audit Log (FLD-28)
+      description: |
+        Chỉ ghi người dùng đăng nhập (giáo viên, quản trị viên); không ghi IP hay thiết bị của học sinh.
+        Mọi endpoint `/admin` cũng được ghi vào Audit Log.
+      x-status: planned
+      x-phase: a
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: actorId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: result
+          in: query
+          schema:
+            $ref: '#/components/schemas/AuditResult'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Trang nhật ký.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/PageInfo'
+                      - type: object
+                        required: [items]
+                        properties:
+                          items:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/AuditLogEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/usage:
+    get:
+      tags: [Admin]
+      operationId: adminGetUsage
+      summary: Chi phí và trạng thái dịch vụ (UC-12)
+      description: |
+        Một dịch vụ lỗi vẫn trả dữ liệu các dịch vụ khác (UC-12 2a). `costSource: UNAVAILABLE` thì `cost`
+        là `null`; Frontend hiển thị "Chưa có dữ liệu chi phí", không tự đưa giá trị giả định (UC-12 3b).
+        Đợt (b) phụ thuộc số liệu sử dụng dịch vụ.
+      x-status: planned
+      x-phase: b
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [TODAY, 7D, 30D, CUSTOM]
+            default: 7D
+        - name: from
+          in: query
+          description: Bắt buộc khi `range=CUSTOM`.
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: Bắt buộc khi `range=CUSTOM`.
+          schema:
+            type: string
+            format: date-time
+        - name: service
+          in: query
+          schema:
+            $ref: '#/components/schemas/ServiceName'
+      responses:
+        '200':
+          description: Số liệu sử dụng.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/UsageReport'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/system-status:
+    get:
+      tags: [Admin]
+      operationId: adminGetSystemStatus
+      summary: Sức khoẻ máy chủ (NFR-03)
+      x-status: planned
+      x-phase: b
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Chỉ số hệ thống.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/SystemStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/ai-config:
+    get:
+      tags: [Admin]
+      operationId: adminGetAiConfig
+      summary: Phiên bản cấu hình AI đang áp dụng và lịch sử (UC-14)
+      x-status: planned
+      x-phase: b
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Phiên bản đang áp dụng và lịch sử.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [active, versions]
+                    properties:
+                      active:
+                        $ref: '#/components/schemas/AiConfigVersion'
+                      versions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AiConfigVersion'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/ai-config/versions:
+    post:
+      tags: [Admin]
+      operationId: adminCreateAiConfigVersion
+      summary: Tạo và áp dụng phiên bản cấu hình mới
+      description: |
+        Mỗi lần lưu tạo một phiên bản mới (không sửa phiên bản cũ), kèm mã SHA-256 do server tính
+        (NFR-05). Giá trị sai trả 400 "Giá trị cấu hình không hợp lệ. Vui lòng kiểm tra lại các tham
+        số..." kèm `error.details.fields`, giữ nguyên cấu hình đang áp dụng (UC-14 4a).
+      x-status: planned
+      x-phase: b
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiConfigInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/AiConfigVersionSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/ai-config/versions/{versionId}/freeze:
+    parameters:
+      - $ref: '#/components/parameters/VersionId'
+    post:
+      tags: [Admin]
+      operationId: adminFreezeAiConfigVersion
+      summary: Đóng băng một phiên bản làm bản chuẩn
+      description: |
+        Phiên bản đã đóng băng không sửa được; thay đổi tiếp theo phải tạo phiên bản mới kế thừa.
+      x-status: planned
+      x-phase: b
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                  examples: [v1.0.0]
+      responses:
+        '200':
+          $ref: '#/components/responses/AiConfigVersionSuccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/ai-config/versions/{versionId}/activate:
+    parameters:
+      - $ref: '#/components/parameters/VersionId'
+    post:
+      tags: [Admin]
+      operationId: adminActivateAiConfigVersion
+      summary: Khôi phục phiên bản làm bản đang áp dụng
+      description: Các lời gọi AI sau đó dùng phiên bản đang áp dụng.
+      x-status: planned
+      x-phase: b
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/AiConfigVersionSuccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/safety/blocked-words:
+    get:
+      tags: [Admin]
+      operationId: adminGetBlockedWords
+      summary: Danh sách từ cấm an toàn học đường (FLD-25)
+      x-status: planned
+      x-phase: b
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/BlockedWordsSuccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Admin]
+      operationId: adminReplaceBlockedWords
+      summary: Thay toàn bộ danh sách từ cấm
+      description: |
+        Backend nạp lại bộ nhớ (hot reload), không cần khởi động lại. Từ trong danh sách còn áp dụng cho
+        nickname và nội dung do giáo viên nhập. Đợt (b) cần chuyển danh sách từ tệp tĩnh sang nơi lưu
+        có thể sửa lúc chạy.
+      x-status: planned
+      x-phase: b
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockedWords'
+      responses:
+        '200':
+          $ref: '#/components/responses/BlockedWordsSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1471,6 +1998,36 @@ components:
   parameters:
     GameId:
       name: gameId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      description: Trang, bắt đầu từ 0.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    TeacherId:
+      name: teacherId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    VersionId:
+      name: versionId
       in: path
       required: true
       schema:
@@ -1567,6 +2124,57 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GameResult'
+    AdminTeacherSuccess:
+      description: Thông tin giáo viên.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [success, data]
+            properties:
+              success: { const: true }
+              data:
+                $ref: '#/components/schemas/AdminTeacher'
+    TeacherStatusSuccess:
+      description: Trạng thái tài khoản sau khi đổi.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [success, data]
+            properties:
+              success: { const: true }
+              data:
+                type: object
+                required: [teacherId, status]
+                properties:
+                  teacherId:
+                    type: string
+                    format: uuid
+                  status:
+                    $ref: '#/components/schemas/TeacherAccountStatus'
+    AiConfigVersionSuccess:
+      description: Phiên bản cấu hình AI sau thay đổi.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [success, data]
+            properties:
+              success: { const: true }
+              data:
+                $ref: '#/components/schemas/AiConfigVersion'
+    BlockedWordsSuccess:
+      description: Danh sách từ cấm hiện tại.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [success, data]
+            properties:
+              success: { const: true }
+              data:
+                $ref: '#/components/schemas/BlockedWords'
     SessionControlSuccess:
       description: Trạng thái phiên sau khi chuyển.
       content:
@@ -2708,3 +3316,245 @@ components:
           type: object
           description: Đáp án đúng, cùng tên trường với `answer`.
           additionalProperties: true
+
+    # --- Admin ---
+
+    PageInfo:
+      type: object
+      required: [page, size, totalItems, totalPages]
+      properties:
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+        totalItems:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
+    TeacherAccountStatus:
+      type: string
+      enum: [ACTIVE, LOCKED]
+
+    AdminTeacher:
+      type: object
+      required: [teacherId, fullName, email, status, createdAt]
+      properties:
+        teacherId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        school:
+          type: [string, 'null']
+        status:
+          $ref: '#/components/schemas/TeacherAccountStatus'
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminCreateTeacherRequest:
+      type: object
+      required: [fullName, email, initialPassword]
+      properties:
+        fullName:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        school:
+          type: string
+          maxLength: 255
+        initialPassword:
+          $ref: '#/components/schemas/Password'
+
+    AuditResult:
+      type: string
+      enum: [SUCCESS, FAILURE, BLOCKED]
+
+    AuditLogEntry:
+      type: object
+      required: [logId, timestamp, actorId, actorRole, action, result]
+      properties:
+        logId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        actorId:
+          type: string
+          format: uuid
+        actorRole:
+          $ref: '#/components/schemas/Role'
+        ip:
+          type: [string, 'null']
+        action:
+          type: string
+          examples: [POST /api/games/generate]
+        result:
+          $ref: '#/components/schemas/AuditResult'
+        moderationResult:
+          type: [string, 'null']
+
+    ServiceName:
+      type: string
+      enum: [GENERATIVE_AI, IMAGE_API, TTS, MODERATION]
+
+    ServiceUsage:
+      type: object
+      required: [service, requests, successCount, failureCount, costSource, status]
+      properties:
+        service:
+          $ref: '#/components/schemas/ServiceName'
+        requests:
+          type: integer
+        successCount:
+          type: integer
+        failureCount:
+          type: integer
+        tokensUsed:
+          type: [integer, 'null']
+        quotaUsedPercent:
+          type: [number, 'null']
+        cost:
+          type: [number, 'null']
+          description: '`null` khi `costSource` là `UNAVAILABLE`.'
+        costCurrency:
+          type: [string, 'null']
+          examples: [USD]
+        costSource:
+          type: string
+          description: |
+            `BILLING` (số liệu nhà cung cấp), `ESTIMATED` (tính từ lượng dùng và bảng giá đã cấu hình),
+            `UNAVAILABLE`.
+          enum: [BILLING, ESTIMATED, UNAVAILABLE]
+        status:
+          type: string
+          description: '`UNREACHABLE` hiển thị "Không thể kết nối", `UNKNOWN` hiển thị "Chưa xác định trạng thái".'
+          enum: [OPERATIONAL, UNREACHABLE, UNKNOWN]
+
+    UsageReport:
+      type: object
+      required: [range, services, timeseries]
+      properties:
+        range:
+          type: object
+          required: [from, to]
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceUsage'
+        timeseries:
+          type: array
+          items:
+            type: object
+            required: [date, requests]
+            properties:
+              date:
+                type: string
+                format: date
+              requests:
+                type: integer
+              cost:
+                type: [number, 'null']
+
+    SystemStatus:
+      type: object
+      properties:
+        server:
+          type: object
+          properties:
+            cpuUsagePercent:
+              type: number
+            heapUsagePercent:
+              type: number
+            activeThreads:
+              type: integer
+        database:
+          type: object
+          properties:
+            poolUsagePercent:
+              type: number
+        liveArena:
+          type: object
+          properties:
+            activeSessions:
+              type: integer
+            connectedClients:
+              type: integer
+
+    AiConfigInput:
+      type: object
+      required: [systemPrompt]
+      properties:
+        systemPrompt:
+          type: string
+          minLength: 1
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.3
+        maxTokens:
+          type: integer
+          minimum: 500
+          maximum: 4000
+          default: 2000
+        moderationThreshold:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.85
+
+    AiConfigVersion:
+      allOf:
+        - $ref: '#/components/schemas/AiConfigInput'
+        - type: object
+          required: [versionId, frozen, active, sha256, createdAt, createdBy]
+          properties:
+            versionId:
+              type: string
+              format: uuid
+            label:
+              type: [string, 'null']
+              examples: [v1.0.0]
+            frozen:
+              type: boolean
+            active:
+              type: boolean
+            sha256:
+              type: string
+              description: Do server tính (NFR-05).
+              examples: [ab12cd34]
+            createdAt:
+              type: string
+              format: date-time
+            createdBy:
+              type: string
+              format: uuid
+
+    BlockedWords:
+      type: object
+      required: [words]
+      properties:
+        words:
+          type: array
+          items:
+            type: string
