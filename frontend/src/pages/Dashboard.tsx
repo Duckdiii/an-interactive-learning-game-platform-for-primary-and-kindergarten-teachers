@@ -5,7 +5,7 @@ import { getGames } from '../api/gamesApi'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PageHeader from '../components/ui/PageHeader'
 import { ROUTES } from '../routes/paths'
-import type { GameFilters, GameSummary } from '../types/game'
+import type { GameFilters, GameSummary } from '../types/game-summary.types'
 
 const initialFilters: GameFilters = {
   subject: '',
