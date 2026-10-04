@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.controller;
 
+import com.aigameplatform.backend.config.OpenApiConfig;
 import com.aigameplatform.backend.dto.request.LoginRequest;
 import com.aigameplatform.backend.dto.request.RegisterRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
@@ -9,6 +10,8 @@ import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.security.RefreshCookieFactory;
 import com.aigameplatform.backend.service.AuthResult;
 import com.aigameplatform.backend.service.AuthService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.CacheControl;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Auth", description = "Đăng ký, đăng nhập, làm mới token, đăng xuất")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -49,6 +53,7 @@ public class AuthController {
         return withRefreshCookie(authService.refresh(refreshToken));
     }
 
+    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal AuthenticatedTeacher teacher) {
         authService.logout(teacher.sessionId());
