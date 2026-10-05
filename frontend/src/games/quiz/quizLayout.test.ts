@@ -73,6 +73,39 @@ describe('computeQuizLayout', () => {
     expect(long.audioButtonY!).toBeGreaterThan(short.audioButtonY!)
   })
 
+  it('có số đo chiều cao thật thì dùng số đó, nút Nghe lại nằm dưới vùng chữ dù chữ cao hơn ước lượng', () => {
+    const base = { hasIllustration: false, hasAudio: true, optionCount: 3, questionLength: 200 }
+    const estimated = computeQuizLayout(base)
+    const measured = computeQuizLayout({ ...base, measuredQuestionHeight: 400 })
+
+    expect(measured.questionHeight).toBeGreaterThan(estimated.questionHeight)
+    expect(measured.audioButtonY!).toBeGreaterThanOrEqual(measured.questionY + 400)
+    expect(measured.optionsOriginY).toBeGreaterThanOrEqual(measured.audioButtonY! + AUDIO_BUTTON_HEIGHT)
+  })
+
+  it('số đo nhỏ vẫn dành tối thiểu một dòng; số đo null thì quay về ước lượng', () => {
+    const base = { hasIllustration: false, hasAudio: false, optionCount: 2, questionLength: 10 }
+    const estimated = computeQuizLayout(base)
+
+    expect(computeQuizLayout({ ...base, measuredQuestionHeight: 5 }).questionHeight).toBeGreaterThanOrEqual(40)
+    expect(computeQuizLayout({ ...base, measuredQuestionHeight: null })).toEqual(estimated)
+  })
+
+  it('mọi tổ hợp vẫn không đè nhau khi dùng số đo thật', () => {
+    for (const input of COMBOS) {
+      const layout = computeQuizLayout({ ...input, measuredQuestionHeight: 37 * (1 + (input.questionLength % 9)) })
+      const label = JSON.stringify(input)
+      const afterQuestion = layout.questionY + layout.questionHeight
+
+      if (layout.audioButtonY !== null) {
+        expect(layout.audioButtonY, label).toBeGreaterThanOrEqual(afterQuestion)
+        expect(layout.optionsOriginY, label).toBeGreaterThanOrEqual(layout.audioButtonY + AUDIO_BUTTON_HEIGHT)
+      } else {
+        expect(layout.optionsOriginY, label).toBeGreaterThanOrEqual(afterQuestion)
+      }
+    }
+  })
+
   it('vùng chạm của nút Nghe lại và ô đáp án đều từ 64px trở lên (quy ước UX)', () => {
     expect(AUDIO_BUTTON_HEIGHT).toBeGreaterThanOrEqual(64)
     expect(OPTION_BUTTON_HEIGHT).toBeGreaterThanOrEqual(64)

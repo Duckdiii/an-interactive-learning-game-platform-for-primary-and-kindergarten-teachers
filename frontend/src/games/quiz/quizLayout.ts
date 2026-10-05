@@ -17,12 +17,19 @@ const TOP_PADDING = 20
 const BOTTOM_PADDING = 40
 const SECTION_GAP = 16
 const AUDIO_GAP_BELOW = 24
+/** Đệm thêm quanh chiều cao chữ đã đo, phòng sai số làm tròn giữa các trình duyệt. */
+const MEASURED_TEXT_PADDING = 8
 
 export interface QuizLayoutInput {
   hasIllustration: boolean
   hasAudio: boolean
   optionCount: number
   questionLength: number
+  /**
+   * Chiều cao chữ câu hỏi đã đo thật (xem `measureWrappedTextHeight`). Có thì dùng số này; `null` hoặc
+   * vắng thì quay về phép ước lượng theo `questionLength`.
+   */
+  measuredQuestionHeight?: number | null
 }
 
 export interface QuizLayout {
@@ -44,6 +51,7 @@ export function computeQuizLayout({
   hasAudio,
   optionCount,
   questionLength,
+  measuredQuestionHeight,
 }: QuizLayoutInput): QuizLayout {
   let y = TOP_PADDING
 
@@ -53,8 +61,14 @@ export function computeQuizLayout({
     y += ILLUSTRATION_SIZE + SECTION_GAP
   }
 
-  const lines = Math.min(QUESTION_MAX_LINES, Math.max(1, Math.ceil(questionLength / QUESTION_CHARS_PER_LINE)))
-  const questionHeight = lines * QUESTION_LINE_HEIGHT
+  const estimatedLines = Math.min(
+    QUESTION_MAX_LINES,
+    Math.max(1, Math.ceil(questionLength / QUESTION_CHARS_PER_LINE)),
+  )
+  const questionHeight =
+    measuredQuestionHeight != null
+      ? Math.max(QUESTION_LINE_HEIGHT, Math.ceil(measuredQuestionHeight) + MEASURED_TEXT_PADDING)
+      : estimatedLines * QUESTION_LINE_HEIGHT
   const questionY = y
   y += questionHeight + SECTION_GAP
 

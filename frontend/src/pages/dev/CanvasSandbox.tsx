@@ -1,6 +1,18 @@
 import { useState } from 'react'
+import type { ComponentProps } from 'react'
 import QuizRenderer from '../../games/quiz/QuizRenderer'
-import { mockQuizQuestion, mockQuizQuestionNoMedia } from '../../games/quiz/QuizRenderer.fixtures'
+import {
+  mockQuizQuestion,
+  mockQuizQuestionLongText,
+  mockQuizQuestionNoMedia,
+} from '../../games/quiz/QuizRenderer.fixtures'
+
+const QUESTIONS = {
+  'Có audio/ảnh': mockQuizQuestion,
+  'Không audio/ảnh': mockQuizQuestionNoMedia,
+  'Câu hỏi dài 195 ký tự': mockQuizQuestionLongText,
+} as const
+type QuestionKey = keyof typeof QUESTIONS
 
 /**
  * Trang tạm (dev-only, không route trong App.tsx) để render thử các Canvas Engine renderer bằng
@@ -8,7 +20,18 @@ import { mockQuizQuestion, mockQuizQuestionNoMedia } from '../../games/quiz/Quiz
  */
 export default function CanvasSandbox() {
   const [mode, setMode] = useState<'preview' | 'play' | 'review'>('preview')
-  const [withMedia, setWithMedia] = useState(true)
+  const [questionKey, setQuestionKey] = useState<QuestionKey>('Có audio/ảnh')
+
+  const question = QUESTIONS[questionKey]
+
+  // Prop phụ thuộc mode (xem QuizRenderer). Dựng object rồi spread để đổi mode vẫn giữ cùng một
+  // instance component, thử được việc renderer tự đặt lại state khi mode đổi mà không unmount.
+  const props: ComponentProps<typeof QuizRenderer> =
+    mode === 'preview'
+      ? { question, mode, onAnswered: (optionId) => console.log('onAnswered (preview)', optionId) }
+      : mode === 'play'
+        ? { question, mode, onAnswered: (optionId) => optionId === question.correctOptionId }
+        : { question, mode, selectedOptionId: 'a' }
 
   return (
     <div style={{ padding: 24, fontFamily: 'sans-serif' }}>
@@ -19,19 +42,17 @@ export default function CanvasSandbox() {
             {m}
           </button>
         ))}
-        <button onClick={() => setWithMedia((v) => !v)}>
-          {withMedia ? 'Câu có audio/ảnh' : 'Câu không audio/ảnh'}
-        </button>
+        {(Object.keys(QUESTIONS) as QuestionKey[]).map((key) => (
+          <button
+            key={key}
+            onClick={() => setQuestionKey(key)}
+            style={{ fontWeight: questionKey === key ? 'bold' : 'normal' }}
+          >
+            {key}
+          </button>
+        ))}
       </div>
-      <QuizRenderer
-        question={withMedia ? mockQuizQuestion : mockQuizQuestionNoMedia}
-        mode={mode}
-        selectedOptionId={mode === 'review' ? 'a' : undefined}
-        onAnswered={(optionId) => {
-          console.log('onAnswered', optionId)
-          if (mode === 'play') return optionId === (withMedia ? mockQuizQuestion : mockQuizQuestionNoMedia).correctOptionId
-        }}
-      />
+      <QuizRenderer {...props} />
     </div>
   )
 }
