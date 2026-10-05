@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { MatchingPair, MatchingQuestion } from '../../types/game-dsl.types'
 import type { MatchingStudentQuestion } from '../../types/game-student.types'
-import { correctLinksOf, fromStudentQuestion, fromTeacherQuestion, isCorrectLocally } from './matchingView'
+import {
+  correctLinksOf,
+  fromStudentQuestion,
+  fromTeacherQuestion,
+  isCorrectLocally,
+  sideDisplay,
+} from './matchingView'
 
 function makeQuestion(pairCount: number, id = 'q1'): MatchingQuestion {
   const pairs: MatchingPair[] = Array.from({ length: pairCount }, (_, i) => ({
@@ -82,6 +88,21 @@ describe('fromStudentQuestion', () => {
 
     expect(view.leftItems[1]).toEqual({ id: 'l2', content: { text: 'cat', imageUrl: '/cat.png' } })
     expect(view.leftItems[1].content).not.toHaveProperty('id')
+  })
+})
+
+describe('sideDisplay', () => {
+  it('có chữ thì hiện chữ, kèm ảnh nếu có', () => {
+    expect(sideDisplay({ text: 'táo' })).toEqual({ text: 'táo', hasImage: false })
+    expect(sideDisplay({ text: 'táo', imageUrl: '/a.png' })).toEqual({ text: 'táo', hasImage: true })
+  })
+
+  it('chỉ có ảnh thì không có chữ', () => {
+    expect(sideDisplay({ imageUrl: '/a.png', visualPrompt: 'apple' })).toEqual({ text: undefined, hasImage: true })
+  })
+
+  it('chỉ có visualPrompt (ảnh chưa lấy về) thì dùng nó làm chữ tạm để ô không trống', () => {
+    expect(sideDisplay({ visualPrompt: 'apple' })).toEqual({ text: 'apple', hasImage: false })
   })
 })
 

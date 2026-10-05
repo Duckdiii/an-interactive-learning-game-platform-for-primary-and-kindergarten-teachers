@@ -5,6 +5,8 @@ interface MeasureTextOptions {
   fontSize: number
   /** Độ rộng khung chữ — phải trùng với node `Text` thật để số dòng wrap giống nhau. */
   width: number
+  /** Kiểu chữ của node thật (ví dụ `'bold'`): chữ đậm rộng hơn nên wrap khác chữ thường. */
+  fontStyle?: string
 }
 
 /**
@@ -13,9 +15,14 @@ interface MeasureTextOptions {
  * dòng thật khó đoán, câu dài dễ bị cắt). Trả `null` nếu không đo được (ví dụ môi trường không có Canvas
  * như jsdom) để người gọi quay về phép ước lượng.
  */
-export function measureWrappedTextHeight({ text, fontSize, width }: MeasureTextOptions): number | null {
+export function measureWrappedTextHeight({
+  text,
+  fontSize,
+  width,
+  fontStyle,
+}: MeasureTextOptions): number | null {
   try {
-    const node = new Konva.Text({ text, fontSize, width })
+    const node = new Konva.Text({ text, fontSize, width, ...(fontStyle ? { fontStyle } : {}) })
     const height = node.height()
     node.destroy()
     return Number.isFinite(height) && height > 0 ? height : null

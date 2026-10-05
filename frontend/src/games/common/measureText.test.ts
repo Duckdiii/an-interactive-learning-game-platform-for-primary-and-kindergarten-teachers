@@ -39,6 +39,12 @@ describe('measureWrappedTextHeight', () => {
     expect(destroyMock).toHaveBeenCalledTimes(1)
   })
 
+  it('truyền fontStyle cho node tạm khi có (chữ đậm wrap khác chữ thường)', () => {
+    measureWrappedTextHeight({ text: 'x', fontSize: 26, width: 200, fontStyle: 'bold' })
+
+    expect(textCtor).toHaveBeenCalledWith({ text: 'x', fontSize: 26, width: 200, fontStyle: 'bold' })
+  })
+
   it('trả null khi Konva ném lỗi (không đo được, ví dụ không có Canvas)', () => {
     nextHeight = () => {
       throw new Error('measureText is not available')

@@ -13,6 +13,7 @@ import {
   cardRect,
   cardTextWidth,
   computeMatchingLayout,
+  estimateTextHeight,
   lineAnchor,
   type MatchingLayoutInput,
 } from './matchingLayout'
@@ -186,6 +187,30 @@ describe('cardRect và lineAnchor', () => {
     expect(leftPoint).toEqual({ x: leftRect.x + leftRect.width, y: leftRect.y + leftRect.height / 2 })
     expect(rightPoint).toEqual({ x: rightRect.x, y: rightRect.y + rightRect.height / 2 })
     expect(rightPoint.x).toBeGreaterThan(leftPoint.x)
+  })
+})
+
+describe('estimateTextHeight', () => {
+  it('chữ ngắn một dòng, chữ dài nhiều dòng hơn, luôn bội số của cỡ chữ', () => {
+    const oneLine = estimateTextHeight('chó', 26, 248)
+    const many = estimateTextHeight('a'.repeat(100), 26, 152)
+
+    expect(oneLine).toBe(26)
+    expect(many).toBeGreaterThan(oneLine * 3)
+    expect(many % 26).toBe(0)
+  })
+
+  it('chữ rỗng hoặc khung rất hẹp vẫn cho chiều cao hợp lệ', () => {
+    expect(estimateTextHeight('', 26, 248)).toBe(26)
+    expect(estimateTextHeight('abc', 26, 1)).toBe(3 * 26)
+  })
+
+  it('khung hẹp hơn (thẻ có ảnh) cần nhiều dòng hơn khung rộng cho cùng một đoạn chữ', () => {
+    const text = 'một đoạn chữ khá dài trong thẻ'
+
+    expect(estimateTextHeight(text, 26, cardTextWidth(true))).toBeGreaterThanOrEqual(
+      estimateTextHeight(text, 26, cardTextWidth(false)),
+    )
   })
 })
 

@@ -1,4 +1,4 @@
-import type { MatchingQuestion } from '../../types/game-dsl.types'
+import type { MatchingQuestion, PairSide } from '../../types/game-dsl.types'
 import type { MatchingStudentQuestion } from '../../types/game-student.types'
 import { seededDerangement } from '../common/seededDerangement'
 import type { MatchingItem, MatchingView, PairLink } from './matchingTypes'
@@ -27,6 +27,15 @@ export function fromStudentQuestion(question: MatchingStudentQuestion): Matching
     content,
   })
   return { leftItems: question.leftItems.map(toItem), rightItems: question.rightItems.map(toItem) }
+}
+
+/**
+ * Cái hiển thị trong một ô: chữ và/hoặc ảnh. DSL cho phép một phía chỉ có `visualPrompt` (ảnh chưa được
+ * lấy về); khi đó dùng `visualPrompt` làm chữ tạm để ô không bị trống, còn có `imageUrl` thì ảnh đã đủ nghĩa.
+ */
+export function sideDisplay(content: PairSide): { text: string | undefined; hasImage: boolean } {
+  const hasImage = Boolean(content.imageUrl)
+  return { text: content.text ?? (hasImage ? undefined : content.visualPrompt), hasImage }
 }
 
 /**

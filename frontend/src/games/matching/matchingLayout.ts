@@ -29,6 +29,15 @@ const SECTION_GAP = 16
 const AUDIO_GAP_BELOW = 24
 const CONFIRM_GAP_ABOVE = 32
 
+/**
+ * Ước lượng chiều cao chữ khi không đo thật được (môi trường không có Canvas). Thiên về dư: coi mỗi ký tự
+ * rộng khoảng 0,65 cỡ chữ (chữ đậm tiếng Việt có dấu) và mỗi dòng cao đúng bằng cỡ chữ (Konva mặc định).
+ */
+export function estimateTextHeight(text: string, fontSize: number, width: number): number {
+  const charsPerLine = Math.max(1, Math.floor(width / (fontSize * 0.65)))
+  return Math.max(1, Math.ceil(text.length / charsPerLine)) * fontSize
+}
+
 /** Độ rộng khung chữ trong thẻ: thẻ có ảnh thì ảnh chiếm bên trái nên chữ hẹp hơn. */
 export function cardTextWidth(hasImage: boolean): number {
   return CARD_WIDTH - 2 * CARD_PADDING - (hasImage ? CARD_IMAGE_SIZE + CARD_PADDING : 0)
