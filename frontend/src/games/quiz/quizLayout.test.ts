@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { AUDIO_BUTTON_HEIGHT, ILLUSTRATION_SIZE } from '../common/mediaLayout'
 import { OPTION_BUTTON_HEIGHT, optionGridHeight, optionPosition } from '../common/optionGrid'
-import {
-  AUDIO_BUTTON_HEIGHT,
-  ILLUSTRATION_SIZE,
-  computeQuizLayout,
-  type QuizLayoutInput,
-} from './quizLayout'
+import { computeQuizLayout, type QuizLayoutInput } from './quizLayout'
 
 /**
  * Test cho phần tính bố cục. Canvas không kiểm tra được trong jsdom nên mọi lỗi "phần này đè lên phần

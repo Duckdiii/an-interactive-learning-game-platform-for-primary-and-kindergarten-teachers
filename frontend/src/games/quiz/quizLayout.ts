@@ -1,10 +1,5 @@
+import { AUDIO_BUTTON_HEIGHT, ILLUSTRATION_SIZE, STAGE_WIDTH } from '../common/mediaLayout'
 import { optionGridHeight } from '../common/optionGrid'
-
-export const STAGE_WIDTH = 800
-export const ILLUSTRATION_SIZE = 140
-/** Nút nghe lại cao 96 (>= 64px quy ước); trên màn nhỏ canvas thu nhỏ nên cần dư để còn dễ chạm. */
-export const AUDIO_BUTTON_WIDTH = 300
-export const AUDIO_BUTTON_HEIGHT = 96
 
 export const QUESTION_FONT_SIZE = 32
 export const QUESTION_TEXT_WIDTH = STAGE_WIDTH - 80

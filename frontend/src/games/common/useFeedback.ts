@@ -1,22 +1,8 @@
 import confetti from 'canvas-confetti'
-import { Howl } from 'howler'
+import { playSound } from './sound'
 
 const CORRECT_SOUND = '/sounds/correct.wav'
 const TRY_AGAIN_SOUND = '/sounds/try-again.wav'
-
-// Mỗi âm chỉ tạo `Howl` một lần rồi phát lại (tạo mới mỗi lần trả lời sẽ để lại một audio node và một
-// buffer đã giải mã, bộ nhớ tăng dần trong phiên chơi dài). Tạo lười để import module không sinh `Howl`.
-// Hai âm ngắn dùng suốt vòng đời ứng dụng nên không gọi `unload()`.
-const sounds = new Map<string, Howl>()
-
-function playSound(src: string) {
-  let sound = sounds.get(src)
-  if (!sound) {
-    sound = new Howl({ src: [src] })
-    sounds.set(src, sound)
-  }
-  sound.play()
-}
 
 /**
  * Hook dùng chung cho mọi renderer: phản hồi khi trả lời đúng/sai theo đúng quy ước UX
