@@ -1206,7 +1206,7 @@ paths:
         | AUDIO_VISUAL_MATCH | Gộp `correct` và `distractors` thành `options: [{ id, imageUrl, visualPrompt }]` đã xáo (`id` là `a, b, c...` gán sau khi xáo); bỏ `correct`, `distractors` |
         | SPOT_THE_TARGET | Bỏ `hitRegion`; giữ `targetDescription`, `imageUrl` |
         | WORD_SCRAMBLE | Bỏ `correctWord`; giữ `scrambledLetters` |
-        | MATCHING | Tách `leftItems` và `rightItems` đã xáo, **cả hai bên dùng mã mờ** (`l1, l2...` và `r1, r2...`), không dùng `pairId` thật; bỏ `pairs` |
+        | MATCHING | Tách `leftItems` và `rightItems` đã xáo, **cả hai bên dùng mã mờ** (`l1, l2...` và `r1, r2...`), không dùng `pairId` thật; bỏ `pairs`. Schema: `MatchingStudentQuestion`. `[ĐỀ XUẤT]` cột phải nên xáo theo thứ tự cột trái sao cho không cặp nào nằm cùng hàng ở hai cột, vì vị trí cùng hàng sẽ tiết lộ đáp án |
         | MEMORY_CARD | Giữ nguyên `pairs` (không có bí mật); Frontend nhân đôi và xáo thẻ |
         | DRAG_DROP | Giữ `dropZones`; bỏ `targetZoneId` ở từng vật |
         | ORDERING | Bỏ `correctPosition`; thứ tự mảng `steps` là thứ tự hiển thị đã xáo |
@@ -1256,7 +1256,7 @@ paths:
         | AUDIO_VISUAL_MATCH | `selectedOptionId` (id do Backend cấp ở dạng học sinh) | Chọn đúng hình |
         | ODD_ONE_OUT | `selectedItemId` | Chọn đúng phần tử khác loại |
         | SPOT_THE_TARGET | `x`, `y` (0 đến 1) | Khoảng cách tới tâm `hitRegion` không vượt `radius` |
-        | MATCHING | `matches: [{ leftPairId, rightPairId }]` (mã mờ của dạng học sinh) | Mọi cặp nối đúng |
+        | MATCHING | `matches: [{ leftPairId, rightPairId }]` (mã mờ của dạng học sinh). Frontend chỉ nộp **một lần** sau khi trẻ nối đủ mọi cặp và bấm «Xong rồi!»; thiếu cặp thì chấm `INCORRECT` (đúng hết hoặc không). `correctAnswer` trả về cùng dạng: `{ matches: [...] }` | Mọi cặp nối đúng |
         | MEMORY_CARD | `matchedPairIds: [...]`, `flips` | Tìm đủ mọi cặp; `flips` lưu vào `attemptsCount` |
         | DRAG_DROP | `placements: [{ itemId, zoneId }]` | Mọi vật vào đúng vùng |
         | VISUAL_CLOZE | `answer` | Trùng đáp án sau khi chuẩn hoá chữ hoa/thường và khoảng trắng |
@@ -2817,8 +2817,8 @@ components:
       description: |
         Dạng dành cho học sinh của `GameResponse`: bỏ `gameId, status, updatedAt`, bỏ trường đáp án, các
         phần tử đã xáo. Biến đổi theo từng loại game xem mô tả của `GET /sessions/{sessionId}/questions`.
-        Cấu trúc câu hỏi chưa có schema máy đọc (DSL chưa mô tả dạng học sinh; đây là cam kết ở cấp hợp
-        đồng).
+        Cấu trúc câu hỏi chưa có schema máy đọc cho hầu hết loại game (DSL chưa mô tả dạng học sinh; đây là
+        cam kết ở cấp hợp đồng). Đã có schema cho MATCHING: `MatchingStudentQuestion`.
       properties:
         schemaVersion:
           const: '1.0.0'
@@ -2844,14 +2844,19 @@ components:
               type: number
         questions:
           type: array
+          description: |
+            Dùng `anyOf` (không phải `oneOf`) vì dạng chung bên dưới cũng khớp với dạng đã có schema riêng.
+            Mỗi loại game có schema riêng sẽ được thêm vào đây khi được mô tả (hiện mới có MATCHING).
           items:
-            type: object
-            required: [id]
-            properties:
-              id:
-                type: string
-                examples: [q1]
-            additionalProperties: true
+            anyOf:
+              - $ref: '#/components/schemas/MatchingStudentQuestion'
+              - type: object
+                required: [id]
+                properties:
+                  id:
+                    type: string
+                    examples: [q1]
+                additionalProperties: true
         answeredQuestionIds:
           type: array
           description: Để tiếp tục đúng chỗ khi tải lại trang.
@@ -2859,6 +2864,91 @@ components:
             type: string
           examples:
             - [q1, q2]
+
+    MatchingStudentItem:
+      type: object
+      description: |
+        Một ô ở dạng học sinh của MATCHING. `id` là mã mờ do Backend cấp (`l1, l2...` cho cột trái, `r1, r2...`
+        cho cột phải), **không phải** `pairId` thật, để học sinh không suy ra đáp án từ id hay thứ tự. Như
+        mỗi phía của cặp trong DSL: phải có `text` hoặc `visualPrompt`.
+      required: [id]
+      properties:
+        id:
+          type: string
+          pattern: '^[lr][0-9]+$'
+          examples: [l1]
+        text:
+          type: string
+          minLength: 1
+          maxLength: 100
+        visualPrompt:
+          type: string
+          minLength: 1
+          maxLength: 100
+        imageUrl:
+          type: string
+          maxLength: 2048
+      anyOf:
+        - required: [text]
+        - required: [visualPrompt]
+
+    MatchingStudentQuestion:
+      type: object
+      description: |
+        MATCHING dạng học sinh (phần tử của `StudentGameResponse.questions` khi `gameType` là `MATCHING`):
+        `pairs` được tách thành hai cột đã xáo, mỗi cột 3 đến 6 ô. Client **giữ nguyên thứ tự này, không xáo
+        lại**: thứ tự được sinh xác định theo HMAC nên tải lại vẫn ra cùng thứ tự. Client cũng không có cách
+        nào biết ô nào ghép với ô nào; việc chấm do Backend làm khi nhận `matches` (xem `InteractionRequest`).
+      required: [id, timeLimitSeconds, points, leftItems, rightItems]
+      properties:
+        id:
+          type: string
+          pattern: '^q[0-9]+$'
+        timeLimitSeconds:
+          type: integer
+          minimum: 5
+          maximum: 600
+        points:
+          type: integer
+          minimum: 1
+          maximum: 100
+        audioText:
+          type: string
+          maxLength: 200
+        audioUrl:
+          type: string
+          maxLength: 2048
+        visualPrompt:
+          type: string
+          maxLength: 100
+        imageUrl:
+          type: string
+          maxLength: 2048
+        leftItems:
+          type: array
+          minItems: 3
+          maxItems: 6
+          items:
+            $ref: '#/components/schemas/MatchingStudentItem'
+        rightItems:
+          type: array
+          minItems: 3
+          maxItems: 6
+          items:
+            $ref: '#/components/schemas/MatchingStudentItem'
+      examples:
+        - id: q1
+          timeLimitSeconds: 60
+          points: 10
+          audioText: Nối từ với nghĩa
+          leftItems:
+            - { id: l1, text: apple }
+            - { id: l2, text: dog }
+            - { id: l3, text: cat }
+          rightItems:
+            - { id: r1, text: mèo }
+            - { id: r2, text: táo }
+            - { id: r3, text: chó }
 
     InteractionBase:
       type: object
@@ -2920,6 +3010,13 @@ components:
                   minimum: 0
                   maximum: 1
         - title: MATCHING
+          examples:
+            - questionId: q1
+              timeSpentMs: 18500
+              matches:
+                - { leftPairId: l1, rightPairId: r2 }
+                - { leftPairId: l2, rightPairId: r3 }
+                - { leftPairId: l3, rightPairId: r1 }
           allOf:
             - $ref: '#/components/schemas/InteractionBase'
             - type: object
@@ -3019,6 +3116,10 @@ components:
           additionalProperties: true
           examples:
             - selectedOptionId: a
+            - matches:
+                - { leftPairId: l1, rightPairId: r2 }
+                - { leftPairId: l2, rightPairId: r3 }
+                - { leftPairId: l3, rightPairId: r1 }
         explanation:
           type: [string, 'null']
           description: Lời giải thích/gợi ý sư phạm (FLD-13); `null` cho đến khi DSL bổ sung trường này.
