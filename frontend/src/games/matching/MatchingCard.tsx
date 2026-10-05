@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Group, Image as KonvaImage, Rect, Text } from 'react-konva'
 import useImage from 'use-image'
 import type { PairSide } from '../../types/game-dsl.types'
@@ -20,6 +21,11 @@ interface MatchingCardProps {
   /** Màu viền của cặp (chỉ dùng khi `linked`/`selected`). */
   accent?: string
   onPress: () => void
+  /**
+   * Gọi khi ảnh của thẻ tải lỗi, để renderer tính lại chiều cao hàng: chữ dự phòng (`visualPrompt`) có thể
+   * dài hơn chỗ đã chừa cho ảnh. Có thể được gọi lặp lại; người nhận cần bỏ qua lần trùng.
+   */
+  onImageFailed?: () => void
 }
 
 const FILL: Record<MatchingCardState, string> = {
@@ -43,9 +49,16 @@ export default function MatchingCard({
   state,
   accent = '#334155',
   onPress,
+  onImageFailed,
 }: MatchingCardProps) {
-  const [image] = useImage(content.imageUrl ?? '')
-  const { text, hasImage } = sideDisplay(content)
+  const [image, imageStatus] = useImage(content.imageUrl ?? '')
+  const imageFailed = imageStatus === 'failed'
+  // Ảnh lỗi thì chữ dự phòng thay chỗ ảnh (xem `sideDisplay`) và báo renderer tính lại bố cục.
+  const { text, hasImage } = sideDisplay(content, imageFailed)
+
+  useEffect(() => {
+    if (imageFailed) onImageFailed?.()
+  }, [imageFailed, onImageFailed])
 
   const emphasised = state === 'selected' || state === 'linked'
   const textWidth = cardTextWidth(hasImage)

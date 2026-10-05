@@ -104,6 +104,27 @@ describe('sideDisplay', () => {
   it('chỉ có visualPrompt (ảnh chưa lấy về) thì dùng nó làm chữ tạm để ô không trống', () => {
     expect(sideDisplay({ visualPrompt: 'apple' })).toEqual({ text: 'apple', hasImage: false })
   })
+
+  it('ảnh tải lỗi và ô không có chữ thì quay về visualPrompt, coi như không có ảnh', () => {
+    expect(sideDisplay({ imageUrl: '/a.png', visualPrompt: 'apple' }, true)).toEqual({
+      text: 'apple',
+      hasImage: false,
+    })
+  })
+
+  it('ảnh tải lỗi nhưng ô đã có chữ thì giữ chữ, không có ảnh', () => {
+    expect(sideDisplay({ text: 'táo', imageUrl: '/a.png', visualPrompt: 'apple' }, true)).toEqual({
+      text: 'táo',
+      hasImage: false,
+    })
+  })
+
+  it('ảnh không lỗi (mặc định) thì giữ nguyên hành vi cũ', () => {
+    expect(sideDisplay({ imageUrl: '/a.png', visualPrompt: 'apple' }, false)).toEqual({
+      text: undefined,
+      hasImage: true,
+    })
+  })
 })
 
 describe('chấm cục bộ (preview, review)', () => {

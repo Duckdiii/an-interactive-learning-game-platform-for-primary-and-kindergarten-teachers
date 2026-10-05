@@ -71,6 +71,33 @@ export const mockMatchingQuestionWithImages: MatchingQuestion = {
   ],
 }
 
+/**
+ * Ảnh trỏ tới tệp không tồn tại (404) để kiểm tra thẻ không bị trống: ô chỉ có ảnh thì hiện `visualPrompt`
+ * thay chỗ ảnh (hai ô đầu, `visualPrompt` dài sát giới hạn), ô có sẵn chữ thì giữ chữ (ô cuối).
+ */
+export const mockMatchingQuestionBrokenImages: MatchingQuestion = {
+  id: 'q5',
+  timeLimitSeconds: 60,
+  points: 10,
+  audioText: 'Ảnh không tải được vẫn phải nhận ra được thẻ',
+  pairs: [
+    {
+      pairId: 'p1',
+      left: { text: 'apple' },
+      right: {
+        visualPrompt: 'một quả táo đỏ bóng nằm trên chiếc bàn gỗ cạnh cửa sổ có nắng sớm chiếu vào buổi sáng',
+        imageUrl: '/mock/missing-apple.png',
+      },
+    },
+    { pairId: 'p2', left: { text: 'dog' }, right: { visualPrompt: 'con chó', imageUrl: '/mock/missing-dog.png' } },
+    {
+      pairId: 'p3',
+      left: { text: 'cat' },
+      right: { text: 'mèo', visualPrompt: 'con mèo', imageUrl: '/mock/missing-cat.png' },
+    },
+  ],
+}
+
 /** 6 cặp: mức tối đa của DSL, để kiểm tra canvas dài nhất vẫn gọn và các hàng không đè nhau. */
 export const mockMatchingQuestionSixPairs: MatchingQuestion = {
   id: 'q3',

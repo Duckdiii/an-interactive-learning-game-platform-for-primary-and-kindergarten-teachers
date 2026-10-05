@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Layer, Text } from 'react-konva'
 import type { MatchingQuestion } from '../../types/game-dsl.types'
 import type { MatchingStudentQuestion } from '../../types/game-student.types'
@@ -124,10 +124,22 @@ function MatchingBoard(props: MatchingRendererProps) {
     return (measured ?? estimateTextHeight(headingText, HEADING_FONT_SIZE, HEADING_WIDTH)) + HEADING_PADDING
   }, [headingText])
 
+  // Thẻ có ảnh tải lỗi báo về đây: khi đó thẻ hiện chữ dự phòng (`visualPrompt`) thay ảnh, có thể dài hơn chỗ
+  // đã chừa cho ảnh, nên phải tính lại chiều cao hàng. Khoá gồm cả cột vì ở dạng giáo viên hai cột dùng
+  // chung `pairId`.
+  const [failedImages, setFailedImages] = useState<ReadonlySet<string>>(() => new Set())
+  const markImageFailed = useCallback((key: string) => {
+    // Trả lại đúng tập cũ nếu đã có để lần báo lặp lại không gây render thừa.
+    setFailedImages((previous) => (previous.has(key) ? previous : new Set(previous).add(key)))
+  }, [])
+
   const cardContentHeights = useMemo(
     () =>
-      [...view.leftItems, ...view.rightItems].map((item) => {
-        const { text, hasImage } = sideDisplay(item.content)
+      [
+        ...view.leftItems.map((item) => ({ item, key: `left-${item.id}` })),
+        ...view.rightItems.map((item) => ({ item, key: `right-${item.id}` })),
+      ].map(({ item, key }) => {
+        const { text, hasImage } = sideDisplay(item.content, failedImages.has(key))
         const width = cardTextWidth(hasImage)
         const textHeight = text
           ? (measureWrappedTextHeight({ text, fontSize: CARD_FONT_SIZE, width, fontStyle: 'bold' }) ??
@@ -135,7 +147,7 @@ function MatchingBoard(props: MatchingRendererProps) {
           : 0
         return cardContentHeight({ hasImage, textHeight })
       }),
-    [view],
+    [view, failedImages],
   )
 
   const layout = computeMatchingLayout({
@@ -276,6 +288,7 @@ function MatchingBoard(props: MatchingRendererProps) {
               state={cardState(link, state.selectedLeftId === item.id)}
               accent={accentOf(link) ?? LINK_COLORS[index % LINK_COLORS.length]}
               onPress={() => handleTapLeft(item.id)}
+              onImageFailed={() => markImageFailed(`left-${item.id}`)}
             />
           )
         })}
@@ -290,6 +303,7 @@ function MatchingBoard(props: MatchingRendererProps) {
               state={cardState(link, false)}
               accent={accentOf(link)}
               onPress={() => handleTapRight(item.id)}
+              onImageFailed={() => markImageFailed(`right-${item.id}`)}
             />
           )
         })}

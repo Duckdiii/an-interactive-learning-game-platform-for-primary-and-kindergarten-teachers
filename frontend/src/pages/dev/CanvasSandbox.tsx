@@ -4,6 +4,7 @@ import MatchingRenderer from '../../games/matching/MatchingRenderer'
 import {
   makeStudentFixture,
   mockMatchingQuestion,
+  mockMatchingQuestionBrokenImages,
   mockMatchingQuestionLongText,
   mockMatchingQuestionSixPairs,
   mockMatchingQuestionWithImages,
@@ -29,6 +30,7 @@ const MATCHING_QUESTIONS = {
   'Có ảnh': mockMatchingQuestionWithImages,
   '6 cặp': mockMatchingQuestionSixPairs,
   'Chữ dài 100 ký tự': mockMatchingQuestionLongText,
+  'Ảnh lỗi (404)': mockMatchingQuestionBrokenImages,
 } as const
 type MatchingQuestionKey = keyof typeof MATCHING_QUESTIONS
 

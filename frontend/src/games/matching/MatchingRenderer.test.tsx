@@ -17,9 +17,11 @@ import type { MatchingAnswerResult, PairLink } from './matchingTypes'
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => (
+  Group: ({ children, onClick, y }: { children?: React.ReactNode; onClick?: () => void; y?: number }) => (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div onClick={onClick}>{children}</div>
+    <div data-y={y} onClick={onClick}>
+      {children}
+    </div>
   ),
   Rect: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
@@ -29,8 +31,10 @@ vi.mock('react-konva', () => ({
   ),
 }))
 
+// Tập URL ảnh được giả lập là tải lỗi; mặc định ảnh không bao giờ tải xong (status `loading`).
+const failedImageUrls = vi.hoisted(() => new Set<string>())
 vi.mock('use-image', () => ({
-  default: () => [undefined],
+  default: (url: string) => [undefined, failedImageUrls.has(url) ? 'failed' : 'loading'],
 }))
 
 vi.mock('howler', () => ({
@@ -98,6 +102,86 @@ describe('MatchingRenderer', () => {
   beforeEach(() => {
     showFeedbackMock.mockClear()
     playSoundMock.mockClear()
+    failedImageUrls.clear()
+  })
+
+  describe('ảnh của thẻ tải lỗi', () => {
+    const LONG_PROMPT = 'a'.repeat(100)
+    const questionWithImageSide = (right: MatchingQuestion['pairs'][number]['right']): MatchingQuestion => ({
+      ...mockMatchingQuestion,
+      pairs: [
+        { pairId: 'p1', left: { text: 'apple' }, right },
+        { pairId: 'p2', left: { text: 'dog' }, right: { text: 'chó' } },
+        { pairId: 'p3', left: { text: 'cat' }, right: { text: 'mèo' } },
+      ],
+    })
+    const rowY = (text: string) => Number(screen.getByText(text).parentElement?.getAttribute('data-y'))
+
+    it('ảnh chưa lỗi thì không hiện chữ dự phòng (visualPrompt)', () => {
+      const question = questionWithImageSide({ visualPrompt: 'hình quả táo', imageUrl: '/x/apple.png' })
+      render(<MatchingRenderer mode="preview" question={question} />)
+
+      expect(screen.queryByText('hình quả táo')).not.toBeInTheDocument()
+    })
+
+    it('ảnh lỗi và ô không có chữ thì hiện visualPrompt thay chỗ ảnh, ô không bị trống', () => {
+      failedImageUrls.add('/x/apple.png')
+      const question = questionWithImageSide({ visualPrompt: 'hình quả táo', imageUrl: '/x/apple.png' })
+      render(<MatchingRenderer mode="preview" question={question} />)
+
+      expect(screen.getByText('hình quả táo')).toBeInTheDocument()
+    })
+
+    it('ảnh lỗi nhưng ô đã có chữ thì giữ chữ đó, không đổi sang visualPrompt', () => {
+      failedImageUrls.add('/x/apple.png')
+      const question = questionWithImageSide({ text: 'táo', visualPrompt: 'quả táo đỏ', imageUrl: '/x/apple.png' })
+      render(<MatchingRenderer mode="preview" question={question} />)
+
+      expect(screen.getByText('táo')).toBeInTheDocument()
+      expect(screen.queryByText('quả táo đỏ')).not.toBeInTheDocument()
+    })
+
+    it('chỉ ô có ảnh lỗi đổi sang chữ dự phòng, ô khác có ảnh tải bình thường thì giữ nguyên', () => {
+      failedImageUrls.add('/x/left.png')
+      const question: MatchingQuestion = {
+        ...mockMatchingQuestion,
+        pairs: [
+          {
+            pairId: 'p1',
+            left: { visualPrompt: 'hình trái', imageUrl: '/x/left.png' },
+            right: { visualPrompt: 'hình phải', imageUrl: '/x/right.png' },
+          },
+          ...mockMatchingQuestion.pairs.slice(1),
+        ],
+      }
+      render(<MatchingRenderer mode="preview" question={question} />)
+
+      expect(screen.getByText('hình trái')).toBeInTheDocument()
+      expect(screen.queryByText('hình phải')).not.toBeInTheDocument()
+    })
+
+    it('chữ dự phòng dài làm hàng cao lên để không bị cắt (các hàng bên dưới dời xuống)', () => {
+      const question = questionWithImageSide({ visualPrompt: LONG_PROMPT, imageUrl: '/x/apple.png' })
+
+      const { unmount } = render(<MatchingRenderer mode="preview" question={question} />)
+      const dogYWithImage = rowY('dog')
+      unmount()
+
+      failedImageUrls.add('/x/apple.png')
+      render(<MatchingRenderer mode="preview" question={question} />)
+      const dogYAfterFailure = rowY('dog')
+
+      expect(dogYAfterFailure).toBeGreaterThan(dogYWithImage)
+    })
+
+    it('báo lỗi ảnh nhiều lần không gây vòng lặp render', () => {
+      failedImageUrls.add('/x/apple.png')
+      const question = questionWithImageSide({ visualPrompt: 'hình quả táo', imageUrl: '/x/apple.png' })
+
+      expect(() => render(<MatchingRenderer mode="preview" question={question} />)).not.toThrow()
+      link('apple', 'hình quả táo')
+      expect(solidLines()).toHaveLength(1)
+    })
   })
 
   describe('hiển thị', () => {

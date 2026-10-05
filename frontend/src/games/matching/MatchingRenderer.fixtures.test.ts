@@ -3,6 +3,7 @@ import type { MatchingQuestion } from '../../types/game-dsl.types'
 import {
   makeStudentFixture,
   mockMatchingQuestion,
+  mockMatchingQuestionBrokenImages,
   mockMatchingQuestionLongText,
   mockMatchingQuestionSixPairs,
   mockMatchingQuestionWithImages,
@@ -18,6 +19,7 @@ const TEACHER_FIXTURES: Array<[string, MatchingQuestion]> = [
   ['có ảnh', mockMatchingQuestionWithImages],
   ['6 cặp', mockMatchingQuestionSixPairs],
   ['chữ dài', mockMatchingQuestionLongText],
+  ['ảnh lỗi', mockMatchingQuestionBrokenImages],
 ]
 
 describe.each(TEACHER_FIXTURES)('fixture dạng giáo viên: %s', (_name, question) => {

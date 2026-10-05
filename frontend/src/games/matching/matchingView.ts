@@ -32,9 +32,16 @@ export function fromStudentQuestion(question: MatchingStudentQuestion): Matching
 /**
  * Cái hiển thị trong một ô: chữ và/hoặc ảnh. DSL cho phép một phía chỉ có `visualPrompt` (ảnh chưa được
  * lấy về); khi đó dùng `visualPrompt` làm chữ tạm để ô không bị trống, còn có `imageUrl` thì ảnh đã đủ nghĩa.
+ *
+ * `imageFailed` là khi có `imageUrl` nhưng ảnh tải lỗi (404, mất mạng): coi như ô không có ảnh và quay về
+ * chữ (`text`, hoặc `visualPrompt` nếu không có). DSL bảo đảm mỗi phía có `text` hoặc `visualPrompt` nên ô
+ * không bao giờ trống, trẻ vẫn nhận ra nội dung ô.
  */
-export function sideDisplay(content: PairSide): { text: string | undefined; hasImage: boolean } {
-  const hasImage = Boolean(content.imageUrl)
+export function sideDisplay(
+  content: PairSide,
+  imageFailed = false,
+): { text: string | undefined; hasImage: boolean } {
+  const hasImage = Boolean(content.imageUrl) && !imageFailed
   return { text: content.text ?? (hasImage ? undefined : content.visualPrompt), hasImage }
 }
 
