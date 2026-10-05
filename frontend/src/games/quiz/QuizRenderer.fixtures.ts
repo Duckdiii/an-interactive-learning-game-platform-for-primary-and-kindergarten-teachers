@@ -11,7 +11,7 @@ export const mockQuizQuestion: QuizQuestion = {
   timeLimitSeconds: 30,
   points: 10,
   audioText: 'Có mấy con mèo?',
-  audioUrl: '/mock/q1.mp3',
+  audioUrl: '/mock/q1.wav',
   visualPrompt: 'three cats sitting together',
   imageUrl: '/mock/three-cats.png',
   questionText: 'Có mấy con mèo?',

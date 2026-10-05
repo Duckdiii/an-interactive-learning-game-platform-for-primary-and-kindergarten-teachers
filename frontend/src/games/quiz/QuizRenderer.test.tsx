@@ -30,6 +30,17 @@ vi.mock('use-image', () => ({
   default: () => [undefined],
 }))
 
+const howlCtorMock = vi.fn()
+const howlPlayMock = vi.fn()
+vi.mock('howler', () => ({
+  Howl: class {
+    constructor(options: unknown) {
+      howlCtorMock(options)
+    }
+    play = howlPlayMock
+  },
+}))
+
 const showFeedbackMock = vi.fn()
 vi.mock('../common/useFeedback', () => ({
   useFeedback: () => ({ showFeedback: showFeedbackMock }),
@@ -38,6 +49,33 @@ vi.mock('../common/useFeedback', () => ({
 describe('QuizRenderer', () => {
   beforeEach(() => {
     showFeedbackMock.mockClear()
+    howlCtorMock.mockClear()
+    howlPlayMock.mockClear()
+  })
+
+  it('nút Nghe lại phát đúng audioUrl của câu hỏi, bấm bao nhiêu lần cũng được', () => {
+    render(<QuizRenderer question={mockQuizQuestion} mode="preview" />)
+
+    fireEvent.click(screen.getByText('🔊 Nghe lại'))
+    fireEvent.click(screen.getByText('🔊 Nghe lại'))
+
+    expect(howlCtorMock).toHaveBeenCalledWith({ src: [mockQuizQuestion.audioUrl] })
+    expect(howlPlayMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('câu không có audioUrl thì không hiện nút Nghe lại', () => {
+    render(<QuizRenderer question={mockQuizQuestionNoMedia} mode="preview" />)
+
+    expect(screen.queryByText('🔊 Nghe lại')).not.toBeInTheDocument()
+  })
+
+  it('nút Nghe lại vẫn bấm được sau khi đã chọn đáp án (đã khoá)', () => {
+    render(<QuizRenderer question={mockQuizQuestion} mode="preview" />)
+
+    fireEvent.click(screen.getByText('2'))
+    fireEvent.click(screen.getByText('🔊 Nghe lại'))
+
+    expect(howlPlayMock).toHaveBeenCalledTimes(1)
   })
 
   it('renders the question and every option from the fixture', () => {

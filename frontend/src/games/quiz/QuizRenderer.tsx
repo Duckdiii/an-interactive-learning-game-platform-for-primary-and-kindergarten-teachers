@@ -6,12 +6,15 @@ import type { QuizQuestion } from '../../types/game-dsl.types'
 import OptionButton from '../common/OptionButton'
 import ResponsiveStage from '../common/ResponsiveStage'
 import { useFeedback } from '../common/useFeedback'
-
-const STAGE_WIDTH = 800
-const STAGE_HEIGHT = 700
-const AUDIO_BUTTON_WIDTH = 200
-const AUDIO_BUTTON_HEIGHT = 64
-const ILLUSTRATION_SIZE = 140
+import {
+  AUDIO_BUTTON_HEIGHT,
+  AUDIO_BUTTON_WIDTH,
+  ILLUSTRATION_SIZE,
+  QUESTION_FONT_SIZE,
+  QUESTION_TEXT_WIDTH,
+  STAGE_WIDTH,
+  computeQuizLayout,
+} from './quizLayout'
 
 interface QuizRendererProps {
   question: QuizQuestion
@@ -43,7 +46,16 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
     () => initialLocalState(mode, selectedOptionId).revealCorrect,
   )
   const { showFeedback } = useFeedback()
-  const [illustration] = useImage(question.imageUrl ?? '')
+  const [illustration, illustrationStatus] = useImage(question.imageUrl ?? '')
+
+  // Chừa chỗ cho ảnh ngay khi có `imageUrl` (tránh bố cục nhảy khi ảnh tải xong); ảnh tải lỗi thì
+  // bỏ chỗ đó đi để không để lại khoảng trống.
+  const layout = computeQuizLayout({
+    hasIllustration: Boolean(question.imageUrl) && illustrationStatus !== 'failed',
+    hasAudio: Boolean(question.audioUrl),
+    optionCount: question.options.length,
+    questionLength: question.questionText.length,
+  })
 
   // Component có thể được cha tái sử dụng cho câu khác hoặc đổi mode mà không unmount (ví dụ GV bấm
   // đổi tab Edit/Preview trong WorkspaceEditor) — phải tự đồng bộ lại trạng thái theo props mới.
@@ -104,46 +116,50 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
   }
 
   return (
-    <ResponsiveStage width={STAGE_WIDTH} height={STAGE_HEIGHT}>
+    <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
       <Layer>
-        {illustration && (
+        {illustration && layout.illustrationY !== null && (
           <KonvaImage
             image={illustration}
             width={ILLUSTRATION_SIZE}
             height={ILLUSTRATION_SIZE}
             x={(STAGE_WIDTH - ILLUSTRATION_SIZE) / 2}
-            y={20}
+            y={layout.illustrationY}
             cornerRadius={16}
           />
         )}
 
         <Text
           text={question.questionText}
-          fontSize={32}
-          x={40}
-          y={illustration ? 180 : 40}
-          width={STAGE_WIDTH - 80}
+          fontSize={QUESTION_FONT_SIZE}
+          x={(STAGE_WIDTH - QUESTION_TEXT_WIDTH) / 2}
+          y={layout.questionY}
+          width={QUESTION_TEXT_WIDTH}
+          height={layout.questionHeight}
           align="center"
+          verticalAlign="middle"
+          listening={false}
         />
 
-        {question.audioUrl && (
+        {layout.audioButtonY !== null && (
           <Group
             x={(STAGE_WIDTH - AUDIO_BUTTON_WIDTH) / 2}
-            y={illustration ? 240 : 100}
+            y={layout.audioButtonY}
             onClick={playAudio}
             onTap={playAudio}
           >
             <Rect
               width={AUDIO_BUTTON_WIDTH}
               height={AUDIO_BUTTON_HEIGHT}
-              cornerRadius={12}
+              cornerRadius={20}
               fill="#E0F2FE"
               stroke="#0284C7"
-              strokeWidth={2}
+              strokeWidth={3}
             />
             <Text
               text="🔊 Nghe lại"
-              fontSize={20}
+              fontSize={30}
+              fontStyle="bold"
               width={AUDIO_BUTTON_WIDTH}
               height={AUDIO_BUTTON_HEIGHT}
               align="center"
@@ -153,19 +169,18 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
           </Group>
         )}
 
-        <Group y={illustration ? 60 : 0}>
-          {question.options.map((option, index) => (
-            <OptionButton
-              key={option.id}
-              option={option}
-              index={index}
-              isSelected={chosenId === option.id}
-              isCorrect={revealCorrect && option.id === question.correctOptionId}
-              locked={locked}
-              onClick={() => handleSelect(option.id)}
-            />
-          ))}
-        </Group>
+        {question.options.map((option, index) => (
+          <OptionButton
+            key={option.id}
+            option={option}
+            index={index}
+            originY={layout.optionsOriginY}
+            isSelected={chosenId === option.id}
+            isCorrect={revealCorrect && option.id === question.correctOptionId}
+            locked={locked}
+            onClick={() => handleSelect(option.id)}
+          />
+        ))}
       </Layer>
     </ResponsiveStage>
   )
