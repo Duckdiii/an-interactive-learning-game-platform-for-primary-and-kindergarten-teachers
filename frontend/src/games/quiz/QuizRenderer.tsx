@@ -1,30 +1,34 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Group, Image as KonvaImage, Layer, Rect, Text } from 'react-konva'
 import { Howl } from 'howler'
 import useImage from 'use-image'
 import type { QuizQuestion } from '../../types/game-dsl.types'
+import { measureWrappedTextHeight } from '../common/measureText'
 import OptionButton from '../common/OptionButton'
 import ResponsiveStage from '../common/ResponsiveStage'
 import { useFeedback } from '../common/useFeedback'
+import {
+  AUDIO_BUTTON_HEIGHT,
+  AUDIO_BUTTON_WIDTH,
+  ILLUSTRATION_SIZE,
+  QUESTION_FONT_SIZE,
+  QUESTION_TEXT_WIDTH,
+  STAGE_WIDTH,
+  computeQuizLayout,
+} from './quizLayout'
 
-const STAGE_WIDTH = 800
-const STAGE_HEIGHT = 700
-const AUDIO_BUTTON_WIDTH = 200
-const AUDIO_BUTTON_HEIGHT = 64
-const ILLUSTRATION_SIZE = 140
-
-interface QuizRendererProps {
-  question: QuizQuestion
-  mode: 'preview' | 'play' | 'review'
-  /** Bắt buộc khi mode='review' — đáp án học sinh đã chọn trước đó. */
-  selectedOptionId?: string
-  /**
-   * preview: gọi lên cha sau khi đã tự so đáp án cục bộ, không cần giá trị trả về.
-   * play: cha lo gọi API, trả về đúng/sai thật (boolean) hoặc Promise<boolean> để QuizRenderer
-   * hiện feedback đúng lúc; component KHÔNG tự so `question.correctOptionId` khi play.
-   */
-  onAnswered?: (optionId: string) => void | boolean | Promise<boolean>
-}
+/**
+ * Prop phụ thuộc `mode` (union) để sai là lỗi lúc build thay vì lỗi lúc chạy:
+ * - preview: GV xem trước; component tự so đáp án cục bộ, `onAnswered` chỉ để thông báo (không cần kết quả).
+ * - play: cha lo gọi API chấm và PHẢI trả đúng/sai thật (boolean hoặc Promise<boolean>); thiếu thì ô bị
+ *   khoá mà không có feedback. Component KHÔNG tự so `question.correctOptionId` ở mode này.
+ * - review: xem lại câu đã làm, khoá sẵn. `selectedOptionId` bỏ trống khi câu hết giờ/bỏ qua.
+ */
+type QuizRendererProps = { question: QuizQuestion } & (
+  | { mode: 'preview'; onAnswered?: (optionId: string) => void }
+  | { mode: 'play'; onAnswered: (optionId: string) => boolean | Promise<boolean> }
+  | { mode: 'review'; selectedOptionId?: string }
+)
 
 function initialLocalState(mode: QuizRendererProps['mode'], selectedOptionId: string | undefined) {
   return {
@@ -34,7 +38,9 @@ function initialLocalState(mode: QuizRendererProps['mode'], selectedOptionId: st
   }
 }
 
-export default function QuizRenderer({ question, mode, selectedOptionId, onAnswered }: QuizRendererProps) {
+export default function QuizRenderer(props: QuizRendererProps) {
+  const { question, mode } = props
+  const selectedOptionId = props.mode === 'review' ? props.selectedOptionId : undefined
   const [chosenId, setChosenId] = useState<string | null>(
     () => initialLocalState(mode, selectedOptionId).chosenId,
   )
@@ -43,7 +49,29 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
     () => initialLocalState(mode, selectedOptionId).revealCorrect,
   )
   const { showFeedback } = useFeedback()
-  const [illustration] = useImage(question.imageUrl ?? '')
+  const [illustration, illustrationStatus] = useImage(question.imageUrl ?? '')
+
+  // Đo chiều cao thật của câu hỏi (Konva wrap theo từ nên số dòng khó ước lượng). Đo bằng useMemo,
+  // không dùng setState trong effect; đo không được thì layout tự quay về phép ước lượng.
+  const measuredQuestionHeight = useMemo(
+    () =>
+      measureWrappedTextHeight({
+        text: question.questionText,
+        fontSize: QUESTION_FONT_SIZE,
+        width: QUESTION_TEXT_WIDTH,
+      }),
+    [question.questionText],
+  )
+
+  // Chừa chỗ cho ảnh ngay khi có `imageUrl` (tránh bố cục nhảy khi ảnh tải xong); ảnh tải lỗi thì
+  // bỏ chỗ đó đi để không để lại khoảng trống.
+  const layout = computeQuizLayout({
+    hasIllustration: Boolean(question.imageUrl) && illustrationStatus !== 'failed',
+    hasAudio: Boolean(question.audioUrl),
+    optionCount: question.options.length,
+    questionLength: question.questionText.length,
+    measuredQuestionHeight,
+  })
 
   // Component có thể được cha tái sử dụng cho câu khác hoặc đổi mode mà không unmount (ví dụ GV bấm
   // đổi tab Edit/Preview trong WorkspaceEditor) — phải tự đồng bộ lại trạng thái theo props mới.
@@ -68,24 +96,29 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
   }, [resetKey])
 
   const handleSelect = async (optionId: string) => {
-    if (locked) return
+    if (locked || props.mode === 'review') return
     const myGeneration = generationRef.current
     setChosenId(optionId)
     setLocked(true)
 
-    if (mode === 'preview') {
+    if (props.mode === 'preview') {
       const isCorrect = optionId === question.correctOptionId
       setRevealCorrect(true)
       showFeedback(isCorrect)
-      onAnswered?.(optionId)
+      // Kiểu `void` không chặn được cha truyền hàm async; bọc lại để Promise bị reject không thành
+      // unhandled rejection.
+      Promise.resolve(props.onAnswered?.(optionId)).catch((error) => {
+        console.error('QuizRenderer: onAnswered (preview) bị lỗi', error)
+      })
       return
     }
 
     // mode === 'play': Backend chấm đúng/sai thật qua component cha; không tự so đáp án ở đây
     // để tránh dựa vào correctOptionId có thể đã lộ trong payload gửi xuống.
     try {
-      const result = await onAnswered?.(optionId)
+      const result = await props.onAnswered(optionId)
       if (generationRef.current !== myGeneration) return // đã đổi câu/mode, bỏ qua kết quả cũ
+      // Kiểu đã bắt buộc boolean; vẫn kiểm tra lúc chạy phòng cha viết bằng JS hoặc ép kiểu sai.
       if (typeof result === 'boolean') {
         setRevealCorrect(true)
         showFeedback(result)
@@ -98,52 +131,71 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
     }
   }
 
+  // Tạo `Howl` một lần theo `audioUrl` rồi dùng lại cho mọi lần bấm «Nghe lại» (nút không giới hạn số
+  // lần bấm, tạo mới mỗi lần sẽ làm bộ nhớ audio tăng dần). Dọn khi đổi câu hoặc đóng component.
+  const audioUrl = question.audioUrl
+  const audioRef = useRef<Howl | null>(null)
+  useEffect(() => {
+    if (!audioUrl) return
+    const howl = new Howl({ src: [audioUrl] })
+    audioRef.current = howl
+    return () => {
+      howl.unload()
+      audioRef.current = null
+    }
+  }, [audioUrl])
+
+  // stop() trước play(): trẻ bấm liên tục thì phát lại từ đầu, không chồng nhiều giọng đọc lên nhau.
   const playAudio = () => {
-    if (!question.audioUrl) return
-    new Howl({ src: [question.audioUrl] }).play()
+    audioRef.current?.stop()
+    audioRef.current?.play()
   }
 
   return (
-    <ResponsiveStage width={STAGE_WIDTH} height={STAGE_HEIGHT}>
+    <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
       <Layer>
-        {illustration && (
+        {illustration && layout.illustrationY !== null && (
           <KonvaImage
             image={illustration}
             width={ILLUSTRATION_SIZE}
             height={ILLUSTRATION_SIZE}
             x={(STAGE_WIDTH - ILLUSTRATION_SIZE) / 2}
-            y={20}
+            y={layout.illustrationY}
             cornerRadius={16}
           />
         )}
 
         <Text
           text={question.questionText}
-          fontSize={32}
-          x={40}
-          y={illustration ? 180 : 40}
-          width={STAGE_WIDTH - 80}
+          fontSize={QUESTION_FONT_SIZE}
+          x={(STAGE_WIDTH - QUESTION_TEXT_WIDTH) / 2}
+          y={layout.questionY}
+          width={QUESTION_TEXT_WIDTH}
+          height={layout.questionHeight}
           align="center"
+          verticalAlign="middle"
+          listening={false}
         />
 
-        {question.audioUrl && (
+        {layout.audioButtonY !== null && (
           <Group
             x={(STAGE_WIDTH - AUDIO_BUTTON_WIDTH) / 2}
-            y={illustration ? 240 : 100}
+            y={layout.audioButtonY}
             onClick={playAudio}
             onTap={playAudio}
           >
             <Rect
               width={AUDIO_BUTTON_WIDTH}
               height={AUDIO_BUTTON_HEIGHT}
-              cornerRadius={12}
+              cornerRadius={20}
               fill="#E0F2FE"
               stroke="#0284C7"
-              strokeWidth={2}
+              strokeWidth={3}
             />
             <Text
               text="🔊 Nghe lại"
-              fontSize={20}
+              fontSize={30}
+              fontStyle="bold"
               width={AUDIO_BUTTON_WIDTH}
               height={AUDIO_BUTTON_HEIGHT}
               align="center"
@@ -153,19 +205,18 @@ export default function QuizRenderer({ question, mode, selectedOptionId, onAnswe
           </Group>
         )}
 
-        <Group y={illustration ? 60 : 0}>
-          {question.options.map((option, index) => (
-            <OptionButton
-              key={option.id}
-              option={option}
-              index={index}
-              isSelected={chosenId === option.id}
-              isCorrect={revealCorrect && option.id === question.correctOptionId}
-              locked={locked}
-              onClick={() => handleSelect(option.id)}
-            />
-          ))}
-        </Group>
+        {question.options.map((option, index) => (
+          <OptionButton
+            key={option.id}
+            option={option}
+            index={index}
+            originY={layout.optionsOriginY}
+            isSelected={chosenId === option.id}
+            isCorrect={revealCorrect && option.id === question.correctOptionId}
+            locked={locked}
+            onClick={() => handleSelect(option.id)}
+          />
+        ))}
       </Layer>
     </ResponsiveStage>
   )

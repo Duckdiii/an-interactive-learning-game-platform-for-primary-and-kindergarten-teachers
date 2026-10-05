@@ -11,7 +11,7 @@ export const mockQuizQuestion: QuizQuestion = {
   timeLimitSeconds: 30,
   points: 10,
   audioText: 'Có mấy con mèo?',
-  audioUrl: '/mock/q1.mp3',
+  audioUrl: '/mock/q1.wav',
   visualPrompt: 'three cats sitting together',
   imageUrl: '/mock/three-cats.png',
   questionText: 'Có mấy con mèo?',
@@ -21,6 +21,18 @@ export const mockQuizQuestion: QuizQuestion = {
     { id: 'c', text: '4' },
   ],
   correctOptionId: 'b',
+}
+
+/**
+ * Câu hỏi dài sát giới hạn 200 ký tự của DSL (195 ký tự, nhiều từ dài) kèm ảnh và audio — dùng để kiểm
+ * tra chữ không bị cắt và nút Nghe lại không bị đè khi câu hỏi wrap thành nhiều dòng.
+ */
+export const mockQuizQuestionLongText: QuizQuestion = {
+  ...mockQuizQuestion,
+  id: 'q3',
+  audioText: 'Câu hỏi dài',
+  questionText:
+    'Hôm nay bạn Minh cùng gia đình đi công viên, nhìn thấy thật nhiều chú mèo con lông vàng đang chơi đùa trên thảm cỏ xanh mướt; hỏi bạn Minh đã đếm được tất cả bao nhiêu chú mèo con dễ thương ở đó?',
 }
 
 /** Câu hỏi không có audio/ảnh, dùng để test renderer vẫn chạy đúng khi 2 field này vắng mặt. */

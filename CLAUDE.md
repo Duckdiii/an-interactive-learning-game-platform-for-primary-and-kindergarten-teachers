@@ -66,7 +66,7 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 - Touch target tối thiểu 64px.
 - Trả lời sai: KHÔNG dùng màu đỏ gắt/rung mạnh/âm thanh phạt. Dùng phản hồi nhẹ nhàng (rung nhẹ, âm thanh trung tính) và ưu tiên chỉ luôn đáp án đúng để trẻ học được.
 - Audio prompt luôn có nút "nghe lại" không giới hạn số lần.
-- Renderer mới phải hỗ trợ prop `mode: 'preview' | 'play' | 'review'` (`preview` cho Workspace Editor live preview tự so đáp án cục bộ; `play` cho học sinh chơi thật, không tự lộ đáp án đúng, báo kết quả lên component cha qua callback; `review` xem lại câu đã trả lời, khoá sẵn, nhận thêm prop `selectedOptionId` cho biết đáp án đã chọn trước đó).
+- Renderer mới phải hỗ trợ prop `mode: 'preview' | 'play' | 'review'` (`preview` cho Workspace Editor live preview tự so đáp án cục bộ; `play` cho học sinh chơi thật, không tự lộ đáp án đúng, báo kết quả lên component cha qua callback `onAnswered` (bắt buộc ở mode này và PHẢI trả `boolean` hoặc `Promise<boolean>` là đúng/sai thật do Backend chấm; kiểu prop là union theo `mode` nên thiếu là lỗi lúc build); `review` xem lại câu đã trả lời, khoá sẵn, nhận thêm prop `selectedOptionId` cho biết đáp án đã chọn trước đó).
 
 ## Nguyên tắc thiết kế: OOP, SOLID, GRASP
 
