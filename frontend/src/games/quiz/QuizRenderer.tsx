@@ -1,21 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Group, Image as KonvaImage, Layer, Rect, Text } from 'react-konva'
-import { Howl } from 'howler'
-import useImage from 'use-image'
+import { Layer, Text } from 'react-konva'
 import type { QuizQuestion } from '../../types/game-dsl.types'
+import { STAGE_WIDTH } from '../common/mediaLayout'
 import { measureWrappedTextHeight } from '../common/measureText'
 import OptionButton from '../common/OptionButton'
+import QuestionAudioButton from '../common/QuestionAudioButton'
+import QuestionIllustration from '../common/QuestionIllustration'
 import ResponsiveStage from '../common/ResponsiveStage'
 import { useFeedback } from '../common/useFeedback'
-import {
-  AUDIO_BUTTON_HEIGHT,
-  AUDIO_BUTTON_WIDTH,
-  ILLUSTRATION_SIZE,
-  QUESTION_FONT_SIZE,
-  QUESTION_TEXT_WIDTH,
-  STAGE_WIDTH,
-  computeQuizLayout,
-} from './quizLayout'
+import { useIllustration } from '../common/useIllustration'
+import { useQuestionAudio } from '../common/useQuestionAudio'
+import { QUESTION_FONT_SIZE, QUESTION_TEXT_WIDTH, computeQuizLayout } from './quizLayout'
 
 /**
  * Prop phụ thuộc `mode` (union) để sai là lỗi lúc build thay vì lỗi lúc chạy:
@@ -49,7 +44,8 @@ export default function QuizRenderer(props: QuizRendererProps) {
     () => initialLocalState(mode, selectedOptionId).revealCorrect,
   )
   const { showFeedback } = useFeedback()
-  const [illustration, illustrationStatus] = useImage(question.imageUrl ?? '')
+  const { image: illustration, reserveSpace: hasIllustration } = useIllustration(question.imageUrl)
+  const playAudio = useQuestionAudio(question.audioUrl)
 
   // Đo chiều cao thật của câu hỏi (Konva wrap theo từ nên số dòng khó ước lượng). Đo bằng useMemo,
   // không dùng setState trong effect; đo không được thì layout tự quay về phép ước lượng.
@@ -63,10 +59,8 @@ export default function QuizRenderer(props: QuizRendererProps) {
     [question.questionText],
   )
 
-  // Chừa chỗ cho ảnh ngay khi có `imageUrl` (tránh bố cục nhảy khi ảnh tải xong); ảnh tải lỗi thì
-  // bỏ chỗ đó đi để không để lại khoảng trống.
   const layout = computeQuizLayout({
-    hasIllustration: Boolean(question.imageUrl) && illustrationStatus !== 'failed',
+    hasIllustration,
     hasAudio: Boolean(question.audioUrl),
     optionCount: question.options.length,
     questionLength: question.questionText.length,
@@ -131,38 +125,11 @@ export default function QuizRenderer(props: QuizRendererProps) {
     }
   }
 
-  // Tạo `Howl` một lần theo `audioUrl` rồi dùng lại cho mọi lần bấm «Nghe lại» (nút không giới hạn số
-  // lần bấm, tạo mới mỗi lần sẽ làm bộ nhớ audio tăng dần). Dọn khi đổi câu hoặc đóng component.
-  const audioUrl = question.audioUrl
-  const audioRef = useRef<Howl | null>(null)
-  useEffect(() => {
-    if (!audioUrl) return
-    const howl = new Howl({ src: [audioUrl] })
-    audioRef.current = howl
-    return () => {
-      howl.unload()
-      audioRef.current = null
-    }
-  }, [audioUrl])
-
-  // stop() trước play(): trẻ bấm liên tục thì phát lại từ đầu, không chồng nhiều giọng đọc lên nhau.
-  const playAudio = () => {
-    audioRef.current?.stop()
-    audioRef.current?.play()
-  }
-
   return (
     <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
       <Layer>
-        {illustration && layout.illustrationY !== null && (
-          <KonvaImage
-            image={illustration}
-            width={ILLUSTRATION_SIZE}
-            height={ILLUSTRATION_SIZE}
-            x={(STAGE_WIDTH - ILLUSTRATION_SIZE) / 2}
-            y={layout.illustrationY}
-            cornerRadius={16}
-          />
+        {layout.illustrationY !== null && (
+          <QuestionIllustration image={illustration} y={layout.illustrationY} />
         )}
 
         <Text
@@ -178,31 +145,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
         />
 
         {layout.audioButtonY !== null && (
-          <Group
-            x={(STAGE_WIDTH - AUDIO_BUTTON_WIDTH) / 2}
-            y={layout.audioButtonY}
-            onClick={playAudio}
-            onTap={playAudio}
-          >
-            <Rect
-              width={AUDIO_BUTTON_WIDTH}
-              height={AUDIO_BUTTON_HEIGHT}
-              cornerRadius={20}
-              fill="#E0F2FE"
-              stroke="#0284C7"
-              strokeWidth={3}
-            />
-            <Text
-              text="🔊 Nghe lại"
-              fontSize={30}
-              fontStyle="bold"
-              width={AUDIO_BUTTON_WIDTH}
-              height={AUDIO_BUTTON_HEIGHT}
-              align="center"
-              verticalAlign="middle"
-              listening={false}
-            />
-          </Group>
+          <QuestionAudioButton y={layout.audioButtonY} onPress={playAudio} />
         )}
 
         {question.options.map((option, index) => (
