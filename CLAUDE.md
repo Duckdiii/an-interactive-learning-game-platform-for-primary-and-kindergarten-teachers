@@ -113,7 +113,41 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 - Cột "Người thực hiện": ghi tên người đang ra lệnh cho agent, lấy từ `git config user.name` (chạy lệnh này để biết, không tự đoán). Cột "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`).
 - Không tự commit. Cột "Mã Commit SHA" ghi `TODO` để user cập nhật sau khi commit; nhắc user làm việc này trong câu báo cáo cuối.
 
+## Subagent (`.claude/agents/`)
+
+Phiên chính điều phối, giao việc kiểm tra cho subagent chỉ đọc (không có `Edit`/`Write`, nên chạy song song được). Subagent không thấy hội thoại, nên **không giao** việc ghi `ai-usage-log.md`, quyết định thiết kế hay việc nhỏ.
+
+Tự chạy (chỉ đọc, rẻ):
+- `test-verifier`: chạy `tsc`/lint/test/build (frontend), `./mvnw test` (backend) và báo kết quả gọn.
+- `contract-guardian`: kiểm tra đồng bộ DSL (4 nơi + test) và `openapi.yaml` (`x-status`, Redocly lint).
+- `reviewer`: review diff độc lập theo các quy ước trong file này (trọng tâm frontend, Canvas Engine, UX, secret).
+- `backend-architect-reviewer`: review kiến trúc backend (Strategy/Chain/Factory, JOINED inheritance, SOLID/GRASP, phân tầng).
+- `migration-checker`: kiểm tra Flyway (không sửa migration cũ, version, `ddl-auto: validate`, entity khớp migration).
+- `pr-triage`: phân loại nhận xét của bot/người trên một PR (Đúng / Sai / Hoãn), không đăng bình luận.
+- `log-auditor`: kiểm định dạng `ai-usage-log.md` (STT, cột, cấu trúc, SHA `TODO`).
+- `pre-commit-checker`: soi lần cuối file nhạy cảm, secret, cấu hình nguy hiểm trước khi commit.
+
+Chỉ chạy khi người dùng yêu cầu rõ (tốn usage):
+- `canvas-ux-checker`: mở sandbox trên trình duyệt, đo touch target 64px sau co giãn, đè khối, phản hồi, nút nghe lại.
+- `mutation-checker`: chèn lỗi vào module trong worktree riêng để chứng minh test bắt được lỗi.
+
+### Bảng định tuyến (thay đổi đụng tới → agent chạy)
+
+| Thay đổi đụng tới | Chạy |
+|---|---|
+| `dto/dsl`, `schema/game-dsl`, `schema/game-ai-output`, `game-dsl.types.ts`, `docs/openapi/openapi.yaml`, controller/DTO REST | `contract-guardian` |
+| `backend/src/main/resources/db/migration/`, `entity/`, `application*.yml` | `migration-checker` |
+| `backend/**/*.java` | `backend-architect-reviewer` + `test-verifier` |
+| `frontend/src/**` | `reviewer` + `test-verifier` |
+| `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | thêm `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |
+| `ai-usage-log.md` | `log-auditor` |
+| PR đã có review của bot/người | `pr-triage` |
+| Mọi commit | `pre-commit-checker` (sau cùng) |
+
+Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.md` hay docs không cần `test-verifier`.
+
 ## Trước khi báo hoàn thành
 
 - Backend: build thử bằng `./mvnw clean install -DskipTests` (hoặc chạy test nếu có DB thật) trước khi báo xong.
 - Frontend: chạy `npm run build` (type-check + build) và/hoặc mở thử bằng dev server trước khi báo xong.
+- Chạy song song các agent theo bảng định tuyến; đợi tất cả xong rồi mới sửa theo kết quả, sau đó chạy lại `test-verifier`. Ngay trước khi đưa commit message, chạy `pre-commit-checker`. Khi sửa `ai-usage-log.md`, chạy `log-auditor`.
