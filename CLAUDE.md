@@ -16,7 +16,11 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 
 ## Backend (`backend/`)
 
-- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc đã có: `entity/{question,session,interaction,enums}` (`entity/question/embedded` chứa các thành phần nhúng như cặp, vùng thả; entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`), `service/{strategy,validation,factory,generation}` (`service/generation` chứa bộ điều phối sinh game bằng AI: cổng `GameContentGenerator` (bản cài đặt Gemini/LangChain4j đặt ở đây), vòng thử lại có phản hồi lỗi; (`service/validation/rule` chứa luật Layer 2 của từng loại game, `service/validation/safety` chứa phần kiểm duyệt an toàn Layer 3: danh sách từ cấm và client OpenAI Moderation), `repository`, `controller`, `dto/{request,response,dsl}` (`dto/dsl` là các record của Game JSON DSL), `config`, `exception`, `security`. Nếu cần thư mục con mới, đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package.
+- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc package đã có (`entity`, `service`, `repository`, `controller`, `dto`, `config`, `exception`, `security`); thư mục con mới đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package. Những chỗ dễ đặt nhầm:
+  - Entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`; thành phần nhúng (cặp, vùng thả) ở `entity/question/embedded`.
+  - `service/generation`: bộ điều phối sinh game bằng AI, cổng `GameContentGenerator` cùng bản cài đặt Gemini/LangChain4j, vòng thử lại có phản hồi lỗi.
+  - `service/validation/rule` (luật Layer 2 từng loại game) và `service/validation/safety` (Layer 3: danh sách từ cấm, client OpenAI Moderation).
+  - `dto/dsl`: các record của Game JSON DSL.
 - **Schema do Flyway quản lý** — `jpa.hibernate.ddl-auto` luôn là `validate`, không được đổi sang `update`/`create`. Mọi thay đổi schema phải viết migration mới trong `src/main/resources/db/migration/` theo thứ tự version tăng dần (`V1__...sql`, `V2__...sql`), không sửa lại migration đã tồn tại.
 - Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
 - Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
@@ -46,7 +50,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
   - **Strategy**: `GameContentStrategy` — mỗi game type 1 class implement, KHÔNG chứa `validateBusinessLogic()` (thuộc trách nhiệm `GameValidationService`).
   - **Chain of Responsibility**: `AbstractGameValidator` → Layer 1 JSON Schema → Layer 2 Business Logic → Layer 3 Safety Moderation. Không bypass layer nào.
   - **Factory Method**: `GameSessionFactory` (tạo session), `InteractionDetailFactoryRegistry` (map gameType → đúng subclass factory).
-- AI integration dùng **LangChain4j duy nhất** — không dùng Spring AI, không dùng song song cả hai.
+- AI integration dùng **LangChain4j duy nhất** — không dùng Spring AI.
 - Enum/discriminator `gameType` dùng `UPPER_SNAKE_CASE` (`QUIZ`, `SPOT_THE_TARGET`...).
 
 ## Contract đã freeze — mọi thay đổi field/endpoint phải đồng bộ cả Backend, Frontend và doc
@@ -112,4 +116,4 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 ## Trước khi báo hoàn thành
 
 - Backend: build thử bằng `./mvnw clean install -DskipTests` (hoặc chạy test nếu có DB thật) trước khi báo xong.
-- Frontend: chạy `npm run build` (type-check + build) và/hoặc mở thử bằng dev server trước khi báo xong, đừng chỉ dựa vào code trông "có vẻ đúng".
+- Frontend: chạy `npm run build` (type-check + build) và/hoặc mở thử bằng dev server trước khi báo xong.
