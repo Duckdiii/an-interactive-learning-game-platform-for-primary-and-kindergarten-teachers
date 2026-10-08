@@ -49,23 +49,27 @@ on:
         description: "Số turn tối đa của agent (để trống = mặc định theo chế độ)"
         required: false
 
-# Khóa theo PR: các lần chạy tự động và label "ai-review" dùng chung một nhóm (lần mới hủy lần cũ đang chạy).
+# Khóa theo PR: mọi lần chạy có GHI lên PR (tự động, label "ai-review", chạy tay với dry_run=false) dùng chung một nhóm,
+# lần mới hủy lần cũ đang chạy, để hai lần chạy không ghi đè trạng thái của nhau trong comment tổng kết.
 # Label khác thì có nhóm riêng (điều kiện concurrency được đánh giá trước `if` của job, nên thêm label khác
-# không được phép hủy run đang chạy). Mỗi lần chạy tay có nhóm riêng (chạy lặp để đo độ ổn định không hủy lẫn nhau).
+# không được phép hủy run đang chạy). Chạy tay với dry_run=true không ghi gì nên mỗi lần có nhóm riêng
+# (chạy lặp để đo độ ổn định không hủy lẫn nhau).
 concurrency:
-  group: ai-review-${{ github.event.pull_request.number || inputs.pr_number }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || (github.event.action == 'labeled' && github.event.label.name != 'ai-review' && github.event.label.name) || 'pr' }}
+  group: ai-review-${{ github.event.pull_request.number || inputs.pr_number }}-${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && github.run_id || (github.event.action == 'labeled' && github.event.label.name != 'ai-review' && github.event.label.name) || 'pr' }}
   cancel-in-progress: true
 
 jobs:
   analyze:
-    # Bỏ qua: label khác ai-review, PR draft, PR từ fork (không có secret và code không tin cậy), PR của dependabot.
+    # Bỏ qua: label khác ai-review, PR draft, PR từ fork (không có secret và code không tin cậy), PR do dependabot tạo.
+    # Dùng TÁC GIẢ PR (user.login), không dùng github.actor: với sự kiện labeled, actor là người gắn label.
+    # workflow_dispatch không đi qua điều kiện này nên tác giả được kiểm tra lại ở bước ctx và boot.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
        (github.event.action != 'labeled' || github.event.label.name == 'ai-review') &&
        github.event.pull_request.draft == false &&
        github.event.pull_request.head.repo.full_name == github.repository &&
-       github.actor != 'dependabot[bot]')
+       github.event.pull_request.user.login != 'dependabot[bot]')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -77,6 +81,7 @@ jobs:
       mode: ${{ steps.prep.outputs.mode }}
       prompt_version: ${{ steps.prep.outputs.prompt_version }}
       run: ${{ steps.pre.outputs.run }}
+      runs: ${{ steps.pre.outputs.runs }}
       round: ${{ steps.pre.outputs.round }}
       base_sha: ${{ steps.pre.outputs.base_sha }}
     steps:
@@ -88,8 +93,15 @@ jobs:
           PR_FROM_EVENT: ${{ github.event.pull_request.number }}
           PR_INPUT: ${{ inputs.pr_number }}
           DRY_RUN: ${{ inputs.dry_run }}
+          REF: ${{ github.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
+          # Chạy tay dùng script/prompt từ chính ref được chọn (để thử prompt mới), nên việc ĐĂNG THẬT lên PR chỉ được phép
+          # từ nhánh mặc định; từ nhánh khác chỉ được dry_run.
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN" != "true" ] && [ "$REF" != "refs/heads/${DEFAULT_BRANCH}" ]; then
+            echo "Chạy thật (dry_run=false) chỉ được phép từ nhánh mặc định (${DEFAULT_BRANCH}); đang chạy từ ${REF}."; exit 1
+          fi
           pr="${PR_FROM_EVENT:-$PR_INPUT}"
           [[ "$pr" =~ ^[0-9]+$ ]] || { echo "pr_number không hợp lệ"; exit 1; }
           json=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${pr}")
@@ -105,10 +117,15 @@ jobs:
           # Mô tả PR là dữ liệu không tin cậy: chỉ ghi ra file, sau đó extract-uc.mjs chỉ lấy các mã UC-nn hợp lệ.
           jq -r '.body // ""' <<<"$json" > "${RUNNER_TEMP}/pr-body.txt"
           if [ "$EVENT" = "pull_request" ]; then ref="refs/pull/${pr}/merge"; else ref="refs/pull/${pr}/head"; fi
+          # Tác giả PR (không phải người kích hoạt): PR của dependabot không có secret nên không review, kể cả khi chạy tay.
+          author=$(jq -r '.user.login // ""' <<<"$json")
+          author_ok=true
+          if [ "$author" = "dependabot[bot]" ]; then author_ok=false; fi
           {
             echo "pr=$pr"
             echo "head_sha=$head_sha"
             echo "checkout_ref=$ref"
+            echo "author_ok=$author_ok"
           } >> "$GITHUB_OUTPUT"
 
       # Script, prompt, schema luôn lấy từ nhánh base. Nếu nhánh base CHƯA có hệ thống này (ví dụ chính PR đầu tiên thêm nó
@@ -118,15 +135,33 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          AUTHOR_OK: ${{ steps.ctx.outputs.author_ok }}
         run: |
           set -uo pipefail
           ready=true
-          for f in scripts/ai-review/precheck.mjs .github/ai-review/prompt.md .github/ai-review/review-result.schema.json; do
-            gh api "repos/${GITHUB_REPOSITORY}/contents/${f}?ref=${BASE_REF}" > /dev/null 2>&1 || ready=false
-          done
+          reason=""
+          if [ "$AUTHOR_OK" != "true" ]; then
+            ready=false
+            reason="PR do dependabot[bot] tạo (không có secret nên không review)."
+          else
+            for f in scripts/ai-review/precheck.mjs .github/ai-review/prompt.md .github/ai-review/review-result.schema.json; do
+              err=$(gh api "repos/${GITHUB_REPOSITORY}/contents/${f}?ref=${BASE_REF}" 2>&1 > /dev/null); rc=$?
+              if [ "$rc" -ne 0 ]; then
+                # Chỉ 404 mới nghĩa là file chưa có. Lỗi xác thực, giới hạn tốc độ hoặc lỗi dịch vụ phải làm job thất bại để chạy lại,
+                # không được hiểu nhầm thành "nhánh base chưa có hệ thống".
+                if grep -q "HTTP 404" <<<"$err"; then
+                  ready=false
+                  reason="nhánh base chưa có hệ thống AI review (thiếu script, prompt hoặc schema). Sau khi hệ thống được merge vào nhánh base thì các PR sau sẽ được review."
+                else
+                  echo "Không kiểm tra được ${f} (lỗi không phải 404): ${err}" >&2
+                  exit 1
+                fi
+              fi
+            done
+          fi
           echo "ready=$ready" >> "$GITHUB_OUTPUT"
           if [ "$ready" != "true" ]; then
-            echo "> **Bỏ qua:** nhánh base chưa có hệ thống AI review (thiếu script, prompt hoặc schema). PR này không được review tự động; sau khi hệ thống được merge vào nhánh base thì các PR sau sẽ được review." >> "$GITHUB_STEP_SUMMARY"
+            echo "> **Bỏ qua:** ${reason}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       # Gom các lần push liền nhau: chỉ commit cuối cùng của một chuỗi push được review. Lần chạy cũ bị `concurrency`
@@ -309,11 +344,17 @@ jobs:
           ANALYZED_SHA: ${{ needs.analyze.outputs.head_sha }}
           ROUND: ${{ needs.analyze.outputs.round }}
           BASE_SHA: ${{ needs.analyze.outputs.base_sha }}
+          EXPECT_MODE: ${{ needs.analyze.outputs.mode }}
+          EXPECT_PROMPT: ${{ needs.analyze.outputs.prompt_version }}
+          EXPECT_RUNS: ${{ needs.analyze.outputs.runs }}
           DRY_RUN: ${{ inputs.dry_run }}
           FORCE: ${{ inputs.force }}
         run: |
           set -euo pipefail
-          args=(--result result/review.json --pr "$PR" --repo "$GITHUB_REPOSITORY" --analyzed-sha "$ANALYZED_SHA" --out result/plan.json)
+          # Chế độ, version prompt và số lần chạy do job analyze quyết định; post từ chối kết quả không khớp hoặc khi
+          # trạng thái trong comment đã bị lần chạy khác thay đổi trong lúc phân tích.
+          args=(--result result/review.json --pr "$PR" --repo "$GITHUB_REPOSITORY" --analyzed-sha "$ANALYZED_SHA" --out result/plan.json
+                --expect-mode "$EXPECT_MODE" --expect-prompt "$EXPECT_PROMPT" --expect-runs "$EXPECT_RUNS")
           # Vòng và mốc commit do bước precheck (code cố định) quyết định, không lấy từ kết quả của agent.
           [ "$ROUND" = "2" ] && args+=(--round 2 --base-sha "$BASE_SHA")
           [ "$DRY_RUN" = "true" ] && args+=(--dry-run)

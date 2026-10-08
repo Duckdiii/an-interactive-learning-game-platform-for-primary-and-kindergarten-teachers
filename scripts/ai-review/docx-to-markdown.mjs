@@ -85,7 +85,8 @@ function paragraphInfo(p) {
   return { text: runText(p).replace(/\s+/g, " ").trim(), style: style ?? "", list: numPr ? ilvl : null };
 }
 
-const escCell = (s) => s.replace(/\|/g, "\|");
+// Ký tự | trong ô bảng phải được escape thành \| nếu không sẽ tạo thêm cột và làm lệch dữ liệu.
+export const escCell = (s) => s.replace(/\|/g, "\\|");
 
 function tableToMarkdown(tbl) {
   const rows = kids(tbl, "w:tr").map((tr) =>

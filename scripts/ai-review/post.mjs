@@ -17,9 +17,17 @@ const BOT = "github-actions[bot]";
 export class PostError extends Error {}
 
 /** Kiểm tra kết quả của agent; ném PostError nếu không đủ tin cậy để đăng. */
-export function checkResult(result, schema, diff) {
+export function checkResult(result, schema, diff, expect = {}) {
   const errors = validate(result, schema);
   if (errors.length) throw new PostError(`Kết quả review không hợp lệ:\n- ${errors.slice(0, 10).join("\n- ")}`);
+  // Schema chỉ kiểm tra định dạng của mode/prompt_version; hai giá trị này đi vào trạng thái lưu trong comment và quyết định
+  // việc bỏ qua ở các lần sau, nên phải khớp với đầu vào mà job analyze đã chọn (agent không được tự đổi).
+  if (expect.mode !== undefined && result.mode !== expect.mode) {
+    throw new PostError(`mode trong kết quả (${result.mode}) khác chế độ đã chọn cho lần chạy (${expect.mode}).`);
+  }
+  if (expect.promptVersion !== undefined && result.prompt_version !== expect.promptVersion) {
+    throw new PostError(`prompt_version trong kết quả (${result.prompt_version}) khác phiên bản prompt đã dùng (${expect.promptVersion}).`);
+  }
   if (result.status !== "complete") throw new PostError("Agent báo status=incomplete (chưa review xong), không đăng.");
   if (diff.size > 0 && result.files_reviewed.length === 0) {
     throw new PostError("files_reviewed rỗng dù PR có thay đổi: coi là agent chưa làm việc, không đăng.");
@@ -40,13 +48,16 @@ const ownBy = (c, bot) => c.user?.login === bot;
  * @param {string} [o.bot]
  * @param {number} [o.round] 1: review toàn bộ; 2: vòng 2 (do bước kiểm tra đầu job 1 quyết định, không lấy từ agent)
  * @param {string} [o.baseSha] commit đã review lần trước (chỉ vòng 2)
+ * @param {string} [o.expectMode] chế độ job analyze đã chọn; kết quả không khớp thì bị từ chối
+ * @param {string} [o.expectPromptVersion] version prompt job analyze đã dùng; kết quả không khớp thì bị từ chối
+ * @param {number} [o.expectRuns] số lần đã chạy mà precheck đọc được; nếu trạng thái trong comment đã khác thì không đăng
  */
-export async function run({ result, schema, github, pr, analyzedSha, dryRun = false, force = false, bot = BOT, round = 1, baseSha = "", log = () => {} }) {
+export async function run({ result, schema, github, pr, analyzedSha, dryRun = false, force = false, bot = BOT, round = 1, baseSha = "", expectMode, expectPromptVersion, expectRuns, log = () => {} }) {
   const [pull, diffText, reviewComments, issueComments] = await Promise.all([
     github.getPull(pr), github.getDiff(pr), github.listReviewComments(pr), github.listIssueComments(pr),
   ]);
   const diff = parseDiff(diffText);
-  checkResult(result, schema, diff);
+  checkResult(result, schema, diff, { mode: expectMode, promptVersion: expectPromptVersion });
 
   const headSha = pull.head.sha;
   const existingSummary = findSummary(issueComments, bot);
@@ -54,6 +65,15 @@ export async function run({ result, schema, github, pr, analyzedSha, dryRun = fa
   if (!force && state && state.sha === analyzedSha && state.prompt === result.prompt_version && state.mode === result.mode) {
     log("Đã có kết quả cho cùng commit, prompt và chế độ; bỏ qua (dùng --force để chạy lại).");
     return { skipped: true };
+  }
+
+  // Chống hai lần chạy ghi đè trạng thái của nhau: kết quả này được tạo từ danh sách vấn đề mà precheck đã đọc, nên
+  // nếu trạng thái trong comment đã đổi từ lúc đó (số lần chạy khác, hoặc mốc commit khác ở vòng 2) thì không đăng.
+  if (expectRuns !== undefined && (state?.runs ?? 0) !== expectRuns) {
+    throw new PostError(`Trạng thái trong comment tổng kết đã thay đổi từ lúc phân tích (số lần chạy ${state?.runs ?? 0}, dự kiến ${expectRuns}); có thể một lần chạy khác đang ghi cùng lúc. Không đăng để tránh ghi đè; hãy chạy lại.`);
+  }
+  if (round === 2 && state?.sha !== baseSha) {
+    throw new PostError(`Vòng 2 so với commit ${baseSha.slice(0, 7)} nhưng trạng thái hiện tại ghi commit ${state?.sha?.slice(0, 7) ?? "(không có)"}; không đăng. Hãy chạy lại.`);
   }
 
   const postedFps = new Set();
@@ -111,7 +131,10 @@ async function main() {
   const github = new Github({ token: process.env.GITHUB_TOKEN, repo: args.repo });
   const out = await run({
     result, schema, github, pr: Number(args.pr), analyzedSha: args["analyzed-sha"],
-    dryRun: args.flags.has("dry-run"), force: args.flags.has("force"), round: args.round === "2" ? 2 : 1, baseSha: args["base-sha"] ?? "", log: (m) => console.log(m),
+    dryRun: args.flags.has("dry-run"), force: args.flags.has("force"), round: args.round === "2" ? 2 : 1, baseSha: args["base-sha"] ?? "",
+    expectMode: args["expect-mode"], expectPromptVersion: args["expect-prompt"],
+    expectRuns: args["expect-runs"] === undefined ? undefined : Number(args["expect-runs"]),
+    log: (m) => console.log(m),
   });
   if (args.out && out.plan) writeFileSync(args.out, JSON.stringify(out.plan, null, 2));
   console.log(JSON.stringify(out.skipped ? { skipped: true, reason: "đã có kết quả cho cùng commit, prompt và chế độ; dùng force để chạy lại" } : { ...out.plan.stats, dryRun: Boolean(out.dryRun), reviewPosted: out.reviewPosted ?? false, conclusion: out.plan.conclusion }));

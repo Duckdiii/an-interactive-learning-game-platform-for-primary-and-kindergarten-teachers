@@ -184,6 +184,41 @@ test("nhánh base chưa có hệ thống thì bỏ qua nhẹ nhàng: kiểm tra 
   const gatedCheckouts = analyze.split("\n").filter((l) => l.includes("steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'")).length;
   assert.ok(gatedCheckouts >= 3, "hai checkout và precheck phải có điều kiện ready và superseded");
   // bước boot không được làm job thất bại và phải để lại lời giải thích
-  assert.ok(analyze.slice(iBoot, iBoot + 1500).includes("Bỏ qua:"));
-  assert.doesNotMatch(analyze.slice(iBoot, iBoot + 1200), /exit 1/);
+  assert.ok(analyze.slice(iBoot, analyze.indexOf("id: wait")).includes("Bỏ qua:"));
+  // chỉ 404 mới là "chưa có hệ thống"; lỗi khác (xác thực, giới hạn tốc độ, 5xx) phải làm job thất bại để chạy lại
+  const boot = analyze.slice(iBoot, analyze.indexOf("id: wait"));
+  assert.ok(boot.includes('grep -q "HTTP 404"'), "phải phân biệt 404");
+  assert.ok(boot.includes("lỗi không phải 404"));
+  const after404 = boot.slice(boot.indexOf('grep -q "HTTP 404"'), boot.indexOf("else", boot.indexOf('grep -q "HTTP 404"')));
+  assert.ok(!after404.includes("exit 1"), "nhánh 404 không được làm job thất bại");
+  assert.match(boot.slice(boot.indexOf("else", boot.indexOf('grep -q "HTTP 404"'))), /exit 1/);
+});
+
+test("dependabot được xác định theo tác giả PR (user.login), không theo người kích hoạt (github.actor)", () => {
+  const noComments = text.split("\n").filter((l) => !l.trim().startsWith("#")).join("\n");
+  assert.doesNotMatch(noComments, /github\.actor/, "github.actor là người gắn label, không phải tác giả PR");
+  const cond = /if: >-\n([\s\S]*?)\n    runs-on/.exec(analyze)[1];
+  assert.match(cond, /github\.event\.pull_request\.user\.login != 'dependabot\[bot\]'/);
+  // chạy tay không đi qua điều kiện job, nên bước ctx và boot phải kiểm tra lại tác giả
+  assert.match(analyze, /\.user\.login/);
+  assert.match(analyze, /author_ok/);
+  assert.match(analyze, /AUTHOR_OK/);
+});
+
+test("chạy thật bằng workflow_dispatch chỉ được từ nhánh mặc định (chỉ dry_run mới được từ nhánh khác)", () => {
+  const ctx = analyze.slice(analyze.indexOf("id: ctx"), analyze.indexOf("id: boot"));
+  assert.match(ctx, /DEFAULT_BRANCH: \$\{\{ github\.event\.repository\.default_branch \}\}/);
+  assert.match(ctx, /REF: \$\{\{ github\.ref \}\}/);
+  assert.ok(ctx.includes('"$EVENT" = "workflow_dispatch"') && ctx.includes('"$DRY_RUN" != "true"') && ctx.includes('refs/heads/${DEFAULT_BRANCH}'));
+});
+
+test("mọi lần chạy có ghi lên PR dùng chung nhóm concurrency; chỉ dry_run mới có nhóm riêng theo run_id", () => {
+  const g = /^  group: (.*)$/m.exec(text)[1];
+  assert.match(g, /github\.event_name == 'workflow_dispatch' && inputs\.dry_run && github\.run_id/);
+});
+
+test("job post truyền chế độ, version prompt và số lần chạy do job analyze quyết định", () => {
+  for (const k of ["--expect-mode", "--expect-prompt", "--expect-runs"]) assert.ok(post.includes(k), `post thiếu ${k}`);
+  assert.match(analyze, /runs: \$\{\{ steps\.pre\.outputs\.runs \}\}/);
+  assert.match(post, /EXPECT_RUNS: \$\{\{ needs\.analyze\.outputs\.runs \}\}/);
 });

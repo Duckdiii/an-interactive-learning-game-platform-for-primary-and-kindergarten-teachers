@@ -1,10 +1,21 @@
 # Hệ thống Auto Review Code bằng AI
 
-> **Phiên bản tài liệu:** 4.4 (thêm bước bỏ qua nhẹ nhàng khi nhánh base chưa có hệ thống) · **Cập nhật:** 2026-10-08 · **Nhánh:** `duy/ai-auto-review` (chưa commit)
+> **Phiên bản tài liệu:** 4.5 (sửa theo nhận xét của CodeRabbit trên PR đầu tiên) · **Cập nhật:** 2026-10-08 · **Nhánh:** `duy/ai-auto-review`
 >
-> **Trạng thái:** phần code, prompt, schema, template và test đã viết xong (**188 test đạt**, khoảng 2.900 dòng script và test). **Workflow chưa được chạy trên GitHub thật** và chưa có review độc lập cho `post.mjs`, `precheck.mjs` và workflow. Các điểm chưa kiểm chứng được đánh dấu **[cần kiểm chứng]**; xem mục 12.
+> **Trạng thái:** phần code, prompt, schema, template và test đã viết xong (**199 test đạt**, khoảng 3.100 dòng script và test). **Workflow chưa được chạy trên GitHub thật** và chưa có review độc lập cho `post.mjs`, `precheck.mjs` và workflow. Các điểm chưa kiểm chứng được đánh dấu **[cần kiểm chứng]**; xem mục 12.
 >
 > **Cách đọc:** muốn hiểu nhanh thì đọc mục 1-3 và mục 12. Muốn cài hoặc sửa thì đọc mục 4-9. Muốn làm thực nghiệm cho đề tài thì đọc mục 10-11. Mục 16 giải thích các thuật ngữ.
+>
+> **Thay đổi ở bản 4.5 so với 4.4** (CodeRabbit review PR đầu tiên, đã đối chiếu từng nhận xét với code):
+>
+> - **Tác giả PR thay cho người kích hoạt:** loại PR của dependabot theo `pull_request.user.login` (với sự kiện `labeled`, `github.actor` là người gắn label); chạy tay cũng kiểm tra tác giả ở bước `ctx` và `boot`.
+> - **`boot` phân biệt 404 với lỗi khác:** chỉ 404 mới là "nhánh base chưa có hệ thống"; lỗi xác thực, giới hạn tốc độ hay 5xx làm job thất bại để chạy lại, không bị hiểu nhầm.
+> - **Chạy thật bằng `workflow_dispatch` chỉ từ nhánh mặc định:** từ nhánh khác chỉ được `dry_run` (vì chạy tay dùng script từ chính ref được chọn).
+> - **`post` từ chối kết quả không khớp đầu vào của job `analyze`:** `mode` và `prompt_version` phải khớp, và trạng thái trong comment (số lần chạy, mốc commit ở vòng 2) không được đổi từ lúc phân tích.
+> - **Mọi lần chạy có ghi lên PR dùng chung một nhóm `concurrency`** (kể cả chạy tay với `dry_run=false`); chỉ `dry_run` mới có nhóm riêng.
+> - **Sửa lỗi `escCell`** trong `docx-to-markdown.mjs`: ký tự `|` trong ô bảng không được escape (lỗi của tôi do lệnh shell làm mất dấu `\`). SRS hiện tại không có ô nào chứa `|` nên bản trích không đổi, nhưng đã có test.
+>
+> Các thay đổi ở bản 4.4 (so với 4.3):
 >
 > **Thay đổi ở bản 4.4 so với 4.3:** thêm bước `boot` ở đầu job `analyze`: nếu nhánh base **chưa có** hệ thống (thiếu `precheck.mjs`, `prompt.md` hoặc schema) thì **bỏ qua nhẹ nhàng** với một dòng giải thích trong job summary, thay vì báo lỗi đỏ. Nhờ vậy chính PR đầu tiên đưa hệ thống vào `main` không hiện dấu đỏ gây nhầm.
 >
@@ -289,6 +300,8 @@ Một nhận xét **không** được đăng inline sẽ nằm trong comment t�
 | Lỗi khác của GitHub (ví dụ 500) | Báo lỗi, job đỏ |
 | Agent trả kết quả rỗng, thiếu trường, `status: incomplete`, hoặc `files_reviewed` rỗng dù PR có thay đổi | **Từ chối đăng**, job đỏ (chống "thành công giả": CI xanh mà không có gì được đăng) |
 | Đăng xong nhưng không đọc lại thấy comment tổng kết | Job đỏ |
+| Kết quả có `mode` hoặc `prompt_version` khác đầu vào của job `analyze` | **Từ chối đăng**, job đỏ |
+| Trạng thái trong comment đã đổi từ lúc phân tích (số lần chạy khác, hoặc mốc commit khác ở vòng 2): lần chạy khác đang ghi cùng lúc | **Không đăng** để tránh ghi đè, job đỏ; chạy lại |
 | Diff quá lớn, GitHub từ chối trả diff | Job đỏ (chưa có xử lý riêng) |
 
 ### 5.4. Làm sạch nội dung agent trước khi đăng
@@ -360,10 +373,12 @@ Nội dung agent sinh ra là **dữ liệu không tin cậy**. `sanitize.mjs` th
 | `--allowedTools` hẹp: không `Bash` tự do, không `Write`, không công cụ đăng | Giảm bề mặt tấn công |
 | Script coi JSON của agent là dữ liệu không tin cậy | Kiểm tra schema, lọc đầu ra (mục 5.4). Action chỉ làm sạch đầu vào, không làm sạch đầu ra; ảnh markdown có thể rò dữ liệu qua URL |
 | Mô tả PR chỉ đi vào prompt qua mã `UC-nn` đã kiểm tra | Mô tả PR là dữ liệu không tin cậy |
-| Bỏ qua PR từ fork và `dependabot[bot]`; không dùng `pull_request_target` | Code không tin cậy không chạy cùng secret; dependabot không có secret nên job chỉ đỏ vô ích |
+| Bỏ qua PR từ fork và PR do `dependabot[bot]` tạo (xét theo tác giả PR, cả khi chạy tay); không dùng `pull_request_target` | Code không tin cậy không chạy cùng secret; dependabot không có secret nên job chỉ đỏ vô ích |
 | OAuth token chỉ truyền cho bước agent; job `post` chỉ có `GITHUB_TOKEN` | Tách quyền |
 | Pin action theo SHA; `persist-credentials: false` cho mọi checkout; không nội suy `${{ }}` trong khối `run` (dữ liệu đi qua `env`) | Giảm rủi ro chuỗi cung ứng và injection |
 | PR đã đóng chỉ chạy được khi `dry_run=true` | Không đăng nhận xét lên PR cũ |
+| Chạy thật (`dry_run=false`) bằng `workflow_dispatch` chỉ được từ nhánh mặc định | Chạy tay dùng script từ chính ref được chọn (để thử prompt mới); không có biện pháp này, người có quyền ghi chạy được script tự sửa với quyền đăng. Đây vẫn không chặn được thành viên có quyền ghi cố ý phá (mục 7.2) |
+| `post` đối chiếu `mode`, `prompt_version`, số lần chạy và mốc commit với job `analyze` | Agent không tự đổi được thông tin đi vào trạng thái lưu; hai lần chạy không ghi đè trạng thái của nhau |
 | Prompt ghi rõ nội dung PR là dữ liệu, không phải lệnh | Chỉ là lớp bổ sung, không phải lớp chính |
 
 Các bất biến này được kiểm tra tự động bằng `scripts/ai-review/workflow.test.mjs`. Đây **không thay thế `actionlint`**.
@@ -410,11 +425,11 @@ File `.github/workflows/ai-review.yml`.
 
 ### 8.2. Chi tiết kỹ thuật
 
-- **Concurrency:** khóa theo số PR; các lần chạy tự động và label `ai-review` dùng chung một nhóm (lần mới hủy lần cũ đang chạy). Label khác có nhóm riêng nên không hủy run đang chạy (điều kiện `concurrency` được đánh giá trước điều kiện `if` của job). Mỗi lần chạy tay có nhóm riêng nên các lần chạy lặp để đo độ ổn định không hủy lẫn nhau.
+- **Concurrency:** khóa theo số PR; mọi lần chạy có ghi lên PR (tự động, label `ai-review`, chạy tay với `dry_run=false`) dùng chung một nhóm, lần mới hủy lần cũ, để hai lần chạy không ghi đè trạng thái của nhau. Label khác có nhóm riêng nên không hủy run đang chạy (điều kiện `concurrency` được đánh giá trước điều kiện `if` của job). Chạy tay với `dry_run=true` không ghi gì nên mỗi lần có nhóm riêng (các lần chạy lặp để đo độ ổn định không hủy lẫn nhau). **Lưu ý:** `cancel-in-progress` áp dụng cho cả workflow nên lần chạy mới có thể hủy job `post` đang ghi giữa chừng (ví dụ review inline đã đăng nhưng comment tổng kết chưa cập nhật). Trạng thái vẫn tự sửa ở lần chạy sau nhờ fingerprint (không đăng trùng) và việc ghi lại comment tổng kết; đây là đánh đổi có chủ ý **[cần kiểm chứng]** khi chạy thật. Nếu gây phiền, chuyển `concurrency` xuống riêng job `analyze`.
 - **Thời gian tối đa:** `analyze` 30 phút (đã tính 3 phút chờ gom push), `post` 10 phút.
 - **Chờ gom push (`synchronize`):** job ngủ 180 giây rồi hỏi lại GitHub; nếu SHA đầu PR đã đổi thì dừng. Lần chạy cũ còn bị `concurrency` hủy ngay khi có lần mới, nên thực tế chỉ commit cuối của một chuỗi push được review. Bước ngủ không tốn token.
 - **`precheck.mjs`:** chạy sau hai bước checkout (cần script ở `trusted/`) và trước mọi bước tốn token; kết quả (`run`, `round`, `base_sha`, `runs`, `reason`) đi vào job summary và vào các bước sau. Vòng và mốc commit do bước này quyết định; job `post` nhận từ đây chứ không lấy từ kết quả của agent.
-- **`boot`:** bước đầu tiên sau khi xác định PR; hỏi API GitHub xem nhánh base (hoặc ref chạy workflow) có đủ `scripts/ai-review/precheck.mjs`, `.github/ai-review/prompt.md` và `.github/ai-review/review-result.schema.json` không. Thiếu thì ghi giải thích vào job summary, `ready=false`, và bước chờ, hai checkout, `precheck` đều bị bỏ qua (job vẫn thành công).
+- **`boot`:** bước đầu tiên sau khi xác định PR; bỏ qua nhẹ nhàng (job vẫn thành công, có dòng giải thích trong job summary) khi PR do dependabot tạo, hoặc khi API GitHub trả **404** cho một trong `scripts/ai-review/precheck.mjs`, `.github/ai-review/prompt.md`, `.github/ai-review/review-result.schema.json` ở nhánh base (hoặc ref chạy workflow). Lỗi khác 404 (xác thực, giới hạn tốc độ, 5xx) làm job thất bại để chạy lại. Khi bỏ qua, bước chờ, hai checkout và `precheck` đều không chạy.
 - **`ai-review-input/`:** thư mục trong workspace của PR do `precheck.mjs` ghi ở vòng 2 để agent đọc bằng `Read`.
 - **Artifact:** kết quả JSON, `usage.md`, `plan.json`, giữ 14 ngày. Không upload file execution của agent (có thể chứa nội dung file).
 - **Job summary:** turn, token, thời gian, cảnh báo lẫn chế độ, UC khai báo, kết quả đăng.
@@ -450,7 +465,7 @@ Các file **chưa tạo** (đã dự kiến): `scripts/ai-review/stats.mjs` (th�
 
 | Script | Việc | Có test |
 |---|---|---|
-| `post.mjs` | Điều phối: kiểm tra → lập kế hoạch → đăng → kiểm tra cuối. Cờ `--dry-run`, `--force`, `--out`, `--round 2 --base-sha` | `post.test.mjs` |
+| `post.mjs` | Điều phối: kiểm tra → lập kế hoạch → đăng → kiểm tra cuối. Cờ `--dry-run`, `--force`, `--out`, `--round 2 --base-sha`, `--expect-mode`, `--expect-prompt`, `--expect-runs` | `post.test.mjs` |
 | `plan.mjs` | Hàm thuần: fingerprint, định vị dòng, chọn inline, dựng comment tổng kết | `plan.test.mjs` |
 | `diff.mjs` | Phân tích unified diff, biết dòng nào comment được | `diff.test.mjs` |
 | `sanitize.mjs` | Làm sạch đầu ra của agent | `sanitize.test.mjs` |
@@ -465,7 +480,7 @@ Các file **chưa tạo** (đã dự kiến): `scripts/ai-review/stats.mjs` (th�
 | `extract-srs.mjs` | Tách SRS thành từng UC, NFR, bảng FR↔UC | `extract-srs.test.mjs` |
 | (kiểm tra workflow) | Các bất biến bảo mật của `ai-review.yml` | `workflow.test.mjs` |
 
-Tổng cộng khoảng 2.900 dòng (cả test) và **188 test**, chạy bằng:
+Tổng cộng khoảng 3.100 dòng (cả test) và **199 test**, chạy bằng:
 
 ```bash
 node --test scripts/ai-review/

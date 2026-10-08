@@ -57,3 +57,22 @@ test("docs/srs/ khớp với kết quả trích từ docs/SRS.docx (nhắc chạ
     assert.equal(norm(readFileSync(resolve(dir, name), "utf8")), norm(content), `${name} lệch; chạy: node scripts/ai-review/extract-srs.mjs`);
   }
 });
+
+// ---- escCell: ký tự | trong ô bảng ----
+import { escCell } from "./docx-to-markdown.mjs";
+
+test("escCell escape ký tự | thành \\| để không tạo thêm cột", () => {
+  assert.equal(escCell("a|b"), "a\\|b");
+  assert.equal(escCell("a|b|c"), "a\\|b\\|c");
+  assert.equal(escCell("không có"), "không có");
+  assert.equal(escCell("a|b").length, 4, "thêm đúng một ký tự backslash");
+});
+
+test("bảng sinh từ SRS thật có số cột đều nhau ở mọi dòng (không dòng nào bị lệch do ký tự |)", { skip: !existsSync(docx()) }, () => {
+  const countCells = (row) => row.replace(/\\\|/g, "").split("|").length - 2;
+  for (const b of docxToBlocks(readFileSync(docx()))) {
+    if (b.type !== "table") continue;
+    const widths = new Set(b.text.split("\n").map(countCells));
+    assert.equal(widths.size, 1, `bảng có số cột không đều: ${[...widths].join(",")}\n${b.text.slice(0, 120)}`);
+  }
+});
