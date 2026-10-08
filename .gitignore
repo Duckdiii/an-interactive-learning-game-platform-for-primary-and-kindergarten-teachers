@@ -39,3 +39,12 @@ Thumbs.db
 # === Logs ===
 *.log
 logs/
+
+# === AI review (file sinh ra khi chạy thử script ở máy cục bộ hoặc trong workflow) ===
+# Thư mục đầu vào vòng 2 do scripts/ai-review/precheck.mjs ghi
+/ai-review-input/
+# Bản checkout nhánh base dùng trong workflow
+/trusted/
+# Thư mục kết quả / artifact khi chạy thử tay
+/out/
+/result/

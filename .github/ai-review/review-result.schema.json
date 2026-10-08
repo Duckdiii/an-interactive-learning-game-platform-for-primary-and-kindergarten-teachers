@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI review result",
+  "description": "Kết quả một lần review PR. Dùng cho --json-schema của claude-code-action và để script post kiểm tra lại. Chỉ dùng các từ khóa mà scripts/ai-review/schema-validate.mjs hỗ trợ.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "prompt_version", "mode", "status", "files_reviewed", "summary", "conclusion", "uc_source", "findings"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "prompt_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "Phiên bản prompt.md đã dùng." },
+    "mode": { "enum": ["A", "B", "C"], "description": "A: chỉ diff. B: diff + đọc repo. C: diff + repo + SRS." },
+    "status": { "enum": ["complete", "incomplete"], "description": "complete chỉ khi đã review hết các file thay đổi. Hết lượt hoặc bỏ dở thì ghi incomplete." },
+    "files_reviewed": {
+      "type": "array",
+      "maxItems": 300,
+      "items": { "type": "string", "minLength": 1, "maxLength": 300 },
+      "description": "Các file trong diff mà bạn đã thật sự xem."
+    },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 2000, "description": "Tóm tắt ngắn bằng tiếng Việt; nói rõ nếu không phát hiện vấn đề đáng kể." },
+    "conclusion": { "enum": ["pass", "fail"], "description": "fail chỉ khi có ít nhất một finding severity=blocker." },
+    "uc_source": { "enum": ["declared", "inferred", "none"], "description": "declared: UC lấy từ dòng UC: của yêu cầu. inferred: bạn tự suy ra từ diff và danh mục SRS. none: không xác định được UC (uc_detected phải rỗng)." },
+    "uc_detected": {
+      "type": "array",
+      "maxItems": 15,
+      "items": { "type": "string", "pattern": "^UC-[0-9]{2}$" },
+      "description": "Các UC xác định được cho PR này. Rỗng nếu không xác định được."
+    },
+    "round": { "enum": [1, 2], "description": "1: review toàn bộ PR. 2: vòng 2, chỉ xem phần thay đổi mới và kiểm tra các vấn đề cũ. Đặt đúng giá trị của dòng ROUND trong yêu cầu." },
+    "previous_findings": {
+      "type": "array",
+      "maxItems": 40,
+      "description": "Chỉ ở vòng 2: trạng thái của TỪNG vấn đề cũ trong file PREVIOUS_FINDINGS_FILE.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref", "status", "evidence"],
+        "properties": {
+          "ref": { "type": "string", "pattern": "^[0-9a-f]{16}$", "description": "Giá trị ref của vấn đề cũ, chép nguyên văn." },
+          "status": { "enum": ["resolved", "still_present", "unclear"], "description": "resolved: đã xử lý (cần căn cứ). still_present: vẫn còn. unclear: không đủ căn cứ để kết luận." },
+          "evidence": { "type": "string", "maxLength": 500, "description": "Căn cứ ngắn gọn, ví dụ dòng code mới hoặc tên file đã đổi. Bắt buộc khi status là resolved." }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "file", "line", "code", "severity", "category", "message"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^F[0-9]{1,3}$", "description": "F1, F2... duy nhất trong một lần chạy." },
+          "file": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "line": { "type": ["integer", "null"], "minimum": 1, "description": "Số dòng trên phiên bản MỚI của file, nằm trong diff. null nếu nhận xét không gắn với dòng cụ thể." },
+          "code": { "type": "string", "maxLength": 300, "description": "Nguyên văn dòng code bị nhận xét (không kèm số dòng). Chuỗi rỗng nếu line=null." },
+          "severity": { "enum": ["blocker", "major", "minor"] },
+          "category": { "enum": ["bug", "security", "transaction", "n_plus_one", "exception", "architecture", "contract", "ux", "gap", "suggestion"] },
+          "message": { "type": "string", "minLength": 1, "maxLength": 1500 },
+          "fix": { "type": "string", "maxLength": 400, "description": "Hướng giải quyết BẰNG LỜI (1-2 câu): cần làm gì và ở đâu. Không viết code. Bắt buộc với blocker và major." },
+          "impact": { "type": "string", "maxLength": 300, "description": "Tác động bằng ngôn ngữ thường, một câu, cho người không phải lập trình viên hiểu vì sao đáng sửa. Có cho blocker và major, không cần cho minor." },
+          "uc": {
+            "type": "array",
+            "maxItems": 5,
+            "items": { "type": "string", "pattern": "^(UC|FR|NFR)-[0-9]{2}$" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,385 @@
+# ai-review: review PR bằng AI theo thiết kế trong docs/ai-auto-review.md.
+# Hai job tách quyền:
+#   analyze  — chạy agent, CHỈ ĐỌC (contents: read, pull-requests: read), trả JSON theo schema.
+#   post     — KHÔNG chạy agent, KHÔNG có OAuth token; chạy script đăng kết quả (pull-requests: write).
+# Script, prompt và schema luôn lấy từ nhánh base (thư mục trusted/), không lấy từ PR.
+#
+# Trigger (tác giả PR không phải làm gì):
+#   - Tự chạy khi PR nhắm vào main được mở (opened), mở lại (reopened), chuyển từ draft sang ready (ready_for_review),
+#     hoặc có commit mới (synchronize).
+#   - Commit mới: chờ 3 phút để gom các lần push liền nhau (lần chạy cũ bị hủy nhờ `concurrency`), rồi bước precheck
+#     quyết định: bỏ qua (đã review commit này / đã đủ số lần tự động), vòng 2 (chỉ kiểm tra vấn đề cũ và phần mới),
+#     hay review toàn bộ (lần đầu, force-push/rebase, đổi chế độ hoặc prompt lớn).
+#   - Muốn chạy tiếp khi đã đủ số lần tự động hoặc muốn review lại: gắn label "ai-review" (gỡ rồi gắn lại nếu đã có),
+#     hoặc chạy tay (workflow_dispatch).
+#   - Bỏ qua PR draft, PR từ fork, PR của dependabot, và PR chỉ đụng .md / docs.
+# Workflow này thay thế claude-review.yml (đã gỡ).
+# Các điểm đánh dấu [cần kiểm chứng] chỉ xác nhận được bằng một lần chạy thật (nên chạy dry_run trước khi merge vào main,
+# vì trigger tự động có hiệu lực ngay trên mọi PR sau khi merge).
+
+name: AI Review
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, ready_for_review, synchronize, labeled]
+    # [cần kiểm chứng] với synchronize, GitHub lọc paths theo toàn bộ PR hay chỉ theo commit vừa push.
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Số PR cần review"
+        required: true
+      mode:
+        description: "A: chỉ diff | B: diff + repo | C: diff + repo + SRS"
+        type: choice
+        options: [C, B, A]
+        default: C
+      dry_run:
+        description: "Chỉ ghi kết quả ra artifact, không đăng lên PR"
+        type: boolean
+        default: true
+      force:
+        description: "Chạy lại dù đã có kết quả cho cùng commit/prompt/chế độ (và bỏ qua giới hạn số lần)"
+        type: boolean
+        default: false
+      max_turns:
+        description: "Số turn tối đa của agent (để trống = mặc định theo chế độ)"
+        required: false
+
+# Khóa theo PR: mọi lần chạy có GHI lên PR (tự động, label "ai-review", chạy tay với dry_run=false) dùng chung một nhóm,
+# lần mới hủy lần cũ đang chạy, để hai lần chạy không ghi đè trạng thái của nhau trong comment tổng kết.
+# Label khác thì có nhóm riêng (điều kiện concurrency được đánh giá trước `if` của job, nên thêm label khác
+# không được phép hủy run đang chạy). Chạy tay với dry_run=true không ghi gì nên mỗi lần có nhóm riêng
+# (chạy lặp để đo độ ổn định không hủy lẫn nhau).
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number || inputs.pr_number }}-${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && github.run_id || (github.event.action == 'labeled' && github.event.label.name != 'ai-review' && github.event.label.name) || 'pr' }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    # Bỏ qua: label khác ai-review, PR draft, PR từ fork (không có secret và code không tin cậy), PR do dependabot tạo.
+    # Dùng TÁC GIẢ PR (user.login), không dùng github.actor: với sự kiện labeled, actor là người gắn label.
+    # workflow_dispatch không đi qua điều kiện này nên tác giả được kiểm tra lại ở bước ctx và boot.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       (github.event.action != 'labeled' || github.event.label.name == 'ai-review') &&
+       github.event.pull_request.draft == false &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.user.login != 'dependabot[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      pr: ${{ steps.ctx.outputs.pr }}
+      head_sha: ${{ steps.ctx.outputs.head_sha }}
+      mode: ${{ steps.prep.outputs.mode }}
+      prompt_version: ${{ steps.prep.outputs.prompt_version }}
+      run: ${{ steps.pre.outputs.run }}
+      runs: ${{ steps.pre.outputs.runs }}
+      round: ${{ steps.pre.outputs.round }}
+      base_sha: ${{ steps.pre.outputs.base_sha }}
+    steps:
+      - name: Xác định PR
+        id: ctx
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          PR_FROM_EVENT: ${{ github.event.pull_request.number }}
+          PR_INPUT: ${{ inputs.pr_number }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          REF: ${{ github.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          # Chạy tay dùng script/prompt từ chính ref được chọn (để thử prompt mới), nên việc ĐĂNG THẬT lên PR chỉ được phép
+          # từ nhánh mặc định; từ nhánh khác chỉ được dry_run.
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN" != "true" ] && [ "$REF" != "refs/heads/${DEFAULT_BRANCH}" ]; then
+            echo "Chạy thật (dry_run=false) chỉ được phép từ nhánh mặc định (${DEFAULT_BRANCH}); đang chạy từ ${REF}."; exit 1
+          fi
+          pr="${PR_FROM_EVENT:-$PR_INPUT}"
+          [[ "$pr" =~ ^[0-9]+$ ]] || { echo "pr_number không hợp lệ"; exit 1; }
+          json=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${pr}")
+          state=$(jq -r '.state' <<<"$json")
+          head_sha=$(jq -r '.head.sha' <<<"$json")
+          same_repo=$(jq -r --arg r "$GITHUB_REPOSITORY" '(.head.repo.full_name // "") == $r' <<<"$json")
+          [[ "$head_sha" =~ ^[0-9a-f]{40}$ ]] || { echo "Không lấy được SHA của PR"; exit 1; }
+          [ "$same_repo" = "true" ] || { echo "Bỏ qua PR từ fork hoặc repo đã xóa."; exit 1; }
+          # PR đã đóng/merge chỉ được chạy ở chế độ dry_run (backtest), không đăng lên PR cũ.
+          if [ "$state" != "open" ] && [ "$DRY_RUN" != "true" ]; then
+            echo "PR không còn mở: chỉ được chạy với dry_run=true."; exit 1
+          fi
+          # Mô tả PR là dữ liệu không tin cậy: chỉ ghi ra file, sau đó extract-uc.mjs chỉ lấy các mã UC-nn hợp lệ.
+          jq -r '.body // ""' <<<"$json" > "${RUNNER_TEMP}/pr-body.txt"
+          if [ "$EVENT" = "pull_request" ]; then ref="refs/pull/${pr}/merge"; else ref="refs/pull/${pr}/head"; fi
+          # Tác giả PR (không phải người kích hoạt): PR của dependabot không có secret nên không review, kể cả khi chạy tay.
+          author=$(jq -r '.user.login // ""' <<<"$json")
+          author_ok=true
+          if [ "$author" = "dependabot[bot]" ]; then author_ok=false; fi
+          {
+            echo "pr=$pr"
+            echo "head_sha=$head_sha"
+            echo "checkout_ref=$ref"
+            echo "author_ok=$author_ok"
+          } >> "$GITHUB_OUTPUT"
+
+      # Script, prompt, schema luôn lấy từ nhánh base. Nếu nhánh base CHƯA có hệ thống này (ví dụ chính PR đầu tiên thêm nó
+      # vào main), bỏ qua nhẹ nhàng với một dòng giải thích thay vì báo lỗi đỏ. Kiểm tra bằng API nên không cần checkout.
+      - name: Kiểm tra nhánh base đã có hệ thống AI review chưa
+        id: boot
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          AUTHOR_OK: ${{ steps.ctx.outputs.author_ok }}
+        run: |
+          # GitHub chạy bước này bằng `bash -e`. Bước này CỐ Ý tắt -e: ta cần đọc mã lỗi của `gh api` để phân biệt 404
+          # với lỗi khác; nếu để -e, phép gán `err=$(gh ...)` lỗi sẽ thoát script ngay (chính là lỗi đã gặp ở PR đầu tiên).
+          set -u -o pipefail
+          set +e
+          ready=true
+          reason=""
+          if [ "$AUTHOR_OK" != "true" ]; then
+            ready=false
+            reason="PR do dependabot[bot] tạo (không có secret nên không review)."
+          else
+            for f in scripts/ai-review/precheck.mjs .github/ai-review/prompt.md .github/ai-review/review-result.schema.json; do
+              rc=0
+              err=$(gh api "repos/${GITHUB_REPOSITORY}/contents/${f}?ref=${BASE_REF}" 2>&1 > /dev/null) || rc=$?
+              if [ "$rc" -ne 0 ]; then
+                # Chỉ 404 mới nghĩa là file chưa có. Lỗi xác thực, giới hạn tốc độ hoặc lỗi dịch vụ phải làm job thất bại để chạy lại,
+                # không được hiểu nhầm thành "nhánh base chưa có hệ thống".
+                if grep -q "HTTP 404" <<<"$err"; then
+                  ready=false
+                  reason="nhánh base chưa có hệ thống AI review (thiếu script, prompt hoặc schema). Sau khi hệ thống được merge vào nhánh base thì các PR sau sẽ được review."
+                else
+                  echo "Không kiểm tra được ${f} (lỗi không phải 404): ${err}" >&2
+                  exit 1
+                fi
+              fi
+            done
+          fi
+          echo "ready=$ready" >> "$GITHUB_OUTPUT"
+          if [ "$ready" != "true" ]; then
+            echo "> **Bỏ qua:** ${reason}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # Gom các lần push liền nhau: chỉ commit cuối cùng của một chuỗi push được review. Lần chạy cũ bị `concurrency`
+      # hủy ngay khi có lần mới; kiểm tra SHA ở cuối là lưới an toàn nếu lần hủy xảy ra sát giờ.
+      - name: Chờ gom các lần push liền nhau (chỉ khi có commit mới)
+        id: wait
+        if: steps.boot.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ github.event.action }}
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR: ${{ steps.ctx.outputs.pr }}
+          DEBOUNCE_SECONDS: "180"
+        run: |
+          set -euo pipefail
+          superseded=false
+          if [ "$ACTION" = "synchronize" ]; then
+            sleep "$DEBOUNCE_SECONDS"
+            now=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR}" --jq .head.sha)
+            [ "$now" = "$EVENT_HEAD_SHA" ] || superseded=true
+          fi
+          echo "superseded=$superseded" >> "$GITHUB_OUTPUT"
+
+      - name: Ghi chú khi bị commit mới hơn thay thế
+        if: steps.wait.outputs.superseded == 'true'
+        run: |
+          echo "> **Bỏ qua:** PR đã có commit mới hơn trong lúc chờ; lần chạy của commit mới nhất sẽ review." >> "$GITHUB_STEP_SUMMARY"
+
+      # Mã của PR (để agent đọc ở chế độ B/C). Không giữ credential trong .git.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        if: steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'
+        with:
+          ref: ${{ steps.ctx.outputs.checkout_ref }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      # Script, prompt, schema, SRS: từ nhánh base (PR) hoặc từ ref đang chạy workflow (workflow_dispatch).
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        if: steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          path: trusted
+          fetch-depth: 1
+          persist-credentials: false
+
+      # Quyết định TRƯỚC khi tốn token: bỏ qua, vòng 2 hay review toàn bộ (xem scripts/ai-review/precheck.mjs).
+      # Vòng 2 ghi previous.json và incremental.diff vào ai-review-input/ để agent đọc.
+      - name: Quyết định bỏ qua / vòng 2 / review toàn bộ
+        id: pre
+        if: steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR: ${{ steps.ctx.outputs.pr }}
+          HEAD_SHA: ${{ steps.ctx.outputs.head_sha }}
+          MODE: ${{ inputs.mode || 'C' }}
+          TRIGGER: ${{ github.event_name == 'workflow_dispatch' && 'dispatch' || (github.event.action == 'labeled' && 'label') || 'auto' }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          args=(--pr "$PR" --repo "$GITHUB_REPOSITORY" --head-sha "$HEAD_SHA" --mode "$MODE" --trigger "$TRIGGER"
+                --prompt-file trusted/.github/ai-review/prompt.md --out-dir ai-review-input)
+          [ "$FORCE" = "true" ] && args+=(--force)
+          node trusted/scripts/ai-review/precheck.mjs "${args[@]}" | tee "${RUNNER_TEMP}/precheck.txt"
+
+      - name: Ghi quyết định vào job summary
+        if: always() && steps.pre.outcome != 'skipped'
+        env:
+          RUN: ${{ steps.pre.outputs.run }}
+          ROUND: ${{ steps.pre.outputs.round }}
+          RUNS: ${{ steps.pre.outputs.runs }}
+          REASON: ${{ steps.pre.outputs.reason }}
+        run: |
+          echo "### AI review: quyết định" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$RUN" = "true" ]; then
+            echo "- **Chạy** (vòng ${ROUND:-1}, đã chạy trước đó ${RUNS:-0} lần): ${REASON:-}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- **Bỏ qua:** ${REASON:-không rõ lý do}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # UC do tác giả PR khai báo trong mục "Liên quan UC/FR" (xem .github/PULL_REQUEST_TEMPLATE.md);
+      # chỉ giữ các mã có file docs/srs/UC-nn.md ở nhánh base.
+      - name: Xác định UC khai báo
+        id: uc
+        if: steps.pre.outputs.run == 'true'
+        run: |
+          node trusted/scripts/ai-review/extract-uc.mjs --body-file "${RUNNER_TEMP}/pr-body.txt" --srs-dir trusted/docs/srs
+
+      - name: Chuẩn bị prompt và đối số
+        id: prep
+        if: steps.pre.outputs.run == 'true'
+        env:
+          MODE: ${{ inputs.mode || 'C' }}
+          PR: ${{ steps.ctx.outputs.pr }}
+          MAX_TURNS: ${{ inputs.max_turns }}
+          UC: ${{ steps.uc.outputs.uc }}
+          ROUND: ${{ steps.pre.outputs.round }}
+          BASE_SHA: ${{ steps.pre.outputs.base_sha }}
+        run: |
+          node trusted/scripts/ai-review/prepare-run.mjs \
+            --mode "$MODE" --trusted trusted --repo "$GITHUB_REPOSITORY" --pr "$PR" --max-turns "$MAX_TURNS" --uc "$UC" \
+            --round "$ROUND" --base-sha "$BASE_SHA"
+
+      - name: Agent review (chỉ đọc)
+        id: claude
+        if: steps.pre.outputs.run == 'true'
+        uses: anthropics/claude-code-action@ed670b4cf9de2a5a570d130d2f6197b9e543cd64 # v1.0.240
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Ép dùng GITHUB_TOKEN của job (quyền đọc) thay vì token của Claude GitHub App. [cần kiểm chứng]
+          # Nếu action đòi id-token: write khi có github_token thì thêm quyền đó vào job analyze và ghi lại.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: ${{ steps.prep.outputs.prompt }}
+          claude_args: ${{ steps.prep.outputs.claude_args }}
+
+      - name: Lưu kết quả
+        if: steps.pre.outputs.run == 'true'
+        env:
+          RESULT: ${{ steps.claude.outputs.structured_output }}
+        run: |
+          set -euo pipefail
+          # Output của action nằm trong biến môi trường (giới hạn ~128KB/biến); kết quả thật thường nhỏ hơn nhiều.
+          [ -n "$RESULT" ] || { echo "Agent không trả structured_output (có thể hết lượt hoặc lỗi)."; exit 1; }
+          mkdir -p out
+          printf '%s' "$RESULT" > out/review.json
+          node -e 'JSON.parse(require("fs").readFileSync("out/review.json","utf8"))' \
+            || { echo "structured_output không phải JSON hợp lệ."; exit 1; }
+
+      - name: Tóm tắt turn và token
+        if: always() && steps.pre.outputs.run == 'true'
+        env:
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          MODE: ${{ steps.prep.outputs.mode }}
+          PROMPT_VERSION: ${{ steps.prep.outputs.prompt_version }}
+          UC: ${{ steps.uc.outputs.uc }}
+          UC_DECLARED: ${{ steps.uc.outputs.uc_declared }}
+          UC_UNKNOWN: ${{ steps.uc.outputs.uc_unknown }}
+          ROUND: ${{ steps.pre.outputs.round }}
+        run: |
+          mkdir -p out
+          {
+            node trusted/scripts/ai-review/usage-summary.mjs --file "${EXEC_FILE:-}" --mode "${MODE:-?}" --prompt-version "${PROMPT_VERSION:-?}"
+            echo "Vòng: ${ROUND:-1}"
+            # Tỷ lệ PR có khai báo UC: `gap` chỉ chạy khi có UC, nên cần ghi lại để diễn giải số liệu.
+            echo "UC khai báo: ${UC:-(không có)} · declared=${UC_DECLARED:-false}${UC_UNKNOWN:+ · mã không có trong SRS: $UC_UNKNOWN}"
+          } | tee out/usage.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always() && steps.pre.outputs.run == 'true'
+        with:
+          name: ai-review-${{ github.run_id }}
+          path: out/
+          retention-days: 14
+          if-no-files-found: warn
+
+  post:
+    needs: analyze
+    if: needs.analyze.result == 'success' && needs.analyze.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          path: trusted
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ai-review-${{ github.run_id }}
+          path: result
+
+      - name: Đăng kết quả lên PR
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR: ${{ needs.analyze.outputs.pr }}
+          ANALYZED_SHA: ${{ needs.analyze.outputs.head_sha }}
+          ROUND: ${{ needs.analyze.outputs.round }}
+          BASE_SHA: ${{ needs.analyze.outputs.base_sha }}
+          EXPECT_MODE: ${{ needs.analyze.outputs.mode }}
+          EXPECT_PROMPT: ${{ needs.analyze.outputs.prompt_version }}
+          EXPECT_RUNS: ${{ needs.analyze.outputs.runs }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          # Chế độ, version prompt và số lần chạy do job analyze quyết định; post từ chối kết quả không khớp hoặc khi
+          # trạng thái trong comment đã bị lần chạy khác thay đổi trong lúc phân tích.
+          args=(--result result/review.json --pr "$PR" --repo "$GITHUB_REPOSITORY" --analyzed-sha "$ANALYZED_SHA" --out result/plan.json
+                --expect-mode "$EXPECT_MODE" --expect-prompt "$EXPECT_PROMPT" --expect-runs "$EXPECT_RUNS")
+          # Vòng và mốc commit do bước precheck (code cố định) quyết định, không lấy từ kết quả của agent.
+          [ "$ROUND" = "2" ] && args+=(--round 2 --base-sha "$BASE_SHA")
+          [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
+          [ "$FORCE" = "true" ] && args+=(--force)
+          node trusted/scripts/ai-review/post.mjs "${args[@]}" | tee result/post-result.json
+          {
+            # Chạy lại cùng commit/prompt/chế độ bị bỏ qua; nói rõ để người gắn lại label không tưởng là hệ thống hỏng.
+            if grep -q '"skipped":true' result/post-result.json; then
+              echo "> **Bỏ qua:** đã có kết quả AI review cho commit này (cùng prompt và chế độ). Dùng workflow_dispatch với force để ép chạy lại."
+              echo ""
+            fi
+            echo "### AI review: kết quả đăng"
+            echo '```json'
+            cat result/post-result.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: ai-review-post-${{ github.run_id }}
+          path: result/
+          retention-days: 14
+          if-no-files-found: warn
