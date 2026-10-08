@@ -222,3 +222,88 @@ test("job post truyền chế độ, version prompt và số lần chạy do job
   assert.match(analyze, /runs: \$\{\{ steps\.pre\.outputs\.runs \}\}/);
   assert.match(post, /EXPECT_RUNS: \$\{\{ needs\.analyze\.outputs\.runs \}\}/);
 });
+
+// ---- Chạy THẬT đoạn lệnh của bước boot bằng bash -e (giống GitHub), với hàm gh giả ----
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, readFileSync as readFile, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+// Thăm dò bash thật sự chạy được một file script với đường dẫn kiểu C:/... (trên Windows, `bash` trong PATH có thể là WSL
+// không hiểu đường dẫn này). Không dùng được thì bỏ qua các test chạy thật thay vì báo lỗi oan.
+const hasBash = (() => {
+  try {
+    const dir = mkdtempSync(join(tmpdir(), "probe-"));
+    const probe = join(dir, "probe.sh");
+    writeFileSync(probe, "echo ok\n");
+    const r = spawnSync("bash", ["-e", probe.replace(/\\/g, "/")], { encoding: "utf8" });
+    return r.status === 0 && r.stdout.trim() === "ok";
+  } catch {
+    return false;
+  }
+})();
+
+/** Lấy nội dung khối `run: |` đầu tiên sau dòng `id: <id>` và bỏ phần thụt lề chung. */
+function stepScript(id) {
+  const start = lines.findIndex((l) => l.trim() === `id: ${id}`);
+  assert.ok(start >= 0, `không thấy step ${id}`);
+  const r = lines.findIndex((l, i) => i > start && /^\s*run: \|\s*$/.test(l));
+  const indent = /^(\s*)/.exec(lines[r])[1].length;
+  const body = [];
+  for (let j = r + 1; j < lines.length && (lines[j].trim() === "" || lines[j].search(/\S/) > indent); j++) body.push(lines[j]);
+  const strip = Math.min(...body.filter((l) => l.trim()).map((l) => l.search(/\S/)));
+  return body.map((l) => l.slice(strip)).join("\n");
+}
+
+function runBoot({ gh, authorOk = "true" }) {
+  const dir = mkdtempSync(join(tmpdir(), "boot-"));
+  const out = join(dir, "output").replace(/\\/g, "/");
+  const summary = join(dir, "summary").replace(/\\/g, "/");
+  writeFileSync(out, "");
+  writeFileSync(summary, "");
+  const script = join(dir, "boot.sh");
+  writeFileSync(script, `${gh}\n${stepScript("boot")}\n`);
+  // Giống GitHub: bash -e, các biến môi trường do workflow truyền vào
+  const r = spawnSync("bash", ["-e", script.replace(/\\/g, "/")], {
+    encoding: "utf8",
+    env: { ...process.env, GITHUB_REPOSITORY: "acme/app", BASE_REF: "a".repeat(40), AUTHOR_OK: authorOk, GITHUB_OUTPUT: out, GITHUB_STEP_SUMMARY: summary, GH_TOKEN: "x" },
+  });
+  return { status: r.status, stderr: r.stderr, output: readFile(out, "utf8"), summary: readFile(summary, "utf8") };
+}
+
+const skipBash = { skip: hasBash ? false : "không có bash" };
+const GH_404 = 'gh() { echo "gh: Not Found (HTTP 404)" >&2; return 1; }';
+const GH_500 = 'gh() { echo "gh: Server Error (HTTP 500)" >&2; return 1; }';
+const GH_403 = 'gh() { echo "gh: API rate limit exceeded (HTTP 403)" >&2; return 1; }';
+const GH_OK = "gh() { echo '{}'; return 0; }";
+
+test("boot chạy thật: 404 (nhánh base chưa có hệ thống) thì job THÀNH CÔNG, ready=false và có lời giải thích", skipBash, () => {
+  const r = runBoot({ gh: GH_404 });
+  assert.equal(r.status, 0, `phải thành công dù bash -e; stderr: ${r.stderr}`);
+  assert.match(r.output, /ready=false/);
+  assert.match(r.summary, /Bỏ qua:\*\* nhánh base chưa có hệ thống AI review/);
+});
+
+test("boot chạy thật: lỗi khác 404 (5xx, hết giới hạn tốc độ) thì job THẤT BẠI với thông báo, không bị hiểu nhầm là thiếu file", skipBash, () => {
+  for (const gh of [GH_500, GH_403]) {
+    const r = runBoot({ gh });
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /lỗi không phải 404/);
+    assert.doesNotMatch(r.output, /ready=false/);
+  }
+});
+
+test("boot chạy thật: đủ ba file ở nhánh base thì ready=true và không ghi lời bỏ qua", skipBash, () => {
+  const r = runBoot({ gh: GH_OK });
+  assert.equal(r.status, 0);
+  assert.match(r.output, /ready=true/);
+  assert.equal(r.summary, "");
+});
+
+test("boot chạy thật: PR của dependabot thì bỏ qua ngay mà không gọi API", skipBash, () => {
+  const r = runBoot({ gh: 'gh() { echo "KHÔNG ĐƯỢC GỌI" >&2; return 99; }', authorOk: "false" });
+  assert.equal(r.status, 0);
+  assert.match(r.output, /ready=false/);
+  assert.match(r.summary, /dependabot/);
+  assert.doesNotMatch(r.stderr, /KHÔNG ĐƯỢC GỌI/);
+});

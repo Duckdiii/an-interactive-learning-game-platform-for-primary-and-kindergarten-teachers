@@ -137,7 +137,10 @@ jobs:
           BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
           AUTHOR_OK: ${{ steps.ctx.outputs.author_ok }}
         run: |
-          set -uo pipefail
+          # GitHub chạy bước này bằng `bash -e`. Bước này CỐ Ý tắt -e: ta cần đọc mã lỗi của `gh api` để phân biệt 404
+          # với lỗi khác; nếu để -e, phép gán `err=$(gh ...)` lỗi sẽ thoát script ngay (chính là lỗi đã gặp ở PR đầu tiên).
+          set -u -o pipefail
+          set +e
           ready=true
           reason=""
           if [ "$AUTHOR_OK" != "true" ]; then
@@ -145,7 +148,8 @@ jobs:
             reason="PR do dependabot[bot] tạo (không có secret nên không review)."
           else
             for f in scripts/ai-review/precheck.mjs .github/ai-review/prompt.md .github/ai-review/review-result.schema.json; do
-              err=$(gh api "repos/${GITHUB_REPOSITORY}/contents/${f}?ref=${BASE_REF}" 2>&1 > /dev/null); rc=$?
+              rc=0
+              err=$(gh api "repos/${GITHUB_REPOSITORY}/contents/${f}?ref=${BASE_REF}" 2>&1 > /dev/null) || rc=$?
               if [ "$rc" -ne 0 ]; then
                 # Chỉ 404 mới nghĩa là file chưa có. Lỗi xác thực, giới hạn tốc độ hoặc lỗi dịch vụ phải làm job thất bại để chạy lại,
                 # không được hiểu nhầm thành "nhánh base chưa có hệ thống".

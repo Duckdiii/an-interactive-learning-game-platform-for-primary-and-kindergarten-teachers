@@ -1,10 +1,12 @@
 # Hệ thống Auto Review Code bằng AI
 
-> **Phiên bản tài liệu:** 4.5 (sửa theo nhận xét của CodeRabbit trên PR đầu tiên) · **Cập nhật:** 2026-10-08 · **Nhánh:** `duy/ai-auto-review`
+> **Phiên bản tài liệu:** 4.6 (sửa lỗi bước `boot` gặp ở lần chạy thật đầu tiên) · **Cập nhật:** 2026-10-08 · **Nhánh:** `duy/ai-auto-review`
 >
-> **Trạng thái:** phần code, prompt, schema, template và test đã viết xong (**199 test đạt**, khoảng 3.100 dòng script và test). **Workflow chưa được chạy trên GitHub thật** và chưa có review độc lập cho `post.mjs`, `precheck.mjs` và workflow. Các điểm chưa kiểm chứng được đánh dấu **[cần kiểm chứng]**; xem mục 12.
+> **Trạng thái:** phần code, prompt, schema, template và test đã viết xong (**203 test đạt**, khoảng 3.200 dòng script và test). **Workflow mới được chạy trên GitHub thật một lần** (PR đầu tiên) và lộ ra một lỗi ở bước `boot` (đã sửa, xem dưới); các điểm còn lại chưa kiểm chứng được đánh dấu **[cần kiểm chứng]**; xem mục 12. Chưa có review độc lập cho `post.mjs`, `precheck.mjs` và workflow.
 >
 > **Cách đọc:** muốn hiểu nhanh thì đọc mục 1-3 và mục 12. Muốn cài hoặc sửa thì đọc mục 4-9. Muốn làm thực nghiệm cho đề tài thì đọc mục 10-11. Mục 16 giải thích các thuật ngữ.
+>
+> **Thay đổi ở bản 4.6 so với 4.5:** lần chạy thật đầu tiên (PR đưa hệ thống vào `main`) làm job `analyze` **đỏ** ở bước `boot`, đúng ca bước này sinh ra để xử lý. Nguyên nhân: GitHub chạy `run` bằng `bash -e`, và phép gán `err=$(gh api …)` trả mã lỗi khi file chưa có (404) nên script thoát ngay, trước khi kịp phân biệt 404. Đã sửa (`set +e` và `|| rc=$?`). Bài học: test chỉ so khớp chữ không bắt được lỗi này, nên đã thêm test **chạy thật** đoạn lệnh của bước `boot` bằng `bash -e` với hàm `gh` giả (bốn ca: 404, 5xx, đủ file, dependabot).
 >
 > **Thay đổi ở bản 4.5 so với 4.4** (CodeRabbit review PR đầu tiên, đã đối chiếu từng nhận xét với code):
 >
@@ -429,7 +431,7 @@ File `.github/workflows/ai-review.yml`.
 - **Thời gian tối đa:** `analyze` 30 phút (đã tính 3 phút chờ gom push), `post` 10 phút.
 - **Chờ gom push (`synchronize`):** job ngủ 180 giây rồi hỏi lại GitHub; nếu SHA đầu PR đã đổi thì dừng. Lần chạy cũ còn bị `concurrency` hủy ngay khi có lần mới, nên thực tế chỉ commit cuối của một chuỗi push được review. Bước ngủ không tốn token.
 - **`precheck.mjs`:** chạy sau hai bước checkout (cần script ở `trusted/`) và trước mọi bước tốn token; kết quả (`run`, `round`, `base_sha`, `runs`, `reason`) đi vào job summary và vào các bước sau. Vòng và mốc commit do bước này quyết định; job `post` nhận từ đây chứ không lấy từ kết quả của agent.
-- **`boot`:** bước đầu tiên sau khi xác định PR; bỏ qua nhẹ nhàng (job vẫn thành công, có dòng giải thích trong job summary) khi PR do dependabot tạo, hoặc khi API GitHub trả **404** cho một trong `scripts/ai-review/precheck.mjs`, `.github/ai-review/prompt.md`, `.github/ai-review/review-result.schema.json` ở nhánh base (hoặc ref chạy workflow). Lỗi khác 404 (xác thực, giới hạn tốc độ, 5xx) làm job thất bại để chạy lại. Khi bỏ qua, bước chờ, hai checkout và `precheck` đều không chạy.
+- **`boot`:** bước đầu tiên sau khi xác định PR; bỏ qua nhẹ nhàng (job vẫn thành công, có dòng giải thích trong job summary) khi PR do dependabot tạo, hoặc khi API GitHub trả **404** cho một trong `scripts/ai-review/precheck.mjs`, `.github/ai-review/prompt.md`, `.github/ai-review/review-result.schema.json` ở nhánh base (hoặc ref chạy workflow). Lỗi khác 404 (xác thực, giới hạn tốc độ, 5xx) làm job thất bại để chạy lại. Khi bỏ qua, bước chờ, hai checkout và `precheck` đều không chạy. Bước này **cố ý tắt `bash -e`** (GitHub bật `-e` mặc định) để đọc được mã lỗi của `gh api`; có test chạy thật đoạn lệnh này.
 - **`ai-review-input/`:** thư mục trong workspace của PR do `precheck.mjs` ghi ở vòng 2 để agent đọc bằng `Read`.
 - **Artifact:** kết quả JSON, `usage.md`, `plan.json`, giữ 14 ngày. Không upload file execution của agent (có thể chứa nội dung file).
 - **Job summary:** turn, token, thời gian, cảnh báo lẫn chế độ, UC khai báo, kết quả đăng.
@@ -480,7 +482,7 @@ Các file **chưa tạo** (đã dự kiến): `scripts/ai-review/stats.mjs` (th�
 | `extract-srs.mjs` | Tách SRS thành từng UC, NFR, bảng FR↔UC | `extract-srs.test.mjs` |
 | (kiểm tra workflow) | Các bất biến bảo mật của `ai-review.yml` | `workflow.test.mjs` |
 
-Tổng cộng khoảng 3.100 dòng (cả test) và **199 test**, chạy bằng:
+Tổng cộng khoảng 3.200 dòng (cả test) và **203 test**, chạy bằng:
 
 ```bash
 node --test scripts/ai-review/
