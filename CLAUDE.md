@@ -116,7 +116,7 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 
 ## Subagent (`.claude/agents/`)
 
-Phiên chính điều phối, giao việc kiểm tra cho subagent chỉ đọc (không có `Edit`/`Write`, nên chạy song song được). Subagent không thấy hội thoại, nên **không giao** việc ghi `ai-usage-log.md`, quyết định thiết kế hay việc nhỏ.
+Phiên chính điều phối: lập kế hoạch, quyết định thiết kế, ghi `ai-usage-log.md`, duyệt kết quả cuối. Việc kiểm tra giao cho subagent chỉ đọc (không có `Edit`/`Write`, nên chạy song song được); việc cài đặt giao cho agent thực thi (xem dưới). Subagent không thấy hội thoại, nên **không giao** việc ghi `ai-usage-log.md`, quyết định thiết kế hay việc nhỏ.
 
 Tự chạy (chỉ đọc, rẻ):
 - `test-verifier`: chạy `tsc`/lint/test/build (frontend), `./mvnw test` (backend) và báo kết quả gọn.
@@ -132,6 +132,22 @@ Chỉ chạy khi người dùng yêu cầu rõ (tốn usage):
 - `canvas-ux-checker`: mở sandbox trên trình duyệt, đo touch target 64px sau co giãn, đè khối, phản hồi, nút nghe lại.
 - `mutation-checker`: chèn lỗi vào module trong worktree riêng để chứng minh test bắt được lỗi.
 
+Agent khảo sát/lập kế hoạch (chỉ đọc, chạy ở bước khảo sát trước khi lập kế hoạch để phiên chính khỏi tự đọc nhiều file):
+- `codebase-explorer`: trả lời "chức năng X nằm ở đâu, chạy thế nào" kèm `file:dòng`, phân biệt phần đã cài với khung/TODO/planned.
+- `impact-analyzer`: cho một thay đổi dự định, liệt kê mọi nơi bị ảnh hưởng (DSL 4 nơi, openapi, test, renderer, migration), thứ tự làm và agent kiểm tra nên chạy sau.
+- `ai-prompt-evaluator`: đánh giá pipeline sinh game bằng AI hoàn toàn offline (fixture, test có mock), tuyệt đối không gọi API thật; chạy khi đổi prompt, schema đầu ra của AI hoặc `GameGenerationService`.
+
+Agent tài liệu và bảo mật:
+- `doc-syncer`: có quyền ghi nhưng chỉ file tài liệu, chạy trong worktree riêng, không commit; tự sửa `x-status` và mô tả đã lỗi thời, KHÔNG tự đổi contract đã freeze (chỗ code khác spec thì báo để phiên chính hỏi user).
+- `security-auditor`: chỉ đọc, rà soát bảo mật sâu (xác thực, phân quyền theo chủ sở hữu, CORS, WebSocket, dữ liệu trẻ em, kiểm duyệt AI, lạm dụng chi phí AI); không gọi mạng; chạy khi đổi code liên quan bảo mật và trước khi triển khai, bổ sung chứ không thay `pre-commit-checker`.
+
+Agent thực thi (có quyền ghi, luôn chạy trong worktree riêng, không commit; chỉ giao khi phiên chính đã có kế hoạch và viết được bản giao việc tự chứa):
+- `backend-implementer`: cài đặt code backend theo bản giao việc, tự build và chạy test lớp của mình.
+- `frontend-implementer`: cài đặt code frontend/renderer theo bản giao việc, tự `tsc`/lint/test/build.
+- `test-writer`: chỉ thêm/sửa file test (ví dụ lấp mutant sống sót), không sửa code nguồn.
+
+Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/class, ràng buộc (kiến trúc, contract, không thêm dependency), tiêu chí xong, lệnh kiểm chứng. Không giao việc nhỏ (tự làm rẻ hơn) hay quyết định thiết kế. Không giao hai agent thực thi sửa cùng file; nếu bắt buộc thì chạy tuần tự. Phiên chính phải xem diff trong worktree của agent, chạy agent kiểm tra theo bảng định tuyến rồi mới đưa thay đổi vào cây chính.
+
 ### Bảng định tuyến (thay đổi đụng tới → agent chạy)
 
 | Thay đổi đụng tới | Chạy |
@@ -141,6 +157,14 @@ Chỉ chạy khi người dùng yêu cầu rõ (tốn usage):
 | `backend/**/*.java` | `backend-architect-reviewer` + `test-verifier` |
 | `frontend/src/**` | `reviewer` + `test-verifier` |
 | `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | thêm `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |
+| Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
+| Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch và bản giao việc |
+| `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
+| Code đã xong, tài liệu có thể lỗi thời (`x-status`, mô tả, bảng agent) | `doc-syncer`, sau đó `contract-guardian` |
+| `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` |
+| Cần cài đặt backend theo kế hoạch đã chốt | `backend-implementer`, sau đó như hàng `backend/**/*.java` |
+| Cần cài đặt frontend theo kế hoạch đã chốt | `frontend-implementer`, sau đó như hàng `frontend/src/**` |
+| Mutant sống sót hoặc module thiếu test | `test-writer`, sau đó `mutation-checker` nếu người dùng yêu cầu |
 | `ai-usage-log.md` | `log-auditor` |
 | PR đã có review của bot/người | `pr-triage` |
 | Mọi commit | `pre-commit-checker` (sau cùng) |
