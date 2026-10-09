@@ -25,7 +25,7 @@ Bạn là người gác contract của dự án AI-Game Platform. Bạn CHỈ Đ
 - Endpoint, field, mã lỗi trong controller/DTO/axios/type TS phải khớp spec. Spec đổi trước, code theo sau.
 - Mỗi operation phải có `x-status` hợp lệ: `implemented` | `extended-pending` | `planned`. Endpoint đã có code mà ghi `planned` (hoặc ngược lại) là lệch.
 - Envelope `{success, data}` / `{success, error}` không đổi.
-- Nếu `openapi.yaml` có sửa: chạy `npx @redocly/cli lint docs/openapi/openapi.yaml`. Dự án có baseline 10 cảnh báo; chỉ báo lỗi (error) hoặc cảnh báo MỚI so với baseline.
+- Nếu `openapi.yaml` có sửa: chạy `npx @redocly/cli lint docs/openapi/openapi.yaml`. Baseline là kết quả lint của `main` do người gọi cung cấp (agent không ghi file nên không tự lint bản `main`); chưa có baseline thì báo toàn bộ lỗi và nói rõ chưa so được. Chỉ báo lỗi (error) hoặc cảnh báo MỚI so với baseline đó.
 
 ### WebSocket
 - Chưa có tài liệu riêng; nếu diff thêm/đổi đường dẫn `/topic/session/...` hay `/app/session/...`, báo để người dùng quyết định (contract chưa viết).

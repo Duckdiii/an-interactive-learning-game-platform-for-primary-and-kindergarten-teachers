@@ -25,6 +25,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 - Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
 - Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
 - Dùng Lombok cho entity/DTO thay vì viết getter/setter tay.
+- Test Spring: backend dùng Spring Boot 4.x nên mock bean bằng `@MockitoBean` (`org.springframework.test.context.bean.override.mockito`), không dùng `@MockBean`. Bỏ qua mẫu Spring Boot 3.x trong skill `spring-boot-engineer`.
 - Kiểm duyệt an toàn (Layer 3): mặc định `app.moderation.required=true`, thiếu `OPENAI_API_KEY` thì app không khởi động. Chỉ đặt `MODERATION_REQUIRED=false` (trong `.env` cá nhân) khi chạy thử ở máy mình, khi đó chỉ dùng danh sách từ cấm; môi trường triển khai thật phải có `OPENAI_API_KEY` và không được đặt cờ này. Trong `.env.example` để trống `OPENAI_API_KEY`, không điền giá trị mẫu (giá trị mẫu bị coi là key thật và làm mọi lần sinh game lỗi).
 
 ## Frontend (`frontend/`)
