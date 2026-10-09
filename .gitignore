@@ -48,3 +48,7 @@ logs/
 # Thư mục kết quả / artifact khi chạy thử tay
 /out/
 /result/
+
+# Cấu hình Claude Code riêng của máy và nhật ký dùng tool
+/.claude/settings.local.json
+/.claude/tool-usage.log
