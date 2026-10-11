@@ -12,6 +12,8 @@ spring:
     hikari:
       # Supabase free tier caps concurrent connections, keep the pool small.
       maximum-pool-size: 5
+      # Supabase installs pgvector in the extensions schema; LangChain4j needs it on the search path.
+      connection-init-sql: SET search_path TO public, extensions
 
   jpa:
     hibernate:
@@ -71,3 +73,9 @@ app:
     gemini:
       api-key: ${GEMINI_API_KEY:}
       model: ${GEMINI_MODEL:}
+      game-generation:
+        enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
+  curriculum-rag:
+    enabled: ${CURRICULUM_RAG_ENABLED:false}
+    embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
+    min-score: ${CURRICULUM_RAG_MIN_SCORE:0.855}

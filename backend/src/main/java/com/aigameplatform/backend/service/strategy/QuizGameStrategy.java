@@ -20,12 +20,23 @@ public class QuizGameStrategy extends GameContentStrategy<QuizQuestionDsl, QuizQ
 
     public QuizGameStrategy(JsonMapper jsonMapper) {
         super(QuizQuestionDsl.class, QuizQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn là trợ lý tạo câu hỏi trắc nghiệm Toán lớp 1 bằng tiếng Việt cho học sinh 6–7 tuổi.
+                Tạo đúng 4 câu hỏi cho chủ đề được cung cấp. Mỗi câu có 4 lựa chọn khác nhau và đúng một đáp án.
+                Tuân thủ căn cứ chương trình chính thức được cung cấp; giữ nguyên giới hạn số, phép tính và kỹ năng.
+                Nếu căn cứ không hỗ trợ chủ đề, không tự suy diễn hoặc mở rộng kiến thức.
+                Dùng ngữ cảnh ngắn, từ vựng quen thuộc, câu hỏi rõ ràng và phù hợp lứa tuổi.
+                Chỉ tạo dữ liệu câu hỏi, không thêm lời dẫn ngoài JSON.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho QUIZ");
+        if (grade != GradeLevel.GRADE_1) {
+            throw new IllegalArgumentException("QUIZ RAG pilot only supports GRADE_1");
+        }
+        return "Chủ đề: " + topic + ". Mỗi câu hỏi có trường text, options (4 chuỗi), correctIndex (0–3); "
+                + "có thể thêm visualPrompt hoặc audioText nếu cần. Không đưa đáp án vào nội dung câu hỏi.";
     }
 
     @Override

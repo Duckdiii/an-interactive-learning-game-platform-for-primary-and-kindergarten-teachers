@@ -4,7 +4,12 @@ import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.ai.AiGameOutput;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.exception.AiGenerationTimeoutException;
+import com.aigameplatform.backend.exception.CurriculumEvidenceNotFoundException;
+import com.aigameplatform.backend.exception.CurriculumServiceUnavailableException;
 import com.aigameplatform.backend.exception.UnsafeContentException;
+import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.service.curriculum.CurriculumContextProvider;
 import com.aigameplatform.backend.service.factory.GameDslFactoryRegistry;
 import com.aigameplatform.backend.service.factory.GameDslRequest;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
@@ -39,6 +44,8 @@ public class GameGenerationService {
     private final GameDslFactoryRegistry factories;
     private final GameValidationService validationService;
     private final JsonMapper jsonMapper;
+    private final ObjectProvider<CurriculumContextProvider> curriculumProvider;
+    private final boolean curriculumRagEnabled;
     private final int maxRetries;
 
     // ObjectProvider để ứng dụng vẫn khởi động khi chưa có bản cài đặt cổng AI; thiếu thì báo lúc gọi.
@@ -49,6 +56,8 @@ public class GameGenerationService {
             GameDslFactoryRegistry factories,
             GameValidationService validationService,
             JsonMapper jsonMapper,
+            ObjectProvider<CurriculumContextProvider> curriculumProvider,
+            @Value("${app.curriculum-rag.enabled:false}") boolean curriculumRagEnabled,
             @Value("${app.generation.max-retries:2}") int maxRetries) {
         if (maxRetries < 0) {
             throw new IllegalArgumentException("app.generation.max-retries không được âm");
@@ -59,6 +68,8 @@ public class GameGenerationService {
         this.factories = factories;
         this.validationService = validationService;
         this.jsonMapper = jsonMapper;
+        this.curriculumProvider = curriculumProvider;
+        this.curriculumRagEnabled = curriculumRagEnabled;
         this.maxRetries = maxRetries;
     }
 
@@ -68,6 +79,7 @@ public class GameGenerationService {
      * @throws AiGenerationTimeoutException nếu AI hoặc kiểm duyệt không dùng được, hoặc hết số lần thử
      */
     public GameDsl generate(GameType type, GameDslRequest request) {
+        String curriculumContext = curriculumRagEnabled ? retrieveCurriculumContext(type, request) : null;
         GameContentGenerator generator = generatorProvider.getIfAvailable();
         if (generator == null) {
             throw new AiGenerationTimeoutException("Chưa cấu hình dịch vụ AI để sinh game");
@@ -78,7 +90,7 @@ public class GameGenerationService {
         List<ValidationError> previousErrors = List.of();
         for (int attemptNumber = 1; attemptNumber <= maxRetries + 1; attemptNumber++) {
             String raw = callAi(generator, new GenerationAttempt(type, request.topic(), request.subject(),
-                    request.gradeLevel(), schema, attemptNumber, previousOutput, previousErrors));
+                    request.gradeLevel(), schema, curriculumContext, attemptNumber, previousOutput, previousErrors));
 
             AiOutputReport aiReport = aiOutputValidator.validate(type, raw);
             List<ValidationError> errors;
@@ -105,6 +117,32 @@ public class GameGenerationService {
             previousErrors = errors.stream().limit(MAX_FEEDBACK_ERRORS).toList();
         }
         throw new AiGenerationTimeoutException("AI chưa sinh được game hợp lệ sau " + (maxRetries + 1) + " lần thử");
+    }
+
+    private String retrieveCurriculumContext(GameType type, GameDslRequest request) {
+        if (type != GameType.QUIZ || request.subject() != Subject.MATH || request.gradeLevel() != GradeLevel.GRADE_1) {
+            throw new CurriculumEvidenceNotFoundException(
+                    "Curriculum RAG pilot currently supports QUIZ / Mathematics Grade 1 only");
+        }
+        CurriculumContextProvider provider = curriculumProvider.getIfAvailable();
+        if (provider == null) {
+            throw new CurriculumServiceUnavailableException("Curriculum retrieval is enabled but not configured", null);
+        }
+        try {
+            CurriculumContextProvider.Evidence evidence = provider.retrieve(
+                    request.topic(), request.subject(), request.gradeLevel());
+            if (evidence == null || !evidence.sufficient()) {
+                throw new CurriculumEvidenceNotFoundException(
+                        "Không tìm thấy yêu cầu cần đạt đủ liên quan trong chương trình Toán lớp 1 cho chủ đề này");
+            }
+            return evidence.context();
+        } catch (CurriculumEvidenceNotFoundException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            log.error("Curriculum retrieval failed: {}", exception.getMessage());
+            throw new CurriculumServiceUnavailableException(
+                    "Không truy xuất được căn cứ chương trình; vui lòng thử lại sau", exception);
+        }
     }
 
     private String callAi(GameContentGenerator generator, GenerationAttempt attempt) {
