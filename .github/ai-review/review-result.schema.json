@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "AI review result",
   "description": "Kết quả một lần review PR. Dùng cho --json-schema của claude-code-action và để script post kiểm tra lại. Chỉ dùng các từ khóa mà scripts/ai-review/schema-validate.mjs hỗ trợ.",
   "type": "object",
