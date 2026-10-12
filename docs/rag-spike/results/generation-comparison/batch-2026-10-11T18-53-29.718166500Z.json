@@ -1,0 +1,90 @@
+{
+  "MATCHING" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "QUIZ" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "MEMORY_CARD" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "DRAG_DROP" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "ORDERING" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "WORD_SCRAMBLE" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "ODD_ONE_OUT" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "VISUAL_CLOZE" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "AUDIO_VISUAL_MATCH" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "SPOT_THE_TARGET" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "IllegalStateException",
+    "failureReason" : "RETRIEVAL_RETURNED_NO_EVIDENCE_AT_CONFIGURED_MIN_SCORE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "runAtUtc" : "2026-10-11T18:53:29.717186300Z",
+  "scope" : {
+    "subject" : "MATH",
+    "gradeLevel" : "GRADE_1"
+  },
+  "topic" : "Phép c?ng nh?m trong ph?m vi 10",
+  "model" : "gemini-3.5-flash-lite",
+  "retrievalMinScore" : 0.855
+}

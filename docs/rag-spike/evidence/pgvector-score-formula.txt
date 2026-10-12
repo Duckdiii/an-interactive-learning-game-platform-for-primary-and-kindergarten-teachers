@@ -1,0 +1,9 @@
+LangChain4j PgVector score calculation — local dependency audit
+
+Dependency: dev.langchain4j:langchain4j-pgvector:1.20.1-beta30
+Class: dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore
+
+Decompiled string constant:        93: ldc_w         #449                // String SELECT (2 - (embedding <=> \'%s\')) / 2 AS score, embedding_id, embedding, text, %s FROM %s WHERE round(cast(float8 (embedding <=> \'%s\') as numeric), 8) <= round(2 - 2 * %s, 8) %s ORDER BY embedding <=> \'%s\' LIMIT %s;
+For pgvector cosine distance d = 1 - cosine_similarity, the score expression (2 - d) / 2 equals (1 + cosine_similarity) / 2. The corresponding minimum-score SQL compares rounded cosine distance to 2 - 2 * minScore.
+
+This records implementation semantics for the pinned local dependency version; it is not an official LangChain4j documentation statement.

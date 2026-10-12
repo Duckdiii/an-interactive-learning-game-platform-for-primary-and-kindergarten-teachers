@@ -1,0 +1,84 @@
+{
+  "MATCHING" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "failureReason" : "UNCLASSIFIED_RUNTIME_FAILURE",
+    "failureClass" : "InvalidRequestException"
+  },
+  "QUIZ" : {
+    "answerCorrectness" : "NOT_REVIEWED",
+    "withoutRagSchemaValid" : true,
+    "status" : "PAIRED_OUTPUTS_CAPTURED_MANUAL_SCORING_REQUIRED",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "withRagSchemaValid" : true
+  },
+  "MEMORY_CARD" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "failureReason" : "UNCLASSIFIED_RUNTIME_FAILURE",
+    "failureClass" : "InvalidRequestException"
+  },
+  "DRAG_DROP" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "failureReason" : "UNCLASSIFIED_RUNTIME_FAILURE",
+    "failureClass" : "InvalidRequestException"
+  },
+  "ORDERING" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "failureReason" : "UNCLASSIFIED_RUNTIME_FAILURE",
+    "failureClass" : "InvalidRequestException"
+  },
+  "WORD_SCRAMBLE" : {
+    "answerCorrectness" : "NOT_REVIEWED",
+    "withoutRagSchemaValid" : true,
+    "status" : "PAIRED_OUTPUTS_CAPTURED_MANUAL_SCORING_REQUIRED",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "withRagSchemaValid" : true
+  },
+  "ODD_ONE_OUT" : {
+    "answerCorrectness" : "NOT_REVIEWED",
+    "withoutRagSchemaValid" : true,
+    "status" : "PAIRED_OUTPUTS_CAPTURED_MANUAL_SCORING_REQUIRED",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "withRagSchemaValid" : true
+  },
+  "VISUAL_CLOZE" : {
+    "answerCorrectness" : "NOT_REVIEWED",
+    "withoutRagSchemaValid" : true,
+    "status" : "PAIRED_OUTPUTS_CAPTURED_MANUAL_SCORING_REQUIRED",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "withRagSchemaValid" : true
+  },
+  "AUDIO_VISUAL_MATCH" : {
+    "answerCorrectness" : "NOT_REVIEWED",
+    "withoutRagSchemaValid" : true,
+    "status" : "PAIRED_OUTPUTS_CAPTURED_MANUAL_SCORING_REQUIRED",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "withRagSchemaValid" : true
+  },
+  "SPOT_THE_TARGET" : {
+    "answerCorrectness" : "NOT_REVIEWED",
+    "withoutRagSchemaValid" : true,
+    "status" : "PAIRED_OUTPUTS_CAPTURED_MANUAL_SCORING_REQUIRED",
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "withRagSchemaValid" : true
+  },
+  "runAtUtc" : "2026-10-11T18:54:34.343326200Z",
+  "scope" : {
+    "gradeLevel" : "GRADE_1",
+    "subject" : "MATH"
+  },
+  "topic" : "Phép cộng nhẩm trong phạm vi 10",
+  "model" : "gemini-3.5-flash-lite",
+  "retrievalMinScore" : 0.855
+}

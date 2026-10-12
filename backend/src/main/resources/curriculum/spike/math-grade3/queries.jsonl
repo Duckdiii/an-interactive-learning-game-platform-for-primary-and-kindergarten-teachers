@@ -1,0 +1,13 @@
+{"queryId":"q01","topic":"Đọc và viết số trong phạm vi một trăm nghìn","expectedChunkIds":["math-g3-001"],"negative":false}
+{"queryId":"q02","topic":"Số La Mã trong phạm vi 20","expectedChunkIds":["math-g3-004"],"negative":false}
+{"queryId":"q03","topic":"So sánh và sắp xếp tối đa bốn số đến 100 000","expectedChunkIds":["math-g3-006","math-g3-007"],"negative":false}
+{"queryId":"q04","topic":"Cộng trừ số có năm chữ số và hai lượt nhớ không liên tiếp","expectedChunkIds":["math-g3-009"],"negative":false}
+{"queryId":"q05","topic":"Nhân số có một chữ số và không quá hai lượt nhớ","expectedChunkIds":["math-g3-012"],"negative":false}
+{"queryId":"q06","topic":"Tính giá trị biểu thức có ngoặc, làm trong ngoặc trước","expectedChunkIds":["math-g3-019"],"negative":false}
+{"queryId":"q07","topic":"Nhận biết một phần hai, một phần ba đến một phần chín","expectedChunkIds":["math-g3-022"],"negative":false}
+{"queryId":"q08","topic":"Nhận biết góc vuông, tam giác và tứ giác","expectedChunkIds":["math-g3-025","math-g3-026"],"negative":false}
+{"queryId":"q09","topic":"Nhận biết tiền Việt Nam trong phạm vi một trăm nghìn đồng","expectedChunkIds":["math-g3-039"],"negative":false}
+{"queryId":"q10","topic":"Thu thập, phân loại và ghi chép số liệu theo tiêu chí cho trước","expectedChunkIds":["math-g3-048"],"negative":false}
+{"queryId":"q11","topic":"Chia cho số có hai chữ số trong phạm vi chương trình lớp 3","expectedChunkIds":[],"negative":true}
+{"queryId":"q12","topic":"Chứng minh hai tam giác đồng dạng","expectedChunkIds":[],"negative":true}
+{"queryId":"q13","topic":"Tính chu vi hình tròn","expectedChunkIds":[],"negative":true}

@@ -1,0 +1,45 @@
+{
+  "reviewedAtUtc": "2026-10-11T18:18:25Z",
+  "reviewer": "Codex preliminary review; not a teacher or independent evaluator",
+  "rawPair": "pair-2026-10-11T18-15-51.159168100Z.json",
+  "scope": "MATH/GRADE_1",
+  "gameType": "QUIZ",
+  "topic": "Phép cộng nhẩm trong phạm vi 10",
+  "model": "gemini-3.5-flash-lite",
+  "retrievalThreshold": 0.75,
+  "rubric": "Check output schema, arithmetic answers, requested number scope, elementary readability, and whether the RAG output aligns with the retrieved outcome. Human scoring remains required.",
+  "results": [
+    {
+      "variant": "WITH_RAG",
+      "schemaValid": {"successes": 1, "denominator": 1},
+      "arithmeticCorrect": {"successes": 4, "denominator": 4},
+      "withinRequestedRange": {"successes": 4, "denominator": 4},
+      "preliminaryGradeFit": "PASS",
+      "retrievedEvidence": ["math-g1-007", "math-g1-008", "math-g1-004"],
+      "sourceGrounding": "The system prompt contained 3 cited curriculum chunks; the generated four addition questions fit the Math G1 outcome for mental addition/subtraction within 10. No citations were embedded in the student-facing quiz fields."
+    },
+    {
+      "variant": "WITHOUT_RAG",
+      "schemaValid": {"successes": 1, "denominator": 1},
+      "arithmeticCorrect": {"successes": 4, "denominator": 4},
+      "withinRequestedRange": {"successes": 4, "denominator": 4},
+      "preliminaryGradeFit": "PASS",
+      "retrievedEvidence": [],
+      "sourceGrounding": "No official curriculum text or citation was supplied to the model. The output happened to match the requested elementary arithmetic scope."
+    }
+  ],
+  "latencyMillis": {
+    "withRagGenerationOnly": 2279,
+    "withoutRagGenerationOnly": 1867,
+    "difference": 412,
+    "note": "These values measure the chat call only. The separate retrieval probe took 1124 ms and is not included."
+  },
+  "observations": [
+    "Both outputs were schema-valid and all eight arithmetic answers were correct.",
+    "No answer-correctness lift was observed in this single pair.",
+    "The RAG output included optional visualPrompt/audioText fields for all four questions; the baseline did not. One sample cannot attribute that difference to RAG.",
+    "The pair was generated with minScore 0.75. The same topic returned INSUFFICIENT_EVIDENCE at the configured threshold 0.855 in the adjacent probe, so this is exploratory and would not pass the current fail-closed production gate."
+  ],
+  "teacherReview": "NOT_RUN",
+  "generalization": "NOT_ESTIMABLE_FROM_ONE_PAIR"
+}

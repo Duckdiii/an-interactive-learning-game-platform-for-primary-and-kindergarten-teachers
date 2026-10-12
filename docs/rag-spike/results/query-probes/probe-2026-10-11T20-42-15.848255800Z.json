@@ -1,0 +1,23 @@
+{
+  "measuredAtUtc" : "2026-10-11T20:42:15.848255800Z",
+  "measurementStatus" : "LIVE_SINGLE_QUERY",
+  "subject" : "MATH",
+  "gradeLevel" : "GRADE_3",
+  "topic" : "multiply by one digit with remainder",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "latencyMillis" : 997,
+  "dataset" : {
+    "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "curriculumVersion" : "32/2018/TT-BGDDT",
+    "datasetVersion" : "math-grade3-outcomes-v1",
+    "pdfPageCount" : 1555
+  },
+  "result" : {
+    "status" : "INSUFFICIENT_EVIDENCE",
+    "chunks" : [ ]
+  }
+}

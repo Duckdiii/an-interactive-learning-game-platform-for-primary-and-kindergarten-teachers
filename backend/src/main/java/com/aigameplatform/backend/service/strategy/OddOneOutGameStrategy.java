@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl;
 import com.aigameplatform.backend.dto.dsl.OddOneOutQuestionDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.OddOneOutQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import tools.jackson.databind.json.JsonMapper;
@@ -22,9 +23,10 @@ public class OddOneOutGameStrategy extends GameContentStrategy<OddOneOutQuestion
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho ODD_ONE_OUT");
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
+                + ". Mỗi câu tạo 3–5 mục, trong đó chỉ đúng một mục khác nhóm; các mục còn lại phải cùng một tiêu chí rõ ràng. "
+                + "oddOneOutIndex là vị trí từ 0 của mục khác nhóm.";
     }
 
     @Override

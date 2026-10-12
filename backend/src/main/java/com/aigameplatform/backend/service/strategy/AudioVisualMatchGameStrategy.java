@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.dsl.GameMetadata;
 import com.aigameplatform.backend.dto.dsl.GameplaySettings;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.AudioVisualMatchQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import tools.jackson.databind.json.JsonMapper;
@@ -23,9 +24,10 @@ public class AudioVisualMatchGameStrategy
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho AUDIO_VISUAL_MATCH");
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
+                + ". Mỗi câu cung cấp audioText để học sinh nghe, một lựa chọn correct và 1–3 distractors; "
+                + "visualPrompt của mỗi lựa chọn phải mô tả hình ngắn gọn, không dùng chữ làm lộ đáp án.";
     }
 
     @Override

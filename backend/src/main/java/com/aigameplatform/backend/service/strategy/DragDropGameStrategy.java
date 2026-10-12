@@ -9,6 +9,7 @@ import com.aigameplatform.backend.dto.dsl.GameMetadata;
 import com.aigameplatform.backend.dto.dsl.GameplaySettings;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.DragDropQuestion;
 import com.aigameplatform.backend.entity.question.embedded.DraggableItem;
 import com.aigameplatform.backend.entity.question.embedded.DropZone;
@@ -26,9 +27,10 @@ public class DragDropGameStrategy extends GameContentStrategy<DragDropQuestionDs
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho DRAG_DROP");
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
+                + ". Mỗi câu tạo 2–4 dropZones và 3–8 items; zoneIndex của mỗi item là chỉ số bắt đầu từ 0 "
+                + "trỏ tới đúng dropZone. Mỗi item chỉ có một đáp án đúng.";
     }
 
     @Override

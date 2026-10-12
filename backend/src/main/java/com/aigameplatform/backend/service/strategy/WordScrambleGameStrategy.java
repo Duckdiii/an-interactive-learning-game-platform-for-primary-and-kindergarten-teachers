@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.dsl.WordScrambleGameDsl;
 import com.aigameplatform.backend.dto.dsl.WordScrambleQuestionDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.WordScrambleQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import tools.jackson.databind.json.JsonMapper;
@@ -22,9 +23,10 @@ public class WordScrambleGameStrategy extends GameContentStrategy<WordScrambleQu
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho WORD_SCRAMBLE");
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
+                + ". Mỗi câu tạo một correctWord dài 2–10 ký tự. Chỉ dùng dạng từ và chính tả phù hợp chủ đề; "
+                + "không dùng dấu cách hoặc ký hiệu trong từ.";
     }
 
     @Override

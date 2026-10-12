@@ -1,0 +1,36 @@
+{
+    "datasetVersion":  "english-grade2-familiarization-outcomes-v1",
+    "curriculumVersion":  "32/2018/TT-BGDDT",
+    "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "pdfPageCount":  1555,
+    "primaryOutcomeCount":  13,
+    "controlOutcomeCount":  4,
+    "sourceSection":  "Chương trình làm quen tiếng Anh / yêu cầu cần đạt lớp 2",
+    "programVariant":  "OPTIONAL_FAMILIARIZATION",
+    "gradePdfPages":  [
+                          1243,
+                          1244
+                      ],
+    "gradePrintedPages":  [
+                              12,
+                              13
+                          ],
+    "reviewedAmendments":  [
+                               {
+                                   "scope":  "Amendment changes the Informatics timetable provision; it does not change primary English outcomes.",
+                                   "id":  "20/2021/TT-BGDDT",
+                                   "changesEnglishPrimaryOutcomes":  false
+                               },
+                               {
+                                   "scope":  "Amendment concerns the general program and History; it does not change primary English outcomes.",
+                                   "id":  "13/2022/TT-BGDDT",
+                                   "changesEnglishPrimaryOutcomes":  false
+                               },
+                               {
+                                   "scope":  "Amendment concerns History and Geography, History, Geography, and Civic Education; it does not change primary English outcomes.",
+                                   "id":  "17/2025/TT-BGDDT",
+                                   "changesEnglishPrimaryOutcomes":  false
+                               }
+                           ]
+}

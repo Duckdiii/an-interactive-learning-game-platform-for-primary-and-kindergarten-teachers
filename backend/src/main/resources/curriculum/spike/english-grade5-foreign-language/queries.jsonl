@@ -1,0 +1,13 @@
+{"queryId":"q01","topic":"Nhận biết trọng âm từ bằng kỹ năng nghe","expectedChunkIds":["english-g5-001"],"negative":false}
+{"queryId":"q02","topic":"Làm theo chỉ dẫn đơn giản","expectedChunkIds":["english-g5-002"],"negative":false}
+{"queryId":"q03","topic":"Trả lời câu hỏi về chủ đề chương trình","expectedChunkIds":["english-g5-003"],"negative":false}
+{"queryId":"q04","topic":"Nghe hội thoại hoặc độc thoại 45–60 từ","expectedChunkIds":["english-g5-004"],"negative":false}
+{"queryId":"q05","topic":"Nghe hiểu nội dung chính của câu chuyện ngắn","expectedChunkIds":["english-g5-005"],"negative":false}
+{"queryId":"q06","topic":"Nói chỉ dẫn và đề nghị trong và ngoài lớp","expectedChunkIds":["english-g5-006"],"negative":false}
+{"queryId":"q07","topic":"Hỏi đáp về chủ đề quen thuộc và nhu cầu hằng ngày","expectedChunkIds":["english-g5-007"],"negative":false}
+{"queryId":"q08","topic":"Nói về chủ đề chương trình có trợ giúp","expectedChunkIds":["english-g5-008"],"negative":false}
+{"queryId":"q09","topic":"Trả lời phỏng vấn đơn giản","expectedChunkIds":["english-g5-009"],"negative":false}
+{"queryId":"q10","topic":"Đọc hiểu văn bản 60–80 từ","expectedChunkIds":["english-g5-011"],"negative":false}
+{"queryId":"n01","topic":"Viết câu tiếng Anh bằng thì hiện tại hoàn thành","expectedChunkIds":[],"negative":true}
+{"queryId":"n02","topic":"Giải bài toán cộng các số tự nhiên trong phạm vi 100","expectedChunkIds":[],"negative":true}
+{"queryId":"n03","topic":"Viết chương trình Python dùng vòng lặp","expectedChunkIds":[],"negative":true}

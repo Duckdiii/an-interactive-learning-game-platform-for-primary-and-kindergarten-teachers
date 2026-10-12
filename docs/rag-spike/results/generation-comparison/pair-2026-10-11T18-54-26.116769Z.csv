@@ -1,0 +1,61 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","VISUAL_CLOZE","Phép cộng nhẩm trong phạm vi 10","FOUND","math-g1-007;math-g1-008;math-g1-005","true","2304","{
+  ""questions"": [
+    {
+      ""sentenceTemplate"": ""Điền số thích hợp vào chỗ trống: 3 + 2 = ___"",
+      ""visualPrompt"": ""Hình ảnh 3 quả táo và thêm 2 quả táo."",
+      ""correctAnswer"": ""5"",
+      ""distractors"": [
+        ""4"",
+        ""6"",
+        ""7""
+      ],
+      ""audioText"": ""Ba cộng hai bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""Kết quả của phép tính 4 + 4 = ___ là bao nhiêu?"",
+      ""visualPrompt"": ""Hình ảnh 4 con mèo và thêm 4 con mèo."",
+      ""correctAnswer"": ""8"",
+      ""distractors"": [
+        ""7"",
+        ""9"",
+        ""6""
+      ],
+      ""audioText"": ""Bốn cộng bốn bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""Phép cộng nhẩm: 5 + 3 = ___"",
+      ""visualPrompt"": ""Hình ảnh 5 bông hoa và thêm 3 bông hoa."",
+      ""correctAnswer"": ""8"",
+      ""distractors"": [
+        ""7"",
+        ""6"",
+        ""9""
+      ],
+      ""audioText"": ""Năm cộng ba bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""Điền kết quả đúng: 1 + 6 = ___"",
+      ""visualPrompt"": ""Hình ảnh 1 ngôi sao và thêm 6 ngôi sao."",
+      ""correctAnswer"": ""7"",
+      ""distractors"": [
+        ""6"",
+        ""8"",
+        ""5""
+      ],
+      ""audioText"": ""Một cộng sáu bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""Tính nhẩm nhanh: 2 + 7 = ___"",
+      ""visualPrompt"": ""Hình ảnh 2 quả bóng và thêm 7 quả bóng."",
+      ""correctAnswer"": ""9"",
+      ""distractors"": [
+        ""8"",
+        ""10"",
+        ""7""
+      ],
+      ""audioText"": ""Hai cộng bảy bằng mấy?""
+    }
+  ]
+}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","VISUAL_CLOZE","Phép cộng nhẩm trong phạm vi 10","NOT_USED","","true","1783","{""questions"":[{""sentenceTemplate"":""3 + 2 = ___"",""visualPrompt"":""Ba quả táo thêm hai quả táo"",""correctAnswer"":""5"",""distractors"":[""4"",""6""]},{""sentenceTemplate"":""4 + 1 = ___"",""visualPrompt"":""Bốn con mèo thêm một con mèo"",""correctAnswer"":""5"",""distractors"":[""3"",""6""]},{""sentenceTemplate"":""2 + 2 = ___"",""visualPrompt"":""Hai bông hoa thêm hai bông hoa"",""correctAnswer"":""4"",""distractors"":[""3"",""5""]},{""sentenceTemplate"":""5 + 3 = ___"",""visualPrompt"":""Năm ngôi sao thêm ba ngôi sao"",""correctAnswer"":""8"",""distractors"":[""7"",""9""]},{""sentenceTemplate"":""1 + 6 = ___"",""visualPrompt"":""Một viên kẹo thêm sáu viên kẹo"",""correctAnswer"":""7"",""distractors"":[""6"",""8""]}]}"

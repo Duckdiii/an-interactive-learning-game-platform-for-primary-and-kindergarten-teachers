@@ -21,6 +21,37 @@ class CurriculumPdfExtractorTest {
     @TempDir Path directory;
 
     @Test
+    void recordsVisualTranscriptionForAFragmentWhosePdfTextLayoutCannotBeCompared() throws Exception {
+        Path pdf = directory.resolve("visual-source.pdf");
+        try (var doc = new PDDocument()) {
+            var page = new PDPage();
+            doc.addPage(page);
+            try (var stream = new PDPageContentStream(doc, page)) {
+                stream.beginText();
+                stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
+                stream.newLineAtOffset(300, 650);
+                stream.showText("Fraction symbols rendered visually.");
+                stream.endText();
+            }
+            doc.save(pdf.toFile());
+        }
+        String sha = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(pdf)));
+        var source = new CurriculumSource("visual-source.pdf", sha, "version", "visual-v1", 1);
+        var chunk = new CurriculumChunk("fraction", Subject.MATH, GradeLevel.GRADE_3, "fractions",
+                "Visually transcribed fraction outcome.", false,
+                List.of(new CurriculumChunk.SourceFragment(1, 1, "VISUAL_RIGHT",
+                        "Visually transcribed fraction outcome.")));
+
+        var verification = new CurriculumPdfExtractor().verifyAndExtract(pdf,
+                new CurriculumDataset(source, List.of(chunk)), directory.resolve("visual-output"));
+
+        assertThat(verification.chunks()).singleElement().satisfies(result -> {
+            assertThat(result.sourceFragmentsMatched()).isTrue();
+            assertThat(result.sourceVerificationMethod()).isEqualTo("VISUAL_TRANSCRIPTION");
+        });
+        assertThat(verification.evaluationStatus()).contains("VISUAL_TRANSCRIPTION_REVIEWED");
+    }
+    @Test
     void validatesFragmentsInTheirPagesAndRejectsADifferentSource() throws Exception {
         Path pdf = directory.resolve("source.pdf");
         try (var doc = new PDDocument()) {
@@ -39,11 +70,105 @@ class CurriculumPdfExtractorTest {
         var source = new CurriculumSource("source.pdf", sha, "version", "fixture-v1", 1);
         var chunk = new CurriculumChunk("alpha", Subject.MATH, GradeLevel.GRADE_1, "topic", "Outcome alpha.", false,
                 List.of(new CurriculumChunk.SourceFragment(1, 1, "RIGHT", "Outcome alpha.")));
-        assertThat(new CurriculumPdfExtractor().verifyAndExtract(pdf,
-                new CurriculumDataset(source, List.of(chunk)), directory.resolve("output")).verifiedChunks()).isEqualTo(1);
+        var verification = new CurriculumPdfExtractor().verifyAndExtract(pdf,
+                new CurriculumDataset(source, List.of(chunk)), directory.resolve("output"));
+        assertThat(verification.verifiedChunks()).isEqualTo(1);
+        assertThat(verification.chunks()).singleElement().satisfies(result -> {
+            assertThat(result.chunkId()).isEqualTo("alpha");
+            assertThat(result.sourceFragmentsMatched()).isTrue();
+            assertThat(result.semanticAtomicityReview()).isEqualTo("NOT_REVIEWED");
+            assertThat(result.pedagogicalReview()).isEqualTo("NOT_REVIEWED");
+        });
         var badSource = new CurriculumSource("source.pdf", "0".repeat(64), "version", "fixture-v1", 1);
         assertThatThrownBy(() -> new CurriculumPdfExtractor().verifyAndExtract(pdf,
                 new CurriculumDataset(badSource, List.of(chunk)), directory.resolve("bad-output")))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void verifiesOutcomeTextNearTheBottomPageMargin() throws Exception {
+        Path pdf = directory.resolve("bottom-outcome.pdf");
+        try (var doc = new PDDocument()) {
+            var page = new PDPage();
+            doc.addPage(page);
+            try (var stream = new PDPageContentStream(doc, page)) {
+                stream.beginText();
+                stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
+                stream.newLineAtOffset(300, 15);
+                stream.showText("Outcome near the page bottom.");
+                stream.endText();
+            }
+            doc.save(pdf.toFile());
+        }
+        String sha = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(pdf)));
+        var source = new CurriculumSource("bottom-outcome.pdf", sha, "version", "bottom-v1", 1);
+        var chunk = new CurriculumChunk("bottom", Subject.MATH, GradeLevel.GRADE_1, "topic",
+                "Outcome near the page bottom.", false,
+                List.of(new CurriculumChunk.SourceFragment(1, 1, "RIGHT", "Outcome near the page bottom.")));
+
+        var verification = new CurriculumPdfExtractor().verifyAndExtract(pdf,
+                new CurriculumDataset(source, List.of(chunk)), directory.resolve("bottom-output"));
+
+        assertThat(verification.verifiedChunks()).isEqualTo(1);
+    }
+
+    @Test
+    void includesTheFullThirdColumnWhenVerifyingCenterRightRegionOutcomes() throws Exception {
+        Path pdf = directory.resolve("right-column-outcome.pdf");
+        try (var doc = new PDDocument()) {
+            var page = new PDPage();
+            doc.addPage(page);
+            try (var stream = new PDPageContentStream(doc, page)) {
+                stream.beginText();
+                stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
+                stream.newLineAtOffset(240, 650);
+                stream.showText("Outcome begins at the third-column edge.");
+                stream.endText();
+            }
+            doc.save(pdf.toFile());
+        }
+        String sha = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(pdf)));
+        var source = new CurriculumSource("right-column-outcome.pdf", sha, "version", "right-column-v1", 1);
+        var chunk = new CurriculumChunk("right-column", Subject.ENGLISH, GradeLevel.GRADE_4, "listening",
+                "Outcome begins at the third-column edge.", false,
+                List.of(new CurriculumChunk.SourceFragment(1, 1, "CENTER_RIGHT", "Outcome begins at the third-column edge.")));
+
+        var verification = new CurriculumPdfExtractor().verifyAndExtract(pdf,
+                new CurriculumDataset(source, List.of(chunk)), directory.resolve("right-column-output"));
+
+        assertThat(verification.verifiedChunks()).isEqualTo(1);
+    }
+
+    @Test
+    void isolatesCenterLeftOutcomesFromAdjacentLanguageColumnText() throws Exception {
+        Path pdf = directory.resolve("center-left-outcome.pdf");
+        try (var doc = new PDDocument()) {
+            var page = new PDPage();
+            doc.addPage(page);
+            try (var stream = new PDPageContentStream(doc, page)) {
+                stream.beginText();
+                stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
+                stream.newLineAtOffset(50, 650);
+                stream.showText("Outcome from first column.");
+                stream.newLineAtOffset(280, 0);
+                stream.showText("Text from adjacent column.");
+                stream.endText();
+            }
+            doc.save(pdf.toFile());
+        }
+        String sha = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(pdf)));
+        var source = new CurriculumSource("center-left-outcome.pdf", sha, "version", "center-left-v1", 1);
+        var chunk = new CurriculumChunk("center-left", Subject.ENGLISH, GradeLevel.GRADE_1, "listening",
+                "Outcome from first column.", false,
+                List.of(new CurriculumChunk.SourceFragment(1, 1, "CENTER_LEFT", "Outcome from first column.")));
+        Path output = directory.resolve("center-left-output");
+
+        var verification = new CurriculumPdfExtractor().verifyAndExtract(pdf,
+                new CurriculumDataset(source, List.of(chunk)), output);
+
+        assertThat(verification.verifiedChunks()).isEqualTo(1);
+        assertThat(Files.readString(output.resolve("page-1-center_left.txt")))
+                .contains("Outcome from first column.")
+                .doesNotContain("Text from adjacent column.");
     }
 }

@@ -1,0 +1,34 @@
+{
+  "measuredAtUtc" : "2026-10-11T20:42:41.225604400Z",
+  "measurementStatus" : "LIVE_SINGLE_QUERY",
+  "subject" : "MATH",
+  "gradeLevel" : "GRADE_3",
+  "topic" : "Xác ??nh m?t ph?n ba c?a m?t nhóm ?? v?t b?ng cách chia thành các ph?n ??u nhau",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "latencyMillis" : 1147,
+  "dataset" : {
+    "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "curriculumVersion" : "32/2018/TT-BGDDT",
+    "datasetVersion" : "math-grade3-outcomes-v1",
+    "pdfPageCount" : 1555
+  },
+  "result" : {
+    "status" : "FOUND",
+    "chunks" : [ {
+      "chunkId" : "math-g3-023",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_3",
+      "topic" : "Phân số",
+      "text" : "Xác định được 1/2; 1/3;...;1/9 của một nhóm đồ vật (đối tượng) bằng việc chia thành các phần đều nhau.",
+      "score" : 0.872919946788097,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 197 ],
+      "printedPages" : [ 31 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ]
+  }
+}

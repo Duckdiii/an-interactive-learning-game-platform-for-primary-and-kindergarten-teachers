@@ -1,0 +1,5 @@
+﻿"runFile","subject","gradeLevel","controlChunkId","controlExcludedFromPrimary","primaryScopeLeakage","primaryScopeChunkIds"
+"live-2026-10-11T20-43-36.715406300Z.json","MATH","GRADE_3","control-math-g1-g3-001","True","0","math-g3-001;math-g3-004;math-g3-003"
+"live-2026-10-11T20-43-36.715406300Z.json","MATH","GRADE_3","control-math-g1-g3-002","True","0","math-g3-003;math-g3-002;math-g3-008"
+"live-2026-10-11T20-43-36.715406300Z.json","MATH","GRADE_3","control-vietnamese-g1-g3-001","True","0","math-g3-001;math-g3-004"
+"live-2026-10-11T20-43-36.715406300Z.json","MATH","GRADE_3","control-vietnamese-g1-g3-002","True","0","math-g3-049;math-g3-050"

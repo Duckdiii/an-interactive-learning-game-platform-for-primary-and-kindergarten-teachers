@@ -1,0 +1,171 @@
+﻿{
+    "runId":  "full-corpus-2026-10-12-post-ingest-and-retrieval",
+    "runDate":  "2026-10-12",
+    "totalScopes":  15,
+    "scopeCounts":  {
+                        "sourceVerified":  "15/15",
+                        "chunks":  "558/558",
+                        "primaryOutcomes":  "497/497",
+                        "controls":  "61/61",
+                        "indexed":  "558/558",
+                        "ingestRepeat":  "0 written / 558 skipped",
+                        "exploratoryRetrieval":  "8/15",
+                        "holdout":  "3/15",
+                        "generationE2E":  "0/15",
+                        "fullTenGameTypeProductionE2E":  "0/15 scopes",
+                        "priorSingleTypeQuizSmoke":  "MATH/GRADE_1 passed"
+                    },
+    "exploratory":  {
+                        "latestPerScopePositiveHitAt3":  "80/80",
+                        "negativeRejection":  "19/24",
+                        "falseAcceptance":  "5/24",
+                        "leakage":  0,
+                        "threshold":  0.855,
+                        "gate":  "FAIL"
+                    },
+    "quotaBlocker":  {
+                         "status":  "BLOCKED",
+                         "metric":  "generativelanguage.googleapis.com/embed_content_free_tier_requests",
+                         "limit":  "1000 requests/day",
+                         "retryAfter":  "19h 2m 50.8s",
+                         "providerModel":  "gemini-embedding-1.0",
+                         "firstScopeNotEvaluated":  "ENGLISH/GRADE_3"
+                     },
+    "retrievalEvaluatedScopes":  [
+                                     "ENGLISH/GRADE_1",
+                                     "ENGLISH/GRADE_2",
+                                     "MATH/GRADE_1",
+                                     "MATH/GRADE_2",
+                                     "MATH/GRADE_3",
+                                     "VIETNAMESE/GRADE_3",
+                                     "VIETNAMESE/GRADE_4",
+                                     "VIETNAMESE/GRADE_5"
+                                 ],
+    "retrievalNotRunScopes":  [
+                                  "MATH/GRADE_4",
+                                  "MATH/GRADE_5",
+                                  "VIETNAMESE/GRADE_1",
+                                  "VIETNAMESE/GRADE_2",
+                                  "ENGLISH/GRADE_3",
+                                  "ENGLISH/GRADE_4",
+                                  "ENGLISH/GRADE_5"
+                              ],
+    "notRunStages":  [
+                         "retrieval for 7 scopes",
+                         "holdout for 12 scopes",
+                         "generation end-to-end for all 15 scopes",
+                         "semantic/pedagogical chunk review",
+                         "live claim-evidence check",
+                         "teacher review"
+                     ],
+    "offlineUpdate":  {
+                          "rawFailureAnalysis":  {
+                                                     "status":  "PASS_OFFLINE",
+                                                     "exploratoryFalseAcceptances":  5,
+                                                     "holdoutFailures":  6,
+                                                     "developmentQueries":  11,
+                                                     "classification":  "quality failures; metadata scope/version correct; provider quota separate",
+                                                     "labelsChanged":  false,
+                                                     "report":  "../evidence/false-acceptance-analysis-2026-10-12.md"
+                                                 },
+                          "evidenceGuard":  {
+                                                "status":  "CODED_UNIT_TESTED_NOT_LIVE",
+                                                "threshold":  0.855,
+                                                "devRegressionCases":  "11/11 original raw failures rejected offline; 30 exact-source boundary cases (15 supported, 15 unsupported) across 14 rules; development set only",
+                                                "limitations":  "Deterministic checks for explicit recognized constraints; semantic entailment not complete",
+                                                "pipelineVersion":  "evidence-gate-v2",
+                                                "liveStatus":  "FULL_RETRIEVAL_BENCHMARK_NOT_RUN; q01 gate traversed during 4 strategy retries without output metrics",
+                                                "sourceBoundaryMatrix":  {
+                                                                             "cases":  30,
+                                                                             "supportedCases":  15,
+                                                                             "unsupportedNearMisses":  15,
+                                                                             "falseBlocks":  "0/15",
+                                                                             "falseAccepts":  "0/15",
+                                                                             "ruleGroups":  14,
+                                                                             "classification":  "development regression only",
+                                                                             "audit":  "evidence/evidence-gate-rule-audit.csv",
+                                                                             "codeSha256":  "86604d7e6fe2cb0f6da93eee891839fd8a157b7c3c7f39159585666697a281fe",
+                                                                             "testSha256":  "b75ae0677b306887fe5769f47430192118e68ae9d3e9f7edb0cdd8131a8b1d7b"
+                                                                         }
+                                            },
+                          "queryEmbeddingCache":  {
+                                                      "status":  "IMPLEMENTED",
+                                                      "keyFields":  [
+                                                                        "exact query",
+                                                                        "embedding model",
+                                                                        "dimension",
+                                                                        "task type"
+                                                                    ],
+                                                      "preexistingVectorsSeeded":  2,
+                                                      "documentEmbeddingsRegenerated":  0
+                                                  },
+                          "holdoutV2":  {
+                                            "status":  "PREPARED_NOT_RUN_PENDING_INDEPENDENT_LABEL_REVIEW",
+                                            "scopes":  [
+                                                           "MATH/GRADE_1",
+                                                           "MATH/GRADE_2",
+                                                           "MATH/GRADE_3"
+                                                       ],
+                                            "queries":  "12 per scope: 6 positive, 3 negative, 3 near-miss",
+                                            "classification":  "fresh candidate; authored after guard by implementer, not blinded confirmation"
+                                        },
+                          "orchestrationOffline":  {
+                                                       "status":  "PASS_TARGETED",
+                                                       "targetedTests":  75,
+                                                       "targetedFailures":  0,
+                                                       "targetedErrors":  0,
+                                                       "targetedSkipped":  0,
+                                                       "fullBackendSuite":  {
+                                                                                "status":  "PASS_WITH_TWO_SKIPS",
+                                                                                "tests":  533,
+                                                                                "failures":  0,
+                                                                                "errors":  0,
+                                                                                "skipped":  2,
+                                                                                "skippedReason":  "Gemini opt-in credential tests",
+                                                                                "jacocoLineCoverage":  "71.14%",
+                                                                                "floor":  "70%",
+                                                                                "contextLoads":  "PASS on in-memory H2"
+                                                                            }
+                                                   },
+                          "productionE2E":  {
+                                                "status":  "NOT_RUN",
+                                                "scopes":  "0/15",
+                                                "cases":  "0/30 executed; 30 prepared",
+                                                "providerFailedStrategies":  "0/4 retried",
+                                                "reason":  "quota not confirmed; no calls repeated",
+                                                "blocker":  "No backend game-generation endpoint; embedding quota retry time has not elapsed"
+                                            },
+                          "resumeRunbook":  "resume-runbook-2026-10-12.md",
+                          "liveQuotaStatus":  "BLOCKED by provider daily embedding quota; no calls repeated",
+                          "holdoutCoverage":  {
+                                                  "status":  "PREPARED_NOT_RUN",
+                                                  "scopeCount":  15,
+                                                  "queryCount":  180,
+                                                  "queriesPerScope":  "6 positive, 3 negative, 3 near-miss",
+                                                  "fixtureSplit":  "12 unrun v1 scopes, 3 MATH G1-G3 candidate v2 scopes",
+                                                  "manifest":  "holdout-manifest-2026-10-12.csv",
+                                                  "sourceTraceability":  "source SHA, PDF page, rationale; positive IDs resolve within scope",
+                                                  "independentLabelReview":  "PENDING for all 15"
+                                              }
+                      },
+    "holdoutPreparation":  {
+                               "status":  "PREPARED_NOT_RUN",
+                               "scopeCount":  15,
+                               "queryCount":  180,
+                               "queriesPerScope":  "6 positive, 3 negative, 3 near-miss",
+                               "fixtureSplit":  "12 unrun v1 scopes, 3 MATH G1-G3 candidate v2 scopes",
+                               "manifest":  "holdout-manifest-2026-10-12.csv",
+                               "sourceTraceability":  "source SHA, source PDF page, rationale; all positive IDs resolve within scope",
+                               "independentLabelReview":  "PENDING for all 15; do not treat as confirmatory"
+                           },
+    "evidenceGateLiveStatus":  "NOT_RUN",
+    "priorLiveResultStatus":  "FAIL retained; historical JSON/CSV unchanged",
+    "newProductionWork":  {
+                              "status":  "NOT_RUN",
+                              "productionE2ECases":  "0/30",
+                              "productionE2EScopes":  "0/15",
+                              "providerFailedStrategiesRetry":  "4/4 attempted; 0 produced outputs",
+                              "reason":  "InvalidRequestException at GEMINI_WITH_RAG; cache hit and zero embedding provider misses",
+                              "documentEmbeddingsRegenerated":  0
+                          }
+}

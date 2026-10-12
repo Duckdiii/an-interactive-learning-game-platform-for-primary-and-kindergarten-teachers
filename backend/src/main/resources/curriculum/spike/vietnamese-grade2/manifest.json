@@ -1,0 +1,63 @@
+{
+  "datasetVersion": "vietnamese-grade2-outcomes-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "applicabilityReviewedOn": "2026-10-12",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "primaryOutcomeCount": 42,
+  "controlOutcomeCount": 4,
+  "sourceSection": "Chương trình GDPT môn Tiếng Việt / V. Nội dung giáo dục / 3. Nội dung cụ thể và yêu cầu cần đạt ở các lớp / Lớp 2",
+  "vietnameseGradePdfPages": [
+    78,
+    79,
+    80,
+    81,
+    82
+  ],
+  "vietnameseGradePrintedPages": [
+    22,
+    23,
+    24,
+    25,
+    26
+  ],
+  "excludedFromOutcomeCorpus": "Không đưa cột Nội dung, Ngữ liệu, Kiến thức tiếng Việt, Kiến thức văn học, hướng dẫn và hoạt động vào corpus như yêu cầu cần đạt. Chỉ lập chunk từ các đơn vị trong cột Yêu cầu cần đạt.",
+  "sourceEvidence": "docs/rag-spike/evidence/source-pages/tt32-2018-primary-scopes-pdfbox.txt",
+  "sourceLayoutNote": "PDFBox text order can interleave the Yêu cầu cần đạt and Nội dung columns. Included fragments are transcribed from the Yêu cầu cần đạt text; precise column boundaries on wrapped rows were not independently checked against rendered page images.",
+  "reviewedAmendments": [
+    {
+      "id": "20/2021/TT-BGDDT",
+      "sourceDocument": "20-bgddt.pdf",
+      "sourceSha256": "242913c886242173dd05d16ce63b306dce584cf1c238cd1c2b914e261af18c08",
+      "pdfPages": [
+        1
+      ],
+      "scope": "Bổ sung khoản 4 Điều 3 về lộ trình môn Tin học THCS.",
+      "changesVietnameseGrade1to5Outcomes": false
+    },
+    {
+      "id": "13/2022/TT-BGDDT",
+      "sourceDocument": "13-bgddt.pdf",
+      "sourceSha256": "62ceeae5c15897470d4c949bd9c532650fe9d7013f90a0503d5cbbcad50f575c",
+      "pdfPages": [
+        1,
+        2,
+        3
+      ],
+      "scope": "Chương trình tổng thể giai đoạn định hướng nghề nghiệp và chương trình môn Lịch sử.",
+      "changesVietnameseGrade1to5Outcomes": false
+    },
+    {
+      "id": "17/2025/TT-BGDDT",
+      "sourceDocument": "17-bgddt.pdf",
+      "sourceSha256": "1d40c0513a1fdff35245c633ffc382122a18d2d5c0fbc96fcb426a51a8f9fea6",
+      "pdfPages": [
+        1,
+        2
+      ],
+      "scope": "Lịch sử và Địa lí tiểu học/THCS, Lịch sử lớp 10, Địa lí, Giáo dục công dân.",
+      "changesVietnameseGrade1to5Outcomes": false
+    }
+  ]
+}

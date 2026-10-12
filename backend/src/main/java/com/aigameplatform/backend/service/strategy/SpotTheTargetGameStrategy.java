@@ -8,6 +8,7 @@ import com.aigameplatform.backend.dto.dsl.SpotTheTargetGameDsl;
 import com.aigameplatform.backend.dto.dsl.SpotTheTargetQuestionDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.SpotTheTargetQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import tools.jackson.databind.json.JsonMapper;
@@ -22,9 +23,10 @@ public class SpotTheTargetGameStrategy extends GameContentStrategy<SpotTheTarget
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho SPOT_THE_TARGET");
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
+                + ". Mỗi câu mô tả một hình trong visualPrompt và một mục tiêu duy nhất trong targetDescription "
+                + "để học sinh tìm trên hình. Không tạo hitRegion vì vị trí cần được giáo viên rà soát.";
     }
 
     @Override

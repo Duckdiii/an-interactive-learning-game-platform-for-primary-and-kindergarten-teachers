@@ -55,7 +55,113 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 200
-        }
+        },
+        "curriculumReview": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+                           "status",
+                           "claims",
+                           "warnings"
+                       ],
+          "properties": {
+                             "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                         "REVIEWED",
+                                                         "UNAVAILABLE"
+                                                     ]
+                                        },
+                             "claims": {
+                                            "type": "array",
+                                            "items": {
+                                                          "type": "object",
+                                                          "additionalProperties": false,
+                                                          "required": [
+                                                                           "questionId",
+                                                                           "claim",
+                                                                           "status",
+                                                                           "reason",
+                                                                           "chunkIds"
+                                                                       ],
+                                                          "properties": {
+                                                                             "questionId": {
+                                                                                                "type": "string",
+                                                                                                "minLength": 1
+                                                                                            },
+                                                                             "claim": {
+                                                                                           "type": "string",
+                                                                                           "minLength": 1
+                                                                                       },
+                                                                             "status": {
+                                                                                            "type": "string",
+                                                                                            "enum": [
+                                                                                                         "SUPPORTED",
+                                                                                                         "UNSUPPORTED",
+                                                                                                         "UNCERTAIN"
+                                                                                                     ]
+                                                                                        },
+                                                                             "reason": {
+                                                                                            "type": "string",
+                                                                                            "minLength": 1
+                                                                                        },
+                                                                             "chunkIds": {
+                                                                                              "type": "array",
+                                                                                              "minItems": 1,
+                                                                                              "items": {
+                                                                                                            "type": "string",
+                                                                                                            "minLength": 1
+                                                                                                        }
+                                                                                          }
+                                                                         }
+                                                      }
+                                        },
+                             "warnings": {
+                                              "type": "array",
+                                              "items": {
+                                                            "type": "object",
+                                                            "additionalProperties": false,
+                                                            "required": [
+                                                                             "questionId",
+                                                                             "claim",
+                                                                             "status",
+                                                                             "reason",
+                                                                             "chunkIds"
+                                                                         ],
+                                                            "properties": {
+                                                                               "questionId": {
+                                                                                                  "type": "string",
+                                                                                                  "minLength": 1
+                                                                                              },
+                                                                               "claim": {
+                                                                                             "type": "string",
+                                                                                             "minLength": 1
+                                                                                         },
+                                                                               "status": {
+                                                                                              "type": "string",
+                                                                                              "enum": [
+                                                                                                           "SUPPORTED",
+                                                                                                           "UNSUPPORTED",
+                                                                                                           "UNCERTAIN"
+                                                                                                       ]
+                                                                                          },
+                                                                               "reason": {
+                                                                                              "type": "string",
+                                                                                              "minLength": 1
+                                                                                          },
+                                                                               "chunkIds": {
+                                                                                                "type": "array",
+                                                                                                "minItems": 1,
+                                                                                                "items": {
+                                                                                                              "type": "string",
+                                                                                                              "minLength": 1
+                                                                                                          }
+                                                                                            }
+                                                                           }
+                                                        }
+                                          }
+                         }
+          }
       }
     },
     "gameplaySettings": {

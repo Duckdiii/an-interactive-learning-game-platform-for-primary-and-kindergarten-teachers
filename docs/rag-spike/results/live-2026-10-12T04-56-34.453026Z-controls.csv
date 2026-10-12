@@ -1,0 +1,5 @@
+﻿"runFile","subject","gradeLevel","controlChunkId","controlExcludedFromPrimary","primaryScopeLeakage","primaryScopeChunkIds"
+"live-2026-10-12T04-56-34.453026Z.json","VIETNAMESE","GRADE_5","vietnamese-g5-control-001","True","0","vietnamese-g5-001;vietnamese-g5-021;vietnamese-g5-026"
+"live-2026-10-12T04-56-34.453026Z.json","VIETNAMESE","GRADE_5","vietnamese-g5-control-002","True","0","vietnamese-g5-005;vietnamese-g5-029;vietnamese-g5-006"
+"live-2026-10-12T04-56-34.453026Z.json","VIETNAMESE","GRADE_5","vietnamese-g5-control-003","True","0",""
+"live-2026-10-12T04-56-34.453026Z.json","VIETNAMESE","GRADE_5","vietnamese-g5-control-004","True","0",""

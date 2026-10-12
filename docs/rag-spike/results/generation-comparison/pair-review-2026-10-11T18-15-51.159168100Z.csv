@@ -1,0 +1,11 @@
+variant,metric,numerator,denominator,result,note
+WITH_RAG,schema_valid,1,1,PASS,Structured output validator accepted the response
+WITH_RAG,arithmetic_correct,4,4,PASS,Preliminary manual arithmetic check
+WITH_RAG,within_requested_range,4,4,PASS,All sums are within the requested range of 10
+WITH_RAG,preliminary_grade_fit,,,PASS,Short wording and familiar concrete examples; teacher review required
+WITH_RAG,source_context_present,3,3,PASS,Three cited curriculum chunks were in the system prompt; not student-facing citations
+WITHOUT_RAG,schema_valid,1,1,PASS,Structured output validator accepted the response
+WITHOUT_RAG,arithmetic_correct,4,4,PASS,Preliminary manual arithmetic check
+WITHOUT_RAG,within_requested_range,4,4,PASS,All sums are within the requested range of 10
+WITHOUT_RAG,preliminary_grade_fit,,,PASS,Short wording; teacher review required
+WITHOUT_RAG,source_context_present,0,3,NOT_APPLICABLE,No source chunks were supplied

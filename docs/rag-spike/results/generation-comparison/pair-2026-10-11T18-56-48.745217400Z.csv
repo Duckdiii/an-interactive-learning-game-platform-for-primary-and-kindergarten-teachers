@@ -1,0 +1,79 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","ODD_ONE_OUT","Phép cộng nhẩm trong phạm vi 10","FOUND","math-g1-007;math-g1-008;math-g1-005","true","1749","{
+  ""questions"": [
+    {
+      ""items"": [
+        ""3 + 2"",
+        ""4 + 1"",
+        ""2 + 3"",
+        ""4 + 2""
+      ],
+      ""oddOneOutIndex"": 3,
+      ""audioText"": ""Tim phep tinh khac voi cac phep tinh con lai""
+    },
+    {
+      ""items"": [
+        ""1 + 5"",
+        ""2 + 4"",
+        ""3 + 3"",
+        ""2 + 2""
+      ],
+      ""oddOneOutIndex"": 3,
+      ""audioText"": ""Tim phep tinh khac voi cac phep tinh con lai""
+    },
+    {
+      ""items"": [
+        ""5 + 1"",
+        ""3 + 4"",
+        ""2 + 4"",
+        ""1 + 5""
+      ],
+      ""oddOneOutIndex"": 1,
+      ""audioText"": ""Tim phep tinh khac voi cac phep tinh con lai""
+    }
+  ]
+}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","ODD_ONE_OUT","Phép cộng nhẩm trong phạm vi 10","NOT_USED","","true","1760","{
+  ""questions"": [
+    {
+      ""items"": [
+        ""2 + 3"",
+        ""1 + 4"",
+        ""3 + 2"",
+        ""4 + 2""
+      ],
+      ""oddOneOutIndex"": 3,
+      ""audioText"": ""Em hãy tìm phép tính có kết quả khác các phép tính còn lại.""
+    },
+    {
+      ""items"": [
+        ""5"",
+        ""6"",
+        ""2 + 4"",
+        ""3 + 1""
+      ],
+      ""oddOneOutIndex"": 3,
+      ""audioText"": ""Em hãy tìm phép tính có kết quả khác các số còn lại.""
+    },
+    {
+      ""items"": [
+        ""1 + 1"",
+        ""2 + 0"",
+        ""3 + 1"",
+        ""0 + 2""
+      ],
+      ""oddOneOutIndex"": 2,
+      ""audioText"": ""Em hãy tìm phép tính không có kết quả bằng 2.""
+    },
+    {
+      ""items"": [
+        ""4 + 4"",
+        ""5 + 3"",
+        ""6 + 2"",
+        ""3 + 4""
+      ],
+      ""oddOneOutIndex"": 3,
+      ""audioText"": ""Em hãy tìm phép tính không có kết quả bằng 8.""
+    }
+  ]
+}"

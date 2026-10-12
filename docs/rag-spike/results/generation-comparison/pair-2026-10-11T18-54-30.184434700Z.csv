@@ -1,0 +1,90 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","AUDIO_VISUAL_MATCH","Phép cộng nhẩm trong phạm vi 10","FOUND","math-g1-007;math-g1-008;math-g1-005","true","1779","{
+  ""questions"": [
+    {
+      ""audioText"": ""Bốn cộng ba bằng mấy?"",
+      ""correct"": {
+        ""visualPrompt"": ""So 7""
+      },
+      ""distractors"": [
+        {
+          ""visualPrompt"": ""So 6""
+        },
+        {
+          ""visualPrompt"": ""So 8""
+        }
+      ]
+    },
+    {
+      ""audioText"": ""Năm cộng hai bằng mấy?"",
+      ""correct"": {
+        ""visualPrompt"": ""So 7""
+      },
+      ""distractors"": [
+        {
+          ""visualPrompt"": ""So 5""
+        },
+        {
+          ""visualPrompt"": ""So 8""
+        }
+      ]
+    },
+    {
+      ""audioText"": ""Ba cộng bốn bằng mấy?"",
+      ""correct"": {
+        ""visualPrompt"": ""So 7""
+      },
+      ""distractors"": [
+        {
+          ""visualPrompt"": ""So 6""
+        }
+      ]
+    }
+  ]
+}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","AUDIO_VISUAL_MATCH","Phép cộng nhẩm trong phạm vi 10","NOT_USED","","true","1672","{
+  ""questions"": [
+    {
+      ""audioText"": ""Bốn cộng hai bằng mấy?"",
+      ""correct"": {
+        ""visualPrompt"": ""Sáu quả táo""
+      },
+      ""distractors"": [
+        {
+          ""visualPrompt"": ""Năm quả táo""
+        },
+        {
+          ""visualPrompt"": ""Bảy quả táo""
+        }
+      ]
+    },
+    {
+      ""audioText"": ""Ba cộng ba bằng bao nhiêu?"",
+      ""correct"": {
+        ""visualPrompt"": ""Sáu ngôi sao""
+      },
+      ""distractors"": [
+        {
+          ""visualPrompt"": ""Năm ngôi sao""
+        },
+        {
+          ""visualPrompt"": ""Bốn ngôi sao""
+        }
+      ]
+    },
+    {
+      ""audioText"": ""Năm cộng một bằng mấy?"",
+      ""correct"": {
+        ""visualPrompt"": ""Sáu bông hoa""
+      },
+      ""distractors"": [
+        {
+          ""visualPrompt"": ""Bảy bông hoa""
+        },
+        {
+          ""visualPrompt"": ""Bốn bông hoa""
+        }
+      ]
+    }
+  ]
+}"

@@ -1,0 +1,27 @@
+{
+  "DRAG_DROP" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "SafeComparisonFailure",
+    "safeStackFrames" : [ "dev.langchain4j.internal.ExceptionMapper$DefaultExceptionMapper.mapHttpStatusCode", "dev.langchain4j.internal.ExceptionMapper$DefaultExceptionMapper.mapException", "dev.langchain4j.internal.ExceptionMapper.withExceptionMapper", "dev.langchain4j.internal.RetryUtils.lambda$withRetryMappingExceptions$1", "dev.langchain4j.internal.RetryUtils$RetryPolicy.withRetry", "dev.langchain4j.internal.RetryUtils.withRetry" ],
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "failureReason" : "UNCLASSIFIED_RUNTIME_FAILURE",
+    "phase" : "GEMINI_WITH_RAG",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "rootCauseClass" : "InvalidRequestException",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "queryEmbeddingCache" : {
+    "providerMisses" : 0,
+    "hits" : 1,
+    "file" : "backend/target/curriculum-spike/query-embedding-cache.jsonl"
+  },
+  "runAtUtc" : "2026-10-12T06:04:15.753611700Z",
+  "pipelineVersion" : "evidence-gate-v2",
+  "scope" : {
+    "subject" : "MATH",
+    "gradeLevel" : "GRADE_1"
+  },
+  "topic" : "Phép cộng nhẩm trong phạm vi 10",
+  "model" : "gemini-3.5-flash-lite",
+  "retrievalMinScore" : 0.855
+}

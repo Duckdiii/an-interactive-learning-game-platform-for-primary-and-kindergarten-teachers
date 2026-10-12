@@ -1,6 +1,6 @@
 # Kế hoạch tích hợp RAG vào luồng sinh game
 
-**Trạng thái:** đã triển khai pilot orchestration QUIZ / Toán lớp 1 trên nhánh hiện tại. Contract được người dùng chọn; Duy chưa review. Live smoke một chủ đề trong corpus và một chủ đề ngoài corpus đều pass.
+**Trạng thái:** orchestration RAG đã nối cho các scope có corpus; hiện catalog chỉ có Toán lớp 1. Context được đưa vào strategy của cả 10 game type, nhưng live E2E mới có một cặp QUIZ. Ba giá trị enum subject được giữ nguyên. Contract được người dùng chọn; Duy chưa review. Mục tiêu full corpus là 15 primary subject-grade/program scopes. Ngưỡng 0.855 vẫn exploratory; q01 đúng UTF-8 lặp lại 0.895729657 và đạt ngưỡng ở cả hai lần chạy. Probe 0.8548 dùng query bị thay 3 ký tự tiếng Việt thành `?`, nên không phải một lần chạy lại cùng query.
 
 ## Mục tiêu
 
@@ -12,8 +12,8 @@ Pilot đầu tiên là **QUIZ + Toán lớp 1** với corpus đã kiểm chứng
 
 - `GameGenerationService.generate` đã có topic, subject, gradeLevel, schema và vòng retry; đây là điểm lấy context một lần trước retry.
 - `GenerationAttempt` đi qua cổng `GameContentGenerator`, nhưng repo hiện không có class production nào implement cổng này.
-- `GameContentStrategy` có `buildPrompt(topic, grade)` và overload nhận `curriculumContext`; code gọi tên `buildPrompt`, không phải `buildSystemPrompt` như mô tả ban đầu.
-- `promptTemplate` ban đầu chưa được cấu hình và strategy QUIZ còn TODO; pilot đã bổ sung prompt cho QUIZ.
+- `GameContentStrategy` có overload `buildPrompt(topic, subject, grade, curriculumContext)`; code gọi `buildPrompt`, không phải `buildSystemPrompt` như mô tả ban đầu.
+- Ban đầu 9/10 game strategies chưa có prompt instruction dùng được; hiện đã có prompt/template theo output schema cho cả 10 game type và test context đi tới generator cho ba giá trị `Subject`.
 - `QuizSpikeContentService` là spike riêng cho KINDERGARTEN; không dùng registry/strategy và không thể thay cho production adapter.
 - Spring đã có cấu hình `DB_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL`; embedding cần model/config riêng. RAG hiện được tạo bởi runner độc lập, chưa phải Spring bean.
 
@@ -25,7 +25,7 @@ Vì adapter Gemini production còn thiếu, không thể kết luận context đ
 2. `GameGenerationService` gọi provider một lần bằng `topic + subject + gradeLevel`, trước vòng retry.
 3. Với phạm vi RAG bật, `INSUFFICIENT_EVIDENCE` trả lỗi API có mã riêng `CURRICULUM_EVIDENCE_NOT_FOUND` (HTTP 422); không gọi Gemini bằng kiến thức chung.
 4. Kết quả `FOUND` được giữ thành immutable `curriculumContext` cùng danh sách chunk/citation và truyền trong mọi `GenerationAttempt`, kể cả retry. Feedback sửa JSON không được thay đổi context.
-5. Production `GameContentGenerator` lấy strategy theo game type và gọi `strategy.buildPrompt(topic, grade, curriculumContext)` để tạo system prompt trước khi gọi model. Structured output tiếp tục dùng `structuredSchema` hiện tại.
+5. Production `GameContentGenerator` lấy strategy theo game type và gọi `strategy.buildPrompt(topic, subject, grade, curriculumContext)` để tạo system prompt trước khi gọi model. Structured output tiếp tục dùng `structuredSchema` hiện tại.
 6. Context được bao bằng tag, giữ chunk ID, tài liệu, phiên bản, PDF page và printed page. Prompt chỉ cho phép dùng đoạn này làm căn cứ nội dung; không coi văn bản nguồn là chỉ dẫn hệ thống.
 7. Thêm feature flag `app.curriculum-rag.enabled`. Khi bật cho pilot, chỉ `QUIZ/MATH/GRADE_1` được đi qua flow RAG; phạm vi khác trả lỗi `CURRICULUM_EVIDENCE_NOT_FOUND`. Khi flag tắt, ứng dụng giữ flow hiện tại trong giai đoạn rollout. Không fallback âm thầm trong phạm vi RAG đã bật.
 
@@ -37,7 +37,7 @@ Vì adapter Gemini production còn thiếu, không thể kết luận context đ
 - Xác định owner/nhánh của `GameContentGenerator` production. Tái sử dụng adapter nếu có ở nhánh khác; nếu không, hoàn tất adapter LangChain4j/Gemini trong cùng phần việc trước khi gọi là tích hợp xong.
 - Chốt nội dung lỗi API và policy cho scope chưa có corpus.
 
-**Trạng thái:** code đã gọi `buildPrompt(topic, grade, curriculumContext)` và adapter Gemini gửi prompt/schema qua LangChain4j. Người dùng đã chọn contract đề xuất; Duy cần review trước khi merge. Không gửi thông điệp cho Duy từ agent này.
+**Trạng thái:** adapter Gemini gửi prompt/schema qua LangChain4j; context được giữ qua retry. Người dùng đã chọn contract đề xuất; Duy cần review trước khi merge. Không gửi thông điệp cho Duy từ agent này.
 
 ### 2. Đưa RAG vào Spring theo cấu hình ứng dụng
 
@@ -56,10 +56,17 @@ Vì adapter Gemini production còn thiếu, không thể kết luận context đ
 
 **Trạng thái:** orchestration đã retrieval một lần, fail-closed khi thiếu bằng chứng và truyền context qua mọi retry; fake Gemini test xác nhận context/citation nằm trong system prompt trước chat call.
 
-### 4. Hoàn thiện prompt cho pilot QUIZ
+### 4. Hoàn thiện prompt cho các game strategy
 
-- Cấu hình `promptTemplate` và hoàn thành hướng dẫn type-specific cho QUIZ; không mở rộng prompt của các game type khác trong pilot.
+- Cấu hình prompt dùng chung và hướng dẫn type-specific theo schema của cả 10 game type; truyền đúng môn, lớp, chủ đề và curriculum context.
 - Đảm bảo instruction, context và structured schema không mâu thuẫn; không thêm field vào DSL/response chỉ để biểu diễn RAG status.
+
+### Contract `metadata.curriculumReview` — cần Duy review
+
+- `GameGenerationService` hiện đính kèm review tư vấn vào game trả về: `status` (`REVIEWED`/`UNAVAILABLE`), `claims[]`, `warnings[]`; mỗi claim có `questionId`, nội dung, trạng thái hỗ trợ, lý do và `chunkIds` nguồn. Review chỉ cảnh báo, không chặn game.
+- Frontend hiện chỉ khai báo TypeScript type; không có nơi đọc hoặc hiển thị warning. Product requirement trước đó yêu cầu giáo viên nhìn thấy cảnh báo, nên giữ contract public và thêm renderer ở frontend; không chuyển nó thành artifact đánh giá riêng.
+- Field đang được thêm vào JSON schemas của DSL `1.0.0`. Optional không bảo đảm tương thích: Duy cần quyết định có giữ trong `metadata` hay chuyển sang response envelope, cách version schema/API, semantics của `UNAVAILABLE`, và định dạng citation trước merge. Renderer phải phân biệt warning AI với teacher review đang pending.
+- Trạng thái hiện tại: contract code có, frontend runtime consumer chưa có, Duy review/versioning chưa xong. Không xem advisory AI là phê duyệt sư phạm.
 
 ### 5. Kiểm chứng
 
@@ -68,7 +75,7 @@ Vì adapter Gemini production còn thiếu, không thể kết luận context đ
 - Smoke test live cho QUIZ + Toán lớp 1: một chủ đề có căn cứ và một chủ đề ngoài corpus; kiểm tra nội dung game, giới hạn chương trình và citations/log nguồn.
 - Giữ benchmark RAG hiện có; thêm holdout queries độc lập trước khi quảng bá ngưỡng `0.855` là đã hiệu chỉnh tổng quát.
 
-**Đã chạy:** suite thường có 471 tests: 469 pass, 2 live tests skip theo cấu hình opt-in; JaCoCo đạt gate. Chạy riêng, cả hai live smoke (trong corpus và ngoài corpus) pass với `gemini-3.5-flash-lite`. Ngưỡng `0.855` vẫn exploratory; benchmark holdout là bước sau.
+**Đã chạy:** bộ test targeted ban đầu 48 pass; full backend suite (không gồm `AigameBackendApplicationTests`, cần Spring context/DB) có 478 pass, 0 failure/error, 2 live tests skip theo opt-in; sau đó có thêm 3 unit test pass cho vector-score audit. Gemini chunk advisory: 28/28 kết quả, tất cả `CANDIDATE_OK`; teacher review vẫn bắt buộc. Một cặp game Math G1/QUIZ tại threshold 0.75: cả hai schema-valid, preliminary arithmetic 4/4 mỗi output; chưa có teacher scoring. Hai lần chạy đúng fixture UTF-8 cho q01 đều đạt 0.895729657 tại cả threshold 0.75 và 0.855. Vector replay xác nhận query bị lỗi mã hoá có relevance 0.854824668 theo công thức PgVector `(1+cosine)/2`; không phải cùng một query. Holdout độc lập đã chạy và FAIL near-miss gate (2/6 false acceptance); calibration riêng NOT_RUN. Claim verifier advisory đã có code/unit test, chưa live-evaluate. 14 scope đã trích raw page text nhưng chưa outcome-chunk/ingest/evaluate; Duy review vẫn pending. Báo cáo tổng hợp và flow nằm ở [`results/curriculum-rag-summary.md`](results/curriculum-rag-summary.md) và [`curriculum-rag-flow.md`](curriculum-rag-flow.md).
 
 ## Tiêu chí nghiệm thu
 
@@ -77,11 +84,12 @@ Vì adapter Gemini production còn thiếu, không thể kết luận context đ
 - Retry JSON: giữ nguyên curriculum context và schema; chỉ thay previous output/errors.
 - Không có chunk ngoài subject/grade/version; citation truy được về PDF đã audit.
 - Legacy mode và scope ngoài pilot tuân theo feature flag/policy đã chốt; không có fallback âm thầm trong scope RAG bật.
-- Duy review contract trước khi merge; bổ sung holdout queries độc lập.
+- Duy review contract trước khi merge; calibration riêng; mở rộng corpus 14 scope; live-evaluate advisory checker; chạy full orchestration; teacher review.
 
 ## Rủi ro/phụ thuộc
 
-- Adapter Gemini production mới bao phủ QUIZ / Toán lớp 1; game type khác chưa được thêm vào pilot.
-- Duy chưa review contract. Holdout retrieval và so sánh live sinh game có/không RAG chưa được chạy.
-- Ngưỡng `0.855` được chọn từ cùng bộ query exploratory; cần holdout độc lập.
+- Hiện mới có 1/15 curriculum scopes đã chunk/ingest; không có scope nào được xác nhận full support.
+- Chỉ 1/10 game type đã có live end-to-end pair; 9 loại còn lại và các môn/khối còn lại chưa chạy live.
+- Duy chưa review contract. Holdout chạy nhưng fail; independent calibration chưa chạy. Post-generation checker đã implement advisory nhưng chưa live-evaluate.
+- Ngưỡng `0.855` được chọn từ cùng bộ exploratory query; lặp đúng q01 ổn định nhưng không thay thế holdout.
 - Supabase hiện đã có bảng và embeddings của spike; production bean cần đọc đúng dataset/source/model metadata và không tự ingest hoặc drop bảng lúc khởi động.

@@ -1,0 +1,54 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","SPOT_THE_TARGET","Phép cộng nhẩm trong phạm vi 10","FOUND","math-g1-007;math-g1-008;math-g1-005","true","1684","{
+  ""questions"": [
+    {
+      ""visualPrompt"": ""Bức tranh có 3 quả táo đỏ và 2 quả táo xanh trên cây."",
+      ""targetDescription"": ""Tìm tổng số quả táo trên cây."",
+      ""audioText"": ""Em hãy tính nhẩm xem trên cây có tất cả bao nhiêu quả táo nhé!""
+    },
+    {
+      ""visualPrompt"": ""Bức tranh có 4 con cá vàng trong bể và 3 con cá cam bơi tới."",
+      ""targetDescription"": ""Tìm tổng số con cá trong bể."",
+      ""audioText"": ""Em hãy cộng nhẩm số con cá vàng và số con cá cam với nhau nhé!""
+    },
+    {
+      ""visualPrompt"": ""Bức tranh có 5 bông hoa hồng vàng và 4 bông hoa cúc trắng."",
+      ""targetDescription"": ""Tìm tổng số bông hoa."",
+      ""audioText"": ""Em hãy tính nhẩm tổng số bông hoa có trong hình!""
+    },
+    {
+      ""visualPrompt"": ""Bức tranh có 2 con chim đang đậu trên cành và 3 con chim bay đến."",
+      ""targetDescription"": ""Tìm tổng số con chim."",
+      ""audioText"": ""Em hãy nhẩm tính xem có tất cả bao nhiêu con chim nhé!""
+    }
+  ]
+}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","SPOT_THE_TARGET","Phép cộng nhẩm trong phạm vi 10","NOT_USED","","true","1854","{
+  ""questions"": [
+    {
+      ""visualPrompt"": ""Bức tranh có 3 quả bóng bay màu đỏ và 2 quả bóng bay màu xanh."",
+      ""targetDescription"": ""Tìm nhóm có tất cả 5 quả bóng bay."",
+      ""audioText"": ""Em hãy tìm nhóm có ba cộng hai bằng năm quả bóng bay nhé.""
+    },
+    {
+      ""visualPrompt"": ""Trên cành cây có 4 con chim và có thêm 1 con chim bay tới."",
+      ""targetDescription"": ""Tìm nhóm có tổng cộng 5 con chim."",
+      ""audioText"": ""Em hãy tìm nhóm có bốn cộng một bằng năm con chim.""
+    },
+    {
+      ""visualPrompt"": ""Trên bàn có 2 chiếc bánh quy và mẹ đặt thêm 2 chiếc bánh quy nữa."",
+      ""targetDescription"": ""Tìm nhóm có tất cả 4 chiếc bánh quy."",
+      ""audioText"": ""Em hãy tìm nhóm có hai cộng hai bằng bốn chiếc bánh quy.""
+    },
+    {
+      ""visualPrompt"": ""Trong ao có 5 con cá bơi lội và có thêm 3 con cá bơi đến."",
+      ""targetDescription"": ""Tìm nhóm có tổng cộng 8 con cá."",
+      ""audioText"": ""Em hãy tìm nhóm có năm cộng ba bằng tám con cá.""
+    },
+    {
+      ""visualPrompt"": ""Bạn An có 4 cái kẹo, bạn Bình cho thêm 3 cái kẹo."",
+      ""targetDescription"": ""Tìm nhóm có tất cả 7 cái kẹo."",
+      ""audioText"": ""Em hãy tìm nhóm có bốn cộng ba bằng bảy cái kẹo.""
+    }
+  ]
+}"

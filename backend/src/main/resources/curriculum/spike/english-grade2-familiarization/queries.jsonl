@@ -1,0 +1,13 @@
+{"queryId":"q01","topic":"Nhận biết chữ cái đã học bằng kỹ năng nghe","expectedChunkIds":["english-g2-001"],"negative":false}
+{"queryId":"q02","topic":"Nhận biết âm đầu hoặc âm cuối của từ","expectedChunkIds":["english-g2-002"],"negative":false}
+{"queryId":"q03","topic":"Nghe hiểu số đếm trong phạm vi 20","expectedChunkIds":["english-g2-003"],"negative":false}
+{"queryId":"q04","topic":"Từ và cụm từ quen thuộc trong hoạt động học sinh","expectedChunkIds":["english-g2-004"],"negative":false}
+{"queryId":"q05","topic":"Thực hiện hướng dẫn đơn giản trong lớp học","expectedChunkIds":["english-g2-006"],"negative":false}
+{"queryId":"q06","topic":"Tham gia hoạt động lớp có chỉ dẫn tiếng Anh","expectedChunkIds":["english-g2-007"],"negative":false}
+{"queryId":"q07","topic":"Phản hồi bằng tiếng Anh trong hỏi đáp quen thuộc","expectedChunkIds":["english-g2-008"],"negative":false}
+{"queryId":"q08","topic":"Nhắc lại câu, cụm từ, bài vè hoặc bài hát","expectedChunkIds":["english-g2-009"],"negative":false}
+{"queryId":"q09","topic":"Nói các từ quen thuộc về sự vật","expectedChunkIds":["english-g2-010"],"negative":false}
+{"queryId":"q10","topic":"Đưa ra chỉ dẫn khi tham gia hoạt động trên lớp","expectedChunkIds":["english-g2-013"],"negative":false}
+{"queryId":"n01","topic":"Viết câu tiếng Anh bằng thì hiện tại hoàn thành","expectedChunkIds":[],"negative":true}
+{"queryId":"n02","topic":"Giải bài toán cộng các số tự nhiên trong phạm vi 100","expectedChunkIds":[],"negative":true}
+{"queryId":"n03","topic":"Viết chương trình Python dùng vòng lặp","expectedChunkIds":[],"negative":true}

@@ -1,0 +1,1569 @@
+﻿# Raw PDFBox page text extraction (not chunked curriculum data)
+sourceDocument: Thông-tư-32-2018-TT-BGDĐT.pdf
+sourceSha256: cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013
+extractor: Apache PDFBox 3.0.8, PDFTextStripperByArea over the complete page crop
+pageCount: 58
+pageRanges: 74-96, 187-211, 1241-1244, 1275-1280
+note: Content and Yêu cầu cần đạt columns can interleave in text-layer order. Inspect page layout before creating outcome chunks; this file is discovery/provenance evidence only.
+
+===== PDF PAGE 74 =====
+– Văn học nước ngoài, chọn ít nhất 1 tác phẩm cho mỗi nền văn học sau: Anh, Pháp, Mĩ, Hy Lạp, Nga, Nhật Bản, Trung 
+Quốc, Ấn Độ. 
+2. Nội dung cụ thể 
+LỚP 1 
+Yêu cầu cần đạt Nội dung 
+ĐỌC KIẾN THỨC TIẾNG VIỆT 
+KĨ THUẬT ĐỌC 1.1. Âm, vần, thanh; chữ và dấu thanh 
+– Ngồi (hoặc đứng) thẳng lưng; sách, vở mở rộng trên mặt bàn (hoặc trên hai tay). 1.2. Quy tắc chính tả phân biệt: c và 
+Giữ khoảng cách giữa mắt với sách, vở khoảng 25cm.  k, g và gh, ng và ngh 
+– Đọc đúng âm, vần, tiếng, từ, câu (có thể đọc chưa thật đúng một số tiếng có vần 1.3. Quy tắc viết hoa: viết hoa chữ cái 
+khó, ít dùng). đầu câu, viết hoa tên riêng  
+– Đọc đúng và rõ ràng đoạn văn hoặc văn bản ngắn. Tốc độ đọc khoảng 40 – 60 2. Vốn từ theo chủ điểm: Từ chỉ sự 
+tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu phẩy, dấu kết thúc câu hay ở chỗ kết vật, hoạt động, đặc điểm gần gũi 
+thúc dòng thơ. 3. Công dụng của dấu chấm, dấu 
+– Bước đầu biết đọc thầm. chấm hỏi: đánh dấu kết thúc câu 
+– Nhận biết được bìa sách và tên sách. 4.1. Từ xưng hô thông dụng khi giao 
+ĐỌC HIỂU tiếp ở nhà và ở trường 
+Văn bản văn học 4.2. Một số nghi thức giao tiếp thông 
+dụng ở nhà và ở trường: chào hỏi, 
+Đọc hiểu nội dung 
+giới thiệu, cảm ơn, xin lỗi, xin phép 
+– Hỏi và trả lời được những câu hỏi đơn giản liên quan đến các chi tiết được thể 
+5. Thông tin bằng hình ảnh (phương 
+hiện tường minh. 
+tiện giao tiếp phi ngôn ngữ) 
+– Trả lời được các câu hỏi đơn giản về nội dung cơ bản của văn bản dựa vào gợi ý, 
+18
+
+===== PDF PAGE 75 =====
+Yêu cầu cần đạt Nội dung 
+hỗ trợ.  KIẾN THỨC VĂN HỌC 
+Đọc hiểu hình thức   1. Câu chuyện, bài thơ 
+– Nhận biết được hình dáng, hành động của nhân vật thể hiện qua một số từ ngữ 2. Nhân vật trong truyện 
+trong câu chuyện dựa vào gợi ý của giáo viên. NGỮ LIỆU 
+– Nhận biết được lời nhân vật trong truyện dựa vào gợi ý của giáo viên. 1.1. Văn bản văn học 
+Liên hệ, so sánh, kết nối – Cổ tích, ngụ ngôn, truyện ngắn, 
+– Liên hệ được tranh minh hoạ với các chi tiết trong văn bản. truyện tranh, đoạn văn miêu tả 
+– Nêu được nhân vật yêu thích nhất và bước đầu biết giải thích vì sao. – Đoạn thơ, bài thơ (gồm cả đồng dao) 
+Đọc mở rộng Độ dài của văn bản: truyện và đoạn 
+– Trong 1 năm học, đọc tối thiểu 10 văn bản văn học có thể loại và độ dài tương văn miêu tả khoảng 90 – 130 chữ, thơ 
+đương với các văn bản đã học. khoảng 50 – 70 chữ 
+– Thuộc lòng 4 – 5 đoạn thơ hoặc bài thơ đã học, mỗi đoạn thơ, bài thơ có độ dài 1.2. Văn bản thông tin: giới thiệu những 
+khoảng 30 – 40 chữ. sự vật, sự việc gần gũi với học sinh 
+Văn bản thông tin Độ dài của văn bản: khoảng 90 chữ 
+Đọc hiểu nội dung 2. Gợi ý chọn văn bản: xem danh 
+– Hỏi và trả lời được những câu hỏi đơn giản về các chi tiết nổi bật trong văn bản. mục gợi ý  
+– Trả lời được câu hỏi: “Văn bản này viết về điều gì?” với sự gợi ý, hỗ trợ. 3. Các từ ngữ có ý nghĩa tích cực, phù 
+hợp với học sinh lớp 1 
+Đọc hiểu hình thức 
+– Nhận biết được trình tự của các sự việc trong văn bản. 
+– Hiểu nghĩa của một số tín hiệu đơn giản, gần gũi với học sinh. 
+Đọc mở rộng 
+19
+
+===== PDF PAGE 76 =====
+Yêu cầu cần đạt Nội dung 
+Trong 1 năm học, đọc tối thiểu 5 văn bản thông tin có kiểu văn bản và độ dài tương 
+đương với các văn bản đã học.  
+VIẾT 
+KĨ THUẬT VIẾT 
+– Biết ngồi viết đúng tư thế: ngồi thẳng lưng; hai chân đặt vuông góc với mặt đất; 
+một tay úp đặt lên góc vở, một tay cầm bút; không tì ngực vào mép bàn; khoảng 
+cách giữa mắt và vở khoảng 25cm; cầm bút bằng ba ngón tay (ngón cái, ngón trỏ, 
+ngón giữa). 
+– Viết đúng chữ viết thường, chữ số (từ 0 đến 9); biết viết chữ hoa. 
+– Đặt dấu thanh đúng vị trí. Viết đúng quy tắc các tiếng mở đầu bằng các chữ c, k, g, 
+gh, ng, ngh.  
+– Viết đúng chính tả đoạn thơ, đoạn văn có độ dài khoảng 30 – 35 chữ theo các hình 
+thức nhìn – viết (tập chép), nghe – viết. Tốc độ viết khoảng 30 – 35 chữ trong 15 phút. 
+VIẾT CÂU, ĐOẠN VĂN NGẮN 
+Quy trình viết 
+Bước đầu trả lời được những câu hỏi như: Viết về ai? Viết về cái gì, việc gì? 
+Thực hành viết 
+– Điền được phần thông tin còn trống, viết được câu trả lời, viết câu dưới tranh phù 
+hợp với nội dung câu chuyện đã đọc hoặc đã nghe. 
+– Điền được vào phần thông tin còn trống, viết câu nói về hình dáng hoặc hoạt động 
+của nhân vật dưới tranh trong câu chuyện đã học dựa trên gợi ý. 
+– Điền được phần thông tin còn trống, viết câu trả lời hoặc viết lại câu đã nói để giới 
+20
+
+===== PDF PAGE 77 =====
+Yêu cầu cần đạt Nội dung 
+thiệu bản thân dựa trên gợi ý. 
+NÓI VÀ NGHE 
+Nói 
+– Nói rõ ràng, thành câu. Biết nhìn vào người nghe khi nói. 
+– Đặt được câu hỏi đơn giản và trả lời đúng vào nội dung câu hỏi. 
+– Nói và đáp lại được lời chào hỏi, xin phép, cảm ơn, xin lỗi, phù hợp với đối tượng 
+người nghe. 
+– Biết giới thiệu ngắn về bản thân, gia đình, đồ vật yêu thích dựa trên gợi ý. 
+– Kể lại được một đoạn hoặc cả câu chuyện đơn giản đã đọc, xem hoặc nghe (dựa 
+vào các tranh minh hoạ và lời gợi ý dưới tranh). 
+Nghe 
+– Có thói quen và thái độ chú ý nghe người khác nói (nhìn vào người nói, có tư thế 
+nghe phù hợp). Đặt một vài câu hỏi để hỏi lại những điều chưa rõ. 
+– Nghe hiểu các thông báo, hướng dẫn, yêu cầu, nội quy trong lớp học. 
+– Nghe một câu chuyện và trả lời được các câu hỏi: Ai? Cái gì? Khi nào? Ở đâu? 
+Nói nghe tương tác 
+– Biết đưa tay xin phát biểu, chờ đến lượt được phát biểu. 
+– Biết trao đổi trong nhóm để chia sẻ những ý nghĩ và thông tin đơn giản 
+ 
+ 
+ 
+21
+
+===== PDF PAGE 78 =====
+LỚP 2 
+Yêu cầu cần đạt Nội dung 
+ĐỌC KIẾN THỨC TIẾNG VIỆT 
+KĨ THUẬT ĐỌC 1. Bảng chữ cái tiếng Việt, sự khác 
+– Đọc đúng các tiếng (bao gồm cả một số tiếng có vần khó, ít dùng). Thuộc bảng nhau giữa tên chữ cái (a, bê, xê,...) và 
+chữ cái tiếng Việt; biết phân biệt tên chữ cái (a, bê, xê,...) và âm (a, bờ, cờ,...) mà âm (a, bờ, cờ,...) 
+chữ cái và con chữ biểu hiện. 2. Vốn từ theo chủ điểm 
+– Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. 3.1. Từ chỉ sự vật, hoạt động, tính chất  
+Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ 3.2. Công dụng của dấu chấm, dấu 
+ngắt nhịp thơ. chấm hỏi, dấu chấm than: đánh dấu 
+– Bước đầu phân biệt được lời nhân vật trong đối thoại và lời người kể chuyện để kết thúc câu; dấu phẩy: tách các bộ 
+đọc với ngữ điệu phù hợp. phận đồng chức trong câu 
+– Biết đọc thầm.  4.1. Hội thoại: lắng nghe, nói theo 
+lượt lời 
+– Nhận biết được thông tin trên bìa sách: tranh minh hoạ, tên sách, tên tác giả, nhà 
+xuất bản. 4.2. Đoạn văn 
+– Điền được những thông tin quan trọng vào phiếu đọc sách. – Đoạn văn kể lại một sự việc 
+ĐỌC HIỂU – Đoạn văn miêu tả ngắn, đơn giản 
+theo gợi ý 
+Văn bản văn học 
+– Đoạn văn nói về tình cảm của mình 
+Đọc hiểu nội dung 
+với những người thân yêu 
+– Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái 
+– Đoạn văn giới thiệu loài vật, đồ vật; 
+gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao? 
+22
+
+===== PDF PAGE 79 =====
+Yêu cầu cần đạt Nội dung 
+– Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý. văn bản hướng dẫn thực hiện một 
+Đọc hiểu hình thức hoạt động, bưu thiếp, danh sách, mục 
+lục sách, thời khoá biểu, thời gian 
+– Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện. 
+biểu 
+– Nhận biết được hình dáng, điệu bộ, hành động của nhân vật qua ngôn ngữ và hình ảnh. 
+5. Thông tin bằng hình ảnh (phương 
+– Nhận biết được thái độ, tình cảm giữa các nhân vật thể hiện qua hành động, lời thoại. tiện giao tiếp phi ngôn ngữ)  
+– Nhận biết được vần trong thơ.  KIẾN THỨC VĂN HỌC 
+Liên hệ, so sánh, kết nối 1. Đề tài (viết, kể về điều gì) 
+Nêu được nhân vật yêu thích nhất và giải thích được vì sao. 2. Hình dáng, điệu bộ, lời thoại của 
+Đọc mở rộng nhân vật 
+– Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương 3. Tình cảm, thái độ giữa các nhân 
+đương với các văn bản đã học. vật 
+– Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài 4. Vần trong thơ 
+thơ, đoạn văn có độ dài khoảng 30 – 45 chữ. NGỮ LIỆU 
+Văn bản thông tin 1.1. Văn bản văn học 
+Đọc hiểu nội dung – Cổ tích, ngụ ngôn, truyện ngắn; 
+– Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? đoạn (bài) văn miêu tả 
+Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao? – Bài thơ, đồng dao, ca dao, vè 
+– Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng Độ dài của văn bản: truyện khoảng 
+chú ý dựa vào gợi ý. 180 – 200 chữ, bài miêu tả khoảng 
+Đọc hiểu hình thức 150 –180 chữ, thơ khoảng 70 – 90 
+chữ 
+– Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm 
+23
+
+===== PDF PAGE 80 =====
+Yêu cầu cần đạt Nội dung 
+của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn 1.2. Văn bản thông tin 
+bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động. – Văn bản giới thiệu về loài vật, đồ 
+– Nhận biết được trình tự các sự việc, hiện tượng nêu trong văn bản. dùng; văn bản hướng dẫn một hoạt 
+Liên hệ, so sánh, kết nối động đơn giản bao gồm cả dạng kí 
+hiệu 
+– Nêu được các thông tin bổ ích đối với bản thân từ văn bản. 
+– Danh sách học sinh; mục lục sách; 
+– Nhận biết được thông tin cơ bản của văn bản thể hiện qua nhan đề, hình ảnh minh 
+thời khoá biểu; thời gian biểu 
+hoạ và chú thích hình ảnh.  
+Độ dài của văn bản: khoảng 110 – 
+Đọc mở rộng 
+140 chữ 
+Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin có kiểu văn bản và độ dài tương 
+2. Gợi ý chọn văn bản: xem danh 
+đương với các văn bản đã học. 
+mục gợi ý 
+VIẾT   
+KĨ THUẬT VIẾT 
+– Viết thành thạo chữ viết thường, viết đúng chữ viết hoa. 
+– Viết hoa chữ cái đầu câu, viết đúng tên người, tên địa lí phổ biến ở địa phương. 
+– Nghe – viết chính tả đoạn thơ, đoạn văn có độ dài khoảng 50 – 55 chữ, tốc độ 
+khoảng 50 – 55 chữ trong 15 phút. Viết đúng một số từ dễ viết sai do đặc điểm phát 
+âm địa phương. 
+– Trình bày bài viết sạch sẽ, đúng quy định. 
+VIẾT ĐOẠN VĂN NGẮN 
+Quy trình viết 
+– Xác định được nội dung bằng cách trả lời câu hỏi: “Viết về cái gì?”; viết nháp; dựa 
+24
+
+===== PDF PAGE 81 =====
+Yêu cầu cần đạt Nội dung 
+vào hỗ trợ của giáo viên, chỉnh sửa được lỗi dấu kết thúc câu, cách viết hoa, cách 
+dùng từ ngữ. 
+Thực hành viết 
+– Viết được 4 – 5 câu thuật lại một sự việc đã chứng kiến hoặc tham gia dựa vào gợi ý. 
+– Viết được 4 – 5 câu tả một đồ vật gần gũi, quen thuộc dựa vào gợi ý. 
+– Viết được 4 – 5 câu nói về tình cảm của mình đối với người thân hoặc sự việc dựa 
+vào gợi ý. 
+– Viết được 4 – 5 câu giới thiệu về một đồ vật quen thuộc dựa vào gợi ý. 
+– Biết đặt tên cho một bức tranh. 
+– Biết viết thời gian biểu, bưu thiếp, tin nhắn, lời cảm ơn, lời xin lỗi. 
+NÓI VÀ NGHE 
+Nói 
+– Nói rõ ràng, có thói quen nhìn vào người nghe. 
+– Biết nói và đáp lại lời chào hỏi, chia tay, cảm ơn, xin lỗi, lời mời, lời đề nghị, chúc 
+mừng, chia buồn, an ủi, khen ngợi, bày tỏ sự ngạc nhiên; đồng ý, không đồng ý, từ 
+chối phù hợp với đối tượng người nghe. 
+– Kể được một câu chuyện đơn giản (có hình ảnh) đã đọc, nghe, xem. 
+– Nói ngắn gọn về một câu chuyện hoặc bài thơ đã đọc theo lựa chọn của cá nhân 
+(tên văn bản, nội dung văn bản, nhân vật yêu thích). 
+ 
+25
+
+===== PDF PAGE 82 =====
+Yêu cầu cần đạt Nội dung 
+Nghe 
+– Có thói quen và thái độ chú ý nghe người khác nói. Đặt được câu hỏi về những gì 
+chưa rõ khi nghe.  
+– Nghe một bài thơ hoặc bài hát, dựa vào gợi ý, nói một vài câu nêu cảm nhận của 
+mình về bài thơ hoặc bài hát đó. 
+– Nghe câu chuyện, dựa vào gợi ý, nêu ý kiến về nhân vật chính hoặc một sự việc 
+trong câu chuyện. 
+Nói nghe tương tác 
+– Biết trao đổi trong nhóm về các nhân vật trong một câu chuyện dựa vào gợi ý. 
+– Biết trao đổi trong nhóm về một vấn đề: chú ý lắng nghe người khác, đóng góp ý 
+kiến của mình, không nói chen ngang khi người khác đang nói. 
+ 
+LỚP 3 
+Yêu cầu cần đạt Nội dung 
+ĐỌC KIẾN THỨC TIẾNG VIỆT 
+KĨ THUẬT ĐỌC 1. Cách viết nhan đề văn bản 
+– Đọc đúng và bước đầu biết đọc diễn cảm các đoạn văn miêu tả, câu chuyện, bài 2.1. Vốn từ theo chủ điểm 
+thơ; tốc độ đọc khoảng 70 – 80 tiếng trong 1 phút. Biết nghỉ hơi ở chỗ có dấu câu 2.2. Từ có nghĩa giống nhau và từ có 
+hay chỗ ngắt nhịp thơ. nghĩa trái ngược nhau  
+– Đọc theo ngữ điệu phù hợp với vai được phân trong một đoạn đối thoại có hai 
+26
+
+===== PDF PAGE 83 =====
+Yêu cầu cần đạt Nội dung 
+hoặc ba nhân vật. 3.1. Từ chỉ sự vật, hoạt động, tính 
+– Đọc thầm với tốc độ nhanh hơn lớp 2.  chất  
+– Đánh dấu được đoạn sách đang đọc. 3.2. Sơ giản về câu kể, câu hỏi, câu 
+– Ghi chép ngắn gọn những nội dung quan trọng vào phiếu đọc sách hoặc sổ tay. khiến, câu cảm: đặc điểm thể hiện 
+qua dấu câu, qua từ đánh dấu kiểu 
+ĐỌC HIỂU 
+câu và công dụng của từng kiểu câu 
+Văn bản văn học 
+3.3. Công dụng của dấu gạch ngang 
+Đọc hiểu nội dung (đặt ở đầu dòng để đánh dấu lời nói 
+– Nhận biết được chi tiết và nội dung chính. Hiểu được nội dung hàm ẩn của văn trực tiếp của nhân vật); dấu ngoặc kép 
+bản với những suy luận đơn giản. (đánh dấu phần trích dẫn trực tiếp 
+– Tìm được ý chính của từng đoạn văn dựa trên các câu hỏi gợi ý. hoặc lời đối thoại); dấu hai chấm (báo 
+– Hiểu được điều tác giả muốn nói qua văn bản dựa vào gợi ý. hiệu phần giải thích, liệt kê) 
+Đọc hiểu hình thức 4.1. Biện pháp tu từ so sánh: đặc 
+– Nhận biết được điệu bộ, hành động của nhân vật qua một số từ ngữ trong văn bản. điểm và tác dụng  
+– Nhận biết được thời gian, địa điểm và trình tự các sự việc trong câu chuyện. 4.2. Sơ giản về đoạn văn và văn bản 
+có nhiều đoạn: dấu hiệu nhận biết 
+– Nhận biết được vần và biện pháp tu từ so sánh trong thơ. 
+4.3. Sơ giản về lượt lời thể hiện qua 
+– Nhận xét được về hình dáng, điệu bộ, hành động của nhân vật trong truyện tranh 
+trao đổi nhóm  
+hoặc phim hoạt hình.  
+4.4. Kiểu văn bản và thể loại 
+Liên hệ, so sánh, kết nối 
+– Đoạn văn kể lại câu chuyện đã đọc 
+– Lựa chọn một nhân vật trong tác phẩm đã học hoặc đã đọc, nêu tình cảm và suy nghĩ hoặc một việc đã làm 
+về nhân vật đó. 
+– Đoạn văn miêu tả đồ vật 
+– Lựa chọn một nhân vật hoặc địa điểm trong tác phẩm đã học hoặc đã đọc, mô tả hoặc 
+27
+
+===== PDF PAGE 84 =====
+Yêu cầu cần đạt Nội dung 
+vẽ lại được nhân vật, địa điểm đó. – Đoạn văn chia sẻ cảm xúc, tình cảm 
+Đọc mở rộng – Đoạn văn nêu lí do vì sao mình 
+thích một nhân vật trong câu chuyện 
+– Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng 
+dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã – Đoạn văn giới thiệu về đồ vật, văn 
+học. bản thuật lại một hiện tượng gồm 2 – 
+3 sự việc, thông báo hoặc bản tin 
+– Thuộc lòng được ít nhất 8 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, 
+ngắn, tờ khai in sẵn 
+bài thơ, đoạn văn có độ dài khoảng 60 chữ. 
+5. Thông tin bằng hình ảnh, số liệu 
+Văn bản thông tin 
+(phương tiện giao tiếp phi ngôn 
+Đọc hiểu nội dung ngữ)  
+– Trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý? 
+KIẾN THỨC VĂN HỌC 
+– Tìm được ý chính của từng đoạn trong văn bản. 
+1. Bài học rút ra từ văn bản 
+Đọc hiểu hình thức 2. Địa điểm và thời gian 
+– Nhận biết được một số loại văn bản thông tin thông dụng, đơn giản qua đặc điểm 
+3. Suy nghĩ và hành động của nhân vật 
+của văn bản: văn bản thuật lại một hiện tượng gồm 2 – 3 sự việc, văn bản giới thiệu 
+ 
+một đồ vật, thông báo ngắn, tờ khai đơn giản. 
+NGỮ LIỆU 
+– Nhận biết được cách sắp xếp thông tin trong văn bản theo trật tự thời gian. 
+1.1. Văn bản văn học 
+– Nhận biết được thông tin qua hình ảnh, số liệu trong văn bản. 
+– Cổ tích, ngụ ngôn, truyện ngắn; 
+Liên hệ, so sánh, kết nối 
+đoạn (bài) văn miêu tả 
+Nêu được những điều học được từ văn bản. 
+– Bài thơ, đồng dao, ca dao, vè 
+Đọc mở rộng 
+Độ dài của văn bản: truyện khoảng 
+Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin (bao gồm văn bản được hướng dẫn 
+28
+
+===== PDF PAGE 85 =====
+Yêu cầu cần đạt Nội dung 
+đọc trên mạng Internet) có kiểu văn bản và độ dài tương đương các văn bản đã học. 200 – 250 chữ, bài miêu tả khoảng 
+VIẾT 180 – 200 chữ, thơ khoảng 80 – 100 
+chữ 
+KĨ THUẬT VIẾT 
+1.2. Văn bản thông tin 
+– Viết thành thạo chữ viết thường, viết đúng chữ viết hoa. 
+– Văn bản giới thiệu một đồ vật, văn 
+– Biết viết đúng tên người, tên địa lí Việt Nam và một số tên nhân vật, tên địa lí 
+bản thuật lại một hiện tượng gồm 2 – 
+nước ngoài đã học.  
+3 sự việc 
+– Viết đúng những từ dễ viết sai do đặc điểm phát âm địa phương. 
+– Thông báo ngắn, tờ khai in sẵn 
+– Viết đúng chính tả đoạn thơ, đoạn văn theo hình thức nghe – viết hoặc nhớ viết 
+một bài có độ dài khoảng 65 – 70 chữ, tốc độ khoảng 65 – 70 chữ trong 15 phút.  Độ dài của văn bản: khoảng 120 – 
+– Trình bày bài viết sạch sẽ, đúng quy định. 150 chữ 
+VIẾT ĐOẠN VĂN, VĂN BẢN 2. Gợi ý chọn văn bản: xem danh 
+mục gợi ý 
+Quy trình viết 
+ 
+Biết viết theo các bước: xác định nội dung viết (viết về cái gì); hình thành một vài ý 
+lớn; viết thành đoạn văn; chỉnh sửa lỗi (dùng từ, đặt câu, dấu câu, viết hoa) dựa vào 
+gợi ý. 
+Thực hành viết 
+– Viết được đoạn văn thuật lại một sự việc đã chứng kiến, tham gia. 
+– Viết được đoạn văn ngắn miêu tả đồ vật. 
+– Viết được đoạn văn ngắn nêu tình cảm, cảm xúc về con người, cảnh vật dựa vào 
+gợi ý. 
+– Viết được đoạn văn ngắn nêu lí do vì sao mình thích hoặc không thích một nhân 
+vật trong câu chuyện đã đọc hoặc đã nghe. 
+29
+
+===== PDF PAGE 86 =====
+Yêu cầu cần đạt Nội dung 
+– Viết được đoạn văn ngắn giới thiệu về bản thân, nêu được những thông tin quan 
+trọng như: họ và tên, ngày sinh, nơi sinh, sở thích, ước mơ của bản thân. 
+– Viết được thông báo hay bản tin ngắn theo mẫu; điền được thông tin vào một số tờ 
+khai in sẵn; viết được thư cho người thân hay bạn bè (thư viết tay hoặc thư điện tử). 
+NÓI VÀ NGHE 
+Nói 
+– Nói rõ ràng, tập trung vào mục đích nói và đề tài được nói tới; có thái độ tự tin và 
+có thói quen nhìn vào người nghe, biết tránh dùng từ ngữ kém văn hoá. 
+– Biết phát biểu ý kiến trước nhóm, tổ, lớp; giới thiệu các thành viên, các hoạt động 
+của nhóm, tổ, lớp. 
+– Nói được về một con người, đồ vật, vật nuôi dựa vào gợi ý.  
+– Kể được một câu chuyện đơn giản đã đọc, nghe hoặc xem (có sự hỗ trợ, gợi ý); kết 
+hợp lời kể, điệu bộ thể hiện cảm xúc về câu chuyện. Nói 2 – 3 câu về một tình huống 
+do em tưởng tượng. 
+– Nói được về một số đặc điểm của nhân vật thể hiện qua hình ảnh trong truyện 
+tranh hay phim hoạt hình. 
+Nghe 
+– Chú ý nghe người khác nói. Đặt được những câu hỏi có liên quan để hiểu đúng nội 
+dung đã nghe.  
+– Biết hỏi và đáp kết hợp với cử chỉ, điệu bộ thích hợp. 
+– Nghe một câu chuyện, tưởng tượng và diễn tả lại dáng vẻ hoặc hành động, lời nói 
+của một nhân vật trong câu chuyện đó. 
+ 
+30
+
+===== PDF PAGE 87 =====
+Yêu cầu cần đạt Nội dung 
+Nói nghe tương tác 
+– Chú ý lắng nghe, tập trung vào vấn đề trao đổi, không nói lạc đề. 
+– Biết nói chuyện qua điện thoại với cách mở đầu và kết thúc phù hợp; lắng nghe để 
+hiểu đúng thông tin; nói rõ ràng và tỏ thái độ thích hợp; tập trung vào mục đích cuộc 
+nói chuyện. 
+ 
+LỚP 4 
+Yêu cầu cần đạt Nội dung 
+ĐỌC KIẾN THỨC TIẾNG VIỆT 
+KĨ THUẬT ĐỌC 1. Quy tắc viết tên riêng của cơ quan, 
+– Đọc đúng và diễn cảm các văn bản truyện, kịch, thơ, văn bản miêu tả: nhấn giọng tổ chức 
+đúng từ ngữ; thể hiện cảm xúc qua giọng đọc. Tốc độ đọc khoảng 80 – 90 tiếng 2.1. Vốn từ theo chủ điểm 
+trong 1 phút. 2.2. Công dụng của từ điển, cách tìm 
+– Đọc thầm với tốc độ nhanh hơn lớp 3.  từ và nghĩa của từ trong từ điển  
+– Sử dụng được từ điển học sinh để tìm từ và nghĩa của các từ ngữ mới. 2.3. Nghĩa của một số thành ngữ dễ hiểu 
+– Ghi chép được vắn tắt những ý tưởng, chi tiết quan trọng vào phiếu đọc sách hoặc 2.4. Nghĩa của một số yếu tố Hán Việt 
+sổ tay. thông dụng  
+ĐỌC HIỂU 2.5. Tác dụng của việc lựa chọn từ 
+Văn bản văn học ngữ trong việc biểu đạt nghĩa  
+Đọc hiểu nội dung 3.1. Danh từ, động từ, tính từ: đặc điểm 
+– Nhận biết được một số chi tiết và nội dung chính của văn bản; dựa vào gợi ý hiểu và chức năng 
+31
+
+===== PDF PAGE 88 =====
+Yêu cầu cần đạt Nội dung 
+được điều tác giả muốn nói qua văn bản. 3.2. Danh từ riêng và danh từ chung: 
+– Tóm tắt được văn bản truyện đơn giản. đặc điểm và chức năng 
+– Nhận biết được chủ đề văn bản. 3.3. Câu và thành phần chính của 
+Đọc hiểu hình thức câu: đặc điểm và chức năng 
+– Nhận biết được đặc điểm của nhân vật thể hiện qua hình dáng, điệu bộ, hành động, 3.4. Trạng ngữ của câu: đặc điểm và 
+lời thoại. chức năng (bổ sung thông tin) 
+– Nhận biết được trình tự sắp xếp các sự việc trong câu chuyện theo quan hệ nhân quả. 3.5. Công dụng của dấu gạch ngang ( 
+đặt ở đầu dòng để đánh dấu các ý liệt 
+– Nhận biết được quan hệ giữa các nhân vật trong câu chuyện thể hiện qua cách 
+kê); dấu gạch nối (nối các từ ngữ 
+xưng hô. 
+trong một liên danh); dấu ngoặc kép 
+– Nhận biết được hình ảnh trong thơ, lời thoại trong văn bản kịch (đánh dấu tên của một tác phẩm, tài 
+– Hiểu tác dụng của biện pháp tu từ nhân hoá.  liệu); dấu ngoặc đơn (đánh dấu phần 
+Liên hệ, so sánh, kết nối chú thích) 
+– Nêu được tình cảm, suy nghĩ của bản thân sau khi đọc văn bản. 4.1. Biện pháp tu từ nhân hoá: đặc 
+– Nêu được câu chuyện, bài hoặc đoạn thơ mà mình yêu thích nhất và giải thích vì sao. điểm và tác dụng  
+– Nêu được cách ứng xử của bản thân nếu gặp những tình huống tương tự như tình 4.2. Câu chủ đề của đoạn văn: đặc điểm 
+huống của nhân vật trong tác phẩm. và chức năng 
+Đọc mở rộng 4.3. Cấu trúc ba phần (mở bài, thân 
+– Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng bài, kết bài) của văn bản: đặc điểm và 
+dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học. chức năng của mỗi phần 
+– Thuộc lòng ít nhất 10 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài 4.4. Kiểu văn bản và thể loại  
+thơ, đoạn văn có độ dài khoảng 80 chữ. – Bài văn kể lại một sự việc bản 
+32
+
+===== PDF PAGE 89 =====
+Yêu cầu cần đạt Nội dung 
+Văn bản thông tin thân đã chứng kiến; bài văn kể lại 
+Đọc hiểu nội dung câu chuyện, có kèm tranh minh hoạ 
+– Nhận biết được những thông tin chính trong văn bản. – Bài văn miêu tả: bài văn miêu tả 
+– Biết tóm tắt văn bản. con vật, cây cối 
+Đọc hiểu hình thức – Đoạn văn thể hiện tình cảm, cảm xúc 
+về một nhân vật 
+– Nhận biết được đặc điểm của một số loại văn bản thông dụng, đơn giản và mối 
+quan hệ giữa đặc điểm văn bản với mục đích của nó: văn bản chỉ dẫn các bước thực – Đoạn văn nêu ý kiến về một câu 
+hiện một công việc hoặc cách làm, cách sử dụng một sản phẩm; thư thăm hỏi, thư chuyện, nhân vật hay một sự việc, 
+cảm ơn hoặc xin lỗi; đơn (xin nghỉ học, xin nhập học); giấy mời, báo cáo công việc. nêu lí do vì sao có ý kiến như vậy 
+– Nhận biết được bố cục của một văn bản thông tin thông thường: phần đầu, phần – Văn bản hướng dẫn các bước thực 
+giữa (chính) và phần cuối. hiện một công việc; giấy mời, đơn, 
+Liên hệ, so sánh, kết nối thư, báo cáo công việc 
+– Nêu được một vấn đề có ý nghĩa đối với bản thân hay cộng đồng được gợi ra từ 5. Thông tin bằng hình ảnh, số liệu 
+văn bản đã đọc. (phương tiện giao tiếp phi ngôn ngữ) 
+– Nhận biết được thông tin qua hình ảnh, số liệu trong văn bản (văn bản in hoặc văn KIẾN THỨC VĂN HỌC 
+bản điện tử). 1. Chủ đề 
+Đọc mở rộng 2. Đặc điểm nhân vật 
+Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin (bao gồm văn bản được hướng 3. Hình ảnh trong thơ 
+dẫn đọc trên mạng Internet) có kiểu văn bản và độ dài tương đương với các văn bản 3. Lời thoại trong kịch bản văn học 
+đã học. NGỮ LIỆU 
+VIẾT 1.1. Văn bản văn học 
+KĨ THUẬT VIẾT – Truyện cổ, truyện ngắn; đoạn (bài) 
+33
+
+===== PDF PAGE 90 =====
+Yêu cầu cần đạt Nội dung 
+Viết đúng các tên riêng của tổ chức, cơ quan. văn miêu tả 
+VIẾT ĐOẠN VĂN, VĂN BẢN – Đoạn thơ, bài thơ, đồng dao, ca 
+Quy trình viết dao, tục ngữ 
+– Biết viết theo các bước: xác định nội dung viết (viết về cái gì); quan sát và tìm tư – Kịch bản văn học 
+liệu để viết; hình thành ý chính cho đoạn, bài viết; viết đoạn, bài; chỉnh sửa (bố cục, Độ dài của văn bản: truyện, kịch bản 
+dùng từ, đặt câu, chính tả). khoảng 280 – 330 chữ, bài miêu tả 
+– Viết đoạn văn, bài văn thể hiện chủ đề, ý tưởng chính; phù hợp với yêu cầu về kiểu, khoảng 200 – 250 chữ, thơ khoảng 
+loại văn bản; có mở đầu, triển khai, kết thúc; các câu, đoạn có mối liên kết với nhau. 100 – 120 chữ 
+Thực hành viết 1.2. Văn bản thông tin 
+– Viết được bài văn thuật lại một sự việc đã chứng kiến (nhìn, xem) hoặc tham gia – Văn bản chỉ dẫn các bước thực hiện 
+và chia sẻ suy nghĩ, tình cảm của mình về sự việc đó. một công việc hoặc cách làm, cách sử 
+– Viết được bài văn kể lại câu chuyện đã đọc, đã nghe hoặc viết đoạn văn tưởng dụng một sản phẩm 
+tượng dựa vào câu chuyện đã đọc, đã nghe.  – Giấy mời 
+– Viết được bài văn miêu tả con vật, cây cối; sử dụng nhân hoá và những từ ngữ gợi –Thư thăm hỏi, thư cảm ơn, thư xin 
+lên đặc điểm nổi bật của đối tượng được tả. lỗi 
+– Viết được đoạn văn nêu tình cảm, cảm xúc của bản thân về một nhân vật trong văn – Đơn (xin nghỉ học, xin nhập học) 
+học hoặc một người gần gũi, thân thiết. 
+– Báo cáo công việc 
+– Viết được đoạn văn ngắn nêu lí do vì sao mình thích câu chuyện đã đọc hoặc đã 
+Độ dài của văn bản: khoảng 150 – 
+nghe. 
+180 chữ 
+– Viết được văn bản ngắn hướng dẫn các bước thực hiện một công việc hoặc làm, sử 
+2. Gợi ý chọn văn bản: xem danh 
+dụng một sản phẩm gồm 2 – 3 bước. 
+mục gợi ý 
+– Viết được báo cáo thảo luận nhóm, đơn theo mẫu, thư cho người thân, bạn bè. 
+34
+
+===== PDF PAGE 91 =====
+Yêu cầu cần đạt Nội dung 
+NÓI VÀ NGHE 
+Nói 
+– Nói rõ ràng, tập trung vào mục đích và đề tài; có thái độ tự tin; biết kết hợp cử chỉ, 
+điệu bộ để tăng hiệu quả giao tiếp. 
+– Nói được về một đề tài có sử dụng các phương tiện hỗ trợ (ví dụ: tranh ảnh, sơ đồ,...). 
+– Kể lại được một sự việc đã tham gia và chia sẻ cảm xúc, suy nghĩ về sự việc đó. 
+– Trình bày được lí lẽ để củng cố cho một ý kiến hoặc nhận định về một vấn đề gần 
+gũi với đời sống. 
+Nghe 
+– Nghe và hiểu chủ đề, những chi tiết quan trọng trong câu chuyện. 
+– Ghi lại được những nội dung quan trọng khi nghe ý kiến phát biểu của người khác. 
+Nói nghe tương tác 
+– Thực hiện đúng những quy định trong thảo luận: nguyên tắc luân phiên lượt lời, 
+tập trung vào vấn đề thảo luận. 
+– Biết đóng góp ý kiến trong việc thảo luận về một vấn đề đáng quan tâm hoặc một 
+nhiệm vụ mà nhóm, lớp phải thực hiện.  
+ 
+LỚP 5 
+Yêu cầu cần đạt Nội dung 
+ĐỌC KIẾN THỨC TIẾNG VIỆT 
+KĨ THUẬT ĐỌC 1.1. Quy tắc viết tên người, tên địa lí 
+35
+
+===== PDF PAGE 92 =====
+Yêu cầu cần đạt Nội dung 
+– Đọc đúng và diễn cảm các văn bản truyện, kịch bản, bài thơ, bài miêu tả, tốc độ nước ngoài 
+đọc khoảng 90 – 100 tiếng trong 1 phút. 1.2. Một số trường hợp viết hoa danh 
+– Đọc thầm với tốc độ nhanh hơn lớp 4.  từ chung để thể hiện sự tôn trọng đặc 
+– Sử dụng được một số từ điển tiếng Việt thông dụng để tìm từ, nghĩa của từ, cách biệt 
+dùng từ và tra cứu thông tin khác. 2.1. Vốn từ theo chủ điểm 
+– Biết đọc theo những cách khác nhau (đọc lướt và đọc kĩ). 2.2. Từ điển: cách tìm từ, nghĩa của 
+– Ghi chép được vắn tắt những ý tưởng, chi tiết quan trọng vào phiếu đọc sách hoặc từ, cách dùng từ và tra cứu thông tin 
+sổ tay. khác 
+ĐỌC HIỂU 2.3. Nghĩa của một số thành ngữ dễ 
+Văn bản văn học hiểu, thông dụng  
+Đọc hiểu nội dung 2.4. Nghĩa của một số yếu tố Hán 
+Việt thông dụng, “đồng âm khác 
+– Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được 
+nghĩa”  
+nội dung hàm ẩn dễ nhận biết của văn bản. 
+2.5. Từ đồng nghĩa: đặc điểm và tác 
+– Chỉ ra được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản. 
+dụng  
+– Hiểu chủ đề của văn bản. 
+2.6. Từ đa nghĩa và nghĩa của từ đa 
+Đọc hiểu hình thức nghĩa trong văn bản. 
+– Nhận biết được văn bản viết theo tưởng tượng và văn bản viết về người thật, việc thật. 3.1. Đại từ và kết từ: đặc điểm và chức 
+– Nhận biết được thời gian, địa điểm và tác dụng của chúng trong câu chuyện. năng 
+– Hiểu từ ngữ, hình ảnh, biện pháp so sánh, nhân hoá trong văn bản.  3.2. Câu đơn và câu ghép: đặc điểm 
+Liên hệ, so sánh, kết nối và chức năng 
+– Biết nhận xét về thời gian, địa điểm, hình dáng, tính cách của nhân vật qua hình 
+36
+
+===== PDF PAGE 93 =====
+Yêu cầu cần đạt Nội dung 
+ảnh trong truyện tranh hoặc phim hoạt hình.  3.3. Công dụng của dấu gạch ngang 
+– Tìm được một cách kết thúc khác cho câu chuyện. (đặt ở giữa câu để đánh dấu bộ phận 
+– Nêu những điều học được từ câu chuyện, bài thơ, màn kịch; lựa chọn điều tâm đắc chú thích, giải thích trong câu); dấu 
+nhất và giải thích vì sao. gạch nối (nối các tiếng trong những 
+từ mượn gồm nhiều tiếng) 
+Đọc mở rộng 
+4.1. Biện pháp tu từ điệp từ, điệp 
+– Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng 
+ngữ: đặc điểm và tác dụng  
+dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã 
+4.2. Liên kết giữa các câu trong một 
+học. 
+đoạn văn, một số biện pháp liên kết 
+– Thuộc lòng ít nhất 10 – 12 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, 
+câu và các từ ngữ liên kết: đặc điểm 
+bài thơ, đoạn văn có độ dài khoảng 100 chữ. 
+và tác dụng  
+Văn bản thông tin 
+4.3. Kiểu văn bản và thể loại 
+Đọc hiểu nội dung 
+– Bài văn viết lại phần kết thúc dựa 
+ – Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản. trên một truyện kể 
+– Dựa vào nhan đề và các đề mục lớn, xác định được đề tài, thông tin chính của văn bản. – Bài văn tả người, phong cảnh 
+– Nhận biết được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản. – Đoạn văn thể hiện tình cảm, cảm 
+Đọc hiểu hình thức xúc trước một sự việc hoặc một bài 
+– Nhận biết được mục đích và đặc điểm của văn bản giải thích về một hiện tượng tự thơ, câu chuyện 
+nhiên; văn bản giới thiệu sách hoặc phim; văn bản quảng cáo, văn bản chương trình – Đoạn văn nêu ý kiến về một hiện 
+hoạt động. tượng xã hội 
+– Nhận biết được bố cục (phần đầu, phần giữa (chính), phần cuối) và các yếu tố – Bài văn giải thích về một hiện 
+(nhan đề, đoạn văn, câu chủ đề) của một văn bản thông tin đơn giản. tượng tự nhiên, bài giới thiệu sách 
+– Nhận biết được cách triển khai ý tưởng và thông tin trong văn bản theo trật tự thời hoặc phim, báo cáo công việc, 
+37
+
+===== PDF PAGE 94 =====
+Yêu cầu cần đạt Nội dung 
+gian hoặc theo tầm quan trọng. chương trình hoạt động, có sử dụng 
+– Nhận biết được vai trò của hình ảnh, kí hiệu hoặc số liệu trong việc thể hiện thông bảng biểu; văn bản quảng cáo (tờ rơi, 
+tin chính của văn bản (văn bản in hoặc văn bản điện tử). áp phích,...) 
+Liên hệ, so sánh, kết nối 5. Thông tin bằng hình ảnh, số liệu 
+– Nêu được những thay đổi trong hiểu biết, tình cảm, cách ứng xử của bản thân sau (phương tiện giao tiếp phi ngôn ngữ). 
+khi đọc văn bản. KIẾN THỨC VĂN HỌC 
+Đọc mở rộng 1. Chủ đề 
+Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin (bao gồm văn bản được hướng 2. Kết thúc câu chuyện 
+dẫn đọc trên mạng Internet) có kiểu văn bản và độ dài tương đương với các văn bản 3. Chuyện có thật và chuyện tưởng 
+đã học. tượng 
+VIẾT 4. Chi tiết, thời gian, địa điểm trong 
+KĨ THUẬT VIẾT câu chuyện; hình ảnh trong thơ 
+Biết viết hoa danh từ chung trong một số trường hợp đặc biệt khi muốn thể hiện sự 5. Nhân vật trong văn bản kịch và lời 
+tôn kính. Biết viết đúng tên người, tên địa lí nước ngoài. thoại 
+VIẾT ĐOẠN VĂN, VĂN BẢN NGỮ LIỆU 
+Quy trình viết 1.1. Văn bản văn học 
+ – Biết viết theo các bước: xác định mục đích và nội dung viết (viết để làm gì, về cái – Truyện dân gian, truyện ngắn, 
+gì); quan sát và tìm tư liệu để viết; hình thành ý chính, lập dàn ý cho bài viết; viết truyện khoa học viễn tưởng; đoạn 
+đoạn, bài; chỉnh sửa (bố cục, dùng từ, đặt câu, chính tả). (bài) văn miêu tả 
+– Viết được đoạn văn, văn bản thể hiện rõ ràng và mạch lạc chủ đề, thông tin chính; – Bài thơ, đoạn thơ, đồng dao, ca 
+phù hợp với yêu cầu về kiểu, loại; có mở đầu, triển khai, kết thúc; các câu, đoạn liên dao, tục ngữ 
+kết với nhau. – Kịch bản văn học 
+38
+
+===== PDF PAGE 95 =====
+Yêu cầu cần đạt Nội dung 
+Thực hành viết Độ dài của văn bản: truyện và kịch 
+– Viết được bài văn kể lại câu chuyện đã đọc, đã nghe với những chi tiết sáng tạo. bản khoảng 300 – 350 chữ, bài miêu 
+– Viết được bài tả người, phong cảnh có sử dụng so sánh, nhân hoá và những từ ngữ tả khoảng 200 – 250 chữ, thơ khoảng 
+gợi tả để làm nổi bật đặc điểm của đối tượng được tả. 110 – 130 chữ 
+– Viết được đoạn văn thể hiện tình cảm, cảm xúc của bản thân trước một sự việc 1.2. Văn bản thông tin 
+hoặc một bài thơ, câu chuyện. – Văn bản giải thích về một hiện 
+– Viết được đoạn văn nêu lí do vì sao tán thành hoặc phản đối về một hiện tượng, sự tượng tự nhiên. 
+việc có ý nghĩa trong cuộc sống. – Văn bản giới thiệu sách, phim 
+– Viết được đoạn văn giới thiệu về một nhân vật trong một cuốn sách hoặc bộ phim – Chương trình hoạt động; quảng cáo 
+hoạt hình đã xem (hình dáng, cử chỉ, hành động, ngôn ngữ). Độ dài của văn bản: khoảng 230 chữ 
+– Viết được báo cáo công việc, chương trình hoạt động, có sử dụng bảng biểu. 2. Gợi ý chọn văn bản: xem danh 
+NÓI VÀ NGHE mục gợi ý 
+Nói   
+ – Điều chỉnh được lời nói (từ ngữ, tốc độ, âm lượng) cho phù hợp với người nghe. 
+Trình bày ý tưởng rõ ràng, có cảm xúc; có thái độ tự tin khi nói trước nhiều người; 
+sử dụng lời nói, cử chỉ, điệu bộ thích hợp. 
+– Sử dụng được các phương tiện hỗ trợ phù hợp để tăng hiệu quả biểu đạt. 
+– Biết dựa trên gợi ý, giới thiệu về một di tích, một địa điểm tham quan hoặc một địa 
+chỉ vui chơi.  
+Nghe 
+– Biết vừa nghe vừa ghi những nội dung quan trọng từ ý kiến của người khác. 
+– Nhận biết được một số lí lẽ và dẫn chứng mà người nói sử dụng để thuyết phục 
+39
+
+===== PDF PAGE 96 =====
+Yêu cầu cần đạt Nội dung 
+người nghe. 
+Nói nghe tương tác 
+Biết thảo luận về một vấn đề có các ý kiến khác biệt; biết dùng lí lẽ và dẫn chứng để 
+thuyết phục người đối thoại, biết tôn trọng sự khác biệt trong thảo luận, thể hiện sự 
+nhã nhặn, lịch sự khi trình bày ý kiến trái ngược với người khác. 
+ 
+LỚP 6 
+Yêu cầu cần đạt Nội dung 
+ĐỌC KIẾN THỨC TIẾNG VIỆT 
+ĐỌC HIỂU 1.1. Từ đơn và từ phức, từ ghép và từ 
+Văn bản văn học láy 
+Đọc hiểu nội dung 1.2. Từ đa nghĩa và từ đồng âm   
+– Nêu được ấn tượng chung về văn bản; nhận biết được các chi tiết tiêu biểu, đề tài, 1.3. Nghĩa của một số thành ngữ 
+câu chuyện, nhân vật trong tính chỉnh thể tác phẩm. thông dụng  
+– Nhận biết được chủ đề của văn bản. 1.4. Nghĩa của một số yếu tố Hán 
+– Nhận biết được tình cảm, cảm xúc của người viết thể hiện qua ngôn ngữ văn bản. Việt thông dụng (ví dụ: bất, phi) và 
+nghĩa của những từ có yếu tố Hán 
+– Tóm tắt được văn bản một cách ngắn gọn. 
+Việt đó (ví dụ: bất công, bất đồng, 
+Đọc hiểu hình thức phi nghĩa, phi lí) 
+– Nhận biết được một số yếu tố của truyện truyền thuyết, cổ tích, đồng thoại như: 2.1. Các thành phần chính của câu: 
+cốt truyện, nhân vật, lời người kể chuyện và lời nhân vật. 
+40 
+
+
+===== PDF PAGE 187 =====
+Lớp 
+Mạch Chủ đề 
+1 2 3 4 5 6 7 8 9 10 11 12 
+Dung tích. Thể tích  x x  x  x x x  x x 
+Khối lượng  x x x         
+Nhiệt độ   x          
+Thời gian x x x x x        
+Vận tốc     x      x  
+Tiền tệ  x x x         
+THỐNG KÊ VÀ XÁC SUẤT  
+Một số yếu tố thống kê  x x x x x x x x x x x 
+Một số yếu tố xác suất  x x x x x x x x x x x 
+HOẠT ĐỘNG THỰC HÀNH VÀ TRẢI NGHIỆM x x x x x x x x x x x x 
+3. Nội dung cụ thể và yêu cầu cần đạt ở các lớp 
+LỚP 1 
+Nội dung Yêu cầu cần đạt 
+SỐ VÀ PHÉP TÍNH 
+Số tự nhiên 
+Số tự nhiên Đếm, đọc, viết các số – Đếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong 
+trong phạm vi 100 phạm vi 100.  
+21
+
+===== PDF PAGE 188 =====
+Nội dung Yêu cầu cần đạt 
+– Nhận biết được chục và đơn vị, số tròn chục. 
+So sánh các số trong phạm Nhận biết được cách so sánh, xếp thứ tự các số trong phạm vi 100 (ở các 
+vi 100 nhóm có không quá 4 số).  
+Các phép tính với Phép cộng, phép trừ – Nhận biết được ý nghĩa của phép cộng, phép trừ. 
+số tự nhiên  – Thực hiện được phép cộng, phép trừ (không nhớ) các số trong phạm vi 100. 
+– Làm quen với việc thực hiện tính toán trong trường hợp có hai dấu phép 
+tính cộng, trừ (theo thứ tự từ trái sang phải). 
+Tính nhẩm – Thực hiện được việc cộng, trừ nhẩm trong phạm vi 10. 
+– Thực hiện được việc cộng, trừ nhẩm các số tròn chục. 
+Thực hành giải quyết vấn – Nhận biết được ý nghĩa thực tiễn của phép tính (cộng, trừ) thông qua 
+đề liên quan đến các phép tranh ảnh, hình vẽ hoặc tình huống thực tiễn. 
+tính cộng, trừ – Nhận biết và viết được phép tính (cộng, trừ) phù hợp với câu trả lời của 
+bài toán có lời văn và tính được kết quả đúng. 
+HÌNH HỌC VÀ ĐO LƯỜNG 
+Hình học trực quan 
+Hình phẳng  Quan sát, nhận biết hình – Nhận biết được vị trí, định hướng trong không gian: trên – dưới, phải – 
+và hình khối dạng của một số hình trái, trước – sau, ở giữa. 
+phẳng và hình khối đơn – Nhận dạng được hình vuông, hình tròn, hình tam giác, hình chữ nhật 
+giản thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật. 
+– Nhận dạng được khối lập phương, khối hộp chữ nhật thông qua việc sử 
+22
+
+===== PDF PAGE 189 =====
+Nội dung Yêu cầu cần đạt 
+dụng bộ đồ dùng học tập cá nhân hoặc vật thật. 
+Thực hành lắp ghép, xếp Nhận biết và thực hiện được việc lắp ghép, xếp hình gắn với sử dụng bộ 
+hình gắn với một số hình đồ dùng học tập cá nhân hoặc vật thật. 
+phẳng và hình khối đơn  
+giản 
+Đo lường 
+Đo lường Biểu tượng về đại lượng – Nhận biết được về “dài hơn”, “ngắn hơn”. 
+và đơn vị đo đại lượng – Nhận biết được đơn vị đo độ dài: cm (xăng-ti-mét); đọc và viết được số 
+đo độ dài trong phạm vi 100cm.   
+– Nhận biết được mỗi tuần lễ có 7 ngày và tên gọi, thứ tự các ngày trong 
+tuần lễ. 
+– Nhận biết được giờ đúng trên đồng hồ.  
+Thực hành đo đại lượng – Thực hiện được việc đo và ước lượng độ dài theo đơn vị đo tự quy ước 
+(gang tay, bước chân,...). 
+– Thực hiện được việc đo độ dài bằng thước thẳng với đơn vị đo là cm. 
+– Thực hiện được việc đọc giờ đúng trên đồng hồ. 
+– Xác định được thứ, ngày trong tuần khi xem lịch (loại lịch tờ hàng 
+ngày). 
+– Giải quyết được một số vấn đề thực tiễn đơn giản liên quan đến đo độ 
+dài, đọc giờ đúng và xem lịch (loại lịch tờ hằng ngày). 
+ 
+23
+
+===== PDF PAGE 190 =====
+Nội dung Yêu cầu cần đạt 
+HOẠT ĐỘNG THỰC HÀNH VÀ TRẢI NGHIỆM 
+Nhà trường tổ chức cho học sinh một số hoạt động sau và có thể bổ sung các hoạt động khác tuỳ vào điều kiện cụ thể. 
+Hoạt động 1: Thực hành ứng dụng các kiến thức toán học vào thực tiễn, chẳng hạn: 
+– Thực hành đếm, nhận biết số, thực hiện phép tính trong một số tình huống thực tiễn hằng ngày (ví dụ: đếm số bàn học và 
+số cửa sổ trong lớp học,...). 
+– Thực hành các hoạt động liên quan đến vị trí, định hướng không gian (ví dụ: xác định được một vật ở trên hoặc dưới mặt 
+bàn, một vật cao hơn hoặc thấp hơn vật khác,...). 
+– Thực hành đo và ước lượng độ dài một số đồ vật trong thực tế gắn với đơn vị đo cm; thực hành đọc giờ đúng trên đồng hồ, 
+xem lịch loại lịch tờ hằng ngày. 
+Hoạt động 2: Tổ chức các hoạt động ngoài giờ chính khoá (ví dụ: các trò chơi học toán,...) liên quan đến ôn tập, củng cố các 
+kiến thức cơ bản. 
+ 
+LỚP 2 
+Nội dung Yêu cầu cần đạt 
+SỐ VÀ PHÉP TÍNH 
+Số tự nhiên 
+Số tự nhiên Số và cấu tạo thập phân – Đếm, đọc, viết được các số trong phạm vi 1000. 
+của một số – Nhận biết được số tròn trăm. 
+– Nhận biết được số liền trước, số liền sau của một số. 
+– Thực hiện được việc viết số thành tổng của trăm, chục, đơn vị. 
+24
+
+===== PDF PAGE 191 =====
+Nội dung Yêu cầu cần đạt 
+– Nhận biết được tia số và viết được số thích hợp trên tia số. 
+So sánh các số  – Nhận biết được cách so sánh hai số trong phạm vi 1000.  
+– Xác định được số lớn nhất hoặc số bé nhất trong một nhóm có không 
+quá 4 số (trong phạm vi 1000). 
+– Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc 
+ngược lại) trong một nhóm có không quá 4 số (trong phạm vi 1000). 
+Ước lượng số đồ vật Làm quen với việc ước lượng số đồ vật theo các nhóm 1 chục. 
+Các phép tính với Phép cộng, phép trừ – Nhận biết được các thành phần của phép cộng, phép trừ. 
+số tự nhiên – Thực hiện được phép cộng, phép trừ (không nhớ, có nhớ không quá một 
+lượt) các số trong phạm vi 1000. 
+– Thực hiện được việc tính toán trong trường hợp có hai dấu phép tính 
+cộng, trừ (theo thứ tự từ trái sang phải). 
+Phép nhân, phép chia – Nhận biết được ý nghĩa của phép nhân, phép chia. 
+– Nhận biết được các thành phần của phép nhân, phép chia. 
+– Vận dụng được bảng nhân 2 và bảng nhân 5 trong thực hành tính. 
+– Vận dụng được bảng chia 2 và bảng chia 5 trong thực hành tính. 
+Tính nhẩm  – Thực hiện được việc cộng, trừ nhẩm trong phạm vi 20.  
+– Thực hiện được việc cộng, trừ nhẩm các số tròn chục, tròn trăm trong 
+phạm vi 1000. 
+ Thực hành giải quyết vấn – Nhận biết ý nghĩa thực tiễn của phép tính (cộng, trừ, nhân, chia) thông 
+đề liên quan đến các phép qua tranh ảnh, hình vẽ hoặc tình huống thực tiễn. 
+25
+
+===== PDF PAGE 192 =====
+Nội dung Yêu cầu cần đạt 
+tính đã học – Giải quyết được một số vấn đề gắn với việc giải các bài toán có một 
+bước tính (trong phạm vi các số và phép tính đã học) liên quan đến ý 
+nghĩa thực tế của phép tính (ví dụ: bài toán về thêm, bớt một số đơn vị; 
+bài toán về nhiều hơn, ít hơn một số đơn vị). 
+HÌNH HỌC VÀ ĐO LƯỜNG 
+Hình học trực quan 
+Hình phẳng  Quan sát, nhận biết, mô tả – Nhận biết được điểm, đoạn thẳng, đường cong, đường thẳng, đường gấp 
+và hình khối hình dạng của một số hình khúc, ba điểm thẳng hàng thông qua hình ảnh trực quan.  
+phẳng và hình khối đơn – Nhận dạng được hình tứ giác thông qua việc sử dụng bộ đồ dùng học 
+giản tập cá nhân hoặc vật thật.  
+– Nhận dạng được khối trụ, khối cầu thông qua việc sử dụng bộ đồ dùng 
+học tập cá nhân hoặc vật thật. 
+Thực hành đo, vẽ, lắp – Thực hiện được việc vẽ đoạn thẳng có độ dài cho trước. 
+ghép, tạo hình gắn với một – Nhận biết và thực hiện được việc gấp, cắt, ghép, xếp và tạo hình gắn với 
+số hình phẳng và hình khối việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật. 
+đã học  – Giải quyết được một số vấn đề thực tiễn đơn giản liên quan đến hình 
+phẳng và hình khối đã học. 
+Đo lường 
+Đo lường Biểu tượng về đại lượng và – Nhận biết được về “nặng hơn”, “nhẹ hơn”. 
+đơn vị đo đại lượng – Nhận biết được đơn vị đo khối lượng: kg (ki-lô-gam); đọc và viết được 
+số đo khối lượng trong phạm vi 1000kg. 
+– Nhận biết được đơn vị đo dung tích: l (lít); đọc và viết được số đo dung 
+26
+
+===== PDF PAGE 193 =====
+Nội dung Yêu cầu cần đạt 
+tích trong phạm vi 1000 lít. 
+– Nhận biết được các đơn vị đo độ dài dm (đề-xi-mét), m (mét), km  
+(ki-lô-mét) và quan hệ giữa các đơn vị đo độ dài đã học.  
+– Nhận biết được một ngày có 24 giờ; một giờ có 60 phút.  
+– Nhận biết được số ngày trong tháng, ngày trong tháng (ví dụ: tháng Ba 
+có 31 ngày; sinh nhật Bác Hồ là ngày 19 tháng 5). 
+– Nhận biết được tiền Việt Nam thông qua hình ảnh một số tờ tiền. 
+Thực hành đo đại lượng – Sử dụng được một số dụng cụ thông dụng (một số loại cân thông dụng, 
+thước thẳng có chia vạch đến xăng-ti-mét,...) để thực hành cân, đo, đong, 
+đếm. 
+– Đọc được giờ trên đồng hồ khi kim phút chỉ số 3, số 6. 
+Tính toán và ước lượng với – Thực hiện được việc chuyển đổi và tính toán với các số đo độ dài, khối 
+các số đo đại lượng lượng, dung tích đã học.  
+ – Thực hiện được việc ước lượng các số đo trong một số trường hợp đơn 
+giản (ví dụ: cột cờ trường em cao khoảng 6m, cửa ra vào của lớp học cao 
+khoảng 2m,...). 
+– Tính được độ dài đường gấp khúc khi biết độ dài các cạnh. 
+– Giải quyết được một số vấn đề thực tiễn liên quan đến đo lường các đại 
+lượng đã học. 
+MỘT SỐ YẾU TỐ THỐNG KÊ VÀ XÁC SUẤT 
+Một số yếu tố thống kê 
+27
+
+===== PDF PAGE 194 =====
+Nội dung Yêu cầu cần đạt 
+Một số yếu tố  Thu thập, phân loại, sắp Làm quen với việc thu thập, phân loại, kiểm đếm các đối tượng thống kê 
+thống kê xếp các số liệu  (trong một số tình huống đơn giản). 
+Đọc biểu đồ tranh Đọc và mô tả được các số liệu ở dạng biểu đồ tranh. 
+Nhận xét về các số liệu Nêu được một số nhận xét đơn giản từ biểu đồ tranh. 
+trên biểu đồ tranh 
+Một số yếu tố xác suất 
+Một số yếu tố xác Làm quen với các khả Làm quen với việc mô tả những hiện tượng liên quan tới các thuật ngữ: có 
+suất năng xảy ra (có tính ngẫu thể, chắc chắn, không thể, thông qua một vài thí nghiệm, trò chơi, hoặc 
+nhiên) của một sự kiện xuất phát từ thực tiễn.  
+HOẠT ĐỘNG THỰC HÀNH VÀ TRẢI NGHIỆM 
+Nhà trường tổ chức cho học sinh một số hoạt động sau và có thể bổ sung các hoạt động khác tuỳ vào điều kiện cụ thể. 
+Hoạt động 1: Thực hành ứng dụng các kiến thức toán học vào thực tiễn, chẳng hạn: 
+– Thực hành tính toán, đo lường và ước lượng độ dài, khối lượng, dung tích một số đồ vật trong thực tiễn; thực hành đọc giờ 
+trên đồng hồ, xem lịch; thực hành sắp xếp thời gian biểu học tập và sinh hoạt của cá nhân hằng ngày, trong tuần,... 
+– Thực hành thu thập, phân loại, ghi chép, kiểm đếm một số đối tượng thống kê trong trường, lớp. 
+Hoạt động 2: Tổ chức các hoạt động ngoài giờ chính khoá (ví dụ: trò chơi học toán hoặc các hoạt động “Học vui – Vui 
+học”,...) liên quan đến ôn tập, củng cố các kiến thức cơ bản. 
+ 
+ 
+ 
+28
+
+===== PDF PAGE 195 =====
+LỚP 3 
+Nội dung Yêu cầu cần đạt 
+SỐ VÀ PHÉP TÍNH 
+Số tự nhiên 
+Số tự nhiên Số và cấu tạo thập phân – Đọc, viết được các số trong phạm vi 10 000; trong phạm vi 100 000. 
+của một số – Nhận biết được số tròn nghìn, tròn mười nghìn. 
+– Nhận biết được cấu tạo thập phân của một số. 
+– Nhận biết được chữ số La Mã và viết được các số tự nhiên trong phạm 
+vi 20 bằng cách sử dụng chữ số La Mã. 
+So sánh các số  – Nhận biết được cách so sánh hai số trong phạm vi 100 000.  
+– Xác định được số lớn nhất hoặc số bé nhất trong một nhóm có không 
+quá 4 số (trong phạm vi 100 000). 
+– Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc 
+ngược lại) trong một nhóm có không quá 4 số (trong phạm vi 100 000). 
+Làm tròn số Làm quen với việc làm tròn số đến tròn chục, tròn trăm, tròn nghìn, tròn 
+mười nghìn (ví dụ: làm tròn số 1234 đến hàng chục thì được số 1230). 
+Các phép tính với Phép cộng, phép trừ – Thực hiện được phép cộng, phép trừ các số có đến 5 chữ số (có nhớ 
+số tự nhiên không quá hai lượt và không liên tiếp).  
+– Nhận biết được tính chất giao hoán, tính chất kết hợp của phép cộng và 
+mối quan hệ giữa phép cộng với phép trừ trong thực hành tính. 
+Phép nhân, phép chia – Vận dụng được các bảng nhân, bảng chia 2, 3,..., 9 trong thực hành tính. 
+29
+
+===== PDF PAGE 196 =====
+Nội dung Yêu cầu cần đạt 
+– Thực hiện được phép nhân với số có một chữ số (có nhớ không quá hai 
+lượt và không liên tiếp). 
+– Thực hiện được phép chia cho số có một chữ số. 
+– Nhận biết và thực hiện được phép chia hết và phép chia có dư. 
+– Nhận biết được tính chất giao hoán, tính chất kết hợp của phép nhân và 
+mối quan hệ giữa phép nhân với phép chia trong thực hành tính. 
+Tính nhẩm  Thực hiện được cộng, trừ, nhân, chia nhẩm trong những trường hợp  
+đơn giản. 
+Biểu thức số  – Làm quen với biểu thức số. 
+– Tính được giá trị của biểu thức số có đến hai dấu phép tính và không có 
+dấu ngoặc. 
+– Tính được giá trị của biểu thức số có đến hai dấu phép tính và có dấu 
+ngoặc theo nguyên tắc thực hiện trong dấu ngoặc trước. 
+– Xác định được thành phần chưa biết của phép tính thông qua các giá trị 
+đã biết. 
+ Thực hành giải quyết vấn Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai 
+đề liên quan đến các phép bước tính (trong phạm vi các số và phép tính đã học) liên quan đến ý 
+tính đã học nghĩa thực tế của phép tính; liên quan đến thành phần và kết quả của phép 
+tính; liên quan đến các mối quan hệ so sánh trực tiếp và đơn giản (chẳng 
+hạn: gấp một số lên một số lần, giảm một số đi một số lần, so sánh số lớn 
+gấp mấy lần số bé).  
+30
+
+===== PDF PAGE 197 =====
+Nội dung Yêu cầu cần đạt 
+Phân số 
+Phân số Làm quen với phân số 1 1 1
+– Nhận biết được về ; ;...; thông qua các hình ảnh trực quan. 
+2 3 9  
+1 1 1
+– Xác định được ; ;...; của một nhóm đồ vật (đối tượng) bằng việc 
+2 3 9  
+chia thành các phần đều nhau. 
+HÌNH HỌC VÀ ĐO LƯỜNG 
+Hình học trực quan 
+Hình phẳng và Quan sát, nhận biết, mô tả – Nhận biết được điểm ở giữa, trung điểm của đoạn thẳng. 
+hình khối hình dạng và đặc điểm của – Nhận biết được góc, góc vuông, góc không vuông.  
+một số hình phẳng và hình – Nhận biết được tam giác, tứ giác. 
+khối  
+– Nhận biết được một số yếu tố cơ bản như đỉnh, cạnh, góc của hình chữ 
+đơn giản 
+nhật, hình vuông; tâm, bán kính, đường kính của hình tròn.  
+– Nhận biết được một số yếu tố cơ bản như đỉnh, cạnh, mặt của khối lập 
+phương, khối hộp chữ nhật. 
+Thực hành đo, vẽ, lắp –  Thực hiện được việc vẽ góc vuông, đường tròn, vẽ trang trí. 
+ghép, tạo hình gắn với một – Sử dụng được êke để kiểm tra góc vuông, sử dụng được compa để vẽ 
+số hình phẳng và hình khối đường tròn. 
+đã học  –  Thực hiện được việc vẽ hình vuông, hình chữ nhật bằng lưới ô vuông.  
+– Giải quyết được một số vấn đề liên quan đến gấp, cắt, ghép, xếp, vẽ và 
+tạo hình trang trí. 
+31
+
+===== PDF PAGE 198 =====
+Nội dung Yêu cầu cần đạt 
+Đo lường 
+Đo lường Biểu tượng về đại lượng và – Nhận biết được “diện tích” thông qua một số biểu tượng cụ thể. 
+đơn vị đo đại lượng – Nhận biết được đơn vị đo diện tích: cm2 (xăng-ti-mét vuông).  
+– Nhận biết được đơn vị đo độ dài: mm (mi-li-mét); quan hệ giữa các đơn 
+vị m, dm, cm và mm.  
+– Nhận biết được đơn vị đo khối lượng: g (gam); quan hệ giữa g và kg. 
+– Nhận biết được đơn vị đo dung tích: ml (mi-li-lít); quan hệ giữa l và ml. 
+– Nhận biết được đơn vị đo nhiệt độ (oC). 
+– Nhận biết được mệnh giá của các tờ tiền Việt Nam (trong phạm vi        
+100 000 đồng); nhận biết được tờ tiền hai trăm nghìn đồng và năm trăm 
+nghìn đồng (không yêu cầu học sinh đọc, viết số chỉ mệnh giá). 
+– Nhận biết được tháng trong năm. 
+Thực hành đo đại lượng – Sử dụng được một số dụng cụ thông dụng (một số loại cân thông dụng, 
+thước thẳng có chia vạch đến mi-li-mét, nhiệt kế,...) để thực hành cân, đo, 
+đong, đếm. 
+– Đọc được giờ chính xác đến 5 phút và từng phút trên đồng hồ. 
+Tính toán và ước lượng với – Thực hiện được việc chuyển đổi và tính toán với các số đo độ dài (mm, 
+các số đo đại lượng cm, dm, m, km); diện tích (cm2); khối lượng (g, kg); dung tích (ml, l); thời 
+ gian (phút, giờ, ngày, tuần lễ, tháng, năm); tiền Việt Nam đã học. 
+– Tính được chu vi của hình tam giác, hình tứ giác, hình chữ nhật, hình 
+vuông khi biết độ dài các cạnh. 
+32
+
+===== PDF PAGE 199 =====
+Nội dung Yêu cầu cần đạt 
+– Tính được diện tích hình chữ nhật, hình vuông.  
+– Thực hiện được việc ước lượng các kết quả đo lường trong một số 
+trường hợp đơn giản (ví dụ: cân nặng của một con gà khoảng 2kg,...). 
+– Giải quyết được một số vấn đề thực tiễn liên quan đến đo lường. 
+MỘT SỐ YẾU TỐ THỐNG KÊ VÀ XÁC SUẤT 
+Một số yếu tố thống kê 
+Một số yếu tố Thu thập, phân loại, sắp Nhận biết được cách thu thập, phân loại, ghi chép số liệu thống kê (trong 
+thống kê xếp các số liệu  một số tình huống đơn giản) theo các tiêu chí cho trước. 
+Đọc, mô tả bảng số liệu  Đọc và mô tả được các số liệu ở dạng bảng. 
+Nhận xét về các số liệu Nêu được một số nhận xét đơn giản từ bảng số liệu. 
+trong bảng 
+Một số yếu tố xác suất 
+Một số yếu tố xác Nhận biết và mô tả các khả Nhận biết và mô tả được các khả năng xảy ra (có tính ngẫu nhiên) của 
+suất năng xảy ra (có tính ngẫu một sự kiện khi thực hiện (1 lần) thí nghiệm đơn giản (ví dụ: nhận ra được 
+nhiên) của một sự kiện hai khả năng xảy ra đối với mặt xuất hiện của đồng xu khi tung 1 lần; 
+ nhận ra được hai khả năng xảy ra đối với màu của quả bóng lấy ra từ hộp 
+kín đựng các quả bóng có hai màu xanh hoặc đỏ;...). 
+HOẠT ĐỘNG THỰC HÀNH VÀ TRẢI NGHIỆM 
+Nhà trường tổ chức cho học sinh một số hoạt động sau và có thể bổ sung các hoạt động khác tuỳ vào điều kiện cụ thể. 
+Hoạt động 1: Thực hành ứng dụng các kiến thức toán học vào thực tiễn, chẳng hạn: 
+33
+
+===== PDF PAGE 200 =====
+Nội dung Yêu cầu cần đạt 
+– Thực hành các hoạt động liên quan đến tính toán, đo lường và ước lượng như: thực hành tính và ước lượng chu vi, diện 
+tích của một số hình phẳng trong thực tế liên quan đến các hình phẳng đã được học; thực hành đo, cân, đong và ước lượng 
+độ dài, khối lượng, dung tích, nhiệt độ,... 
+– Thực hành thu thập, phân loại, sắp xếp số liệu thống kê (theo các tiêu chí cho trước) về một số đối tượng thống kê trong 
+trường, lớp.  
+Hoạt động 2: Tổ chức các hoạt động ngoài giờ chính khoá (ví dụ: trò chơi học Toán hoặc các hoạt động “Học vui – Vui 
+học”; trò chơi liên quan đến mua bán, trao đổi hàng hoá; lắp ghép, gấp, xếp hình; tung đồng xu, xúc xắc,...) liên quan đến ôn 
+tập, củng cố các kiến thức toán. 
+ 
+LỚP 4 
+Nội dung Yêu cầu cần đạt 
+SỐ VÀ PHÉP TÍNH 
+Số tự nhiên 
+Số tự nhiên Số và cấu tạo thập phân – Đọc, viết được các số có nhiều chữ số (đến lớp triệu). 
+của một số – Nhận biết được cấu tạo thập phân của một số và giá trị theo vị trí của 
+từng chữ số trong mỗi số. 
+– Nhận biết được số chẵn, số lẻ. 
+– Làm quen với dãy số tự nhiên và đặc điểm. 
+So sánh các số  – Nhận biết được cách so sánh hai số trong phạm vi lớp triệu. 
+– Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc 
+34
+
+===== PDF PAGE 201 =====
+Nội dung Yêu cầu cần đạt 
+ngược lại) trong một nhóm có không quá 4 số (trong phạm vi lớp triệu). 
+Làm tròn số Làm tròn được số đến tròn chục, tròn trăm, tròn nghìn, tròn mười nghìn, 
+tròn trăm nghìn (ví dụ: làm tròn số 12 345 đến hàng trăm thì được số      
+12 300). 
+Các phép tính với Phép cộng, phép trừ – Thực hiện được các phép cộng, phép trừ các số tự nhiên có nhiều chữ số 
+số tự nhiên (có nhớ không quá ba lượt và không liên tiếp). 
+– Vận dụng được tính chất giao hoán, tính chất kết hợp của phép cộng và 
+quan hệ giữa phép cộng và phép trừ trong thực hành tính toán. 
+Phép nhân, phép chia – Tính được số trung bình cộng của hai hay nhiều số. 
+– Thực hiện được phép nhân với các số có không quá hai chữ số. 
+– Thực hiện được phép chia cho số có không quá hai chữ số. 
+– Thực hiện được phép nhân với 10; 100; 1000;... và phép chia cho 10; 
+100; 1000;... 
+– Vận dụng được tính chất giao hoán, tính chất kết hợp của phép nhân và 
+mối quan hệ giữa phép nhân với phép chia trong thực hành tính toán. 
+Tính nhẩm  – Vận dụng được tính chất của phép tính để tính nhẩm và tính bằng cách 
+thuận tiện nhất. 
+– Ước lượng được trong những tính toán đơn giản (ví dụ: chia 572 cho 21 
+thì được thương không thể là 30). 
+Biểu thức số và biểu thức – Làm quen với biểu thức chứa một, hai, ba chữ và tính được giá trị của 
+chữ biểu thức chứa một, hai, hoặc ba chữ (trường hợp đơn giản). 
+35
+
+===== PDF PAGE 202 =====
+Nội dung Yêu cầu cần đạt 
+– Vận dụng được tính chất phân phối của phép nhân đối với phép cộng 
+trong tính giá trị của biểu thức. 
+ Thực hành giải quyết vấn Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai 
+đề liên quan đến các phép hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan 
+tính đã học đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ 
+so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví 
+dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số 
+khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).  
+Phân số 
+Phân số Khái niệm ban đầu về – Nhận biết được khái niệm ban đầu về phân số, tử số, mẫu số. 
+phân số – Đọc, viết được các phân số. 
+Tính chất cơ bản của phân – Nhận biết được tính chất cơ bản của phân số. 
+số – Thực hiện được việc rút gọn phân số trong những trường hợp đơn giản. 
+– Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có 
+một mẫu số chia hết cho mẫu số còn lại. 
+So sánh phân số – So sánh và sắp xếp được thứ tự các phân số trong những trường hợp 
+sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số 
+còn lại. 
+– Xác định được phân số lớn nhất, bé nhất (trong một nhóm có không quá 
+4 phân số) trong những trường hợp sau: các phân số có cùng mẫu số; có 
+một mẫu số chia hết cho các mẫu số còn lại. 
+Các phép tính với Các phép tính cộng, trừ, – Thực hiện được phép cộng, phép trừ phân số trong những trường hợp  
+36
+
+===== PDF PAGE 203 =====
+Nội dung Yêu cầu cần đạt 
+phân số nhân, chia với phân số sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số 
+còn lại.  
+– Thực hiện được phép nhân, phép chia hai phân số. 
+– Giải quyết được một số vấn đề gắn với việc giải các bài toán (có đến hai 
+hoặc ba bước tính) liên quan đến 4 phép tính với phân số (ví dụ: bài toán 
+liên quan đến tìm phân số của một số). 
+HÌNH HỌC VÀ ĐO LƯỜNG 
+Hình học trực quan 
+Hình phẳng và Quan sát, nhận biết, mô tả – Nhận biết được góc nhọn, góc tù, góc bẹt. 
+hình khối hình dạng và đặc điểm của – Nhận biết được hai đường thẳng vuông góc, hai đường thẳng song song. 
+một số hình phẳng đơn – Nhận biết được hình bình hành, hình thoi. 
+giản 
+ 
+Thực hành đo, vẽ, lắp – Thực hiện được việc vẽ đường thẳng vuông góc, đường thẳng song song 
+ghép, tạo hình gắn với một bằng thước thẳng và êke. 
+số hình phẳng và hình khối – Thực hiện được việc đo, vẽ, lắp ghép, tạo lập một số hình phẳng và hình 
+đã học  khối đã học. 
+ – Giải quyết được một số vấn đề liên quan đến đo góc, vẽ hình, lắp ghép, 
+tạo lập hình gắn với một số hình phẳng và hình khối đã học. 
+Đo lường 
+Đo lường Biểu tượng về đại lượng và – Nhận biết được các đơn vị đo khối lượng: yến, tạ, tấn và quan hệ giữa 
+37
+
+===== PDF PAGE 204 =====
+Nội dung Yêu cầu cần đạt 
+đơn vị đo đại lượng các đơn vị đó với kg. 
+– Nhận biết được các đơn vị đo diện tích: dm2 (đề-xi-mét vuông), m2 (mét 
+vuông), mm2 (mi-li-mét vuông) và quan hệ giữa các đơn vị đó. 
+– Nhận biết được các đơn vị đo thời gian: giây, thế kỉ và quan hệ giữa các 
+đơn vị đo thời gian đã học. 
+– Nhận biết được đơn vị đo góc: độ (o). 
+Thực hành đo đại lượng – Sử dụng được một số dụng cụ thông dụng để thực hành cân, đo, đong, 
+đếm, xem thời gian với các đơn vị đo đã học. 
+– Sử dụng được thước đo góc để đo các góc: 60o; 90o; 120o; 180o. 
+Tính toán và ước lượng với – Thực hiện được việc chuyển đổi và tính toán với các số đo độ dài (mm, 
+các số đo đại lượng cm, dm, m, km); diện tích (mm2, cm2, dm2, m2); khối lượng (g, kg, yến, tạ, 
+ tấn); dung tích (ml, l); thời gian (giây, phút, giờ, ngày, tuần lễ, tháng, năm, 
+thế kỉ); tiền Việt Nam đã học. 
+– Thực hiện được việc ước lượng các kết quả đo lường trong một số 
+trường hợp đơn giản (ví dụ: con bò cân nặng khoảng 3 tạ,...). 
+– Giải quyết được một số vấn đề thực tiễn liên quan đến đo độ dài, diện 
+tích, khối lượng, dung tích, thời gian, tiền Việt Nam. 
+MỘT SỐ YẾU TỐ THỐNG KÊ VÀ XÁC SUẤT 
+Một số yếu tố thống kê 
+Một số yếu tố Thu thập, phân loại, sắp – Nhận biết được về dãy số liệu thống kê.  
+thống kê xếp các số liệu  – Nhận biết được cách sắp xếp dãy số liệu thống kê theo các tiêu chí cho 
+38
+
+===== PDF PAGE 205 =====
+Nội dung Yêu cầu cần đạt 
+trước. 
+Đọc, mô tả biểu đồ cột. – Đọc và mô tả được các số liệu ở dạng biểu đồ cột. 
+Biểu diễn số liệu vào biểu – Sắp xếp được số liệu vào biểu đồ cột (không yêu cầu học sinh vẽ biểu 
+đồ cột đồ). 
+Hình thành và giải quyết – Nêu được một số nhận xét đơn giản từ biểu đồ cột. 
+vấn đề đơn giản xuất hiện – Tính được giá trị trung bình của các số liệu trong bảng hay biểu đồ cột. 
+từ các số liệu và biểu đồ – Làm quen với việc phát hiện vấn đề hoặc quy luật đơn giản dựa trên 
+cột đã có quan sát các số liệu từ biểu đồ cột. 
+ – Giải quyết được những vấn đề đơn giản liên quan đến các số liệu thu 
+được từ biểu đồ cột. 
+ 
+Một số yếu tố xác suất 
+Một số yếu tố xác Kiểm đếm số lần lặp lại Kiểm đếm được số lần lặp lại của một khả năng xảy ra (nhiều lần) của 
+suất của một khả năng xảy ra một sự kiện khi thực hiện (nhiều lần) thí nghiệm, trò chơi đơn giản (ví dụ: 
+nhiều lần của một sự kiện trong một vài trò chơi như tung đồng xu, lấy bóng từ hộp kín,...). 
+HOẠT ĐỘNG THỰC HÀNH VÀ TRẢI NGHIỆM 
+Nhà trường tổ chức cho học sinh một số hoạt động sau và có thể bổ sung các hoạt động khác tuỳ vào điều kiện cụ thể. 
+Hoạt động 1: Thực hành ứng dụng các kiến thức toán học vào thực tiễn và các chủ đề liên môn, chẳng hạn: 
+– Thực hành các hoạt động liên quan đến tính toán, đo lường và ước lượng như: tính toán và ước lượng chu vi, diện tích, góc 
+của một số hình phẳng trong thực tế liên quan đến các hình phẳng đã học; tính toán và ước lượng về khối lượng, dung 
+tích,...; xác định năm, thế kỉ đánh dấu sự ra đời (diễn ra) của một số phát minh khoa học, sự kiện văn hoá – xã hội, lịch sử,... 
+39
+
+===== PDF PAGE 206 =====
+Nội dung Yêu cầu cần đạt 
+– Thực hành thu thập, phân tích, biểu diễn các số liệu thống kê (thông qua một số tình huống đơn giản gắn với những vấn đề 
+phát triển kinh tế, xã hội hoặc có tính toàn cầu như biến đổi khí hậu, phát triển bền vững, giáo dục tài chính, chủ quyền biển 
+đảo, biên giới, giáo dục STEM,...). 
+– Thực hành mua bán, trao đổi tiền tệ.  
+Hoạt động 2: Tổ chức các hoạt động ngoài giờ chính khoá (ví dụ: trò chơi học toán hoặc các hoạt động “Học vui – Vui 
+học”; trò chơi liên quan đến mua bán, trao đổi hàng hoá; lắp ghép, gấp, xếp hình; tung đồng xu, xúc xắc,...) liên quan đến ôn 
+tập, củng cố các kiến thức toán hoặc giải quyết vấn đề nảy sinh trong tình huống thực tiễn. 
+Hoạt động 3 (nếu nhà trường có điều kiện thực hiện): Tổ chức giao lưu với học sinh có năng khiếu toán trong trường và 
+trường bạn. 
+ 
+LỚP 5 
+Nội dung Yêu cầu cần đạt 
+SỐ VÀ PHÉP TÍNH 
+Số tự nhiên 
+Số tự nhiên và các Ôn tập về số tự nhiên và Củng cố và hoàn thiện các kĩ năng: 
+phép tính với số tự các phép tính với số tự – Đọc, viết, so sánh, xếp thứ tự được các số tự nhiên. 
+nhiên nhiên – Thực hiện được các phép tính cộng, trừ, nhân, chia các số tự nhiên. Vận 
+ dụng được tính chất của phép tính với số tự nhiên để tính nhẩm và tính 
+hợp lí. 
+– Ước lượng và làm tròn được số trong những tính toán đơn giản. 
+– Giải quyết được vấn đề gắn với việc giải các bài toán có đến bốn bước 
+40
+
+===== PDF PAGE 207 =====
+Nội dung Yêu cầu cần đạt 
+tính liên quan đến các phép tính về số tự nhiên; liên quan đến quan hệ phụ 
+thuộc trực tiếp và đơn giản. 
+Phân số 
+Phân số và các Ôn tập về phân số và các Củng cố và hoàn thiện các kĩ năng: 
+phép tính với phân phép tính với phân số  – Rút gọn được phân số. 
+số  – Quy đồng, so sánh, xếp thứ tự được các phân số trong trường hợp có 
+một mẫu số chia hết cho các mẫu số còn lại. 
+– Thực hiện được phép cộng, phép trừ các phân số trong trường hợp có 
+một mẫu số chia hết cho các mẫu số còn lại và nhân, chia phân số. 
+– Thực hiện được phép cộng, phép trừ hai phân số bằng cách lấy mẫu số 
+chung là tích của hai mẫu số. 
+– Nhận biết được phân số thập phân và cách viết phân số thập phân ở 
+dạng hỗn số. 
+– Giải quyết được vấn đề gắn với việc giải các bài toán (có một hoặc một 
+vài bước tính) liên quan đến các phép tính về phân số. 
+Số thập phân 
+Số thập phân Số thập phân – Đọc, viết được số thập phân. 
+– Nhận biết được số thập phân gồm phần nguyên, phần thập phân và hàng 
+của số thập phân. 
+– Thể hiện được các số đo đại lượng bằng cách dùng số thập phân. 
+So sánh các số thập phân – Nhận biết được cách so sánh hai số thập phân. 
+41
+
+===== PDF PAGE 208 =====
+Nội dung Yêu cầu cần đạt 
+– Thực hiện được việc sắp xếp các số thập phân theo thứ tự (từ bé đến lớn 
+hoặc ngược lại) trong một nhóm có không quá 4 số thập phân. 
+Làm tròn số thập phân – Làm tròn được một số thập phân tới số tự nhiên gần nhất hoặc tới số 
+thập phân có một hoặc hai chữ số ở phần thập phân. 
+Các phép tính với Các phép tính cộng, trừ, – Thực hiện được phép cộng, phép trừ hai số thập phân. 
+số thập phân nhân, chia với số thập – Thực hiện được phép nhân một số với số thập phân có không quá hai 
+phân  chữ số ở dạng: a,b và 0,ab. 
+– Thực hiện được phép chia một số với số thập phân có không quá hai 
+chữ số khác không ở dạng: a,b và 0,ab.  
+– Vận dụng được tính chất của các phép tính với số thập phân và quan hệ 
+giữa các phép tính đó trong thực hành tính toán. 
+– Thực hiện được phép nhân, chia nhẩm một số thập phân với (cho) 10; 
+100; 1000;... hoặc với (cho) 0,1; 0,01; 0,001;... 
+– Giải quyết vấn đề gắn với việc giải các bài toán (có một hoặc một vài 
+bước tính) liên quan đến các phép tính với các số thập phân. 
+Tỉ số. Tỉ số phần trăm 
+Tỉ số. Tỉ số phần Tỉ số. Tỉ số phần trăm – Nhận biết được tỉ số, tỉ số phần trăm của hai đại lượng cùng loại. 
+trăm – Giải quyết được một số vấn đề gắn với việc giải các bài toán liên quan 
+đến: tìm hai số khi biết tổng (hoặc hiệu) và tỉ số của hai số đó; tính tỉ số 
+phần trăm của hai số; tìm giá trị phần trăm của một số cho trước. 
+– Nhận biết được tỉ lệ bản đồ. Vận dụng được tỉ lệ bản đồ để giải quyết 
+42
+
+===== PDF PAGE 209 =====
+Nội dung Yêu cầu cần đạt 
+một số tình huống thực tiễn. 
+Sử dụng máy tính  Làm quen với việc sử dụng máy tính cầm tay để thực hiện các phép tính 
+cầm tay cộng, trừ, nhân, chia các số tự nhiên; tính tỉ số phần trăm của hai số; tính 
+giá trị phần trăm của một số cho trước. 
+HÌNH HỌC VÀ ĐO LƯỜNG 
+Hình học trực quan 
+Hình phẳng và Quan sát, nhận biết, mô tả – Nhận biết được hình thang, đường tròn, một số loại hình tam giác như 
+hình khối hình dạng và đặc điểm của tam giác nhọn, tam giác vuông, tam giác tù, tam giác đều. 
+một số hình phẳng và hình – Nhận biết được hình khai triển của hình lập phương, hình hộp chữ nhật 
+khối đơn giản và hình trụ. 
+Thực hành vẽ, lắp ghép, – Vẽ được hình thang, hình bình hành, hình thoi (sử dụng lưới ô vuông). 
+tạo hình gắn với một số – Vẽ được đường cao của hình tam giác. 
+hình phẳng và hình khối đã – Vẽ được đường tròn có tâm và độ dài bán kính hoặc đường kính cho trước. 
+học 
+– Giải quyết được một số vấn đề về đo, vẽ, lắp ghép, tạo hình gắn với một 
+số hình phẳng và hình khối đã học, liên quan đến ứng dụng của hình học 
+trong thực tiễn, liên quan đến nội dung các môn học như Mĩ thuật, Công 
+nghệ, Tin học. 
+Đo lường 
+Đo lường Biểu tượng về đại lượng và – Nhận biết được các đơn vị đo diện tích: km2 (ki-lô-mét vuông), ha (héc-ta).  
+đơn vị đo đại lượng – Nhận biết được “thể tích” thông qua một số biểu tượng cụ thể. 
+– Nhận biết được một số đơn vị đo thể tích thông dụng: cm3 (xăng-ti-mét 
+43
+
+===== PDF PAGE 210 =====
+Nội dung Yêu cầu cần đạt 
+khối), dm3 (đề-xi-mét khối), m3 (mét khối). 
+– Nhận biết được vận tốc của một chuyển động đều; tên gọi, kí hiệu của 
+một số đơn vị đo vận tốc: km/h (km/giờ), m/s (m/giây). 
+Thực hành đo đại lượng Sử dụng được một số dụng cụ thông dụng để thực hành cân, đo, đong, 
+đếm, xem thời gian, mua bán với các đơn vị đo đại lượng và tiền tệ đã 
+học. 
+Tính toán và ước lượng với – Thực hiện được việc chuyển đổi và tính toán với các số đo thể tích (cm3, 
+các số đo đại lượng dm3, m3) và số đo thời gian. 
+ – Tính được diện tích hình tam giác, hình thang. 
+– Tính được chu vi và diện tích hình tròn. 
+– Tính được diện tích xung quanh, diện tích toàn phần, thể tích của hình 
+hộp chữ nhật, hình lập phương. 
+– Thực hiện được việc ước lượng thể tích trong một số trường hợp đơn 
+giản (ví dụ: thể tích của hộp phấn viết bảng,...). 
+– Giải quyết được một số vấn đề thực tiễn liên quan đến đo thể tích, dung 
+tích, thời gian. 
+– Giải quyết được một số vấn đề gắn với việc giải các bài toán liên quan 
+đến chuyển động đều (tìm vận tốc, quãng đường, thời gian của một 
+chuyển động đều).  
+MỘT SỐ YẾU TỐ THỐNG KÊ VÀ XÁC SUẤT 
+Một số yếu tố thống kê 
+44
+
+===== PDF PAGE 211 =====
+Nội dung Yêu cầu cần đạt 
+Một số yếu tố Thu thập, phân loại, sắp Thực hiện được việc thu thập, phân loại, so sánh, sắp xếp số liệu thống kê 
+thống kê xếp các số liệu  theo các tiêu chí cho trước. 
+Đọc, mô tả biểu đồ thống – Đọc và mô tả được các số liệu ở dạng biểu đồ hình quạt tròn. 
+kê hình quạt tròn. Biểu – Sắp xếp được số liệu vào biểu đồ hình quạt tròn (không yêu cầu học 
+diễn số liệu bằng biểu đồ sinh vẽ hình).  
+thống kê hình quạt tròn – Lựa chọn được cách biểu diễn (bằng dãy số liệu, bảng số liệu, hoặc 
+ bằng biểu đồ) các số liệu thống kê. 
+Hình thành và giải quyết – Nêu được một số nhận xét đơn giản từ biểu đồ hình quạt tròn. 
+vấn đề đơn giản xuất hiện – Làm quen với việc phát hiện vấn đề hoặc quy luật đơn giản dựa trên 
+từ các số liệu và biểu đồ quan sát các số liệu từ biểu đồ hình quạt tròn. 
+thống kê hình quạt tròn đã – Giải quyết được những vấn đề đơn giản liên quan đến các số liệu thu được từ 
+có biểu đồ hình quạt tròn. 
+ – Nhận biết được mối liên hệ giữa thống kê với các kiến thức khác trong 
+môn Toán và trong thực tiễn (ví dụ: số thập phân, tỉ số phần trăm,...). 
+Một số yếu tố xác suất 
+Một số yếu tố xác Tỉ số mô tả số lần lặp lại Sử dụng được tỉ số để mô tả số lần lặp lại của một khả năng xảy ra (nhiều 
+suất của một khả năng xảy ra lần) của một sự kiện trong một thí nghiệm so với tổng số lần thực hiện thí 
+(nhiều lần) của một sự kiện 2
+nghiệm đó ở những trường hợp đơn giản (ví dụ: sử dụng tỉ số  để mô tả 
+trong một thí nghiệm so 5
+với tổng số lần thực hiện 2 lần xảy ra khả năng “mặt sấp đồng xu xuất hiện” của khi tung đồng xu 5 
+thí nghiệm đó ở những lần). 
+45
+
+===== PDF PAGE 1241 =====
+Màu sắc Hoạt động hằng ngày Hoạt động vui chơi 
+Động vật Hoạt động trong lớp học Các phòng trong nhà 
+Đồ chơi Đồ dùng học tập Các loại quả 
+Trường học Bộ phận cơ thể Thức ăn 
+Gia đình Ngày trong tuần Cảm xúc 
+Hình cơ bản Quần áo Giác quan 
+Địa điểm Phương tiện giao thông Trò chơi  
+2. Nội dung cụ thể 
+Nội dung dạy học từng lớp lấy năng lực giao tiếp (thể hiện ở các kĩ năng giao tiếp cụ thể Nghe, Nói, Đọc và Viết) trong 
+ngữ cảnh cụ thể làm điểm xuất phát để xác định kiến thức và chủ đề cụ thể dùng để phát triển năng lực giao tiếp. Việc lựa 
+chọn chủ đề và kiến thức ngôn ngữ có thể được lặp lại và mở rộng. Phần kiến thức ngôn ngữ và chủ đề mang tính gợi ý. 
+Lớp 1  
+Kĩ năng giao tiếp Kiến thức ngôn ngữ Chủ đề Chủ điểm 
+Nghe Ngữ âm - Màu sắc - Em và những 
+- Nghe các chữ cái đã học (khoảng 13 chữ cái).  - 13 chữ cái - Các con vật người bạn của 
+em 
+- Nghe các âm cơ bản đã học. - Một số âm đơn giản - Đồ vật trong lớp 
+- Nghe các số đếm trong phạm vi 10. ở vị trí bắt đầu của từ.  - Em và trường 
+- Đồ chơi 
+học của em 
+- Nghe các từ và cụm từ gần gũi với hoạt động của học sinh  
+10
+
+===== PDF PAGE 1242 =====
+trong ngữ cảnh (trong phạm vi khoảng 35 - 70 từ quen Từ vựng - Hoạt động hằng - Em và gia đình 
+thuộc). - Số đếm 1 - 10 ngày của em 
+- Nghe và phản hồi phi ngôn ngữ trong một số tình huống - Khoảng 35 - 70 từ - Số đếm - Em và thế giới 
+giao tiếp rất đơn giản khi đã được thực hành nhiều lần. vựng trong các chủ đề quanh em 
+- Hoạt động trong 
+- Nghe và thực hiện theo các hướng dẫn rất đơn giản trong quen thuộc, ưu tiên lớp/ gia đình - ...  
+lớp học khi đã được thực hành nhiều lần. danh từ và động từ.  
+- Ngôi nhà  
+- Nghe và phản hồi bằng tiếng Anh trong một số tình huống  
+- Các loại quả/ đồ 
+hỏi đáp rất quen thuộc khi đã được thực hành nhiều lần. 
+ăn 
+Nói - Bộ phận cơ thể 
+- Nhắc lại một số cụm từ, câu đơn giản, bài đọc vè, bài hát - Số đếm 
+phù hợp với lứa tuổi. 
+- ... 
+- Nói các từ quen thuộc chỉ sự vật trong ngữ cảnh (trong 
+phạm vi khoảng 35-70 từ quen thuộc). 
+- Nghe và nhắc lại các âm cơ bản đã học.  
+- Trả lời đơn giản, có thể chỉ ở cấp độ từ hoặc cụm từ, các 
+câu hỏi rất đơn giản trong các tình huống giao tiếp đơn giản 
+hoạt động hằng ngày. 
+11
+
+===== PDF PAGE 1243 =====
+Đọc 
+- Đọc thành lời các từ và một số cụm từ quen thuộc, đơn 
+giản và cụ thể. 
+Viết 
+- Tô hoặc chép lại chữ cái trong từ. 
+- Viết chữ cái trong từ 
+Lớp 2 
+Kĩ năng giao tiếp Kiến thức ngôn ngữ Chủ đề Chủ điểm 
+Nghe Ngữ âm - Ngày trong tuần - Em và những 
+- Nghe và nhận biết các chữ cái đã học (khoảng 13 chữ - 13 chữ cái  - Hoạt động trong người bạn của em 
+cái). - Một số âm đơn giản lớp - Em và trường 
+- Nghe và nhận biết các âm đã học ở vị trí bắt đầu hoặc kết ở vị trí bắt đầu và kết - Cảm xúc học của em 
+thúc của từ. thúc của từ. - Hoạt động ở sân - Em và gia đình  
+- Nghe hiểu các số đếm trong phạm vi 20. Từ vựng chơi của em 
+- Nghe hiểu các từ và cụm từ gần gũi với hoạt động của học - Số đếm từ 1 - 20 - Hình cơ bản - Em và thế giới 
+sinh trong ngữ cảnh (thêm khoảng 35 - 70 từ so với lớp 1). quanh em 
+- Thêm khoảng 35-70 - Số đếm 
+- Nghe hiểu và phản hồi phi ngôn ngữ trong một số tình từ vựng; ưu tiên danh - ... 
+- Quần áo 
+huống giao tiếp đơn giản. từ, động từ và tính từ. 
+12
+
+===== PDF PAGE 1244 =====
+- Nghe hiểu và thực hiện theo các hướng dẫn đơn giản - Phương tiện giao 
+trong lớp học. thông 
+- Nghe hiểu và tham gia vào các hoạt động trên lớp có chỉ - Động vật 
+dẫn bằng tiếng Anh. - Trò chơi trong 
+- Nghe hiểu và phản hồi bằng tiếng Anh trong một số tình lớp học 
+huống hỏi đáp quen thuộc. - ... 
+Nói  
+- Nhắc lại một số cụm từ, câu đơn giản, bài vè, bài hát phù 
+hợp với lứa tuổi. 
+- Nói các từ quen thuộc chỉ sự vật trong ngữ cảnh (thêm 
+khoảng 35 - 70 từ so với lớp 1). 
+- Nghe và nhắc lại các âm cơ bản đã học.  
+- Trả lời các câu hỏi đơn giản quen thuộc gắn liền với trải 
+nghiệm của học sinh, có thể ở cấp độ từ hoặc câu đơn 
+giản.  
+- Đưa ra một số chỉ dẫn quen thuộc khi tham gia vào các 
+hoạt động đơn giản trên lớp. 
+13
+
+===== PDF PAGE 1275 =====
+nắm được khoảng 2500 từ.   
+Ngữ pháp  Nội dung dạy học ngữ pháp ở cấp trung học phổ thông tiếp tục củng cố và mở rộng các nội dung đã học ở 
+ cấp tiểu học và cấp trung học cơ sở, bao gồm các cấu trúc phục vụ phát triển năng lực giao tiếp ở Bậc 3 như 
+mệnh đề quan hệ, câu điều kiện (loại 2 và loại 3), câu chủ động, câu bị động, câu trực tiếp, câu gián tiếp, câu 
+ghép, câu phức, thì hiện tại đơn, thì hiện tại tiếp diễn, thì hiện tại hoàn thành, thì quá khứ đơn, thì quá khứ 
+tiếp diễn, thì quá khứ hoàn thành, thì tương lai đơn, thì tương lai tiếp diễn, thì tương lai gần, liên từ, động từ 
+tình thái, ngữ động từ, thể bị động… 
+2. Nội dung cụ thể  
+Lớp 3 
+Chủ điểm Chủ đề Kỹ năng ngôn ngữ Kiến thức ngôn ngữ 
+- Em và - Bản thân  Nghe Ngữ âm 
+những - Những người bạn của - Nghe hiểu các từ và cụm từ quen thuộc, Nguyên âm đơn, nguyên âm đôi, 
+người bạn em đơn giản. phụ âm, tổ hợp phụ âm  
+của em 
+- Sở thích - Nghe hiểu và làm theo những chỉ dẫn rất Từ vựng 
+- Em và 
+- Trường học của em đơn giản trong lớp học. Các từ liên quan đến chủ điểm, 
+trường học 
+của em - Lớp học của em - Nghe và trả lời các câu hỏi rất đơn giản về chủ đề của lớp 3  
+các chủ đề quen thuộc được nói chậm và rõ 
+- Em và gia - Đồ dùng  học tập Ngữ pháp 
+ràng. 
+đình em - Ngôi nhà của em Thì hiện tại đơn 
+- Nghe hiểu các đoạn hội thoại ngắn, rất đơn 
+2 6
+
+===== PDF PAGE 1276 =====
+- Em và thế - Phòng và đồ vật trong giản khoảng 20 - 30 từ về các chủ đề quen Thì hiện tại tiếp diễn  
+giới quanh nhà thuộc được nói chậm và rõ ràng. Câu đơn 
+em - Thành viên trong gia Nói Đại từ chỉ định: 
+đình  
+- Nói các từ và cụm từ quen thuộc, đơn giản.  this/that/these/those 
+- Đồ chơi của em 
+- Hỏi và trả lời các câu hỏi rất đơn giản về There is/There are 
+- Màu sắc yêu thích bản thân và những người khác. Câu hỏi có từ để hỏi: what, where, 
+- Các con vật nuôi - Hỏi và trả lời các câu hỏi thường dùng who, how, how old… 
+… trong lớp học. Câu hỏi nghi vấn (Yes/No 
+- Nói về một số chủ đề quen thuộc, sử dụng question)  
+các từ và cụm từ rất đơn giản (có sự trợ Câu mệnh lệnh:  Stand up, please. 
+giúp). Don’t talk, please,… 
+Động từ tình thái: may, can 
+Đọc 
+- Đọc đúng chữ cái trong bảng chữ cái, chữ Đại từ nhân xưng: I, you, he, she, 
+it, we, they 
+cái trong từ. 
+Tính từ sở hữu: my, your, his, her, 
+- Đọc hiểu nghĩa các từ và cụm từ quen 
+its, our, their 
+thuộc, rất đơn giản. 
+Danh từ (số ít, số nhiều): pen(s), 
+- Đọc hiểu các câu ngắn, rất đơn giản. 
+book(s), chair(s), ...  
+- Đọc hiểu các văn bản ngắn, rất đơn giản 
+Tính từ miêu tả: big, small, new, old, 
+khoảng 30 - 40 từ về các chủ đề trong nội 
+2 7
+
+===== PDF PAGE 1277 =====
+dung Chương trình. … 
+Viết Từ chỉ số lượng: a lot, many, 
+some, ... 
+- Viết các từ, cụm từ rất đơn giản.  
+Liên từ: and 
+- Điền thông tin cá nhân vào các mẫu rất đơn 
+giản (tên, địa chỉ…). Mạo từ: a/an, the 
+- Viết các văn bản ngắn khoảng 10 - 20 từ (có Giới từ (chỉ địa điểm): in, at, on, ... 
+gợi ý) trong phạm vi các chủ đề trong Chương … 
+trình. 
+Lớp 4 
+Chủ điểm  Chủ đề  Kỹ năng ngôn ngữ Kiến thức ngôn ngữ 
+- Em và - Bản thân và bạn bè Nghe Ngữ âm 
+những - Những việc có thể làm - Nghe hiểu và làm theo những chỉ dẫn đơn Nguyên âm đơn, phụ âm, tổ hợp 
+người bạn 
+- Hoạt động hằng ngày giản trong lớp học. phụ âm, trọng âm từ  
+của em 
+- Thói quen, sở thích - Nghe hiểu và làm theo những chỉ dẫn đơn Từ vựng 
+- Em và giản được truyền đạt chậm và rõ ràng. 
+- Hoạt động học tập ở Các từ liên quan đến chủ điểm, 
+trường học 
+của em trường   - Nghe và trả lời các câu hỏi rất đơn giản về chủ đề của lớp 4 
+các chủ đề quen thuộc. 
+- Em và gia - Hoạt động ngoại khoá Ngữ pháp 
+đình em ở trường - Nghe hiểu các đoạn hội thoại ngắn, rất đơn Thì hiện tại đơn (củng cố và mở 
+giản khoảng 35 - 40 từ về các chủ đề quen 
+2 8
+
+===== PDF PAGE 1278 =====
+- Em và thế - Ngoại hình, nghề thuộc. rộng)  
+giới quanh nghiệp của các thành Thì hiện tại tiếp diễn (củng cố và 
+em viên trong gia đình Nói 
+mở rộng) 
+- Hoạt động của các - Nói các cụm từ và các câu đơn giản.  
+Thì quá khứ đơn 
+thành viên trong gia đình - Nói các chỉ dẫn và đề nghị ngắn gọn, đơn 
+giản. Câu đơn  
+- Động vật 
+- Hỏi và trả lời các câu hỏi đơn giản về chủ Câu hỏi có từ để hỏi 
+- Chỉ đường và biển chỉ 
+đề trong nội dung Chương trình. Câu hỏi nghi vấn (Yes/No 
+dẫn  
+- Nói về một số chủ đề quen thuộc, sử dụng question) 
+- Thời tiết 
+các từ và cụm từ đơn giản (có sự trợ giúp). Động từ tình thái: can, would 
+… 
+Đại từ chỉ định (củng cố và mở 
+Đọc 
+rộng) 
+- Đọc các câu ngắn và đơn giản.  
+Liên từ: and, but, or, because 
+- Đọc hiểu các câu ngắn, đơn giản về chủ đề 
+quen thuộc. Giới từ: with, near, behind, next 
+to, opposite, by,… 
+- Đọc hiểu các đoạn văn bản ngắn, đơn giản 
+… 
+khoảng 45 - 55 từ về các chủ đề trong 
+Chương trình. 
+Viết 
+- Viết các câu trả lời rất đơn giản.   
+- Điền thông tin vào các mẫu đơn giản (thời 
+2 9
+
+===== PDF PAGE 1279 =====
+khoá biểu, thiếp sinh nhật, nhãn vở, …). 
+- Viết các văn bản ngắn, rất đơn giản khoảng  
+20 - 30 từ (có gợi ý) về các chủ đề quen 
+thuộc. 
+Lớp 5 
+Chủ điểm  Chủ đề Kỹ năng ngôn ngữ Kiến thức ngôn ngữ 
+- Em và - Bản thân và bạn bè Nghe Ngữ âm 
+những - Nơi em sinh sống - Nghe và nhận biết trọng âm từ. Trọng âm từ, nhịp điệu và ngữ 
+người bạn 
+- Sở thích, ước mơ  - Nghe hiểu và làm theo những chỉ dẫn đơn điệu  
+của em 
+- Môn học và hoạt động giản. Từ vựng 
+- Em và 
+yêu thích ở trường - Nghe và trả lời các câu hỏi đơn giản về các Các từ liên quan đến chủ điểm, 
+trường học 
+chủ đề trong Chương trình. chủ đề của lớp 5 
+của em - Nghề nghiệp  
+- Nghe hiểu các đoạn hội thoại, độc thoại Ngữ pháp: 
+- Em và gia - Kỳ nghỉ, lễ hội 
+ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về 
+đình em - Các món ăn và đồ uống Thì quá khứ đơn (củng cố và mở 
+các chủ đề trong Chương trình. rộng)  
+- Em và thế - Mùa và thời tiết 
+- Nghe hiểu nội dung chính các câu chuyện 
+giới quanh Thì tương lai đơn  
+- Sức khoẻ và các bệnh ngắn rất đơn giản về các chủ đề quen thuộc 
+em 
+thường gặp Câu hỏi có từ để hỏi 
+(có sự trợ giúp). 
+ 
+- Phương tiện giao thông Câu hỏi nghi vấn (Yes/No 
+Nói 
+3 0
+
+===== PDF PAGE 1280 =====
+- Danh lam thắng cảnh - Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả question) (củng cố và mở rộng) 
+… lời những câu lệnh đơn giản trong và ngoài lớp Động từ tình thái: should, could, 
+học. would 
+- Hỏi và trả lời những câu hỏi đơn giản về Tính từ chỉ tính chất đơn giản 
+những chủ đề quen thuộc như bản thân, gia 
+Trạng từ (chỉ cách thức hành 
+đình, trường học, … hoặc liên quan đến nhu 
+động): fast, hard, well, ...; Trạng 
+cầu giao tiếp tối thiểu hằng ngày. 
+từ (chỉ tần suất): always, usually, 
+- Nói về một số chủ đề trong Chương trình often, never,... 
+(có sự trợ giúp). 
+Giới từ: by, on, ... 
+- Trả lời các câu hỏi trực tiếp trong những 
+… 
+phỏng vấn đơn giản với tốc độ nói chậm và 
+rõ ràng về những chủ đề quen thuộc. 
+Đọc 
+- Đọc những đoạn văn bản ngắn, đơn giản đã 
+được chuẩn bị trước về những chủ đề quen 
+thuộc như bạn bè, gia đình, nhà trường, …  
+- Đọc hiểu các đoạn văn bản ngắn, đơn giản 
+khoảng 60 - 80 từ về các chủ đề quen thuộc. 
+- Ðọc hiểu các thông điệp ngắn, đơn giản 
+trên bưu thiếp; các chỉ dẫn ngắn, đơn giản. 
+3 1
+

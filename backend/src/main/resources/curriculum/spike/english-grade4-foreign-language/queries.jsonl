@@ -1,0 +1,13 @@
+{"queryId":"q01","topic":"Làm theo hướng dẫn trong lớp học","expectedChunkIds":["english-g4-001"],"negative":false}
+{"queryId":"q02","topic":"Nghe chỉ dẫn chậm và rõ","expectedChunkIds":["english-g4-002"],"negative":false}
+{"queryId":"q03","topic":"Trả lời câu hỏi về chủ đề quen thuộc","expectedChunkIds":["english-g4-003"],"negative":false}
+{"queryId":"q04","topic":"Nghe hội thoại 35–40 từ","expectedChunkIds":["english-g4-004"],"negative":false}
+{"queryId":"q05","topic":"Nói cụm từ và câu đơn giản","expectedChunkIds":["english-g4-005"],"negative":false}
+{"queryId":"q06","topic":"Nói chỉ dẫn và đề nghị ngắn","expectedChunkIds":["english-g4-006"],"negative":false}
+{"queryId":"q07","topic":"Hỏi đáp về chủ đề chương trình","expectedChunkIds":["english-g4-007"],"negative":false}
+{"queryId":"q08","topic":"Đọc câu ngắn đơn giản","expectedChunkIds":["english-g4-009"],"negative":false}
+{"queryId":"q09","topic":"Đọc văn bản 45–55 từ","expectedChunkIds":["english-g4-011"],"negative":false}
+{"queryId":"q10","topic":"Viết văn bản 20–30 từ có gợi ý","expectedChunkIds":["english-g4-014"],"negative":false}
+{"queryId":"n01","topic":"Viết câu tiếng Anh bằng thì hiện tại hoàn thành","expectedChunkIds":[],"negative":true}
+{"queryId":"n02","topic":"Giải bài toán cộng các số tự nhiên trong phạm vi 100","expectedChunkIds":[],"negative":true}
+{"queryId":"n03","topic":"Viết chương trình Python dùng vòng lặp","expectedChunkIds":[],"negative":true}

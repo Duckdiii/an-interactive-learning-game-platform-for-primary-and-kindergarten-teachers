@@ -56,3 +56,7 @@ Ngưỡng 0.855 được chọn sau khi xem bộ 10 positive và 3 negative, nê
 3. Đã nạp 28 embedding; lần chạy lại ghi `written=0, skipped=28`.
 4. Đã chạy 10 query, 3 negative query và 5 control probes; giữ JSON từng lần chạy.
 5. Đã xem thủ công từng positive result, nguồn PDF/printed page và negative rejection. Kết quả trên bộ spike đạt tiêu chí đã định; ngưỡng được hiệu chỉnh trên cùng bộ và cần kiểm tra thêm bằng holdout trước khi khái quát hóa.
+
+## Later independent holdout (2026-10-11)
+
+The frozen `math-g1-holdout-v1` is separate from the exploratory 13-query fixture. At the existing threshold 0.855 it returned Hit@3 6/6, false rejection 0/6, negative rejection 3/3, near-miss rejection 1/3, false acceptance 2/6 and leakage 0. The holdout gate failed on two accepted near-miss queries. Calibration remains `NOT_RUN`; production threshold was not changed. Do not read the historical exploratory pass above as a holdout pass. See the [consolidated report](results/curriculum-rag-summary.md) and linked raw JSON/CSV.

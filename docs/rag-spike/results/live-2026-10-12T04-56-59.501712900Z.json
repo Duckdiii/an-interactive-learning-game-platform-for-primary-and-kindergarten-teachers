@@ -1,0 +1,450 @@
+{
+  "measurementStatus" : "LIVE_COMPLETED",
+  "measuredAtUtc" : "2026-10-12T04:56:59.501712900Z",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "manualReview" : "PENDING: inspect returned text and source pages before citing quality conclusions",
+  "scopeCount" : 1,
+  "scopeResults" : [ {
+    "gradeLevel" : "GRADE_2",
+    "summary" : {
+      "positiveQueries" : 10,
+      "hits" : 10,
+      "hitAt3" : 1.0,
+      "leakedChunks" : 0,
+      "negativeQueries" : 3,
+      "negativeRejections" : 3,
+      "retrievalGatePassed" : true,
+      "negativeGatePassed" : true,
+      "passed" : true
+    },
+    "controlProbes" : [ {
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "english-g2-014",
+      "primaryScopeChunkIds" : [ "english-g2-001", "english-g2-011", "english-g2-002" ]
+    }, {
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "english-g2-015",
+      "primaryScopeChunkIds" : [ "english-g2-011", "english-g2-002", "english-g2-001" ]
+    }, {
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "english-g2-016",
+      "primaryScopeChunkIds" : [ "english-g2-003" ]
+    }, {
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "english-g2-017",
+      "primaryScopeChunkIds" : [ ]
+    } ],
+    "queries" : [ {
+      "queryId" : "q01",
+      "topic" : "Nhận biết chữ cái đã học bằng kỹ năng nghe",
+      "expectedChunkIds" : [ "english-g2-001" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe và nhận biết các chữ cái đã học (khoảng 13 chữ cái).",
+        "text" : "Nghe và nhận biết các chữ cái đã học (khoảng 13 chữ cái).",
+        "score" : 0.91749205929276,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1243 ],
+        "printedPages" : [ 12 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-002",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe và nhận biết các âm đã học ở vị trí bắt đầu hoặc kết thúc của từ.",
+        "text" : "Nghe và nhận biết các âm đã học ở vị trí bắt đầu hoặc kết thúc của từ.",
+        "score" : 0.890608172379294,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1243 ],
+        "printedPages" : [ 12 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-011",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Nghe và nhắc lại các âm cơ bản đã học.",
+        "text" : "Nghe và nhắc lại các âm cơ bản đã học.",
+        "score" : 0.884620044682619,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1074
+    }, {
+      "queryId" : "q02",
+      "topic" : "Nhận biết âm đầu hoặc âm cuối của từ",
+      "expectedChunkIds" : [ "english-g2-002" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-002",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe và nhận biết các âm đã học ở vị trí bắt đầu hoặc kết thúc của từ.",
+        "text" : "Nghe và nhận biết các âm đã học ở vị trí bắt đầu hoặc kết thúc của từ.",
+        "score" : 0.89717936557356,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1243 ],
+        "printedPages" : [ 12 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe và nhận biết các chữ cái đã học (khoảng 13 chữ cái).",
+        "text" : "Nghe và nhận biết các chữ cái đã học (khoảng 13 chữ cái).",
+        "score" : 0.861522823380049,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1243 ],
+        "printedPages" : [ 12 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-011",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Nghe và nhắc lại các âm cơ bản đã học.",
+        "text" : "Nghe và nhắc lại các âm cơ bản đã học.",
+        "score" : 0.858047738638909,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 579
+    }, {
+      "queryId" : "q03",
+      "topic" : "Nghe hiểu số đếm trong phạm vi 20",
+      "expectedChunkIds" : [ "english-g2-003" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu các số đếm trong phạm vi 20.",
+        "text" : "Nghe hiểu các số đếm trong phạm vi 20.",
+        "score" : 0.9320133610517,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1243 ],
+        "printedPages" : [ 12 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu các từ và cụm từ gần gũi với hoạt động của học sinh trong ngữ cảnh (thêm khoảng 35 - 70 từ so với lớp 1).",
+        "text" : "Nghe hiểu các từ và cụm từ gần gũi với hoạt động của học sinh trong ngữ cảnh (thêm khoảng 35 - 70 từ so với lớp 1).",
+        "score" : 0.866294332564614,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1243 ],
+        "printedPages" : [ 12 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe và nhận biết các chữ cái đã học (khoảng 13 chữ cái).",
+        "text" : "Nghe và nhận biết các chữ cái đã học (khoảng 13 chữ cái).",
+        "score" : 0.863471138732183,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1243 ],
+        "printedPages" : [ 12 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 541
+    }, {
+      "queryId" : "q04",
+      "topic" : "Từ và cụm từ quen thuộc trong hoạt động học sinh",
+      "expectedChunkIds" : [ "english-g2-004" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu các từ và cụm từ gần gũi với hoạt động của học sinh trong ngữ cảnh (thêm khoảng 35 - 70 từ so với lớp 1).",
+        "text" : "Nghe hiểu các từ và cụm từ gần gũi với hoạt động của học sinh trong ngữ cảnh (thêm khoảng 35 - 70 từ so với lớp 1).",
+        "score" : 0.858094062731695,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1243 ],
+        "printedPages" : [ 12 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 522
+    }, {
+      "queryId" : "q05",
+      "topic" : "Thực hiện hướng dẫn đơn giản trong lớp học",
+      "expectedChunkIds" : [ "english-g2-006" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu và thực hiện theo các hướng dẫn đơn giản trong lớp học.",
+        "text" : "Nghe hiểu và thực hiện theo các hướng dẫn đơn giản trong lớp học.",
+        "score" : 0.890780476329273,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-013",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Đưa ra một số chỉ dẫn quen thuộc khi tham gia vào các hoạt động đơn giản trên lớp.",
+        "text" : "Đưa ra một số chỉ dẫn quen thuộc khi tham gia vào các hoạt động đơn giản trên lớp.",
+        "score" : 0.89063868477032,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu và tham gia vào các hoạt động trên lớp có chỉ dẫn bằng tiếng Anh.",
+        "text" : "Nghe hiểu và tham gia vào các hoạt động trên lớp có chỉ dẫn bằng tiếng Anh.",
+        "score" : 0.863539457458361,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 533
+    }, {
+      "queryId" : "q06",
+      "topic" : "Tham gia hoạt động lớp có chỉ dẫn tiếng Anh",
+      "expectedChunkIds" : [ "english-g2-007" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-013",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Đưa ra một số chỉ dẫn quen thuộc khi tham gia vào các hoạt động đơn giản trên lớp.",
+        "text" : "Đưa ra một số chỉ dẫn quen thuộc khi tham gia vào các hoạt động đơn giản trên lớp.",
+        "score" : 0.886960108647201,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu và tham gia vào các hoạt động trên lớp có chỉ dẫn bằng tiếng Anh.",
+        "text" : "Nghe hiểu và tham gia vào các hoạt động trên lớp có chỉ dẫn bằng tiếng Anh.",
+        "score" : 0.877232460034979,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu và thực hiện theo các hướng dẫn đơn giản trong lớp học.",
+        "text" : "Nghe hiểu và thực hiện theo các hướng dẫn đơn giản trong lớp học.",
+        "score" : 0.865518437640136,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 556
+    }, {
+      "queryId" : "q07",
+      "topic" : "Phản hồi bằng tiếng Anh trong hỏi đáp quen thuộc",
+      "expectedChunkIds" : [ "english-g2-008" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu và phản hồi bằng tiếng Anh trong một số tình huống hỏi đáp quen thuộc.",
+        "text" : "Nghe hiểu và phản hồi bằng tiếng Anh trong một số tình huống hỏi đáp quen thuộc.",
+        "score" : 0.868223600274738,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-012",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Trả lời các câu hỏi đơn giản quen thuộc gắn liền với trải nghiệm của học sinh, có thể ở cấp độ từ hoặc câu đơn giản.",
+        "text" : "Trả lời các câu hỏi đơn giản quen thuộc gắn liền với trải nghiệm của học sinh, có thể ở cấp độ từ hoặc câu đơn giản.",
+        "score" : 0.855236630981263,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 566
+    }, {
+      "queryId" : "q08",
+      "topic" : "Nhắc lại câu, cụm từ, bài vè hoặc bài hát",
+      "expectedChunkIds" : [ "english-g2-009" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Nhắc lại một số cụm từ, câu đơn giản, bài vè, bài hát phù hợp với lứa tuổi.",
+        "text" : "Nhắc lại một số cụm từ, câu đơn giản, bài vè, bài hát phù hợp với lứa tuổi.",
+        "score" : 0.882140961636216,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 660
+    }, {
+      "queryId" : "q09",
+      "topic" : "Nói các từ quen thuộc về sự vật",
+      "expectedChunkIds" : [ "english-g2-010" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Nói các từ quen thuộc chỉ sự vật trong ngữ cảnh (thêm khoảng 35 - 70 từ so với lớp 1).",
+        "text" : "Nói các từ quen thuộc chỉ sự vật trong ngữ cảnh (thêm khoảng 35 - 70 từ so với lớp 1).",
+        "score" : 0.882366348476332,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Nhắc lại một số cụm từ, câu đơn giản, bài vè, bài hát phù hợp với lứa tuổi.",
+        "text" : "Nhắc lại một số cụm từ, câu đơn giản, bài vè, bài hát phù hợp với lứa tuổi.",
+        "score" : 0.855309491870966,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 546
+    }, {
+      "queryId" : "q10",
+      "topic" : "Đưa ra chỉ dẫn khi tham gia hoạt động trên lớp",
+      "expectedChunkIds" : [ "english-g2-013" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "returned" : [ {
+        "chunkId" : "english-g2-013",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói / Đưa ra một số chỉ dẫn quen thuộc khi tham gia vào các hoạt động đơn giản trên lớp.",
+        "text" : "Đưa ra một số chỉ dẫn quen thuộc khi tham gia vào các hoạt động đơn giản trên lớp.",
+        "score" : 0.90451628574014,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu và thực hiện theo các hướng dẫn đơn giản trong lớp học.",
+        "text" : "Nghe hiểu và thực hiện theo các hướng dẫn đơn giản trong lớp học.",
+        "score" : 0.876683083929011,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g2-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nghe / Nghe hiểu và tham gia vào các hoạt động trên lớp có chỉ dẫn bằng tiếng Anh.",
+        "text" : "Nghe hiểu và tham gia vào các hoạt động trên lớp có chỉ dẫn bằng tiếng Anh.",
+        "score" : 0.87155797750891,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1244 ],
+        "printedPages" : [ 13 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 558
+    }, {
+      "queryId" : "n01",
+      "topic" : "Viết câu tiếng Anh bằng thì hiện tại hoàn thành",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "returned" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 498
+    }, {
+      "queryId" : "n02",
+      "topic" : "Giải bài toán cộng các số tự nhiên trong phạm vi 100",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "returned" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 514
+    }, {
+      "queryId" : "n03",
+      "topic" : "Viết chương trình Python dùng vòng lặp",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "returned" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 524
+    } ],
+    "subject" : "ENGLISH",
+    "dataset" : {
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "curriculumVersion" : "32/2018/TT-BGDDT",
+      "datasetVersion" : "english-grade2-familiarization-outcomes-v1",
+      "pdfPageCount" : 1555
+    },
+    "controlsStatus" : "PASS"
+  } ],
+  "passed" : true
+}

@@ -8,6 +8,7 @@ import com.aigameplatform.backend.dto.dsl.OrderingGameDsl;
 import com.aigameplatform.backend.dto.dsl.OrderingQuestionDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.OrderStep;
 import com.aigameplatform.backend.entity.question.OrderingQuestion;
 import com.aigameplatform.backend.service.factory.Ids;
@@ -26,9 +27,10 @@ public class OrderingGameStrategy extends GameContentStrategy<OrderingQuestionDs
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho ORDERING");
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
+                + ". Mỗi câu tạo 2–6 bước theo một thứ tự đúng rõ ràng (ví dụ trình tự, tăng dần hoặc trước-sau); "
+                + "không tạo nhiều đáp án hợp lý ngang nhau.";
     }
 
     /**

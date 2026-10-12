@@ -1,0 +1,27 @@
+{
+  "MATCHING" : {
+    "status" : "FAILED_OR_BLOCKED",
+    "failureClass" : "SafeComparisonFailure",
+    "safeStackFrames" : [ ],
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "failureReason" : "UNCLASSIFIED_RUNTIME_FAILURE",
+    "phase" : "RETRIEVAL_NO_EVIDENCE",
+    "schemaValidity" : "NOT_AVAILABLE",
+    "rootCauseClass" : "NoEvidence",
+    "answerCorrectness" : "NOT_REVIEWED"
+  },
+  "queryEmbeddingCache" : {
+    "providerMisses" : 0,
+    "hits" : 1,
+    "file" : "backend/target/curriculum-spike/query-embedding-cache.jsonl"
+  },
+  "runAtUtc" : "2026-10-12T06:02:25.099101Z",
+  "pipelineVersion" : "evidence-gate-v2",
+  "scope" : {
+    "subject" : "MATH",
+    "gradeLevel" : "GRADE_1"
+  },
+  "topic" : "Phép c?ng nh?m trong ph?m vi 10",
+  "model" : "gemini-3.5-flash-lite",
+  "retrievalMinScore" : 0.855
+}

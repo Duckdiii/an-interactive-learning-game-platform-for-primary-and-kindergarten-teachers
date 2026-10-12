@@ -8,6 +8,7 @@ import com.aigameplatform.backend.dto.dsl.MatchingPairDsl;
 import com.aigameplatform.backend.dto.dsl.MatchingQuestionDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.MatchingQuestion;
 import com.aigameplatform.backend.entity.question.embedded.MatchingPair;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
@@ -24,9 +25,10 @@ public class MatchingGameStrategy extends GameContentStrategy<MatchingQuestionDs
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho MATCHING");
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
+                + ". Tạo các cặp trái-phải có quan hệ đúng, duy nhất và dễ hiểu; mỗi câu gồm 3–6 cặp. "
+                + "Không lặp đáp án hoặc tạo cặp mơ hồ.";
     }
 
     @Override

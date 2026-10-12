@@ -1,0 +1,443 @@
+{
+  "runId" : "math-g1-holdout-v1-2026-10-11T20-44-04.135007200Z",
+  "runType" : "INDEPENDENT_HOLDOUT",
+  "measuredAtUtc" : "2026-10-11T20:44:04.135007200Z",
+  "subject" : "MATH",
+  "gradeLevel" : "GRADE_1",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "productionMinScore" : 0.855,
+  "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "fixtureSha256" : "378126981405b91808653fea7f2b3f0e71187faf47bd32b5a4b477b134083c19",
+  "summary" : {
+    "queryCount" : 12,
+    "positiveQueries" : 6,
+    "hits" : 6,
+    "hitAt3Fraction" : "6/6",
+    "negativeQueries" : 3,
+    "negativeRejections" : 3,
+    "negativeRejectionFraction" : "3/3",
+    "nearMissQueries" : 3,
+    "nearMissRejections" : 1,
+    "nearMissRejectionFraction" : "1/3",
+    "falseRejections" : 0,
+    "falseRejectionFraction" : "0/6",
+    "falseAcceptances" : 2,
+    "falseAcceptanceFraction" : "2/6",
+    "leakedChunks" : 0,
+    "passed" : false
+  },
+  "queries" : [ {
+    "query" : {
+      "queryId" : "h01",
+      "kind" : "POSITIVE",
+      "topic" : "Cộng nhẩm và trừ nhẩm các số nhỏ hơn hoặc bằng 10",
+      "expectedChunkIds" : [ "math-g1-007" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 188,
+      "goldRationale" : "Direct match to the grade 1 mental addition and subtraction outcome, PDF 188 / printed page 22."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g1-007",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm trong phạm vi 10.",
+      "score" : 0.906160098573082,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-008",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục.",
+      "score" : 0.889131610815323,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-005",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Phép cộng, phép trừ",
+      "text" : "Thực hiện được phép cộng, phép trừ (không nhớ) các số trong phạm vi 100.",
+      "score" : 0.881631959890478,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 1100
+  }, {
+    "query" : {
+      "queryId" : "h02",
+      "kind" : "POSITIVE",
+      "topic" : "Đọc và viết các số đến 100",
+      "expectedChunkIds" : [ "math-g1-001" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 187,
+      "goldRationale" : "Direct match to counting, reading and writing numbers outcome, PDF 187 / printed page 21."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g1-001",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Số tự nhiên / Đếm, đọc, viết các số trong phạm vi 100",
+      "text" : "Đếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong phạm vi 100.",
+      "score" : 0.905911998795343,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 187 ],
+      "printedPages" : [ 21 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-002",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Số tự nhiên / Chục và đơn vị",
+      "text" : "Nhận biết được chục và đơn vị, số tròn chục.",
+      "score" : 0.868800574199979,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-003",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Số tự nhiên / So sánh các số trong phạm vi 100",
+      "text" : "Nhận biết được cách so sánh, xếp thứ tự các số trong phạm vi 100 (ở các nhóm có không quá 4 số).",
+      "score" : 0.86468132963827,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 588
+  }, {
+    "query" : {
+      "queryId" : "h03",
+      "kind" : "POSITIVE",
+      "topic" : "So sánh và xếp thứ tự một nhóm tối đa bốn số trong phạm vi 100",
+      "expectedChunkIds" : [ "math-g1-003" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 188,
+      "goldRationale" : "Direct match to the grade 1 comparison and ordering limit, PDF 188 / printed page 22."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g1-003",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Số tự nhiên / So sánh các số trong phạm vi 100",
+      "text" : "Nhận biết được cách so sánh, xếp thứ tự các số trong phạm vi 100 (ở các nhóm có không quá 4 số).",
+      "score" : 0.910141481062165,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-001",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Số tự nhiên / Đếm, đọc, viết các số trong phạm vi 100",
+      "text" : "Đếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong phạm vi 100.",
+      "score" : 0.857604157801066,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 187 ],
+      "printedPages" : [ 21 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-015",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Đo lường / Biểu tượng về đại lượng và đơn vị đo đại lượng",
+      "text" : "Nhận biết được về “dài hơn”, “ngắn hơn”.",
+      "score" : 0.856577735513263,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 189 ],
+      "printedPages" : [ 23 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 575
+  }, {
+    "query" : {
+      "queryId" : "h04",
+      "kind" : "POSITIVE",
+      "topic" : "Ý nghĩa của phép cộng và phép trừ",
+      "expectedChunkIds" : [ "math-g1-004" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 188,
+      "goldRationale" : "Direct match to recognition of addition and subtraction meaning, PDF 188 / printed page 22."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g1-004",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Phép cộng, phép trừ",
+      "text" : "Nhận biết được ý nghĩa của phép cộng, phép trừ.",
+      "score" : 0.889678433310358,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-006",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Phép cộng, phép trừ",
+      "text" : "Làm quen với việc thực hiện tính toán trong trường hợp có hai dấu phép tính cộng, trừ (theo thứ tự từ trái sang phải).",
+      "score" : 0.864707678212437,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-009",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Thực hành giải quyết vấn đề liên quan đến các phép tính cộng, trừ",
+      "text" : "Nhận biết được ý nghĩa thực tiễn của phép tính (cộng, trừ) thông qua tranh ảnh, hình vẽ hoặc tình huống thực tiễn.",
+      "score" : 0.864552046997116,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 587
+  }, {
+    "query" : {
+      "queryId" : "h05",
+      "kind" : "POSITIVE",
+      "topic" : "Dùng thước thẳng đo độ dài theo đơn vị xăng-ti-mét",
+      "expectedChunkIds" : [ "math-g1-020" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 189,
+      "goldRationale" : "Direct match to measuring with a ruler in cm, PDF 189 / printed page 23."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g1-020",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Đo lường / Đo độ dài bằng thước thẳng",
+      "text" : "Thực hiện được việc đo độ dài bằng thước thẳng với đơn vị đo là cm.",
+      "score" : 0.896493072634823,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 189 ],
+      "printedPages" : [ 23 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-016",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Đo lường / Đơn vị đo độ dài cm",
+      "text" : "Nhận biết được đơn vị đo độ dài: cm (xăng-ti-mét); đọc và viết được số đo độ dài trong phạm vi 100cm.",
+      "score" : 0.889708747415771,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 189 ],
+      "printedPages" : [ 23 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-019",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Đo lường / Thực hành đo đại lượng",
+      "text" : "Thực hiện được việc đo và ước lượng độ dài theo đơn vị đo tự quy ước (gang tay, bước chân,...).",
+      "score" : 0.864233980539114,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 189 ],
+      "printedPages" : [ 23 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 572
+  }, {
+    "query" : {
+      "queryId" : "h06",
+      "kind" : "POSITIVE",
+      "topic" : "Đọc giờ đúng trên mặt đồng hồ",
+      "expectedChunkIds" : [ "math-g1-021" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 189,
+      "goldRationale" : "Direct match to reading the exact hour on a clock, PDF 189 / printed page 23."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g1-018",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Đo lường / Giờ đúng trên đồng hồ",
+      "text" : "Nhận biết được giờ đúng trên đồng hồ.",
+      "score" : 0.890875998137835,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 189 ],
+      "printedPages" : [ 23 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-021",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Đo lường / Đọc giờ đúng trên đồng hồ",
+      "text" : "Thực hiện được việc đọc giờ đúng trên đồng hồ.",
+      "score" : 0.888064467233524,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 189 ],
+      "printedPages" : [ 23 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 589
+  }, {
+    "query" : {
+      "queryId" : "h07",
+      "kind" : "NEGATIVE",
+      "topic" : "Cộng hai phân số khác mẫu số",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 188,
+      "goldRationale" : "No fraction outcomes occur in this grade 1 scope; reject as unsupported for the requested scope. Scope reference page 188."
+    },
+    "returned" : [ ],
+    "rejected" : true,
+    "leakedChunks" : 0,
+    "latencyMillis" : 507
+  }, {
+    "query" : {
+      "queryId" : "h08",
+      "kind" : "NEGATIVE",
+      "topic" : "Viết vòng lặp for trong Python",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 188,
+      "goldRationale" : "Programming is outside the grade 1 mathematics outcomes represented by this scope; reject as unsupported."
+    },
+    "returned" : [ ],
+    "rejected" : true,
+    "leakedChunks" : 0,
+    "latencyMillis" : 513
+  }, {
+    "query" : {
+      "queryId" : "h09",
+      "kind" : "NEGATIVE",
+      "topic" : "Học thuộc bảng nhân 7",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 188,
+      "goldRationale" : "The queried multiplication table is not a grade 1 outcome; reject as outside this scope."
+    },
+    "returned" : [ ],
+    "rejected" : true,
+    "leakedChunks" : 0,
+    "latencyMillis" : 526
+  }, {
+    "query" : {
+      "queryId" : "h10",
+      "kind" : "NEAR_MISS",
+      "topic" : "Cộng có nhớ các số trong phạm vi 100",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 188,
+      "goldRationale" : "Near miss: grade 1 outcome explicitly limits addition/subtraction to without carrying; reject the changed constraint."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g1-005",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Phép cộng, phép trừ",
+      "text" : "Thực hiện được phép cộng, phép trừ (không nhớ) các số trong phạm vi 100.",
+      "score" : 0.879772351430984,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-008",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục.",
+      "score" : 0.874566845570595,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-007",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm trong phạm vi 10.",
+      "score" : 0.867074543388233,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 567
+  }, {
+    "query" : {
+      "queryId" : "h11",
+      "kind" : "NEAR_MISS",
+      "topic" : "Thực hiện phép nhân các số tự nhiên trong phạm vi 100",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 188,
+      "goldRationale" : "Near miss: source outcomes on this page describe addition/subtraction; multiplication is not listed for grade 1."
+    },
+    "returned" : [ ],
+    "rejected" : true,
+    "leakedChunks" : 0,
+    "latencyMillis" : 519
+  }, {
+    "query" : {
+      "queryId" : "h12",
+      "kind" : "NEAR_MISS",
+      "topic" : "Đọc và viết số lớn hơn 100",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 187,
+      "goldRationale" : "Near miss: the grade 1 counting outcome is explicitly bounded by 100; reject requests beyond that boundary."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g1-001",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Số tự nhiên / Đếm, đọc, viết các số trong phạm vi 100",
+      "text" : "Đếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong phạm vi 100.",
+      "score" : 0.877109238015521,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 187 ],
+      "printedPages" : [ 21 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 516
+  } ]
+}

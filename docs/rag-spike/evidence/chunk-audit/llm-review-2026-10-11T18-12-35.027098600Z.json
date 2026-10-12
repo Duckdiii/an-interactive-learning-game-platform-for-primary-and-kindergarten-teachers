@@ -1,0 +1,215 @@
+{
+  "runAtUtc" : "2026-10-11T18:12:35.026098700Z",
+  "status" : "AI_ADVISORY_COMPLETED_HUMAN_REVIEW_REQUIRED",
+  "model" : "gemini-3.5-flash-lite",
+  "reviewPromptVersion" : "chunk-advisory-v1",
+  "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "curriculumVersion" : "32/2018/TT-BGDDT",
+  "datasetVersion" : "math-grade1-spike-v1",
+  "reviewedChunkCount" : 28,
+  "dispositionCounts" : {
+    "CANDIDATE_OK" : 28,
+    "NEEDS_HUMAN_REVIEW" : 0,
+    "REJECT" : 0
+  },
+  "humanReview" : "REQUIRED; AI results are advisory and do not approve curriculum content",
+  "reviews" : [ {
+    "chunkId" : "math-g1-001",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Phan doan phu hop voi yeu cau can dat ve dem doc viet so.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-002",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Phan doan ro rang ve chuc, don vi va so tron chuc.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-003",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Dung pham vi va gioi han so luong so.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-004",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Nhan biet y nghia phep toan hop ly.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-005",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Thuc hien phep tinh khong nho trong pham vi 100 dung yeu cau.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-006",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Phan doan dam bao tinh lien tuc cua noi dung.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-007",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Dung yeu cau tinh nhẩm trong pham vi 10.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-008",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Dung yeu cau tinh nham so tron chuc.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-009",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Y nghia thuc tien phep toan phu hop.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-010",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Bai toan co loi van duoc trinh bày ro rang.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-011",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Dinh huong khong gian dung.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-012",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Nhan dang hinh phang dung yeu cau.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-013",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Nhan dang khoi hop phu hop.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-014",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Thuc hanh lap ghep dung.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-015",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Nhan biet dai hon ngan hon chinh xac.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-016",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Don vi cm va pham vi 100cm dung.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-017",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Cac ngay trong tuan dung.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-018",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Gio dung tren dong ho phu hop.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-019",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Do va uoc luong do dai tu quy uoc dung.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-020",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Do do dai bang thuoc thang dung.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-021",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Doc gio dung tren dong ho phu hop.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-022",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Xem lich dung loai lich to hang ngay.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "math-g1-023",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Giai quyet van de thuc tien dung.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "control-math-g2-001",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Du lieu kiem chung hop le.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "control-math-g2-002",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Du lieu kiem chung hop le.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "control-math-g2-003",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Du lieu kiem chung hop le.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "control-vietnamese-g1-001",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Du lieu kiem chung hop le.",
+    "disposition" : "CANDIDATE_OK"
+  }, {
+    "chunkId" : "control-vietnamese-g1-002",
+    "atomicity" : "PASS",
+    "scopeFit" : "PASS",
+    "limits" : "PASS",
+    "note" : "Du lieu kiem chung hop le.",
+    "disposition" : "CANDIDATE_OK"
+  } ],
+  "rawModelResponse" : "{\n  \"reviews\": [\n    {\n      \"chunkId\": \"math-g1-001\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Phan doan phu hop voi yeu cau can dat ve dem doc viet so.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-002\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Phan doan ro rang ve chuc, don vi va so tron chuc.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-003\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Dung pham vi va gioi han so luong so.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-004\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Nhan biet y nghia phep toan hop ly.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-005\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Thuc hien phep tinh khong nho trong pham vi 100 dung yeu cau.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-006\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Phan doan dam bao tinh lien tuc cua noi dung.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-007\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Dung yeu cau tinh nhẩm trong pham vi 10.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-008\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Dung yeu cau tinh nham so tron chuc.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-009\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Y nghia thuc tien phep toan phu hop.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-010\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Bai toan co loi van duoc trinh bày ro rang.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-011\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Dinh huong khong gian dung.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-012\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Nhan dang hinh phang dung yeu cau.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-013\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Nhan dang khoi hop phu hop.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-014\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Thuc hanh lap ghep dung.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-015\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Nhan biet dai hon ngan hon chinh xac.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-016\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Don vi cm va pham vi 100cm dung.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-017\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Cac ngay trong tuan dung.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-018\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Gio dung tren dong ho phu hop.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-019\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Do va uoc luong do dai tu quy uoc dung.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-020\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Do do dai bang thuoc thang dung.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-021\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Doc gio dung tren dong ho phu hop.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-022\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Xem lich dung loai lich to hang ngay.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"math-g1-023\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Giai quyet van de thuc tien dung.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"control-math-g2-001\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Du lieu kiem chung hop le.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"control-math-g2-002\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Du lieu kiem chung hop le.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"control-math-g2-003\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Du lieu kiem chung hop le.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"control-vietnamese-g1-001\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Du lieu kiem chung hop le.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    },\n    {\n      \"chunkId\": \"control-vietnamese-g1-002\",\n      \"atomicity\": \"PASS\",\n      \"scopeFit\": \"PASS\",\n      \"limits\": \"PASS\",\n      \"note\": \"Du lieu kiem chung hop le.\",\n      \"disposition\": \"CANDIDATE_OK\"\n    }\n  ]\n}"
+}

@@ -8,6 +8,7 @@ import com.aigameplatform.backend.dto.dsl.MemoryCardQuestionDsl;
 import com.aigameplatform.backend.dto.dsl.MemoryPairDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.MemoryCardQuestion;
 import com.aigameplatform.backend.entity.question.embedded.MemoryPair;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
@@ -24,9 +25,10 @@ public class MemoryCardGameStrategy extends GameContentStrategy<MemoryCardQuesti
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho MEMORY_CARD");
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
+                + ". Tạo 2–8 thẻ ghép thành các cặp ghi nhớ; mỗi cặp phải dùng visualPrompt mô tả hình rõ ràng "
+                + "và phân biệt được với các cặp còn lại.";
     }
 
     @Override

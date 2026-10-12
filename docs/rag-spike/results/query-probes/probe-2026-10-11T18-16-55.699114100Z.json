@@ -1,0 +1,56 @@
+{
+  "measuredAtUtc" : "2026-10-11T18:16:55.699114100Z",
+  "measurementStatus" : "LIVE_SINGLE_QUERY",
+  "subject" : "MATH",
+  "gradeLevel" : "GRADE_1",
+  "topic" : "Phép c?ng nh?m trong ph?m vi 10",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.75,
+  "latencyMillis" : 1124,
+  "dataset" : {
+    "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "curriculumVersion" : "32/2018/TT-BGDDT",
+    "datasetVersion" : "math-grade1-spike-v1",
+    "pdfPageCount" : 1555
+  },
+  "result" : {
+    "status" : "FOUND",
+    "chunks" : [ {
+      "chunkId" : "math-g1-007",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm trong phạm vi 10.",
+      "score" : 0.854824668423837,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-008",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục.",
+      "score" : 0.848320225104096,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-004",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Phép cộng, phép trừ",
+      "text" : "Nhận biết được ý nghĩa của phép cộng, phép trừ.",
+      "score" : 0.844906439357183,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ]
+  }
+}

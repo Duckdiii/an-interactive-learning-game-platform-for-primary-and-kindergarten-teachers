@@ -1,0 +1,443 @@
+{
+  "runId" : "math-g2-holdout-v1-2026-10-11T19-43-54.536351800Z",
+  "runType" : "INDEPENDENT_HOLDOUT",
+  "measuredAtUtc" : "2026-10-11T19:43:54.536351800Z",
+  "subject" : "MATH",
+  "gradeLevel" : "GRADE_2",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "productionMinScore" : 0.855,
+  "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "fixtureSha256" : "408bb78aea7aed930ec3334a66a9fa48ecccff31ec675a926dba173f5154881d",
+  "summary" : {
+    "queryCount" : 12,
+    "positiveQueries" : 6,
+    "hits" : 6,
+    "hitAt3Fraction" : "6/6",
+    "negativeQueries" : 3,
+    "negativeRejections" : 3,
+    "negativeRejectionFraction" : "3/3",
+    "nearMissQueries" : 3,
+    "nearMissRejections" : 0,
+    "nearMissRejectionFraction" : "0/3",
+    "falseRejections" : 0,
+    "falseRejectionFraction" : "0/6",
+    "falseAcceptances" : 3,
+    "falseAcceptanceFraction" : "3/6",
+    "leakedChunks" : 0,
+    "passed" : false
+  },
+  "queries" : [ {
+    "query" : {
+      "queryId" : "h01",
+      "kind" : "POSITIVE",
+      "topic" : "Viết các số trong phạm vi một nghìn",
+      "expectedChunkIds" : [ "math-g2-001" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 190,
+      "goldRationale" : "Yêu cầu cần đạt về đếm, đọc, viết số trong phạm vi 1000; PDF 190, trang in 24."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-001",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Số và cấu tạo thập phân của một số",
+      "text" : "Đếm, đọc, viết được các số trong phạm vi 1000.",
+      "score" : 0.880168314527864,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 190 ],
+      "printedPages" : [ 24 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-004",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Số và cấu tạo thập phân của một số",
+      "text" : "Thực hiện được việc viết số thành tổng của trăm, chục, đơn vị.",
+      "score" : 0.865100937619504,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 190 ],
+      "printedPages" : [ 24 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 706
+  }, {
+    "query" : {
+      "queryId" : "h02",
+      "kind" : "POSITIVE",
+      "topic" : "Cộng trừ các số có nhớ tối đa một lượt trong phạm vi 1000",
+      "expectedChunkIds" : [ "math-g2-011" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 191,
+      "goldRationale" : "Yêu cầu cần đạt giới hạn cộng trừ có nhớ không quá một lượt; PDF 191, trang in 25."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-011",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Phép cộng, phép trừ",
+      "text" : "Thực hiện được phép cộng, phép trừ (không nhớ, có nhớ không quá một lượt) các số trong phạm vi 1000.",
+      "score" : 0.89842870729574,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-018",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục, tròn trăm trong phạm vi 1000.",
+      "score" : 0.882909677452201,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-017",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm trong phạm vi 20.",
+      "score" : 0.871108655231845,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 622
+  }, {
+    "query" : {
+      "queryId" : "h03",
+      "kind" : "POSITIVE",
+      "topic" : "Vận dụng bảng nhân 2 và bảng nhân 5",
+      "expectedChunkIds" : [ "math-g2-015" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 191,
+      "goldRationale" : "Yêu cầu cần đạt nêu rõ bảng nhân 2 và 5; PDF 191, trang in 25."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-015",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Phép nhân, phép chia",
+      "text" : "Vận dụng được bảng nhân 2 và bảng nhân 5 trong thực hành tính.",
+      "score" : 0.912869145563244,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-016",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Phép nhân, phép chia",
+      "text" : "Vận dụng được bảng chia 2 và bảng chia 5 trong thực hành tính.",
+      "score" : 0.89716196480779,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-013",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Phép nhân, phép chia",
+      "text" : "Nhận biết được ý nghĩa của phép nhân, phép chia.",
+      "score" : 0.866614531317527,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 610
+  }, {
+    "query" : {
+      "queryId" : "h04",
+      "kind" : "POSITIVE",
+      "topic" : "Đọc giờ đồng hồ khi kim phút chỉ số 3 hoặc số 6",
+      "expectedChunkIds" : [ "math-g2-035" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 193,
+      "goldRationale" : "Yêu cầu cần đạt giới hạn đọc giờ ở vị trí kim phút số 3 và 6; PDF 193, trang in 27."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-035",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Đọc giờ trên đồng hồ",
+      "text" : "Đọc được giờ trên đồng hồ khi kim phút chỉ số 3, số 6.",
+      "score" : 0.894158641089862,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 193 ],
+      "printedPages" : [ 27 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 540
+  }, {
+    "query" : {
+      "queryId" : "h05",
+      "kind" : "POSITIVE",
+      "topic" : "Đo và đọc số đo khối lượng bằng đơn vị kg",
+      "expectedChunkIds" : [ "math-g2-028" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 192,
+      "goldRationale" : "Yêu cầu cần đạt về đơn vị kg và số đo trong phạm vi 1000kg; PDF 192, trang in 26."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-028",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Đơn vị đo khối lượng kg",
+      "text" : "Nhận biết được đơn vị đo khối lượng: kg (ki-lô-gam); đọc và viết được số đo khối lượng trong phạm vi 1000kg.",
+      "score" : 0.887252637749704,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 192 ],
+      "printedPages" : [ 26 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-034",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Thực hành đo đại lượng",
+      "text" : "Sử dụng được một số dụng cụ thông dụng (một số loại cân thông dụng, thước thẳng có chia vạch đến xăng-ti-mét,...) để thực hành cân, đo, đong, đếm.",
+      "score" : 0.868673091058091,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 193 ],
+      "printedPages" : [ 27 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-039",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Vấn đề thực tiễn về đo lường",
+      "text" : "Giải quyết được một số vấn đề thực tiễn liên quan đến đo lường các đại lượng đã học.",
+      "score" : 0.858998752227293,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 193 ],
+      "printedPages" : [ 27 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 620
+  }, {
+    "query" : {
+      "queryId" : "h06",
+      "kind" : "POSITIVE",
+      "topic" : "Đọc số liệu trên biểu đồ tranh",
+      "expectedChunkIds" : [ "math-g2-041" ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 194,
+      "goldRationale" : "Yêu cầu cần đạt về đọc và mô tả số liệu biểu đồ tranh; PDF 194, trang in 28."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-041",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Đọc biểu đồ tranh",
+      "text" : "Đọc và mô tả được các số liệu ở dạng biểu đồ tranh.",
+      "score" : 0.904172620625966,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 194 ],
+      "printedPages" : [ 28 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-042",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Nhận xét biểu đồ tranh",
+      "text" : "Nêu được một số nhận xét đơn giản từ biểu đồ tranh.",
+      "score" : 0.889138776180253,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 194 ],
+      "printedPages" : [ 28 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 535
+  }, {
+    "query" : {
+      "queryId" : "h07",
+      "kind" : "NEGATIVE",
+      "topic" : "Cộng hai phân số khác mẫu số",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 191,
+      "goldRationale" : "Phân số không phải nội dung lớp 2 trong phạm vi này; từ chối ngoài phạm vi môn/lớp."
+    },
+    "returned" : [ ],
+    "rejected" : true,
+    "leakedChunks" : 0,
+    "latencyMillis" : 572
+  }, {
+    "query" : {
+      "queryId" : "h08",
+      "kind" : "NEGATIVE",
+      "topic" : "Lập trình vòng lặp for bằng Python",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 191,
+      "goldRationale" : "Lập trình Python nằm ngoài chương trình Toán lớp 2; từ chối ngoài phạm vi."
+    },
+    "returned" : [ ],
+    "rejected" : true,
+    "leakedChunks" : 0,
+    "latencyMillis" : 538
+  }, {
+    "query" : {
+      "queryId" : "h09",
+      "kind" : "NEGATIVE",
+      "topic" : "Giải phương trình bậc hai",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 191,
+      "goldRationale" : "Phương trình bậc hai nằm ngoài nội dung Toán lớp 2; từ chối ngoài phạm vi."
+    },
+    "returned" : [ ],
+    "rejected" : true,
+    "leakedChunks" : 0,
+    "latencyMillis" : 546
+  }, {
+    "query" : {
+      "queryId" : "h10",
+      "kind" : "NEAR_MISS",
+      "topic" : "Cộng có nhớ hai lượt trong phạm vi 1000",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 191,
+      "goldRationale" : "Gần với phép cộng lớp 2 nhưng vượt giới hạn có nhớ không quá một lượt; PDF 191, trang in 25."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-011",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Phép cộng, phép trừ",
+      "text" : "Thực hiện được phép cộng, phép trừ (không nhớ, có nhớ không quá một lượt) các số trong phạm vi 1000.",
+      "score" : 0.884519421270862,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-018",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục, tròn trăm trong phạm vi 1000.",
+      "score" : 0.875259271834414,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-001",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Số và cấu tạo thập phân của một số",
+      "text" : "Đếm, đọc, viết được các số trong phạm vi 1000.",
+      "score" : 0.865935607673161,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 190 ],
+      "printedPages" : [ 24 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 608
+  }, {
+    "query" : {
+      "queryId" : "h11",
+      "kind" : "NEAR_MISS",
+      "topic" : "Đọc giờ khi kim phút chỉ số 9",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 193,
+      "goldRationale" : "Gần với yêu cầu đọc giờ nhưng nguồn chỉ nêu kim phút ở số 3 hoặc 6; PDF 193, trang in 27."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-035",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Đọc giờ trên đồng hồ",
+      "text" : "Đọc được giờ trên đồng hồ khi kim phút chỉ số 3, số 6.",
+      "score" : 0.864964576357667,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 193 ],
+      "printedPages" : [ 27 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 545
+  }, {
+    "query" : {
+      "queryId" : "h12",
+      "kind" : "NEAR_MISS",
+      "topic" : "Làm tròn số đến hàng nghìn ở lớp 2",
+      "expectedChunkIds" : [ ],
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourcePdfPage" : 190,
+      "goldRationale" : "Làm tròn số là nội dung xuất hiện ở lớp sau, không có trong các yêu cầu Toán lớp 2 đã xác định; đối chứng trang nội dung lớp 2 PDF 190."
+    },
+    "returned" : [ {
+      "chunkId" : "math-g2-018",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục, tròn trăm trong phạm vi 1000.",
+      "score" : 0.875780088909819,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 191 ],
+      "printedPages" : [ 25 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-002",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Số và cấu tạo thập phân của một số",
+      "text" : "Nhận biết được số tròn trăm.",
+      "score" : 0.871631961986361,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 190 ],
+      "printedPages" : [ 24 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g2-001",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_2",
+      "topic" : "Số và cấu tạo thập phân của một số",
+      "text" : "Đếm, đọc, viết được các số trong phạm vi 1000.",
+      "score" : 0.870762680249261,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 190 ],
+      "printedPages" : [ 24 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "rejected" : false,
+    "leakedChunks" : 0,
+    "latencyMillis" : 612
+  } ]
+}

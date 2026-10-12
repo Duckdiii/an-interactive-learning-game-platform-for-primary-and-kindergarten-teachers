@@ -1,6 +1,6 @@
-# Chạy spike RAG Toán lớp 1
+﻿# Chạy spike Curriculum RAG
 
-Trạng thái: spike live Toán lớp 1 **đạt bộ tiêu chí exploratory**: Hit@3 10/10, zero leakage, 3/3 negative bị từ chối và 5/5 control probes đúng scope. Ngưỡng 0.855 được chọn sau lần chạy đầu trên cùng bộ query; cần đánh giá holdout trước khi coi kết quả tổng quát. Pilot QUIZ / Toán lớp 1 đã nối retrieval vào `GameGenerationService` và system prompt Gemini qua feature flag. Fake Gemini test xác nhận context/citation và schema; live smoke sinh quiz từ chủ đề trong corpus và từ chối chủ đề ngoài corpus đều pass. Xem [kiểm tra nguồn](source-audit.md), [contract context](context-contract.md), [kế hoạch tích hợp orchestration](integration-plan.md) và [bảng đánh giá](evaluation.md).
+Trạng thái: corpus 15/15 scope đã nạp đủ 558/558 vector; lần nạp lặp bỏ qua 558, ghi 0. Exploratory retrieval đã chạy trên 8/15 scope: Hit@3 80/80, negative rejection 19/24, leakage 0; gate tổng thể FAIL. Holdout MATH G1–G3 đều FAIL; calibration chưa chạy. Hai live QUIZ smoke trước đó xác nhận sinh được game cho chủ đề trong corpus và từ chối chủ đề ngoài corpus. So sánh strategy có/không RAG cho MATH G1 có output schema-valid ở 6/10 type, còn 4 lỗi provider; ma trận E2E production đủ 10 type mới chạy 0/15 scope. Gemini embedding daily quota hiện chặn 7 scope retrieval còn lại. Xem [báo cáo tổng hợp](results/curriculum-rag-summary.md), [coverage](results/scope-coverage.csv), [kiểm tra nguồn](source-audit.md), [contract context](context-contract.md) và [kế hoạch orchestration](integration-plan.md).
 
 ## Điền cấu hình trên máy
 
@@ -34,7 +34,9 @@ GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 CURRICULUM_RAG_MIN_SCORE=0.855
 ```
 
-Pilot chỉ nhận `QUIZ + MATH + GRADE_1`. Với flag RAG bật, yêu cầu ngoài scope, không đủ evidence, hoặc retrieval không dùng được sẽ dừng rõ ràng trước khi gọi Gemini. Để sinh game khi chưa bật RAG, tắt `CURRICULUM_RAG_ENABLED` và bật `GEMINI_GAME_GENERATION_ENABLED`. Live smoke dùng tạm `gemini-3.5-flash-lite` vì `GEMINI_MODEL` trong `.env` còn trống; `.env` không bị sửa. Duy cần review contract trước khi merge; benchmark holdout còn là bước tiếp theo.
+Corpus outcome-level hiện có đủ **15/15 curriculum scope**: 497 yêu cầu cần đạt và 61 chunk đối chứng, tổng 558 chunk; tất cả đã trích xuất và đối chiếu text/trang nguồn, semantic/pedagogical review chưa chạy. Kiểm tra Supabase xác nhận **558/558 vectors**, 15/15 scope. Ingest lặp ghi 0 và bỏ qua 558 ID đã có.
+
+Retrieval exploratory đã chạy 8/15 scope; 7 scope còn lại (`MATH` G4–G5, `VIETNAMESE` G1–G2, `ENGLISH` G3–G5) chưa chạy vì Gemini báo hết 1000 embedding requests/ngày. Trên 104 query ở các scope đã đo: Hit@3 80/80; negative rejection 19/24; 5 false acceptance nên gate FAIL. Holdout chỉ có MATH G1–G3 và cả ba FAIL; calibration chưa chạy. Hai live QUIZ smoke ở MATH G1 đã xác nhận một topic được sinh và topic ngoài corpus bị từ chối; đầy đủ 10 game type E2E theo scope chưa chạy (0/15). So sánh strategy MATH G1 có 6/10 cặp schema-valid và 4 provider failures. Checker chỉ advisory; live checker và UI giáo viên chưa xác minh; review của giáo viên đang pending. Chi tiết từng scope/run ở [báo cáo tổng hợp](results/curriculum-rag-summary.md), [coverage CSV/JSON](results/scope-coverage.csv) và [run checkpoint](results/full-curriculum-run-2026-10-12.json).
 
 ## Lệnh PowerShell từ thư mục gốc repo
 
@@ -48,7 +50,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode 
 # Chạy Flyway của project: V1 bật vector; V5 tạo bảng. Không sửa V1–V4.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Migrate -SkipBuild
 
-# Nạp 23 yêu cầu và 5 đoạn đối chứng; xác minh nguồn trước khi gọi embedding API.
+# Nạp/retry các dataset còn thiếu (558 chunks tổng cộng; scope hoàn tất được bỏ qua); xác minh nguồn trước khi gọi embedding API.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Ingest -SkipBuild
 
 # Chạy lại: cùng ID được bỏ qua, không gọi embedding lại cho các ID đã có.
@@ -56,6 +58,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode 
 
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Query -Topic 'Phép cộng nhẩm trong phạm vi 10' -SkipBuild
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Evaluate -SkipBuild
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Holdout -SkipBuild
 ```
 
 Lần đầu bỏ `-SkipBuild` để compile và tạo classpath. Script dùng Maven có sẵn hoặc Maven trong wrapper cache, rồi mới dùng `mvnw.cmd`. Có thể truyền `-EnvFile 'đường_dẫn_file.env'` và `-PdfPath 'đường_dẫn_PDF'`. Biến môi trường process được ưu tiên so với file.
@@ -68,7 +71,7 @@ Mã thoát: 0 thành công; 1 lỗi vận hành; 2 cấu hình còn thiếu; 3 q
 - Bảng do Flyway quản lý, vector 768 chiều; `PgVectorEmbeddingStore` không tự tạo bảng/extension, không xoá bảng trước khi chạy.
 - Cùng embedding model 001 và 768 chiều; tài liệu dùng `RETRIEVAL_DOCUMENT`, query dùng `RETRIEVAL_QUERY`. Vectors tài liệu được chuẩn hoá. [Tài liệu Google](https://ai.google.dev/gemini-api/docs/embeddings).
 - ID UUID được xác định từ SHA nguồn, phiên bản bộ dữ liệu, chunk ID, model, dimension và nội dung. Nạp lại bỏ qua các ID đã tồn tại; thư viện còn upsert theo primary key nếu có lần nạp đồng thời.
-- Nếu dữ liệu/model thay đổi, phải review và tạo phiên bản mới; không trộn vector khác model vào cùng phạm vi retrieval. Bộ dữ liệu phải đủ 28 ID đúng trước khi query/evaluate.
+- Nếu dữ liệu/model thay đổi, phải review và tạo phiên bản mới; không trộn vector khác model vào cùng phạm vi retrieval. Mỗi scope phải khớp danh sách ID và expected outcomes đã đóng băng trong catalog/fixture trước khi query/evaluate.
 - Metadata lọc bắt buộc `subject`, `gradeLevel`, `contentType`, phiên bản dữ liệu/chương trình, SHA nguồn và embedding model. Dữ liệu đối chứng không bị loại bằng cờ `control`, để kiểm tra bộ lọc môn/lớp có tác dụng thực sự.
 
 ## Kết quả và giới hạn
@@ -77,4 +80,8 @@ Extraction lưu tại `backend/target/curriculum-spike/extracted/`. Báo cáo li
 
 `FOUND` nghĩa là có ứng viên vượt ngưỡng tương đồng, không chứng minh mọi yêu cầu trong câu giáo viên nhập đều được chương trình hỗ trợ. Đặc biệt, similarity có thể không phân biệt được “không nhớ” và “có nhớ”. Negative queries được đo riêng để phát hiện vấn đề này. Nếu negative gate không đạt, cần nghiên cứu xác nhận phạm vi/reranking trước khi đưa vào luồng sinh game.
 
-Đánh giá retrieval không chứng minh Gemini luôn sinh đúng chương trình. Chưa chạy so sánh live sinh game có/không RAG; pilot mới hoàn thiện prompt QUIZ và chưa mở rộng prompt cho 10 strategy.
+Đánh giá retrieval không chứng minh Gemini luôn sinh đúng chương trình. Đã chạy một so sánh strategy-level có/không RAG cho cả 10 game type tại MATH/GRADE_1: 6/10 cặp có output hợp lệ schema, 4/10 bị lỗi từ provider. Đây chưa phải kiểm thử orchestration production end-to-end cho toàn bộ 15 scope; ma trận đó vẫn NOT_RUN. Đáp án và curriculum alignment chưa được giáo viên đánh giá.
+
+## Tiếp tục sau quota và kết quả offline
+
+Failure analysis, evidence guard, query embedding cache, test status và trạng thái NOT_RUN được cập nhật trong [báo cáo tổng hợp](results/curriculum-rag-summary.md). Dùng [resume runbook](results/resume-runbook-2026-10-12.md) để chạy đúng 7 scope retrieval còn thiếu, 12 holdout chưa chạy và 4 strategy provider failures. [Production E2E matrix](results/production-e2e-matrix.csv) có 30 ca cho 15 scope, hiện tất cả `NOT_RUN`. Corpus 558 vector không cần ingest lại. Evidence guard là kiểm tra ràng buộc tường minh, chưa chứng minh semantic alignment tổng quát; threshold giữ 0.855.

@@ -1,0 +1,127 @@
+{
+  "datasetVersion": "math-grade4-outcomes-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "applicabilityReviewedOn": "2026-10-12",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "primaryOutcomeCount": 53,
+  "controlOutcomeCount": 4,
+  "sourceSection": "Chương trình GDPT môn Toán / V. Nội dung giáo dục / 3. Nội dung cụ thể và yêu cầu cần đạt ở các lớp / Lớp 4",
+  "mathCoverPdfPage": 167,
+  "excludedFromOutcomeCorpus": "Không đưa phần Hoạt động thực hành và trải nghiệm vào corpus.",
+  "reviewedAmendments": [
+    {
+      "id": "20/2021/TT-BGDDT",
+      "sourceDocument": "20-bgddt.pdf",
+      "sourceSha256": "242913c886242173dd05d16ce63b306dce584cf1c238cd1c2b914e261af18c08",
+      "pdfPages": [
+        1
+      ],
+      "scope": "Bổ sung khoản 4 Điều 3 về lộ trình môn Tin học THCS.",
+      "changesMathGrade4Outcomes": false
+    },
+    {
+      "id": "13/2022/TT-BGDDT",
+      "sourceSha256": "62ceeae5c15897470d4c949bd9c532650fe9d7013f90a0503d5cbbcad50f575c",
+      "pdfPages": [
+        1,
+        2,
+        3
+      ],
+      "scope": "Chương trình tổng thể giai đoạn định hướng nghề nghiệp và chương trình môn Lịch sử.",
+      "changesMathGrade4Outcomes": false
+    },
+    {
+      "id": "17/2025/TT-BGDDT",
+      "sourceDocument": "17-bgddt.pdf",
+      "sourceSha256": "1d40c0513a1fdff35245c633ffc382122a18d2d5c0fbc96fcb426a51a8f9fea6",
+      "pdfPages": [
+        1,
+        2
+      ],
+      "scope": "Lịch sử và Địa lí tiểu học/THCS, Lịch sử lớp 10, Địa lí, Giáo dục công dân.",
+      "changesMathGrade4Outcomes": false
+    }
+  ],
+  "mathGradePdfPages": [
+    200,
+    201,
+    202,
+    203,
+    204,
+    205
+  ],
+  "mathGradePrintedPages": [
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "visualReviewNote": "?? ki?m tra tr?c quan ??y ?? c?c trang PDF 200?205; x?c nh?n c?t Y?u c?u c?n ??t ? b?n ph?i, c?c bullet ti?p di?n qua trang 200?203 v? n?i dung ??n h?t trang 205. Lo?i tr? Ho?t ??ng th?c h?nh v? tr?i nghi?m.",
+  "visualEvidence": [
+    "../evidence/math-grade4-pdf-200.png",
+    "../evidence/math-grade4-pdf-201.png",
+    "../evidence/math-grade4-pdf-202.png",
+    "../evidence/math-grade4-pdf-203.png",
+    "../evidence/math-grade4-pdf-204.png",
+    "../evidence/math-grade4-pdf-205.png"
+  ],
+  "visualTranscriptionReviewedChunks": [
+    "math-g4-001",
+    "math-g4-002",
+    "math-g4-003",
+    "math-g4-004",
+    "math-g4-005",
+    "math-g4-006",
+    "math-g4-007",
+    "math-g4-008",
+    "math-g4-009",
+    "math-g4-010",
+    "math-g4-011",
+    "math-g4-012",
+    "math-g4-013",
+    "math-g4-014",
+    "math-g4-015",
+    "math-g4-016",
+    "math-g4-017",
+    "math-g4-018",
+    "math-g4-019",
+    "math-g4-020",
+    "math-g4-021",
+    "math-g4-022",
+    "math-g4-023",
+    "math-g4-024",
+    "math-g4-025",
+    "math-g4-026",
+    "math-g4-027",
+    "math-g4-028",
+    "math-g4-029",
+    "math-g4-030",
+    "math-g4-031",
+    "math-g4-032",
+    "math-g4-033",
+    "math-g4-034",
+    "math-g4-035",
+    "math-g4-036",
+    "math-g4-037",
+    "math-g4-038",
+    "math-g4-039",
+    "math-g4-040",
+    "math-g4-041",
+    "math-g4-042",
+    "math-g4-043",
+    "math-g4-044",
+    "math-g4-045",
+    "math-g4-046",
+    "math-g4-047",
+    "math-g4-048",
+    "math-g4-049",
+    "math-g4-050",
+    "math-g4-051",
+    "math-g4-052",
+    "math-g4-053"
+  ]
+}

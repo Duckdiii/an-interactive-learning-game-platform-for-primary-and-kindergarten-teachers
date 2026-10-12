@@ -6,10 +6,11 @@ import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.exception.AiGenerationTimeoutException;
 import com.aigameplatform.backend.exception.CurriculumEvidenceNotFoundException;
 import com.aigameplatform.backend.exception.CurriculumServiceUnavailableException;
+import com.aigameplatform.backend.exception.GenerationScopeUnsupportedException;
 import com.aigameplatform.backend.exception.UnsafeContentException;
-import com.aigameplatform.backend.entity.enums.GradeLevel;
-import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.service.curriculum.CurriculumContextProvider;
+import com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview;
+import tools.jackson.databind.node.ObjectNode;
 import com.aigameplatform.backend.service.factory.GameDslFactoryRegistry;
 import com.aigameplatform.backend.service.factory.GameDslRequest;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
@@ -45,6 +46,7 @@ public class GameGenerationService {
     private final GameValidationService validationService;
     private final JsonMapper jsonMapper;
     private final ObjectProvider<CurriculumContextProvider> curriculumProvider;
+    private final ObjectProvider<CurriculumEvidenceReviewer> curriculumReviewerProvider;
     private final boolean curriculumRagEnabled;
     private final int maxRetries;
 
@@ -57,6 +59,7 @@ public class GameGenerationService {
             GameValidationService validationService,
             JsonMapper jsonMapper,
             ObjectProvider<CurriculumContextProvider> curriculumProvider,
+            ObjectProvider<CurriculumEvidenceReviewer> curriculumReviewerProvider,
             @Value("${app.curriculum-rag.enabled:false}") boolean curriculumRagEnabled,
             @Value("${app.generation.max-retries:2}") int maxRetries) {
         if (maxRetries < 0) {
@@ -69,6 +72,7 @@ public class GameGenerationService {
         this.validationService = validationService;
         this.jsonMapper = jsonMapper;
         this.curriculumProvider = curriculumProvider;
+        this.curriculumReviewerProvider = curriculumReviewerProvider;
         this.curriculumRagEnabled = curriculumRagEnabled;
         this.maxRetries = maxRetries;
     }
@@ -97,7 +101,9 @@ public class GameGenerationService {
             if (aiReport.valid()) {
                 ValidationReport report = validate(type, aiReport.output(), request);
                 if (report.valid()) {
-                    return report.game();
+                    GameDsl game = report.game();
+                    return curriculumRagEnabled && curriculumContext != null
+                            ? addCurriculumReview(game, curriculumContext) : game;
                 }
                 if (report.unsafe()) {
                     log.warn("Nội dung AI sinh ra bị từ chối vì không an toàn (lần thử {})", attemptNumber);
@@ -119,11 +125,36 @@ public class GameGenerationService {
         throw new AiGenerationTimeoutException("AI chưa sinh được game hợp lệ sau " + (maxRetries + 1) + " lần thử");
     }
 
-    private String retrieveCurriculumContext(GameType type, GameDslRequest request) {
-        if (type != GameType.QUIZ || request.subject() != Subject.MATH || request.gradeLevel() != GradeLevel.GRADE_1) {
-            throw new CurriculumEvidenceNotFoundException(
-                    "Curriculum RAG pilot currently supports QUIZ / Mathematics Grade 1 only");
+    private GameDsl addCurriculumReview(GameDsl game, String context) {
+        CurriculumEvidenceReview review;
+        try {
+            CurriculumEvidenceReviewer reviewer = curriculumReviewerProvider.getIfAvailable();
+            if (reviewer == null) throw new IllegalStateException("Curriculum reviewer is unavailable");
+            review = reviewer.review(game, context);
+            if (review == null) throw new IllegalStateException("Curriculum reviewer returned no result");
+        } catch (RuntimeException exception) {
+            log.warn("Curriculum evidence review unavailable; returning game with an advisory warning: {}",
+                    exception.getMessage());
+            review = CurriculumEvidenceReview.unavailable("Chưa kiểm tra được nội dung đối chiếu với chương trình.");
         }
+        if (review.status() == CurriculumEvidenceReview.Status.REVIEWED && review.warnings().isEmpty()) {
+            log.info("Curriculum evidence review found no unsupported claims (advisory only)");
+        } else {
+            log.warn("Curriculum evidence review requires teacher attention: status={}, warnings={}",
+                    review.status(), review.warnings().size());
+        }
+        try {
+            ObjectNode gameNode = (ObjectNode) jsonMapper.valueToTree(game);
+            ObjectNode metadata = (ObjectNode) gameNode.get("metadata");
+            metadata.set("curriculumReview", jsonMapper.valueToTree(review));
+            return jsonMapper.treeToValue(gameNode, GameDsl.class);
+        } catch (RuntimeException exception) {
+            log.warn("Could not attach curriculum advisory to generated game: {}", exception.getMessage());
+            return game;
+        }
+    }
+
+    private String retrieveCurriculumContext(GameType type, GameDslRequest request) {
         CurriculumContextProvider provider = curriculumProvider.getIfAvailable();
         if (provider == null) {
             throw new CurriculumServiceUnavailableException("Curriculum retrieval is enabled but not configured", null);
@@ -131,12 +162,18 @@ public class GameGenerationService {
         try {
             CurriculumContextProvider.Evidence evidence = provider.retrieve(
                     request.topic(), request.subject(), request.gradeLevel());
+            if (evidence != null && evidence.status() == CurriculumContextProvider.Evidence.Status.UNSUPPORTED_SCOPE) {
+                throw new GenerationScopeUnsupportedException(
+                        "Requested curriculum scope is not supported by a reviewed dataset");
+            }
             if (evidence == null || !evidence.sufficient()) {
                 throw new CurriculumEvidenceNotFoundException(
-                        "Không tìm thấy yêu cầu cần đạt đủ liên quan trong chương trình Toán lớp 1 cho chủ đề này");
+                        "Không tìm thấy yêu cầu cần đạt đủ liên quan trong chương trình cho chủ đề này");
             }
             return evidence.context();
         } catch (CurriculumEvidenceNotFoundException exception) {
+            throw exception;
+        } catch (GenerationScopeUnsupportedException exception) {
             throw exception;
         } catch (RuntimeException exception) {
             log.error("Curriculum retrieval failed: {}", exception.getMessage());

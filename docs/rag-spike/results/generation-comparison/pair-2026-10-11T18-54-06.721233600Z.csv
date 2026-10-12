@@ -1,0 +1,34 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","QUIZ","Phép cộng nhẩm trong phạm vi 10","FOUND","math-g1-007;math-g1-008;math-g1-005","true","1850","{""questions"":[{""text"":""Em hãy tính nhẩm: 3 + 2 = ?"",""options"":[""4"",""5"",""6"",""7""],""correctIndex"":1,""visualPrompt"":""Hình ảnh 3 quả bóng và 2 quả bóng""},{""text"":""Em hãy tính nhẩm: 4 + 4 = ?"",""options"":[""6"",""7"",""8"",""9""],""correctIndex"":2,""visualPrompt"":""Hình ảnh 4 bông hoa và 4 bông hoa""},{""text"":""Em hãy tính nhẩm: 5 + 3 = ?"",""options"":[""7"",""8"",""9"",""10""],""correctIndex"":1,""visualPrompt"":""Hình ảnh 5 ngôi sao và 3 ngôi sao""},{""text"":""Em hãy tính nhẩm: 6 + 4 = ?"",""options"":[""8"",""9"",""10"",""7""],""correctIndex"":2,""visualPrompt"":""Hình ảnh 6 viên kẹo và 4 viên kẹo""}]}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","QUIZ","Phép cộng nhẩm trong phạm vi 10","NOT_USED","","true","2060","{
+  ""questions"": [
+    {
+      ""text"": ""Kết quả của phép tính 3 + 2 bằng mấy?"",
+      ""options"": [""4"", ""5"", ""6"", ""7""],
+      ""correctIndex"": 1,
+      ""visualPrompt"": ""Hình ảnh 3 quả táo và 2 quả táo"",
+      ""audioText"": ""Ba cộng hai bằng mấy?""
+    },
+    {
+      ""text"": ""Tính nhẩm: 4 + 4 = ?"",
+      ""options"": [""7"", ""8"", ""9"", ""10""],
+      ""correctIndex"": 1,
+      ""visualPrompt"": ""Hình ảnh 4 bông hoa và 4 bông hoa"",
+      ""audioText"": ""Bốn cộng bốn bằng mấy?""
+    },
+    {
+      ""text"": ""Số thích hợp điền vào phép tính 5 + 1 = ? là:"",
+      ""options"": [""5"", ""6"", ""7"", ""8""],
+      ""correctIndex"": 1,
+      ""visualPrompt"": ""Hình ảnh 5 con cá và 1 con cá"",
+      ""audioText"": ""Năm cộng một bằng mấy?""
+    },
+    {
+      ""text"": ""Phép tính nào dưới đây có kết quả bằng 7?"",
+      ""options"": [""3 + 3"", ""2 + 4"", ""5 + 2"", ""4 + 2""],
+      ""correctIndex"": 2,
+      ""visualPrompt"": ""Hình ảnh các con số từ 1 đến 10"",
+      ""audioText"": ""Phép tính nào có kết quả bằng bảy?""
+    }
+  ]
+}"

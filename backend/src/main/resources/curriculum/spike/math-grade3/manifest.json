@@ -1,0 +1,73 @@
+{
+    "datasetVersion":  "math-grade3-outcomes-v1",
+    "curriculumVersion":  "32/2018/TT-BGDDT",
+    "applicabilityReviewedOn":  "2026-10-12",
+    "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "pdfPageCount":  1555,
+    "primaryOutcomeCount":  51,
+    "controlOutcomeCount":  4,
+    "sourceSection":  "Chương trình GDPT môn Toán / V. Nội dung giáo dục / 3. Nội dung cụ thể và yêu cầu cần đạt ở các lớp / Lớp 3",
+    "mathCoverPdfPage":  167,
+    "excludedFromOutcomeCorpus":  "Không đưa phần Hoạt động thực hành và trải nghiệm vào corpus; bảng Lớp 4 bắt đầu ở PDF 200.",
+    "reviewedAmendments":  [
+                               {
+                                   "id":  "20/2021/TT-BGDDT",
+                                   "sourceDocument":  "20-bgddt.pdf",
+                                   "sourceSha256":  "242913c886242173dd05d16ce63b306dce584cf1c238cd1c2b914e261af18c08",
+                                   "pdfPages":  [
+                                                    1
+                                                ],
+                                   "scope":  "Bổ sung khoản 4 Điều 3 về lộ trình môn Tin học THCS.",
+                                   "changesMathGrade3Outcomes":  false
+                               },
+                               {
+                                   "id":  "13/2022/TT-BGDDT",
+                                   "sourceSha256":  "62ceeae5c15897470d4c949bd9c532650fe9d7013f90a0503d5cbbcad50f575c",
+                                   "pdfPages":  [
+                                                    1,
+                                                    2,
+                                                    3
+                                                ],
+                                   "scope":  "Chương trình tổng thể giai đoạn định hướng nghề nghiệp và chương trình môn Lịch sử.",
+                                   "changesMathGrade3Outcomes":  false
+                               },
+                               {
+                                   "id":  "17/2025/TT-BGDDT",
+                                   "sourceDocument":  "17-bgddt.pdf",
+                                   "sourceSha256":  "1d40c0513a1fdff35245c633ffc382122a18d2d5c0fbc96fcb426a51a8f9fea6",
+                                   "pdfPages":  [
+                                                    1,
+                                                    2
+                                                ],
+                                   "scope":  "Lịch sử và Địa lí tiểu học/THCS, Lịch sử lớp 10, Địa lí, Giáo dục công dân.",
+                                   "changesMathGrade3Outcomes":  false
+                               }
+                           ],
+    "mathGrade3PdfPages":  [
+                               195,
+                               196,
+                               197,
+                               198,
+                               199
+                           ],
+    "mathGrade3PrintedPages":  [
+                                   29,
+                                   30,
+                                   31,
+                                   32,
+                                   33
+                               ],
+    "visualReviewNote":  "Fractions are stacked vertically in the source table; transcribed from the rendered official PDF page and manually visually checked.",
+    "visualEvidence":  [
+                           "../evidence/math-grade3-pdf-197.png",
+                           "../evidence/math-grade3-pdf-198.png"
+                       ],
+    "visualTranscriptionReviewedChunks":  [
+                                              "math-g3-022",
+                                              "math-g3-023",
+                                              "math-g3-034",
+                                              "math-g3-038",
+                                              "math-g3-043"
+                                          ]
+}

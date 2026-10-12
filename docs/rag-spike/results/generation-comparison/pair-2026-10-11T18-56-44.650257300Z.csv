@@ -1,0 +1,54 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","WORD_SCRAMBLE","Phép cộng nhẩm trong phạm vi 10","FOUND","math-g1-007;math-g1-008;math-g1-005","true","1346","{
+  ""questions"": [
+    {
+      ""correctWord"": ""nam"",
+      ""visualPrompt"": ""2 + 3 bằng mấy?"",
+      ""audioText"": ""Hai cộng ba bằng mấy?""
+    },
+    {
+      ""correctWord"": ""bay"",
+      ""visualPrompt"": ""4 + 3 bằng mấy?"",
+      ""audioText"": ""Bốn cộng ba bằng mấy?""
+    },
+    {
+      ""correctWord"": ""sau"",
+      ""visualPrompt"": ""3 + 3 bằng mấy?"",
+      ""audioText"": ""Ba cộng ba bằng mấy?""
+    },
+    {
+      ""correctWord"": ""muoi"",
+      ""visualPrompt"": ""5 + 5 bằng mấy?"",
+      ""audioText"": ""Năm cộng năm bằng mấy?""
+    },
+    {
+      ""correctWord"": ""tam"",
+      ""visualPrompt"": ""5 + 3 bằng mấy?"",
+      ""audioText"": ""Năm cộng ba bằng mấy?""
+    }
+  ]
+}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","WORD_SCRAMBLE","Phép cộng nhẩm trong phạm vi 10","NOT_USED","","true","1413","{
+  ""questions"": [
+    {
+      ""correctWord"": ""nam"",
+      ""visualPrompt"": ""2 + 3 = ?"",
+      ""audioText"": ""Hai cộng ba bằng mấy?""
+    },
+    {
+      ""correctWord"": ""sau"",
+      ""visualPrompt"": ""4 + 2 = ?"",
+      ""audioText"": ""Bốn cộng hai bằng mấy?""
+    },
+    {
+      ""correctWord"": ""bay"",
+      ""visualPrompt"": ""5 + 2 = ?"",
+      ""audioText"": ""Năm cộng hai bằng mấy?""
+    },
+    {
+      ""correctWord"": ""tam"",
+      ""visualPrompt"": ""1 + 2 = ?"",
+      ""audioText"": ""Một cộng hai bằng mấy?""
+    }
+  ]
+}"

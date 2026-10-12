@@ -1,34 +1,493 @@
 {
-    "measurementStatus":  "LIVE_COMPLETED",
+    "schemaVersion":  "curriculum-rag-status-v2",
+    "asOf":  "2026-10-12",
+    "overallStatus":  "CORPUS_AND_INDEX_PRESENT_FOR_15_OF_15; TWO_SELECTIVE_CORPUS_CLEANUPS_PENDING; EVALUATION_INCOMPLETE_AND_FAILING",
     "scope":  {
-                  "subject":  "MATH",
-                  "gradeLevel":  "GRADE_1"
+                  "count":  15,
+                  "definition":  "MATH, VIETNAMESE, ENGLISH x primary grades 1-5; English G1-G2 optional familiarization",
+                  "excludes":  "Kindergarten development areas and kindergarten English age groups are outside this agreed primary-school denominator."
               },
-    "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
-    "sourceVerifiedChunks":  28,
-    "indexedChunks":  28,
-    "repeatIngest":  {
+    "corpus":  {
+                   "officialSourceVerifiedScopes":  "15/15",
+                   "primaryOutcomeChunks":  497,
+                   "controlChunks":  61,
+                   "totalSourceVerifiedChunks":  558,
+                   "indexedScopes":  "15/15",
+                   "indexedChunks":  "558/558",
+                   "sourceAndPageVerification":  "PDFBox exact source/page and ordered fragment checks 558/558; 25 cross-page joins and 6 visual transcriptions reviewed by Codex AI; teacher/pedagogical review pending",
+                   "contextFindings":  {
+                                           "parentTitleContinuation":  "math-g5-053 topic continues onto PDF page 212; source index still has abbreviated topic",
+                                           "sameScopeDuplicate":  "vietnamese-g5-011 and vietnamese-g5-030 are one identical source row on PDF page 93; both retained pending one-row index cleanup",
+                                           "structuralCompleteness":  "497/497 outcomes have exact source fragments, matching chunk text and source scope",
+                                           "controls":  "61/61 are wrong-scope fixtures; control=false retriever filter regression tested"
+                                       },
+                   "duplicateHashReview":  {
+                                               "duplicateRows":  107,
+                                               "duplicateGroups":  38,
+                                               "controlReplicas":  "61 rows across 31 hash groups",
+                                               "crossScopeOutcomes":  "13 rows across 6 hash groups",
+                                               "sameScopeRedundant":  "2 rows in 1 confirmed source-row duplicate; cleanup pending",
+                                               "removedByHash":  0,
+                                               "primaryOutcomeRowsMatchingControlHashes":  31,
+                                               "uniqueRows":  451
+                                           }
+               },
+    "ingestRepeat":  {
                          "written":  0,
-                         "skipped":  28
+                         "skipped":  558,
+                         "assessment":  "Idempotent across all 15 scopes"
                      },
-    "embeddingModel":  "gemini-embedding-001",
-    "embeddingDimension":  768,
-    "minScore":  0.855,
-    "positiveQueries":  10,
-    "hits":  10,
-    "hitAt3":  1,
-    "leakedChunks":  0,
-    "negativeQueries":  3,
-    "negativeRejections":  3,
-    "controlQueries":  5,
-    "controlsPassed":  true,
-    "retrievalGatePassed":  true,
-    "negativeGatePassed":  true,
-    "passed":  true,
-    "thresholdCalibration":  "Exploratory; selected after reviewing this same 10-positive/3-negative set; holdout still needed",
-    "reports":  [
-                    "results/live-2026-10-10T16-35-07.114857800Z.json",
-                    "results/live-2026-10-10T16-36-56.842743600Z.json"
-                ],
-    "manualReview":  "Completed: retrieved outcome text and source pages checked against the audited PDF"
+    "embedding":  {
+                      "model":  "gemini-embedding-001",
+                      "dimension":  768,
+                      "documentTaskType":  "RETRIEVAL_DOCUMENT",
+                      "queryTaskType":  "RETRIEVAL_QUERY"
+                  },
+    "exploratoryRetrieval":  {
+                                 "evaluatedScopes":  "8/15",
+                                 "queries":  104,
+                                 "positiveHitAt3":  "80/80",
+                                 "falseRejections":  "0/80",
+                                 "negativeRejections":  "19/24",
+                                 "falseAcceptances":  "5/24",
+                                 "controlsExcluded":  "33/33",
+                                 "leakedChunks":  0,
+                                 "threshold":  0.855,
+                                 "gate":  "FAIL",
+                                 "notRunScopes":  "7/15; quota blocked"
+                             },
+    "calibration":  "NOT_RUN",
+    "holdout":  {
+                    "evaluatedScopes":  "3/15 (MATH GRADE_1-GRADE_3)",
+                    "queries":  36,
+                    "positiveHitAt3":  "18/18",
+                    "falseRejections":  "0/18",
+                    "negativeRejections":  "9/9",
+                    "nearMissRejections":  "3/9",
+                    "falseAcceptances":  "6/18",
+                    "leakedChunks":  0,
+                    "gate":  "FAIL",
+                    "notRunScopes":  "12/15",
+                    "thresholdChanged":  false
+                },
+    "generation":  {
+                       "strategyTypesAttempted":  "10/10 in one strategy-level comparison",
+                       "pairedSchemaValidOutputs":  "6/10",
+                       "providerFailures":  "4/10",
+                       "fullProductionEndToEnd":  "0/15 scopes; NOT_RUN",
+                       "serviceIntegration":  "PASS_OFFLINE_LOCAL_GEMINI_STUB; 30/30 positive/insufficient service cases through GameGenerationService; not live provider or HTTP API",
+                       "httpApiE2E":  "NOT_RUN; no generation endpoint",
+                       "priorSingleQuizSmoke":  "MATH GRADE_1 passed; one in-corpus and one out-of-scope smoke case",
+                       "curriculumAlignmentReview":  "NOT_REVIEWED",
+                       "aiReview":  "ADVISORY; live evaluation NOT_RUN",
+                       "teacherReview":  "PENDING",
+                       "providerFailureDiagnostics":  "Status, provider code/message and a surfaced correlation ID are now safely logged with credential redaction; old 4 failures remain unexplained until one controlled live probe."
+                   },
+    "blockers":  [
+                     {
+                         "status":  "BLOCKED",
+                         "service":  "Gemini embeddings",
+                         "metric":  "embed_content_free_tier_requests",
+                         "limit":  "1000 requests/day",
+                         "lastProviderRetryDelay":  "19h 2m 50.8s at 2026-10-12T04:57Z",
+                         "firstRetrievalScopeNotRun":  "ENGLISH/GRADE_3",
+                         "checkedAtUtc":  "2026-10-12T08:24Z",
+                         "note":  "The last provider retry delay was 19h 2m 50.8s at 2026-10-12T04:57Z; checked again at 08:24Z and the estimated window has not elapsed. Do not rerun provider calls yet."
+                     }
+                 ],
+    "evidence":  {
+                     "scopeMatrixCsv":  "scope-coverage.csv",
+                     "scopeMatrixJson":  "scope-coverage.json",
+                     "runCheckpoint":  "full-curriculum-run-2026-10-12.json",
+                     "consolidatedReport":  "curriculum-rag-summary.md",
+                     "chunkAuditCsv":  "../evidence/chunk-audit/all-558-chunks.csv"
+                 },
+    "historicalInitialMathG1ToG3Status":  {
+                                              "measurementStatus":  "LIVE_COMPLETED_WITH_FAILING_NEGATIVE_AND_HOLDOUT_GATES",
+                                              "scope":  {
+                                                            "subject":  "MATH",
+                                                            "gradeLevels":  [
+                                                                                "GRADE_1",
+                                                                                "GRADE_2",
+                                                                                "GRADE_3"
+                                                                            ]
+                                                        },
+                                              "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                                              "sourceVerifiedChunks":  130,
+                                              "indexedChunks":  130,
+                                              "repeatIngest":  {
+                                                                   "written":  0,
+                                                                   "skipped":  130,
+                                                                   "assessment":  "Idempotent: 28 G1 + 47 G2 + 55 G3 vectors already indexed"
+                                                               },
+                                              "embeddingModel":  "gemini-embedding-001",
+                                              "embeddingDimension":  768,
+                                              "minScore":  0.855,
+                                              "positiveQueries":  30,
+                                              "hits":  30,
+                                              "hitAt3":  "30/30",
+                                              "leakedChunks":  0,
+                                              "negativeQueries":  9,
+                                              "negativeRejections":  7,
+                                              "controlQueries":  13,
+                                              "controlsPassed":  true,
+                                              "exploratoryRetrievalGatePassed":  true,
+                                              "exploratoryNegativeGatePassed":  false,
+                                              "holdoutGatePassed":  false,
+                                              "overallStatus":  "EXPLORATORY_POSITIVE_AND_FILTER_PASS; NEGATIVE_FAIL; FAIL_HOLDOUT",
+                                              "passed":  false,
+                                              "holdout":  {
+                                                              "run":  "holdout-v1",
+                                                              "queryCount":  36,
+                                                              "positiveQueries":  18,
+                                                              "hits":  18,
+                                                              "positiveHitAt3":  "18/18",
+                                                              "negativeQueries":  9,
+                                                              "negativeRejections":  9,
+                                                              "nearMissQueries":  9,
+                                                              "nearMissRejections":  3,
+                                                              "falseRejections":  0,
+                                                              "falseAcceptances":  6,
+                                                              "leakedChunks":  0,
+                                                              "passed":  false,
+                                                              "scopes":  [
+                                                                             {
+                                                                                 "scope":  "MATH/GRADE_1",
+                                                                                 "queryCount":  12,
+                                                                                 "positiveHitAt3":  "6/6",
+                                                                                 "falseRejections":  "0/6",
+                                                                                 "negativeRejections":  "3/3",
+                                                                                 "nearMissRejections":  "1/3",
+                                                                                 "falseAcceptances":  "2/6",
+                                                                                 "leakedChunks":  0,
+                                                                                 "passed":  false,
+                                                                                 "report":  "holdout/math-g1-holdout-v1-2026-10-11T19-52-40.314220700Z.json",
+                                                                                 "csv":  "holdout/math-g1-holdout-v1-2026-10-11T19-52-40.314220700Z.csv"
+                                                                             },
+                                                                             {
+                                                                                 "scope":  "MATH/GRADE_2",
+                                                                                 "queryCount":  12,
+                                                                                 "positiveHitAt3":  "6/6",
+                                                                                 "falseRejections":  "0/6",
+                                                                                 "negativeRejections":  "3/3",
+                                                                                 "nearMissRejections":  "0/3",
+                                                                                 "falseAcceptances":  "3/6",
+                                                                                 "leakedChunks":  0,
+                                                                                 "passed":  false,
+                                                                                 "report":  "holdout/math-g2-holdout-v1-2026-10-11T19-52-47.370879100Z.json",
+                                                                                 "csv":  "holdout/math-g2-holdout-v1-2026-10-11T19-52-47.370879100Z.csv"
+                                                                             },
+                                                                             {
+                                                                                 "scope":  "MATH/GRADE_3",
+                                                                                 "queryCount":  12,
+                                                                                 "positiveHitAt3":  "6/6",
+                                                                                 "falseRejections":  "0/6",
+                                                                                 "negativeRejections":  "3/3",
+                                                                                 "nearMissRejections":  "2/3",
+                                                                                 "falseAcceptances":  "1/6",
+                                                                                 "leakedChunks":  0,
+                                                                                 "passed":  false,
+                                                                                 "report":  "holdout/math-g3-holdout-v1-2026-10-11T20-44-17.350531100Z.json",
+                                                                                 "csv":  "holdout/math-g3-holdout-v1-2026-10-11T20-44-17.350531100Z.csv"
+                                                                             }
+                                                                         ]
+                                                          },
+                                              "thresholdCalibration":  "Exploratory @0.75 and @0.855 retained; production threshold 0.855 unchanged; independent holdout fails in all three Math scopes; calibration NOT_RUN",
+                                              "reports":  [
+                                                              "results/live-2026-10-10T16-35-07.114857800Z.json",
+                                                              "results/live-2026-10-10T16-36-56.842743600Z.json",
+                                                              "results/live-2026-10-11T19-42-38.824532700Z.json",
+                                                              "results/holdout/math-g1-holdout-v1-2026-10-11T19-43-47.432479200Z.json",
+                                                              "results/holdout/math-g2-holdout-v1-2026-10-11T19-43-54.536351800Z.json",
+                                                              "results/live-2026-10-11T19-52-22.284643700Z.json",
+                                                              "results/holdout/math-g1-holdout-v1-2026-10-11T19-52-40.314220700Z.json",
+                                                              "results/holdout/math-g2-holdout-v1-2026-10-11T19-52-47.370879100Z.json",
+                                                              "results/live-2026-10-11T20-43-36.715406300Z.json",
+                                                              "results/holdout/math-g3-holdout-v1-2026-10-11T20-44-17.350531100Z.json",
+                                                              "results/holdout/math-g3-holdout-v1-2026-10-11T20-44-17.350531100Z.csv"
+                                                          ],
+                                              "manualReview":  "Math G1 23 outcomes + 5 controls, G2 43 + 4, G3 51 + 4 source verified. G3 has 5 manually visually transcribed outcomes on PDF 197-198. Semantic/pedagogical review NOT_RUN; teacher review PENDING.",
+                                              "followUp":  {
+                                                               "chunkSourceAudit":  {
+                                                                                        "runAtUtc":  "2026-10-11T18:07:24Z",
+                                                                                        "chunks":  28,
+                                                                                        "sourceMatches":  28,
+                                                                                        "semanticAndPedagogicalHumanReviews":  "NOT_RUN"
+                                                                                    },
+                                                               "aiChunkReview":  {
+                                                                                     "runAtUtc":  "2026-10-11T18:12:35.027098600Z",
+                                                                                     "model":  "gemini-3.5-flash-lite",
+                                                                                     "reviewedChunks":  28,
+                                                                                     "candidateOk":  28,
+                                                                                     "needsHumanReview":  0,
+                                                                                     "rejected":  0,
+                                                                                     "humanApproval":  "NOT_RUN"
+                                                                                 },
+                                                               "pairedGeneration":  {
+                                                                                        "scope":  "MATH/GRADE_1",
+                                                                                        "gameType":  "QUIZ",
+                                                                                        "threshold":  0.75,
+                                                                                        "outputsCaptured":  2,
+                                                                                        "bothSchemaValid":  true,
+                                                                                        "preliminaryCorrectAnswers":  "4/4 each; not teacher scored",
+                                                                                        "teacherReview":  "NOT_RUN"
+                                                                                    },
+                                                               "reingestionCheck":  {
+                                                                                        "written":  0,
+                                                                                        "skippedExisting":  28,
+                                                                                        "assessment":  "Idempotent; no database rows changed"
+                                                                                    },
+                                                               "queryEncodingDiagnosis":  {
+                                                                                              "correctQuery":  "PhÃ©p cá»™ng nháº©m trong pháº¡m vi 10",
+                                                                                              "correctQueryScore075":  0.895729657396445,
+                                                                                              "correctQueryScore0855":  0.895729657396445,
+                                                                                              "corruptedProbeQuery":  "PhÃ©p c?ng nh?m trong ph?m vi 10",
+                                                                                              "corruptedQueryScore":  0.854824668423837,
+                                                                                              "pgVectorScoreFormula":  "(1 + cosineSimilarity) / 2",
+                                                                                              "cleanCosine":  0.79145932671005992,
+                                                                                              "corruptedCosine":  0.70964932174596129,
+                                                                                              "interpretation":  "Different query strings; not evidence of same-query model/index drift"
+                                                                                          },
+                                                               "currentFullScopeStatus":  "Current corpus checkpoint 2026-10-12: all 15 curriculum scopes source-verified (497 primary outcomes + 61 controls = 558 chunks) and all 558 IDs are indexed in Supabase. Exploratory retrieval ran on 8/15 scopes: positive Hit@3 80/80, negative rejection 19/24, false acceptance 5/24, controls 33/33 excluded, leakage 0; aggregate FAIL. Seven scopes are NOT_RUN due to Gemini embedding free-tier 1000 requests/day quota. See scope-coverage.csv/json and full-curriculum-run-2026-10-12.json.",
+                                                               "fixedQueryReplay":  {
+                                                                                        "threshold075":  "10/10 positive Hit@3; 0/3 negative rejected",
+                                                                                        "threshold0855":  "10/10 positive Hit@3; 3/3 negative rejected",
+                                                                                        "independence":  "Same exploratory query set; no calibration or holdout"
+                                                                                    },
+                                                               "currentRepeatIngest":  {
+                                                                                           "runAtUtc":  "2026-10-12T04:53Z",
+                                                                                           "written":  0,
+                                                                                           "skippedExisting":  558,
+                                                                                           "assessment":  "Idempotent across all 15 scopes"
+                                                                                       },
+                                                               "latestLiveRetrieval":  {
+                                                                                           "run":  "per-scope latest exploratory; raw files linked in scope-coverage.csv",
+                                                                                           "embeddingModel":  "gemini-embedding-001",
+                                                                                           "dimension":  768,
+                                                                                           "minScore":  0.855,
+                                                                                           "topK":  3,
+                                                                                           "scopes":  8,
+                                                                                           "positiveQueries":  "80/80",
+                                                                                           "negativeRejections":  "19/24",
+                                                                                           "falseAcceptances":  "5/24",
+                                                                                           "controlProbes":  "33/33 excluded",
+                                                                                           "leakedChunks":  0,
+                                                                                           "gate":  "FAIL",
+                                                                                           "notRunScopes":  "7/15, provider daily quota",
+                                                                                           "report":  "results/scope-coverage.json"
+                                                                                       },
+                                                               "currentHoldoutStatus":  "36 queries across 3 scopes; positive Hit@3 18/18; false rejection 0/18; negative rejection 9/9; near-miss rejection 3/9; false acceptance 6/18; leakage 0; FAIL; threshold unchanged",
+                                                               "currentQuotaBlocker":  {
+                                                                                           "status":  "BLOCKED",
+                                                                                           "quotaMetric":  "embed_content_free_tier_requests",
+                                                                                           "limit":  "1000 requests/day",
+                                                                                           "providerRetryAfter":  "19h 2m 50.8s at 2026-10-12T04:57Z",
+                                                                                           "firstNotRunScope":  "ENGLISH/GRADE_3"
+                                                                                       }
+                                                           },
+                                              "scopeDenominator":  15,
+                                              "scopeDefinition":  "MATH, VIETNAMESE, ENGLISH x primary grades 1-5; English G1-G2 optional familiarization",
+                                              "stale71Denominator":  "Superseded: mixed 53 primary-subject claims, 15 kindergarten development-area-age scopes and 3 kindergarten-English ages; not the current 3-subject target",
+                                              "generationClaimReviewer":  {
+                                                                              "codeAndUnitTests":  "PASS; requires at least one claim per questionId and only accepts retrieved-chunk citations; does not establish complete claim coverage within each question",
+                                                                              "generationBehavior":  "advisory only; reviewer failure returns UNAVAILABLE warning and does not block the game",
+                                                                              "liveEvaluation":  "NOT_RUN",
+                                                                              "teacherUi":  "NOT_CONNECTED; current frontend has no generated-game review surface",
+                                                                              "teacherReview":  "PENDING"
+                                                                          },
+                                              "primaryOutcomeChunks":  117,
+                                              "controlChunks":  13,
+                                              "scopeCount":  3,
+                                              "scopeResults":  [
+                                                                   {
+                                                                       "subject":  "MATH",
+                                                                       "gradeLevel":  "GRADE_1",
+                                                                       "outcomeChunks":  23,
+                                                                       "controlChunks":  5,
+                                                                       "indexedChunks":  28,
+                                                                       "exploratoryHitAt3":  "10/10",
+                                                                       "negativeRejections":  "3/3",
+                                                                       "controlFilterStatus":  "PASS 5/5",
+                                                                       "holdoutHitAt3":  "6/6",
+                                                                       "falseAcceptances":  "2/6",
+                                                                       "holdoutStatus":  "FAIL"
+                                                                   },
+                                                                   {
+                                                                       "subject":  "MATH",
+                                                                       "gradeLevel":  "GRADE_2",
+                                                                       "outcomeChunks":  43,
+                                                                       "controlChunks":  4,
+                                                                       "indexedChunks":  47,
+                                                                       "exploratoryHitAt3":  "10/10",
+                                                                       "negativeRejections":  "3/3",
+                                                                       "controlFilterStatus":  "PASS 4/4",
+                                                                       "holdoutHitAt3":  "6/6",
+                                                                       "falseAcceptances":  "3/6",
+                                                                       "holdoutStatus":  "FAIL"
+                                                                   },
+                                                                   {
+                                                                       "subject":  "MATH",
+                                                                       "gradeLevel":  "GRADE_3",
+                                                                       "outcomeChunks":  51,
+                                                                       "controlChunks":  4,
+                                                                       "indexedChunks":  55,
+                                                                       "exploratoryHitAt3":  "10/10",
+                                                                       "negativeRejections":  "1/3",
+                                                                       "controlFilterStatus":  "PASS 4/4",
+                                                                       "holdoutHitAt3":  "6/6",
+                                                                       "falseAcceptances":  "1/6",
+                                                                       "holdoutStatus":  "FAIL"
+                                                                   }
+                                                               ]
+                                          },
+    "offlineUpdate":  {
+                          "rawFailureAnalysis":  {
+                                                     "status":  "PASS_OFFLINE",
+                                                     "exploratoryFalseAcceptances":  5,
+                                                     "holdoutFailures":  6,
+                                                     "developmentQueries":  11,
+                                                     "classification":  "quality failures; metadata scope/version correct; provider quota separate",
+                                                     "labelsChanged":  false,
+                                                     "report":  "../evidence/false-acceptance-analysis-2026-10-12.md"
+                                                 },
+                          "evidenceGuard":  {
+                                                "status":  "CODED_REGRESSION_TESTED_LIVE_NOT_RUN",
+                                                "threshold":  0.855,
+                                                "devRegressionCases":  "11/11 original raw failures rejected offline; 30 exact-source boundary cases (15 supported, 15 unsupported) across 14 rules; development set only",
+                                                "limitations":  "Deterministic checks for explicit recognized constraints; semantic entailment not complete",
+                                                "pipelineVersion":  "evidence-gate-v2",
+                                                "falseBlocks":  "0/15",
+                                                "falseAccepts":  "0/15",
+                                                "codeSha256":  "86604d7e6fe2cb0f6da93eee891839fd8a157b7c3c7f39159585666697a281fe",
+                                                "testSha256":  "b75ae0677b306887fe5769f47430192118e68ae9d3e9f7edb0cdd8131a8b1d7b",
+                                                "ruleAudit":  "evidence/evidence-gate-rule-audit.csv"
+                                            },
+                          "queryEmbeddingCache":  {
+                                                      "status":  "IMPLEMENTED",
+                                                      "keyFields":  [
+                                                                        "exact query",
+                                                                        "embedding model",
+                                                                        "dimension",
+                                                                        "task type"
+                                                                    ],
+                                                      "preexistingVectorsSeeded":  2,
+                                                      "documentEmbeddingsRegenerated":  0
+                                                  },
+                          "holdoutV2":  {
+                                            "status":  "PREPARED_NOT_RUN_PENDING_INDEPENDENT_LABEL_REVIEW",
+                                            "scopes":  [
+                                                           "MATH/GRADE_1",
+                                                           "MATH/GRADE_2",
+                                                           "MATH/GRADE_3"
+                                                       ],
+                                            "queries":  "12 per scope: 6 positive, 3 negative, 3 near-miss",
+                                            "classification":  "fresh candidate; authored after guard by implementer, not blinded confirmation"
+                                        },
+                          "orchestrationOffline":  {
+                                                       "status":  "PASS_TARGETED",
+                                                       "targetedTests":  60,
+                                                       "targetedFailures":  0,
+                                                       "targetedErrors":  0,
+                                                       "targetedSkipped":  0,
+                                                       "fullBackendSuite":  {
+                                                                                "status":  "TESTS_PASS_TWO_SKIPS_COVERAGE_NOT_RUN",
+                                                                                "tests":  537,
+                                                                                "failures":  0,
+                                                                                "errors":  0,
+                                                                                "skipped":  2,
+                                                                                "skippedReason":  "Gemini opt-in credential tests",
+                                                                                "jacocoLineCoverage":  "NOT_RUN_CURRENT_JDK25",
+                                                                                "coverageFloor":  "70% configured; not evaluated",
+                                                                                "contextLoads":  "PASS on isolated in-memory H2; no production DB credentials",
+                                                                                "runtime":  "JDK 25.0.3; all 535 executed tests passed; two Gemini opt-in tests skipped",
+                                                                                "latestVerification":  {
+                                                                                                           "atUtc":  "2026-10-12T08:24Z",
+                                                                                                           "command":  "mvnw.cmd -q -o -Dmaven.repo.local=%USERPROFILE%\\.m2\\repository -Djacoco.skip=true test",
+                                                                                                           "result":  "537 tests; 0 failures; 0 errors; 2 Gemini opt-in skipped; 49 suites",
+                                                                                                           "filesystem":  "Unprivileged run hit AccessDeniedException during JUnit @TempDir cleanup; targeted tests and full suite passed with normal filesystem permissions."
+                                                                                                       }
+                                                                            }
+                                                   },
+                          "productionE2E":  {
+                                                "status":  "NOT_RUN",
+                                                "scopes":  "0/15",
+                                                "cases":  30,
+                                                "matrix":  "production-e2e-matrix.csv; production-e2e-matrix.json"
+                                            },
+                          "resumeRunbook":  "resume-runbook-2026-10-12.md",
+                          "liveQuotaStatus":  "BLOCKED by provider daily embedding quota; no calls repeated",
+                          "evidenceGateLiveStatus":  "FULL_RETRIEVAL_BENCHMARK_NOT_RUN; q01 gate traversed during 4 strategy retries without output metrics",
+                          "priorLiveResults":  "Exploratory and holdout failures remain FAIL; no historical result changed",
+                          "holdoutCoverage":  {
+                                                  "status":  "PREPARED_NOT_RUN",
+                                                  "scopes":  "15/15",
+                                                  "queries":  180,
+                                                  "perScope":  "6 positive, 3 negative, 3 near-miss",
+                                                  "fixtureVersions":  "12 scopes v1 not previously run; MATH GRADE_1-GRADE_3 v2 fresh candidate",
+                                                  "sourceTrace":  "source SHA, PDF page, rationale; positive chunk IDs resolve within same scope",
+                                                  "independentLabelReview":  "PENDING for all 15 scopes",
+                                                  "manifest":  "holdout-manifest-2026-10-12.csv"
+                                              },
+                          "contextLoadsFix":  {
+                                                  "cause":  "Test inherited spring.datasource.url=${DB_URL} from application.yml; runtime DB_URL was non-JDBC",
+                                                  "testDatasource":  "jdbc:h2:mem:contextloads",
+                                                  "flyway":  "disabled only for contextLoads",
+                                                  "schemaValidation":  "disabled only for contextLoads",
+                                                  "jwt":  "test-only dummy key",
+                                                  "productionConfigChanged":  false,
+                                                  "supabaseConnection":  false,
+                                                  "status":  "PASS"
+                                              },
+                          "generationRetries":  {
+                                                    "status":  "FAIL_ALL_FOUR_RETRIED",
+                                                    "providerFailedStrategies":  4,
+                                                    "productionE2Ecases":  "0/30",
+                                                    "productionE2EScopes":  "0/15",
+                                                    "quota":  "No live rerun; provider quota not confirmed available",
+                                                    "attempted":  4,
+                                                    "result":  "4/4 InvalidRequestException at GEMINI_WITH_RAG; no generated outputs",
+                                                    "cacheHits":  "4 total",
+                                                    "embeddingProviderMisses":  0,
+                                                    "checkpoint":  "generation-comparison/batch-2026-10-12T06-03-36.023121900Z.json through batch-2026-10-12T06-04-28.315900300Z.json",
+                                                    "blocker":  "No production game-generation endpoint; embedding quota retry time has not elapsed",
+                                                    "queryEncoding":  "Direct PowerShell UTF-8 topic was mangled; new retries use q01 fixture and pass retrieval"
+                                                },
+                          "buildEnvironment":  {
+                                                   "maven":  "Wrapper Maven 3.9.16",
+                                                   "defaultLocalRepo":  "sandbox-managed local Maven cache",
+                                                   "usableLocalRepo":  "%USERPROFILE%\\.m2\\repository",
+                                                   "parentArtifact":  "Spring Boot starter parent 4.1.0 exists in usable cache; version unchanged",
+                                                   "wrapper":  "Fixed null Target[0] handling and verified cached wrapper startup",
+                                                   "jdk":  "25.0.3; JDK 21 not installed",
+                                                   "jacoco":  "Skipped for current tests: JaCoCo 0.8.12 fails on generated class file major 69",
+                                                   "exactTestCommand":  "mvnw.cmd -o -Dmaven.repo.local=%USERPROFILE%\\.m2\\repository -Djacoco.skip=true test"
+                                               },
+                          "sourceAudit":  {
+                                              "status":  "PDFBOX_PASS_STRUCTURAL_REVIEW_COMPLETE_CONTEXT_REVIEW_PARTIAL",
+                                              "outcomes":  497,
+                                              "controls":  61,
+                                              "sourceFragmentMatches":  "558/558",
+                                              "crossPageReviewed":  25,
+                                              "visualReviewed":  6,
+                                              "teacherReview":  "PENDING",
+                                              "contextFlagged":  1,
+                                              "duplicateRows":  107,
+                                              "duplicateGroups":  38
+                                          },
+                          "curriculumReviewContract":  {
+                                                           "decision":  "KEEP_PUBLIC_FIELD_PENDING_DUY_REVIEW",
+                                                           "reason":  "Prior product instruction requires teacher-visible advisory warnings; current backend attaches them to game metadata",
+                                                           "frontend":  "TypeScript type exists, no runtime consumer/renderer found",
+                                                           "compatibility":  "Optionality does not settle additive change to 1.0.0 DSL schemas; Duy must decide field semantics and versioning; FE renderer remains pending"
+                                                       },
+                          "serviceIntegration":  {
+                                                     "status":  "PASS_OFFLINE_LOCAL_STUB",
+                                                     "testMethods":  2,
+                                                     "serviceCases":  30,
+                                                     "positive":  15,
+                                                     "insufficientEvidence":  15,
+                                                     "realGemini":  "NOT_RUN",
+                                                     "httpApiE2E":  "NOT_RUN_NO_ENDPOINT"
+                                                 }
+                      }
 }

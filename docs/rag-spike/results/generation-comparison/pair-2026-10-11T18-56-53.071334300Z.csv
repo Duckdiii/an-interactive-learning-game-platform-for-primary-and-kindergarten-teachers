@@ -1,0 +1,89 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","VISUAL_CLOZE","Phép cộng nhẩm trong phạm vi 10","FOUND","math-g1-007;math-g1-008;math-g1-005","true","2043","{
+  ""questions"": [
+    {
+      ""sentenceTemplate"": ""3 + 2 = ___"",
+      ""visualPrompt"": ""Hinh anh 3 qua tao them 2 qua tao"",
+      ""correctAnswer"": ""5"",
+      ""distractors"": [
+        ""4"",
+        ""6""
+      ],
+      ""audioText"": ""Ba cộng hai bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""4 + 4 = ___"",
+      ""visualPrompt"": ""Hinh anh 4 bong hoa them 4 bong hoa"",
+      ""correctAnswer"": ""8"",
+      ""distractors"": [
+        ""7"",
+        ""9""
+      ],
+      ""audioText"": ""Bốn cộng bốn bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""5 + 1 = ___"",
+      ""visualPrompt"": ""Hinh anh 5 con ca them 1 con ca"",
+      ""correctAnswer"": ""6"",
+      ""distractors"": [
+        ""5"",
+        ""7""
+      ],
+      ""audioText"": ""Năm cộng một bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""2 + 3 = ___"",
+      ""visualPrompt"": ""Hinh anh 2 qua bong them 3 qua bong"",
+      ""correctAnswer"": ""5"",
+      ""distractors"": [
+        ""4"",
+        ""6""
+      ],
+      ""audioText"": ""Hai cộng ba bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""6 + 3 = ___"",
+      ""visualPrompt"": ""Hinh anh 6 chu chim them 3 chu chim"",
+      ""correctAnswer"": ""9"",
+      ""distractors"": [
+        ""8"",
+        ""7""
+      ],
+      ""audioText"": ""Sáu cộng ba bằng mấy?""
+    }
+  ]
+}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","VISUAL_CLOZE","Phép cộng nhẩm trong phạm vi 10","NOT_USED","","true","1690","{
+  ""questions"": [
+    {
+      ""sentenceTemplate"": ""3 + 2 = ___"",
+      ""visualPrompt"": ""Hinh anh 3 qua tao them 2 qua tao"",
+      ""correctAnswer"": ""5"",
+      ""distractors"": [
+        ""4"",
+        ""6""
+      ],
+      ""audioText"": ""Ba cộng hai bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""4 + 1 = ___"",
+      ""visualPrompt"": ""Hinh anh 4 con meo them 1 con meo"",
+      ""correctAnswer"": ""5"",
+      ""distractors"": [
+        ""3"",
+        ""6""
+      ],
+      ""audioText"": ""Bốn cộng một bằng mấy?""
+    },
+    {
+      ""sentenceTemplate"": ""2 + 3 = ___"",
+      ""visualPrompt"": ""Hinh anh 2 bong hoa them 3 bong hoa"",
+      ""correctAnswer"": ""5"",
+      ""distractors"": [
+        ""4"",
+        ""5""
+      ],
+      ""audioText"": ""Hai cộng ba bằng mấy?""
+    }
+  ]
+}"

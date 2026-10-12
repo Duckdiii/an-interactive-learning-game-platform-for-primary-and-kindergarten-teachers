@@ -1,0 +1,5 @@
+﻿"runFile","subject","gradeLevel","controlChunkId","controlExcludedFromPrimary","primaryScopeLeakage","primaryScopeChunkIds"
+"live-2026-10-12T04-56-47.487452800Z.json","ENGLISH","GRADE_1","english-g1-015","True","0","english-g1-001;english-g1-002;english-g1-010"
+"live-2026-10-12T04-56-47.487452800Z.json","ENGLISH","GRADE_1","english-g1-016","True","0","english-g1-002;english-g1-010;english-g1-001"
+"live-2026-10-12T04-56-47.487452800Z.json","ENGLISH","GRADE_1","english-g1-017","True","0","english-g1-003;english-g1-012"
+"live-2026-10-12T04-56-47.487452800Z.json","ENGLISH","GRADE_1","english-g1-018","True","0",""

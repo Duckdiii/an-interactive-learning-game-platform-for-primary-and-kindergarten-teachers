@@ -1,0 +1,13 @@
+{"queryId":"q01","topic":"Nghe hiểu từ và cụm từ quen thuộc","expectedChunkIds":["english-g3-001"],"negative":false}
+{"queryId":"q02","topic":"Làm theo chỉ dẫn rất đơn giản trong lớp","expectedChunkIds":["english-g3-002"],"negative":false}
+{"queryId":"q03","topic":"Trả lời câu hỏi về chủ đề quen thuộc","expectedChunkIds":["english-g3-003"],"negative":false}
+{"queryId":"q04","topic":"Nghe hội thoại 20–30 từ","expectedChunkIds":["english-g3-004"],"negative":false}
+{"queryId":"q05","topic":"Hỏi đáp rất đơn giản về bản thân","expectedChunkIds":["english-g3-006"],"negative":false}
+{"queryId":"q06","topic":"Hỏi đáp câu hỏi thường dùng trong lớp","expectedChunkIds":["english-g3-007"],"negative":false}
+{"queryId":"q07","topic":"Đọc đúng chữ cái trong từ","expectedChunkIds":["english-g3-009"],"negative":false}
+{"queryId":"q08","topic":"Đọc hiểu câu ngắn","expectedChunkIds":["english-g3-011"],"negative":false}
+{"queryId":"q09","topic":"Đọc hiểu văn bản khoảng 30–40 từ","expectedChunkIds":["english-g3-012"],"negative":false}
+{"queryId":"q10","topic":"Điền tên và địa chỉ vào mẫu đơn giản","expectedChunkIds":["english-g3-014"],"negative":false}
+{"queryId":"n01","topic":"Viết câu tiếng Anh bằng thì hiện tại hoàn thành","expectedChunkIds":[],"negative":true}
+{"queryId":"n02","topic":"Giải bài toán cộng các số tự nhiên trong phạm vi 100","expectedChunkIds":[],"negative":true}
+{"queryId":"n03","topic":"Viết chương trình Python dùng vòng lặp","expectedChunkIds":[],"negative":true}

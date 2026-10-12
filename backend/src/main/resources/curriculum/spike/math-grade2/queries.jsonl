@@ -1,0 +1,13 @@
+{"queryId":"q01","topic":"Đếm đọc viết số đến 1000","expectedChunkIds":["math-g2-001"],"negative":false}
+{"queryId":"q02","topic":"Tách số thành trăm chục đơn vị","expectedChunkIds":["math-g2-004"],"negative":false}
+{"queryId":"q03","topic":"So sánh và xếp thứ tự các số nhỏ hơn 1000","expectedChunkIds":["math-g2-006","math-g2-008"],"negative":false}
+{"queryId":"q04","topic":"Phép cộng trừ có nhớ một lượt trong phạm vi 1000","expectedChunkIds":["math-g2-011"],"negative":false}
+{"queryId":"q05","topic":"Cộng trừ nhẩm trong phạm vi 20","expectedChunkIds":["math-g2-017"],"negative":false}
+{"queryId":"q06","topic":"Bảng nhân 2 và bảng nhân 5","expectedChunkIds":["math-g2-015"],"negative":false}
+{"queryId":"q07","topic":"Nhận biết hình tứ giác qua đồ dùng trực quan","expectedChunkIds":["math-g2-022"],"negative":false}
+{"queryId":"q08","topic":"Đo khối lượng bằng ki-lô-gam đến 1000 kg","expectedChunkIds":["math-g2-028"],"negative":false}
+{"queryId":"q09","topic":"Đọc giờ khi kim phút chỉ số 3 hoặc 6","expectedChunkIds":["math-g2-035"],"negative":false}
+{"queryId":"q10","topic":"Thu thập kiểm đếm và đọc dữ liệu biểu đồ tranh","expectedChunkIds":["math-g2-040","math-g2-041"],"negative":false}
+{"queryId":"n01","topic":"Cộng trừ phân số cùng mẫu số","expectedChunkIds":[],"negative":true}
+{"queryId":"n02","topic":"Bảng nhân 7 và bảng chia 7","expectedChunkIds":[],"negative":true}
+{"queryId":"n03","topic":"Làm tròn số đến hàng nghìn","expectedChunkIds":[],"negative":true}

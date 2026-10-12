@@ -1,0 +1,57 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","QUIZ","Phép c?ng nh?m trong ph?m vi 10","FOUND","math-g1-007;math-g1-008;math-g1-004","true","2279","{
+  ""questions"": [
+    {
+      ""text"": ""Tính nhẩm: 3 + 2 = ?"",
+      ""options"": [""4"", ""5"", ""6"", ""7""],
+      ""correctIndex"": 1,
+      ""visualPrompt"": ""Ba quả táo cộng hai quả táo"",
+      ""audioText"": ""Ba cộng hai bằng mấy?""
+    },
+    {
+      ""text"": ""Kết quả của phép tính 4 + 4 là bao nhiêu?"",
+      ""options"": [""6"", ""7"", ""8"", ""9""],
+      ""correctIndex"": 2,
+      ""visualPrompt"": ""Bốn bông hoa cộng bốn bông hoa"",
+      ""audioText"": ""Bốn cộng bốn bằng mấy?""
+    },
+    {
+      ""text"": ""Tính nhẩm: 5 + 3 = ?"",
+      ""options"": [""7"", ""8"", ""9"", ""10""],
+      ""correctIndex"": 1,
+      ""visualPrompt"": ""Năm quả bóng cộng ba quả bóng"",
+      ""audioText"": ""Năm cộng ba bằng mấy?""
+    },
+    {
+      ""text"": ""Số thích hợp để điền vào phép tính 6 + ... = 9 là:"",
+      ""options"": [""2"", ""3"", ""4"", ""5""],
+      ""correctIndex"": 1,
+      ""visualPrompt"": ""Sáu ngôi sao cộng thêm mấy ngôi sao để được chín ngôi sao?"",
+      ""audioText"": ""Sáu cộng mấy bằng chín?""
+    }
+  ]
+}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","QUIZ","Phép c?ng nh?m trong ph?m vi 10","NOT_USED","","true","1867","{
+  ""questions"": [
+    {
+      ""text"": ""Kết quả của phép tính 3 + 2 là bao nhiêu?"",
+      ""options"": [""4"", ""5"", ""6"", ""7""],
+      ""correctIndex"": 1
+    },
+    {
+      ""text"": ""Tính nhẩm: 4 + 4 = ?"",
+      ""options"": [""6"", ""7"", ""8"", ""9""],
+      ""correctIndex"": 2
+    },
+    {
+      ""text"": ""Số thích hợp điền vào dấu chấm hỏi trong phép tính 5 + 3 = ? là:"",
+      ""options"": [""7"", ""8"", ""9"", ""10""],
+      ""correctIndex"": 1
+    },
+    {
+      ""text"": ""Phép tính nào dưới đây có kết quả bằng 6?"",
+      ""options"": [""2 + 3"", ""3 + 3"", ""4 + 3"", ""1 + 4""],
+      ""correctIndex"": 1
+    }
+  ]
+}"

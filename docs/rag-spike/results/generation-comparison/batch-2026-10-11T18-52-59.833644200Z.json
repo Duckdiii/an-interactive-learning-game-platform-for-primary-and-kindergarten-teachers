@@ -1,0 +1,80 @@
+{
+  "MATCHING" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "QUIZ" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "MEMORY_CARD" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "DRAG_DROP" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "ORDERING" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "WORD_SCRAMBLE" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "ODD_ONE_OUT" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "VISUAL_CLOZE" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "AUDIO_VISUAL_MATCH" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "SPOT_THE_TARGET" : {
+    "curriculumAlignment" : "NOT_REVIEWED",
+    "status" : "FAILED_OR_BLOCKED",
+    "answerCorrectness" : "NOT_REVIEWED",
+    "failureClass" : "IllegalStateException",
+    "schemaValidity" : "NOT_AVAILABLE"
+  },
+  "runAtUtc" : "2026-10-11T18:52:59.833644200Z",
+  "scope" : {
+    "subject" : "MATH",
+    "gradeLevel" : "GRADE_1"
+  },
+  "topic" : "Phép c?ng nh?m trong ph?m vi 10",
+  "model" : "gemini-3.5-flash-lite",
+  "retrievalMinScore" : 0.855
+}

@@ -64,6 +64,7 @@ Giáo viên chỉnh sửa (`PUT`) gửi lại dạng hoàn chỉnh, và Backend 
 | `metadata.title`, `topic` | string | |
 | `metadata.subject` | enum | `MATH`, `VIETNAMESE`, `ENGLISH` |
 | `metadata.gradeLevel` | enum | `KINDERGARTEN`, `GRADE_1`, `GRADE_2`, `GRADE_3`, `GRADE_4`, `GRADE_5` |
+| `metadata.curriculumReview` | object, tùy chọn | Kết quả advisory sau khi sinh: claim gắn với `questionId`, `SUPPORTED`/`UNSUPPORTED`/`UNCERTAIN`, lý do và `chunkIds` nguồn. Checker yêu cầu có claim cho mọi câu hỏi nhưng vẫn có thể bỏ sót hoặc phân loại sai; `UNAVAILABLE` nghĩa là chưa kiểm tra được. Giáo viên xem cảnh báo và tự quyết định nội dung. |
 | `gameplaySettings.hitboxScale` | number | **Backend tự gán** theo khối lớp (ví dụ 1.5 cho `KINDERGARTEN` và `GRADE_1`, 1.0 cho các lớp lớn). AI không sinh |
 | `questions[]` | array | Mỗi phần tử là một màn chơi |
 

@@ -1,0 +1,69 @@
+variant,model,subject,gradeLevel,gameType,topic,retrievalStatus,chunkIds,valid,latencyMillis,rawOutput
+"WITH_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","ODD_ONE_OUT","Phép cộng nhẩm trong phạm vi 10","FOUND","math-g1-007;math-g1-008;math-g1-005","true","1690","{
+  ""questions"": [
+    {
+      ""items"": [
+        ""2 + 3"",
+        ""1 + 4"",
+        ""3 + 2"",
+        ""6 + 2""
+      ],
+      ""oddOneOutIndex"": 3,
+      ""audioText"": ""Tim phep tinh co ket qua khac voi cac phep tinh con lai.""
+    },
+    {
+      ""items"": [
+        ""4 + 1"",
+        ""2 + 2"",
+        ""5 + 3"",
+        ""3 + 1""
+      ],
+      ""oddOneOutIndex"": 2,
+      ""audioText"": ""Tim phep tinh co ket qua khac voi cac phep tinh con lai.""
+    },
+    {
+      ""items"": [
+        ""5 + 5"",
+        ""4 + 6"",
+        ""3 + 7"",
+        ""2 + 6""
+      ],
+      ""oddOneOutIndex"": 3,
+      ""audioText"": ""Tim phep tinh co ket qua khac voi cac phep tinh con lai.""
+    }
+  ]
+}"
+"WITHOUT_RAG","gemini-3.5-flash-lite","MATH","GRADE_1","ODD_ONE_OUT","Phép cộng nhẩm trong phạm vi 10","NOT_USED","","true","1796","{
+  ""questions"": [
+    {
+      ""items"": [
+        ""2 + 3"",
+        ""1 + 4"",
+        ""5 + 2"",
+        ""3 + 2""
+      ],
+      ""oddOneOutIndex"": 2,
+      ""audioText"": ""Em hãy tìm phép tính có kết quả khác với các phép tính còn lại nhé.""
+    },
+    {
+      ""items"": [
+        ""4 + 4"",
+        ""3 + 5"",
+        ""6 + 2"",
+        ""1 + 6""
+      ],
+      ""oddOneOutIndex"": 3,
+      ""audioText"": ""Em hãy tìm phép tính có kết quả khác với các phép tính còn lại nhé.""
+    },
+    {
+      ""items"": [
+        ""2 + 1"",
+        ""1 + 2"",
+        ""3 + 3"",
+        ""0 + 3""
+      ],
+      ""oddOneOutIndex"": 2,
+      ""audioText"": ""Em hãy tìm phép tính có kết quả khác với các phép tính còn lại nhé.""
+    }
+  ]
+}"

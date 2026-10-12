@@ -35,7 +35,24 @@ export interface GameMetadata {
   subject: Subject
   gradeLevel: GradeLevel
   /** 1 đến 200 ký tự. */
+  /** 1 đến 200 ký tự. */
   topic: string
+  /** Advisory claim review against retrieved curriculum evidence; teachers make the final decision. */
+  curriculumReview?: CurriculumEvidenceReview
+}
+
+export interface CurriculumEvidenceReview {
+  status: 'REVIEWED' | 'UNAVAILABLE'
+  claims: CurriculumEvidenceClaim[]
+  warnings: CurriculumEvidenceClaim[]
+}
+
+export interface CurriculumEvidenceClaim {
+  questionId: string
+  claim: string
+  status: 'SUPPORTED' | 'UNSUPPORTED' | 'UNCERTAIN'
+  reason: string
+  chunkIds: string[]
 }
 
 export interface GameplaySettings {
