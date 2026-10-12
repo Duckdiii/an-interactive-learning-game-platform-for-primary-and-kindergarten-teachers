@@ -7,6 +7,11 @@ React + TypeScript + Vite frontend shell for the AI Game Platform.
 - `npm run dev` - start local development server.
 - `npm run build` - type-check and build production assets.
 - `npm run lint` - run Oxlint.
+- `npm run test:drag-drop` - run drag/drop geometry and validation tests (Node 22.18+).
+
+## Drag & Drop Demo
+
+Run the dev server, select **Đăng nhập demo**, then open **Editor**. The editor contains a Konva drag/drop question with local preview and trial-play results. See [drag/drop integration notes](docs/drag-drop-integration.md) for the completion payload, backend integration boundary, and browser verification commands.
 
 ## Structure
 

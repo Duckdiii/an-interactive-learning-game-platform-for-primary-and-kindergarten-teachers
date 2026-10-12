@@ -9,7 +9,7 @@ const navigationItems = [
 ]
 
 export default function AppLayout() {
-  const { user, logout } = useAuth()
+  const { user, logout, isDemo } = useAuth()
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
@@ -56,12 +56,17 @@ export default function AppLayout() {
             </div>
 
             <div className="flex items-center gap-3">
+              {isDemo ? (
+                <span className="rounded bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">
+                  Demo
+                </span>
+              ) : null}
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-semibold">
                   {user?.email ?? 'Demo teacher'}
                 </p>
                 <p className="text-xs text-slate-500">
-                  {user ? 'Signed in' : 'No session yet'}
+                  {isDemo ? 'Dữ liệu mẫu' : user ? 'Signed in' : 'No session yet'}
                 </p>
               </div>
               <button

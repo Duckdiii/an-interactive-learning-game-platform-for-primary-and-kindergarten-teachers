@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import PageHeader from '../components/ui/PageHeader'
 import { ROUTES } from '../routes/paths'
 import type { GameFilters, GameSummary } from '../types/game'
+import { useAuth } from '../hooks/useAuth'
 
 const initialFilters: GameFilters = {
   subject: '',
@@ -15,10 +16,11 @@ const initialFilters: GameFilters = {
 
 export default function Dashboard() {
   const [filters, setFilters] = useState(initialFilters)
+  const { user, isDemo } = useAuth()
 
   const gamesQuery = useQuery({
-    queryKey: ['games', filters],
-    queryFn: () => getGames(filters),
+    queryKey: ['games', user?.id, isDemo, filters],
+    queryFn: () => getGames(filters, isDemo),
   })
 
   const games = gamesQuery.data ?? []

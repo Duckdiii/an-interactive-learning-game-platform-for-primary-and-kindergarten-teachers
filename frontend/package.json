@@ -7,18 +7,24 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:drag-drop": "node --experimental-strip-types --test scripts/drag-drop.test.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.103.2",
     "axios": "^1.20.0",
+    "howler": "^2.2.4",
+    "konva": "^10.7.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-konva": "^19.3.0",
     "react-router-dom": "^7.18.4",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "use-image": "^1.1.4"
   },
   "devDependencies": {
+    "@types/howler": "^2.2.13",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
