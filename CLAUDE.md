@@ -171,6 +171,16 @@ Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/c
 
 Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.md` hay docs không cần `test-verifier`.
 
+## Học từ lỗi của agent
+
+Quy tắc đã duyệt (mỗi quy tắc rút từ một lỗi thật, chi tiết ở `.claude/lessons-inbox.md`):
+- Agent/lệnh lấy diff phải gồm cả thay đổi chưa commit: `git diff main...HEAD` + `git diff` + `git diff --cached`, không chỉ so với `main`.
+- Viết tiêu chí cho agent kiểm tra từ nội dung file thật, không từ giả định; chạy thử trên dữ liệu thật trước khi coi agent là xong.
+- Máy không có `gh`; thao tác GitHub dùng công cụ `mcp__github__*`. Kiểm tra công cụ có sẵn trước khi đưa vào prompt agent.
+- Agent vừa tạo chưa gọi theo tên được trong cùng phiên (chỉ nạp lúc bắt đầu phiên); thử bằng `general-purpose` kèm thân file agent.
+
+Quy trình: khi gặp lỗi của chính mình (test/build fail do mình gây ra, bị người dùng sửa lại, subagent báo lệch), thêm một mục theo mẫu vào phần "Chờ duyệt" của `.claude/lessons-inbox.md` trước khi báo hoàn thành. Không tự chuyển vào `CLAUDE.md` hay prompt agent; người dùng duyệt trước. Khi lỗi có thể kiểm tra tự động, ưu tiên biến thành mục kiểm tra trong prompt agent hoặc test thay vì chỉ thêm chữ vào file này. Chỉ ghi lỗi có hậu quả hoặc lặp lại, không ghi typo/format.
+
 ## Trước khi báo hoàn thành
 
 - Backend: build thử bằng `./mvnw clean install -DskipTests` (hoặc chạy test nếu có DB thật) trước khi báo xong.

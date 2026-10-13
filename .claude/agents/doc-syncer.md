@@ -28,7 +28,7 @@ Chỉ các file tài liệu: `docs/**/*.md`, `docs/openapi/openapi.yaml`, `docs/
 
 ## Cách làm
 
-1. Xác định code nào vừa đổi (bản giao việc hoặc `git diff main...HEAD --stat`). Đọc code thật, không suy từ tên file.
+1. Xác định code nào vừa đổi (bản giao việc hoặc `git diff main...HEAD --stat` cộng `git diff --stat` và `git diff --cached --stat`). Đọc code thật, không suy từ tên file.
 2. Tìm tài liệu nhắc đến phần đó bằng Grep (tên class, endpoint, field, đường dẫn). Đọc kỹ từng chỗ nhắc.
 3. Phân loại từng chỗ lệch: **cập nhật được** (theo mục trên) hay **lệch contract** (chỉ báo).
 4. Sửa tối thiểu, giữ giọng văn và định dạng sẵn có; không viết lại cả tài liệu, không thêm nội dung mới ngoài phạm vi.
