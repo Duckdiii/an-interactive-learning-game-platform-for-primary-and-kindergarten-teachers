@@ -57,11 +57,11 @@ export default function LoginPage() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">
+        <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
           {viText.auth.loginKicker}
         </p>
-        <h2 className="mt-2 text-3xl font-semibold">Đăng nhập</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <h2 className="mt-2 text-3xl font-bold">Đăng nhập</h2>
+        <p className="mt-2 text-base leading-7 text-ink-soft">
           {viText.auth.loginDescription}
         </p>
       </div>
@@ -69,7 +69,7 @@ export default function LoginPage() {
       {locationState?.successMessage ? (
         <p
           role="status"
-          className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+          className="mb-4 rounded-xl border border-brand/30 bg-brand-soft px-4 py-3 text-base text-brand-strong"
         >
           {locationState.successMessage}
         </p>
@@ -78,7 +78,7 @@ export default function LoginPage() {
       {errorMessage ? (
         <p
           role="alert"
-          className="mb-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+          className="mb-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-base text-rose-900"
         >
           {errorMessage}
         </p>
@@ -86,7 +86,7 @@ export default function LoginPage() {
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Email</span>
+          <span className="text-base font-semibold text-ink">Email</span>
           <input
             type="email"
             name="email"
@@ -100,12 +100,12 @@ export default function LoginPage() {
             autoComplete="email"
             required
             placeholder={viText.auth.emailPlaceholder}
-            className="mt-2 h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+            className="mt-2 h-12 w-full rounded-xl border-2 border-ink/20 px-4 text-base transition focus:border-brand"
           />
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Mật khẩu</span>
+          <span className="text-base font-semibold text-ink">Mật khẩu</span>
           <input
             type="password"
             name="password"
@@ -119,7 +119,7 @@ export default function LoginPage() {
             autoComplete="current-password"
             required
             placeholder="Nhập mật khẩu"
-            className="mt-2 h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+            className="mt-2 h-12 w-full rounded-xl border-2 border-ink/20 px-4 text-base transition focus:border-brand"
           />
         </label>
 
@@ -128,9 +128,12 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-sm text-slate-600">
+      <p className="mt-6 text-base text-ink-soft">
         Chưa có tài khoản?{' '}
-        <Link to={ROUTES.register} className="font-semibold text-emerald-700">
+        <Link
+          to={ROUTES.register}
+          className="inline-flex min-h-11 items-center px-1 font-bold text-brand-strong underline"
+        >
           Đăng ký
         </Link>
       </p>

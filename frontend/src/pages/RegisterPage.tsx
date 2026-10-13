@@ -108,11 +108,11 @@ export default function RegisterPage() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">
+        <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
           {viText.auth.registerKicker}
         </p>
-        <h2 className="mt-2 text-3xl font-semibold">Tạo tài khoản</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <h2 className="mt-2 text-3xl font-bold">Tạo tài khoản</h2>
+        <p className="mt-2 text-base leading-7 text-ink-soft">
           Đăng ký tài khoản giáo viên để bắt đầu xây dựng trò chơi học tập.
         </p>
       </div>
@@ -120,7 +120,7 @@ export default function RegisterPage() {
       {errors.form ? (
         <p
           role="alert"
-          className="mb-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+          className="mb-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-base text-rose-900"
         >
           {errors.form}
         </p>
@@ -173,9 +173,12 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-sm text-slate-600">
+      <p className="mt-6 text-base text-ink-soft">
         Đã có tài khoản?{' '}
-        <Link to={ROUTES.login} className="font-semibold text-emerald-700">
+        <Link
+          to={ROUTES.login}
+          className="inline-flex min-h-11 items-center px-1 font-bold text-brand-strong underline"
+        >
           Đăng nhập
         </Link>
       </p>
@@ -208,7 +211,7 @@ function Field({
 
   return (
     <label className="block">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <span className="text-base font-semibold text-ink">{label}</span>
       <input
         type={type}
         name={name}
@@ -219,14 +222,14 @@ function Field({
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
         className={[
-          'mt-2 h-11 w-full rounded-md border px-3 text-sm outline-none transition focus:ring-2',
+          'mt-2 h-12 w-full rounded-xl border-2 px-4 text-base transition',
           error
-            ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-100'
-            : 'border-slate-300 focus:border-emerald-600 focus:ring-emerald-100',
+            ? 'border-rose-500 focus:border-rose-600'
+            : 'border-ink/20 focus:border-brand',
         ].join(' ')}
       />
       {error ? (
-        <span id={errorId} className="mt-1 block text-xs text-rose-700">
+        <span id={errorId} className="mt-1 block text-sm text-rose-800">
           {error}
         </span>
       ) : null}

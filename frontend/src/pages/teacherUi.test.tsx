@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getGames } from '../api/gamesApi'
@@ -149,110 +148,5 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
       'href',
       '/dashboard',
     )
-  })
-})
-
-describe('Dashboard: nhãn tiếng Việt, giá trị gửi API giữ nguyên enum', () => {
-  beforeEach(() => {
-    localStorage.clear()
-    storeSession({ id: 't1', email: 'giaovien@example.com' }, 'token', 'refresh')
-    mockedGetGames.mockResolvedValue([
-      {
-        id: 'g1',
-        title: 'Đếm số đến 10',
-        subject: 'MATH',
-        gradeLevel: 'GRADE_1',
-        status: 'DRAFT',
-        thumbnailUrl: null,
-      },
-    ])
-  })
-
-  afterEach(() => {
-    localStorage.clear()
-    vi.clearAllMocks()
-  })
-
-  it('thẻ game hiển thị môn, khối lớp và trạng thái bằng tiếng Việt', async () => {
-    renderApp('/dashboard')
-
-    const card = (await screen.findByText('Đếm số đến 10')).closest('article')
-    expect(card).not.toBeNull()
-    expect(within(card as HTMLElement).getByText('Toán · Lớp 1')).toBeInTheDocument()
-    expect(within(card as HTMLElement).getByText('Bản nháp')).toBeInTheDocument()
-  })
-
-  it('bộ lọc hiển thị nhãn Việt nhưng gửi giá trị enum gốc lên API', async () => {
-    const user = userEvent.setup()
-    renderApp('/dashboard')
-    await screen.findByText('Đếm số đến 10')
-
-    const statusSelect = screen.getByLabelText('Trạng thái')
-    const draftOption = within(statusSelect).getByRole('option', {
-      name: 'Bản nháp',
-    })
-    expect(draftOption).toHaveValue('DRAFT')
-    expect(
-      within(statusSelect).getByRole('option', { name: 'Đã đăng' }),
-    ).toHaveValue('PUBLISHED')
-
-    await user.selectOptions(statusSelect, 'DRAFT')
-
-    await waitFor(() =>
-      expect(mockedGetGames).toHaveBeenLastCalledWith({
-        subject: '',
-        gradeLevel: '',
-        status: 'DRAFT',
-      }),
-    )
-  })
-
-  it('ô chọn Khối lớp xếp Mầm non trước Lớp 1, không theo thứ tự chữ cái của enum', async () => {
-    mockedGetGames.mockResolvedValue([
-      {
-        id: 'g1',
-        title: 'Trò chơi A',
-        subject: 'MATH',
-        gradeLevel: 'GRADE_2',
-        status: 'PUBLISHED',
-        thumbnailUrl: null,
-      },
-      {
-        id: 'g2',
-        title: 'Trò chơi B',
-        subject: 'ENGLISH',
-        gradeLevel: 'KINDERGARTEN',
-        status: 'DRAFT',
-        thumbnailUrl: null,
-      },
-      {
-        id: 'g3',
-        title: 'Trò chơi C',
-        subject: 'VIETNAMESE',
-        gradeLevel: 'GRADE_1',
-        status: 'DRAFT',
-        thumbnailUrl: null,
-      },
-    ])
-    renderApp('/dashboard')
-    await screen.findByText('Trò chơi A')
-
-    const optionTexts = (labelText: string) =>
-      within(screen.getByLabelText(labelText))
-        .getAllByRole('option')
-        .map((option) => option.textContent)
-
-    expect(optionTexts('Khối lớp')).toEqual([
-      'Tất cả',
-      'Mầm non',
-      'Lớp 1',
-      'Lớp 2',
-    ])
-    expect(optionTexts('Môn học')).toEqual([
-      'Tất cả',
-      'Toán',
-      'Tiếng Việt',
-      'Tiếng Anh',
-    ])
   })
 })

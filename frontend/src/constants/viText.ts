@@ -38,6 +38,19 @@ export const viText = {
 
   home: {
     kicker: 'Trang chủ',
+    bannerTitle: 'Tạo trò chơi mới cho lớp của bạn',
+    bannerTag: 'Đang hoàn thiện',
+    bannerSteps: [
+      'Chọn môn học và khối lớp',
+      'Nhập chủ đề bài học',
+      'Xem lại và chỉnh sửa trước khi đăng',
+    ],
+    noMatchTitle: 'Không có trò chơi nào khớp bộ lọc',
+    noMatchDescription: 'Thử chọn môn, khối lớp hoặc trạng thái khác.',
+    clearFilters: 'Bỏ bộ lọc',
+    emptyTitle: 'Chưa có trò chơi nào',
+    emptyDescription:
+      'Khi bạn tạo trò chơi, chúng sẽ hiện ở đây để bạn mở lại và chỉnh sửa.',
   },
 
   generator: {

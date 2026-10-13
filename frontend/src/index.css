@@ -1,6 +1,29 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+/* Bảng màu giao diện giáo viên (src/games/ có quy ước màu riêng, không dùng chung các biến này).
+   Chữ đạt tương phản >= 4.5:1 (đã tính): brand/trắng 5.3, brand-strong/trắng 7.3, ink/paper 15.1, ink-soft/paper 7.0. */
+@theme {
+  --color-paper: #f6f7f2;
+  --color-ink: #17212b;
+  --color-ink-soft: #475569;
+  --color-brand: #0b7a5b;
+  --color-brand-strong: #086349;
+  --color-brand-soft: #e3f4ec;
+  --color-sun: #f6b73c;
+  --color-sun-soft: #fff4d6;
+  /* Mỗi môn một màu nền nhạt (soft), màu hình (mark) và màu chữ đậm (ink, >= 5.5:1 trên nền soft). */
+  --color-math-soft: #e0eaff;
+  --color-math-mark: #2563eb;
+  --color-math-ink: #1d4ed8;
+  --color-viet-soft: #fdebd0;
+  --color-viet-mark: #d97706;
+  --color-viet-ink: #92400e;
+  --color-eng-soft: #ece4ff;
+  --color-eng-mark: #7c3aed;
+  --color-eng-ink: #6d28d9;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -8,7 +31,7 @@
 
   html {
     min-width: 320px;
-    background: #f1f5f9;
+    background: var(--color-paper);
   }
 
   body {
@@ -18,7 +41,16 @@
     font-family:
       Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
       "Segoe UI", sans-serif;
-    color: #020617;
+    color: var(--color-ink);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Viền focus hai lớp (khe trắng + viền ink 3px) để thấy rõ trên cả nền sáng lẫn nền tối. */
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    box-shadow: 0 0 0 2px #fff;
+    outline-offset: 2px;
   }
 
   button,

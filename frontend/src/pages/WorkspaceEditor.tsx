@@ -13,8 +13,8 @@ export default function WorkspaceEditor() {
       />
 
       <section className="grid min-h-[640px] gap-4 xl:grid-cols-[280px_1fr_320px]">
-        <aside className="rounded-lg border border-slate-200 bg-white p-4">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">
+        <aside className="rounded-2xl border border-ink/10 bg-white p-4 sm:p-5">
+          <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-ink-soft">
             {text.libraryTitle}
           </h3>
           <div className="mt-4 space-y-3">
@@ -22,27 +22,27 @@ export default function WorkspaceEditor() {
               <button
                 key={gameType}
                 type="button"
-                className="flex min-h-12 w-full items-center justify-between rounded-md border border-slate-200 px-3 text-left text-sm font-medium transition hover:border-slate-400"
+                className="flex min-h-14 w-full items-center justify-between rounded-xl border-2 border-ink/10 px-4 text-left text-base font-semibold transition hover:border-brand hover:bg-brand-soft"
               >
                 <span>{gameType}</span>
-                <span className="text-slate-400">{text.add}</span>
+                <span className="text-ink-soft">{text.add}</span>
               </button>
             ))}
           </div>
         </aside>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-4">
+        <section className="rounded-2xl border border-ink/10 bg-white p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-semibold">{text.previewTitle}</h3>
-              <p className="text-sm text-slate-500">{text.previewHint}</p>
+              <h3 className="text-lg font-bold">{text.previewTitle}</h3>
+              <p className="text-base text-ink-soft">{text.previewHint}</p>
             </div>
-            <div className="flex rounded-md border border-slate-200 p-1">
+            <div className="flex rounded-xl border-2 border-ink/10 p-1">
               {text.modes.map((mode) => (
                 <button
                   key={mode}
                   type="button"
-                  className="min-h-9 rounded px-3 text-sm font-medium first:bg-slate-950 first:text-white"
+                  className="min-h-11 rounded-lg px-4 text-base font-semibold first:bg-brand first:text-white"
                 >
                   {mode}
                 </button>
@@ -50,30 +50,30 @@ export default function WorkspaceEditor() {
             </div>
           </div>
 
-          <div className="mt-5 grid min-h-[480px] place-items-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+          <div className="mt-5 grid min-h-[480px] place-items-center rounded-2xl border-2 border-dashed border-ink/20 bg-paper p-6 text-center">
             <div>
-              <p className="text-lg font-semibold text-slate-800">
+              <p className="text-xl font-bold text-ink">
                 {text.previewEmptyTitle}
               </p>
-              <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
+              <p className="mx-auto mt-2 max-w-md text-base leading-7 text-ink-soft">
                 {text.previewEmptyDescription}
               </p>
             </div>
           </div>
         </section>
 
-        <aside className="rounded-lg border border-slate-200 bg-white p-4">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">
+        <aside className="rounded-2xl border border-ink/10 bg-white p-4 sm:p-5">
+          <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-ink-soft">
             {text.inspectorTitle}
           </h3>
           <div className="mt-4 space-y-3">
             {text.panels.map((panel) => (
               <div
                 key={panel}
-                className="rounded-md border border-slate-200 bg-slate-50 p-3"
+                className="rounded-xl border border-ink/10 bg-paper p-4"
               >
-                <p className="text-sm font-semibold">{panel}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
+                <p className="text-base font-bold">{panel}</p>
+                <p className="mt-1 text-sm leading-6 text-ink-soft">
                   {text.panelHint}
                 </p>
               </div>

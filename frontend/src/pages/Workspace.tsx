@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import ButtonLink from '../components/ButtonLink'
 import PageHeader from '../components/ui/PageHeader'
 import { viText } from '../constants/viText'
 import { ROUTES } from '../routes/paths'
@@ -13,58 +13,56 @@ export default function Workspace() {
         title={text.title}
         description={text.description}
         actions={
-          <Link
-            to={ROUTES.workspaceEditor}
-            className="inline-flex min-h-11 items-center rounded-md bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
+          <ButtonLink to={ROUTES.workspaceEditor}>
             {text.createAction}
-          </Link>
+          </ButtonLink>
         }
       />
 
       <section className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        <div className="rounded-lg border border-slate-200 bg-white p-5">
-          <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        <div className="rounded-2xl border border-ink/10 bg-white p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-4 border-b border-ink/10 pb-4">
             <div>
-              <h3 className="text-base font-semibold">{text.libraryTitle}</h3>
-              <p className="mt-1 text-sm text-slate-500">{text.libraryHint}</p>
+              <h3 className="text-lg font-bold">{text.libraryTitle}</h3>
+              <p className="mt-1 text-base text-ink-soft">{text.libraryHint}</p>
             </div>
-            <span className="text-sm font-medium text-slate-500">
+            <span className="text-base font-medium text-ink-soft">
               {text.libraryCount}
             </span>
           </div>
 
           <div className="grid min-h-72 place-items-center py-10 text-center">
             <div>
-              <p className="text-base font-semibold text-slate-800">
+              <p className="text-lg font-bold text-ink">
                 {text.emptyTitle}
               </p>
-              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+              <p className="mx-auto mt-2 max-w-sm text-base leading-7 text-ink-soft">
                 {text.emptyDescription}
               </p>
-              <Link
+              <ButtonLink
                 to={ROUTES.workspaceEditor}
-                className="mt-5 inline-flex min-h-10 items-center rounded-md border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:text-slate-950"
+                variant="secondary"
+                className="mt-5"
               >
                 {text.openEditor}
-              </Link>
+              </ButtonLink>
             </div>
           </div>
         </div>
 
-        <aside className="rounded-lg border border-slate-200 bg-white p-5">
-          <h3 className="text-base font-semibold">{text.summaryTitle}</h3>
-          <dl className="mt-5 space-y-4 text-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <dt className="text-slate-500">{text.drafts}</dt>
+        <aside className="rounded-2xl border border-ink/10 bg-white p-5 sm:p-6">
+          <h3 className="text-lg font-bold">{text.summaryTitle}</h3>
+          <dl className="mt-5 space-y-4 text-base">
+            <div className="flex items-center justify-between border-b border-ink/10 pb-4">
+              <dt className="text-ink-soft">{text.drafts}</dt>
               <dd className="font-semibold">0</dd>
             </div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <dt className="text-slate-500">{text.published}</dt>
+            <div className="flex items-center justify-between border-b border-ink/10 pb-4">
+              <dt className="text-ink-soft">{text.published}</dt>
               <dd className="font-semibold">0</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-slate-500">{text.shared}</dt>
+              <dt className="text-ink-soft">{text.shared}</dt>
               <dd className="font-semibold">0</dd>
             </div>
           </dl>

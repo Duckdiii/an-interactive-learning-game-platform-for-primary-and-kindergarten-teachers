@@ -52,3 +52,7 @@ logs/
 # Cấu hình Claude Code riêng của máy và nhật ký dùng tool
 /.claude/settings.local.json
 /.claude/tool-usage.log
+/.claude/tool-usage.error.log
+
+# Ảnh chụp và nhật ký do Playwright MCP tạo khi kiểm tra giao diện
+/.playwright-mcp/

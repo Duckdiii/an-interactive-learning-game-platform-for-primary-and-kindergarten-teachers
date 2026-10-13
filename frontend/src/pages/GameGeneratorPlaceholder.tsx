@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import ButtonLink from '../components/ButtonLink'
 import PageHeader from '../components/ui/PageHeader'
 import { viText } from '../constants/viText'
 import { ROUTES } from '../routes/paths'
@@ -11,20 +11,19 @@ export default function GameGeneratorPlaceholder() {
         title={viText.generator.title}
         description={viText.generator.description}
       />
-      <section className="grid min-h-80 place-items-center rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center">
+      <section className="grid min-h-80 place-items-center rounded-2xl border-2 border-dashed border-ink/20 bg-white p-8 text-center">
         <div>
-          <p className="text-base font-semibold">
-            {viText.generator.emptyTitle}
-          </p>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+          <p className="text-lg font-bold">{viText.generator.emptyTitle}</p>
+          <p className="mx-auto mt-2 max-w-md text-base leading-7 text-ink-soft">
             {viText.generator.emptyDescription}
           </p>
-          <Link
+          <ButtonLink
             to={ROUTES.dashboard}
-            className="mt-5 inline-flex min-h-10 items-center rounded-md border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:text-slate-950"
+            variant="secondary"
+            className="mt-5"
           >
             {viText.generator.backHome}
-          </Link>
+          </ButtonLink>
         </div>
       </section>
     </div>
