@@ -5,6 +5,7 @@ import { getGames } from '../api/gamesApi'
 import Button from '../components/Button'
 import ButtonLink from '../components/ButtonLink'
 import LoadingSpinner from '../components/LoadingSpinner'
+import ErrorNotice from '../components/ui/ErrorNotice'
 import PageHeader from '../components/ui/PageHeader'
 import SubjectCover from '../components/ui/SubjectCover'
 import { subjectTheme } from '../components/ui/subjectTheme'
@@ -19,6 +20,7 @@ import {
 import { viText } from '../constants/viText'
 import { ROUTES } from '../routes/paths'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
+import { parseApiError } from '../utils/apiError'
 
 const initialFilters: GameFilters = {
   subject: '',
@@ -115,24 +117,18 @@ export default function Dashboard() {
       {gamesQuery.isPending ? <DashboardLoading /> : null}
 
       {gamesQuery.isError ? (
-        <section
-          role="alert"
-          className="rounded-2xl border-2 border-rose-200 bg-white p-8 text-center"
-        >
-          <h3 className="text-lg font-bold text-ink">
-            Không thể tải danh sách trò chơi
-          </h3>
-          <p className="mt-2 text-base text-ink-soft">
-            Vui lòng kiểm tra kết nối mạng rồi thử lại.
-          </p>
-          <Button
-            variant="secondary"
-            className="mt-5"
-            onClick={() => gamesQuery.refetch()}
-          >
-            Thử lại
-          </Button>
-        </section>
+        <ErrorNotice
+          title="Không thể tải danh sách trò chơi"
+          message={
+            parseApiError(gamesQuery.error, 'Vui lòng thử lại sau ít phút.')
+              .message
+          }
+          action={
+            <Button variant="secondary" onClick={() => gamesQuery.refetch()}>
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
 
       {gamesQuery.isSuccess && games.length === 0 ? (

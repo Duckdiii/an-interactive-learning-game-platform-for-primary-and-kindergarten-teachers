@@ -226,7 +226,8 @@ describe('Dashboard (trang chủ giáo viên)', () => {
     )
     renderDashboard()
 
-    await screen.findByRole('alert')
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Máy chủ phản hồi quá chậm')
     expect(mockedGetGames).toHaveBeenCalledTimes(1)
   })
 

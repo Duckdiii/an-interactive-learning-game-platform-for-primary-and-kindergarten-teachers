@@ -21,6 +21,10 @@ const GAME_STATUS_LABELS = new Map([
   ['PUBLISHED', 'Đã đăng'],
 ])
 
+// Danh sách giá trị hợp lệ theo thứ tự hiển thị, dùng cho ô chọn ở form (khớp enum Subject, GradeLevel của API).
+export const SUBJECT_VALUES = [...SUBJECT_LABELS.keys()]
+export const GRADE_LEVEL_VALUES = [...GRADE_LEVEL_LABELS.keys()]
+
 // Giá trị chưa có trong bảng (ví dụ backend thêm enum mới) vẫn hiển thị được, không làm vỡ giao diện.
 export function fallbackLabel(value: string) {
   return value

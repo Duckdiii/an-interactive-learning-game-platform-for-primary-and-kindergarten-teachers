@@ -3,7 +3,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import AuthLayout from './layouts/AuthLayout'
 import AppLayout from './layouts/AppLayout'
 import Dashboard from './pages/Dashboard'
-import GameGeneratorPlaceholder from './pages/GameGeneratorPlaceholder'
+import CreateGamePage from './pages/CreateGamePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import Workspace from './pages/Workspace'
@@ -37,7 +37,7 @@ function App() {
         <Route path={ROUTES.dashboard} element={<Dashboard />} />
         <Route
           path={ROUTES.createGame}
-          element={<GameGeneratorPlaceholder />}
+          element={<CreateGamePage />}
         />
         <Route path={ROUTES.workspace} element={<Workspace />} />
         <Route path={ROUTES.workspaceEditor} element={<WorkspaceEditor />} />

@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { registerTeacher } from '../api/authApi'
 import Button from '../components/Button'
+import ErrorNotice from '../components/ui/ErrorNotice'
 import { viText } from '../constants/viText'
 import { ROUTES } from '../routes/paths'
 import { parseApiError } from '../utils/apiError'
@@ -118,12 +119,7 @@ export default function RegisterPage() {
       </div>
 
       {errors.form ? (
-        <p
-          role="alert"
-          className="mb-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-base text-rose-900"
-        >
-          {errors.form}
-        </p>
+        <ErrorNotice message={errors.form} className="mb-4" />
       ) : null}
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>

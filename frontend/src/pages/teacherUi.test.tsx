@@ -140,13 +140,11 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
     ).toHaveAttribute('href', '/workspace/editor')
   })
 
-  it('trang Tạo game mới nói rõ tính năng sắp ra mắt và có lối về Trang chủ', () => {
+  it('trang Tạo game mới có mẫu gợi ý, form và nói rõ nút tạo chưa dùng được', () => {
     renderApp('/games/new')
 
-    expect(screen.getByText('Tính năng sắp ra mắt')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Về Trang chủ' })).toHaveAttribute(
-      'href',
-      '/dashboard',
-    )
+    expect(screen.getByText('Bắt đầu từ mẫu gợi ý')).toBeInTheDocument()
+    expect(screen.getByLabelText('Môn học')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Tạo trò chơi' })).toBeDisabled()
   })
 })

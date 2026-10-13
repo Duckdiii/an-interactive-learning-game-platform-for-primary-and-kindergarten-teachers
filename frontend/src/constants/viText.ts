@@ -56,11 +56,24 @@ export const viText = {
   generator: {
     kicker: 'Tạo game bằng AI',
     title: 'Tạo game mới',
-    description: 'Tính năng tạo trò chơi bằng AI đang được hoàn thiện.',
-    emptyTitle: 'Tính năng sắp ra mắt',
-    emptyDescription:
-      'Bạn sẽ chọn môn học, khối lớp và chủ đề ở đây. Trong lúc chờ, bạn có thể xem các trò chơi của mình ở Trang chủ.',
-    backHome: 'Về Trang chủ',
+    description:
+      'Chọn một mẫu gợi ý hoặc tự nhập môn học, khối lớp và chủ đề bài học.',
+    templatesTitle: 'Bắt đầu từ mẫu gợi ý',
+    templatesHint: 'Mẫu chỉ là gợi ý, bạn có thể sửa chủ đề trước khi tạo.',
+    levelLegend: 'Cấp học',
+    templatesLegend: 'Mẫu gợi ý',
+    selected: 'Đã chọn',
+    filledFrom: 'Đã điền sẵn từ mẫu',
+    formTitle: 'Thông tin trò chơi',
+    subjectLabel: 'Môn học',
+    gradeLabel: 'Khối lớp',
+    topicLabel: 'Chủ đề bài học',
+    topicPlaceholder: 'Ví dụ: Phép cộng trong phạm vi 10',
+    chooseSubject: 'Chọn môn học',
+    chooseGrade: 'Chọn khối lớp',
+    submit: 'Tạo trò chơi',
+    notReady:
+      'Tính năng tạo trò chơi bằng AI đang được hoàn thiện nên nút này chưa dùng được. Thông tin bạn nhập chưa được lưu.',
   },
 
   workspace: {

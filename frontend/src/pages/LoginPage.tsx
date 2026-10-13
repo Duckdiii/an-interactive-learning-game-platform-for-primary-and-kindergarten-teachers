@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { loginTeacher } from '../api/authApi'
 import Button from '../components/Button'
+import ErrorNotice from '../components/ui/ErrorNotice'
 import { viText } from '../constants/viText'
 import { useAuth } from '../hooks/useAuth'
 import { ROUTES } from '../routes/paths'
@@ -76,12 +77,7 @@ export default function LoginPage() {
       ) : null}
 
       {errorMessage ? (
-        <p
-          role="alert"
-          className="mb-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-base text-rose-900"
-        >
-          {errorMessage}
-        </p>
+        <ErrorNotice message={errorMessage} className="mb-4" />
       ) : null}
 
       <form className="space-y-4" onSubmit={handleSubmit}>

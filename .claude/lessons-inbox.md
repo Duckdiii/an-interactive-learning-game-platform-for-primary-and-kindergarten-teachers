@@ -29,6 +29,7 @@ Mẫu một mục:
 - Phát hiện nhờ: `node --check` và `node --test` báo lỗi.
 - Nguyên nhân gốc: giả định heredoc giữ nguyên ký tự `\`; không kiểm tra trước. Ngoài ra không có Python trên máy.
 - Cách chặn: sửa file có `\` bằng công cụ Edit/Write, không ghi qua heredoc; luôn chạy `node --check` sau khi sinh file bằng script.
+- Lặp lại: 2026-10-13 (đợt 3 UI) mình lại ghi regex có `\r?\n` bằng `node - <<'EOF'` và file hỏng đúng như vậy; `tsc` bắt được. Đây là lần thứ hai nên nên nâng thành quy tắc trong `CLAUDE.md`.
 - Trạng thái: CHỜ DUYỆT
 
 ## Đã xử lý
