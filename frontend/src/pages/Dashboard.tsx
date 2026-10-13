@@ -4,6 +4,15 @@ import { Link } from 'react-router-dom'
 import { getGames } from '../api/gamesApi'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PageHeader from '../components/ui/PageHeader'
+import {
+  compareGameStatuses,
+  compareGradeLevels,
+  compareSubjects,
+  gameStatusLabel,
+  gradeLevelLabel,
+  subjectLabel,
+} from '../constants/labels'
+import { viText } from '../constants/viText'
 import { ROUTES } from '../routes/paths'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
 
@@ -25,14 +34,17 @@ export default function Dashboard() {
   const subjectOptions = mergeOptions(
     filters.subject ? [filters.subject] : [],
     games.map((game) => game.subject),
+    compareSubjects,
   )
   const gradeOptions = mergeOptions(
     filters.gradeLevel ? [filters.gradeLevel] : [],
     games.map((game) => game.gradeLevel),
+    compareGradeLevels,
   )
   const statusOptions = mergeOptions(
     ['DRAFT', 'PUBLISHED', ...(filters.status ? [filters.status] : [])],
     games.map((game) => game.status),
+    compareGameStatuses,
   )
 
   const updateFilter = (field: keyof GameFilters, value: string) => {
@@ -42,7 +54,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Teacher Console"
+        eyebrow={viText.home.kicker}
         title="Trò chơi của bạn"
         description="Quản lý bản nháp, theo dõi trò chơi đã xuất bản và tiếp tục công việc đang dang dở."
         actions={
@@ -50,7 +62,7 @@ export default function Dashboard() {
             to={ROUTES.createGame}
             className="inline-flex min-h-11 items-center rounded-md bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
-            + Tạo game mới
+            + {viText.nav.createGame}
           </Link>
         }
       />
@@ -63,18 +75,21 @@ export default function Dashboard() {
           label="Môn học"
           value={filters.subject}
           options={subjectOptions}
+          formatOption={subjectLabel}
           onChange={(value) => updateFilter('subject', value)}
         />
         <FilterSelect
           label="Khối lớp"
           value={filters.gradeLevel}
           options={gradeOptions}
+          formatOption={gradeLevelLabel}
           onChange={(value) => updateFilter('gradeLevel', value)}
         />
         <FilterSelect
           label="Trạng thái"
           value={filters.status}
           options={statusOptions}
+          formatOption={gameStatusLabel}
           onChange={(value) => updateFilter('status', value)}
         />
       </section>
@@ -116,11 +131,13 @@ function FilterSelect({
   label,
   value,
   options,
+  formatOption,
   onChange,
 }: {
   label: string
   value: string
   options: string[]
+  formatOption: (value: string) => string
   onChange: (value: string) => void
 }) {
   return (
@@ -136,7 +153,7 @@ function FilterSelect({
         <option value="">Tất cả</option>
         {options.map((option) => (
           <option key={option} value={option}>
-            {formatLabel(option)}
+            {formatOption(option)}
           </option>
         ))}
       </select>
@@ -177,7 +194,7 @@ function EmptyState() {
           to={ROUTES.createGame}
           className="mt-5 inline-flex min-h-11 items-center rounded-md bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
-          + Tạo game mới
+          + {viText.nav.createGame}
         </Link>
       </div>
     </section>
@@ -206,7 +223,7 @@ function GameCard({ game }: { game: GameSummary }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-              {formatLabel(game.subject)} · {formatLabel(game.gradeLevel)}
+              {subjectLabel(game.subject)} · {gradeLevelLabel(game.gradeLevel)}
             </p>
             <h3 className="mt-2 text-base font-semibold text-slate-950">
               {game.title}
@@ -220,7 +237,7 @@ function GameCard({ game }: { game: GameSummary }) {
                 : 'bg-amber-100 text-amber-800',
             ].join(' ')}
           >
-            {formatLabel(game.status)}
+            {gameStatusLabel(game.status)}
           </span>
         </div>
       </div>
@@ -228,14 +245,10 @@ function GameCard({ game }: { game: GameSummary }) {
   )
 }
 
-function mergeOptions(current: string[], incoming: string[]) {
-  return [...new Set([...current, ...incoming.filter(Boolean)])].sort()
-}
-
-function formatLabel(value: string) {
-  return value
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
+function mergeOptions(
+  current: string[],
+  incoming: string[],
+  compare: (a: string, b: string) => number,
+) {
+  return [...new Set([...current, ...incoming.filter(Boolean)])].sort(compare)
 }

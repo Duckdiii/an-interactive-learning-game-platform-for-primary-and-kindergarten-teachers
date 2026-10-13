@@ -1,11 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { viText } from '../constants/viText'
 import { useAuth } from '../hooks/useAuth'
 import { ROUTES } from '../routes/paths'
 
+// Trình soạn thảo (ROUTES.workspaceEditor) không nằm trên thanh điều hướng: giáo viên mở nó từ trang "Trò chơi của tôi",
+// nên mục này không dùng `end` để vẫn được tô sáng khi đang ở trình soạn thảo.
 const navigationItems = [
-  { label: 'Dashboard', to: ROUTES.dashboard, end: true },
-  { label: 'Workspace', to: ROUTES.workspace, end: true },
-  { label: 'Editor', to: ROUTES.workspaceEditor, end: true },
+  { label: viText.nav.home, to: ROUTES.dashboard, end: true },
+  { label: viText.nav.myGames, to: ROUTES.workspace, end: false },
+  { label: viText.nav.createGame, to: ROUTES.createGame, end: true },
 ]
 
 export default function AppLayout() {
@@ -19,12 +22,17 @@ export default function AppLayout() {
             AI
           </span>
           <div>
-            <p className="font-semibold">AI Game Platform</p>
-            <p className="text-xs text-slate-500">Teacher Console</p>
+            <p className="font-semibold">{viText.appName}</p>
+            <p className="text-xs text-slate-500">
+              {viText.layout.sidebarSubtitle}
+            </p>
           </div>
         </div>
 
-        <nav className="mt-8 space-y-1">
+        <nav
+          aria-label={viText.layout.navLabel}
+          className="mt-8 space-y-1"
+        >
           {navigationItems.map((item) => (
             <NavLink
               key={item.to}
@@ -50,18 +58,20 @@ export default function AppLayout() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-slate-500">
-                Primary & Kindergarten Learning Games
+                {viText.layout.headerKicker}
               </p>
-              <h1 className="text-xl font-semibold">Teacher Console</h1>
+              <h1 className="text-xl font-semibold">
+                {viText.layout.headerTitle}
+              </h1>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-semibold">
-                  {user?.email ?? 'Demo teacher'}
+                  {user?.email ?? viText.layout.fallbackUser}
                 </p>
                 <p className="text-xs text-slate-500">
-                  {user ? 'Signed in' : 'No session yet'}
+                  {user ? viText.layout.signedIn : viText.layout.noSession}
                 </p>
               </div>
               <button
@@ -69,12 +79,15 @@ export default function AppLayout() {
                 onClick={logout}
                 className="min-h-10 rounded-md border border-slate-300 px-3 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:text-slate-950"
               >
-                Sign out
+                {viText.layout.signOut}
               </button>
             </div>
           </div>
 
-          <nav className="mt-3 flex gap-2 overflow-x-auto lg:hidden">
+          <nav
+            aria-label={viText.layout.navLabelCompact}
+            className="mt-3 flex gap-2 overflow-x-auto lg:hidden"
+          >
             {navigationItems.map((item) => (
               <NavLink
                 key={item.to}

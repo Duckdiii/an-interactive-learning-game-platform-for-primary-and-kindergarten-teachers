@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { loginTeacher } from '../api/authApi'
 import Button from '../components/Button'
+import { viText } from '../constants/viText'
 import { useAuth } from '../hooks/useAuth'
 import { ROUTES } from '../routes/paths'
 import { parseApiError } from '../utils/apiError'
@@ -57,11 +58,11 @@ export default function LoginPage() {
     <div className="w-full">
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">
-          Welcome back
+          {viText.auth.loginKicker}
         </p>
         <h2 className="mt-2 text-3xl font-semibold">Đăng nhập</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Tiếp tục vào Teacher Console để quản lý và xây dựng trò chơi học tập.
+          {viText.auth.loginDescription}
         </p>
       </div>
 
@@ -98,7 +99,7 @@ export default function LoginPage() {
             }
             autoComplete="email"
             required
-            placeholder="teacher@example.com"
+            placeholder={viText.auth.emailPlaceholder}
             className="mt-2 h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
           />
         </label>

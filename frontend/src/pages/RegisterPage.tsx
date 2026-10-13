@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { registerTeacher } from '../api/authApi'
 import Button from '../components/Button'
+import { viText } from '../constants/viText'
 import { ROUTES } from '../routes/paths'
 import { parseApiError } from '../utils/apiError'
 
@@ -108,7 +109,7 @@ export default function RegisterPage() {
     <div className="w-full">
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">
-          Teacher access
+          {viText.auth.registerKicker}
         </p>
         <h2 className="mt-2 text-3xl font-semibold">Tạo tài khoản</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -143,7 +144,7 @@ export default function RegisterPage() {
           value={form.email}
           error={errors.email}
           autoComplete="email"
-          placeholder="teacher@example.com"
+          placeholder={viText.auth.emailPlaceholder}
           onChange={(value) => updateField('email', value)}
         />
         <Field

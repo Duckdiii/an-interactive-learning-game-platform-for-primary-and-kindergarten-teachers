@@ -1,9 +1,11 @@
+import { viText } from '../constants/viText'
+
 interface LoadingSpinnerProps {
   label?: string
 }
 
 export default function LoadingSpinner({
-  label = 'Loading',
+  label = viText.common.loading,
 }: LoadingSpinnerProps) {
   return (
     <span className="inline-flex items-center gap-2 text-sm font-medium text-slate-600">

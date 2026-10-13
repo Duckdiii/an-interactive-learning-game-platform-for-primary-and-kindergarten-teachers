@@ -1,9 +1,10 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import { viText } from '../constants/viText'
 import { ROUTES } from '../routes/paths'
 
 const authNavigation = [
-  { label: 'Login', to: ROUTES.login },
-  { label: 'Register', to: ROUTES.register },
+  { label: viText.auth.tabLogin, to: ROUTES.login },
+  { label: viText.auth.tabRegister, to: ROUTES.register },
 ]
 
 export default function AuthLayout() {
@@ -15,26 +16,22 @@ export default function AuthLayout() {
             <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-400 font-bold text-slate-950">
               AI
             </span>
-            <span className="font-semibold">AI Game Platform</span>
+            <span className="font-semibold">{viText.appName}</span>
           </Link>
 
           <div className="py-16 lg:py-0">
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300">
-              Teacher workspace
+              {viText.auth.heroKicker}
             </p>
             <h1 className="max-w-xl text-4xl font-semibold leading-tight sm:text-5xl">
-              Create playful learning sessions without rebuilding the app shell.
+              {viText.auth.heroTitle}
             </h1>
             <p className="mt-5 max-w-lg text-base leading-7 text-slate-300">
-              Authentication screens are isolated here so the real login flow can
-              plug in later without touching dashboard or editor routes.
+              {viText.auth.heroDescription}
             </p>
           </div>
 
-          <p className="text-sm text-slate-400">
-            Frontend skeleton only. Backend integration will connect through the
-            shared API layer.
-          </p>
+          <p className="text-sm text-slate-400">{viText.auth.footer}</p>
         </section>
 
         <section className="flex items-center bg-white px-6 py-10 text-slate-950 sm:px-10 lg:px-12">

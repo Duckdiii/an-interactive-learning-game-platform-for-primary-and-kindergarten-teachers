@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { viText } from '../constants/viText'
 import { ROUTES } from '../routes/paths'
 
 export default function NotFound() {
@@ -8,15 +9,17 @@ export default function NotFound() {
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">
           404
         </p>
-        <h1 className="mt-3 text-2xl font-semibold">Page not found</h1>
+        <h1 className="mt-3 text-2xl font-semibold">
+          {viText.notFound.title}
+        </h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          This route is not registered in the frontend shell yet.
+          {viText.notFound.description}
         </p>
         <Link
           to={ROUTES.dashboard}
           className="mt-5 inline-flex min-h-11 items-center rounded-md bg-slate-950 px-4 text-sm font-semibold text-white"
         >
-          Back to dashboard
+          {viText.notFound.backHome}
         </Link>
       </section>
     </main>
