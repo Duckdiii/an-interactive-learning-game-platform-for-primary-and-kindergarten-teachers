@@ -1,7 +1,20 @@
-// Hook `Stop`: đếm skill / MCP / subagent / tool Claude đã dùng trong lượt trả lời vừa xong,
-// đọc từ transcript do Claude Code ghi (Claude không sửa được), rồi in một dòng tóm tắt
-// và ghi thêm vào .claude/tool-usage.log. Chỉ ghi tên, không ghi tham số hay nội dung lệnh.
-import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs'
+// Đếm skill / MCP / subagent / tool Claude đã dùng trong lượt (tác vụ) vừa rồi, đọc từ transcript do
+// Claude Code ghi (Claude không sửa được). Chỉ ghi tên, không ghi tham số hay nội dung lệnh.
+//
+// Hai cách chạy:
+//   1. Hook `Stop` (không tham số): in tóm tắt dạng systemMessage và ghi/ghi đè MỘT dòng cho mỗi lượt vào
+//      .claude/tool-usage.log (hook Stop chạy lại mỗi khi subagent báo xong, nên dòng của cùng lượt bị ghi đè).
+//   2. `node scripts/tool-usage/summarize.mjs --current`: in một dòng "Công cụ đã dùng: ..." cho lượt đang làm,
+//      lấy từ transcript mới nhất của dự án, để dán vào báo cáo cuối tác vụ. Không ghi log.
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -38,6 +51,9 @@ const slashCommand = (entry) => {
   return match ? match[1] : null
 }
 
+// mcp__playwright__browser_click -> "playwright" (gom theo máy chủ cho ngắn gọn).
+const mcpServer = (toolName) => toolName.split('__')[1] || toolName
+
 export function summarizeLastTurn(entries) {
   let start = -1
   for (let i = entries.length - 1; i >= 0; i--) {
@@ -51,6 +67,8 @@ export function summarizeLastTurn(entries) {
   const mcp = new Map()
   const agents = new Map()
   const others = new Map()
+  // Dấu của lượt: uuid tin nhắn người dùng bắt đầu lượt, để biết hai lần chạy hook là cùng một lượt.
+  const turnKey = start >= 0 ? (entries[start].uuid ?? entries[start].timestamp ?? '') : ''
 
   if (start >= 0) {
     const command = slashCommand(entries[start])
@@ -60,11 +78,11 @@ export function summarizeLastTurn(entries) {
     for (const block of toolUses(entry)) {
       if (block.name === 'Skill') bump(skills, block.input?.skill ?? '?')
       else if (block.name === 'Agent') bump(agents, block.input?.subagent_type ?? 'claude')
-      else if (block.name.startsWith('mcp__')) bump(mcp, block.name.slice('mcp__'.length))
+      else if (block.name.startsWith('mcp__')) bump(mcp, mcpServer(block.name))
       else bump(others, block.name)
     }
   }
-  return { skills, mcp, agents, others }
+  return { skills, mcp, agents, others, turnKey }
 }
 
 const list = (map, withCount) =>
@@ -72,12 +90,49 @@ const list = (map, withCount) =>
     ? '(không)'
     : [...map].map(([name, n]) => (withCount && n > 1 ? `${name} ×${n}` : name)).join(', ')
 
+const toolsText = (others) =>
+  [...others].map(([name, n]) => `${name} ×${n}`).join(', ') || '(không)'
+
 export function formatSummary({ skills, mcp, agents, others }) {
-  const tools = [...others].map(([name, n]) => `${name} ×${n}`).join(', ') || '(không)'
   return (
     `Lượt này: Skill: ${list(skills)} | MCP: ${list(mcp, true)} | ` +
-    `Subagent: ${list(agents, true)} | Tool: ${tools}`
+    `Subagent: ${list(agents, true)} | Tool: ${toolsText(others)}`
   )
+}
+
+// Một dòng để dán vào báo cáo cuối tác vụ.
+export function formatReport({ skills, mcp, agents, others }) {
+  return (
+    `Công cụ đã dùng: Skill: ${list(skills)} · MCP: ${list(mcp, true)} · ` +
+    `Subagent: ${list(agents, true)} · Tool: ${toolsText(others)}`
+  )
+}
+
+// Ghi một dòng cho mỗi lượt: nếu dòng cuối cùng cùng phiên và cùng lượt thì thay thế, ngược lại thêm mới.
+export function upsertLogLine(logFile, sessionId, turnKey, text, now = new Date()) {
+  const tag = `${sessionId} [lượt:${String(turnKey).slice(0, 8)}]`
+  const line = `${now.toISOString()} ${tag} ${text}`
+  const existing = existsSync(logFile) ? readFileSync(logFile, 'utf8') : ''
+  const lines = existing.split('\n').filter(Boolean)
+
+  if (turnKey && lines.length > 0 && lines[lines.length - 1].includes(` ${tag} `)) {
+    lines[lines.length - 1] = line
+    writeFileSync(logFile, `${lines.join('\n')}\n`)
+  } else {
+    appendFileSync(logFile, `${line}\n`)
+  }
+}
+
+// Thư mục transcript của dự án: đường dẫn với mọi ký tự không phải chữ/số đổi thành "-".
+export const projectDirName = (cwd) => cwd.replace(/[^A-Za-z0-9]/g, '-')
+
+export function latestTranscript(dir) {
+  if (!existsSync(dir)) return null
+  const files = readdirSync(dir)
+    .filter((name) => name.endsWith('.jsonl'))
+    .map((name) => ({ path: join(dir, name), mtime: statSync(join(dir, name)).mtimeMs }))
+    .sort((a, b) => b.mtime - a.mtime)
+  return files[0]?.path ?? null
 }
 
 function findTranscript(input) {
@@ -91,22 +146,57 @@ function findTranscript(input) {
   return null
 }
 
-function main() {
+function readSummary(transcript) {
+  return summarizeLastTurn(parseLines(readFileSync(transcript, 'utf8')))
+}
+
+function projectRoot(input = {}) {
+  return input.cwd ?? process.env.CLAUDE_PROJECT_DIR ?? process.cwd()
+}
+
+function runHook() {
   const input = JSON.parse(readFileSync(0, 'utf8') || '{}')
   const transcript = findTranscript(input)
   if (!transcript) return
-  const summary = formatSummary(summarizeLastTurn(parseLines(readFileSync(transcript, 'utf8'))))
+  const summary = readSummary(transcript)
+  const text = formatSummary(summary)
 
-  const logFile = join(input.cwd ?? process.cwd(), '.claude', 'tool-usage.log')
+  const logFile = join(projectRoot(input), '.claude', 'tool-usage.log')
   mkdirSync(dirname(logFile), { recursive: true })
-  appendFileSync(logFile, `${new Date().toISOString()} ${input.session_id ?? ''} ${summary}\n`)
-  process.stdout.write(JSON.stringify({ systemMessage: summary }))
+  upsertLogLine(logFile, input.session_id ?? '', summary.turnKey, text)
+  process.stdout.write(JSON.stringify({ systemMessage: text }))
+}
+
+function runCurrent() {
+  // Chạy từ thư mục con (ví dụ frontend/) vẫn tìm được: thử lần lượt thư mục hiện tại rồi các thư mục cha.
+  let transcript = null
+  for (let dir = projectRoot(); !transcript; dir = dirname(dir)) {
+    transcript = latestTranscript(join(homedir(), '.claude', 'projects', projectDirName(dir)))
+    if (dirname(dir) === dir) break
+  }
+  if (!transcript) {
+    process.stdout.write('Công cụ đã dùng: (không tìm thấy transcript của dự án)\n')
+    return
+  }
+  process.stdout.write(`${formatReport(readSummary(transcript))}\n`)
+}
+
+// Hook chỉ để theo dõi: lỗi không được chặn phản hồi, nhưng được ghi lại để biết khi nào hook hỏng.
+function logError(error) {
+  try {
+    const file = join(projectRoot(), '.claude', 'tool-usage.error.log')
+    mkdirSync(dirname(file), { recursive: true })
+    appendFileSync(file, `${new Date().toISOString()} ${error?.stack ?? error}\n`)
+  } catch {
+    // Không còn gì để làm.
+  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    main()
-  } catch {
-    // Hook chỉ để theo dõi: lỗi không được chặn phản hồi.
+    if (process.argv.includes('--current')) runCurrent()
+    else runHook()
+  } catch (error) {
+    logError(error)
   }
 }

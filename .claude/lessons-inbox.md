@@ -17,7 +17,19 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
-(trống)
+### 2026-10-13 — Tạo nhánh git trái ý người dùng
+- Lỗi: tự tạo nhánh con `duy/ui-teacher-phase1` để làm UI, dù người dùng chỉ dùng nhánh `everyone/UI`.
+- Phát hiện nhờ: người dùng ngắt và yêu cầu xóa.
+- Nguyên nhân gốc: làm theo "mỗi đợt một nhánh" trong kế hoạch của chính mình mà chưa hỏi lại về nhánh.
+- Cách chặn: không `git checkout -b` khi chưa được cho phép; kế hoạch có bước tạo nhánh phải hỏi lại. Đã ghi memory cá nhân.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-10-13 — Heredoc qua công cụ Bash làm mất dấu `\` khi ghi file JS
+- Lỗi: ghi file test bằng `node - <<'EOF'` chứa `\n`, `\(`, `\\`: dấu `\` bị mất, file lỗi cú pháp và regex sai. Thử "sửa" bằng cùng cách lần nữa vẫn hỏng.
+- Phát hiện nhờ: `node --check` và `node --test` báo lỗi.
+- Nguyên nhân gốc: giả định heredoc giữ nguyên ký tự `\`; không kiểm tra trước. Ngoài ra không có Python trên máy.
+- Cách chặn: sửa file có `\` bằng công cụ Edit/Write, không ghi qua heredoc; luôn chạy `node --check` sau khi sinh file bằng script.
+- Trạng thái: CHỜ DUYỆT
 
 ## Đã xử lý
 
