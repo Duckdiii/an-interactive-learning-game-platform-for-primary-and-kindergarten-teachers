@@ -30,6 +30,27 @@ Mẫu một mục:
 - Nguyên nhân gốc: giả định heredoc giữ nguyên ký tự `\`; không kiểm tra trước. Ngoài ra không có Python trên máy.
 - Cách chặn: sửa file có `\` bằng công cụ Edit/Write, không ghi qua heredoc; luôn chạy `node --check` sau khi sinh file bằng script.
 - Lặp lại: 2026-10-13 (đợt 3 UI) mình lại ghi regex có `\r?\n` bằng `node - <<'EOF'` và file hỏng đúng như vậy; `tsc` bắt được. Đây là lần thứ hai nên nên nâng thành quy tắc trong `CLAUDE.md`.
+- Lặp lại lần 3 và 4: đợt cải thiện UI/UX lớn (2026-10-13) mình lại ghi regex và chuỗi có `\` bằng heredoc, `node -e "..."` ở 4 chỗ; mỗi lần phải sửa lại bằng công cụ Edit. Bằng chứng đủ để nâng thành quy tắc trong `CLAUDE.md`: "không ghi file chứa dấu gạch chéo ngược bằng heredoc/`node -e`, dùng Write/Edit".
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-10-13 — Chỉ kiểm tràn ngang ở điện thoại, bỏ sót máy tính
+- Lỗi: khung ứng dụng dùng `w-full` cùng `lg:ml-72` nên ở màn hình máy tính nội dung rộng hơn khung (cuộn ngang, cột phải bị cắt). Mình chỉ đo tràn ngang ở 390px nên không thấy; lỗi lộ ra khi ảnh chụp ở 1280px rộng hơn khung nhìn.
+- Phát hiện nhờ: xem ảnh chụp thật (thanh cuộn ngang và cột "Tóm tắt yêu cầu" bị cắt chữ).
+- Nguyên nhân gốc: kiểm thử UI theo một kích thước; tin rằng bố cục "đúng" vì nhìn một ảnh.
+- Cách chặn: mọi lần kiểm UI đo `scrollWidth - clientWidth` ở ít nhất 360, 768, 1024, 1280, 1920; cột phụ chỉ hiện từ độ rộng đủ chỗ (đã làm: cột tóm tắt từ 1280px).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-10-13 — Test sao chép bị clipboard giả của user-event ghi đè
+- Lỗi: gán `navigator.clipboard` trước `userEvent.setup()` thì `setup()` thay bằng clipboard giả của nó, mock `writeText` không bao giờ được gọi.
+- Phát hiện nhờ: test `GameCard` báo `writeText` chưa được gọi.
+- Cách chặn: đặt mock clipboard SAU `userEvent.setup()` (ghi chú ngay tại test).
+- Trạng thái: ĐÃ ÁP DỤNG (trong `GameCard.test.tsx`, `MyGamesPage.test.tsx`); chờ duyệt có đưa vào hướng dẫn test không.
+
+### 2026-10-13 — Dữ liệu dùng chung không gắn danh tính người dùng, và hiệu ứng của layout đè lên tiêu điểm của trang con
+- Lỗi: (1) khóa react-query `['games']` không có giáo viên, máy dùng chung ở trường sẽ cho cô đăng nhập sau thấy danh sách (kèm mã chơi) của cô trước; (2) effect của `AppLayout` luôn đưa tiêu điểm về `<main>`, đè lên ô khối lớp mà trang tạo game vừa tự focus (effect của con chạy trước effect của cha).
+- Phát hiện nhờ: agent `reviewer`, không phải do mình tự rà; test cũ không bao phủ hai trường hợp này.
+- Nguyên nhân gốc: chỉ kiểm luồng một người dùng một trang; viết hiệu ứng toàn cục mà không nghĩ tới thứ tự effect cha/con.
+- Cách chặn: khóa cache mọi dữ liệu theo người dùng phải có định danh người dùng (đã có test hai giáo viên dùng chung cache); hiệu ứng ở layout phải kiểm tra tiêu điểm hiện tại trước khi đặt lại (đã có test đi qua `<App />`).
 - Trạng thái: CHỜ DUYỆT
 
 ## Đã xử lý

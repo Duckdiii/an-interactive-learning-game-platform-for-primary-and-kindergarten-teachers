@@ -5,8 +5,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { loginTeacher } from '../api/authApi'
 import Button from '../components/Button'
 import ErrorNotice from '../components/ui/ErrorNotice'
+import FormField from '../components/ui/FormField'
+import PasswordInput from '../components/ui/PasswordInput'
+import { inputClass } from '../components/ui/formStyles'
 import { viText } from '../constants/viText'
 import { useAuth } from '../hooks/useAuth'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { ROUTES } from '../routes/paths'
 import { parseApiError } from '../utils/apiError'
 
@@ -25,6 +29,7 @@ const initialForm: LoginForm = {
 }
 
 export default function LoginPage() {
+  usePageTitle('Đăng nhập')
   const [form, setForm] = useState(initialForm)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -57,11 +62,11 @@ export default function LoginPage() {
 
   return (
     <div className="w-full">
-      <div className="mb-8">
+      <div className="mb-6">
         <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
           {viText.auth.loginKicker}
         </p>
-        <h2 className="mt-2 text-3xl font-bold">Đăng nhập</h2>
+        <h1 className="mt-2 text-3xl font-extrabold">Đăng nhập</h1>
         <p className="mt-2 text-base leading-7 text-ink-soft">
           {viText.auth.loginDescription}
         </p>
@@ -80,44 +85,36 @@ export default function LoginPage() {
         <ErrorNotice message={errorMessage} className="mb-4" />
       ) : null}
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <label className="block">
-          <span className="text-base font-semibold text-ink">Email</span>
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        <FormField id="login-email" label="Email">
           <input
+            id="login-email"
             type="email"
             name="email"
             value={form.email}
             onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                email: event.target.value,
-              }))
+              setForm((current) => ({ ...current, email: event.target.value }))
             }
             autoComplete="email"
             required
             placeholder={viText.auth.emailPlaceholder}
-            className="mt-2 h-12 w-full rounded-xl border-2 border-ink/20 px-4 text-base transition focus:border-brand"
+            className={inputClass()}
           />
-        </label>
+        </FormField>
 
-        <label className="block">
-          <span className="text-base font-semibold text-ink">Mật khẩu</span>
-          <input
-            type="password"
+        <FormField id="login-password" label="Mật khẩu">
+          <PasswordInput
+            id="login-password"
             name="password"
             value={form.password}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                password: event.target.value,
-              }))
+            onChange={(password) =>
+              setForm((current) => ({ ...current, password }))
             }
             autoComplete="current-password"
             required
             placeholder="Nhập mật khẩu"
-            className="mt-2 h-12 w-full rounded-xl border-2 border-ink/20 px-4 text-base transition focus:border-brand"
           />
-        </label>
+        </FormField>
 
         <Button type="submit" fullWidth disabled={isSubmitting}>
           {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}

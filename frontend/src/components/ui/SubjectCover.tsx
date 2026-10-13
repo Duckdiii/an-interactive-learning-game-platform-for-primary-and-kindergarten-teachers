@@ -1,4 +1,5 @@
 // Hình bìa mặc định của thẻ game khi chưa có ảnh: ba ô chữ nghiêng nhẹ theo môn học, màu lấy từ bảng màu ở index.css.
+// Bản `compact` (điện thoại) chỉ giữ một ô to ở giữa để vẫn nhận ra môn học ở khung nhỏ.
 // Chỉ để trang trí (aria-hidden); tên môn đã có trong chữ của thẻ.
 
 import { subjectTheme } from './subjectTheme'
@@ -10,8 +11,27 @@ const TILE_LAYOUT = [
   { x: 212, y: 58, rotate: -4 },
 ]
 
-export default function SubjectCover({ subject }: { subject: string }) {
+export default function SubjectCover({
+  subject,
+  compact = false,
+}: {
+  subject: string
+  compact?: boolean
+}) {
   const theme = subjectTheme(subject)
+
+  if (compact) {
+    return (
+      <div
+        aria-hidden="true"
+        className={`grid h-full w-full place-items-center ${theme.cover} ${theme.mark}`}
+      >
+        <span className="grid h-14 w-14 -rotate-6 place-items-center rounded-2xl border-2 border-b-4 border-current bg-white text-3xl font-extrabold">
+          {theme.tiles[0]}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className={`aspect-[16/9] ${theme.cover}`} aria-hidden="true">
@@ -25,6 +45,15 @@ export default function SubjectCover({ subject }: { subject: string }) {
             key={index}
             transform={`rotate(${tile.rotate} ${tile.x + 36} ${tile.y + 36})`}
           >
+            <rect
+              x={tile.x}
+              y={tile.y + 4}
+              width="72"
+              height="72"
+              rx="18"
+              fill="currentColor"
+              opacity="0.35"
+            />
             <rect
               x={tile.x}
               y={tile.y}

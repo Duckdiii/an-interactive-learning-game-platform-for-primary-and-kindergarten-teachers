@@ -10,5 +10,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // Test đầu tiên của mỗi file nạp trang (lazy) lần đầu nên chậm hơn hẳn khi máy bận; 5 giây mặc định gây chập chờn.
+    testTimeout: 20_000,
+    hookTimeout: 20_000,
   },
 })

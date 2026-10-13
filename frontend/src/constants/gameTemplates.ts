@@ -12,11 +12,6 @@ export interface GameTemplate {
   topic: string
 }
 
-// Độ dài tối đa của ô nhập chủ đề (giới hạn của giao diện, giữ chủ đề ngắn gọn). Đây KHÔNG phải ràng buộc của API:
-// request tạo game dùng trường `idea` (10 đến 2000 ký tự) trong docs/openapi/openapi.yaml; khi endpoint được cài
-// thì phải ánh xạ lại chủ đề sang `idea` theo contract.
-export const TOPIC_MAX_LENGTH = 200
-
 export const TEMPLATE_LEVELS: ReadonlyArray<{ value: TemplateLevel; label: string }> = [
   { value: 'KINDERGARTEN', label: 'Mầm non' },
   { value: 'GRADE_1', label: 'Lớp 1' },

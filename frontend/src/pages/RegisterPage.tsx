@@ -4,7 +4,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { registerTeacher } from '../api/authApi'
 import Button from '../components/Button'
 import ErrorNotice from '../components/ui/ErrorNotice'
+import FormField from '../components/ui/FormField'
+import PasswordInput from '../components/ui/PasswordInput'
+import { describedBy, inputClass } from '../components/ui/formStyles'
 import { viText } from '../constants/viText'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { ROUTES } from '../routes/paths'
 import { parseApiError } from '../utils/apiError'
 
@@ -15,7 +19,15 @@ interface RegisterForm {
   confirmPassword: string
 }
 
-type FieldErrors = Partial<Record<keyof RegisterForm | 'form', string>>
+type FieldKey = keyof RegisterForm
+type FieldErrors = Partial<Record<FieldKey | 'form', string>>
+
+const FIELD_ORDER: ReadonlyArray<FieldKey> = [
+  'fullName',
+  'email',
+  'password',
+  'confirmPassword',
+]
 
 const initialForm: RegisterForm = {
   fullName: '',
@@ -48,15 +60,31 @@ function validateForm(form: RegisterForm): FieldErrors {
   return errors
 }
 
+const fieldId = (field: FieldKey) => `register-${field}`
+
+// Đưa tiêu điểm tới ô lỗi đầu tiên để giáo viên (và trình đọc màn hình) biết ngay chỗ cần sửa, không phải tự tìm.
+function focusFirstError(errors: FieldErrors) {
+  const first = FIELD_ORDER.find((field) => errors[field])
+
+  if (first) document.getElementById(fieldId(first))?.focus()
+}
+
 export default function RegisterPage() {
+  usePageTitle('Đăng ký')
   const [form, setForm] = useState(initialForm)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
-  const updateField = (field: keyof RegisterForm, value: string) => {
+  const updateField = (field: FieldKey, value: string) => {
     setForm((current) => ({ ...current, [field]: value }))
     setErrors((current) => ({ ...current, [field]: undefined, form: undefined }))
+  }
+
+  const showErrors = (next: FieldErrors) => {
+    setErrors(next)
+    // Chờ React vẽ xong (ô lỗi đã có aria-invalid) rồi mới chuyển tiêu điểm.
+    setTimeout(() => focusFirstError(next), 0)
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -64,7 +92,7 @@ export default function RegisterPage() {
 
     const validationErrors = validateForm(form)
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors)
+      showErrors(validationErrors)
       return
     }
 
@@ -85,12 +113,7 @@ export default function RegisterPage() {
       const parsedError = parseApiError(error, 'Không thể đăng ký lúc này')
       const knownFieldErrors: FieldErrors = {}
 
-      for (const field of [
-        'fullName',
-        'email',
-        'password',
-        'confirmPassword',
-      ] as const) {
+      for (const field of FIELD_ORDER) {
         if (parsedError.fieldErrors[field]) {
           knownFieldErrors[field] = parsedError.fieldErrors[field]
         }
@@ -100,19 +123,42 @@ export default function RegisterPage() {
         knownFieldErrors.form = parsedError.message
       }
 
-      setErrors(knownFieldErrors)
+      showErrors(knownFieldErrors)
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const textField = (
+    field: 'fullName' | 'email',
+    label: string,
+    autoComplete: string,
+    placeholder: string,
+    type: 'text' | 'email',
+  ) => (
+    <FormField id={fieldId(field)} label={label} error={errors[field]}>
+      <input
+        id={fieldId(field)}
+        name={field}
+        type={type}
+        value={form[field]}
+        onChange={(event) => updateField(field, event.target.value)}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        aria-invalid={errors[field] ? true : undefined}
+        aria-describedby={describedBy(fieldId(field), { error: Boolean(errors[field]) })}
+        className={inputClass(Boolean(errors[field]))}
+      />
+    </FormField>
+  )
+
   return (
     <div className="w-full">
-      <div className="mb-8">
+      <div className="mb-6">
         <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
           {viText.auth.registerKicker}
         </p>
-        <h2 className="mt-2 text-3xl font-bold">Tạo tài khoản</h2>
+        <h1 className="mt-2 text-3xl font-extrabold">Tạo tài khoản</h1>
         <p className="mt-2 text-base leading-7 text-ink-soft">
           Đăng ký tài khoản giáo viên để bắt đầu xây dựng trò chơi học tập.
         </p>
@@ -122,47 +168,49 @@ export default function RegisterPage() {
         <ErrorNotice message={errors.form} className="mb-4" />
       ) : null}
 
-      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-        <Field
-          label="Họ và tên"
-          name="fullName"
-          type="text"
-          value={form.fullName}
-          error={errors.fullName}
-          autoComplete="name"
-          placeholder="Nguyễn Văn An"
-          onChange={(value) => updateField('fullName', value)}
-        />
-        <Field
-          label="Email"
-          name="email"
-          type="email"
-          value={form.email}
-          error={errors.email}
-          autoComplete="email"
-          placeholder={viText.auth.emailPlaceholder}
-          onChange={(value) => updateField('email', value)}
-        />
-        <Field
+      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+        {textField('fullName', 'Họ và tên', 'name', 'Nguyễn Văn An', 'text')}
+        {textField('email', 'Email', 'email', viText.auth.emailPlaceholder, 'email')}
+
+        <FormField
+          id={fieldId('password')}
           label="Mật khẩu"
-          name="password"
-          type="password"
-          value={form.password}
+          hint={viText.auth.passwordHint}
           error={errors.password}
-          autoComplete="new-password"
-          placeholder="Tối thiểu 8 ký tự"
-          onChange={(value) => updateField('password', value)}
-        />
-        <Field
+        >
+          <PasswordInput
+            id={fieldId('password')}
+            name="password"
+            value={form.password}
+            onChange={(value) => updateField('password', value)}
+            autoComplete="new-password"
+            invalid={Boolean(errors.password)}
+            describedBy={describedBy(fieldId('password'), {
+              hint: true,
+              error: Boolean(errors.password),
+            })}
+          />
+        </FormField>
+
+        <FormField
+          id={fieldId('confirmPassword')}
           label="Xác nhận mật khẩu"
-          name="confirmPassword"
-          type="password"
-          value={form.confirmPassword}
           error={errors.confirmPassword}
-          autoComplete="new-password"
-          placeholder="Nhập lại mật khẩu"
-          onChange={(value) => updateField('confirmPassword', value)}
-        />
+        >
+          <PasswordInput
+            id={fieldId('confirmPassword')}
+            name="confirmPassword"
+            value={form.confirmPassword}
+            onChange={(value) => updateField('confirmPassword', value)}
+            autoComplete="new-password"
+            placeholder="Nhập lại mật khẩu"
+            invalid={Boolean(errors.confirmPassword)}
+            describedBy={describedBy(fieldId('confirmPassword'), {
+              error: Boolean(errors.confirmPassword),
+            })}
+            toggleSuffix=" xác nhận"
+          />
+        </FormField>
 
         <Button type="submit" fullWidth disabled={isSubmitting}>
           {isSubmitting ? 'Đang đăng ký...' : 'Đăng ký'}
@@ -179,56 +227,5 @@ export default function RegisterPage() {
         </Link>
       </p>
     </div>
-  )
-}
-
-interface FieldProps {
-  label: string
-  name: string
-  type: 'text' | 'email' | 'password'
-  value: string
-  error?: string
-  autoComplete: string
-  placeholder: string
-  onChange: (value: string) => void
-}
-
-function Field({
-  label,
-  name,
-  type,
-  value,
-  error,
-  autoComplete,
-  placeholder,
-  onChange,
-}: FieldProps) {
-  const errorId = `${name}-error`
-
-  return (
-    <label className="block">
-      <span className="text-base font-semibold text-ink">{label}</span>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? errorId : undefined}
-        className={[
-          'mt-2 h-12 w-full rounded-xl border-2 px-4 text-base transition',
-          error
-            ? 'border-rose-500 focus:border-rose-600'
-            : 'border-ink/20 focus:border-brand',
-        ].join(' ')}
-      />
-      {error ? (
-        <span id={errorId} className="mt-1 block text-sm text-rose-800">
-          {error}
-        </span>
-      ) : null}
-    </label>
   )
 }

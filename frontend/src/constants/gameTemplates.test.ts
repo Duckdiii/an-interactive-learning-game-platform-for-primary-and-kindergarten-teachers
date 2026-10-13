@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   GAME_TEMPLATES,
   TEMPLATE_LEVELS,
-  TOPIC_MAX_LENGTH,
   templatesForLevel,
 } from './gameTemplates'
 import {
@@ -11,6 +10,7 @@ import {
   gradeLevelLabel,
   subjectLabel,
 } from './labels'
+import { IDEA_MAX_LENGTH, IDEA_MIN_LENGTH } from '../utils/generateRequest'
 
 describe('mẫu game gợi ý', () => {
   it('id không trùng và mọi mẫu có tiêu đề, chủ đề', () => {
@@ -32,9 +32,10 @@ describe('mẫu game gợi ý', () => {
     }
   })
 
-  it('chủ đề không vượt giới hạn độ dài của ô nhập', () => {
+  it('chủ đề đủ dài để dùng làm ý tưởng theo contract (tối thiểu 10 ký tự)', () => {
     for (const template of GAME_TEMPLATES) {
-      expect(template.topic.length).toBeLessThanOrEqual(TOPIC_MAX_LENGTH)
+      expect(template.topic.length).toBeGreaterThanOrEqual(IDEA_MIN_LENGTH)
+      expect(template.topic.length).toBeLessThanOrEqual(IDEA_MAX_LENGTH)
     }
   })
 
