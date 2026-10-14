@@ -16,12 +16,14 @@ export function shouldRetryGame(failureCount: number, error: unknown) {
 }
 
 // Khóa truy vấn có danh tính giáo viên (cùng lý do với `useGames`): máy dùng chung không lộ game của người trước.
+export const gameQueryKey = (owner: string, gameId: string | null) => ['game', owner, gameId] as const
+
 export function useGame(gameId: string | null) {
   const { user } = useAuth()
   const owner = user?.teacherId ?? user?.email ?? 'anonymous'
 
   return useQuery({
-    queryKey: ['game', owner, gameId],
+    queryKey: gameQueryKey(owner, gameId),
     queryFn: () => getGame(gameId ?? ''),
     enabled: Boolean(gameId),
     retry: shouldRetryGame,

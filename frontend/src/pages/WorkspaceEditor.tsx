@@ -3,9 +3,12 @@ import { useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import ButtonLink from '../components/ButtonLink'
 import LoadingSpinner from '../components/LoadingSpinner'
+import DraftRestoreNotice from '../components/editor/DraftRestoreNotice'
 import EditorLayout from '../components/editor/EditorLayout'
 import type { EditorPane } from '../components/editor/EditorLayout'
+import GameInfoForm from '../components/editor/GameInfoForm'
 import QuestionList from '../components/editor/QuestionList'
+import SaveBar from '../components/editor/SaveBar'
 import ErrorNotice from '../components/ui/ErrorNotice'
 import GameTypeCover from '../components/ui/GameTypeCover'
 import LetterTiles from '../components/ui/LetterTiles'
@@ -21,7 +24,9 @@ import {
 import { viText } from '../constants/viText'
 import { isMock } from '../config/mockMode'
 import { useGame } from '../hooks/useGame'
+import { useGameEditor } from '../hooks/useGameEditor'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { useUnsavedChangesGuard } from '../hooks/useUnsavedChangesGuard'
 import { ROUTES } from '../routes/paths'
 import type { GameResponse } from '../types/game-response.types'
 import { parseApiError } from '../utils/apiError'
@@ -65,18 +70,39 @@ function EditorSkeleton() {
 }
 
 function EditorWorkspace({ game }: { game: GameResponse }) {
+  const editor = useGameEditor(game)
+  const { draft } = editor
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
-  const summaries = useMemo(() => summarizeQuestions(game), [game])
-  const items = game.questions.map((question, index) => ({
-    summary: summaries[index],
+  const summaries = useMemo(() => summarizeQuestions(draft), [draft])
+  const questionsWithIssues = useMemo(
+    () => new Set(editor.issues.map((issue) => issue.questionIndex).filter((value) => value !== null)),
+    [editor.issues],
+  )
+  const items = draft.questions.map((question, position) => ({
+    summary: summaries[position],
     timeLimitSeconds: question.timeLimitSeconds,
     points: question.points,
+    hasIssue: questionsWithIssues.has(position),
   }))
   const index = Math.min(selected, Math.max(0, items.length - 1))
   const current = items[index]
   const theme = subjectTheme(game.metadata.subject)
   const isPublished = game.status === 'PUBLISHED'
+  const title = draft.metadata.title.trim() || text.untitled
+  const saveText = text.save
+  const conflict = editor.saveError?.code === 'CONFLICT'
+
+  useUnsavedChangesGuard(editor.dirty, saveText.leaveConfirm)
+
+  // Đưa tiêu điểm tới ô cần chú ý (sau khi khôi phục hoặc khi lưu bị chặn) để người dùng bàn phím và trình đọc màn hình không mất vị trí.
+  const focusField = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.focus())
+
+  const handleSave = () => {
+    const first = editor.save().find((issue) => issue.questionIndex === null)
+
+    if (first) focusField(first.field === 'metadata.topic' ? 'game-topic' : 'game-title')
+  }
 
   const choose = (next: number) => {
     setSelected(next)
@@ -117,7 +143,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">{text.kicker}</p>
           {isMock('editor') ? <MockBadge /> : null}
         </div>
-        <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{game.metadata.title}</h1>
+        <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{title}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-3 py-1 text-sm font-bold ${theme.chip}`}>
             {subjectLabel(game.metadata.subject)} · {gradeLevelLabel(game.metadata.gradeLevel)}
@@ -139,6 +165,65 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           </span>
         </div>
       </header>
+
+      {editor.pendingRestore ? (
+        <DraftRestoreNotice
+          draft={editor.pendingRestore}
+          serverUpdatedAt={game.updatedAt}
+          onRestore={() => {
+            editor.restore()
+            focusField('game-title')
+          }}
+          onDiscard={() => {
+            editor.discardRestore()
+            focusField('game-title')
+          }}
+        />
+      ) : null}
+
+      <SaveBar
+        dirty={editor.dirty}
+        saving={editor.saving}
+        saved={editor.savedNotice}
+        isPublished={isPublished}
+        onSave={handleSave}
+      />
+
+      {editor.issues.length > 0 ? (
+        <ErrorNotice
+          title={saveText.invalidTitle}
+          message={editor.issueSummary ?? ''}
+          action={
+            <ul className="list-disc space-y-1 pl-5 text-base">
+              {editor.issues.map((issue) => (
+                <li key={`${issue.questionIndex}-${issue.field}-${issue.code}`}>{issue.message}</li>
+              ))}
+            </ul>
+          }
+        />
+      ) : null}
+
+      {editor.saveError ? (
+        <ErrorNotice
+          title={saveText.saveErrorTitle}
+          message={conflict ? saveText.conflict : `${editor.saveError.message} ${saveText.keptNote}`}
+          action={
+            conflict ? null : (
+              <Button type="button" onClick={editor.save} disabled={editor.saving}>
+                {saveText.retry}
+              </Button>
+            )
+          }
+        />
+      ) : null}
+
+      <GameInfoForm
+        metadata={draft.metadata}
+        issues={editor.issues}
+        disabled={Boolean(editor.pendingRestore)}
+        onTitleChange={editor.setTitle}
+        onTopicChange={editor.setTopic}
+      />
 
       <EditorLayout
         pane={pane}

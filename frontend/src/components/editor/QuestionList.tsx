@@ -1,9 +1,12 @@
 import { viText } from '../../constants/viText'
+import Icon from '../ui/Icon'
 
 export interface QuestionListItem {
   summary: string
   timeLimitSeconds: number
   points: number
+  // Câu còn lỗi sau lần bấm Lưu: hiện dấu cảnh báo kèm chữ (không chỉ màu).
+  hasIssue?: boolean
 }
 
 interface QuestionListProps {
@@ -54,6 +57,12 @@ export default function QuestionList({ items, selectedIndex, onSelect }: Questio
                 <span className="mt-0.5 block text-sm text-ink-soft">
                   {item.timeLimitSeconds} {text.seconds} · {item.points} {text.points}
                 </span>
+                {item.hasIssue ? (
+                  <span className="mt-0.5 flex items-center gap-1 text-sm font-bold text-rose-800">
+                    <Icon name="alert" className="h-4 w-4" />
+                    {text.needsFix}
+                  </span>
+                ) : null}
               </span>
             </button>
           </li>

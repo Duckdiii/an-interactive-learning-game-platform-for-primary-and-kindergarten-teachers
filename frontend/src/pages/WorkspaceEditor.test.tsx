@@ -33,7 +33,7 @@ describe('trang soạn thảo: mở game', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Đang mở trò chơi')
     expect(await screen.findByRole('heading', { level: 1, name: 'Đếm số đến 10' })).toBeInTheDocument()
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.queryByText('Đang mở trò chơi')).not.toBeInTheDocument()
   })
 
   it('hiện tiêu đề, trạng thái, nhãn mô phỏng và đủ số câu hỏi kèm tóm tắt', async () => {

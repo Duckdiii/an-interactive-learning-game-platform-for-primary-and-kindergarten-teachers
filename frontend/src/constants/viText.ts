@@ -227,6 +227,33 @@ export const viText = {
     previewHeading: 'Xem câu hỏi',
     previewNote:
       'Chơi thử như học sinh và sửa từng câu sẽ có ở các bước tiếp theo. Hiện bạn xem được nội dung và thứ tự câu hỏi.',
+    untitled: 'Chưa đặt tên',
+    infoHeading: 'Thông tin trò chơi',
+    titleLabel: 'Tên trò chơi',
+    topicLabel: 'Chủ đề',
+    needsFix: 'Cần sửa',
+    save: {
+      button: 'Lưu bản nháp',
+      saving: 'Đang lưu...',
+      unsaved: 'Chưa lưu',
+      allSaved: 'Đã lưu',
+      savedDraft: 'Bạn đã lưu bản nháp thành công.',
+      savedPublished: 'Đã lưu thay đổi của trò chơi.',
+      invalidTitle: 'Chưa lưu được',
+      saveErrorTitle: 'Chưa lưu được trò chơi',
+      conflict:
+        'Trò chơi đang có phòng chơi chưa kết thúc nên chưa sửa được. Hãy kết thúc phòng chơi rồi lưu lại. Nội dung bạn đang soạn vẫn được giữ.',
+      keptNote: 'Nội dung bạn đang soạn vẫn được giữ nguyên.',
+      retry: 'Thử lại',
+      leaveConfirm: 'Bạn có thay đổi chưa lưu. Rời khỏi trang này, những thay đổi đó có thể bị mất. Bạn vẫn muốn rời đi?',
+    },
+    restore: {
+      title: 'Có bản chỉnh sửa chưa lưu trên máy này',
+      description: 'Lưu lúc {time}. Bạn muốn tiếp tục từ bản đó không?',
+      newerOnServer: 'Trò chơi đã được lưu lại sau thời điểm đó, nên khôi phục sẽ ghi đè lên bản mới hơn.',
+      accept: 'Khôi phục bản chỉnh sửa',
+      discard: 'Bỏ bản chỉnh sửa',
+    },
     summary: {
       noContent: 'Câu chưa có nội dung',
       listen: 'Nghe',

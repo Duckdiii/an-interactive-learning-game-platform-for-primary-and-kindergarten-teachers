@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios'
+import { setMockGameLocked } from './mockGames'
 
 // Môi trường chạy chung của mọi service mô phỏng: độ trễ giả lập và kịch bản (bình thường, trống, lỗi, chậm) để kiểm các
 // trạng thái giao diện mà không cần backend (normal, empty, error, timeout, slow). Kịch bản chỉ đổi được ở môi trường phát triển, qua `window.__mock`:
@@ -53,7 +54,12 @@ export async function runMock<T>(produce: (current: MockScenario) => T | Promise
 
 declare global {
   interface Window {
-    __mock?: { setScenario: (next: MockScenario) => void; getScenario: () => MockScenario }
+    __mock?: {
+      setScenario: (next: MockScenario) => void
+      getScenario: () => MockScenario
+      // Giả lập game đang có (hoặc hết) phòng chơi chưa kết thúc: lưu sẽ bị 409.
+      lockGame: (gameId: string, locked?: boolean) => void
+    }
   }
 }
 
@@ -63,7 +69,11 @@ const SCENARIOS: ReadonlyArray<MockScenario> = ['normal', 'empty', 'error', 'tim
 export function installMockDevTools() {
   if (!import.meta.env.DEV || typeof window === 'undefined') return
 
-  window.__mock = { setScenario: setMockScenario, getScenario: getMockScenario }
+  window.__mock = {
+    setScenario: setMockScenario,
+    getScenario: getMockScenario,
+    lockGame: (gameId, locked = true) => setMockGameLocked(gameId, locked),
+  }
 
   const fromUrl = new URLSearchParams(window.location.search).get('mock')
   const requested = SCENARIOS.find((item) => item === fromUrl)

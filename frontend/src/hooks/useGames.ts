@@ -14,6 +14,9 @@ export function shouldRetryGames(failureCount: number, error: unknown) {
   return failureCount < 1 && !isTimeout
 }
 
+// Dùng chung để trình soạn thảo làm mới danh sách sau khi lưu.
+export const gamesQueryKey = (owner: string) => ['games', owner] as const
+
 const NO_FILTERS = { subject: '', gradeLevel: '', status: '' }
 
 // Tải toàn bộ danh sách game của giáo viên MỘT lần (API chưa phân trang, đã sắp theo updatedAt giảm dần) rồi lọc,
@@ -25,7 +28,7 @@ export function useGames() {
   const owner = user?.teacherId ?? user?.email ?? 'anonymous'
 
   return useQuery({
-    queryKey: ['games', owner],
+    queryKey: gamesQueryKey(owner),
     queryFn: () => listGames(NO_FILTERS),
     retry: shouldRetryGames,
   })

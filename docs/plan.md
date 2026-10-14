@@ -52,7 +52,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 
 ## Nhóm A: Workspace Editor (UC-03, 04, 05, 06)
 
-### [ ] A1. Trạng thái soạn thảo và lưu bản nháp
+### [x] A1. Trạng thái soạn thảo và lưu bản nháp
 - **Mục tiêu:** `useReducer` giữ bản đang soạn, cờ chưa lưu, nút **Lưu bản nháp** (UC-04), cảnh báo khi rời trang chưa lưu, báo lỗi 5a (câu chưa có đáp án đúng) và lỗi lưu có nút thử lại; sao lưu nháp vào trình duyệt khi mất mạng (NFR-03).
 - **File dự kiến:** `components/editor/editorReducer.ts`, `utils/draftStorage.ts`, `components/editor/SaveBar.tsx`, tests.
 - **Phụ thuộc:** F3, F4.
