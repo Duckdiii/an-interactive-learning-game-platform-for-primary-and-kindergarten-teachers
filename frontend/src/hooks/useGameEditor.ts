@@ -141,6 +141,9 @@ export function useGameEditor(game: GameResponse) {
     return []
   }
 
+  /** Kiểm tra bản đang soạn như lúc lưu (dùng cho chơi thử: thiếu dữ liệu thì không mở màn chơi). */
+  const validate = () => validateGame(state.draft, 'save', { baseline: state.baseline })
+
   const saveError = mutation.isError ? parseApiError(mutation.error, viText.editor.save.saveErrorTitle) : null
 
   return {
@@ -155,6 +158,7 @@ export function useGameEditor(game: GameResponse) {
     setTitle: (title: string) => edit({ type: 'setTitle', title }),
     setTopic: (topic: string) => edit({ type: 'setTopic', topic }),
     save,
+    validate,
     restore: () => {
       if (!pendingRestore) return
 

@@ -247,6 +247,39 @@ export const viText = {
       retry: 'Thử lại',
       leaveConfirm: 'Bạn có thay đổi chưa lưu. Rời khỏi trang này, những thay đổi đó có thể bị mất. Bạn vẫn muốn rời đi?',
     },
+    play: {
+      button: 'Chơi thử',
+      panelLabel: 'Màn chơi thử',
+      // UC-03 luồng 2a: nguyên văn theo SRS.
+      invalidData:
+        'Trò chơi chưa đủ dữ liệu hoặc thiếu thông tin bắt buộc để chơi thử. Vui lòng kiểm tra và hoàn thiện nội dung trong màn hình soạn thảo.',
+      invalidTitle: 'Chưa chơi thử được',
+      // UC-03 luồng 3b: nguyên văn theo SRS.
+      resourceError:
+        'Hệ thống gặp sự cố khi tải tài nguyên đồ họa của trò chơi. Vui lòng kiểm tra lại kết nối mạng hoặc cập nhật lại tài nguyên.',
+      resourceErrorTitle: 'Chưa mở được màn chơi thử',
+      loading: 'Đang mở màn chơi thử',
+      exit: 'Thoát',
+      backToEdit: 'Quay lại chỉnh sửa',
+      questionProgress: 'Câu',
+      of: 'trên',
+      retryQuestion: 'Thử lại câu này',
+      nextQuestion: 'Câu tiếp theo',
+      showResult: 'Xem kết quả',
+      correct: 'Đúng rồi!',
+      wrong: 'Chưa đúng. Đáp án đúng đã được đánh dấu trên màn hình.',
+      summaryTitle: 'Kết quả chơi thử',
+      scoreCorrect: 'Đúng',
+      scoreUnit: 'câu',
+      simulatedNote: 'Đây là kết quả mô phỏng của lần chơi thử, không được lưu vào báo cáo học sinh.',
+      playAgain: 'Chơi lại',
+      resultCorrect: 'Đúng',
+      resultWrong: 'Chưa đúng',
+      unsupportedTitle: 'Loại game này chưa hỗ trợ chơi thử',
+      unsupportedDescription:
+        'Hiện chỉ chơi thử được trò chơi Trắc nghiệm và Nối cặp. Bạn vẫn xem được nội dung từng câu ở dưới; chơi thử cho loại này sẽ có sau.',
+      unsupportedListLabel: 'Nội dung các câu hỏi',
+    },
     restore: {
       title: 'Có bản chỉnh sửa chưa lưu trên máy này',
       description: 'Lưu lúc {time}. Bạn muốn tiếp tục từ bản đó không?',

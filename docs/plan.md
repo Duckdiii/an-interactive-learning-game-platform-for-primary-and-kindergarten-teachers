@@ -59,9 +59,9 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** sửa tiêu đề thì hiện "chưa lưu"; lưu thành công hiện đúng câu "Bạn đã lưu bản nháp thành công." và **xóa bản sao lưu**; lỗi giữ nguyên nội dung đang soạn; tải lại trang khôi phục bản nháp sao lưu (có hỏi); `draftStorage` **bọc try/catch** (bị chặn thì bỏ qua), chỉ lưu nội dung game, **không lưu dữ liệu học sinh**.
 - **Kiểm tra:** `vitest` (reducer, draftStorage); ảnh trạng thái lưu, lỗi, 409.
 
-### [ ] A2. Chơi thử (UC-03)
+### [x] A2. Chơi thử (UC-03)
 - **Mục tiêu:** nút **Chơi thử**; QUIZ và MATCHING dùng renderer thật ở chế độ `preview`; loại khác hiện khung "chưa hỗ trợ xem thử" **kèm ảnh tĩnh minh họa loại game đó (`GameTypeCover`, không để trống)** và bản chữ; màn tổng kết mô phỏng ghi rõ "không lưu vào báo cáo học sinh"; thoát giữa chừng, "Quay lại chỉnh sửa"; lỗi 2a khi dữ liệu thiếu.
-- **File dự kiến:** `components/editor/PlayTestPanel.tsx`, `components/editor/playTestRegistry.ts` (bảng loại game đến renderer), `PlayTestSummary.tsx`, tests.
+- **File dự kiến:** `components/editor/PlayTestPanel.tsx`, `components/editor/play/playTestRegistry.ts` (bảng loại game đến renderer, kèm `QuizPlayTest`/`MatchingPlayTest`), `PlayTestSummary.tsx`, tests.
 - **Phụ thuộc:** F3, F4.
 - **Hoàn thành khi:** chơi hết QUIZ mẫu thấy tổng kết; game thiếu đáp án bị từ chối bằng đúng câu UC-03 2a; loại chưa hỗ trợ không giả lập.
 - **Kiểm tra:** `vitest` (registry, tổng kết); ảnh chơi thử Quiz, Matching, loại chưa hỗ trợ, lỗi.
@@ -209,6 +209,11 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 ---
 
 ## Việc phải làm lại khi điều kiện cho phép
+
+- **Hạn chế đã biết của chơi thử (A2), nằm ở engine `frontend/src/games/` nên chưa sửa trong A2:**
+  - *Cảm ứng:* đã kiểm bằng giả lập chạm của trình duyệt (CDP) ở 390px và 768px, chưa kiểm trên máy thật; cần thử trên một điện thoại và một máy tính bảng thật.
+  - *Cỡ vùng chạm MATCHING trên điện thoại 390px:* sân chơi co theo chiều rộng (hệ số khoảng 0,45) nên thẻ cao khoảng 49px, dưới mức 64px của `CLAUDE.md`; từ khoảng 470px trở lên mới đủ 64px (máy tính bảng ở 768px thẻ cao khoảng 92px). Cần một subtask cho `ResponsiveStage` hoặc `matchingLayout` (bố cục dọc cho màn hẹp hoặc hệ số co tối thiểu).
+  - *Bàn phím:* QUIZ và MATCHING chỉ trả lời được bằng chạm hoặc chuột trên canvas; người chỉ dùng bàn phím chưa chơi thử được (vẫn dùng được nút Thoát). Cần phương án thay thế (nút trả lời ẩn cho trình đọc màn hình) ở engine.
 
 - **Chạy lại `reviewer` cho F4** (khung trang soạn thảo: `pages/WorkspaceEditor.tsx`, `components/editor/*`, `hooks/useGame.ts`, `utils/questionSummary.ts`). Lần chạy ngày 2026-10-14 lỗi 529 (máy chủ quá tải) ba lần liên tiếp nên F4 mới chỉ được tự rà. Tối thiểu chạy lại ở cuối nhóm A, gộp với review của các subtask A.
 

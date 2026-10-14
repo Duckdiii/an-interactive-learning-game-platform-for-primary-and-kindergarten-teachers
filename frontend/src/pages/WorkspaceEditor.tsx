@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Suspense, lazy, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import ButtonLink from '../components/ButtonLink'
@@ -7,6 +7,7 @@ import DraftRestoreNotice from '../components/editor/DraftRestoreNotice'
 import EditorLayout from '../components/editor/EditorLayout'
 import type { EditorPane } from '../components/editor/EditorLayout'
 import GameInfoForm from '../components/editor/GameInfoForm'
+import PlayTestBoundary from '../components/editor/PlayTestBoundary'
 import QuestionList from '../components/editor/QuestionList'
 import SaveBar from '../components/editor/SaveBar'
 import ErrorNotice from '../components/ui/ErrorNotice'
@@ -34,6 +35,9 @@ import { summarizeQuestions } from '../utils/questionSummary'
 import { formatRelativeTime } from '../utils/relativeTime'
 
 const text = viText.editor
+
+// Màn chơi thử kéo theo renderer Canvas (react-konva): chỉ tải khi giáo viên bấm "Chơi thử" để trang soạn thảo mở nhanh.
+const loadPlayTestPanel = () => import('../components/editor/PlayTestPanel')
 
 // Thẻ thông báo cho các trạng thái không có game để soạn (chưa chọn, không tìm thấy): tiêu đề h1 + lối về.
 function EditorMessage({ title, description }: { title: string; description: string }) {
@@ -74,6 +78,11 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const { draft } = editor
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
+  const [playing, setPlaying] = useState(false)
+  // `lazy` ghi nhớ cả lần tải LỖI: muốn thử lại sau khi mạng ổn lại phải dựng `lazy` mới, nên tạo lại mỗi lần thoát khỏi màn chơi thử.
+  const [PlayTestPanel, setPlayTestPanel] = useState(() => lazy(loadPlayTestPanel))
+  // Đã bấm "Chơi thử" mà dữ liệu chưa đủ: lỗi được tính lại theo từng lần sửa để sửa xong là hết.
+  const [playAttempted, setPlayAttempted] = useState(false)
   const summaries = useMemo(() => summarizeQuestions(draft), [draft])
   const questionsWithIssues = useMemo(
     () => new Set(editor.issues.map((issue) => issue.questionIndex).filter((value) => value !== null)),
@@ -102,6 +111,33 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     const first = editor.save().find((issue) => issue.questionIndex === null)
 
     if (first) focusField(first.field === 'metadata.topic' ? 'game-topic' : 'game-title')
+  }
+
+  const playIssues = playAttempted ? editor.validate() : []
+
+  const startPlay = () => {
+    setPlayAttempted(true)
+
+    // UC-03 luồng 2a: dữ liệu chưa đủ thì không mở màn chơi thử, giữ giáo viên ở màn soạn thảo.
+    const found = editor.validate()
+
+    if (found.length > 0) {
+      const first = found.find((issue) => issue.questionIndex === null)
+
+      if (first) focusField(first.field === 'metadata.topic' ? 'game-topic' : 'game-title')
+
+      return
+    }
+
+    setPlaying(true)
+  }
+
+  const exitPlay = () => {
+    setPlaying(false)
+    setPlayTestPanel(() => lazy(loadPlayTestPanel))
+    setPlayAttempted(false)
+    // Trở về đúng nút đã bấm để người dùng bàn phím không mất vị trí.
+    focusField('play-test-button')
   }
 
   const choose = (next: number) => {
@@ -166,72 +202,103 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
         </div>
       </header>
 
-      {editor.pendingRestore ? (
-        <DraftRestoreNotice
-          draft={editor.pendingRestore}
-          serverUpdatedAt={game.updatedAt}
-          onRestore={() => {
-            editor.restore()
-            focusField('game-title')
-          }}
-          onDiscard={() => {
-            editor.discardRestore()
-            focusField('game-title')
-          }}
-        />
-      ) : null}
+      {playing ? (
+        <PlayTestBoundary onExit={exitPlay}>
+          <Suspense
+            fallback={
+              <div role="status">
+                <LoadingSpinner label={text.play.loading} />
+              </div>
+            }
+          >
+            <PlayTestPanel game={editor.draft} onExit={exitPlay} />
+          </Suspense>
+        </PlayTestBoundary>
+      ) : (
+        <>
+          {editor.pendingRestore ? (
+            <DraftRestoreNotice
+              draft={editor.pendingRestore}
+              serverUpdatedAt={game.updatedAt}
+              onRestore={() => {
+                editor.restore()
+                focusField('game-title')
+              }}
+              onDiscard={() => {
+                editor.discardRestore()
+                focusField('game-title')
+              }}
+            />
+          ) : null}
 
-      <SaveBar
-        dirty={editor.dirty}
-        saving={editor.saving}
-        saved={editor.savedNotice}
-        isPublished={isPublished}
-        onSave={handleSave}
-      />
+          <SaveBar
+            dirty={editor.dirty}
+            saving={editor.saving}
+            saved={editor.savedNotice}
+            isPublished={isPublished}
+            onSave={handleSave}
+            onPlayTest={startPlay}
+          />
 
-      {editor.issues.length > 0 ? (
-        <ErrorNotice
-          title={saveText.invalidTitle}
-          message={editor.issueSummary ?? ''}
-          action={
-            <ul className="list-disc space-y-1 pl-5 text-base">
-              {editor.issues.map((issue) => (
-                <li key={`${issue.questionIndex}-${issue.field}-${issue.code}`}>{issue.message}</li>
-              ))}
-            </ul>
-          }
-        />
-      ) : null}
+          {playIssues.length > 0 ? (
+            <ErrorNotice
+              title={text.play.invalidTitle}
+              message={text.play.invalidData}
+              action={
+                <ul className="list-disc space-y-1 pl-5 text-base">
+                  {playIssues.map((issue) => (
+                    <li key={`${issue.questionIndex}-${issue.field}-${issue.code}`}>{issue.message}</li>
+                  ))}
+                </ul>
+              }
+            />
+          ) : null}
 
-      {editor.saveError ? (
-        <ErrorNotice
-          title={saveText.saveErrorTitle}
-          message={conflict ? saveText.conflict : `${editor.saveError.message} ${saveText.keptNote}`}
-          action={
-            conflict ? null : (
-              <Button type="button" onClick={editor.save} disabled={editor.saving}>
-                {saveText.retry}
-              </Button>
-            )
-          }
-        />
-      ) : null}
+          {editor.issues.length > 0 ? (
+            <ErrorNotice
+              title={saveText.invalidTitle}
+              message={editor.issueSummary ?? ''}
+              action={
+                <ul className="list-disc space-y-1 pl-5 text-base">
+                  {editor.issues.map((issue) => (
+                    <li key={`${issue.questionIndex}-${issue.field}-${issue.code}`}>{issue.message}</li>
+                  ))}
+                </ul>
+              }
+            />
+          ) : null}
 
-      <GameInfoForm
-        metadata={draft.metadata}
-        issues={editor.issues}
-        disabled={Boolean(editor.pendingRestore)}
-        onTitleChange={editor.setTitle}
-        onTopicChange={editor.setTopic}
-      />
+          {editor.saveError ? (
+            <ErrorNotice
+              title={saveText.saveErrorTitle}
+              message={conflict ? saveText.conflict : `${editor.saveError.message} ${saveText.keptNote}`}
+              action={
+                conflict ? null : (
+                  <Button type="button" onClick={editor.save} disabled={editor.saving}>
+                    {saveText.retry}
+                  </Button>
+                )
+              }
+            />
+          ) : null}
 
-      <EditorLayout
-        pane={pane}
-        onPaneChange={setPane}
-        questionCount={items.length}
-        list={<QuestionList items={items} selectedIndex={index} onSelect={choose} />}
-        preview={preview}
-      />
+          <GameInfoForm
+            metadata={draft.metadata}
+            issues={editor.issues}
+            disabled={Boolean(editor.pendingRestore)}
+            onTitleChange={editor.setTitle}
+            onTopicChange={editor.setTopic}
+          />
+
+          <EditorLayout
+            pane={pane}
+            onPaneChange={setPane}
+            questionCount={items.length}
+            list={<QuestionList items={items} selectedIndex={index} onSelect={choose} />}
+            preview={preview}
+          />
+        </>
+      )}
     </div>
   )
 }

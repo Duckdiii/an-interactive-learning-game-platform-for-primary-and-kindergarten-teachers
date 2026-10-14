@@ -9,11 +9,12 @@ interface SaveBarProps {
   saved: boolean
   isPublished: boolean
   onSave: () => void
+  onPlayTest: () => void
 }
 
 // Thanh lưu: trạng thái bằng chữ (không chỉ bằng màu) và nút Lưu bản nháp. Câu xác nhận nằm trong vùng role="status" để
 // trình đọc màn hình đọc ra khi vừa lưu xong.
-export default function SaveBar({ dirty, saving, saved, isPublished, onSave }: SaveBarProps) {
+export default function SaveBar({ dirty, saving, saved, isPublished, onSave, onPlayTest }: SaveBarProps) {
   const text = viText.editor.save
   const status = saving ? text.saving : dirty ? text.unsaved : text.allSaved
 
@@ -33,9 +34,15 @@ export default function SaveBar({ dirty, saving, saved, isPublished, onSave }: S
           {saved ? (isPublished ? text.savedPublished : text.savedDraft) : ''}
         </p>
       </div>
-      <Button type="button" onClick={onSave} disabled={saving || !dirty} className="sm:min-w-44">
-        {saving ? text.saving : text.button}
-      </Button>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button id="play-test-button" type="button" variant="secondary" onClick={onPlayTest}>
+          <Icon name="play" className="mr-2 h-4 w-4" />
+          {viText.editor.play.button}
+        </Button>
+        <Button type="button" onClick={onSave} disabled={saving || !dirty} className="sm:min-w-44">
+          {saving ? text.saving : text.button}
+        </Button>
+      </div>
     </div>
   )
 }

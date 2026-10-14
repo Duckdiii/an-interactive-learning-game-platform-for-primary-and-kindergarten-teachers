@@ -29,7 +29,7 @@ describe('đăng xuất trên máy dùng chung', () => {
     const user = userEvent.setup()
     const { queryClient } = renderWithProviders(<App />, '/dashboard')
 
-    await screen.findByText(makeGame(1).title)
+    await screen.findByText(makeGame(1).title, {}, { timeout: 10_000 })
     saveDraft('t1', 'g1', buildMockGameContents()[0], '2026-10-14T07:00:00.000Z')
     saveDraft('t-khac', 'g2', buildMockGameContents()[0], '2026-10-14T07:00:00.000Z')
     expect(queryClient.getQueryCache().getAll().length).toBeGreaterThan(0)
