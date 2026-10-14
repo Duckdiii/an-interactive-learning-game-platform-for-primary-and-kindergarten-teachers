@@ -5,6 +5,7 @@ import { getMockGame, resetMockGames, setMockGameLocked } from '../services/mock
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import { clearDraft, loadDraft, saveDraft } from '../utils/draftStorage'
+import { storeSession } from '../utils/authStorage'
 import { toContent } from '../utils/gameContent'
 import WorkspaceEditor from './WorkspaceEditor'
 
@@ -359,5 +360,40 @@ describe('trình soạn thảo: các lỗi tinh vi (nhận xét review A1)', () 
 
     await waitFor(() => expect(loadDraft(OWNER, DRAFT_ID)?.content.metadata.title).toMatch(/ab$/))
     expect(loadDraft(OWNER, DRAFT_ID)?.baseUpdatedAt).toBe(opened)
+  })
+})
+
+describe('trình soạn thảo: máy dùng chung ở trường', () => {
+  it('phiên chưa có mã giáo viên thì KHÔNG sao lưu và không hỏi khôi phục, nhưng vẫn sửa và lưu được', async () => {
+    const user = userEvent.setup()
+
+    storeSession({ email: 'lan@truong.edu.vn', fullName: 'Lan' }, 'token', 'refresh')
+    // Dù có sẵn một bản sao lưu cùng khóa theo email, cũng không được dùng tới.
+    localStorage.setItem(`ai-game:editor-draft:lan@truong.edu.vn:${DRAFT_ID}`, 'x')
+    await openLoaded(DRAFT_ID)
+    await user.type(titleBox(), 'abc')
+    await new Promise((resolve) => setTimeout(resolve, 800))
+
+    const draftKeys = Object.keys(localStorage).filter((key) => key.startsWith('ai-game:editor-draft'))
+
+    expect(draftKeys).toEqual([`ai-game:editor-draft:lan@truong.edu.vn:${DRAFT_ID}`])
+    expect(localStorage.getItem(draftKeys[0])).toBe('x')
+    expect(screen.queryByRole('heading', { name: 'Có bản chỉnh sửa chưa lưu trên máy này' })).not.toBeInTheDocument()
+
+    await user.click(saveButton())
+
+    expect(await screen.findByText('Bạn đã lưu bản nháp thành công.')).toBeInTheDocument()
+  })
+
+  it('giáo viên B đăng nhập sau giáo viên A không thấy bản sao lưu của A (kể cả khi A chưa đăng xuất sạch)', async () => {
+    const content = toContent(getMockGame(DRAFT_ID))
+
+    // A (tA) để lại bản sao lưu; B (t1, do loginAsTeacher) mở đúng game đó.
+    saveDraft('tA', DRAFT_ID, { ...content, metadata: { ...content.metadata, title: 'Của cô A' } }, getMockGame(DRAFT_ID).updatedAt)
+    await openLoaded(DRAFT_ID)
+
+    expect(screen.queryByRole('heading', { name: 'Có bản chỉnh sửa chưa lưu trên máy này' })).not.toBeInTheDocument()
+    expect(titleBox()).toHaveValue(content.metadata.title)
+    expect(loadDraft('tA', DRAFT_ID)).not.toBeNull()
   })
 })

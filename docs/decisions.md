@@ -28,6 +28,9 @@ Mỗi dòng: **quyết định**, lý do. Tất cả mục dưới đây đã đ
 | 2026-10-14 | **Duyệt cài `qrcode.react`** cho subtask B2 | Bạn duyệt (đề xuất 13); thư viện đã nằm trong danh sách duyệt sẵn của `CLAUDE.md` |
 | 2026-10-14 | Đường dẫn mới: `/rooms/:sessionId`, `/results/:sessionId`; giữ `/workspace/editor?gameId=` | Bạn đồng ý (đề xuất 14); không phá liên kết hiện có |
 | 2026-10-14 | Tạo nhiều game từ bước đề xuất: một game thì mở trình soạn thảo, nhiều game thì về "Trò chơi của tôi". **Các game vừa tạo có đánh dấu "Mới"** ở trang "Trò chơi của tôi" | Bạn đồng ý (đề xuất 16) và thêm đánh dấu "Mới" để giáo viên thấy ngay game vừa sinh |
+| 2026-10-14 | **Sao lưu nháp luôn gắn với MÃ giáo viên** (`teacherId`); chưa có mã thì **không sao lưu và không khôi phục**; **xóa sạch mọi bản sao lưu khi đăng xuất**, đồng thời xóa bộ nhớ đệm truy vấn (danh sách game, game đang mở). Khóa bộ nhớ đệm dùng mã giáo viên (hoặc email khi phiên cũ chưa có mã); chưa đăng nhập thì truy vấn không chạy, không còn khóa chung `anonymous` | Bạn yêu cầu (máy tính ở trường dùng chung); mục 11 của review A1 |
+| 2026-10-14 | **Phiên hết hạn (401) KHÔNG xóa bản sao lưu** (để giáo viên đăng nhập lại còn khôi phục công việc), nhưng **bản sao lưu của người khác bị xóa khi có người đăng nhập** và mọi bản bị xóa khi đăng xuất. Hệ quả chấp nhận: bản của A nằm lại trên máy (đọc được bằng devtools) từ lúc hết hạn tới khi có người đăng nhập hoặc đăng xuất; và nếu B đăng nhập trước khi A kịp quay lại thì A mất bản sao lưu đó. Việc ghi sao lưu bị chặn khi phiên đã hết (dọn dẹp lúc rời trang không ghi lại sau đăng xuất, kể cả khi đăng xuất ở tab khác). Phiên thiếu cả mã giáo viên lẫn email bị coi là chưa đăng nhập | Nhận xét review (máy tính ở trường dùng chung: ưu tiên riêng tư hơn tiện lợi) |
+| 2026-10-14 | **Nút Quay lại của trình duyệt không bị chặn** khi còn thay đổi chưa lưu vì ứng dụng dùng `BrowserRouter` (không có `useBlocker`). Đã bù bằng cảnh báo khi đóng tab hoặc bấm liên kết trong ứng dụng, cùng bản sao lưu tự động khôi phục được. Cân nhắc chuyển data router sau (xem Backlog) | Bạn ghi nhận (mục 3 phản hồi A1); đổi router ngoài phạm vi A1 |
 
 ## Backlog
 
@@ -36,6 +39,7 @@ Mỗi dòng: **quyết định**, lý do. Tất cả mục dưới đây đã đ
 - **Chia đội thủ công và học sinh tự chọn đội** (cần giao diện học sinh).
 - **Cổng STOMP thật** (cần tài liệu message format từ backend).
 - **Trường thống kê theo câu** ở `SessionResults` (cần backend bổ sung).
+- **Chuyển sang data router (`createBrowserRouter`) để chặn được nút Quay lại của trình duyệt** khi còn thay đổi chưa lưu (`useBlocker`); hiện chưa làm vì đổi cách khởi tạo router ảnh hưởng toàn ứng dụng.
 
 ## Danh sách lệch contract cần nhóm xử lý (tích lũy)
 
@@ -45,3 +49,4 @@ Mỗi dòng: **quyết định**, lý do. Tất cả mục dưới đây đã đ
 4. `SessionResults` thiếu thống kê theo câu; `GET .../interactions` chưa được xác nhận. **Backend bổ sung.**
 5. Tài liệu WebSocket Message Format chưa viết. **Backend cung cấp.**
 6. **Đã xử lý (2026-10-14):** `GameDefaults` của Backend đặt thời gian 90 × 1,5 = 135 giây cho MEMORY_CARD mầm non: hợp lệ theo DSL (5 đến 600 giây, mọi loại game) nhưng vượt 120 giây của SRS. Giao diện giờ phân biệt hai nguồn: giá trị Backend sinh ra mà giáo viên chưa sửa chỉ kiểm theo DSL; giá trị giáo viên nhập hoặc sửa phải trong 10 đến 120 giây (`validateGame(game, mode, { baseline })`, ghép câu theo `id`). Nhóm vẫn nên thống nhất lại SRS cho khớp DSL; khi đó chỉ cần đổi `QUESTION_LIMITS`.
+7. **Khóa lạc quan khi lưu game (cần Backend hỗ trợ).** Hiện `PUT /games/{id}` ghi đè bản mới nhất: hai tab hoặc hai máy cùng sửa một game thì lần lưu sau âm thầm đè lần lưu trước. Backend cần trả `updatedAt` (hoặc `version`) trong `GET`/`PUT`, nhận lại giá trị đó khi lưu và trả `409 CONFLICT` kèm mã riêng khi bản trên máy chủ đã khác. Giao diện đã xử lý 409 (giữ nguyên nội dung đang soạn); khi Backend sẵn sàng chỉ cần gửi kèm mốc phiên bản và thêm thông báo "Bản này đã được sửa ở nơi khác" (nút tải bản mới, hoặc giữ bản của mình), không phải làm lại luồng lưu. **Thêm vào danh sách yêu cầu cho nhóm Backend.**

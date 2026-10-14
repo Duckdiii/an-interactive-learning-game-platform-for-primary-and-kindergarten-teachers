@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { getGame } from '../services/gameService'
-import { useAuth } from './useAuth'
+import { useTeacherIdentity } from './useTeacherIdentity'
 
 // Mở game: 404 và các lỗi 4xx khác là kết quả chắc chắn (thử lại không đổi được), quá hạn thì thử lại chỉ làm giáo viên chờ
 // gấp đôi. Chỉ lỗi mạng hoặc 5xx mới thử lại một lần.
@@ -19,13 +19,12 @@ export function shouldRetryGame(failureCount: number, error: unknown) {
 export const gameQueryKey = (owner: string, gameId: string | null) => ['game', owner, gameId] as const
 
 export function useGame(gameId: string | null) {
-  const { user } = useAuth()
-  const owner = user?.teacherId ?? user?.email ?? 'anonymous'
+  const { cacheOwner } = useTeacherIdentity()
 
   return useQuery({
-    queryKey: gameQueryKey(owner, gameId),
+    queryKey: gameQueryKey(cacheOwner ?? '', gameId),
     queryFn: () => getGame(gameId ?? ''),
-    enabled: Boolean(gameId),
+    enabled: Boolean(gameId) && cacheOwner !== null,
     retry: shouldRetryGame,
   })
 }

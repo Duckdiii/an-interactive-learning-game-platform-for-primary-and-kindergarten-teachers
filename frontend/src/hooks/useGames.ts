@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { listGames } from '../services/gamesService'
 import type { GameSummary } from '../types/game-summary.types'
-import { useAuth } from './useAuth'
+import { useTeacherIdentity } from './useTeacherIdentity'
 
 // Mặc định react-query thử lại 3 lần (hơn 7 giây mới báo lỗi). Lệnh đọc danh sách chỉ thử lại 1 lần, và không thử
 // lại khi đã quá hạn (máy chủ treo): thử lại chỉ làm giáo viên chờ gấp đôi mà hiếm khi có kết quả khác.
@@ -24,12 +24,13 @@ const NO_FILTERS = { subject: '', gradeLevel: '', status: '' }
 // Khóa truy vấn có danh tính giáo viên: máy dùng chung ở trường, cô B đăng nhập sau cô A không bao giờ thấy danh sách
 // (kèm mã chơi) còn trong bộ nhớ đệm của cô A.
 export function useGames() {
-  const { user } = useAuth()
-  const owner = user?.teacherId ?? user?.email ?? 'anonymous'
+  const { cacheOwner } = useTeacherIdentity()
 
   return useQuery({
-    queryKey: gamesQueryKey(owner),
+    queryKey: gamesQueryKey(cacheOwner ?? ''),
     queryFn: () => listGames(NO_FILTERS),
+    // Chưa biết là ai thì không tải: không có khóa bộ nhớ đệm chung cho "người lạ".
+    enabled: cacheOwner !== null,
     retry: shouldRetryGames,
   })
 }

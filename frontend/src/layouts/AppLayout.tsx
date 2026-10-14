@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, useLocation, useNavigationType } from 'react-router-dom'
 import Icon from '../components/ui/Icon'
@@ -23,8 +24,14 @@ const navigationItems: ReadonlyArray<{
 
 export default function AppLayout() {
   const { user, logout } = useAuth()
+  const queryClient = useQueryClient()
   const location = useLocation()
   const mainRef = useRef<HTMLElement>(null)
+  // Đăng xuất cũng xóa bộ nhớ đệm truy vấn (danh sách game, game đang mở): máy dùng chung không giữ dữ liệu của người trước.
+  const handleLogout = () => {
+    logout()
+    queryClient.clear()
+  }
   const displayName = user?.fullName || user?.email || viText.layout.fallbackUser
 
   // Sang trang mới (trong ứng dụng) thì đưa tiêu điểm về nội dung chính và cuộn lên đầu: người dùng bàn phím và trình
@@ -100,7 +107,7 @@ export default function AppLayout() {
             </div>
             <button
               type="button"
-              onClick={logout}
+              onClick={handleLogout}
               className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-ink/15 bg-white px-4 text-base font-semibold text-ink-soft transition hover:border-brand hover:text-brand-strong"
             >
               <Icon name="logout" />
@@ -116,7 +123,7 @@ export default function AppLayout() {
           <Avatar name={displayName} />
           <button
             type="button"
-            onClick={logout}
+            onClick={handleLogout}
             aria-label={viText.layout.signOut}
             className="grid h-11 w-11 place-items-center rounded-xl border-2 border-ink/15 text-ink-soft transition hover:border-brand hover:text-brand-strong"
           >

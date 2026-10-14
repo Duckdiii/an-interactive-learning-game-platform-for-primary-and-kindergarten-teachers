@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildMockGameContents } from '../services/mock/gameFixtures'
-import { clearDraft, loadDraft, saveDraft } from './draftStorage'
+import { clearAllDrafts, clearDraft, clearDraftsExcept, loadDraft, saveDraft } from './draftStorage'
 
 const content = buildMockGameContents()[0]
 
@@ -65,5 +65,78 @@ describe('draftStorage', () => {
 
     expect(Object.keys(JSON.parse(raw)).sort()).toEqual(['baseUpdatedAt', 'content', 'savedAt'])
     expect(raw).not.toMatch(/participant|nickname|sessionId|studentId/i)
+  })
+})
+
+describe('draftStorage: gắn với mã giáo viên và xóa khi đăng xuất', () => {
+  it('chưa có mã giáo viên (null, undefined, rỗng) thì không lưu, không đọc, không xóa gì', () => {
+    saveDraft('t1', 'g1', content, '2026-10-14T07:00:00.000Z')
+
+    for (const owner of [null, undefined, '', '   ']) {
+      expect(saveDraft(owner, 'g1', content, '2026-10-14T07:00:00.000Z'), String(owner)).toBe(false)
+      expect(loadDraft(owner, 'g1'), String(owner)).toBeNull()
+      clearDraft(owner, 'g1')
+    }
+
+    // Không có khóa lạ nào được tạo, và bản của giáo viên thật không bị đụng tới.
+    expect(localStorage.length).toBe(1)
+    expect(loadDraft('t1', 'g1')).not.toBeNull()
+  })
+
+  it('clearAllDrafts xóa bản sao lưu của MỌI giáo viên và game, nhưng giữ nguyên khóa khác', () => {
+    saveDraft('tA', 'g1', content, '2026-10-14T07:00:00.000Z')
+    saveDraft('tA', 'g2', content, '2026-10-14T07:00:00.000Z')
+    saveDraft('tB', 'g1', content, '2026-10-14T07:00:00.000Z')
+    localStorage.setItem('accessToken', 'giu-nguyen')
+
+    clearAllDrafts()
+
+    expect(loadDraft('tA', 'g1')).toBeNull()
+    expect(loadDraft('tA', 'g2')).toBeNull()
+    expect(loadDraft('tB', 'g1')).toBeNull()
+    expect(localStorage.getItem('accessToken')).toBe('giu-nguyen')
+  })
+
+  it('clearAllDrafts không văng lỗi khi trình duyệt chặn lưu trữ', () => {
+    vi.spyOn(Storage.prototype, 'key').mockImplementation(() => {
+      throw new DOMException('bị chặn', 'SecurityError')
+    })
+    saveDraft('tA', 'g1', content, '2026-10-14T07:00:00.000Z')
+
+    expect(() => clearAllDrafts()).not.toThrow()
+  })
+})
+
+describe('clearDraftsExcept', () => {
+  it('giữ bản sao lưu của giáo viên được chỉ định, xóa của mọi người khác, không đụng khóa khác', () => {
+    saveDraft('tA', 'g1', content, '2026-10-14T07:00:00.000Z')
+    saveDraft('tB', 'g1', content, '2026-10-14T07:00:00.000Z')
+    saveDraft('tB', 'g2', content, '2026-10-14T07:00:00.000Z')
+    localStorage.setItem('accessToken', 'giu-nguyen')
+
+    clearDraftsExcept('tB')
+
+    expect(loadDraft('tA', 'g1')).toBeNull()
+    expect(loadDraft('tB', 'g1')).not.toBeNull()
+    expect(loadDraft('tB', 'g2')).not.toBeNull()
+    expect(localStorage.getItem('accessToken')).toBe('giu-nguyen')
+  })
+
+  it('không rõ người đăng nhập là ai (thiếu mã) thì xóa hết', () => {
+    saveDraft('tA', 'g1', content, '2026-10-14T07:00:00.000Z')
+
+    clearDraftsExcept(undefined)
+
+    expect(loadDraft('tA', 'g1')).toBeNull()
+  })
+
+  it('mã giáo viên là tiền tố của mã khác (t1 và t10) không bị nhầm', () => {
+    saveDraft('t1', 'g1', content, '2026-10-14T07:00:00.000Z')
+    saveDraft('t10', 'g1', content, '2026-10-14T07:00:00.000Z')
+
+    clearDraftsExcept('t1')
+
+    expect(loadDraft('t1', 'g1')).not.toBeNull()
+    expect(loadDraft('t10', 'g1')).toBeNull()
   })
 })

@@ -6,6 +6,7 @@ import { updateGame } from '../services/gameService'
 import type { GameDsl } from '../types/game-dsl.types'
 import type { GameResponse } from '../types/game-response.types'
 import { parseApiError } from '../utils/apiError'
+import { getStoredAccessToken } from '../utils/authStorage'
 import { clearDraft, loadDraft, saveDraft } from '../utils/draftStorage'
 import type { StoredDraft } from '../utils/draftStorage'
 import { deepEqual, toContent } from '../utils/gameContent'
@@ -13,12 +14,16 @@ import { summarizeIssues, validateGame } from '../utils/gameValidation'
 import type { ValidationIssue } from '../utils/gameValidation'
 import { gameQueryKey } from './useGame'
 import { gamesQueryKey } from './useGames'
-import { useAuth } from './useAuth'
+import { useTeacherIdentity } from './useTeacherIdentity'
 
 const BACKUP_DELAY_MS = 500
 
+// Đã đăng xuất (ở tab này hoặc tab khác) thì tuyệt đối không ghi sao lưu: dọn dẹp khi rời trang vẫn chạy sau khi đăng xuất đã xóa
+// sạch, và nếu ghi lại thì nội dung của giáo viên vừa đăng xuất nằm lại trên máy dùng chung.
+const sessionActive = () => getStoredAccessToken() !== null
+
 // Bản sao lưu chỉ đáng hỏi lại khi khác bản đang mở; trùng hoặc không dùng được (đổi loại game) thì bỏ luôn.
-function readRestorable(owner: string, gameId: string, baseline: GameDsl): StoredDraft | null {
+function readRestorable(owner: string | null, gameId: string, baseline: GameDsl): StoredDraft | null {
   const stored = loadDraft(owner, gameId)
 
   if (!stored) return null
@@ -35,8 +40,9 @@ function readRestorable(owner: string, gameId: string, baseline: GameDsl): Store
 // Toàn bộ logic của một phiên soạn thảo (trạng thái bản nháp, kiểm tra trước khi lưu, lưu, sao lưu và khôi phục) để trang chỉ
 // còn lo bố cục. Lưu thất bại KHÔNG bao giờ động tới bản đang soạn.
 export function useGameEditor(game: GameResponse) {
-  const { user } = useAuth()
-  const owner = user?.teacherId ?? user?.email ?? 'anonymous'
+  // `owner` là MÃ giáo viên dùng cho sao lưu (chưa có mã thì không sao lưu); `queryOwner` chỉ để đặt khóa bộ nhớ đệm.
+  const { teacherId: owner, cacheOwner } = useTeacherIdentity()
+  const queryOwner = cacheOwner ?? ''
   const queryClient = useQueryClient()
   const [state, dispatch] = useReducer(editorReducer, game, (loaded) => createEditorState(toContent(loaded)))
   const [attempted, setAttempted] = useState(false)
@@ -56,9 +62,9 @@ export function useGameEditor(game: GameResponse) {
       clearDraft(owner, game.gameId)
       setLastSaveOk(true)
       setAttempted(false)
-      queryClient.setQueryData(gameQueryKey(owner, game.gameId), response)
+      queryClient.setQueryData(gameQueryKey(queryOwner, game.gameId), response)
       // Danh sách "Trò chơi của tôi" có ngày cập nhật và tên: làm mới để khớp bản vừa lưu.
-      void queryClient.invalidateQueries({ queryKey: gamesQueryKey(owner) })
+      void queryClient.invalidateQueries({ queryKey: gamesQueryKey(queryOwner) })
     },
   })
 
@@ -81,7 +87,9 @@ export function useGameEditor(game: GameResponse) {
       return
     }
 
-    const timer = setTimeout(() => saveDraft(owner, game.gameId, state.draft, baseUpdatedAt), BACKUP_DELAY_MS)
+    const timer = setTimeout(() => {
+      if (sessionActive()) saveDraft(owner, game.gameId, state.draft, baseUpdatedAt)
+    }, BACKUP_DELAY_MS)
 
     return () => clearTimeout(timer)
   }, [dirty, pendingRestore, owner, game.gameId, baseUpdatedAt, state.draft, state.baseline])
@@ -91,7 +99,7 @@ export function useGameEditor(game: GameResponse) {
     const flush = () => {
       const current = latest.current
 
-      if (current.dirty && !current.pendingRestore) saveDraft(owner, game.gameId, current.draft, current.baseUpdatedAt)
+      if (current.dirty && !current.pendingRestore && sessionActive()) saveDraft(owner, game.gameId, current.draft, current.baseUpdatedAt)
     }
 
     window.addEventListener('beforeunload', flush)
