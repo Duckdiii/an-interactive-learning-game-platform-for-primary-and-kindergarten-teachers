@@ -440,10 +440,81 @@ describe('khớp luật của Backend (nhận xét review F3)', () => {
     expect(fixtures).toHaveLength(10)
   })
 
-  it('xung đột đã ghi nhận: mặc định 135 giây của Backend (MEMORY_CARD mầm non) vượt giới hạn 120 giây của SRS', () => {
-    // docs/decisions.md: giới hạn lấy giao của SRS và DSL. Nếu nhóm nâng giới hạn (hoặc Backend hạ mặc định) thì sửa test này.
-    expect(has(run('MEMORY_CARD', (q) => (q.timeLimitSeconds = 135)), 'range', 'timeLimitSeconds')).toBe(true)
-    expect(run('MEMORY_CARD', (q) => (q.timeLimitSeconds = 120))).toEqual([])
+  describe('thời gian trả lời: giá trị của Backend chỉ theo DSL (5-600), giá trị giáo viên nhập theo SRS (10-120)', () => {
+    // MEMORY_CARD mầm non: Backend tự đặt 90 x 1,5 = 135 giây (GameDefaults), hợp lệ theo DSL nhưng vượt 120 của SRS.
+    const fromBackend = () => {
+      const game = structuredClone(base('MEMORY_CARD'))
+
+      game.questions.forEach((question) => (question.timeLimitSeconds = 135))
+
+      return game
+    }
+    const timeIssue = (issues: ReturnType<typeof validateGame>) => issues.find((issue) => issue.field === 'timeLimitSeconds')
+
+    it('135 giây còn nguyên như Backend sinh ra thì hợp lệ, lưu nháp và xuất bản đều được', () => {
+      const game = fromBackend()
+
+      expect(validateGame(game, 'save', { baseline: structuredClone(game) })).toEqual([])
+      expect(validateGame(game, 'publish', { baseline: structuredClone(game) })).toEqual([])
+    })
+
+    it('cùng giá trị 135 nhưng không có bản gốc (giáo viên nhập tay) thì bị chặn theo SRS với câu "từ 10 đến 120"', () => {
+      const issue = timeIssue(validateGame(fromBackend(), 'save'))
+
+      expect(issue).toMatchObject({ code: 'range', questionIndex: 0 })
+      expect(issue?.message).toContain('từ 10 đến 120')
+    })
+
+    it('giáo viên sửa giá trị sang số khác ngoài SRS thì bị chặn, kể cả khi bản gốc là 135', () => {
+      const baseline = fromBackend()
+      const edited = structuredClone(baseline)
+
+      edited.questions[0].timeLimitSeconds = 140
+
+      expect(timeIssue(validateGame(edited, 'save', { baseline }))).toMatchObject({ code: 'range', questionIndex: 0 })
+      // Các câu còn lại vẫn nguyên 135 nên không bị báo.
+      expect(validateGame(edited, 'save', { baseline }).filter((issue) => issue.field === 'timeLimitSeconds')).toHaveLength(1)
+    })
+
+    it('giáo viên sửa về số trong SRS thì hợp lệ', () => {
+      const baseline = fromBackend()
+      const edited = structuredClone(baseline)
+
+      edited.questions[0].timeLimitSeconds = 120
+
+      expect(validateGame(edited, 'save', { baseline })).toEqual([])
+    })
+
+    it('giá trị Backend nguyên vẹn nhưng ngoài DSL (4 hoặc 601 giây) vẫn bị chặn, câu báo "từ 5 đến 600"', () => {
+      for (const bad of [4, 601]) {
+        const baseline = structuredClone(base('QUIZ'))
+
+        baseline.questions[0].timeLimitSeconds = bad
+
+        const issue = timeIssue(validateGame(baseline, 'save', { baseline: structuredClone(baseline) }))
+
+        expect(issue, String(bad)).toMatchObject({ code: 'range' })
+        expect(issue?.message).toContain('từ 5 đến 600')
+      }
+    })
+
+    it('câu mới thêm (id không có trong bản gốc) luôn theo SRS', () => {
+      const baseline = structuredClone(base('QUIZ'))
+      const game = structuredClone(baseline)
+
+      ;(game.questions as unknown[]).push({ ...structuredClone(game.questions[0]), id: 'q99', timeLimitSeconds: 200 })
+
+      expect(timeIssue(validateGame(game, 'save', { baseline }))).toMatchObject({ code: 'range', questionIndex: game.questions.length - 1 })
+    })
+
+    it('bản gốc ghép theo id chứ không theo vị trí: đổi chỗ câu hỏi không làm giá trị Backend bị coi là nhập tay', () => {
+      const baseline = fromBackend()
+      const reordered = structuredClone(baseline)
+
+      reordered.questions.reverse()
+
+      expect(validateGame(reordered, 'save', { baseline })).toEqual([])
+    })
   })
 })
 

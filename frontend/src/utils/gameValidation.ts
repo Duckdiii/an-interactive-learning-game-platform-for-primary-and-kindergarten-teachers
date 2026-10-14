@@ -16,7 +16,7 @@ import type {
   VisualClozeQuestion,
   WordScrambleQuestion,
 } from '../types/game-dsl.types'
-import { CLOZE_BLANK, GAME_LIMITS, QUESTION_LIMITS, TYPE_LIMITS } from './questionSpecs'
+import { CLOZE_BLANK, DSL_TIME_LIMIT, GAME_LIMITS, QUESTION_LIMITS, TYPE_LIMITS } from './questionSpecs'
 import type { Range } from './questionSpecs'
 
 // Kiểm tra nội dung game ở máy giáo viên, phản chiếu luật Lớp 1 và 2 của Backend (docs/game-json-dsl-v1.0.0.md mục 5 và 7)
@@ -25,6 +25,12 @@ import type { Range } from './questionSpecs'
 //   - chế độ 'publish' (xuất bản): thêm điều kiện của UC-07 2c, ví dụ SPOT_THE_TARGET phải có vùng đúng trên ảnh.
 
 export type ValidationMode = 'save' | 'publish'
+
+export interface ValidationOptions {
+  // Bản game như Backend trả về (trước khi giáo viên sửa). Giá trị còn y nguyên bản này chỉ phải đúng DSL; giá trị do giáo
+  // viên nhập (khác bản gốc, hoặc không có bản gốc) còn phải đúng giới hạn chặt hơn của SRS. Câu được ghép theo `id`.
+  baseline?: GameDsl
+}
 
 export interface ValidationIssue {
   // Vị trí câu (từ 0); null là lỗi ở cấp cả trò chơi.
@@ -338,7 +344,13 @@ const TYPE_OWNED_COMMON_FIELDS: Readonly<Record<GameType, ReadonlyArray<'audioTe
 }
 
 /** Kiểm tra một câu hỏi (các trường chung và luật của loại game). `index` là vị trí trong game, tính từ 0. */
-export function validateQuestion(gameType: GameType, question: QuestionDsl, index: number, mode: ValidationMode): ValidationIssue[] {
+export function validateQuestion(
+  gameType: GameType,
+  question: QuestionDsl,
+  index: number,
+  mode: ValidationMode,
+  baseline?: QuestionDsl,
+): ValidationIssue[] {
   const c = new Collector(index)
 
   // Dữ liệu từ API cũ hoặc hỏng không được làm trang soạn thảo văng lỗi: thiếu câu hoặc loại lạ thì báo thành lỗi.
@@ -354,7 +366,10 @@ export function validateQuestion(gameType: GameType, question: QuestionDsl, inde
     return c.issues
   }
 
-  checkRange(c, 'timeLimitSeconds', L.timeLimitSeconds, question.timeLimitSeconds, QUESTION_LIMITS.timeLimitSeconds)
+  // Thời gian còn nguyên như Backend sinh ra thì chỉ kiểm theo DSL (5 đến 600), còn lại theo SRS (10 đến 120).
+  const untouchedTime = baseline !== undefined && baseline.timeLimitSeconds === question.timeLimitSeconds
+
+  checkRange(c, 'timeLimitSeconds', L.timeLimitSeconds, question.timeLimitSeconds, untouchedTime ? DSL_TIME_LIMIT : QUESTION_LIMITS.timeLimitSeconds)
   checkRange(c, 'points', L.points, question.points, QUESTION_LIMITS.points)
   // Trường mà luật của loại game đã kiểm (bắt buộc) thì không kiểm lần hai, tránh báo một lỗi hai lần.
   const owned = TYPE_OWNED_COMMON_FIELDS[gameType]
@@ -367,8 +382,9 @@ export function validateQuestion(gameType: GameType, question: QuestionDsl, inde
 }
 
 /** Kiểm tra cả game: thông tin chung, số câu, id các câu và từng câu. Trả mảng rỗng khi hợp lệ. */
-export function validateGame(game: GameDsl, mode: ValidationMode): ValidationIssue[] {
+export function validateGame(game: GameDsl, mode: ValidationMode, options: ValidationOptions = {}): ValidationIssue[] {
   const c = new Collector(null)
+  const baselineById = new Map((options.baseline?.questions ?? []).map((question) => [question?.id, question as QuestionDsl]))
   const meta = game.metadata
 
   checkText(c, 'metadata.title', L.title, meta?.title, GAME_LIMITS.title)
@@ -383,7 +399,7 @@ export function validateGame(game: GameDsl, mode: ValidationMode): ValidationIss
 
   return [
     ...c.issues,
-    ...questions.flatMap((question, index) => validateQuestion(game.gameType, question, index, mode)),
+    ...questions.flatMap((question, index) => validateQuestion(game.gameType, question, index, mode, baselineById.get(question?.id))),
   ]
 }
 

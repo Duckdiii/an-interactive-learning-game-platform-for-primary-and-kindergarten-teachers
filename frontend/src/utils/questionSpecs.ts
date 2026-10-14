@@ -2,9 +2,11 @@
 // giới hạn là sửa ở đây. Nguồn: JSON Schema `backend/src/main/resources/schema/game-dsl/1.0.0/*.schema.json`, SRS (FLD-05..07)
 // và luật Lớp 2 trong `docs/game-json-dsl-v1.0.0.md`.
 //
-// Khi SRS và DSL khác nhau thì lấy GIAO của hai bên (phía khắt khe hơn), xem `docs/decisions.md`:
+// Khi SRS và DSL khác nhau thì lấy GIAO của hai bên (phía khắt khe hơn) cho giá trị GIÁO VIÊN NHẬP, xem `docs/decisions.md`:
 //   - thời gian trả lời: SRS 10 đến 120 giây, DSL 5 đến 600 giây  => 10 đến 120;
 //   - nội dung câu hỏi: SRS tối đa 500 ký tự, DSL tối đa 200       => 200.
+// Giá trị do Backend sinh ra và giáo viên chưa đụng tới (ví dụ 135 giây của MEMORY_CARD mầm non) chỉ phải đúng DSL, vì đó là
+// giới hạn của hợp đồng dữ liệu; giới hạn chặt hơn của SRS chỉ chặn giá trị mới nhập (xem `DSL_TIME_LIMIT`).
 
 export interface Range {
   min: number
@@ -16,6 +18,9 @@ export const GAME_LIMITS = {
   topic: { min: 1, max: 200 },
   questions: { min: 1, max: 20 },
 } as const satisfies Record<string, Range>
+
+/** Thời gian trả lời theo DSL (mọi loại game): giới hạn áp cho giá trị lấy từ Backend mà giáo viên chưa sửa. */
+export const DSL_TIME_LIMIT = { min: 5, max: 600 } as const satisfies Range
 
 export const QUESTION_LIMITS = {
   timeLimitSeconds: { min: 10, max: 120, default: 30 },

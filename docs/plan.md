@@ -208,6 +208,10 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 
 ---
 
+## Việc phải làm lại khi điều kiện cho phép
+
+- **Chạy lại `reviewer` cho F4** (khung trang soạn thảo: `pages/WorkspaceEditor.tsx`, `components/editor/*`, `hooks/useGame.ts`, `utils/questionSummary.ts`). Lần chạy ngày 2026-10-14 lỗi 529 (máy chủ quá tải) ba lần liên tiếp nên F4 mới chỉ được tự rà. Tối thiểu chạy lại ở cuối nhóm A, gộp với review của các subtask A.
+
 ## Giai đoạn sau (đã thống nhất làm sau task này)
 
 - **Form sửa tay cho 8 loại game còn lại** (AUDIO_VISUAL_MATCH, ODD_ONE_OUT, SPOT_THE_TARGET, WORD_SCRAMBLE, MEMORY_CARD, DRAG_DROP, ORDERING, VISUAL_CLOZE): mỗi loại thêm mô tả trường vào `questionSpecs` và một thành phần form nhỏ nhờ khung ở A3.
