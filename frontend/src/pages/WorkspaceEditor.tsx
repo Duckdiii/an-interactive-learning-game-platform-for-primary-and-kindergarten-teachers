@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useMemo, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import ButtonLink from '../components/ButtonLink'
@@ -45,10 +45,17 @@ const loadPlayTestPanel = () => playTestPanelLoader.load()
 
 // Thẻ thông báo cho các trạng thái không có game để soạn (chưa chọn, không tìm thấy): tiêu đề h1 + lối về.
 function EditorMessage({ title, description }: { title: string; description: string }) {
+  const headingRef = useRef<HTMLHeadingElement>(null)
+
+  // Từ khung chờ (role=status) chuyển sang thông báo này thì trình đọc màn hình không nghe gì: đưa tiêu điểm vào tiêu đề.
+  useEffect(() => headingRef.current?.focus({ preventScroll: true }), [])
+
   return (
     <section className="rounded-3xl border-2 border-dashed border-ink/20 bg-white p-6 sm:p-10">
       <LetterTiles tiles={MIXED_TILES} />
-      <h1 className="mt-8 text-2xl font-extrabold sm:text-3xl">{title}</h1>
+      <h1 ref={headingRef} tabIndex={-1} className="mt-8 text-2xl font-extrabold focus:outline-none sm:text-3xl">
+        {title}
+      </h1>
       <p className="mt-3 max-w-2xl text-base leading-7 text-ink-soft">{description}</p>
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <ButtonLink to={ROUTES.workspace}>{text.backToGames}</ButtonLink>
@@ -106,6 +113,8 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     hasIssue: issuesByQuestion.has(position),
   }))
   const index = Math.min(selected, Math.max(0, items.length - 1))
+
+  if (selected !== index) setSelected(index)
   const current = items[index]
   const theme = subjectTheme(game.metadata.subject)
   const isPublished = game.status === 'PUBLISHED'
@@ -155,14 +164,25 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     setSelected(next)
     // Điện thoại chỉ hiện một khung: chọn câu xong thì chuyển sang xem câu đó.
     setPane('preview')
+    // Nút vừa bấm nằm trong khung danh sách sắp bị ẩn: đưa tiêu điểm sang khung mới để người dùng bàn phím không rơi về đầu trang.
+    // Trên máy tính khung danh sách vẫn hiện nên giữ nguyên tiêu điểm.
+    requestAnimationFrame(() => {
+      const list = document.getElementById('editor-pane-list')
+
+      if (list && getComputedStyle(list).display === 'none') document.getElementById('editor-pane-preview')?.focus()
+    })
   }
 
   const previewCard = (
     <div className="space-y-4 rounded-2xl border-2 border-ink/10 bg-white p-4 sm:p-6">
       <h2 className="text-lg font-extrabold">{text.previewHeading}</h2>
       {current ? (
-        <div aria-live="polite">
-          <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
+        <div>
+          {/* Chỉ báo khi ĐỔI CÂU, không đọc lại nội dung mỗi lần gõ. */}
+          <p role="status" className="sr-only">
+            {text.questionLabel} {index + 1}
+          </p>
+          <p aria-hidden="true" className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
             {text.questionLabel} {index + 1}
           </p>
           <p className="mt-1 [overflow-wrap:anywhere] text-xl font-bold leading-8">{current.summary}</p>
@@ -363,9 +383,11 @@ export default function WorkspaceEditor() {
           message={parsed.message}
           action={
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button onClick={() => void query.refetch()} disabled={query.isFetching}>
-                {text.retry}
-              </Button>
+              {parsed.code === 'FORBIDDEN' ? null : (
+                <Button onClick={() => void query.refetch()} disabled={query.isFetching}>
+                  {text.retry}
+                </Button>
+              )}
               <ButtonLink to={ROUTES.workspace} variant="secondary">
                 {text.backToGames}
               </ButtonLink>

@@ -351,8 +351,8 @@ describe('chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đang chạy
     await waitUntilApplied()
 
     // Còn {3, Bốn quả}: chữ vừa gõ ở C nay là đáp án B.
+    await waitFor(() => expect(optionBox('B')).toHaveValue('Bốn quả'), { timeout: 4000 })
     expect(optionBox('A')).toHaveValue('3')
-    expect(optionBox('B')).toHaveValue('Bốn quả')
   })
 })
 

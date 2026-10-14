@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
+import type { KeyboardEvent, ReactNode } from 'react'
 import { viText } from '../../constants/viText'
+import { useIsDesktop } from '../../hooks/useIsDesktop'
 
 export type EditorPane = 'list' | 'preview'
 
@@ -17,14 +18,37 @@ const PANES: ReadonlyArray<{ id: EditorPane; label: string }> = [
   { id: 'preview', label: viText.editor.previewTab },
 ]
 
-// Khung hai phần của trình soạn thảo. Máy tính (lg trở lên): danh sách câu hỏi bên trái, vùng xem bên phải, cùng hiện.
-// Điện thoại: hai tab, mỗi lúc một phần để không phải cuộn dài và mỗi nút đủ lớn.
+// Khung hai phần của trình soạn thảo. Máy tính (lg trở lên): danh sách câu hỏi bên trái, vùng xem bên phải, cùng hiện và là hai vùng
+// thường (không có tab). Điện thoại: hai tab theo mẫu WAI-ARIA (mũi tên Trái/Phải, Home, End), mỗi lúc một phần.
 export default function EditorLayout({ pane, onPaneChange, list, preview, questionCount }: EditorLayoutProps) {
   const text = viText.editor
+  const isDesktop = useIsDesktop()
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const current = PANES.findIndex((item) => item.id === pane)
+    const target =
+      event.key === 'ArrowRight' ? (current + 1) % PANES.length
+        : event.key === 'ArrowLeft' ? (current - 1 + PANES.length) % PANES.length
+          : event.key === 'Home' ? 0
+            : event.key === 'End' ? PANES.length - 1
+              : -1
+
+    if (target < 0) return
+
+    event.preventDefault()
+    onPaneChange(PANES[target].id)
+    requestAnimationFrame(() => document.getElementById(`editor-tab-${PANES[target].id}`)?.focus())
+  }
+
+  // Trên máy tính cả hai khung đều hiện và không có tablist, nên không gắn vai trò tab (trình đọc màn hình không thấy tabpanel mồ côi).
+  const panelProps = (id: EditorPane, label: string) =>
+    isDesktop
+      ? { 'aria-label': label }
+      : { role: 'tabpanel' as const, 'aria-labelledby': `editor-tab-${id}` }
 
   return (
     <div>
-      <div role="tablist" aria-label={text.panesLabel} className="mb-4 grid grid-cols-2 gap-2 lg:hidden">
+      <div role="tablist" aria-label={text.panesLabel} onKeyDown={handleKeyDown} className="mb-4 grid grid-cols-2 gap-2 lg:hidden">
         {PANES.map((item) => {
           const selected = pane === item.id
 
@@ -36,6 +60,7 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, questi
               id={`editor-tab-${item.id}`}
               aria-selected={selected}
               aria-controls={`editor-pane-${item.id}`}
+              tabIndex={selected ? 0 : -1}
               onClick={() => onPaneChange(item.id)}
               className={[
                 'min-h-12 rounded-xl border-2 px-4 text-base font-bold transition',
@@ -53,18 +78,18 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, questi
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
         <section
-          role="tabpanel"
           id="editor-pane-list"
-          aria-labelledby="editor-tab-list"
-          className={pane === 'list' ? 'block min-w-0' : 'hidden min-w-0 lg:block'}
+          tabIndex={-1}
+          {...panelProps('list', text.questionsTab)}
+          className={pane === 'list' ? 'block min-w-0 focus:outline-none' : 'hidden min-w-0 focus:outline-none lg:block'}
         >
           {list}
         </section>
         <section
-          role="tabpanel"
           id="editor-pane-preview"
-          aria-labelledby="editor-tab-preview"
-          className={pane === 'preview' ? 'block min-w-0' : 'hidden min-w-0 lg:block'}
+          tabIndex={-1}
+          {...panelProps('preview', text.previewTab)}
+          className={pane === 'preview' ? 'block min-w-0 focus:outline-none' : 'hidden min-w-0 focus:outline-none lg:block'}
         >
           {preview}
         </section>

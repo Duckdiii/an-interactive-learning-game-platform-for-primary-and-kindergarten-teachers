@@ -215,12 +215,32 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
   - *Cỡ vùng chạm MATCHING trên điện thoại 390px:* sân chơi co theo chiều rộng (hệ số khoảng 0,45) nên thẻ cao khoảng 49px, dưới mức 64px của `CLAUDE.md`; từ khoảng 470px trở lên mới đủ 64px (máy tính bảng ở 768px thẻ cao khoảng 92px). Cần một subtask cho `ResponsiveStage` hoặc `matchingLayout` (bố cục dọc cho màn hẹp hoặc hệ số co tối thiểu).
   - *Bàn phím:* QUIZ và MATCHING chỉ trả lời được bằng chạm hoặc chuột trên canvas; người chỉ dùng bàn phím chưa chơi thử được (vẫn dùng được nút Thoát). Cần phương án thay thế (nút trả lời ẩn cho trình đọc màn hình) ở engine.
 
-- **Chạy lại `reviewer` cho F4** (khung trang soạn thảo: `pages/WorkspaceEditor.tsx`, `components/editor/*`, `hooks/useGame.ts`, `utils/questionSummary.ts`). Lần chạy ngày 2026-10-14 lỗi 529 (máy chủ quá tải) ba lần liên tiếp nên F4 mới chỉ được tự rà. Tối thiểu chạy lại ở cuối nhóm A, gộp với review của các subtask A.
+- **Đã chạy lại `reviewer` cho F4 (2026-10-15, không còn lỗi 529)**: không có lỗi cao; các mục trung bình (tab/tabpanel trên máy tính, tiêu điểm khi đổi khung, chính sách thử lại của `useGame`, tóm tắt câu rỗng, 403 không mời thử lại) đã sửa kèm test.
 
 ## Giai đoạn sau (đã thống nhất làm sau task này)
 
 - **Form sửa tay cho 8 loại game còn lại** (AUDIO_VISUAL_MATCH, ODD_ONE_OUT, SPOT_THE_TARGET, WORD_SCRAMBLE, MEMORY_CARD, DRAG_DROP, ORDERING, VISUAL_CLOZE): mỗi loại thêm mô tả trường vào `questionSpecs` và một thành phần form nhỏ nhờ khung ở A3.
 - Renderer chơi thử của 8 loại đó (renderer thuộc engine Canvas, ngoài phạm vi).
+
+### Ước lượng công sức: form sửa chi tiết cho 8 loại còn lại (chưa làm, để chọn thứ tự)
+
+Đơn vị: ngày làm việc của một người, đã gồm test (kèm chèn lỗi), ảnh desktop/mobile, review và sửa theo review. Ước lượng thô theo số trường và luật kiểm tra trong `gameValidation.ts`; mỗi loại cần thêm một mục `QUESTION_FORMS`, một form nhỏ, một file hàm sửa thuần, chữ trong `viText` và test.
+
+| Loại | Trường cần sửa (theo DSL) | Độ phức tạp | Tái dùng được | Phụ thuộc | Ước lượng |
+|---|---|---|---|---|---|
+| MEMORY_CARD | 2 đến 8 cặp, mỗi cặp một `content` (chữ hoặc mô tả hình), không trùng | Thấp | Gần như sao chép `MatchingForm` với một bên | Không (ảnh thẻ thật chờ A5) | 0,5 đến 1 |
+| ODD_ONE_OUT | 3 đến 5 phần tử chữ (mã a..e theo vị trí), chọn đúng một phần tử khác loại, không trùng | Thấp | Cùng mẫu `QuizForm` (khóa ổn định, mã theo vị trí, chọn đáp án đúng) | Không | 0,5 đến 1 |
+| VISUAL_CLOZE | Câu có đúng một chỗ trống `___` (3 đến 200 ký tự), từ đúng, 1 đến 3 từ nhiễu (không trùng), mô tả hình bắt buộc | Thấp đến trung bình | `CheckedTextField`, danh sách từ nhiễu như đáp án `QuizForm` | Cần thêm nút "Chèn chỗ trống" và kiểm tra đúng một chỗ | 1 |
+| WORD_SCRAMBLE | Từ đáp án (2 đến 10 chữ, không dấu cách), các chữ đã xáo (khác thứ tự gốc, đúng các chữ của từ) | Thấp đến trung bình | `CheckedTextField` | Cần hàm xáo chữ có kiểm soát (không trùng thứ tự gốc, từ chỉ một loại chữ, NFC, hoa thường) và nút "Xáo lại" | 1 |
+| AUDIO_VISUAL_MATCH | Lời đọc bắt buộc, hình đúng, 1 đến 3 hình nhiễu (mỗi hình một mô tả, không trùng) | Trung bình | `CommonFieldsForm`, danh sách như đáp án | A5 (mỗi lựa chọn cần ảnh riêng); `ImageChoice` có `imageUrl` | 1 đến 1,5 |
+| ORDERING | 2 đến 6 bước (chữ hoặc mô tả hình), thứ tự ĐÚNG là một hoán vị khác thứ tự hiển thị | Trung bình đến cao | Danh sách có khóa ổn định như `MatchingForm` | Cần giao diện hai khái niệm (thứ tự hiển thị và thứ tự đúng), nút lên/xuống dùng được bằng bàn phím, kiểm tra hoán vị | 2 |
+| DRAG_DROP | 2 đến 4 vùng thả (tên không trùng), 3 đến 8 vật (chữ hoặc hình), mỗi vật thuộc một vùng, mỗi vùng có ít nhất một vật | Trung bình đến cao | Hai danh sách có khóa ổn định; ô chọn vùng cho từng vật | Xóa vùng phải xử lý các vật đang gán; kiểm tra "mỗi vùng ≥ 1 vật" | 2 |
+| SPOT_THE_TARGET | Ảnh nền (bắt buộc), mô tả vật cần tìm, vùng đúng (x, y, bán kính theo tỉ lệ ảnh; chỉ bắt buộc khi xuất bản) | Cao | `CommonFieldsForm`, hiển thị ảnh của A5 | A5 (có ảnh thật mới chọn vùng được), thành phần chọn điểm trên ảnh chạm/chuột kèm cách nhập bằng bàn phím, kiểm tra chế độ xuất bản | 2,5 đến 3 |
+
+**Đề xuất làm trước (3 loại, khoảng 2,5 đến 3 ngày):** MEMORY_CARD, ODD_ONE_OUT, VISUAL_CLOZE. Cả ba rẻ vì dùng lại gần như nguyên mẫu `MatchingForm`/`QuizForm`, không phụ thuộc A5, và phủ thêm ba dạng bài phổ biến cho mầm non và lớp 1 (lật thẻ, tìm vật khác loại, điền từ). Làm xong ba loại này thì WORD_SCRAMBLE là ứng viên kế tiếp; ORDERING, DRAG_DROP, SPOT_THE_TARGET để sau cùng vì phức tạp và (với SPOT_THE_TARGET) cần A5.
+
+Lưu ý: chơi thử cho các loại này cần renderer của engine Canvas (ngoài phạm vi giao diện giáo viên), nên form sửa xong vẫn hiện khung "chưa hỗ trợ chơi thử" cho tới khi engine có renderer.
+
 
 ## Việc ngoài danh sách (hoãn, chờ bạn quyết)
 - **Backlog:** FLD-13 khối giải thích (chờ DSL 1.1.0).

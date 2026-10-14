@@ -1,6 +1,8 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import * as gameService from '../services/gameService'
+import { mockApiError } from '../services/mock/mockErrors'
 import { resetMockGames } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
@@ -61,7 +63,7 @@ describe('trang soạn thảo: mở game', () => {
 
     expect(buttons[1]).toHaveAttribute('aria-current', 'true')
     expect(buttons[0]).not.toHaveAttribute('aria-current')
-    expect(screen.getByText('Câu 2', { selector: 'p' })).toBeInTheDocument()
+    expect(screen.getAllByText('Câu 2', { selector: 'p' }).length).toBeGreaterThan(0)
   })
 
   it('điện thoại: hai tab, chọn câu thì tự chuyển sang tab xem câu', async () => {
@@ -142,5 +144,58 @@ describe('trang soạn thảo: mở game', () => {
       expect(within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')).toHaveLength(3)
       view.unmount()
     }
+  })
+})
+
+describe('trang soạn thảo: tiêu điểm và quyền (nhận xét review F4)', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('điện thoại: chọn câu làm khung danh sách bị ẩn thì tiêu điểm chuyển sang khung vừa hiện', async () => {
+    const user = userEvent.setup()
+    const real = window.getComputedStyle.bind(window)
+
+    // jsdom không có CSS: giả lập khung danh sách đang `display: none` như trên điện thoại sau khi đổi sang tab xem.
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element: Element, pseudo?: string | null) => {
+      const style = real(element, pseudo)
+
+      return element.id === 'editor-pane-list' ? ({ ...style, display: 'none' } as CSSStyleDeclaration) : style
+    })
+    open('?gameId=mock-game-1')
+    await screen.findByRole('heading', { level: 1, name: 'Đếm số đến 10' })
+    // Khung danh sách bị giả lập là ẩn nên phải tìm với hidden: true.
+    await user.click(within(screen.getByRole('list', { name: 'Danh sách câu hỏi', hidden: true })).getAllByRole('button', { hidden: true })[1])
+
+    await waitFor(() => expect(document.getElementById('editor-pane-preview')).toHaveFocus())
+  })
+
+  it('máy tính: khung danh sách vẫn hiện nên tiêu điểm ở lại nút vừa bấm', async () => {
+    const user = userEvent.setup()
+
+    open('?gameId=mock-game-1')
+    await screen.findByRole('heading', { level: 1, name: 'Đếm số đến 10' })
+
+    const second = within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')[1]
+
+    await user.click(second)
+    await new Promise((resolve) => setTimeout(resolve, 50))
+
+    expect(second).toHaveFocus()
+  })
+
+  it('403 (không có quyền): báo rõ và KHÔNG mời thử lại (vô ích); các lỗi khác vẫn có nút Thử lại', async () => {
+    vi.spyOn(gameService, 'getGame').mockRejectedValue(mockApiError(403, 'FORBIDDEN', 'Không có quyền.'))
+    open('?gameId=mock-game-1')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Bạn không có quyền thực hiện thao tác này.')
+    expect(screen.queryByRole('button', { name: 'Thử lại' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Về Trò chơi của tôi' })).toBeInTheDocument()
+  })
+
+  it('khung "không tìm thấy" được đưa tiêu điểm vào tiêu đề để trình đọc màn hình đọc ra', async () => {
+    open('?gameId=khong-co')
+
+    const heading = await screen.findByRole('heading', { level: 1, name: 'Không tìm thấy trò chơi này' })
+
+    expect(heading).toHaveFocus()
   })
 })

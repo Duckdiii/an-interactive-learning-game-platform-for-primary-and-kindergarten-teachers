@@ -315,9 +315,9 @@ describe('MATCHING: chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đ
     await waitUntilApplied()
 
     // Còn {ă, â, (mới)}: chữ vừa gõ ở "â" (nay là cặp 2).
+    await waitFor(() => expect(sideBox(1, 'phải', 'Chữ')).toHaveValue('ấm áp'), { timeout: 4000 })
     expect(sideBox(0, 'trái', 'Chữ')).toHaveValue('ă')
     expect(sideBox(1, 'trái', 'Chữ')).toHaveValue('â')
-    expect(sideBox(1, 'phải', 'Chữ')).toHaveValue('ấm áp')
   })
 
   it('chữ bị từ chối ở cặp 2 rồi xóa cặp 1: chữ bị từ chối đi theo cặp 2, không dính sang cặp khác', async () => {

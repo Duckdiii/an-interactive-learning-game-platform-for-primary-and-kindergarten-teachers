@@ -66,3 +66,22 @@ describe('summarizeQuestions', () => {
     }
   })
 })
+
+describe('câu rỗng của mọi loại game', () => {
+  const emptyOf: Record<GameType, object> = {
+    QUIZ: { questionText: '' },
+    AUDIO_VISUAL_MATCH: {},
+    ODD_ONE_OUT: { items: [{ id: 'a', text: '  ' }, { id: 'b', text: '' }, { id: 'c', text: '' }] },
+    SPOT_THE_TARGET: {},
+    WORD_SCRAMBLE: { scrambledLetters: [] },
+    MATCHING: { pairs: [{ pairId: 'p1', left: {}, right: {} }] },
+    MEMORY_CARD: { pairs: [{ pairId: 'p1', content: {} }] },
+    DRAG_DROP: { dropZones: [{ id: 'z1', label: '' }], items: [] },
+    ORDERING: { steps: [{ id: 's1', correctPosition: 1 }] },
+    VISUAL_CLOZE: { sentenceTemplate: '' },
+  }
+
+  it.each(GAME_TYPES)('%s: không có nội dung thì ra "Câu chưa có nội dung", không treo dấu hai chấm', (type) => {
+    expect(summarizeQuestion(type, emptyOf[type] as unknown as QuestionDsl)).toBe('Câu chưa có nội dung')
+  })
+})

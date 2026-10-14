@@ -17,19 +17,22 @@ const sideText = (side: PairSide) => side.text?.trim() || side.visualPrompt?.tri
 const joined = (values: ReadonlyArray<string>, separator = ', ') =>
   values.map((value) => value.trim()).filter(Boolean).join(separator)
 
+// Ghép tiền tố với phần liệt kê; không có gì để liệt kê thì trả rỗng để dòng tóm tắt thành "Câu chưa có nội dung".
+const listed = (prefix: string, items: string) => (items ? `${prefix}: ${items}` : '')
+
 const SUMMARIZERS: { [T in GameType]: (question: QuestionOfType<T>) => string } = {
   QUIZ: (q) => q.questionText,
   AUDIO_VISUAL_MATCH: (q) => (q.audioText?.trim() ? `${text.listen}: ${q.audioText}` : ''),
   ODD_ONE_OUT: (q) => joined(q.items.map((item) => item.text), ' · '),
   SPOT_THE_TARGET: (q) => (q.targetDescription?.trim() ? `${text.find}: ${q.targetDescription}` : ''),
   WORD_SCRAMBLE: (q) => (q.scrambledLetters.length > 0 ? `${text.scramble}: ${q.scrambledLetters.join(' ')}` : ''),
-  MATCHING: (q) => `${q.pairs.length} ${text.pairs}: ${joined(q.pairs.map((pair) => sideText(pair.left)))}`,
-  MEMORY_CARD: (q) => `${q.pairs.length} ${text.cardPairs}: ${joined(q.pairs.map((pair) => sideText(pair.content)))}`,
-  DRAG_DROP: (q) => `${text.dropInto}: ${joined(q.dropZones.map((zone) => zone.label))}`,
+  MATCHING: (q) => listed(`${q.pairs.length} ${text.pairs}`, joined(q.pairs.map((pair) => sideText(pair.left)))),
+  MEMORY_CARD: (q) => listed(`${q.pairs.length} ${text.cardPairs}`, joined(q.pairs.map((pair) => sideText(pair.content)))),
+  DRAG_DROP: (q) => listed(text.dropInto, joined(q.dropZones.map((zone) => zone.label))),
   ORDERING: (q) => {
     const ordered = [...q.steps].sort((a, b) => a.correctPosition - b.correctPosition)
 
-    return `${q.steps.length} ${text.steps}: ${joined(ordered.map((step) => step.text?.trim() || step.visualPrompt || ''), ' → ')}`
+    return listed(`${q.steps.length} ${text.steps}`, joined(ordered.map((step) => step.text?.trim() || step.visualPrompt || ''), ' → '))
   },
   VISUAL_CLOZE: (q) => q.sentenceTemplate,
 }

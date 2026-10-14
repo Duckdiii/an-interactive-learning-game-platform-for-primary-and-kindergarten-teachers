@@ -8,7 +8,8 @@ import { useTeacherIdentity } from './useTeacherIdentity'
 export function shouldRetryGame(failureCount: number, error: unknown) {
   if (failureCount >= 1) return false
   if (!axios.isAxiosError(error)) return false
-  if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') return false
+  // Quá hạn thì chờ thêm vô ích; người dùng chủ động hủy thì càng không tự gửi lại.
+  if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.code === 'ERR_CANCELED') return false
 
   const status = error.response?.status
 
