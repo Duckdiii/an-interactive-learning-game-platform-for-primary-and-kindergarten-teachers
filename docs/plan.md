@@ -19,7 +19,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 
 ## Nhóm F: nền tảng dùng chung
 
-### [ ] F1. Cờ mô phỏng và nhãn "Dữ liệu mô phỏng"
+### [x] F1. Cờ mô phỏng và nhãn "Dữ liệu mô phỏng"
 - **Mục tiêu:** có một chỗ duy nhất quyết định dùng mock hay API thật, **theo từng nhóm endpoint** (nhóm đã có backend thật như đăng nhập luôn gọi thật); `getGames` đi qua lớp service; có banner "Đang dùng dữ liệu mô phỏng", cảnh báo console và nhãn "Dữ liệu mô phỏng" dùng chung; có kịch bản mô phỏng (bình thường, trống, lỗi, chậm) chỉ ở môi trường phát triển để kiểm các trạng thái.
 - **File dự kiến:** `config/mockMode.ts`, `services/mock/{mockRuntime,mockGames}.ts`, `components/ui/{MockBadge,MockBanner}.tsx`, `services/gamesService.ts` (bọc `api/gamesApi.ts`), `hooks/useGames.ts` (đổi nguồn), `layouts/AppLayout.tsx` (banner), `main.tsx` (cảnh báo console), `frontend/.env.example`, `src/test-setup.ts`, `constants/viText.ts`, tests.
 - **Phụ thuộc:** không.

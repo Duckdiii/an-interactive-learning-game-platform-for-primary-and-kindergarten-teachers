@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { getGames } from '../api/gamesApi'
+import { listGames } from '../services/gamesService'
 import type { GameSummary } from '../types/game-summary.types'
 import { useAuth } from './useAuth'
 
@@ -26,7 +26,7 @@ export function useGames() {
 
   return useQuery({
     queryKey: ['games', owner],
-    queryFn: () => getGames(NO_FILTERS),
+    queryFn: () => listGames(NO_FILTERS),
     retry: shouldRetryGames,
   })
 }

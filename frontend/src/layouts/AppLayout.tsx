@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, useLocation, useNavigationType } from 'react-router-dom'
 import Icon from '../components/ui/Icon'
+import MockBanner from '../components/ui/MockBanner'
 import type { IconName } from '../components/ui/Icon'
 import { viText } from '../constants/viText'
 import { useAuth } from '../hooks/useAuth'
@@ -131,6 +132,7 @@ export default function AppLayout() {
         className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-6 outline-none sm:px-6 sm:pt-8 lg:mx-0 lg:max-w-none lg:px-10 lg:pb-12"
       >
         <div key={location.pathname} className="page-in mx-auto max-w-5xl">
+          <MockBanner />
           <Outlet />
         </div>
       </main>

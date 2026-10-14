@@ -6,6 +6,7 @@ import { TOP_FIT_SCORE } from '../../services/gameTypeSuggestionService'
 import { MAX_GAMES_PER_REQUEST } from '../../utils/generateRequest'
 import Button from '../Button'
 import ErrorNotice from '../ui/ErrorNotice'
+import MockBadge from '../ui/MockBadge'
 import GameTypeCover from '../ui/GameTypeCover'
 import Icon from '../ui/Icon'
 
@@ -47,6 +48,7 @@ const GameTypeSuggestionStep = forwardRef<HTMLHeadingElement, GameTypeSuggestion
           >
             {text.suggestStepTitle}
           </h2>
+          <MockBadge className="mt-2" />
           {randomTopic ? (
             <p className="mt-2 text-base leading-7 text-ink-soft">{text.suggestStepRandom}</p>
           ) : null}

@@ -4,6 +4,22 @@
 export const viText = {
   appName: 'AI Game Platform',
 
+  // Dữ liệu mô phỏng (cờ VITE_USE_MOCK, xem config/mockMode.ts).
+  mock: {
+    badge: 'Dữ liệu mô phỏng',
+    bannerTitle: 'Đang dùng dữ liệu mô phỏng',
+    bannerBody: 'Một số màn hình đang dùng dữ liệu mẫu để thử giao diện, chưa phải dữ liệu thật của bạn.',
+    bannerGroups: 'Đang mô phỏng:',
+    groups: {
+      games: 'danh sách trò chơi',
+      editor: 'trình soạn thảo',
+      media: 'tải tệp',
+      ai: 'kết quả AI',
+      sessions: 'phòng chơi',
+      results: 'kết quả chơi',
+    },
+  },
+
   layout: {
     sidebarSubtitle: 'Dành cho giáo viên',
     fallbackUser: 'Giáo viên',

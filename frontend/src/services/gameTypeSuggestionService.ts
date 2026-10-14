@@ -1,6 +1,8 @@
 import type { GameTypeSuggestion, SuggestGameTypesInput } from '../types/game-suggestion.types'
 import { hasPhrase, toMatchText } from '../utils/phraseMatch'
 
+// LUÔN LÀ MÔ PHỎNG: contract (`openapi.yaml`) chưa có endpoint đề xuất loại game, nên hàm này không đi qua cờ `ai` và nhãn
+// "Dữ liệu mô phỏng" ở bước đề xuất luôn hiện. Khi backend có endpoint, thêm nhánh gọi thật dưới cờ `ai`.
 // MOCK: đề xuất loại game theo MỤC TIÊU HỌC của ý tưởng. Khi có endpoint AI thật, chỉ thay thân hàm `suggestGameTypes`
 // (giữ nguyên chữ ký và kiểu trả về); hook và giao diện không phải sửa.
 //

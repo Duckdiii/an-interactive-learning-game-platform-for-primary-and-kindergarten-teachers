@@ -350,6 +350,16 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
     expect(cards()[0]).toBeChecked()
   })
 
+  it('bước đề xuất luôn gắn nhãn "Dữ liệu mô phỏng" vì chưa có endpoint đề xuất thật, kể cả khi tắt mọi nhóm mô phỏng', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await toSuggestions(user)
+
+    const step = within(screen.getByRole('region', { name: 'AI đề xuất các loại trò chơi cho bạn' }))
+    expect(step.getByText('Dữ liệu mô phỏng')).toBeInTheDocument()
+  })
+
   it('đang chờ AI thì hiện khung xương có thông báo cho trình đọc màn hình, chưa có thẻ nào', async () => {
     mockedSuggest.mockReturnValue(new Promise(() => {}))
     const user = userEvent.setup()
