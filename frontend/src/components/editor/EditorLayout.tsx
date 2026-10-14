@@ -51,12 +51,12 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, questi
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
         <section
           role="tabpanel"
           id="editor-pane-list"
           aria-labelledby="editor-tab-list"
-          className={pane === 'list' ? 'block' : 'hidden lg:block'}
+          className={pane === 'list' ? 'block min-w-0' : 'hidden min-w-0 lg:block'}
         >
           {list}
         </section>
@@ -64,7 +64,7 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, questi
           role="tabpanel"
           id="editor-pane-preview"
           aria-labelledby="editor-tab-preview"
-          className={pane === 'preview' ? 'block' : 'hidden lg:block'}
+          className={pane === 'preview' ? 'block min-w-0' : 'hidden min-w-0 lg:block'}
         >
           {preview}
         </section>

@@ -53,7 +53,7 @@ export default function QuestionList({ items, selectedIndex, onSelect }: Questio
               </span>
               <span className="min-w-0 flex-1">
                 <span className="sr-only">{`${text.questionLabel} ${index + 1}: `}</span>
-                <span className="line-clamp-2 text-base font-semibold">{item.summary}</span>
+                <span className="line-clamp-2 [overflow-wrap:anywhere] text-base font-semibold">{item.summary}</span>
                 <span className="mt-0.5 block text-sm text-ink-soft">
                   {item.timeLimitSeconds} {text.seconds} · {item.points} {text.points}
                 </span>

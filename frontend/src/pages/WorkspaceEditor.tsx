@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo, useState } from 'react'
+import { Suspense, lazy, useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import ButtonLink from '../components/ButtonLink'
@@ -9,6 +9,8 @@ import type { EditorPane } from '../components/editor/EditorLayout'
 import GameInfoForm from '../components/editor/GameInfoForm'
 import PlayTestBoundary from '../components/editor/PlayTestBoundary'
 import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
+import { PendingEditsContext } from '../components/editor/forms/PendingEditsContext'
+import QuestionEditor from '../components/editor/forms/QuestionEditor'
 import QuestionList from '../components/editor/QuestionList'
 import SaveBar from '../components/editor/SaveBar'
 import ErrorNotice from '../components/ui/ErrorNotice'
@@ -32,6 +34,7 @@ import { useUnsavedChangesGuard } from '../hooks/useUnsavedChangesGuard'
 import { ROUTES } from '../routes/paths'
 import type { GameResponse } from '../types/game-response.types'
 import { parseApiError } from '../utils/apiError'
+import { groupByQuestion } from '../utils/gameValidation'
 import { summarizeQuestions } from '../utils/questionSummary'
 import { formatRelativeTime } from '../utils/relativeTime'
 
@@ -80,20 +83,27 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
   const [playing, setPlaying] = useState(false)
+  // Số ô chữ còn chữ vừa gõ chưa vào bản đang soạn (xem `PendingEditsContext`).
+  const [pendingEdits, setPendingEdits] = useState(0)
+  const beginEdit = useCallback(() => {
+    setPendingEdits((count) => count + 1)
+
+    return () => setPendingEdits((count) => Math.max(0, count - 1))
+  }, [])
+  const pendingApi = useMemo(() => ({ begin: beginEdit }), [beginEdit])
+  const applying = pendingEdits > 0
   // `lazy` ghi nhớ cả lần tải LỖI: muốn thử lại sau khi mạng ổn lại phải dựng `lazy` mới, nên tạo lại mỗi lần thoát khỏi màn chơi thử.
   const [PlayTestPanel, setPlayTestPanel] = useState(() => lazy(loadPlayTestPanel))
   // Đã bấm "Chơi thử" mà dữ liệu chưa đủ: lỗi được tính lại theo từng lần sửa để sửa xong là hết.
   const [playAttempted, setPlayAttempted] = useState(false)
   const summaries = useMemo(() => summarizeQuestions(draft), [draft])
-  const questionsWithIssues = useMemo(
-    () => new Set(editor.issues.map((issue) => issue.questionIndex).filter((value) => value !== null)),
-    [editor.issues],
-  )
+  // Câu nào còn lỗi (tính trực tiếp, không đợi bấm Lưu) thì danh sách đánh dấu "Cần sửa".
+  const issuesByQuestion = useMemo(() => groupByQuestion(editor.liveIssues), [editor.liveIssues])
   const items = draft.questions.map((question, position) => ({
     summary: summaries[position],
     timeLimitSeconds: question.timeLimitSeconds,
     points: question.points,
-    hasIssue: questionsWithIssues.has(position),
+    hasIssue: issuesByQuestion.has(position),
   }))
   const index = Math.min(selected, Math.max(0, items.length - 1))
   const current = items[index]
@@ -103,7 +113,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const saveText = text.save
   const conflict = editor.saveError?.code === 'CONFLICT'
 
-  useUnsavedChangesGuard(editor.dirty, saveText.leaveConfirm)
+  useUnsavedChangesGuard(editor.dirty || applying, saveText.leaveConfirm)
 
   // Đưa tiêu điểm tới ô cần chú ý (sau khi khôi phục hoặc khi lưu bị chặn) để người dùng bàn phím và trình đọc màn hình không mất vị trí.
   const focusField = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.focus())
@@ -147,7 +157,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     setPane('preview')
   }
 
-  const preview = (
+  const previewCard = (
     <div className="space-y-4 rounded-2xl border-2 border-ink/10 bg-white p-4 sm:p-6">
       <h2 className="text-lg font-extrabold">{text.previewHeading}</h2>
       {current ? (
@@ -155,7 +165,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
             {text.questionLabel} {index + 1}
           </p>
-          <p className="mt-1 text-xl font-bold leading-8">{current.summary}</p>
+          <p className="mt-1 [overflow-wrap:anywhere] text-xl font-bold leading-8">{current.summary}</p>
           <p className="mt-2 text-base text-ink-soft">
             {current.timeLimitSeconds} {text.seconds} · {current.points} {text.points}
           </p>
@@ -173,7 +183,25 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     </div>
   )
 
+  // Khung sửa (form theo loại game) nằm trên phần xem: sửa xong là phần xem bên dưới và danh sách câu cập nhật ngay.
+  const preview = (
+    <div className="space-y-6">
+      {current ? (
+        <QuestionEditor
+          key={`${index}-${editor.revision}`}
+          gameType={draft.gameType}
+          question={draft.questions[index]}
+          number={index + 1}
+          issues={issuesByQuestion.get(index) ?? []}
+          onUpdate={(update) => editor.updateQuestion(index, draft.questions[index].id, update)}
+        />
+      ) : null}
+      {previewCard}
+    </div>
+  )
+
   return (
+    <PendingEditsContext.Provider value={pendingApi}>
     <div className="space-y-6">
       <header>
         <div className="flex flex-wrap items-center gap-2">
@@ -237,6 +265,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
             saving={editor.saving}
             saved={editor.savedNotice}
             isPublished={isPublished}
+            applying={applying}
             onSave={handleSave}
             onPlayTest={startPlay}
           />
@@ -301,6 +330,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
         </>
       )}
     </div>
+    </PendingEditsContext.Provider>
   )
 }
 

@@ -43,7 +43,7 @@ describe('trang soạn thảo: mở game', () => {
     const list = screen.getByRole('list', { name: 'Danh sách câu hỏi' })
 
     expect(within(list).getAllByRole('button')).toHaveLength(3)
-    expect(screen.getByText('Dữ liệu mô phỏng')).toBeInTheDocument()
+    expect(screen.getAllByText('Dữ liệu mô phỏng').length).toBeGreaterThan(0)
     expect(screen.getByText('3 câu hỏi', { exact: false })).toBeInTheDocument()
   })
 
@@ -71,7 +71,7 @@ describe('trang soạn thảo: mở game', () => {
     await screen.findByRole('heading', { level: 1, name: 'Đếm số đến 10' })
 
     const questionsTab = screen.getByRole('tab', { name: /Câu hỏi/ })
-    const previewTab = screen.getByRole('tab', { name: 'Xem câu' })
+    const previewTab = screen.getByRole('tab', { name: 'Sửa câu' })
 
     expect(questionsTab).toHaveAttribute('aria-selected', 'true')
     expect(previewTab).toHaveAttribute('aria-selected', 'false')

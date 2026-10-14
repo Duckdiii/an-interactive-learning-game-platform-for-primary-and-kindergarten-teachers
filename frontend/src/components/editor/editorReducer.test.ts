@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildMockGameContents } from '../../services/mock/gameFixtures'
+import type { QuestionDsl } from '../../types/game-dsl.types'
 import { createEditorState, editorReducer, isDirty } from './editorReducer'
 
 const quiz = () => buildMockGameContents()[0]
@@ -51,5 +52,42 @@ describe('editorReducer', () => {
 
     expect(restored.draft.metadata.title).toBe('Từ bản sao lưu')
     expect(isDirty(restored)).toBe(true)
+  })
+})
+
+describe('editorReducer: updateQuestion (bản vá áp lên câu hiện hành)', () => {
+  const patchTime = (seconds: number) => (question: QuestionDsl) => ({ ...question, timeLimitSeconds: seconds })
+
+  it('áp bản vá lên câu ở đúng vị trí, các câu khác nguyên vẹn', () => {
+    const start = createEditorState(quiz())
+    const next = editorReducer(start, { type: 'updateQuestion', index: 1, questionId: start.draft.questions[1].id, update: patchTime(77) })
+
+    expect(next.draft.questions[1].timeLimitSeconds).toBe(77)
+    expect(next.draft.questions[0]).toBe(start.draft.questions[0])
+    expect(isDirty(next)).toBe(true)
+  })
+
+  it('bản vá chạy trên trạng thái MỚI NHẤT: hai bản vá liên tiếp cộng dồn, không bản nào ghi đè bản nào', () => {
+    const start = createEditorState(quiz())
+    const id = start.draft.questions[0].id
+    const first = editorReducer(start, { type: 'updateQuestion', index: 0, questionId: id, update: patchTime(40) })
+    // Bản vá thứ hai được dựng từ lúc "chụp" cũ nhưng chỉ đổi điểm: không được làm mất thời gian vừa đổi.
+    const second = editorReducer(first, { type: 'updateQuestion', index: 0, questionId: id, update: (question) => ({ ...question, points: 55 }) })
+
+    expect(second.draft.questions[0]).toMatchObject({ timeLimitSeconds: 40, points: 55 })
+  })
+
+  it('câu ở vị trí đó không còn là câu cũ (đổi câu, khôi phục) hoặc vị trí không có thì bỏ qua', () => {
+    const start = createEditorState(quiz())
+
+    expect(editorReducer(start, { type: 'updateQuestion', index: 0, questionId: 'q-khac', update: patchTime(77) })).toBe(start)
+    expect(editorReducer(start, { type: 'updateQuestion', index: 99, questionId: 'q1', update: patchTime(77) })).toBe(start)
+    expect(editorReducer(start, { type: 'updateQuestion', index: -1, questionId: 'q1', update: patchTime(77) })).toBe(start)
+  })
+
+  it('bản vá không đổi gì (trả lại đúng câu cũ) thì không tạo trạng thái mới', () => {
+    const start = createEditorState(quiz())
+
+    expect(editorReducer(start, { type: 'updateQuestion', index: 0, questionId: start.draft.questions[0].id, update: (question) => question })).toBe(start)
   })
 })

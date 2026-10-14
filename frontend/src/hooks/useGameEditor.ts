@@ -3,7 +3,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { createEditorState, editorReducer, isDirty, trimMetadata } from '../components/editor/editorReducer'
 import { viText } from '../constants/viText'
 import { updateGame } from '../services/gameService'
-import type { GameDsl } from '../types/game-dsl.types'
+import type { GameDsl, QuestionDsl } from '../types/game-dsl.types'
 import type { GameResponse } from '../types/game-response.types'
 import { parseApiError } from '../utils/apiError'
 import { getStoredAccessToken } from '../utils/authStorage'
@@ -52,6 +52,8 @@ export function useGameEditor(game: GameResponse) {
   // Mốc `updatedAt` của máy chủ lúc bắt đầu soạn (đổi khi CHÍNH phiên này lưu thành công, không đổi theo lần tải lại nền):
   // dùng để biết bản sao lưu có cũ hơn bản trên máy chủ hay không.
   const [baseUpdatedAt, setBaseUpdatedAt] = useState(game.updatedAt)
+  // Tăng mỗi lần khôi phục bản sao lưu: các ô nhập giữ chữ đang gõ dở thì dựng lại theo số này để hiện đúng nội dung vừa khôi phục.
+  const [revision, setRevision] = useState(0)
   const dirty = isDirty(state)
 
   const mutation = useMutation({
@@ -116,6 +118,9 @@ export function useGameEditor(game: GameResponse) {
     [attempted, state.draft, state.baseline],
   )
 
+  // Lỗi của từng câu tính TRỰC TIẾP trên bản đang soạn (không đợi bấm Lưu) để form hiện lỗi ngay dưới ô đang sửa.
+  const liveIssues = useMemo(() => validateGame(state.draft, 'save', { baseline: state.baseline }), [state.draft, state.baseline])
+
   const edit = (action: Parameters<typeof dispatch>[0]) => {
     setLastSaveOk(false)
     // Sửa tiếp thì lỗi lưu lần trước không còn đúng nữa (đang lưu dở thì để nguyên, tránh mở khóa nút Lưu giữa chừng).
@@ -152,17 +157,22 @@ export function useGameEditor(game: GameResponse) {
     saving: mutation.isPending,
     savedNotice: lastSaveOk && !dirty,
     issues,
+    liveIssues,
+    revision,
     issueSummary: summarizeIssues(issues, 'save'),
     saveError,
     pendingRestore,
     setTitle: (title: string) => edit({ type: 'setTitle', title }),
     setTopic: (topic: string) => edit({ type: 'setTopic', topic }),
+    updateQuestion: (index: number, questionId: string, update: (question: QuestionDsl) => QuestionDsl) =>
+      edit({ type: 'updateQuestion', index, questionId, update }),
     save,
     validate,
     restore: () => {
       if (!pendingRestore) return
 
       edit({ type: 'restore', content: pendingRestore.content })
+      setRevision((value) => value + 1)
       setPendingRestore(null)
     },
     discardRestore: () => {

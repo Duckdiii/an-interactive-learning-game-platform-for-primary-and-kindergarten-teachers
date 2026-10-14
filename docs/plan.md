@@ -66,7 +66,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** chơi hết QUIZ mẫu thấy tổng kết; game thiếu đáp án bị từ chối bằng đúng câu UC-03 2a; loại chưa hỗ trợ không giả lập.
 - **Kiểm tra:** `vitest` (registry, tổng kết); ảnh chơi thử Quiz, Matching, loại chưa hỗ trợ, lỗi.
 
-### [ ] A3. Sửa tay QUIZ (UC-05, FLD-05/06/07)
+### [x] A3. Sửa tay QUIZ (UC-05, FLD-05/06/07)
 - **Thiết kế mở rộng:** dựng khung form chung đọc `questionSpecs` (nhãn, giới hạn, bộ đếm ký tự, thông báo lỗi từng trường); `QuizForm` chỉ là phần riêng của loại này. Loại mới sau này = thêm mô tả trường + một thành phần nhỏ, không sửa khung.
 - **Mục tiêu:** form sửa câu QUIZ: nội dung, 2 đến 4 đáp án (thêm, bớt, chọn đáp án đúng), thời gian, điểm; kiểm tra trực tiếp từng trường; vùng xem bên phải cập nhật ngay; lọc từ không phù hợp (mock, có nhãn) giữ nguyên nội dung cũ khi từ chối.
 - **File dự kiến:** `components/editor/forms/{QuizForm,TimeLimitField}.tsx`, `services/mock/safetyCheck.ts`, `utils/` (nếu cần), tests.
