@@ -14,13 +14,17 @@ export function renderWithProviders(ui: ReactElement, initialPath = '/') {
     defaultOptions: { queries: { retry: false } },
   })
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <MemoryRouter initialEntries={[initialPath]}>{ui}</MemoryRouter>
-      </AuthProvider>
-    </QueryClientProvider>,
-  )
+  // Trả thêm queryClient để test chủ động làm mới dữ liệu (mô phỏng tải lại nền) mà không phụ thuộc sự kiện trình duyệt.
+  return {
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <MemoryRouter initialEntries={[initialPath]}>{ui}</MemoryRouter>
+        </AuthProvider>
+      </QueryClientProvider>,
+    ),
+    queryClient,
+  }
 }
 
 export function loginAsTeacher(fullName = 'Nguyễn Thị Lan') {

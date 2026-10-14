@@ -41,7 +41,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** test duyệt mọi loại game ở ranh giới (đủ, thiếu, thừa); thông báo đúng câu của SRS (UC-04 5a, UC-07 2c).
 - **Kiểm tra:** `vitest` (bảng ca cho từng loại).
 
-### [ ] F4. Khung trang soạn thảo (đọc, chưa sửa)
+### [x] F4. Khung trang soạn thảo (đọc, chưa sửa)
 - **Mục tiêu:** thay trang giữ chỗ bằng trình soạn thảo 2 khung: danh sách câu hỏi ở trái, vùng xem ở phải; điện thoại dùng hai tab. Có trạng thái đang tải, lỗi (kèm thử lại), không tìm thấy game.
 - **File dự kiến:** `pages/WorkspaceEditor.tsx`, `components/editor/{EditorLayout,QuestionList}.tsx`, `hooks/useGame.ts`, `routes/paths.ts` (nếu cần), `viText`, tests.
 - **Phụ thuộc:** F2.

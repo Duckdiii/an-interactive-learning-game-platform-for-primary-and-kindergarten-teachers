@@ -202,18 +202,41 @@ export const viText = {
 
   editor: {
     kicker: 'Soạn thảo',
-    title: 'Trình soạn thảo đang được hoàn thiện',
-    description:
-      'Khi hoàn thiện, đây là nơi bạn sửa từng câu hỏi của trò chơi, xem thử như học sinh và đăng cho cả lớp.',
-    comingTag: 'Đang hoàn thiện',
-    comingTitle: 'Bạn sẽ làm được gì ở đây',
-    coming: [
-      'Sửa câu chữ, đáp án, hình ảnh và âm thanh của từng câu hỏi',
-      'Chơi thử như học sinh mà không ghi điểm',
-      'Đăng trò chơi và nhận mã chơi để gửi cho học sinh',
-    ],
+    noGameTitle: 'Chưa chọn trò chơi để soạn',
+    noGameDescription:
+      'Hãy mở một trò chơi trong "Trò chơi của tôi" để xem và soạn các câu hỏi của nó.',
+    loading: 'Đang mở trò chơi',
+    notFoundTitle: 'Không tìm thấy trò chơi này',
+    notFoundDescription:
+      'Trò chơi có thể đã bị xóa hoặc địa chỉ chưa đúng. Hãy chọn lại trong "Trò chơi của tôi".',
+    loadErrorTitle: 'Chưa mở được trò chơi',
+    retry: 'Thử lại',
     backToGames: 'Về Trò chơi của tôi',
     createInstead: 'Tạo game mới',
+    comingTag: 'Đang hoàn thiện',
+    panesLabel: 'Chọn khung làm việc',
+    questionsTab: 'Câu hỏi',
+    previewTab: 'Xem câu',
+    listLabel: 'Danh sách câu hỏi',
+    questionCount: 'câu hỏi',
+    emptyQuestions: 'Trò chơi này chưa có câu hỏi nào.',
+    questionLabel: 'Câu',
+    seconds: 'giây',
+    points: 'điểm',
+    updatedPrefix: 'Cập nhật',
+    previewHeading: 'Xem câu hỏi',
+    previewNote:
+      'Chơi thử như học sinh và sửa từng câu sẽ có ở các bước tiếp theo. Hiện bạn xem được nội dung và thứ tự câu hỏi.',
+    summary: {
+      noContent: 'Câu chưa có nội dung',
+      listen: 'Nghe',
+      find: 'Tìm',
+      scramble: 'Sắp xếp chữ',
+      pairs: 'cặp',
+      cardPairs: 'cặp thẻ',
+      dropInto: 'Thả vào',
+      steps: 'bước',
+    },
   },
 
   notFound: {

@@ -38,7 +38,7 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
     ['/dashboard', /Xin chào/],
     ['/games/new', 'Tạo game mới'],
     ['/workspace', 'Trò chơi của tôi'],
-    ['/workspace/editor', /Trình soạn thảo/],
+    ['/workspace/editor', /Chưa chọn trò chơi/],
     ['/khong-ton-tai', 'Không tìm thấy trang'],
   ])('trang %s không còn chữ tiếng Anh dành cho lập trình viên', async (path, heading) => {
     renderApp(path)
@@ -86,7 +86,7 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
 
   it('đang ở trình soạn thảo thì mục "Trò chơi của tôi" vẫn sáng ở cả hai thanh', async () => {
     renderApp('/workspace/editor')
-    await waitForPage(/Trình soạn thảo/)
+    await waitForPage(/Chưa chọn trò chơi/)
 
     for (const name of ['Điều hướng chính', 'Điều hướng chính (thanh dưới)']) {
       const nav = screen.getByRole('navigation', { name })
