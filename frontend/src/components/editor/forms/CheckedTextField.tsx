@@ -4,6 +4,7 @@ import { checkTextSafety } from '../../../services/safetyService'
 import type { Range } from '../../../utils/questionSpecs'
 import Button from '../../Button'
 import { usePendingEdits } from './PendingEditsContext'
+import { withTimeout } from './safetyTimeout'
 import FormField from '../../ui/FormField'
 import { describedBy, inputClass, textareaClass } from '../../ui/formStyles'
 
@@ -17,6 +18,8 @@ interface CheckedTextFieldProps {
   error?: string
   hint?: string
   multiline?: boolean
+  // Trường bắt buộc thì hiện dấu sao; trường tùy chọn cho phép để trống (nội dung rỗng được áp như "bỏ trường").
+  required?: boolean
   disabled?: boolean
   onCommit: (text: string) => void
 }
@@ -29,7 +32,7 @@ const COMMIT_DELAY_MS = 350
 // Ô chữ của form sửa tay (UC-05). Giáo viên gõ thì chữ nằm ở ô; ngừng gõ (hoặc rời ô) thì chữ được KIỂM TRA TỪ NGỮ rồi mới áp
 // vào cấu hình game. Từ ngữ chưa phù hợp thì dừng cập nhật, GIỮ NGUYÊN nội dung cũ trong game, hiện đúng câu của SRS, và để
 // nguyên chữ vừa gõ trong ô cho giáo viên sửa lại.
-export default function CheckedTextField({ id, label, value, limits, error, hint, multiline = false, disabled = false, onCommit }: CheckedTextFieldProps) {
+export default function CheckedTextField({ id, label, value, limits, error, hint, multiline = false, required = true, disabled = false, onCommit }: CheckedTextFieldProps) {
   const text = viText.editor.form
   const [typed, setTyped] = useState<string | null>(null)
   const [verdict, setVerdict] = useState<Verdict>('idle')
@@ -56,7 +59,8 @@ export default function CheckedTextField({ id, label, value, limits, error, hint
       setVerdict('checking')
 
       try {
-        const result = await checkTextSafety([next])
+        // Quá thời gian thì coi như chưa kiểm tra được (nhánh `catch`), để không khóa Lưu và Chơi thử mãi.
+        const result = await withTimeout(checkTextSafety([next]))
 
         // Có lần gõ hoặc lần kiểm tra mới hơn thì bỏ kết quả cũ.
         if (request !== requestRef.current) return
@@ -130,7 +134,7 @@ export default function CheckedTextField({ id, label, value, limits, error, hint
         label={label}
         hint={hint}
         error={shownError}
-        required
+        required={required}
         aside={
           <span className={['text-sm', size > limits.max ? 'font-bold text-rose-800' : 'text-ink-soft'].join(' ')}>
             {size}/{limits.max} {text.characters}

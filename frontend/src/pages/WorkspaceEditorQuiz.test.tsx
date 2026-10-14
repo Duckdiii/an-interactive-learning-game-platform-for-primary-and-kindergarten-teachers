@@ -1,8 +1,9 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getMockGame, resetMockGames } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
+import * as safety from '../services/safetyService'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import WorkspaceEditor from './WorkspaceEditor'
 
@@ -346,5 +347,78 @@ describe('chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đang chạy
     // Còn {3, Bốn quả}: chữ vừa gõ ở C nay là đáp án B.
     expect(optionBox('A')).toHaveValue('3')
     expect(optionBox('B')).toHaveValue('Bốn quả')
+  })
+})
+
+describe('khóa Lưu/Chơi thử khi "Đang áp dụng chỉnh sửa..." luôn mở lại (câu hỏi của user)', () => {
+  const APPLYING = 'Đang áp dụng chỉnh sửa...'
+  const saveBtn = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
+  const playBtn = () => screen.getByRole('button', { name: 'Chơi thử' })
+
+  // Làm cho bản nháp "chưa lưu" bằng một sửa đổi khác (nút Lưu chỉ bật khi có thay đổi), rồi gõ chữ chờ kiểm tra.
+  async function typeSomethingPending(text: string) {
+    const user = userEvent.setup()
+
+    await user.clear(timeBox())
+    await user.type(timeBox(), '45')
+    fireEvent.change(questionBox(), { target: { value: text } })
+    expect(screen.getByText(APPLYING)).toBeInTheDocument()
+    expect(saveBtn()).toBeDisabled()
+    expect(playBtn()).toBeDisabled()
+  }
+
+  const expectReleased = () => {
+    expect(screen.queryByText(APPLYING)).not.toBeInTheDocument()
+    expect(saveBtn()).toBeEnabled()
+    expect(playBtn()).toBeEnabled()
+  }
+
+  it('bộ lọc từ chối từ ngữ: khóa mở lại, nội dung bị từ chối KHÔNG vào bản nháp', async () => {
+    await openLoaded(QUIZ_ID)
+    await typeSomethingPending('Cảnh máu me trong hình?')
+
+    await waitFor(() => expectReleased(), { timeout: 4000 })
+    expect((await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)))).length).toBeGreaterThan(0)
+    expect(listItems()[0]).toHaveTextContent('Có mấy quả táo trong hình?')
+  })
+
+  it('bộ lọc lỗi kết nối: khóa mở lại và báo "chưa kiểm tra được"', async () => {
+    await openLoaded(QUIZ_ID)
+    setMockScenario('error')
+    await typeSomethingPending('Đếm táo nhé?')
+
+    await waitFor(() => expectReleased(), { timeout: 4000 })
+    expect((await screen.findAllByText(/Chưa kiểm tra được từ ngữ vì lỗi kết nối/)).length).toBeGreaterThan(0)
+  })
+
+  it('bộ lọc quá thời gian (lỗi ECONNABORTED của mô phỏng): khóa mở lại', async () => {
+    await openLoaded(QUIZ_ID)
+    setMockScenario('timeout')
+    await typeSomethingPending('Đếm táo nhé?')
+
+    await waitFor(() => expectReleased(), { timeout: 4000 })
+  })
+
+  it('bộ lọc treo không bao giờ trả lời: hết thời hạn thì khóa vẫn mở lại', async () => {
+    await openLoaded(QUIZ_ID)
+    vi.spyOn(safety, 'checkTextSafety').mockImplementation(() => new Promise(() => {}))
+    vi.useFakeTimers()
+
+    try {
+      fireEvent.change(timeBox(), { target: { value: '45' } })
+      fireEvent.change(questionBox(), { target: { value: 'Đếm táo nhé?' } })
+      expect(screen.getByText(APPLYING)).toBeInTheDocument()
+      expect(saveBtn()).toBeDisabled()
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(9000 + 1000)
+      })
+
+      expectReleased()
+      expect(screen.getAllByText(/Chưa kiểm tra được từ ngữ vì lỗi kết nối/).length).toBeGreaterThan(0)
+    } finally {
+      vi.useRealTimers()
+      vi.restoreAllMocks()
+    }
   })
 })

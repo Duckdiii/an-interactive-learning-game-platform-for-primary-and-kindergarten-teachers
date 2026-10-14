@@ -82,7 +82,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Kiểm tra:** `vitest`; ảnh MATCHING và một loại chưa có form.
 
 ### [ ] A5. Tải ảnh và âm thanh (UC-05, FLD-11/12)
-- **Mục tiêu:** nút tải tệp trên thẻ câu: kiểm tra định dạng và dung lượng (ảnh PNG/JPG/WebP ≤ 5MB, MP3 ≤ 10MB), mock tải lên và mock từ chối nội dung không an toàn, lỗi giữ nguyên tệp cũ; chọn giọng đọc Nam/Nữ của game.
+- **Mục tiêu:** toàn bộ UC-05 **luồng 1a, 3a, 3b**: nút "Tải tệp lên" trên vùng ảnh và vùng âm thanh của thẻ câu, mở hộp chọn tệp, bước "Xác nhận tải lên"; kiểm tra định dạng và dung lượng (ảnh PNG/JPG/WebP ≤ 5MB, MP3 ≤ 10MB), mock tải lên và mock từ chối nội dung không an toàn, lỗi giữ nguyên tệp cũ; chọn giọng đọc Nam/Nữ của game. (A4 chỉ làm trường **mô tả hình ảnh** `visualPrompt` dạng chữ; tải tệp ảnh/âm thanh thật nằm ở đây.)
 - **File dự kiến:** `components/editor/MediaField.tsx`, `utils/mediaFile.ts`, `services/mediaService.ts` (mock), tests.
 - **Phụ thuộc:** A3.
 - **Hoàn thành khi:** tệp sai định dạng hoặc quá lớn bị từ chối bằng đúng câu UC-05 3a; tệp không an toàn bị từ chối bằng câu 3b; ảnh mới hiện ở vùng xem.
