@@ -41,9 +41,31 @@ describe('Trang chủ giáo viên', () => {
     renderDashboard()
     const hero = within(screen.getByRole('region', { name: /Tạo trò chơi mới/ }))
 
-    expect(hero.getByText('Đang hoàn thiện')).toBeInTheDocument()
+    expect(hero.queryByText('Đang hoàn thiện')).toBeNull()
     expect(hero.getByRole('link', { name: 'Tạo từ ý tưởng' })).toHaveAttribute('href', '/games/new')
     expect(hero.getByRole('link', { name: 'Tạo ngẫu nhiên' })).toHaveAttribute('href', '/games/new?random=1')
+  })
+
+  it('có mục "Gợi ý chủ đề cho bạn": 4 gợi ý bám khối lớp, môn gần đây; bấm sang Tạo game mới với ô mô tả điền sẵn', async () => {
+    mockedGetGames.mockResolvedValue([makeGame(1, { gradeLevel: 'GRADE_1', subject: 'VIETNAMESE', title: 'Bài riêng' })])
+    renderDashboard()
+    const section = within(await screen.findByRole('region', { name: 'Gợi ý chủ đề cho bạn' }))
+
+    const links = section.getAllByRole('link')
+    expect(links).toHaveLength(4)
+    expect(links[0]).toHaveTextContent('Tiếng Việt · Lớp 1')
+    const url = new URL(links[0].getAttribute('href') ?? '', 'http://localhost')
+    expect(url.pathname).toBe('/games/new')
+    expect(url.searchParams.get('idea')).toBeTruthy()
+    expect(url.searchParams.get('grade')).toBe('GRADE_1')
+    expect(url.searchParams.get('subject')).toBe('VIETNAMESE')
+  })
+
+  it('thư viện còn trống vẫn có gợi ý chủ đề để bắt đầu', async () => {
+    mockedGetGames.mockResolvedValue([])
+    renderDashboard()
+
+    expect(await screen.findByRole('region', { name: 'Gợi ý chủ đề cho bạn' })).toBeInTheDocument()
   })
 
   it('đang tải hiện đúng một vùng trạng thái cho trình đọc màn hình', () => {

@@ -43,7 +43,7 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
   ])('trang %s không còn chữ tiếng Anh dành cho lập trình viên', async (path, heading) => {
     renderApp(path)
     await waitForPage(heading)
-    if (path === '/dashboard' || path === '/workspace') await screen.findByText('Trò chơi 1')
+    if (path === '/dashboard' || path === '/workspace') await screen.findByText(makeGame(1).title)
 
     expect(document.body.textContent).not.toMatch(ENGLISH_UI_TEXT)
   })
@@ -151,6 +151,20 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
     const grade = screen.getByLabelText(/Khối lớp/)
     await waitFor(() => expect(grade).toHaveFocus())
     expect(document.getElementById('main')).not.toHaveFocus()
+  })
+
+  it('sidebar nằm trong cột lưới cao bằng cả trang, phần bên trong dính ở đầu và cao đúng một màn hình', async () => {
+    renderApp('/games/new')
+    await waitForPage('Tạo game mới')
+
+    const aside = document.querySelector('aside') as HTMLElement
+    const inner = aside.firstElementChild as HTMLElement
+
+    expect(aside.className).toMatch(/\bbg-white\b/)
+    expect(aside.className).not.toMatch(/\bfixed\b/)
+    expect(inner.className).toMatch(/\bsticky\b/)
+    expect(inner.className).toMatch(/\btop-0\b/)
+    expect(inner.className).toMatch(/\bh-screen\b/)
   })
 
   it('placeholder và tên trợ năng cũng bằng tiếng Việt', async () => {

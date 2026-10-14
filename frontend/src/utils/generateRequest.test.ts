@@ -11,17 +11,18 @@ const form = (overrides: Partial<GenerateForm> = {}): GenerateForm => ({
   subject: 'MATH',
   gradeLevel: 'GRADE_1',
   idea: '',
-  gameType: '',
   voiceRegion: 'NORTH',
   voiceGender: 'FEMALE',
   hasFile: false,
   ...overrides,
 })
 
-describe('checkGenerate (theo GenerateGameRequest trong openapi.yaml)', () => {
-  it('thiếu khối lớp hoặc môn học thì không tạo được ở cả hai chế độ', () => {
-    expect(checkGenerate(form({ subject: '' }), 'idea')).toBe('needGradeSubject')
-    expect(checkGenerate(form({ gradeLevel: '' }), 'random')).toBe('needGradeSubject')
+describe('checkGenerate', () => {
+  it('khối lớp và môn học KHÔNG bắt buộc: không chọn, không đoán được vẫn tạo được', () => {
+    const noContext = { idea: 'Đếm số lượng con vật', hasFile: false }
+
+    expect(checkGenerate(noContext, 'idea')).toBeNull()
+    expect(checkGenerate({ idea: '', hasFile: false }, 'random')).toBeNull()
   })
 
   it('chế độ ý tưởng cần ý tưởng đủ dài hoặc tệp giáo án', () => {
@@ -35,7 +36,7 @@ describe('checkGenerate (theo GenerateGameRequest trong openapi.yaml)', () => {
     expect(checkGenerate(form({ idea: ' '.repeat(30) }), 'idea')).toBe('needIdea')
   })
 
-  it('chế độ ngẫu nhiên chỉ cần khối lớp và môn học', () => {
+  it('chế độ ngẫu nhiên không cần gì thêm', () => {
     expect(checkGenerate(form(), 'random')).toBeNull()
   })
 })
@@ -58,6 +59,13 @@ describe('buildGenerateRequest', () => {
     })
   })
 
+  it('chưa có khối lớp hoặc môn thì không gửi hai trường đó (để AI tự suy ra)', () => {
+    const request = buildGenerateRequest(form({ idea: 'Đếm số lượng con vật', subject: '', gradeLevel: '' }), 'idea')
+
+    expect(request).not.toHaveProperty('subject')
+    expect(request).not.toHaveProperty('gradeLevel')
+  })
+
   it('chế độ ngẫu nhiên gửi randomTopic và KHÔNG gửi idea dù trong ô còn chữ', () => {
     const request = buildGenerateRequest(form({ idea: 'Đếm số lượng con vật' }), 'random')
 
@@ -65,9 +73,9 @@ describe('buildGenerateRequest', () => {
     expect(request).not.toHaveProperty('idea')
   })
 
-  it('chỉ gửi gameType khi giáo viên đã chọn, bỏ trống thì để AI chọn', () => {
+  it('mỗi yêu cầu mang đúng một gameType giáo viên đã chọn; không truyền thì để AI chọn', () => {
     expect(buildGenerateRequest(form({ idea: 'Đếm số lượng con vật' }), 'idea')).not.toHaveProperty('gameType')
-    expect(buildGenerateRequest(form({ idea: 'Đếm số lượng con vật', gameType: 'MATCHING' }), 'idea').gameType).toBe('MATCHING')
+    expect(buildGenerateRequest(form({ idea: 'Đếm số lượng con vật' }), 'idea', 'MATCHING').gameType).toBe('MATCHING')
   })
 
   it('có tệp mà ý tưởng quá ngắn thì không gửi idea', () => {

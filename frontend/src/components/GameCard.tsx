@@ -13,7 +13,7 @@ import type { GameSummary } from '../types/game-summary.types'
 import { formatRelativeTime } from '../utils/relativeTime'
 import { buttonClass } from './buttonStyles'
 import Icon from './ui/Icon'
-import SubjectCover from './ui/SubjectCover'
+import GameTypeCover from './ui/GameTypeCover'
 import { subjectTheme } from './ui/subjectTheme'
 
 interface GameCardProps {
@@ -41,10 +41,10 @@ export default function GameCard({ game, now }: GameCardProps) {
         ) : (
           <>
             <div className="h-full sm:hidden">
-              <SubjectCover subject={game.subject} compact />
+              <GameTypeCover gameType={game.gameType} subject={game.subject} compact />
             </div>
             <div className="hidden sm:block">
-              <SubjectCover subject={game.subject} />
+              <GameTypeCover gameType={game.gameType} subject={game.subject} />
             </div>
           </>
         )}

@@ -52,7 +52,7 @@ export default function AppLayout() {
   }, [location.pathname])
 
   return (
-    <div className="min-h-screen bg-paper text-ink">
+    <div className="min-h-screen bg-paper text-ink lg:grid lg:grid-cols-[18rem_minmax(0,1fr)]">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-xl focus:bg-white focus:px-4 focus:py-3 focus:font-semibold focus:text-brand-strong focus:shadow-lg"
@@ -60,48 +60,52 @@ export default function AppLayout() {
         {viText.layout.skipToContent}
       </a>
 
-      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col border-r border-ink/10 bg-white px-4 py-6 lg:flex">
-        <Brand />
+      {/* Cột sidebar là một ô của lưới nên luôn cao bằng cả trang (nền trắng liền mạch dù trang dài hơn màn hình);
+          phần nội dung bên trong dính trên cùng và cao đúng một màn hình nên không cuộn theo trang. */}
+      <aside className="hidden border-r border-ink/10 bg-white lg:block">
+        <div className="sticky top-0 flex h-screen flex-col px-4 py-6">
+          <Brand />
 
-        <nav aria-label={viText.layout.navLabel} className="mt-8 space-y-2">
-          {navigationItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                [
-                  'flex min-h-12 items-center gap-3 rounded-xl px-4 text-base font-semibold transition',
-                  isActive
-                    ? 'bg-brand text-white shadow-sm'
-                    : 'text-ink-soft hover:bg-brand-soft hover:text-brand-strong',
-                ].join(' ')
-              }
-            >
-              <Icon name={item.icon} />
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+          <nav aria-label={viText.layout.navLabel} className="mt-8 space-y-2">
+            {navigationItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  [
+                    'flex min-h-12 items-center gap-3 rounded-xl px-4 text-base font-semibold transition',
+                    isActive
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'text-ink-soft hover:bg-brand-soft hover:text-brand-strong',
+                  ].join(' ')
+                }
+              >
+                <Icon name={item.icon} />
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
 
-        <div className="mt-auto rounded-2xl bg-paper p-4">
-          <div className="flex items-center gap-3">
-            <Avatar name={displayName} />
-            <div className="min-w-0">
-              <p className="truncate text-base font-bold">{displayName}</p>
-              {user?.fullName ? (
-                <p className="truncate text-sm text-ink-soft">{user.email}</p>
-              ) : null}
+          <div className="mt-auto rounded-2xl bg-paper p-4">
+            <div className="flex items-center gap-3">
+              <Avatar name={displayName} />
+              <div className="min-w-0">
+                <p className="truncate text-base font-bold">{displayName}</p>
+                {user?.fullName ? (
+                  <p className="truncate text-sm text-ink-soft">{user.email}</p>
+                ) : null}
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={logout}
+              className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-ink/15 bg-white px-4 text-base font-semibold text-ink-soft transition hover:border-brand hover:text-brand-strong"
+            >
+              <Icon name="logout" />
+              {viText.layout.signOut}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={logout}
-            className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-ink/15 bg-white px-4 text-base font-semibold text-ink-soft transition hover:border-brand hover:text-brand-strong"
-          >
-            <Icon name="logout" />
-            {viText.layout.signOut}
-          </button>
         </div>
       </aside>
 
@@ -124,7 +128,7 @@ export default function AppLayout() {
         id="main"
         ref={mainRef}
         tabIndex={-1}
-        className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 outline-none sm:px-6 sm:pt-8 lg:ml-72 lg:w-auto lg:max-w-none lg:px-10 lg:pb-12"
+        className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-6 outline-none sm:px-6 sm:pt-8 lg:mx-0 lg:max-w-none lg:px-10 lg:pb-12"
       >
         <div key={location.pathname} className="page-in mx-auto max-w-5xl">
           <Outlet />

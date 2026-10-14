@@ -32,12 +32,26 @@ export function loginAsTeacher(fullName = 'Nguyễn Thị Lan') {
   )
 }
 
+// Tên game mẫu có nghĩa (giống dữ liệu thật của giáo viên), dùng xoay vòng theo số thứ tự.
+export const SAMPLE_GAME_TITLES = [
+  'Đếm số đến 10',
+  'Nhận biết chữ cái A Ă Â',
+  'Phân loại con vật theo nơi sống',
+  'Phép cộng trong phạm vi 10',
+  'Sắp xếp các số từ bé đến lớn',
+  'Các màu sắc bằng tiếng Anh',
+  'Lật thẻ tìm cặp con vật',
+  'Ghép vần ăn, ân',
+  'Nhận biết hình tròn, vuông, tam giác',
+  'Điền từ còn thiếu trong câu',
+] as const
+
 export const makeGame = (
   index: number,
   overrides: Partial<GameSummary> = {},
 ): GameSummary => ({
   gameId: `g${index}`,
-  title: `Trò chơi ${index}`,
+  title: SAMPLE_GAME_TITLES[(index - 1 + SAMPLE_GAME_TITLES.length) % SAMPLE_GAME_TITLES.length],
   gameType: 'QUIZ',
   subject: 'MATH',
   gradeLevel: 'GRADE_1',

@@ -53,6 +53,13 @@ Mẫu một mục:
 - Cách chặn: khóa cache mọi dữ liệu theo người dùng phải có định danh người dùng (đã có test hai giáo viên dùng chung cache); hiệu ứng ở layout phải kiểm tra tiêu điểm hiện tại trước khi đặt lại (đã có test đi qua `<App />`).
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-10-14 — Hàm "đoán" bằng so khớp chuỗi con trên văn bản đã bỏ dấu
+- Lỗi: đoán môn học từ ý tưởng bằng `text.includes('toan')` trên chữ đã bỏ dấu nên "hoàn toàn", "ban đêm", "nghề nghiệp", "điện thoại" bị đoán thành Toán hoặc nghe-chọn-hình; chip còn tự điền sẵn cho giáo viên.
+- Phát hiện nhờ: agent `reviewer`; test của mình chỉ có ví dụ đúng, không có ví dụ âm tính.
+- Nguyên nhân gốc: bỏ dấu làm nhiều từ khác nghĩa trùng nhau ("toán/toàn", "tìm/tim", "điền/điện"), mình chỉ nghĩ tới trường hợp khớp đúng.
+- Cách chặn: so khớp từ khóa theo ranh giới từ bằng cụm từ đủ nghĩa (`utils/phraseMatch.ts`); mọi hàm đoán, phân loại theo từ khóa phải có test âm tính với từ gần giống; kiểm bằng ảnh chụp khi hình SVG co giãn (`slice` cắt mất hình ở khung hẹp, phải dùng `meet`).
+- Trạng thái: ĐÃ ÁP DỤNG (đã đổi sang ranh giới từ và thêm test âm tính); chờ duyệt đưa nguyên tắc "test âm tính cho hàm đoán" vào hướng dẫn test.
+
 ## Đã xử lý
 
 ### 2026-10-11 — Agent kiểm tra diff bỏ sót thay đổi chưa commit

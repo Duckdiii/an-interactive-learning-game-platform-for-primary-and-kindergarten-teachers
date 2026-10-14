@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../components/Button'
 import GameCard from '../components/GameCard'
@@ -5,12 +6,16 @@ import ErrorNotice from '../components/ui/ErrorNotice'
 import Icon from '../components/ui/Icon'
 import LetterTiles from '../components/ui/LetterTiles'
 import { MIXED_TILES } from '../components/ui/tileSets'
+import { gradeLevelLabel, subjectLabel } from '../constants/labels'
 import { viText } from '../constants/viText'
 import { countGames, sortByUpdatedDesc, useGames } from '../hooks/useGames'
 import { useAuth } from '../hooks/useAuth'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { ROUTES } from '../routes/paths'
+import { subjectTheme } from '../components/ui/subjectTheme'
+import type { TopicSuggestion } from '../types/game-suggestion.types'
 import { parseApiError } from '../utils/apiError'
+import { suggestTopics, topicToCreateLink } from '../utils/topicSuggestions'
 
 // Số bản nháp tối đa hiện ở mục "Tiếp tục soạn": đủ để chọn nhanh, không biến Trang chủ thành danh sách dài.
 const RECENT_DRAFTS = 3
@@ -24,6 +29,7 @@ export default function Dashboard() {
 
   const games = gamesQuery.data ?? []
   const hasData = gamesQuery.data !== undefined
+  const topics = useMemo(() => suggestTopics(sortByUpdatedDesc(gamesQuery.data ?? [])), [gamesQuery.data])
   const stats = countGames(games)
   const recentDrafts = sortByUpdatedDesc(games)
     .filter((game) => game.status === 'DRAFT')
@@ -117,7 +123,43 @@ export default function Dashboard() {
           </section>
         </>
       ) : null}
+
+      {hasData ? <TopicSuggestions topics={topics} /> : null}
     </div>
+  )
+}
+
+function TopicSuggestions({ topics }: { topics: ReadonlyArray<TopicSuggestion> }) {
+  if (topics.length === 0) return null
+
+  return (
+    <section aria-labelledby="topics-title" className="space-y-4">
+      <div>
+        <h2 id="topics-title" className="text-2xl font-extrabold">
+          {viText.home.topicsTitle}
+        </h2>
+        <p className="mt-1 text-base text-ink-soft">{viText.home.topicsHint}</p>
+      </div>
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {topics.map((topic) => (
+          <li key={topic.id}>
+            <Link
+              to={topicToCreateLink(ROUTES.createGame, topic)}
+              className="group flex h-full flex-col gap-2 rounded-2xl border-2 border-ink/10 bg-white p-4 transition hover:border-brand hover:bg-brand-soft/40"
+            >
+              <span className={`self-start rounded-full px-3 py-1 text-sm font-bold ${subjectTheme(topic.subject).chip}`}>
+                {subjectLabel(topic.subject)} · {gradeLevelLabel(topic.gradeLevel)}
+              </span>
+              <span className="text-lg font-bold leading-snug">{topic.title}</span>
+              <span className="mt-auto flex items-center gap-2 pt-1 text-base font-bold text-brand-strong">
+                <Icon name="sparkles" className="h-4 w-4" />
+                {viText.home.topicsAction}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
@@ -137,9 +179,6 @@ function CreateGameHero() {
             <h2 id="create-title" className="text-2xl font-extrabold sm:text-3xl">
               {viText.home.createTitle}
             </h2>
-            <span className="rounded-full bg-sun px-3 py-1 text-sm font-bold text-ink">
-              {viText.home.createTag}
-            </span>
           </div>
           <p className="mt-3 text-lg leading-8 text-white/90">
             {viText.home.createDescription}
