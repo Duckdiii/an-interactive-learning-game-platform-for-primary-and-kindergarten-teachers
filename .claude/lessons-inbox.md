@@ -31,6 +31,7 @@ Mẫu một mục:
 - Cách chặn: sửa file có `\` bằng công cụ Edit/Write, không ghi qua heredoc; luôn chạy `node --check` sau khi sinh file bằng script.
 - Lặp lại: 2026-10-13 (đợt 3 UI) mình lại ghi regex có `\r?\n` bằng `node - <<'EOF'` và file hỏng đúng như vậy; `tsc` bắt được. Đây là lần thứ hai nên nên nâng thành quy tắc trong `CLAUDE.md`.
 - Lặp lại lần 3 và 4: đợt cải thiện UI/UX lớn (2026-10-13) mình lại ghi regex và chuỗi có `\` bằng heredoc, `node -e "..."` ở 4 chỗ; mỗi lần phải sửa lại bằng công cụ Edit. Bằng chứng đủ để nâng thành quy tắc trong `CLAUDE.md`: "không ghi file chứa dấu gạch chéo ngược bằng heredoc/`node -e`, dùng Write/Edit".
+- Lặp lại lần 5 (2026-10-14, F3): ghi script sửa nhiều file bằng heredoc `cat > ... <<'EOF'` dài trong Bash, lệnh lỗi "unexpected EOF"; phải viết lại bằng công cụ Write rồi chạy `node`.
 - Trạng thái: CHỜ DUYỆT
 
 ### 2026-10-13 — Chỉ kiểm tràn ngang ở điện thoại, bỏ sót máy tính
@@ -59,6 +60,13 @@ Mẫu một mục:
 - Nguyên nhân gốc: bỏ dấu làm nhiều từ khác nghĩa trùng nhau ("toán/toàn", "tìm/tim", "điền/điện"), mình chỉ nghĩ tới trường hợp khớp đúng.
 - Cách chặn: so khớp từ khóa theo ranh giới từ bằng cụm từ đủ nghĩa (`utils/phraseMatch.ts`); mọi hàm đoán, phân loại theo từ khóa phải có test âm tính với từ gần giống; kiểm bằng ảnh chụp khi hình SVG co giãn (`slice` cắt mất hình ở khung hẹp, phải dùng `meet`).
 - Trạng thái: ĐÃ ÁP DỤNG (đã đổi sang ranh giới từ và thêm test âm tính); chờ duyệt đưa nguyên tắc "test âm tính cho hàm đoán" vào hướng dẫn test.
+
+### 2026-10-14 — Test hồi quy "qua" cả khi chưa có bản sửa
+- Lỗi: viết test cho lỗi "tải lại nền thất bại không được thay game đang xem bằng màn lỗi" nhưng test qua cả khi chèn lại lỗi: react-query báo thay đổi bằng `setTimeout(0)` nên giao diện chưa kịp vẽ lại lúc kiểm; lần đầu còn dùng sự kiện `focus` mà react-query không nghe.
+- Phát hiện nhờ: tự chèn lại lỗi (đổi điều kiện về như cũ) rồi chạy test: vẫn xanh.
+- Nguyên nhân gốc: tin test đúng vì nó xanh với bản đã sửa, chưa chứng minh nó đỏ với bản chưa sửa.
+- Cách chặn: mỗi test hồi quy phải được chạy một lần với bản chưa sửa (hoặc chèn lỗi) để thấy nó đỏ; test bất đồng bộ phải chờ một nhịp (hoặc `waitFor`) trước khi kiểm.
+- Trạng thái: CHỜ DUYỆT
 
 ## Đã xử lý
 
