@@ -33,7 +33,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** `getGame(id)` trả game đúng kiểu cho mọi loại; `updateGame` ghi đè và cập nhật `updatedAt`; lỗi được mô hình hóa bằng `ApiError` có mã; test phủ các nhánh lỗi.
 - **Kiểm tra:** `vitest`; kiểm kiểu bằng `tsc -b` (fixture khớp `GameDsl`).
 
-### [ ] F3. Hàm kiểm tra dữ liệu game (thuần)
+### [x] F3. Hàm kiểm tra dữ liệu game (thuần)
 - **Mục tiêu:** `validateGame(game, mode)` với `mode = 'save' | 'publish'` trả danh sách lỗi theo câu và theo trường: giới hạn của SRS giao DSL (câu ≤ 200 ký tự, thời gian 10 đến 120, điểm 1 đến 100, 1 đến 20 câu, đáp án 2 đến 4 và đúng 1 đáp án đúng); SPOT_THE_TARGET thiếu `hitRegion` chỉ lỗi khi xuất bản.
 - **File dự kiến:** `utils/questionSpecs.ts` (bảng mô tả trường theo loại game rút từ schema: nhãn, kiểu, giới hạn, trường nào là đáp án), `utils/gameValidation.ts` (đọc bảng này), `utils/gameValidation.test.ts`, chuỗi lỗi trong `viText`.
 - **Thiết kế mở rộng:** giới hạn và quy tắc của mỗi loại nằm ở **một bảng mô tả**, không rải trong mã; thêm loại mới là thêm một mục vào bảng. Phạm vi kiểm tra hôm nay: QUIZ và MATCHING đầy đủ; các loại khác kiểm các trường chung.

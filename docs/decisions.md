@@ -44,3 +44,4 @@ Mỗi dòng: **quyết định**, lý do. Tất cả mục dưới đây đã đ
 3. Giới hạn câu hỏi 500 (SRS) so với 200 ký tự (DSL), thời gian 10 đến 120 (SRS) so với 5 đến 600 giây (DSL). **Nhóm sửa SRS cho khớp DSL.**
 4. `SessionResults` thiếu thống kê theo câu; `GET .../interactions` chưa được xác nhận. **Backend bổ sung.**
 5. Tài liệu WebSocket Message Format chưa viết. **Backend cung cấp.**
+6. `GameDefaults` của Backend tự đặt thời gian 90 × 1,5 = **135 giây** cho MEMORY_CARD khối mầm non, vượt giới hạn 120 giây (SRS) mà giao diện đang chặn: game AI sinh ra không lưu được cho tới khi giáo viên hạ thời gian. **Nhóm chọn một: Backend giới hạn mặc định ≤ 120, hoặc nâng giới hạn thời gian của SRS/giao diện** (test `gameValidation.test.ts` đang ghi nhận xung đột này).
