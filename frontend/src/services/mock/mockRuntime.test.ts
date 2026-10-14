@@ -31,6 +31,15 @@ describe('runMock', () => {
     expect(produce).not.toHaveBeenCalled()
   })
 
+  it('kịch bản quá thời gian: ném lỗi ECONNABORTED giống axios, parseApiError ra câu "phản hồi quá chậm"', async () => {
+    setMockScenario('timeout')
+
+    const error = await runMock(vi.fn()).catch((caught: unknown) => caught)
+
+    expect((error as AxiosError).code).toBe('ECONNABORTED')
+    expect(parseApiError(error, 'dự phòng').message).toMatch(/quá chậm/)
+  })
+
   it('đổi kịch bản được và đọc lại được', () => {
     setMockScenario('slow')
 
@@ -63,6 +72,14 @@ describe('installMockDevTools (chỉ môi trường phát triển)', () => {
     expect(window.__mock).toBeUndefined()
     expect(getMockScenario()).toBe('normal')
     vi.stubEnv('DEV', true)
+  })
+
+  it('đọc được cả ?mock=timeout', () => {
+    window.history.pushState({}, '', '/workspace?mock=timeout')
+
+    installMockDevTools()
+
+    expect(getMockScenario()).toBe('timeout')
   })
 
   it('giá trị ?mock= lạ bị bỏ qua, giữ kịch bản hiện tại', () => {

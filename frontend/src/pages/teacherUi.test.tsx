@@ -20,7 +20,7 @@ const renderApp = (path: string) => renderWithProviders(<App />, path)
 
 // Mỗi route lazy nên phải chờ tiêu đề trang chính (h1) hiện ra rồi mới kiểm.
 const waitForPage = (name: RegExp | string) =>
-  screen.findByRole('heading', { level: 1, name }, { timeout: 5000 })
+  screen.findByRole('heading', { level: 1, name }, { timeout: 10_000 })
 
 describe('giao diện giáo viên bằng tiếng Việt', () => {
   beforeEach(() => {

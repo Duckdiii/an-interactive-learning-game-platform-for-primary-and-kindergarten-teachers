@@ -1,11 +1,11 @@
 import { AxiosError } from 'axios'
 
 // Môi trường chạy chung của mọi service mô phỏng: độ trễ giả lập và kịch bản (bình thường, trống, lỗi, chậm) để kiểm các
-// trạng thái giao diện mà không cần backend. Kịch bản chỉ đổi được ở môi trường phát triển, qua `window.__mock`:
+// trạng thái giao diện mà không cần backend (normal, empty, error, timeout, slow). Kịch bản chỉ đổi được ở môi trường phát triển, qua `window.__mock`:
 //   window.__mock.setScenario('error')   // 'normal' | 'empty' | 'error' | 'slow'
 // hoặc đặt ngay từ lúc mở trang bằng địa chỉ, ví dụ /workspace?mock=empty
 
-export type MockScenario = 'normal' | 'empty' | 'error' | 'slow'
+export type MockScenario = 'normal' | 'empty' | 'error' | 'timeout' | 'slow'
 
 const SLOW_MS = 3000
 const DEFAULT_LATENCY_MS = 400
@@ -35,6 +35,9 @@ export function mockDelay(ms: number = latencyMs()) {
 /** Lỗi mất kết nối giống lỗi thật của axios, để `parseApiError` ra đúng câu "kiểm tra mạng". */
 export const mockNetworkError = () => new AxiosError('Network Error', 'ERR_NETWORK')
 
+/** Lỗi quá thời gian chờ giống axios (mã ECONNABORTED), để giao diện hiện câu "phản hồi quá chậm". */
+export const mockTimeoutError = () => new AxiosError('timeout of 15000ms exceeded', 'ECONNABORTED')
+
 /**
  * Chạy một lời gọi mô phỏng: chờ độ trễ giả lập, ném lỗi mạng nếu kịch bản là `error`, ngược lại gọi `produce` với kịch
  * bản hiện tại (để service tự trả dữ liệu trống khi `empty`).
@@ -43,6 +46,7 @@ export async function runMock<T>(produce: (current: MockScenario) => T | Promise
   await mockDelay()
 
   if (scenario === 'error') throw mockNetworkError()
+  if (scenario === 'timeout') throw mockTimeoutError()
 
   return produce(scenario)
 }
@@ -53,7 +57,7 @@ declare global {
   }
 }
 
-const SCENARIOS: ReadonlyArray<MockScenario> = ['normal', 'empty', 'error', 'slow']
+const SCENARIOS: ReadonlyArray<MockScenario> = ['normal', 'empty', 'error', 'timeout', 'slow']
 
 /** Gắn công cụ chỉnh kịch bản vào `window.__mock` và đọc `?mock=` trên địa chỉ (chỉ ở môi trường phát triển). */
 export function installMockDevTools() {

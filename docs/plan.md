@@ -26,9 +26,9 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** `VITE_USE_MOCK=all` (mặc định ở `npm run dev`) thì Trang chủ và "Trò chơi của tôi" hiện danh sách mẫu có tên có nghĩa, không cần backend; `none` hoặc không có nhóm `games` thì gọi API thật như cũ; đăng nhập không bao giờ bị mô phỏng; banner và cảnh báo console chỉ hiện khi có nhóm đang mô phỏng; test cho từng nhánh cờ.
 - **Kiểm tra:** `vitest` (hai nhánh cờ); mở trình duyệt với cờ bật và tắt (tắt thì báo lỗi kết nối như hiện nay).
 
-### [ ] F2. Kiểu dữ liệu và kho mock cho game
+### [x] F2. Kiểu dữ liệu và kho mock cho game
 - **Mục tiêu:** có kiểu `GameResponse` (envelope DSL + `gameId`, `status`, `updatedAt`), kho game trong bộ nhớ có mẫu cho cả 10 loại, và `gameService` với `getGame`, `updateGame`, có thể bơm lỗi (không tìm thấy, 409, quá thời gian) cho test.
-- **File dự kiến:** `types/game-response.types.ts`, `services/mock/gameStore.ts`, `services/mock/gameFixtures.ts`, `services/gameService.ts`, `api/gamesApi.ts` (thêm `getGame`, `updateGame` thật), tests.
+- **File dự kiến:** `types/game-response.types.ts`, `services/mock/mockGames.ts` (kho game, thay cho gameStore.ts dự kiến), `services/mock/mockErrors.ts`, `services/mock/gameFixtures.ts`, `services/gameService.ts`, `api/gamesApi.ts` (thêm `getGame`, `updateGame` thật), tests.
 - **Phụ thuộc:** F1.
 - **Hoàn thành khi:** `getGame(id)` trả game đúng kiểu cho mọi loại; `updateGame` ghi đè và cập nhật `updatedAt`; lỗi được mô hình hóa bằng `ApiError` có mã; test phủ các nhánh lỗi.
 - **Kiểm tra:** `vitest`; kiểm kiểu bằng `tsc -b` (fixture khớp `GameDsl`).
