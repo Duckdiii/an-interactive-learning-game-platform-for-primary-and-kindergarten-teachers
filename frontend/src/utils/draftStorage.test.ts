@@ -140,3 +140,25 @@ describe('clearDraftsExcept', () => {
     expect(loadDraft('t10', 'g1')).toBeNull()
   })
 })
+
+describe('draftStorage: tệp nhị phân không vào bản sao lưu', () => {
+  it('đường dẫn blob:/data: của ảnh và âm thanh vừa tải lên bị bỏ khỏi localStorage, đường dẫn thường vẫn giữ', () => {
+    const game = structuredClone(content)
+
+    game.questions[0] = { ...game.questions[0], imageUrl: 'blob:http://localhost/abc', audioUrl: 'data:audio/mpeg;base64,AAAA' }
+    game.questions[1] = { ...game.questions[1], imageUrl: '/mock/cat.png' }
+
+    expect(saveDraft('t1', 'g1', game, '2026-10-14T07:00:00.000Z')).toBe(true)
+
+    const raw = localStorage.getItem('ai-game:editor-draft:t1:g1')!
+
+    expect(raw).not.toContain('blob:')
+    expect(raw).not.toContain('data:')
+
+    const loaded = loadDraft('t1', 'g1')!
+
+    expect(loaded.content.questions[0]).not.toHaveProperty('imageUrl')
+    expect(loaded.content.questions[0]).not.toHaveProperty('audioUrl')
+    expect(loaded.content.questions[1]).toMatchObject({ imageUrl: '/mock/cat.png' })
+  })
+})

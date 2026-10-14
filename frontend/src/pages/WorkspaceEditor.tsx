@@ -11,6 +11,8 @@ import PlayTestBoundary from '../components/editor/PlayTestBoundary'
 import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
 import { PendingEditsContext } from '../components/editor/forms/PendingEditsContext'
 import QuestionEditor from '../components/editor/forms/QuestionEditor'
+import { VoiceContext } from '../components/editor/forms/VoiceContext'
+import type { VoiceGender } from '../services/mediaService'
 import QuestionList from '../components/editor/QuestionList'
 import SaveBar from '../components/editor/SaveBar'
 import ErrorNotice from '../components/ui/ErrorNotice'
@@ -98,6 +100,9 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     return () => setPendingEdits((count) => Math.max(0, count - 1))
   }, [])
   const pendingApi = useMemo(() => ({ begin: beginEdit }), [beginEdit])
+  // Giọng đọc đang chọn cho các lần tạo giọng đọc (FLD-12): giữ ở đây để đổi sang câu khác vẫn còn nguyên.
+  const [voice, setVoice] = useState<VoiceGender>('FEMALE')
+  const voiceApi = useMemo(() => ({ voice, setVoice }), [voice])
   const applying = pendingEdits > 0
   // `lazy` ghi nhớ cả lần tải LỖI: muốn thử lại sau khi mạng ổn lại phải dựng `lazy` mới, nên tạo lại mỗi lần thoát khỏi màn chơi thử.
   const [PlayTestPanel, setPlayTestPanel] = useState(() => lazy(loadPlayTestPanel))
@@ -222,6 +227,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
 
   return (
     <PendingEditsContext.Provider value={pendingApi}>
+    <VoiceContext.Provider value={voiceApi}>
     <div className="space-y-6">
       <header>
         <div className="flex flex-wrap items-center gap-2">
@@ -350,6 +356,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
         </>
       )}
     </div>
+    </VoiceContext.Provider>
     </PendingEditsContext.Provider>
   )
 }

@@ -1,4 +1,5 @@
 import type { GameDsl } from '../types/game-dsl.types'
+import { stripTransientMedia } from './gameContent'
 
 // Sao lưu bản đang soạn vào localStorage để không mất công khi đóng tab, mất mạng hoặc máy hỏng (NFR-03). CHỈ lưu nội dung
 // game của giáo viên đó (khóa theo giáo viên và game), không bao giờ lưu dữ liệu học sinh. Mọi thao tác bọc try/catch:
@@ -50,7 +51,8 @@ export function saveDraft(owner: Owner, gameId: string, content: GameDsl, baseUp
   if (!hasOwner(owner)) return false
 
   try {
-    const draft: StoredDraft = { content, savedAt: now.toISOString(), baseUpdatedAt }
+    // Tệp ảnh/âm thanh vừa tải lên (đường dẫn `blob:`/`data:`) KHÔNG đi vào bản sao lưu: khôi phục sẽ không có ảnh đó thay vì ảnh hỏng.
+    const draft: StoredDraft = { content: stripTransientMedia(content), savedAt: now.toISOString(), baseUpdatedAt }
 
     localStorage.setItem(keyOf(owner, gameId), JSON.stringify(draft))
 

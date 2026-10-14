@@ -3,11 +3,15 @@ import { validationText } from '../../../constants/validationText'
 import type { GameType } from '../../../types/game-dsl.types'
 import { REQUIRED_COMMON_FIELDS } from '../../../utils/gameValidation'
 import { QUESTION_LIMITS } from '../../../utils/questionSpecs'
+import { mediaToolsAvailable } from '../../../services/mediaService'
 import CheckedTextField from './CheckedTextField'
 import { setOptionalText, setPoints, setTimeLimit } from './commonEditing'
 import type { QuestionFormProps } from './formTypes'
+import ImageSuggestions from './ImageSuggestions'
 import { fieldMessage } from './issueText'
+import MediaField from './MediaField'
 import NumberField from './NumberField'
+import SpeechGenerator from './SpeechGenerator'
 import TimeLimitField from './TimeLimitField'
 
 type CommonFieldsFormProps = Pick<QuestionFormProps, 'question' | 'issues' | 'onUpdate'> & {
@@ -16,10 +20,12 @@ type CommonFieldsFormProps = Pick<QuestionFormProps, 'question' | 'issues' | 'on
 }
 
 // Trường CHUNG của mọi loại game: lời đọc (audioText), mô tả hình ảnh (visualPrompt), thời gian trả lời (FLD-07) và điểm. Lời đọc và
-// mô tả hình là tùy chọn, trừ loại game coi chúng là bắt buộc (bảng `REQUIRED_COMMON_FIELDS`). Tải tệp ảnh/âm thanh thật là việc của A5.
+// mô tả hình là tùy chọn, trừ loại game coi chúng là bắt buộc (bảng `REQUIRED_COMMON_FIELDS`). Mỗi trường chữ đi kèm ô tải tệp tương ứng
+// (lời đọc -> âm thanh thuyết minh, mô tả hình -> ảnh minh họa), kèm công cụ gợi ý ảnh và tạo giọng đọc khi có (hiện chỉ ở chế độ mô phỏng).
 export default function CommonFieldsForm({ question, issues, onUpdate, gameType, idPrefix }: CommonFieldsFormProps) {
   const required = REQUIRED_COMMON_FIELDS[gameType]
   const labels = validationText.labels
+  const tools = mediaToolsAvailable()
 
   return (
     <div className="space-y-4">
@@ -32,6 +38,13 @@ export default function CommonFieldsForm({ question, issues, onUpdate, gameType,
         error={fieldMessage(issues, 'audioText')}
         onCommit={(value) => onUpdate((current) => setOptionalText(current, 'audioText', value))}
       />
+      <MediaField
+        kind="audio"
+        idPrefix={idPrefix}
+        url={question.audioUrl}
+        onUpdate={onUpdate}
+        tools={tools ? (api) => <SpeechGenerator idPrefix={idPrefix} audioText={question.audioText} tools={api} /> : undefined}
+      />
       <CheckedTextField
         id={`${idPrefix}-visual-prompt`}
         label={labels.visualPrompt}
@@ -40,6 +53,13 @@ export default function CommonFieldsForm({ question, issues, onUpdate, gameType,
         limits={QUESTION_LIMITS.visualPrompt}
         error={fieldMessage(issues, 'visualPrompt')}
         onCommit={(value) => onUpdate((current) => setOptionalText(current, 'visualPrompt', value))}
+      />
+      <MediaField
+        kind="image"
+        idPrefix={idPrefix}
+        url={question.imageUrl}
+        onUpdate={onUpdate}
+        tools={tools ? (api) => <ImageSuggestions idPrefix={idPrefix} visualPrompt={question.visualPrompt} tools={api} /> : undefined}
       />
       <div className="grid gap-4 sm:grid-cols-2">
         <TimeLimitField

@@ -3,7 +3,7 @@ import { buildMockGameContents } from '../../../services/mock/gameFixtures'
 import type { GameType, QuestionDsl } from '../../../types/game-dsl.types'
 import { GAME_TYPES } from '../../../types/game-dsl.types'
 import { REQUIRED_COMMON_FIELDS, validateQuestion } from '../../../utils/gameValidation'
-import { setOptionalText, setPoints, setTimeLimit } from './commonEditing'
+import { setMediaUrl, setOptionalText, setPoints, setTimeLimit } from './commonEditing'
 
 const questionOf = (type: GameType): QuestionDsl => structuredClone(buildMockGameContents().find((game) => game.gameType === type)!.questions[0])
 
@@ -50,5 +50,30 @@ describe('trường chung', () => {
 
     expect(validateQuestion('AUDIO_VISUAL_MATCH', audio, 0, 'save').some((issue) => issue.field === 'audioText' && issue.code === 'required')).toBe(true)
     expect(validateQuestion('QUIZ', quiz, 0, 'save')).toEqual([])
+  })
+})
+
+describe('setMediaUrl', () => {
+  it('gắn ảnh hoặc âm thanh vào câu mà không đụng các trường khác và không đổi bản cũ', () => {
+    const before = questionOf('QUIZ')
+    const withImage = setMediaUrl(before, 'imageUrl', '/mock/cat.png')
+    const withBoth = setMediaUrl(withImage, 'audioUrl', '/mock/q1.wav')
+
+    expect(withBoth).toMatchObject({ imageUrl: '/mock/cat.png', audioUrl: '/mock/q1.wav', points: before.points, timeLimitSeconds: before.timeLimitSeconds })
+    expect(before.imageUrl).toBeUndefined()
+  })
+
+  it('url undefined (hoặc rỗng) thì BỎ HẲN trường, không để chuỗi rỗng (schema không cho)', () => {
+    const filled = setMediaUrl(questionOf('QUIZ'), 'imageUrl', '/mock/cat.png')
+
+    expect('imageUrl' in setMediaUrl(filled, 'imageUrl', undefined)).toBe(false)
+    expect('imageUrl' in setMediaUrl(filled, 'imageUrl', '')).toBe(false)
+  })
+
+  it('là bản vá lên câu HIỆN HÀNH: áp sau khi câu đã đổi điểm thì giữ điểm mới', () => {
+    const patch = (current: QuestionDsl) => setMediaUrl(current, 'imageUrl', '/mock/cat.png')
+    const edited = setPoints(questionOf('QUIZ'), 77)
+
+    expect(patch(edited)).toMatchObject({ points: 77, imageUrl: '/mock/cat.png' })
   })
 })

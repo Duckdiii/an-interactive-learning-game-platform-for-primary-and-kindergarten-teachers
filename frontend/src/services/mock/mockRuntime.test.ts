@@ -1,7 +1,7 @@
-import { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { parseApiError } from '../../utils/apiError'
-import { getMockScenario, installMockDevTools, mockDelay, runMock, setMockScenario } from './mockRuntime'
+import { getMockScenario, installMockDevTools, mockDelay, mockTotalDelayMs, mockWait, runMock, setMockScenario } from './mockRuntime'
 
 afterEach(() => {
   setMockScenario('normal')
@@ -150,5 +150,62 @@ describe('mockDelay', () => {
     await vi.advanceTimersByTimeAsync(1)
     await promise
     expect(done).toBe(true)
+  })
+})
+
+describe('mockWait (chờ có thể hủy)', () => {
+  it('chờ đủ thời gian rồi mới xong', async () => {
+    vi.useFakeTimers()
+
+    let done = false
+    const waiting = mockWait(1000).then(() => {
+      done = true
+    })
+
+    await vi.advanceTimersByTimeAsync(999)
+    expect(done).toBe(false)
+    await vi.advanceTimersByTimeAsync(1)
+    await waiting
+    expect(done).toBe(true)
+  })
+
+  it('bị hủy GIỮA lúc chờ thì dừng ngay với lỗi hủy của axios, không đợi hết thời gian', async () => {
+    vi.useFakeTimers()
+
+    const controller = new AbortController()
+    const outcome = mockWait(60_000, controller.signal).catch((error: unknown) => error)
+
+    await vi.advanceTimersByTimeAsync(10)
+    controller.abort()
+
+    expect(axios.isCancel(await outcome)).toBe(true)
+    // Bộ hẹn giờ đã được dọn: không còn việc nào treo.
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('đã hủy từ trước thì bị từ chối ngay', async () => {
+    const controller = new AbortController()
+
+    controller.abort()
+
+    await expect(mockWait(10, controller.signal)).rejects.toSatisfy((error) => axios.isCancel(error))
+  })
+
+  it('xong bình thường thì gỡ lắng nghe hủy (hủy sau đó không gây gì)', async () => {
+    const controller = new AbortController()
+
+    await mockWait(0, controller.signal)
+    expect(() => controller.abort()).not.toThrow()
+  })
+})
+
+describe('mockTotalDelayMs', () => {
+  it('kịch bản slow kéo dài tối thiểu 3 giây, kịch bản khác giữ nguyên', () => {
+    expect(mockTotalDelayMs(100)).toBe(100)
+
+    setMockScenario('slow')
+
+    expect(mockTotalDelayMs(100)).toBe(3000)
+    expect(mockTotalDelayMs(5000)).toBe(5000)
   })
 })

@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios'
+import { AxiosError, CanceledError } from 'axios'
 import { setMockGameLocked } from './mockGames'
 
 // Môi trường chạy chung của mọi service mô phỏng: độ trễ giả lập và kịch bản (bình thường, trống, lỗi, chậm) để kiểm các
@@ -27,10 +27,37 @@ function latencyMs() {
   return Number.isFinite(configured) && configured >= 0 ? configured : DEFAULT_LATENCY_MS
 }
 
+/** Độ trễ của MỘT lời gọi theo kịch bản hiện tại (kịch bản `slow` kéo dài tối thiểu 3 giây). */
+export function mockTotalDelayMs(ms: number = latencyMs()) {
+  return scenario === 'slow' ? Math.max(ms, SLOW_MS) : ms
+}
+
 export function mockDelay(ms: number = latencyMs()) {
-  const wait = scenario === 'slow' ? Math.max(ms, SLOW_MS) : ms
+  const wait = mockTotalDelayMs(ms)
 
   return new Promise<void>((resolve) => setTimeout(resolve, wait))
+}
+
+/** Chờ `ms` mili giây nhưng dừng ngay (ném lỗi hủy giống axios) khi `signal` bị hủy: để thử nút "Hủy" của các thao tác chạy lâu. */
+export function mockWait(ms: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new CanceledError('canceled'))
+
+      return
+    }
+
+    const onAbort = () => {
+      clearTimeout(timer)
+      reject(new CanceledError('canceled'))
+    }
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort)
+      resolve()
+    }, ms)
+
+    signal?.addEventListener('abort', onAbort, { once: true })
+  })
 }
 
 /** Lỗi mất kết nối giống lỗi thật của axios, để `parseApiError` ra đúng câu "kiểm tra mạng". */

@@ -220,6 +220,8 @@ describe('MATCHING: dùng được bằng bàn phím', () => {
 
     await openLoaded(MATCHING_ID)
     await user.click(addButton())
+    // Thêm cặp đưa tiêu điểm sang cặp mới ở khung hình kế tiếp: chờ xong rồi mới tự đặt tiêu điểm, kẻo bị giật lại.
+    await waitFor(() => expect(sideBox(3, 'trái', 'Chữ')).toHaveFocus())
     removeButton(4).focus()
     await user.keyboard(' ')
 
@@ -234,6 +236,7 @@ describe('MATCHING: dùng được bằng bàn phím', () => {
     await openLoaded(MATCHING_ID)
     // Có 3 cặp thì nút Xóa bị khóa (không nhận tiêu điểm): thêm một cặp để mọi nút Xóa dùng được.
     await user.click(addButton())
+    await waitFor(() => expect(sideBox(3, 'trái', 'Chữ')).toHaveFocus())
     removeButton(1).focus()
 
     const order: string[] = []

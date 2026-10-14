@@ -9,7 +9,7 @@ import { parseApiError } from '../utils/apiError'
 import { getStoredAccessToken } from '../utils/authStorage'
 import { clearDraft, loadDraft, saveDraft } from '../utils/draftStorage'
 import type { StoredDraft } from '../utils/draftStorage'
-import { deepEqual, toContent, trimContent } from '../utils/gameContent'
+import { deepEqual, stripTransientMedia, toContent, trimContent } from '../utils/gameContent'
 import { summarizeIssues, validateGame } from '../utils/gameValidation'
 import type { ValidationIssue } from '../utils/gameValidation'
 import { gameQueryKey } from './useGame'
@@ -71,10 +71,10 @@ export function useGameEditor(game: GameResponse) {
   })
 
   // Giá trị mới nhất cho các nơi cần ghi sao lưu ngay (rời trang, đóng tab) mà không bị dính giá trị cũ của lần vẽ trước.
-  const latest = useRef({ dirty, pendingRestore, draft: state.draft, baseUpdatedAt })
+  const latest = useRef({ dirty, pendingRestore, draft: state.draft, baseline: state.baseline, baseUpdatedAt })
 
   useEffect(() => {
-    latest.current = { dirty, pendingRestore, draft: state.draft, baseUpdatedAt }
+    latest.current = { dirty, pendingRestore, draft: state.draft, baseline: state.baseline, baseUpdatedAt }
   })
 
   // Sao lưu sau mỗi lần sửa (đợi ngừng gõ một chút). Tạm dừng khi còn đang hỏi khôi phục để không ghi đè bản sao lưu cũ.
@@ -90,7 +90,7 @@ export function useGameEditor(game: GameResponse) {
     }
 
     const timer = setTimeout(() => {
-      if (sessionActive()) saveDraft(owner, game.gameId, state.draft, baseUpdatedAt)
+      if (sessionActive()) saveDraft(owner, game.gameId, stripTransientMedia(state.draft, state.baseline), baseUpdatedAt)
     }, BACKUP_DELAY_MS)
 
     return () => clearTimeout(timer)
@@ -101,7 +101,9 @@ export function useGameEditor(game: GameResponse) {
     const flush = () => {
       const current = latest.current
 
-      if (current.dirty && !current.pendingRestore && sessionActive()) saveDraft(owner, game.gameId, current.draft, current.baseUpdatedAt)
+      if (current.dirty && !current.pendingRestore && sessionActive()) {
+        saveDraft(owner, game.gameId, stripTransientMedia(current.draft, current.baseline), current.baseUpdatedAt)
+      }
     }
 
     window.addEventListener('beforeunload', flush)
