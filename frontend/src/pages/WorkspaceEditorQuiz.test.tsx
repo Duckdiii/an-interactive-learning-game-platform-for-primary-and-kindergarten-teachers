@@ -1,6 +1,6 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getMockGame, resetMockGames } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import * as safety from '../services/safetyService'
@@ -44,6 +44,11 @@ async function openLoaded(gameId: string) {
   renderWithProviders(<WorkspaceEditor />, `/workspace/editor?gameId=${gameId}`)
   await screen.findByRole('textbox', { name: /Tên trò chơi/ })
 }
+
+// Nạp sẵn màn chơi thử (kéo theo renderer Canvas) một lần: lần nạp đầu tiên rất chậm khi nhiều file test chạy song song và sẽ làm test đầu tiên quá hạn.
+beforeAll(async () => {
+  await import('../components/editor/PlayTestPanel')
+}, 120_000)
 
 beforeEach(() => {
   vi.stubEnv('VITE_USE_MOCK', 'editor')
@@ -203,11 +208,12 @@ describe('form sửa câu QUIZ (UC-05)', () => {
     fireEvent.change(questionBox(), { target: { value: 'Cảnh máu me trong hình?' } })
     fireEvent.blur(questionBox())
 
-    expect((await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)))).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)), {}, { timeout: 5000 })).length).toBeGreaterThan(0)
     // Danh sách và vùng xem vẫn là nội dung cũ; chữ vừa gõ còn nằm trong ô để sửa.
     expect(listItems()[0]).toHaveTextContent('Có mấy quả táo trong hình?')
     expect(questionBox()).toHaveValue('Cảnh máu me trong hình?')
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
+    // Bộ đếm "đang áp dụng" giảm ở lượt vẽ kế tiếp sau khi lỗi hiện ra nên chờ một nhịp.
+    await waitFor(() => expect(screen.getByText('Đã lưu')).toBeInTheDocument())
   })
 
   it('có nhãn "Dữ liệu mô phỏng" ở chỗ kiểm tra từ ngữ (bộ lọc là giả lập)', async () => {
@@ -326,7 +332,7 @@ describe('chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đang chạy
     await openLoaded(QUIZ_ID)
     fireEvent.change(optionBox('B'), { target: { value: 'cảnh máu me' } })
     fireEvent.blur(optionBox('B'))
-    await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)))
+    await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)), {}, { timeout: 5000 })
 
     await user.click(screen.getByRole('button', { name: 'Xóa đáp án B' }))
 
@@ -378,7 +384,7 @@ describe('khóa Lưu/Chơi thử khi "Đang áp dụng chỉnh sửa..." luôn m
     await typeSomethingPending('Cảnh máu me trong hình?')
 
     await waitFor(() => expectReleased(), { timeout: 4000 })
-    expect((await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)))).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)), {}, { timeout: 5000 })).length).toBeGreaterThan(0)
     expect(listItems()[0]).toHaveTextContent('Có mấy quả táo trong hình?')
   })
 

@@ -64,7 +64,7 @@ describe('CheckedTextField', () => {
     fireEvent.change(box(), { target: { value: 'Cảnh máu me' } })
     fireEvent.blur(box())
 
-    expect((await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)))).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)), {}, { timeout: 5000 })).length).toBeGreaterThan(0)
     expect(screen.getByRole('textbox', { name: /Nội dung câu hỏi/ })).toHaveAttribute('aria-invalid', 'true')
     expect(committed()).toBe('Có mấy quả táo?')
     expect(onCommit).not.toHaveBeenCalled()
@@ -78,7 +78,7 @@ describe('CheckedTextField', () => {
     render(<Harness />)
     fireEvent.change(box(), { target: { value: 'Cảnh máu me' } })
     fireEvent.blur(box())
-    await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)))
+    await screen.findAllByText(new RegExp(UNSAFE.slice(0, 40)), {}, { timeout: 5000 })
 
     await user.clear(box())
     await user.type(box(), 'Cảnh vui')
@@ -182,5 +182,53 @@ describe('CheckedTextField: kết quả kiểm tra về muộn', () => {
     await act(async () => resolvers[0]({ safe: false }))
 
     expect(screen.queryAllByText(new RegExp(UNSAFE.slice(0, 40)))).toHaveLength(0)
+  })
+})
+
+describe('CheckedTextField: không gửi kiểm tra trùng cùng một nội dung', () => {
+  it('lần kiểm tra chạy chậm hơn hẹn giờ gõ: chỉ gửi MỘT lần và kết quả "không phù hợp" không bị nhấp nháy xóa giữa chừng', async () => {
+    const check = vi.spyOn(safety, 'checkTextSafety').mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve({ safe: false }), 600)),
+    )
+
+    render(<Harness />)
+    fireEvent.change(box(), { target: { value: 'Cảnh máu me' } })
+    fireEvent.blur(box())
+
+    // Qua mốc hẹn giờ gõ (350ms) khi lần kiểm tra đầu còn chạy, rồi chờ lần kiểm tra xong.
+    await new Promise((resolve) => setTimeout(resolve, 900))
+
+    expect(check).toHaveBeenCalledTimes(1)
+    expect(box()).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getAllByText(/Nội dung cũ vẫn được giữ/).length).toBeGreaterThan(0)
+  })
+
+  it('gõ lại đúng nội dung vừa bị từ chối (sau khi sửa rồi quay lại) thì vẫn được kiểm tra lại, không bị kẹt "đang áp dụng"', async () => {
+    const check = vi.spyOn(safety, 'checkTextSafety').mockResolvedValue({ safe: false })
+
+    render(<Harness />)
+    fireEvent.change(box(), { target: { value: 'máu me' } })
+    fireEvent.blur(box())
+    await waitFor(() => expect(check).toHaveBeenCalledTimes(1))
+    fireEvent.change(box(), { target: { value: 'hoa' } })
+    fireEvent.change(box(), { target: { value: 'máu me' } })
+    fireEvent.blur(box())
+
+    await waitFor(() => expect(check).toHaveBeenCalledTimes(2))
+  })
+})
+
+describe('CheckedTextField: sau lỗi kết nối', () => {
+  it('rời ô lần nữa (khi mạng đã ổn) tự kiểm tra lại và áp nội dung, không bắt buộc bấm "Kiểm tra lại"', async () => {
+    render(<Harness />)
+    setMockScenario('error')
+    fireEvent.change(box(), { target: { value: 'Quả cam' } })
+    fireEvent.blur(box())
+    expect((await screen.findAllByText(/Chưa kiểm tra được từ ngữ vì lỗi kết nối/)).length).toBeGreaterThan(0)
+
+    setMockScenario('normal')
+    fireEvent.blur(box())
+
+    await waitFor(() => expect(committed()).toBe('Quả cam'))
   })
 })

@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from '../api/axiosInstance'
 import { getMockGame, resetMockGames } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
@@ -40,6 +40,11 @@ async function openLoaded(gameId: string) {
   renderWithProviders(<WorkspaceEditor />, `/workspace/editor?gameId=${gameId}`)
   await screen.findByRole('textbox', { name: /Tên trò chơi/ })
 }
+
+// Nạp sẵn màn chơi thử (kéo theo renderer Canvas) một lần: lần nạp đầu tiên rất chậm khi nhiều file test chạy song song và sẽ làm test đầu tiên quá hạn.
+beforeAll(async () => {
+  await import('../components/editor/PlayTestPanel')
+}, 120_000)
 
 beforeEach(() => {
   vi.stubEnv('VITE_USE_MOCK', 'editor')

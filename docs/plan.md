@@ -74,7 +74,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** không thể có 5 đáp án hoặc 1 đáp án; đổi đáp án đúng thì chơi thử thấy ngay; nhập từ cấm bị chặn bằng đúng câu UC-05 2a.
 - **Kiểm tra:** `vitest` (form, ranh giới 200 ký tự, 10 đến 120 giây); ảnh bình thường, lỗi từng trường.
 
-### [ ] A4. Sửa tay MATCHING và trường chung các loại khác
+### [x] A4. Sửa tay MATCHING và trường chung các loại khác
 - **Mục tiêu:** form sửa cặp ghép (thêm, bớt, sửa chữ); các loại còn lại sửa được trường chung (thời gian, điểm, lời đọc) và xem nội dung.
 - **File dự kiến:** `components/editor/forms/{MatchingForm,CommonFieldsForm}.tsx`, `components/editor/QuestionEditor.tsx` (chọn form theo loại), tests.
 - **Phụ thuộc:** A3.

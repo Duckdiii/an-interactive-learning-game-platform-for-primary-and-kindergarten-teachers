@@ -329,8 +329,8 @@ const RULES: Readonly<Record<GameType, Rule>> = {
   VISUAL_CLOZE: (q, c) => visualClozeRule(q as VisualClozeQuestion, c),
 }
 
-// Trường chung mà loại game coi là BẮT BUỘC và tự kiểm trong luật riêng.
-const TYPE_OWNED_COMMON_FIELDS: Readonly<Record<GameType, ReadonlyArray<'audioText' | 'visualPrompt'>>> = {
+// Trường chung mà loại game coi là BẮT BUỘC và tự kiểm trong luật riêng (form dùng bảng này để đánh dấu ô bắt buộc).
+export const REQUIRED_COMMON_FIELDS: Readonly<Record<GameType, ReadonlyArray<'audioText' | 'visualPrompt'>>> = {
   QUIZ: [],
   AUDIO_VISUAL_MATCH: ['audioText'],
   ODD_ONE_OUT: [],
@@ -372,7 +372,7 @@ export function validateQuestion(
   checkRange(c, 'timeLimitSeconds', L.timeLimitSeconds, question.timeLimitSeconds, untouchedTime ? DSL_TIME_LIMIT : QUESTION_LIMITS.timeLimitSeconds)
   checkRange(c, 'points', L.points, question.points, QUESTION_LIMITS.points)
   // Trường mà luật của loại game đã kiểm (bắt buộc) thì không kiểm lần hai, tránh báo một lỗi hai lần.
-  const owned = TYPE_OWNED_COMMON_FIELDS[gameType]
+  const owned = REQUIRED_COMMON_FIELDS[gameType]
 
   if (!owned.includes('audioText')) checkText(c, 'audioText', L.audioText, question.audioText, QUESTION_LIMITS.audioText, false)
   if (!owned.includes('visualPrompt')) checkText(c, 'visualPrompt', L.visualPrompt, question.visualPrompt, QUESTION_LIMITS.visualPrompt, false)

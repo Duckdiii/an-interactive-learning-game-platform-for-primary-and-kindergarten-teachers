@@ -1,4 +1,3 @@
-import { useRef, useState } from 'react'
 import { isMock } from '../../../config/mockMode'
 import { viText } from '../../../constants/viText'
 import type { QuizQuestion } from '../../../types/game-dsl.types'
@@ -10,6 +9,7 @@ import CheckedTextField from './CheckedTextField'
 import CommonFieldsForm from './CommonFieldsForm'
 import type { QuestionFormProps } from './formTypes'
 import { fieldMessage } from './issueText'
+import { useStableKeys } from './useStableKeys'
 import { addOption, canAddOption, canRemoveOption, correctIndexOf, positionId, removeOption, setCorrectOption, setOptionText, setQuestionText } from './quizEditing'
 
 const LIMITS = TYPE_LIMITS.QUIZ
@@ -22,12 +22,10 @@ const focusLater = (id: string) => requestAnimationFrame(() => document.getEleme
 // Mã đáp án (a, b, c, d) đổi theo vị trí khi thêm/xóa, nên mỗi đáp án có thêm MỘT KHÓA ỔN ĐỊNH (chỉ nằm trong form này): dùng làm
 // `key` của React để chữ đang gõ dở đi theo đúng đáp án, và để các bản vá đang chờ (kết quả kiểm tra từ ngữ về muộn) tìm lại đúng
 // đáp án theo khóa thay vì theo vị trí đã cũ.
-export default function QuizForm({ question: raw, issues, onUpdate }: QuestionFormProps) {
+export default function QuizForm({ gameType, question: raw, issues, onUpdate }: QuestionFormProps) {
   const text = viText.editor.form
   const question = raw as QuizQuestion
-  const [keys, setKeys] = useState(() => question.options.map((_, index) => `k${index}`))
-  const keysRef = useRef(keys)
-  const nextKey = useRef(question.options.length)
+  const optionKeys = useStableKeys(question.options.length)
   const correctIndex = correctIndexOf(question)
   const canAdd = canAddOption(question)
   const canRemove = canRemoveOption(question)
@@ -41,18 +39,13 @@ export default function QuizForm({ question: raw, issues, onUpdate }: QuestionFo
       : ''
   const describedBy = ['quiz-options-hint', correctError ? 'quiz-correct-error' : '', optionsError ? 'quiz-options-error' : ''].filter(Boolean).join(' ')
 
-  const updateKeys = (next: string[]) => {
-    keysRef.current = next
-    setKeys(next)
-  }
-
   // Vị trí HIỆN TẠI của đáp án có khóa `key` (tính lúc bản vá chạy, không phải lúc bấm); -1 nếu đáp án đã bị xóa.
-  const indexOfKey = (key: string) => keysRef.current.indexOf(key)
+  const indexOfKey = optionKeys.indexOf
 
   const handleAdd = () => {
-    const newIndex = keysRef.current.length
+    const newIndex = optionKeys.count()
 
-    updateKeys([...keysRef.current, `k${nextKey.current++}`])
+    optionKeys.append()
     onUpdate((current) => addOption(current as QuizQuestion))
     focusLater(`quiz-option-${newIndex}`)
   }
@@ -62,10 +55,10 @@ export default function QuizForm({ question: raw, issues, onUpdate }: QuestionFo
 
     if (index < 0) return
 
-    updateKeys(keysRef.current.filter((item) => item !== key))
+    optionKeys.remove(key)
     onUpdate((current) => removeOption(current as QuizQuestion, index))
     // Nút Xóa vừa bị gỡ khỏi trang: đưa tiêu điểm về đáp án kế cận để người dùng bàn phím không mất vị trí.
-    focusLater(`quiz-option-${Math.max(0, Math.min(index, keysRef.current.length - 1))}`)
+    focusLater(`quiz-option-${Math.max(0, Math.min(index, optionKeys.count() - 1))}`)
   }
 
   return (
@@ -95,7 +88,7 @@ export default function QuizForm({ question: raw, issues, onUpdate }: QuestionFo
 
         <ol className="space-y-3">
           {question.options.map((option, index) => {
-            const key = keys[index] ?? option.id
+            const key = optionKeys.keys[index] ?? option.id
             const letter = positionId(index).toUpperCase()
 
             return (
@@ -172,7 +165,7 @@ export default function QuizForm({ question: raw, issues, onUpdate }: QuestionFo
         </div>
       </fieldset>
 
-      <CommonFieldsForm question={question} issues={issues} onUpdate={onUpdate} idPrefix="quiz" />
+      <CommonFieldsForm gameType={gameType} question={question} issues={issues} onUpdate={onUpdate} idPrefix="quiz" />
     </div>
   )
 }

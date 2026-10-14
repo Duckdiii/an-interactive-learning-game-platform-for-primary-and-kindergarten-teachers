@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { createEditorState, editorReducer, isDirty, trimMetadata } from '../components/editor/editorReducer'
+import { createEditorState, editorReducer, isDirty } from '../components/editor/editorReducer'
 import { viText } from '../constants/viText'
 import { updateGame } from '../services/gameService'
 import type { GameDsl, QuestionDsl } from '../types/game-dsl.types'
@@ -9,7 +9,7 @@ import { parseApiError } from '../utils/apiError'
 import { getStoredAccessToken } from '../utils/authStorage'
 import { clearDraft, loadDraft, saveDraft } from '../utils/draftStorage'
 import type { StoredDraft } from '../utils/draftStorage'
-import { deepEqual, toContent } from '../utils/gameContent'
+import { deepEqual, toContent, trimContent } from '../utils/gameContent'
 import { summarizeIssues, validateGame } from '../utils/gameValidation'
 import type { ValidationIssue } from '../utils/gameValidation'
 import { gameQueryKey } from './useGame'
@@ -141,7 +141,7 @@ export function useGameEditor(game: GameResponse) {
 
     // Gửi bản đã cắt khoảng trắng hai đầu; bản đang soạn cũng được cắt để không còn "chưa lưu" chỉ vì dấu cách thừa.
     dispatch({ type: 'normalize' })
-    mutation.mutate(trimMetadata(state.draft))
+    mutation.mutate(trimContent(state.draft))
 
     return []
   }

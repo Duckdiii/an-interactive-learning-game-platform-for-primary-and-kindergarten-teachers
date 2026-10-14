@@ -1,8 +1,9 @@
-import type { QuestionDsl } from '../../../types/game-dsl.types'
+import type { GameType, QuestionDsl } from '../../../types/game-dsl.types'
 import type { ValidationIssue } from '../../../utils/gameValidation'
 
 /** Prop chung của mọi form sửa câu hỏi; mỗi loại game có một form nhận đúng hai thứ này. */
 export interface QuestionFormProps {
+  gameType: GameType
   question: QuestionDsl
   // Lỗi hiện tại của CHÍNH câu này (tính trực tiếp trên bản đang soạn), để hiện ngay dưới từng ô.
   issues: ReadonlyArray<ValidationIssue>
