@@ -1,8 +1,8 @@
 # Kế hoạch thực hiện (Giai đoạn 2)
 
-Trạng thái: **CHỜ DUYỆT ĐỂ BẮT ĐẦU GIAI ĐOẠN 3**. Chưa có dòng mã tính năng nào được viết cho kế hoạch này. Căn cứ: `docs/analysis.md`. Quyết định kèm lý do: `docs/decisions.md`.
+Trạng thái: **ĐÃ DUYỆT (2026-10-14). Đang thực hiện nhóm F**, dừng sau F4 để bạn xem trước khi sang nhóm A. Căn cứ: `docs/analysis.md`. Quyết định kèm lý do: `docs/decisions.md`.
 
-Đã được bạn quyết (2026-10-14): giữ đề xuất 3 đến 5 loại và chọn nhiều tối đa 3; khối lớp, môn học tùy chọn; hai lối sau xuất bản (tự luyện, mở phòng Live); form sửa tay đầy đủ cho QUIZ và MATCHING, **8 loại còn lại làm ở giai đoạn sau**; thống kê câu sai nhiều tự tính từ dữ liệu mô phỏng; duyệt cài `qrcode.react`. Các đề xuất còn lại trong `decisions.md` **chưa áp dụng** cho tới khi bạn trả lời.
+Toàn bộ 16 đề xuất đã được bạn chốt, chi tiết và điều kiện kèm theo ở `docs/decisions.md`. Điều chỉnh so với bản kế hoạch đầu: cờ mô phỏng **theo từng endpoint** (F1), khung "chưa hỗ trợ xem thử" **có ảnh tĩnh minh họa loại game** (A2), `draftStorage` **bọc try/catch và xóa nháp sau khi lưu** (A1), đánh dấu **"Mới"** trên game vừa tạo (A8), FLD-13 vào backlog chờ DSL 1.1.0.
 
 ## Quy ước chung cho mọi subtask
 
@@ -20,10 +20,10 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 ## Nhóm F: nền tảng dùng chung
 
 ### [ ] F1. Cờ mô phỏng và nhãn "Dữ liệu mô phỏng"
-- **Mục tiêu:** có một chỗ duy nhất quyết định dùng mock hay API thật; `getGames` đi qua lớp service; có thành phần nhãn dùng chung.
-- **File dự kiến:** `config/mockMode.ts`, `components/ui/MockBadge.tsx`, `services/gamesService.ts` (bọc `api/gamesApi.ts`), `hooks/useGames.ts` (đổi nguồn), `frontend/.env.example`, `constants/viText.ts`, tests.
+- **Mục tiêu:** có một chỗ duy nhất quyết định dùng mock hay API thật, **theo từng nhóm endpoint** (nhóm đã có backend thật như đăng nhập luôn gọi thật); `getGames` đi qua lớp service; có banner "Đang dùng dữ liệu mô phỏng", cảnh báo console và nhãn "Dữ liệu mô phỏng" dùng chung; có kịch bản mô phỏng (bình thường, trống, lỗi, chậm) chỉ ở môi trường phát triển để kiểm các trạng thái.
+- **File dự kiến:** `config/mockMode.ts`, `services/mock/{mockRuntime,mockGames}.ts`, `components/ui/{MockBadge,MockBanner}.tsx`, `services/gamesService.ts` (bọc `api/gamesApi.ts`), `hooks/useGames.ts` (đổi nguồn), `layouts/AppLayout.tsx` (banner), `main.tsx` (cảnh báo console), `frontend/.env.example`, `src/test-setup.ts`, `constants/viText.ts`, tests.
 - **Phụ thuộc:** không.
-- **Hoàn thành khi:** `VITE_USE_MOCK=true` thì Trang chủ và "Trò chơi của tôi" hiện danh sách mẫu (không cần backend); `false` thì gọi API thật như cũ; nhãn hiển thị đúng chữ; test cho cả hai nhánh.
+- **Hoàn thành khi:** `VITE_USE_MOCK=all` (mặc định ở `npm run dev`) thì Trang chủ và "Trò chơi của tôi" hiện danh sách mẫu có tên có nghĩa, không cần backend; `none` hoặc không có nhóm `games` thì gọi API thật như cũ; đăng nhập không bao giờ bị mô phỏng; banner và cảnh báo console chỉ hiện khi có nhóm đang mô phỏng; test cho từng nhánh cờ.
 - **Kiểm tra:** `vitest` (hai nhánh cờ); mở trình duyệt với cờ bật và tắt (tắt thì báo lỗi kết nối như hiện nay).
 
 ### [ ] F2. Kiểu dữ liệu và kho mock cho game
@@ -56,11 +56,11 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Mục tiêu:** `useReducer` giữ bản đang soạn, cờ chưa lưu, nút **Lưu bản nháp** (UC-04), cảnh báo khi rời trang chưa lưu, báo lỗi 5a (câu chưa có đáp án đúng) và lỗi lưu có nút thử lại; sao lưu nháp vào trình duyệt khi mất mạng (NFR-03).
 - **File dự kiến:** `components/editor/editorReducer.ts`, `utils/draftStorage.ts`, `components/editor/SaveBar.tsx`, tests.
 - **Phụ thuộc:** F3, F4.
-- **Hoàn thành khi:** sửa tiêu đề thì hiện "chưa lưu"; lưu thành công hiện đúng câu "Bạn đã lưu bản nháp thành công."; lỗi giữ nguyên nội dung đang soạn; tải lại trang khôi phục bản nháp sao lưu (có hỏi).
+- **Hoàn thành khi:** sửa tiêu đề thì hiện "chưa lưu"; lưu thành công hiện đúng câu "Bạn đã lưu bản nháp thành công." và **xóa bản sao lưu**; lỗi giữ nguyên nội dung đang soạn; tải lại trang khôi phục bản nháp sao lưu (có hỏi); `draftStorage` **bọc try/catch** (bị chặn thì bỏ qua), chỉ lưu nội dung game, **không lưu dữ liệu học sinh**.
 - **Kiểm tra:** `vitest` (reducer, draftStorage); ảnh trạng thái lưu, lỗi, 409.
 
 ### [ ] A2. Chơi thử (UC-03)
-- **Mục tiêu:** nút **Chơi thử**; QUIZ và MATCHING dùng renderer thật ở chế độ `preview`; loại khác hiện khung "chưa hỗ trợ xem thử" kèm bản chữ; màn tổng kết mô phỏng ghi rõ "không lưu vào báo cáo học sinh"; thoát giữa chừng, "Quay lại chỉnh sửa"; lỗi 2a khi dữ liệu thiếu.
+- **Mục tiêu:** nút **Chơi thử**; QUIZ và MATCHING dùng renderer thật ở chế độ `preview`; loại khác hiện khung "chưa hỗ trợ xem thử" **kèm ảnh tĩnh minh họa loại game đó (`GameTypeCover`, không để trống)** và bản chữ; màn tổng kết mô phỏng ghi rõ "không lưu vào báo cáo học sinh"; thoát giữa chừng, "Quay lại chỉnh sửa"; lỗi 2a khi dữ liệu thiếu.
 - **File dự kiến:** `components/editor/PlayTestPanel.tsx`, `components/editor/playTestRegistry.ts` (bảng loại game đến renderer), `PlayTestSummary.tsx`, tests.
 - **Phụ thuộc:** F3, F4.
 - **Hoàn thành khi:** chơi hết QUIZ mẫu thấy tổng kết; game thiếu đáp án bị từ chối bằng đúng câu UC-03 2a; loại chưa hỗ trợ không giả lập.
@@ -101,6 +101,13 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Phụ thuộc:** A6.
 - **Hoàn thành khi:** đồng ý thì danh sách câu mới; hủy hoặc lỗi giữ nguyên bản cũ.
 - **Kiểm tra:** `vitest`; ảnh cảnh báo, thành công, lỗi.
+
+### [ ] A8. Nối bước đề xuất vào mock và đánh dấu "Mới"
+- **Mục tiêu:** bấm "Tạo N trò chơi" ở trang Tạo game mới gọi `createGames` mock (mỗi loại một game nháp, nhãn "Dữ liệu mô phỏng"); một game thì mở trình soạn thảo, nhiều game thì về "Trò chơi của tôi" kèm thông báo; các game vừa tạo có **đánh dấu "Mới"** trên thẻ game; lỗi giữ nguyên lựa chọn và có nút thử lại.
+- **File dự kiến:** `services/gamesService.ts` (`createGames`), `components/GameCard.tsx` (đánh dấu "Mới"), `pages/CreateGamePage.tsx`, `utils/newGames.ts` (trạng thái "mới" trong phiên làm việc, không lưu máy), tests.
+- **Phụ thuộc:** F2, A1.
+- **Hoàn thành khi:** chọn 1 loại thì vào editor của game mới; chọn 3 loại thì thấy 3 thẻ "Mới" ở danh sách; đánh dấu mất sau khi mở game hoặc khi tải lại trang.
+- **Kiểm tra:** `vitest`; ảnh luồng 1 game, nhiều game, lỗi.
 
 > **Dừng sau nhóm A để bạn duyệt.**
 
@@ -207,7 +214,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - Renderer chơi thử của 8 loại đó (renderer thuộc engine Canvas, ngoài phạm vi).
 
 ## Việc ngoài danh sách (hoãn, chờ bạn quyết)
-- FLD-13 khối giải thích (chờ schema 1.1.0).
+- **Backlog:** FLD-13 khối giải thích (chờ DSL 1.1.0).
 - Chia đội thủ công, học sinh tự chọn đội (cần giao diện học sinh).
-- Cổng STOMP thật (`@stomp/stompjs`, `sockjs-client`) khi có tài liệu message format và backend.
+- Cổng STOMP thật (`@stomp/stompjs`, `sockjs-client`) khi **backend cung cấp tài liệu định dạng message WebSocket** và có backend.
 - Đồng bộ SRS, `openapi.yaml` và backend cho các điểm lệch contract đã liệt kê ở `docs/decisions.md`.
