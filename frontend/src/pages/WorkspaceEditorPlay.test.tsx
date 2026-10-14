@@ -5,6 +5,7 @@ import axiosInstance from '../api/axiosInstance'
 import { getMockGame, resetMockGames } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
+import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
 import WorkspaceEditor from './WorkspaceEditor'
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx).
@@ -46,6 +47,7 @@ beforeEach(() => {
   resetMockGames()
 })
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.stubEnv('VITE_USE_MOCK', 'none')
   setMockScenario('normal')
   localStorage.clear()
@@ -115,5 +117,33 @@ describe('trình soạn thảo: Chơi thử', () => {
     await user.click(screen.getByRole('button', { name: 'Quay lại chỉnh sửa' }))
 
     expect(titleBox()).toBeInTheDocument()
+  })
+})
+
+describe('trình soạn thảo: tải màn chơi thử bị lỗi (UC-03 3b)', () => {
+  it('tải gói đồ họa lỗi: hiện đúng câu của SRS; quay lại chỉnh sửa rồi bấm Chơi thử lại thì mở được', async () => {
+    const user = userEvent.setup()
+
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(playTestPanelLoader, 'load').mockRejectedValueOnce(new Error('ChunkLoadError: mạng chập chờn'))
+
+    await openLoaded(QUIZ_ID)
+    await user.type(titleBox(), ' (thử)')
+    await user.click(playButton())
+
+    const alert = await screen.findByRole('alert', {}, { timeout: 10_000 })
+
+    expect(alert).toHaveTextContent(
+      'Hệ thống gặp sự cố khi tải tài nguyên đồ họa của trò chơi. Vui lòng kiểm tra lại kết nối mạng hoặc cập nhật lại tài nguyên.',
+    )
+
+    // Quay lại chỉnh sửa: nội dung đang soạn còn nguyên.
+    await user.click(screen.getByRole('button', { name: 'Quay lại chỉnh sửa' }))
+    expect(titleBox()).toHaveValue(`${getMockGame(QUIZ_ID).metadata.title} (thử)`)
+
+    // Mạng đã ổn: bấm Chơi thử lần nữa thì mở được (lần tải lỗi không bị ghi nhớ mãi).
+    await user.click(playButton())
+    expect(await screen.findByText('Câu 1 trên 3', {}, { timeout: 10_000 })).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

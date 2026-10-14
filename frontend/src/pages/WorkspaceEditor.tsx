@@ -8,6 +8,7 @@ import EditorLayout from '../components/editor/EditorLayout'
 import type { EditorPane } from '../components/editor/EditorLayout'
 import GameInfoForm from '../components/editor/GameInfoForm'
 import PlayTestBoundary from '../components/editor/PlayTestBoundary'
+import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
 import QuestionList from '../components/editor/QuestionList'
 import SaveBar from '../components/editor/SaveBar'
 import ErrorNotice from '../components/ui/ErrorNotice'
@@ -37,7 +38,7 @@ import { formatRelativeTime } from '../utils/relativeTime'
 const text = viText.editor
 
 // Màn chơi thử kéo theo renderer Canvas (react-konva): chỉ tải khi giáo viên bấm "Chơi thử" để trang soạn thảo mở nhanh.
-const loadPlayTestPanel = () => import('../components/editor/PlayTestPanel')
+const loadPlayTestPanel = () => playTestPanelLoader.load()
 
 // Thẻ thông báo cho các trạng thái không có game để soạn (chưa chọn, không tìm thấy): tiêu đề h1 + lối về.
 function EditorMessage({ title, description }: { title: string; description: string }) {
