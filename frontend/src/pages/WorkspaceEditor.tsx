@@ -17,6 +17,7 @@ import { VoiceContext } from '../components/editor/forms/VoiceContext'
 import type { VoiceGender } from '../services/mediaService'
 import QuestionList from '../components/editor/QuestionList'
 import SaveBar from '../components/editor/SaveBar'
+import SharePanel from '../components/editor/SharePanel'
 import ErrorNotice from '../components/ui/ErrorNotice'
 import GameTypeCover from '../components/ui/GameTypeCover'
 import LetterTiles from '../components/ui/LetterTiles'
@@ -151,6 +152,21 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     const first = editor.save().find((issue) => issue.questionIndex === null)
 
     if (first) focusField(first.field === 'metadata.topic' ? 'game-topic' : 'game-title')
+  }
+
+  const publishText = text.publish
+
+  const handlePublish = () => {
+    setRegenNotice((notice) => (notice?.kind === 'undone' ? null : notice))
+
+    const first = editor.publish().find((issue) => issue.questionIndex === null)
+
+    if (first) focusField(first.field === 'metadata.topic' ? 'game-topic' : 'game-title')
+  }
+
+  const closeSharePanel = () => {
+    editor.dismissPublishResult()
+    focusField('publish-button')
   }
 
   const playIssues = playAttempted ? editor.validate() : []
@@ -384,8 +400,10 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
             saving={editor.saving}
             saved={editor.savedNotice}
             isPublished={isPublished}
+            publishing={editor.publishing}
             applying={applying}
             onSave={handleSave}
+            onPublish={handlePublish}
             onPlayTest={startPlay}
           />
 
@@ -413,6 +431,47 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
                     <li key={`${issue.questionIndex}-${issue.field}-${issue.code}`}>{issue.message}</li>
                   ))}
                 </ul>
+              }
+            />
+          ) : null}
+
+          {editor.publishIssues.length > 0 ? (
+            <ErrorNotice
+              title={publishText.errorTitle}
+              message={editor.publishIssueSummary ?? publishText.invalid}
+              action={
+                <ul className="list-disc space-y-1 pl-5 text-base">
+                  {editor.publishIssues.map((issue) => (
+                    <li key={`${issue.questionIndex}-${issue.field}-${issue.code}`}>
+                      {issue.message}{' '}
+                      <button
+                        type="button"
+                        className="font-bold text-brand-strong underline"
+                        onClick={() => (issue.questionIndex === null ? focusField(issue.field === 'metadata.topic' ? 'game-topic' : 'game-title') : choose(issue.questionIndex))}
+                      >
+                        {issue.questionIndex === null ? publishText.fixInfo : `${publishText.fixQuestion} ${issue.questionIndex + 1}`}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              }
+            />
+          ) : null}
+
+          {editor.publishFailure && editor.publishFailure.kind !== 'canceled' ? (
+            <ErrorNotice
+              title={publishText.errorTitle}
+              message={
+                editor.publishFailure.kind === 'failed' || editor.publishFailure.kind === 'other' || editor.publishFailure.kind === 'invalid'
+                  ? `${editor.publishFailure.message} ${publishText.keptNote}`
+                  : editor.publishFailure.message
+              }
+              action={
+                editor.publishFailure.kind === 'conflict' ? null : (
+                  <Button type="button" onClick={handlePublish} disabled={applying || editor.saving}>
+                    {publishText.retry}
+                  </Button>
+                )
               }
             />
           ) : null}
@@ -448,6 +507,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           />
         </>
       )}
+      {editor.publishResult ? <SharePanel result={editor.publishResult} hasUnsavedAfter={editor.dirty} onClose={closeSharePanel} /> : null}
     </div>
     </VoiceContext.Provider>
     </PendingEditsContext.Provider>

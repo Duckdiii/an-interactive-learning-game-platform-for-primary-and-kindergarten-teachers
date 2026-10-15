@@ -89,6 +89,8 @@ export function useGameEditor(game: GameResponse) {
       setLastSaveOk(false)
       setPublishAttempted(false)
       setPublishResult(result)
+      // Chưa biết mốc thật của máy chủ: tạm dùng giờ máy để bản sao lưu sau đó không bị coi là cũ hơn bản vừa xuất bản; lấy lại được thì thay bằng mốc thật.
+      setBaseUpdatedAt(new Date().toISOString())
       // Kết quả xuất bản không có `updatedAt`: đặt trạng thái ngay để tiêu đề đổi tức thì, rồi lấy bản thật để mốc thời gian khớp máy chủ.
       queryClient.setQueryData<GameResponse>(key, (old) => (old ? { ...old, ...snapshot, status: result.status } : old))
       void queryClient.invalidateQueries({ queryKey: gamesQueryKey(queryOwner) })
@@ -180,6 +182,7 @@ export function useGameEditor(game: GameResponse) {
     setLastSaveOk(false)
     setAttempted(true)
     mutation.reset()
+    publishMutation.reset()
 
     // UC-04 luồng 5a: còn câu thiếu đáp án hoặc nội dung chưa hợp lệ thì báo và KHÔNG gửi lên máy chủ.
     const found = validateGame(state.draft, 'save', { baseline: state.baseline })

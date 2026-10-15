@@ -118,9 +118,10 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 
 ## Nhóm B: Xuất bản và chia sẻ (UC-07, FLD-30)
 
-### [ ] B1. Xuất bản trong trình soạn thảo
+### [x] B1. Xuất bản trong trình soạn thảo
 - **Mục tiêu:** nút **Xuất bản**: kiểm tra chế độ `publish` (UC-07 2c), mock `publishGame`, hộp thoại kết quả có ShareCode, URL, nút sao chép; lỗi 2a, 2b đúng câu SRS và không đổi trạng thái; gọi lại khi đã xuất bản vẫn thành công.
-- **File dự kiến:** `components/editor/{PublishButton,SharePanel}.tsx`, `services/publishService.ts`, `api/gamesApi.ts` (`publishGame` thật), tests.
+- **File thực tế:** B1.1 `api/gamesApi.postPublishGame`, `services/{publishService,mock/mockPublish}.ts`, `mockGames.publishMockGame`, `config/studentApp.ts` (`resolveShareUrl`), `utils/{safeUrl,publishErrors}.ts`; B1.2 `hooks/useGameEditor.publish`; B1.3 `components/editor/{CopyField,SharePanel,SaveBar}.tsx`, `pages/WorkspaceEditor`.
+- **Quyết định khi duyệt B1:** khóa Lưu/Chơi thử/AI/Hoàn tác khi đang xuất bản, thành công thì chỉ phần đã gửi được coi là đã lưu; xuất bản giả định 409 như Lưu; `shareUrl` chỉ nhận http/https; sao chép có phương án dự phòng (chọn sẵn văn bản, báo Ctrl+C); A7 CHƯA chốt (chờ nhóm). Xem `docs/decisions.md` (mục 13, 14 và dòng chuyển trạng thái).
 - **Phụ thuộc:** A1, F3.
 - **Hoàn thành khi:** game thiếu đáp án không xuất bản được và liệt kê câu cần sửa; thành công đổi trạng thái sang "Đã đăng" và thẻ game có mã.
 - **Kiểm tra:** `vitest`; ảnh thành công, lỗi 2a/2b/2c.

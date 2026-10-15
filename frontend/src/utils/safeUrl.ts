@@ -8,6 +8,9 @@ export function safeHttpUrl(value: string | null | undefined): string | null {
   try {
     const url = new URL(value.trim())
 
+    // Địa chỉ kèm tên đăng nhập (https://tai-khoan:mat-khau@host) thường dùng để đánh lừa nơi đến: bỏ luôn.
+    if (url.username !== '' || url.password !== '') return null
+
     return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null
   } catch {
     return null

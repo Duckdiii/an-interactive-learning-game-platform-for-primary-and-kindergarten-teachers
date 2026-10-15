@@ -8,17 +8,20 @@ interface SaveBarProps {
   // Vừa lưu xong và chưa sửa thêm: hiện câu xác nhận.
   saved: boolean
   isPublished: boolean
+  // Đang xuất bản (đã gồm lưu).
+  publishing: boolean
   // Còn chữ vừa gõ chưa vào bản đang soạn (đang kiểm tra từ ngữ): chưa cho Lưu và Chơi thử trên bản cũ.
   applying: boolean
   onSave: () => void
+  onPublish: () => void
   onPlayTest: () => void
 }
 
 // Thanh lưu: trạng thái bằng chữ (không chỉ bằng màu) và nút Lưu bản nháp. Câu xác nhận nằm trong vùng role="status" để
 // trình đọc màn hình đọc ra khi vừa lưu xong.
-export default function SaveBar({ dirty, saving, saved, isPublished, applying, onSave, onPlayTest }: SaveBarProps) {
+export default function SaveBar({ dirty, saving, saved, isPublished, publishing, applying, onSave, onPublish, onPlayTest }: SaveBarProps) {
   const text = viText.editor.save
-  const status = saving ? text.saving : applying ? text.applying : dirty ? text.unsaved : text.allSaved
+  const status = publishing ? viText.editor.publish.publishing : saving ? text.saving : applying ? text.applying : dirty ? text.unsaved : text.allSaved
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border-2 border-ink/10 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -41,8 +44,11 @@ export default function SaveBar({ dirty, saving, saved, isPublished, applying, o
           <Icon name="play" className="mr-2 h-4 w-4" />
           {viText.editor.play.button}
         </Button>
-        <Button type="button" onClick={onSave} disabled={saving || applying || !dirty} className="sm:min-w-44">
+        <Button type="button" variant="secondary" onClick={onSave} disabled={saving || applying || !dirty} className="sm:min-w-44">
           {saving ? text.saving : text.button}
+        </Button>
+        <Button id="publish-button" type="button" onClick={onPublish} disabled={saving || applying} className="sm:min-w-40">
+          {publishing ? viText.editor.publish.publishing : isPublished ? viText.editor.publish.buttonAgain : viText.editor.publish.button}
         </Button>
       </div>
     </div>

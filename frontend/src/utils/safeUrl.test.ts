@@ -8,7 +8,7 @@ describe('safeHttpUrl', () => {
   })
 
   it('bỏ giao thức nguy hiểm hoặc lạ và giá trị không phải địa chỉ', () => {
-    for (const value of ['javascript:alert(1)', 'data:text/html,<b>x</b>', 'file:///etc/passwd', 'ftp://a.b/c', 'vbscript:x', '//evil.com', '/play/ABC', 'abc', '', '   ']) {
+    for (const value of ['javascript:alert(1)', 'data:text/html,<b>x</b>', 'file:///etc/passwd', 'ftp://a.b/c', 'vbscript:x', '//evil.com', '/play/ABC', 'abc', '', '   ', 'https://user:pw@evil.test/x', 'http://user@evil.test/']) {
       expect(safeHttpUrl(value), value).toBeNull()
     }
     expect(safeHttpUrl(null)).toBeNull()

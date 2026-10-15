@@ -6,6 +6,8 @@ interface DialogProps {
   title: string
   // Id của phần tử nhận tiêu điểm đầu tiên khi mở; không có thì lấy phần tử có thể tab đầu tiên.
   initialFocusId?: string
+  // Id của đoạn mô tả để trình đọc màn hình đọc kèm tiêu đề khi mở hộp.
+  describedById?: string
   // Bấm Esc. Hộp thoại KHÔNG đóng khi bấm ra ngoài vùng tối (gõ dở gợi ý dài mà lỡ tay là mất), nên đóng luôn qua nút hoặc Esc.
   onEscape: () => void
   children: ReactNode
@@ -19,7 +21,7 @@ const focusableIn = (root: HTMLElement) => Array.from(root.querySelectorAll<HTML
  * Hộp thoại chặn (modal) dùng được bằng bàn phím và trình đọc màn hình: \`role="dialog"\` + \`aria-modal\`, tiêu điểm vào trong khi mở, Tab quay vòng trong hộp,
  * Esc để đóng, đóng xong trả tiêu điểm về phần tử đã mở nó, khóa cuộn trang nền. Vẽ ra \`document.body\` để không bị bố cục cha cắt hoặc che.
  */
-export default function Dialog({ title, initialFocusId, onEscape, children }: DialogProps) {
+export default function Dialog({ title, initialFocusId, describedById, onEscape, children }: DialogProps) {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   // Chỉ dùng lúc mở: đổi `initialFocusId` sau đó không kéo tiêu điểm đi nữa.
@@ -103,6 +105,7 @@ export default function Dialog({ title, initialFocusId, onEscape, children }: Di
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-describedby={describedById}
         tabIndex={-1}
         className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-6"
       >

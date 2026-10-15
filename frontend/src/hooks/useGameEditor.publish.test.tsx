@@ -75,7 +75,7 @@ describe('useGameEditor.publish', () => {
     client.setQueryData(gameQueryKey(OWNER, GAME_ID), getMockGame(GAME_ID))
     vi.spyOn(gameService, 'getGame').mockRejectedValue(new Error('mất mạng'))
 
-    const { result } = mountEditor()
+    const { result, unmount } = mountEditor()
 
     act(() => result.current.setTitle('Tên mới'))
     act(() => {
@@ -87,6 +87,13 @@ describe('useGameEditor.publish', () => {
 
     expect(result.current.publishFailure).toBeNull()
     expect(client.getQueryData<GameResponse>(gameQueryKey(OWNER, GAME_ID))).toMatchObject({ status: 'PUBLISHED', metadata: { title: 'Tên mới' } })
+
+    // Mốc của bản sao lưu sau đó không được cũ hơn lúc xuất bản dù không lấy lại được mốc máy chủ.
+    const before = getMockGame(GAME_ID).updatedAt
+
+    act(() => result.current.setTitle('Sửa tiếp sau khi xuất bản'))
+    unmount()
+    expect(Date.parse(loadDraft(OWNER, GAME_ID)?.baseUpdatedAt ?? '')).toBeGreaterThanOrEqual(Date.parse(before))
   })
 
   it('dữ liệu chưa đủ để xuất bản (2c): trả lỗi, KHÔNG gọi mạng, không đổi bản đang soạn', async () => {
@@ -177,6 +184,24 @@ describe('useGameEditor.publish', () => {
       result.current.publish()
     })
     await waitFor(() => expect(result.current.publishResult).not.toBeNull())
+    expect(result.current.publishFailure).toBeNull()
+  })
+
+  it('sau lỗi xuất bản, Lưu bản nháp thành công thì lỗi xuất bản cũ biến mất', async () => {
+    const { result } = mountEditor()
+
+    act(() => result.current.setTitle('Lưu sau khi xuất bản lỗi'))
+    setMockPublishFailure('save')
+    act(() => {
+      result.current.publish()
+    })
+    await waitFor(() => expect(result.current.publishFailure).not.toBeNull())
+
+    act(() => {
+      result.current.save()
+    })
+    await waitFor(() => expect(result.current.dirty).toBe(false))
+
     expect(result.current.publishFailure).toBeNull()
   })
 
