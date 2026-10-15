@@ -27,5 +27,21 @@ Chụp trên trình duyệt thật ở chế độ dữ liệu mô phỏng (`VIT
 | `a8-create-many-list-message-desktop.jpg` | A8 | Tạo 3 game xong: về "Trò chơi của tôi" kèm thông báo "Đã tạo 3 trò chơi nháp…" |
 | `a8-list-new-badge-desktop.jpg` | A8 | Thẻ game vừa tạo có chip "Mới", mất khi mở game, đăng xuất hoặc tải lại trang |
 | `a8-editor-simulated-banner-desktop.jpg` | A8 | Mở game vừa tạo: banner nhắc đây là bản mẫu do AI mô phỏng tạo, có thể không khớp mô tả |
+| `b1-share-dialog-desktop.jpg` | B1 (UC-07) | Xuất bản xong: hộp chia sẻ có mã, liên kết, mã QR, nhãn dữ liệu mô phỏng |
+| `b1-share-dialog-mobile-390.jpg` | B1, điện thoại 390px | Cùng hộp chia sẻ dạng tấm trượt từ dưới lên, không tràn ngang |
+| `b1-copy-fallback-desktop.jpg` | B1 | Trình duyệt từ chối sao chép: văn bản liên kết được chọn sẵn và có lời nhắc nhấn Ctrl+C |
+| `b1-copy-fallback-mobile-390.jpg` | B1, điện thoại 390px | Cùng trạng thái sao chép dự phòng trên điện thoại |
+| `b1-error-2a-desktop.jpg` | B1 (UC-07 2a) | Không lưu được: đúng câu SRS, nội dung giữ nguyên, nút "Thử lại" |
+| `b1-error-2a-mobile-390.jpg` | B1 (2a), điện thoại 390px | Cùng lỗi 2a trên điện thoại |
+| `b1-error-2b-desktop.jpg` | B1 (UC-07 2b) | Đã lưu nhưng chưa tạo được mã chia sẻ: đúng câu SRS, nút "Thử lại" |
+| `b1-error-2b-mobile-390.jpg` | B1 (2b), điện thoại 390px | Cùng lỗi 2b trên điện thoại |
+| `b1-error-2c-desktop.jpg` | B1 (UC-07 2c) | Thiếu dữ liệu: câu "kiểm tra và điều chỉnh lại nội dung", liệt kê chỗ cần sửa kèm nút đi tới |
+| `b1-error-2c-mobile-390.jpg` | B1 (2c), điện thoại 390px | Cùng lỗi 2c trên điện thoại |
+| `b2-qr-desktop.jpg` | B2 | Mã QR (nét đen trên nền trắng, vùng yên tĩnh), nút tải SVG, ghi chú QR mô phỏng |
+| `b2-qr-mobile-390.jpg` | B2, điện thoại 390px | Mã QR vừa khít màn hình 390px |
+| `b3-parent-message-desktop.jpg` | B3 | Tin nhắn mẫu gửi phụ huynh: lời nhắc không ghi thông tin học sinh, văn bản sửa được, nút sao chép và đặt lại |
+| `b3-parent-message-mobile-390.jpg` | B3, điện thoại 390px | Cùng tin nhắn mẫu trên điện thoại |
+
+Ảnh nhóm B (B1 đến B3) chụp bằng tập lệnh Playwright chạy qua Bash trên dev server ở chế độ mô phỏng (trình duyệt Chrome có sẵn của máy, không thêm thư viện vào dự án), ở 1280px và 390px; lỗi 2a và 2b do bản xuất bản mô phỏng chèn sẵn. Tập lệnh dùng bản `playwright-core` nằm trong bộ nhớ đệm npx của máy chụp nên không đưa vào kho; ảnh `b2-qr-*` chỉ chụp khung mã QR và nút tải.
 
 Ảnh mobile và các trạng thái lỗi khác của A3, A4 (lỗi nhập, không an toàn) nằm trong `.playwright-mcp/` trên máy phát triển (thư mục này không đưa lên kho mã).

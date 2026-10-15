@@ -250,6 +250,7 @@ Lưu ý: chơi thử cho các loại này cần renderer của engine Canvas (ng
 
 ## Việc ngoài danh sách (hoãn, chờ bạn quyết)
 - **Backlog:** FLD-13 khối giải thích (chờ DSL 1.1.0).
+- **Backlog:** `React.lazy` cho mã QR (và có thể cho cả hộp chia sẻ) để giảm chunk `WorkspaceEditor` (đang khoảng 84,5 kB, gzip 26,6 kB, trong đó thư viện `qrcode.react` và hộp chia sẻ chỉ cần sau khi xuất bản). Chưa làm.
 - Chia đội thủ công, học sinh tự chọn đội (cần giao diện học sinh).
 - Cổng STOMP thật (`@stomp/stompjs`, `sockjs-client`) khi **backend cung cấp tài liệu định dạng message WebSocket** và có backend.
 - Đồng bộ SRS, `openapi.yaml` và backend cho các điểm lệch contract đã liệt kê ở `docs/decisions.md`.
