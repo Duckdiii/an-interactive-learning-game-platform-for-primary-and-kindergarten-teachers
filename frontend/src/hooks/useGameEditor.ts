@@ -2,10 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { createEditorState, editorReducer, isDirty } from '../components/editor/editorReducer'
 import { viText } from '../constants/viText'
-import { updateGame } from '../services/gameService'
+import { getGame, updateGame } from '../services/gameService'
+import { publishGame } from '../services/publishService'
 import type { GameDsl, QuestionDsl } from '../types/game-dsl.types'
 import type { GameResponse } from '../types/game-response.types'
+import type { PublishResult } from '../types/publish.types'
 import { parseApiError } from '../utils/apiError'
+import { describePublishError } from '../utils/publishErrors'
 import { getStoredAccessToken } from '../utils/authStorage'
 import { clearDraft, loadDraft, saveDraft } from '../utils/draftStorage'
 import type { StoredDraft } from '../utils/draftStorage'
@@ -72,6 +75,34 @@ export function useGameEditor(game: GameResponse) {
     },
   })
 
+  // Xuất bản (UC-07): gửi kèm nội dung mới nhất để Backend lưu rồi xuất bản. Thành công thì chỉ phần ĐÃ GỬI được coi là đã lưu (như Lưu): sửa thêm
+  // trong lúc chờ vẫn là "chưa lưu". Lỗi không đụng tới bản đang soạn. Xử lý ở mức mutation nên rời trang giữa chừng vẫn cập nhật bộ nhớ đệm.
+  const [publishAttempted, setPublishAttempted] = useState(false)
+  const [publishResult, setPublishResult] = useState<PublishResult | null>(null)
+  const publishMutation = useMutation({
+    mutationFn: (snapshot: GameDsl) => publishGame(game.gameId, snapshot),
+    onSuccess: async (result, snapshot) => {
+      const key = gameQueryKey(queryOwner, game.gameId)
+
+      dispatch({ type: 'saved', snapshot })
+      clearDraft(owner, game.gameId)
+      setLastSaveOk(false)
+      setPublishAttempted(false)
+      setPublishResult(result)
+      // Kết quả xuất bản không có `updatedAt`: đặt trạng thái ngay để tiêu đề đổi tức thì, rồi lấy bản thật để mốc thời gian khớp máy chủ.
+      queryClient.setQueryData<GameResponse>(key, (old) => (old ? { ...old, ...snapshot, status: result.status } : old))
+      void queryClient.invalidateQueries({ queryKey: gamesQueryKey(queryOwner) })
+
+      try {
+        const fresh = await queryClient.fetchQuery({ queryKey: key, queryFn: () => getGame(game.gameId), staleTime: 0 })
+
+        setBaseUpdatedAt(fresh.updatedAt)
+      } catch {
+        // Không lấy lại được bản mới thì giữ bản vừa vá; xuất bản đã thành công.
+      }
+    },
+  })
+
   // Giá trị mới nhất cho các nơi cần ghi sao lưu ngay (rời trang, đóng tab) mà không bị dính giá trị cũ của lần vẽ trước.
   const latest = useRef({ dirty, pendingRestore, draft: state.draft, baseline: state.baseline, baseUpdatedAt })
 
@@ -127,15 +158,25 @@ export function useGameEditor(game: GameResponse) {
 
   const savedQuestionIds = useMemo(() => new Set(state.baseline.questions.map((question) => question.id)), [state.baseline])
 
+  // Sau lần bấm Xuất bản đầu tiên, lỗi dữ liệu tính lại theo từng lần sửa (kiểm tra theo chế độ XUẤT BẢN, chặt hơn Lưu).
+  const publishIssues = useMemo(
+    () => (publishAttempted ? validateGame(state.draft, 'publish', { baseline: state.baseline }) : []),
+    [publishAttempted, state.draft, state.baseline],
+  )
+
   const edit = (action: Parameters<typeof dispatch>[0]) => {
     setLastSaveOk(false)
     // Sửa tiếp thì lỗi lưu lần trước không còn đúng nữa (đang lưu dở thì để nguyên, tránh mở khóa nút Lưu giữa chừng).
     if (!mutation.isPending) mutation.reset()
+    if (!publishMutation.isPending) publishMutation.reset()
     dispatch(action)
   }
 
   /** Trả về các lỗi tìm thấy (rỗng nghĩa là đã gửi đi), để trang đưa tiêu điểm tới ô lỗi đầu tiên. */
   const save = (): ValidationIssue[] => {
+    // Đang xuất bản (đã gồm lưu) thì không gửi thêm bản lưu chồng lên.
+    if (publishMutation.isPending) return []
+
     setLastSaveOk(false)
     setAttempted(true)
     mutation.reset()
@@ -148,6 +189,26 @@ export function useGameEditor(game: GameResponse) {
     // Gửi bản đã cắt khoảng trắng hai đầu; bản đang soạn cũng được cắt để không còn "chưa lưu" chỉ vì dấu cách thừa.
     dispatch({ type: 'normalize' })
     mutation.mutate(trimContent(state.draft))
+
+    return []
+  }
+
+  /**
+   * Xuất bản bản đang soạn. Trả về các lỗi tìm thấy (rỗng nghĩa là đã gửi đi hoặc đang có lần lưu/xuất bản chạy). Dữ liệu chưa đủ thì KHÔNG gọi mạng (2c).
+   * Đang lưu hoặc đang xuất bản thì bỏ qua (chống bấm đúp, và không gửi hai bản chồng nhau).
+   */
+  const publish = (): ValidationIssue[] => {
+    if (mutation.isPending || publishMutation.isPending) return []
+
+    setPublishAttempted(true)
+    setPublishResult(null)
+
+    const found = validateGame(state.draft, 'publish', { baseline: state.baseline })
+
+    if (found.length > 0) return found
+
+    dispatch({ type: 'normalize' })
+    publishMutation.mutate(trimContent(state.draft))
 
     return []
   }
@@ -202,6 +263,14 @@ export function useGameEditor(game: GameResponse) {
       setRevision((value) => value + 1)
     },
     save,
+    publish,
+    publishing: publishMutation.isPending,
+    publishIssues,
+    publishIssueSummary: summarizeIssues(publishIssues, 'publish'),
+    publishFailure: publishMutation.isError ? describePublishError(publishMutation.error) : null,
+    /** Kết quả lần xuất bản thành công gần nhất (mã chia sẻ, địa chỉ); null khi chưa xuất bản trong phiên này hoặc đã đóng. */
+    publishResult,
+    dismissPublishResult: () => setPublishResult(null),
     validate,
     restore: () => {
       if (!pendingRestore) return

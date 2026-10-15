@@ -108,11 +108,11 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
 
     return () => setPendingEdits((count) => Math.max(0, count - 1))
   }, [])
-  const pendingApi = useMemo(() => ({ begin: beginEdit, pending: pendingEdits > 0 }), [beginEdit, pendingEdits])
+  const applying = pendingEdits > 0 || editor.publishing
+  const pendingApi = useMemo(() => ({ begin: beginEdit, pending: applying }), [beginEdit, applying])
   // Giọng đọc đang chọn cho các lần tạo giọng đọc (FLD-12): giữ ở đây để đổi sang câu khác vẫn còn nguyên.
   const [voice, setVoice] = useState<VoiceGender>('FEMALE')
   const voiceApi = useMemo(() => ({ voice, setVoice }), [voice])
-  const applying = pendingEdits > 0
   // `lazy` ghi nhớ cả lần tải LỖI: muốn thử lại sau khi mạng ổn lại phải dựng `lazy` mới, nên tạo lại mỗi lần thoát khỏi màn chơi thử.
   const [PlayTestPanel, setPlayTestPanel] = useState(() => lazy(loadPlayTestPanel))
   // Đã bấm "Chơi thử" mà dữ liệu chưa đủ: lỗi được tính lại theo từng lần sửa để sửa xong là hết.
