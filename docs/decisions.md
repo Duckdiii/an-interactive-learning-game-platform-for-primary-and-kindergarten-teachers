@@ -57,7 +57,7 @@ Mỗi dòng: **quyết định**, lý do. Tất cả mục dưới đây đã đ
 
 ## Danh sách lệch contract cần nhóm xử lý (tích lũy)
 
-1. Khối lớp, môn học tùy chọn ở giao diện, trong khi SRS (FLD-01/02, UC-02) và `openapi.yaml` (`GenerateGameRequest`) bắt buộc. **Sửa SRS và `openapi.yaml`.**
+1. Khối lớp, môn học tùy chọn ở giao diện, trong khi SRS (FLD-01/02, UC-02) và `openapi.yaml` (`GenerateGameRequest`) bắt buộc. **Sửa SRS và `openapi.yaml`.** **[CHẶN khi nối backend thật] `POST /games/generate` (và `POST /games/{id}/regenerate`) đang BẮT BUỘC `gradeLevel` và `subject`, trong khi UX đã chốt hai trường này là tùy chọn ("Chưa xác định", AI tự suy luận khi thiếu). Đề nghị Backend cho hai trường này OPTIONAL (thiếu thì suy từ `idea`/`randomTopic`, và trả giá trị đã suy trong `metadata`).** Trong lúc chờ, giao diện không gọi API thật bằng yêu cầu thiếu hai trường này (báo giáo viên chọn khối lớp và môn); chế độ mô phỏng không bị ảnh hưởng.
 2. Số lượng và cách chọn loại game đề xuất khác SRS (3 đến 5 nhiều lựa chọn so với 2 đến 3 chọn một). **Cập nhật SRS theo giao diện.**
 3. Giới hạn câu hỏi 500 (SRS) so với 200 ký tự (DSL), thời gian 10 đến 120 (SRS) so với 5 đến 600 giây (DSL). **Nhóm sửa SRS cho khớp DSL.**
 4. `SessionResults` thiếu thống kê theo câu; `GET .../interactions` chưa được xác nhận. **Backend bổ sung.**
