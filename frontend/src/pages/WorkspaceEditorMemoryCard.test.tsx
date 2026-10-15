@@ -4,6 +4,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { getMockGame, resetMockGames, saveMockGame } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
+import type { MemoryCardQuestion } from '../types/game-dsl.types'
 import WorkspaceEditor from './WorkspaceEditor'
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx) để mở màn chơi thử được trong test.
@@ -34,6 +35,15 @@ const saveButton = () => screen.getByRole('button', { name: 'Lưu bản nháp' }
 const type = (box: HTMLElement, value: string) => {
   fireEvent.change(box, { target: { value } })
   fireEvent.blur(box)
+}
+
+// Nạp sẵn câu 1 với `count` cặp thẻ (mã p1, p2...), mỗi cặp một chữ khác nhau.
+function withPairs(count: number) {
+  const game = getMockGame(MEMORY_ID)
+  const question = game.questions[0] as MemoryCardQuestion
+
+  question.pairs = Array.from({ length: count }, (_, index) => ({ pairId: `p${index + 1}`, content: { text: `thẻ ${index + 1}` } }))
+  saveMockGame(MEMORY_ID, game)
 }
 
 async function openLoaded() {
@@ -75,14 +85,12 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('chọn câu khác thì form đổi theo (câu 2 có 4 cặp, câu 3 có 2 cặp)', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(listItems()[1])
+    fireEvent.click(listItems()[1])
     expect(pairItems()).toHaveLength(4)
     expect(cardBox(3, 'Chữ trên thẻ')).toHaveValue('pig')
 
-    await user.click(listItems()[2])
+    fireEvent.click(listItems()[2])
     expect(pairItems()).toHaveLength(2)
     expect(cardBox(1, 'Chữ trên thẻ')).toHaveValue('blue')
   })
@@ -95,19 +103,25 @@ describe('form sửa câu MEMORY_CARD', () => {
     expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
   })
 
-  it('thêm cặp đến 8 thì khóa kèm lời giải thích; xóa về 2 thì khóa nút Xóa', async () => {
+  // Hai test nhẹ thay cho một test dài: dữ liệu được nạp sẵn sát giới hạn nên mỗi test chỉ cần MỘT lần bấm (trước đây 11 lần bấm liên tiếp trên form 8 cặp quá hạn khi máy bận).
+  it('đủ 8 cặp thì nút Thêm khóa kèm lời giải thích (bấm thêm từ 7 cặp)', async () => {
+    withPairs(7)
     await openLoaded()
-    // 3 cặp: còn xóa được (tối thiểu 2).
-    expect(removeButton(1)).toBeEnabled()
+    expect(addButton()).toBeEnabled()
 
-    // fireEvent (đồng bộ) thay cho userEvent: 11 lần bấm liên tiếp trên form lớn đã làm test quá chậm khi máy bận (userEvent chờ giữa các bước bằng bộ hẹn giờ thật).
-    for (let count = 3; count < 8; count += 1) fireEvent.click(addButton())
+    fireEvent.click(addButton())
 
     expect(pairItems()).toHaveLength(8)
     expect(addButton()).toBeDisabled()
     expect(screen.getByText('Đã đủ 8 cặp, không thêm được nữa.')).toBeInTheDocument()
+  })
 
-    for (let count = 8; count > 2; count -= 1) fireEvent.click(removeButton(count))
+  it('còn 2 cặp thì nút Xóa khóa kèm lời giải thích (xóa từ 3 cặp)', async () => {
+    await openLoaded()
+    expect(pairItems()).toHaveLength(3)
+    expect(removeButton(1)).toBeEnabled()
+
+    fireEvent.click(removeButton(3))
 
     expect(pairItems()).toHaveLength(2)
     expect(removeButton(1)).toBeDisabled()
@@ -115,10 +129,8 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('cặp mới còn trống: báo "cần chữ hoặc mô tả hình" và danh sách đánh dấu "Cần sửa"', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(addButton())
+    fireEvent.click(addButton())
 
     expect(within(pairItem(3)).getAllByText(/cần có chữ hoặc mô tả hình/i).length).toBeGreaterThan(0)
     expect(listItems()[0]).toHaveTextContent('Cần sửa')
@@ -129,11 +141,9 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('chữ đang gõ dở đi theo ĐÚNG cặp khi xóa cặp đứng trước (khóa theo mã cặp, không theo vị trí)', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     fireEvent.change(cardBox(1, 'Chữ trên thẻ'), { target: { value: 'dogg' } })
-    await user.click(removeButton(1))
+    fireEvent.click(removeButton(1))
 
     expect(pairItems()).toHaveLength(2)
     expect(cardBox(0, 'Chữ trên thẻ')).toHaveValue('dogg')
@@ -141,10 +151,8 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('mặt thẻ là chữ HOẶC mô tả hình: chỉ cần một trong hai thì hết lỗi', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(addButton())
+    fireEvent.click(addButton())
     type(cardBox(3, 'Mô tả hình trên thẻ'), 'con mèo ngồi trên ghế')
 
     await waitFor(() => expect(within(pairItem(3)).queryAllByText(/cần có chữ hoặc mô tả hình/i)).toHaveLength(0))
@@ -152,14 +160,12 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('không cho trùng: hai cặp cùng chữ bị báo ngay và bấm Lưu bị chặn, kho không đổi', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     type(cardBox(1, 'Chữ trên thẻ'), 'cat')
 
     expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(getMockGame(MEMORY_ID).questions[0]).toMatchObject({ pairs: [{ content: { text: 'cat' } }, { content: { text: 'dog' } }, { content: { text: 'bird' } }] })
@@ -213,7 +219,6 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('game có thời gian 135 giây do Backend sinh: chỉ sửa chữ một thẻ rồi Lưu vẫn thành công và thời gian 135 giây được giữ nguyên', async () => {
-    const user = userEvent.setup()
     const game = getMockGame(MEMORY_ID)
 
     game.questions[0].timeLimitSeconds = 135
@@ -224,7 +229,7 @@ describe('form sửa câu MEMORY_CARD', () => {
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('kitten'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
     await screen.findByText('Bạn đã lưu bản nháp thành công.')
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
@@ -232,15 +237,13 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('lưu: nội dung đã sửa (cặp mới có mã p4, bỏ khoảng trắng thừa) được ghi vào kho', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(addButton())
+    fireEvent.click(addButton())
     type(cardBox(3, 'Chữ trên thẻ'), '  fox  ')
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('4 cặp'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
     await screen.findByText('Bạn đã lưu bản nháp thành công.')
 
     expect(getMockGame(MEMORY_ID).questions[0]).toMatchObject({
@@ -254,10 +257,8 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('chơi thử vẫn "chưa hỗ trợ" (chưa có renderer Canvas cho loại này)', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(screen.getByRole('button', { name: 'Chơi thử' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Chơi thử' }))
 
     expect(await screen.findByText(/chưa hỗ trợ chơi thử/, {}, { timeout: 10_000 })).toBeInTheDocument()
   })

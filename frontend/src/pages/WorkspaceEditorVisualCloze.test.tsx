@@ -46,10 +46,10 @@ async function openLoaded() {
 }
 
 // Nút Lưu chỉ mở khi mọi chữ vừa gõ đã qua bước kiểm tra từ ngữ và vào game: chờ điều kiện đó (không chờ một khoảng cố định) rồi lưu để đọc kết quả thật từ kho.
-async function saveWhenApplied(user: ReturnType<typeof userEvent.setup>) {
+async function saveWhenApplied() {
   await waitFor(() => expect(saveButton()).toBeEnabled(), { timeout: 8000 })
   await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument(), { timeout: 8000 })
-  await user.click(saveButton())
+  fireEvent.click(saveButton())
   await screen.findByText('Bạn đã lưu bản nháp thành công.', {}, { timeout: 8000 })
 }
 
@@ -93,10 +93,8 @@ describe('form sửa câu VISUAL_CLOZE', () => {
   })
 
   it('chọn câu khác thì form đổi theo (câu 3 có 3 từ sai)', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(listItems()[2])
+    fireEvent.click(listItems()[2])
 
     expect(sentenceBox()).toHaveValue('Con cá đang ___ dưới ao.')
     expect(distractorRows()).toHaveLength(3)
@@ -146,8 +144,6 @@ describe('VISUAL_CLOZE: nút "Chèn chỗ trống"', () => {
   })
 
   it('xóa chỗ trống thì nút mở; bấm nút chèn "___" đúng vị trí con trỏ rồi khóa lại, câu hợp lệ trở lại', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     type(sentenceBox(), 'Con mèo đang trên ghế.')
     await waitFor(() => expect(insertButton()).toBeEnabled())
@@ -156,7 +152,7 @@ describe('VISUAL_CLOZE: nút "Chèn chỗ trống"', () => {
     // Con trỏ nằm sau "đang " (vị trí 13).
     sentenceBox().focus()
     sentenceBox().setSelectionRange(13, 13)
-    await user.click(insertButton())
+    fireEvent.click(insertButton())
 
     await waitFor(() => expect(sentenceBox()).toHaveValue('Con mèo đang ___ trên ghế.'))
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('Con mèo đang ___ trên ghế.'), { timeout: 8000 })
@@ -165,15 +161,13 @@ describe('VISUAL_CLOZE: nút "Chèn chỗ trống"', () => {
   })
 
   it('chèn thay cho đoạn đang chọn', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     type(sentenceBox(), 'Con mèo đang ngủ trên ghế.')
     await waitFor(() => expect(insertButton()).toBeEnabled())
 
     sentenceBox().focus()
     sentenceBox().setSelectionRange(13, 16)
-    await user.click(insertButton())
+    fireEvent.click(insertButton())
 
     await waitFor(() => expect(sentenceBox()).toHaveValue('Con mèo đang ___ trên ghế.'))
     // Con trỏ nằm ngay sau chỗ trống vừa chèn (vị trí 16), không nhảy về đầu hay cuối câu.
@@ -182,8 +176,6 @@ describe('VISUAL_CLOZE: nút "Chèn chỗ trống"', () => {
   })
 
   it('đã gõ chỗ trống bằng tay nhưng chữ chưa được áp (nút còn mở): bấm nút không chèn thêm, báo "Câu đã có chỗ trống" và giữ tiêu điểm ở ô câu', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     type(sentenceBox(), 'Con mèo đang trên ghế.')
     await waitFor(() => expect(insertButton()).toBeEnabled())
@@ -191,7 +183,7 @@ describe('VISUAL_CLOZE: nút "Chèn chỗ trống"', () => {
     // Gõ chỗ trống rồi bấm nút ngay, khi chữ này chưa vào game (độ trễ kiểm tra từ ngữ).
     vi.stubEnv('VITE_MOCK_LATENCY_MS', '600')
     fireEvent.change(sentenceBox(), { target: { value: 'Con mèo đang ___ trên ghế.' } })
-    await user.click(insertButton())
+    fireEvent.click(insertButton())
 
     expect(sentenceBox()).toHaveValue('Con mèo đang ___ trên ghế.')
     expect(screen.getByText('Câu đã có chỗ trống.')).toBeInTheDocument()
@@ -201,19 +193,17 @@ describe('VISUAL_CLOZE: nút "Chèn chỗ trống"', () => {
 
 describe('VISUAL_CLOZE: từ sai', () => {
   it('thêm từ sai đến 3 thì khóa kèm lời giải thích; xóa về 1 thì khóa nút Xóa', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     expect(removeButton(1)).toBeEnabled()
 
-    await user.click(addButton())
+    fireEvent.click(addButton())
 
     expect(distractorRows()).toHaveLength(3)
     expect(addButton()).toBeDisabled()
     expect(screen.getByText('Đã đủ 3 từ sai, không thêm được nữa.')).toBeInTheDocument()
 
-    await user.click(removeButton(3))
-    await user.click(removeButton(2))
+    fireEvent.click(removeButton(3))
+    fireEvent.click(removeButton(2))
 
     expect(distractorRows()).toHaveLength(1)
     expect(removeButton(1)).toBeDisabled()
@@ -221,24 +211,20 @@ describe('VISUAL_CLOZE: từ sai', () => {
   })
 
   it('từ sai mới còn trống: báo thiếu chữ đúng ô và danh sách đánh dấu "Cần sửa"', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(addButton())
+    fireEvent.click(addButton())
 
     expect(distractorBox(2)).toHaveAttribute('aria-invalid', 'true')
     expect(listItems()[0]).toHaveTextContent('Cần sửa')
   })
 
   it('từ sai trùng từ đúng bị báo ở danh sách và bấm Lưu bị chặn, kho không đổi', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     type(distractorBox(0), ' NGỦ ')
 
     expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(getMockGame(CLOZE_ID).questions[0]).toMatchObject({ correctAnswer: 'ngủ', distractors: ['chạy', 'bay'] })
@@ -259,30 +245,27 @@ describe('VISUAL_CLOZE: từ sai', () => {
   })
 
   it('xóa từ sai đứng trước: chữ gõ dở đi theo ĐÚNG từ (khóa theo từ, không theo vị trí); lưu xong kho có đúng chữ đó', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(listItems()[2])
+    fireEvent.click(listItems()[2])
     fireEvent.change(distractorBox(1), { target: { value: 'chạy nhanh' } })
-    await user.click(removeButton(1))
+    fireEvent.blur(distractorBox(1))
+    fireEvent.click(removeButton(1))
 
-    await saveWhenApplied(user)
+    await saveWhenApplied()
 
     expect(getMockGame(CLOZE_ID).questions[2]).toMatchObject({ distractors: ['chạy nhanh', 'hát'] })
   })
 
   it('kết quả kiểm tra từ ngữ về MUỘN sau khi xóa từ sai đứng trước: chữ vào đúng từ đã sửa, không trượt sang từ khác', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(listItems()[2])
+    fireEvent.click(listItems()[2])
     vi.stubEnv('VITE_MOCK_LATENCY_MS', '600')
 
     type(distractorBox(2), 'ca hát')
-    await user.click(removeButton(1))
+    fireEvent.click(removeButton(1))
     expect(distractorRows()).toHaveLength(2)
 
-    await saveWhenApplied(user)
+    await saveWhenApplied()
 
     expect(getMockGame(CLOZE_ID).questions[2]).toMatchObject({ distractors: ['chạy', 'ca hát'] })
   })
@@ -298,7 +281,6 @@ describe('VISUAL_CLOZE: kiểm tra từ ngữ, lưu và chơi thử', () => {
   })
 
   it('thời gian: 135 giây do Backend sinh ra giữ nguyên khi chỉ sửa chữ rồi Lưu thành công', async () => {
-    const user = userEvent.setup()
     const game = getMockGame(CLOZE_ID)
 
     game.questions[0].timeLimitSeconds = 135
@@ -309,24 +291,22 @@ describe('VISUAL_CLOZE: kiểm tra từ ngữ, lưu và chơi thử', () => {
     await waitFor(() => expect(screen.getByText('Chưa lưu')).toBeInTheDocument())
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
     await screen.findByText('Bạn đã lưu bản nháp thành công.')
 
     expect(getMockGame(CLOZE_ID).questions[0]).toMatchObject({ timeLimitSeconds: 135, correctAnswer: 'ngủ ngon' })
   })
 
   it('lưu: nội dung đã sửa (câu, từ đúng, từ sai mới, bỏ khoảng trắng thừa) được ghi vào kho', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     type(sentenceBox(), 'Con mèo đang ___ trên giường.')
     type(correctBox(), '  nằm  ')
-    await user.click(addButton())
+    fireEvent.click(addButton())
     type(distractorBox(2), '  hát  ')
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('trên giường'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
     await screen.findByText('Bạn đã lưu bản nháp thành công.')
 
     expect(getMockGame(CLOZE_ID).questions[0]).toMatchObject({
@@ -337,10 +317,8 @@ describe('VISUAL_CLOZE: kiểm tra từ ngữ, lưu và chơi thử', () => {
   })
 
   it('chơi thử vẫn "chưa hỗ trợ" (chưa có renderer Canvas cho loại này)', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(screen.getByRole('button', { name: 'Chơi thử' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Chơi thử' }))
 
     expect(await screen.findByText(/chưa hỗ trợ chơi thử/, {}, { timeout: 10_000 })).toBeInTheDocument()
   })

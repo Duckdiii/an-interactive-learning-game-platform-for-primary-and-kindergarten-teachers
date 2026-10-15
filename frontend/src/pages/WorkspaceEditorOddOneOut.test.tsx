@@ -42,8 +42,8 @@ async function openLoaded() {
   await screen.findByRole('textbox', { name: /Tên trò chơi/ })
 }
 
-const toSecondQuestion = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(listItems()[1])
+const toSecondQuestion = () => {
+  fireEvent.click(listItems()[1])
   expect(itemRows()).toHaveLength(4)
 }
 
@@ -81,10 +81,8 @@ describe('form sửa câu ODD_ONE_OUT', () => {
   })
 
   it('đúng MỘT mục khác loại: chọn mục khác thì mục cũ bỏ chọn', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(oddRadio(0))
+    fireEvent.click(oddRadio(0))
 
     expect(oddRadio(0)).toBeChecked()
     expect(oddRadio(2)).not.toBeChecked()
@@ -100,44 +98,38 @@ describe('form sửa câu ODD_ONE_OUT', () => {
   })
 
   it('thêm mục đến 5 thì khóa kèm lời giải thích; xóa về 3 thì khóa nút Xóa', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     expect(removeButton('A')).toBeDisabled()
     expect(screen.getByText('Cần giữ ít nhất 3 mục.')).toBeInTheDocument()
 
-    await user.click(addButton())
-    await user.click(addButton())
+    fireEvent.click(addButton())
+    fireEvent.click(addButton())
 
     expect(itemRows()).toHaveLength(5)
     expect(addButton()).toBeDisabled()
     expect(screen.getByText('Đã đủ 5 mục, không thêm được nữa.')).toBeInTheDocument()
 
-    await user.click(removeButton('E'))
-    await user.click(removeButton('D'))
+    fireEvent.click(removeButton('E'))
+    fireEvent.click(removeButton('D'))
 
     expect(itemRows()).toHaveLength(3)
     expect(removeButton('A')).toBeDisabled()
   })
 
   it('mục mới còn trống: báo thiếu chữ đúng ô và danh sách đánh dấu "Cần sửa"', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(addButton())
+    fireEvent.click(addButton())
 
     expect(itemBox(3)).toHaveAttribute('aria-invalid', 'true')
     expect(listItems()[0]).toHaveTextContent('Cần sửa')
   })
 
   it('xóa đúng mục đang là mục khác loại: không mục nào được chọn và báo phải chọn lại; chọn lại thì hết lỗi', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await toSecondQuestion(user)
+    toSecondQuestion()
     expect(oddRadio(2)).toBeChecked()
 
-    await user.click(removeButton('C'))
+    fireEvent.click(removeButton('C'))
 
     expect(itemRows()).toHaveLength(3)
     for (let index = 0; index < 3; index += 1) expect(oddRadio(index)).not.toBeChecked()
@@ -145,17 +137,15 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     expect(screen.queryByText(/đáp án đúng/i)).not.toBeInTheDocument()
     expect(listItems()[1]).toHaveTextContent('Cần sửa')
 
-    await user.click(oddRadio(1))
+    fireEvent.click(oddRadio(1))
 
     await waitFor(() => expect(screen.queryByText(/hãy chọn mục khác loại/i)).not.toBeInTheDocument())
   })
 
   it('xóa mục đứng TRƯỚC mục khác loại: lựa chọn đi theo đúng mục (Con cá), không trượt sang mục khác', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await toSecondQuestion(user)
-    await user.click(removeButton('A'))
+    toSecondQuestion()
+    fireEvent.click(removeButton('A'))
 
     expect(itemRows()).toHaveLength(3)
     expect(itemBox(1)).toHaveValue('Con cá')
@@ -163,15 +153,13 @@ describe('form sửa câu ODD_ONE_OUT', () => {
   })
 
   it('kết quả kiểm tra từ ngữ về MUỘN sau khi xóa mục đứng trước: chữ vẫn vào đúng mục đã sửa (theo khóa, không theo vị trí cũ) và mục khác loại không trượt', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await toSecondQuestion(user)
+    toSecondQuestion()
     vi.stubEnv('VITE_MOCK_LATENCY_MS', '600')
 
     // Sửa mục C (Con cá, đang là mục khác loại) rồi xóa mục A trước khi kết quả kiểm tra về.
     type(itemBox(2), 'Cá heo')
-    await user.click(removeButton('A'))
+    fireEvent.click(removeButton('A'))
 
     // Ô vẫn hiện chữ vừa gõ trong lúc chờ: đợi kết quả kiểm tra thật sự vào game (danh sách câu đổi) rồi mới kiểm.
     await waitFor(() => expect(listItems()[1]).toHaveTextContent('Cá heo'), { timeout: 8000 })
@@ -182,12 +170,10 @@ describe('form sửa câu ODD_ONE_OUT', () => {
   })
 
   it('đổi mục khác loại rồi xóa mục đứng trước khi bấm: lựa chọn theo đúng mục được bấm', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await toSecondQuestion(user)
-    await user.click(oddRadio(3))
-    await user.click(removeButton('A'))
+    toSecondQuestion()
+    fireEvent.click(oddRadio(3))
+    fireEvent.click(removeButton('A'))
 
     expect(itemRows()).toHaveLength(3)
     expect(itemBox(2)).toHaveValue('Con bò')
@@ -195,12 +181,15 @@ describe('form sửa câu ODD_ONE_OUT', () => {
   })
 
   it('chữ đang gõ dở đi theo ĐÚNG mục khi xóa mục đứng trước (khóa theo mục, không theo vị trí)', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await toSecondQuestion(user)
+    toSecondQuestion()
     fireEvent.change(itemBox(1), { target: { value: 'Con chó con' } })
-    await user.click(removeButton('A'))
+    fireEvent.click(removeButton('A'))
+
+    // Ngay sau khi xóa (chữ gõ dở CHƯA được áp): ô chữ đi theo đúng mục của nó, không ở lại vị trí cũ.
+    expect(itemRows()).toHaveLength(3)
+    expect(itemBox(0)).toHaveValue('Con chó con')
+    expect(itemBox(1)).toHaveValue('Con cá')
 
     // Chữ gõ dở đi theo mục; chờ đến khi chữ thật sự vào game (danh sách câu đổi) rồi mới khẳng định giá trị cuối.
     await waitFor(() => expect(listItems()[1]).toHaveTextContent('Con chó con'), { timeout: 8000 })
@@ -210,14 +199,12 @@ describe('form sửa câu ODD_ONE_OUT', () => {
   })
 
   it('không cho trùng: hai mục cùng chữ bị báo ngay và bấm Lưu bị chặn, kho không đổi', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     type(itemBox(1), '  hình tròn NHỎ ')
 
     expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(getMockGame(ODD_ID).questions[0]).toMatchObject({ items: [{ text: 'Hình tròn nhỏ' }, { text: 'Hình tròn to' }, { text: 'Hình vuông' }] })
@@ -240,7 +227,6 @@ describe('form sửa câu ODD_ONE_OUT', () => {
   })
 
   it('thời gian: 135 giây do Backend sinh ra giữ nguyên khi chỉ sửa chữ rồi Lưu thành công', async () => {
-    const user = userEvent.setup()
     const game = getMockGame(ODD_ID)
 
     game.questions[0].timeLimitSeconds = 135
@@ -251,23 +237,21 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('Hình tròn bé'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
     await screen.findByText('Bạn đã lưu bản nháp thành công.')
 
     expect(getMockGame(ODD_ID).questions[0]).toMatchObject({ timeLimitSeconds: 135 })
   })
 
   it('lưu: nội dung đã sửa (mục mới mã d, mục khác loại đổi, bỏ khoảng trắng thừa) được ghi vào kho', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(addButton())
+    fireEvent.click(addButton())
     type(itemBox(3), '  Hình tam giác  ')
-    await user.click(oddRadio(3))
+    fireEvent.click(oddRadio(3))
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('Hình tam giác'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    await user.click(saveButton())
+    fireEvent.click(saveButton())
     await screen.findByText('Bạn đã lưu bản nháp thành công.')
 
     expect(getMockGame(ODD_ID).questions[0]).toMatchObject({
@@ -282,10 +266,8 @@ describe('form sửa câu ODD_ONE_OUT', () => {
   })
 
   it('chơi thử vẫn "chưa hỗ trợ" (chưa có renderer Canvas cho loại này)', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
-    await user.click(screen.getByRole('button', { name: 'Chơi thử' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Chơi thử' }))
 
     expect(await screen.findByText(/chưa hỗ trợ chơi thử/, {}, { timeout: 10_000 })).toBeInTheDocument()
   })
