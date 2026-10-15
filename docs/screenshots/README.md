@@ -45,6 +45,10 @@ Chụp trên trình duyệt thật ở chế độ dữ liệu mô phỏng (`VIT
 | `form-memory-card-mobile-390.jpg` | Form MEMORY_CARD, điện thoại 390px | Cùng form một cột, không tràn ngang |
 | `form-memory-card-error-desktop.jpg` | Form MEMORY_CARD | Vừa thêm cặp mới còn trống: báo "cần có chữ hoặc mô tả hình", cả hai ô được đánh dấu |
 | `form-memory-card-error-mobile-390.jpg` | Form MEMORY_CARD, điện thoại 390px | Cùng trạng thái lỗi trên điện thoại |
+| `form-odd-one-out-desktop.jpg` | Form ODD_ONE_OUT | Câu 1 có 3 mục chữ, một mục được chọn là khác loại, nút xóa mục |
+| `form-odd-one-out-mobile-390.jpg` | Form ODD_ONE_OUT, điện thoại 390px | Cùng form một cột, không tràn ngang |
+| `form-odd-one-out-error-desktop.jpg` | Form ODD_ONE_OUT | Vừa thêm mục mới còn trống: báo thiếu chữ đúng ô, ô được đánh dấu không hợp lệ |
+| `form-odd-one-out-error-mobile-390.jpg` | Form ODD_ONE_OUT, điện thoại 390px | Cùng trạng thái lỗi trên điện thoại |
 
 Ảnh nhóm B (B1 đến B3) chụp bằng tập lệnh Playwright chạy qua Bash trên dev server ở chế độ mô phỏng (trình duyệt Chrome có sẵn của máy, không thêm thư viện vào dự án), ở 1280px và 390px; lỗi 2a và 2b do bản xuất bản mô phỏng chèn sẵn. Tập lệnh dùng bản `playwright-core` nằm trong bộ nhớ đệm npx của máy chụp nên không đưa vào kho; ảnh `b2-qr-*` chỉ chụp khung mã QR và nút tải.
 
