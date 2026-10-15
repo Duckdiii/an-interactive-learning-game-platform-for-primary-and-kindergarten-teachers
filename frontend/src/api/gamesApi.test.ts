@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from './axiosInstance'
 import {
   AI_ATTEMPT_TIMEOUT_MS,
+  GENERATE_GAME_TIMEOUT_MS,
+  postGenerateGame,
   AI_BACKEND_ATTEMPTS,
   GAMES_REQUEST_TIMEOUT_MS,
   GAME_REQUEST_TIMEOUT_MS,
@@ -106,5 +108,22 @@ describe('postRegenerateQuestion', () => {
 
     expect(mockedPost.mock.calls[0][1]).toBeUndefined()
     expect(mockedPost.mock.calls[1][1]).toBeUndefined()
+  })
+})
+
+describe('postGenerateGame', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockedPost.mockResolvedValue({ data: { success: true, data: { gameId: 'g1', status: 'DRAFT' } } })
+  })
+
+  it('POST /games/generate với đúng thân yêu cầu, timeout riêng dài hơn một lần gọi AI thường và tín hiệu hủy', async () => {
+    const controller = new AbortController()
+    const request = { gameType: 'QUIZ', idea: 'Trò chơi đếm số lượng con vật', subject: 'MATH', gradeLevel: 'GRADE_1', voice: { region: 'NORTH', gender: 'FEMALE' } }
+    const game = await postGenerateGame(request, controller.signal)
+
+    expect(game).toEqual({ gameId: 'g1', status: 'DRAFT' })
+    expect(mockedPost).toHaveBeenCalledWith('/games/generate', request, { timeout: GENERATE_GAME_TIMEOUT_MS, signal: controller.signal })
+    expect(GENERATE_GAME_TIMEOUT_MS).toBeGreaterThan(REGENERATE_QUESTION_TIMEOUT_MS)
   })
 })

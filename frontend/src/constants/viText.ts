@@ -192,6 +192,8 @@ export const viText = {
     suggestCreateNone: 'Chọn ít nhất 1 loại để tạo',
     suggestErrorTitle: 'Chưa lấy được đề xuất',
     suggestErrorFallback: 'AI chưa đề xuất được lúc này. Bạn thử lại nhé.',
+    createFailed: 'Chưa tạo được trò chơi. Ý tưởng và loại game bạn đã chọn vẫn được giữ, hãy thử lại.',
+    needLessonForServer: 'Hãy chọn khối lớp và môn học trước khi tạo: hệ thống thật cần hai thông tin này.',
     suggestRetry: 'Thử lại',
     suggestEmptyTitle: 'Chưa có đề xuất cho ý tưởng này',
     suggestEmpty: 'Bạn hãy quay lại, mô tả cụ thể hơn một chút (dạy gì, cho lớp nào) rồi thử lại.',

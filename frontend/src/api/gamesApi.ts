@@ -1,7 +1,8 @@
-import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, REGENERATE_QUESTION_TIMEOUT_MS } from '../constants/aiLimits'
+import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS } from '../constants/aiLimits'
 import axiosInstance from './axiosInstance'
 import type { ApiSuccessResponse } from '../types/api'
 import type { RegeneratedQuestion } from '../types/regenerate.types'
+import type { GenerateGameRequest } from '../utils/generateRequest'
 import type { GameEnvelopeBody, GameResponse } from '../types/game-response.types'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
 
@@ -12,7 +13,7 @@ export const GAMES_REQUEST_TIMEOUT_MS = 10_000
 export const GAME_REQUEST_TIMEOUT_MS = 15_000
 
 // Hằng số thời gian chờ của lời gọi AI nằm ở `constants/aiLimits.ts` (dùng chung với AI mô phỏng); xuất lại ở đây cho nơi dùng API.
-export { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, REGENERATE_QUESTION_TIMEOUT_MS }
+export { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS }
 
 export async function getGames(filters: GameFilters) {
   const response = await axiosInstance.get<ApiSuccessResponse<GameSummary[]>>(
@@ -68,6 +69,19 @@ export async function postRegenerateQuestion(gameId: string, questionId: string,
     feedback ? { feedback } : undefined,
     { timeout: REGENERATE_QUESTION_TIMEOUT_MS, signal: options.signal },
   )
+
+  return response.data.data
+}
+
+/**
+ * POST /games/generate (bản JSON đồng bộ): AI sinh MỘT game nháp theo yêu cầu. Muốn nhiều loại thì gọi nhiều lần, mỗi lần một `gameType`.
+ * Không tự thử lại (Backend đã thử lại dịch vụ AI; giới hạn 10 yêu cầu mỗi phút nên thử lại tự động còn dễ chạm 429).
+ */
+export async function postGenerateGame(request: GenerateGameRequest, signal?: AbortSignal) {
+  const response = await axiosInstance.post<ApiSuccessResponse<GameResponse>>('/games/generate', request, {
+    timeout: GENERATE_GAME_TIMEOUT_MS,
+    signal,
+  })
 
   return response.data.data
 }

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { useAuth } from '../hooks/useAuth'
 import { buildMockGameContents } from '../services/mock/gameFixtures'
 import { loadDraft, saveDraft } from '../utils/draftStorage'
+import { clearNewGames, isNewGame, markNewGames } from '../utils/newGames'
 import { AuthProvider } from './AuthContext'
 
 let current: ReturnType<typeof useAuth> | null = null
@@ -21,6 +22,7 @@ function Probe() {
 afterEach(() => {
   current = null
   localStorage.clear()
+  clearNewGames()
 })
 
 describe('AuthProvider.logout', () => {
@@ -62,5 +64,34 @@ describe('AuthProvider.login', () => {
 
     expect(loadDraft('tA', 'g1')).toBeNull()
     expect(loadDraft('tB', 'g2')).not.toBeNull()
+  })
+})
+
+describe('dấu "Mới" của game vừa tạo (máy dùng chung)', () => {
+  it('đăng xuất xóa dấu "Mới"', () => {
+    render(
+      <AuthProvider>
+        <Probe />
+      </AuthProvider>,
+    )
+    act(() => current?.login({ teacherId: 'tA', email: 'a@truong.edu.vn' }, 'token', 'refresh'))
+    markNewGames(['mock-game-11'])
+
+    act(() => current?.logout())
+
+    expect(isNewGame('mock-game-11')).toBe(false)
+  })
+
+  it('người khác đăng nhập (phiên trước chỉ hết hạn chứ chưa đăng xuất) cũng không thấy dấu "Mới" của người trước', () => {
+    render(
+      <AuthProvider>
+        <Probe />
+      </AuthProvider>,
+    )
+    markNewGames(['mock-game-11'])
+
+    act(() => current?.login({ teacherId: 'tB', email: 'b@truong.edu.vn' }, 'token', 'refresh'))
+
+    expect(isNewGame('mock-game-11')).toBe(false)
   })
 })
