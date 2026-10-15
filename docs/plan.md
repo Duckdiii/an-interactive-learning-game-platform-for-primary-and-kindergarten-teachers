@@ -104,9 +104,10 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** đồng ý thì danh sách câu mới; hủy hoặc lỗi giữ nguyên bản cũ.
 - **Kiểm tra:** `vitest`; ảnh cảnh báo, thành công, lỗi.
 
-### [ ] A8. Nối bước đề xuất vào mock và đánh dấu "Mới"
+### [x] A8. Nối bước đề xuất vào mock và đánh dấu "Mới"
 - **Mục tiêu:** bấm "Tạo N trò chơi" ở trang Tạo game mới gọi `createGames` mock (mỗi loại một game nháp, nhãn "Dữ liệu mô phỏng"); một game thì mở trình soạn thảo, nhiều game thì về "Trò chơi của tôi" kèm thông báo; các game vừa tạo có **đánh dấu "Mới"** trên thẻ game; lỗi giữ nguyên lựa chọn và có nút thử lại.
-- **File dự kiến:** `services/gamesService.ts` (`createGames`), `components/GameCard.tsx` (đánh dấu "Mới"), `pages/CreateGamePage.tsx`, `utils/newGames.ts` (trạng thái "mới" trong phiên làm việc, không lưu máy), tests.
+- **File thực tế:** A8.1 `api/gamesApi.postGenerateGame`, `services/{gamesService.createGames,mock/mockGenerate}.ts`, `mockGames.createMockGame`, `utils/{newGames,generateErrors}.ts`; A8.2 `hooks/useCreateGames.ts`, `components/create/CreateGamesProgress.tsx`, `GameCard` (chip "Mới"), `CreateGamePage`, `MyGamesPage` (thông báo), banner game mô phỏng ở `WorkspaceEditor`.
+- **Quyết định khi duyệt A8:** tạo song song tối đa 3 (`allSettled`), không tự thử lại kể cả 429, "Thử lại" chỉ phần còn thiếu, hủy/rời trang hủy yêu cầu, "Mới" chỉ trong phiên và xóa khi đăng xuất/đăng nhập, game mô phỏng có banner ở editor. Xem `docs/decisions.md` mục 12.
 - **Phụ thuộc:** F2, A1.
 - **Hoàn thành khi:** chọn 1 loại thì vào editor của game mới; chọn 3 loại thì thấy 3 thẻ "Mới" ở danh sách; đánh dấu mất sau khi mở game hoặc khi tải lại trang.
 - **Kiểm tra:** `vitest`; ảnh luồng 1 game, nhiều game, lỗi.

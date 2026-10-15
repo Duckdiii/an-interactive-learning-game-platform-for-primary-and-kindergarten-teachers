@@ -8,6 +8,7 @@ import {
 } from '../constants/labels'
 import { viText } from '../constants/viText'
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard'
+import { useNewGameIds } from '../utils/newGames'
 import { ROUTES } from '../routes/paths'
 import type { GameSummary } from '../types/game-summary.types'
 import { formatRelativeTime } from '../utils/relativeTime'
@@ -27,6 +28,8 @@ interface GameCardProps {
 export default function GameCard({ game, now }: GameCardProps) {
   const theme = subjectTheme(game.subject)
   const isPublished = game.status === 'PUBLISHED'
+  // Game vừa tạo bằng AI trong phiên này: chỉ nằm trong bộ nhớ của tab, hết khi giáo viên mở game.
+  const isNew = useNewGameIds().has(game.gameId)
   const { copiedValue, copy } = useCopyToClipboard()
   const [copyFailed, setCopyFailed] = useState(false)
   const justCopied = Boolean(game.shareCode) && copiedValue === game.shareCode
@@ -65,6 +68,7 @@ export default function GameCard({ game, now }: GameCardProps) {
           >
             {gameStatusLabel(game.status)}
           </span>
+          {isNew ? <span className="rounded-full bg-brand px-3 py-1 text-sm font-bold text-white">{viText.gameCard.newBadge}</span> : null}
         </div>
 
         <div className="min-w-0">

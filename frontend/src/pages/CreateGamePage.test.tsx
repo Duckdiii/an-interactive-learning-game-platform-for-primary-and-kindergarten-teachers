@@ -417,30 +417,6 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
     expect(summary.getByText(`${gameTypeLabel(first.type)}, ${gameTypeLabel(second.type)}`)).toBeInTheDocument()
   })
 
-  it('bấm Tạo thì báo rõ chưa tạo được (không giả vờ), chuyển tiêu điểm tới thông báo', async () => {
-    const user = userEvent.setup()
-    renderPage()
-    await toSuggestions(user)
-
-    await user.click(screen.getByRole('button', { name: /^Tạo \d trò chơi$/ }))
-
-    const notice = (await screen.findByText('Tính năng tạo game đang được hoàn thiện')).closest('[role="status"]') as HTMLElement
-    expect(notice).toHaveTextContent('chưa có gì bị mất')
-    await waitFor(() => expect(notice).toHaveFocus())
-  })
-
-  it('đổi lựa chọn sau khi có thông báo thì thông báo biến mất để không gây hiểu nhầm', async () => {
-    const user = userEvent.setup()
-    renderPage()
-    await toSuggestions(user)
-    await user.click(screen.getByRole('button', { name: /^Tạo \d trò chơi$/ }))
-    await screen.findByText('Tính năng tạo game đang được hoàn thiện')
-
-    await user.click(cards()[1])
-
-    expect(screen.queryByText('Tính năng tạo game đang được hoàn thiện')).toBeNull()
-  })
-
   it('"Quay lại sửa mô tả" giữ nguyên mô tả, khối lớp và môn đã nhập, tiêu điểm về ô mô tả', async () => {
     const user = userEvent.setup()
     renderPage()

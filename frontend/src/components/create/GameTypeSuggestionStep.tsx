@@ -18,6 +18,8 @@ interface GameTypeSuggestionStepProps {
   // Chế độ "Tạo ngẫu nhiên": chưa có chủ đề cụ thể, chỉ có thể nói AI sẽ chọn.
   randomTopic: boolean
   errorMessage?: string
+  // Đang tạo game: khóa lựa chọn và nút để không tạo trùng hoặc đổi ý giữa chừng.
+  creating?: boolean
   onToggle: (type: string) => void
   onCreate: () => void
   onBack: () => void
@@ -28,7 +30,7 @@ interface GameTypeSuggestionStepProps {
 // `forwardRef` để trang đưa tiêu điểm vào tiêu đề bước khi vừa chuyển sang đây.
 const GameTypeSuggestionStep = forwardRef<HTMLHeadingElement, GameTypeSuggestionStepProps>(
   function GameTypeSuggestionStep(
-    { status, suggestions, selected, subject, randomTopic, errorMessage, onToggle, onCreate, onBack, onRetry },
+    { status, suggestions, selected, subject, randomTopic, errorMessage, creating = false, onToggle, onCreate, onBack, onRetry },
     headingRef,
   ) {
     const text = viText.generator
@@ -84,7 +86,7 @@ const GameTypeSuggestionStep = forwardRef<HTMLHeadingElement, GameTypeSuggestion
             <ul className="mt-4 grid gap-3">
               {suggestions.map((suggestion, index) => {
                 const checked = selected.includes(suggestion.type)
-                const blocked = limitReached && !checked
+                const blocked = (limitReached && !checked) || creating
 
                 return (
                   <li key={suggestion.type}>
@@ -151,13 +153,13 @@ const GameTypeSuggestionStep = forwardRef<HTMLHeadingElement, GameTypeSuggestion
           <Button
             type="button"
             className="gap-2"
-            disabled={status !== 'success' || selected.length === 0}
+            disabled={status !== 'success' || selected.length === 0 || creating}
             onClick={onCreate}
           >
             <Icon name="sparkles" />
-            {selected.length > 0 ? `${text.suggestCreate} ${selected.length} trò chơi` : text.suggestCreateNone}
+            {creating ? text.creatingButton : selected.length > 0 ? `${text.suggestCreate} ${selected.length} trò chơi` : text.suggestCreateNone}
           </Button>
-          <Button type="button" variant="secondary" onClick={onBack}>
+          <Button type="button" variant="secondary" onClick={onBack} disabled={creating}>
             {text.suggestBack}
           </Button>
         </div>

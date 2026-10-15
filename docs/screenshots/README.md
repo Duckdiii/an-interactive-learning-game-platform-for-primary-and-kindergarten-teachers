@@ -1,4 +1,4 @@
-# Ảnh chụp màn hình giao diện soạn thảo (A3, A4, A5, A6)
+# Ảnh chụp màn hình giao diện soạn thảo (A3, A4, A5, A6, A8)
 
 Chụp trên trình duyệt thật ở chế độ dữ liệu mô phỏng (`VITE_USE_MOCK` bỏ trống khi chạy `npm run dev`), nhóm giáo viên "Nguyễn Thị Lan". Màn hình rộng, bố cục hai cột (danh sách câu và form sửa).
 
@@ -20,5 +20,12 @@ Chụp trên trình duyệt thật ở chế độ dữ liệu mô phỏng (`VIT
 | `a6-regenerate-unsafe-5a-desktop.jpg` | A6 (UC-06 5a) | Nội dung tạo lại không an toàn: đúng câu của SRS, tiêu điểm về ô gợi ý để sửa lại |
 | `a6-regenerate-unsafe-5a-mobile-390.jpg` | A6 (UC-06 5a), điện thoại 390px | Cùng trạng thái 5a, hộp thoại dạng tấm trượt từ dưới lên |
 | `a6-regenerate-save-first-desktop.jpg` | A6 | Câu mới thêm chưa lưu: nút "Yêu cầu AI làm lại" khóa kèm chữ "Hãy lưu trước" |
+| `a8-create-progress-cancel-desktop.jpg` | A8 (UC-02) | Đang tạo 3 trò chơi song song: mỗi loại "Đang tạo", nhãn dữ liệu mô phỏng, nút "Hủy tạo"; nút Tạo và các lựa chọn bị khóa |
+| `a8-create-canceled-desktop.jpg` | A8 | Đã hủy giữa chừng: không game nào được tạo, lựa chọn được giữ, nút "Tạo tiếp phần còn lại" |
+| `a8-create-failed-retry-desktop.jpg` | A8 | Lỗi (AI quá lâu) ở từng loại, câu theo bảng mã lỗi, nút "Thử lại phần còn thiếu" (chỉ tạo loại còn thiếu) |
+| `a8-create-failed-mobile-390.jpg` | A8, điện thoại 390px | Cùng trạng thái lỗi trên điện thoại, không tràn ngang |
+| `a8-create-many-list-message-desktop.jpg` | A8 | Tạo 3 game xong: về "Trò chơi của tôi" kèm thông báo "Đã tạo 3 trò chơi nháp…" |
+| `a8-list-new-badge-desktop.jpg` | A8 | Thẻ game vừa tạo có chip "Mới", mất khi mở game, đăng xuất hoặc tải lại trang |
+| `a8-editor-simulated-banner-desktop.jpg` | A8 | Mở game vừa tạo: banner nhắc đây là bản mẫu do AI mô phỏng tạo, có thể không khớp mô tả |
 
 Ảnh mobile và các trạng thái lỗi khác của A3, A4 (lỗi nhập, không an toàn) nằm trong `.playwright-mcp/` trên máy phát triển (thư mục này không đưa lên kho mã).

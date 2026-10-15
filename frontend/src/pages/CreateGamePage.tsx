@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
+import CreateGamesProgress from '../components/create/CreateGamesProgress'
 import GameTypeSuggestionStep from '../components/create/GameTypeSuggestionStep'
 import LessonContextChips from '../components/create/LessonContextChips'
 import FileDropZone from '../components/ui/FileDropZone'
@@ -17,6 +18,9 @@ import {
   subjectLabel,
 } from '../constants/labels'
 import { viText } from '../constants/viText'
+import { isMock } from '../config/mockMode'
+import { ROUTES } from '../routes/paths'
+import { useCreateGames } from '../hooks/useCreateGames'
 import { useGameTypeSuggestions } from '../hooks/useGameTypeSuggestions'
 import { useLessonContext } from '../hooks/useLessonContext'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -26,6 +30,7 @@ import {
   IDEA_MAX_LENGTH,
   IDEA_MIN_LENGTH,
   MAX_GAMES_PER_REQUEST,
+  buildGenerateRequest,
   checkGenerate,
   hasValidIdea,
 } from '../utils/generateRequest'
@@ -59,8 +64,9 @@ export default function CreateGamePage() {
   const [step, setStep] = useState<Step>('describe')
   const [mode, setMode] = useState<Mode>('idea')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
-  const [ready, setReady] = useState(false)
-  const noticeRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  const creation = useCreateGames()
+  const progressRef = useRef<HTMLDivElement>(null)
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
   const suggestionsMutation = useGameTypeSuggestions()
   const lastInput = useRef({ idea: '', gradeLevel: '', subject: '' })
@@ -70,7 +76,8 @@ export default function CreateGamePage() {
     if (params.get('random')) document.getElementById('create-grade')?.focus()
   }, [params])
 
-  const touch = () => setReady(false)
+  // Đổi ý tưởng hoặc lựa chọn thì kết quả tạo trước đó không còn đúng nữa (game đã tạo vẫn còn trong danh sách, chỉ không dùng lại cho lần tạo mới).
+  const touch = () => creation.reset()
 
   const templates = GAME_TEMPLATES.filter(
     (template) =>
@@ -145,8 +152,8 @@ export default function CreateGamePage() {
     setTimeout(() => document.getElementById('create-idea')?.focus(), 0)
   }
 
+  // Đổi lựa chọn KHÔNG xóa kết quả đã có: loại đã tạo xong vẫn được nhớ (chọn lại hay bấm Tạo cũng không tạo trùng); loại bị bỏ chọn thì biến khỏi khối kết quả.
   const toggleType = (type: string) => {
-    touch()
     setSelectedTypes((current) => {
       if (current.includes(type)) return current.filter((item) => item !== type)
 
@@ -154,11 +161,33 @@ export default function CreateGamePage() {
     })
   }
 
-  const createSelected = () => {
-    // Endpoint POST /games/generate còn `planned`: báo rõ chưa tạo được để giáo viên không tưởng trò chơi đã được tạo.
-    // Khi endpoint sẵn sàng, với mỗi loại đã chọn dựng yêu cầu bằng buildGenerateRequest(form, mode, type) rồi gọi API.
-    setReady(true)
-    setTimeout(() => noticeRef.current?.focus(), 0)
+  // Mỗi loại đã chọn là một yêu cầu sinh game (chạy song song). Dựng từ ĐÚNG dữ liệu đã dùng để đề xuất (lastInput), không từ ô nhập hiện tại.
+  const createSelected = async () => {
+    const form = {
+      subject: lastInput.current.subject,
+      gradeLevel: lastInput.current.gradeLevel,
+      idea: lastInput.current.idea,
+      voiceRegion: voice.voiceRegion,
+      voiceGender: voice.voiceGender,
+      hasFile: file !== null,
+    }
+    const running = creation.create(selectedTypes.map((type) => buildGenerateRequest(form, mode, type)))
+
+    // Nút Tạo vừa bị khóa (mất tiêu điểm): đưa tiêu điểm tới khối tiến trình để người dùng bàn phím tới ngay nút "Hủy tạo".
+    setTimeout(() => progressRef.current?.focus(), 0)
+
+    const outcome = await running
+
+    if (outcome.status === 'done') {
+      // Một game thì vào thẳng trình soạn thảo; nhiều game thì về "Trò chơi của tôi" kèm thông báo (các game có dấu "Mới").
+      if (outcome.games.length === 1) navigate(`${ROUTES.workspaceEditor}?gameId=${encodeURIComponent(outcome.games[0].gameId)}`)
+      else navigate(ROUTES.workspace, { state: { created: outcome.games.length } })
+
+      return
+    }
+
+    // Còn loại chưa tạo được hoặc đã hủy: đưa tiêu điểm tới khối kết quả để người dùng bàn phím và trình đọc màn hình biết ngay.
+    if (outcome.status !== 'busy') setTimeout(() => progressRef.current?.focus(), 0)
   }
 
   const onSubmit = (event: FormEvent) => {
@@ -378,26 +407,33 @@ export default function CreateGamePage() {
                   ? parseApiError(suggestionsMutation.error, text.suggestErrorFallback).message
                   : undefined
               }
+              creating={creation.creating}
               onToggle={toggleType}
-              onCreate={createSelected}
+              onCreate={() => void createSelected()}
               onBack={backToDescribe}
               onRetry={retrySuggestions}
             />
           )}
 
-          {ready ? (
-            <div
-              ref={noticeRef}
-              tabIndex={-1}
-              role="status"
-              className="rounded-2xl border-2 border-sun bg-sun-soft p-4 outline-none"
-            >
-              <p className="flex items-center gap-2 text-base font-bold text-ink">
-                <Icon name="info" />
-                {text.notReadyTitle}
-              </p>
-              <p className="mt-1 text-base leading-7 text-ink">{text.notReady}</p>
-            </div>
+          {step === 'suggest' && file !== null ? (
+            <p className="flex items-start gap-2 text-sm text-ink-soft">
+              <Icon name="info" className="mt-0.5 h-4 w-4 shrink-0" />
+              {text.fileNotUsed}
+            </p>
+          ) : null}
+
+          {step === 'suggest' ? (
+            <CreateGamesProgress
+              ref={progressRef}
+              types={selectedTypes}
+              creating={creation.creating}
+              canceled={creation.canceled}
+              created={creation.created}
+              failures={creation.failures}
+              mock={isMock('ai')}
+              onRetry={() => void createSelected()}
+              onCancel={creation.cancel}
+            />
           ) : null}
         </div>
 

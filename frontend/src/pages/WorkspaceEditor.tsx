@@ -31,6 +31,8 @@ import {
 } from '../constants/labels'
 import { viText } from '../constants/viText'
 import { isMock } from '../config/mockMode'
+import { isMockGenerated } from '../services/mock/mockGames'
+import { unmarkNewGame } from '../utils/newGames'
 import { useGame } from '../hooks/useGame'
 import { useGameEditor } from '../hooks/useGameEditor'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -91,6 +93,9 @@ function EditorSkeleton() {
 function EditorWorkspace({ game }: { game: GameResponse }) {
   const editor = useGameEditor(game)
   const { draft } = editor
+
+  // Đã mở game vừa tạo thì hết dấu "Mới" trên thẻ game.
+  useEffect(() => unmarkNewGame(game.gameId), [game.gameId])
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
   const [playing, setPlaying] = useState(false)
@@ -336,6 +341,14 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           </span>
         </div>
       </header>
+
+      {/* Game do AI mô phỏng tạo: nội dung là bản mẫu của loại game, không khớp mô tả của giáo viên. Nhắc ngay ở trình soạn thảo, không chỉ ở trang tạo. */}
+      {isMockGenerated(game.gameId) ? (
+        <div role="note" className="flex flex-wrap items-start gap-3 rounded-2xl border-2 border-sun bg-sun-soft p-4">
+          <MockBadge />
+          <p className="min-w-0 flex-1 text-base text-ink">{text.simulatedGame}</p>
+        </div>
+      ) : null}
 
       {playing ? (
         <PlayTestBoundary onExit={exitPlay}>

@@ -121,6 +121,7 @@ export const viText = {
     copyFailed: 'Không sao chép được, hãy chọn và chép mã thủ công.',
     notPublished: 'Chưa đăng, chưa có mã chơi',
     edit: 'Chỉnh sửa',
+    newBadge: 'Mới',
   },
 
   generator: {
@@ -192,14 +193,27 @@ export const viText = {
     suggestCreateNone: 'Chọn ít nhất 1 loại để tạo',
     suggestErrorTitle: 'Chưa lấy được đề xuất',
     suggestErrorFallback: 'AI chưa đề xuất được lúc này. Bạn thử lại nhé.',
+    creatingTitle: 'Đang tạo trò chơi',
+    partialTitle: 'Có trò chơi chưa tạo được',
+    canceledTitle: 'Đã hủy tạo trò chơi',
+    canceledNote: 'Lựa chọn của bạn vẫn được giữ. Trò chơi đã tạo xong (nếu có) nằm trong "Trò chơi của tôi".',
+    typeCreating: 'Đang tạo',
+    typeCreated: 'Đã tạo xong, lưu thành bản nháp',
+    typeNotCreated: 'Chưa tạo',
+    openGame: 'Mở',
+    cancelCreate: 'Hủy tạo',
+    retryMissing: 'Thử lại phần còn thiếu',
+    createRest: 'Tạo tiếp phần còn lại',
+    creatingButton: 'Đang tạo trò chơi...',
+    mockCreatedNote: 'Trò chơi do AI mô phỏng tạo: nội dung câu hỏi là bản mẫu, có thể không khớp mô tả của bạn.',
+    fileNotUsed: 'Tệp giáo án bạn tải lên chưa được AI dùng ở bản này: trò chơi được tạo từ phần mô tả.',
+    createdMany: 'Đã tạo {n} trò chơi nháp. Các trò chơi mới có dấu "Mới".',
+    createdManyMock: 'Các trò chơi này do AI mô phỏng tạo: nội dung câu hỏi là bản mẫu, có thể không khớp mô tả của bạn.',
     createFailed: 'Chưa tạo được trò chơi. Ý tưởng và loại game bạn đã chọn vẫn được giữ, hãy thử lại.',
     needLessonForServer: 'Hãy chọn khối lớp và môn học trước khi tạo: hệ thống thật cần hai thông tin này.',
     suggestRetry: 'Thử lại',
     suggestEmptyTitle: 'Chưa có đề xuất cho ý tưởng này',
     suggestEmpty: 'Bạn hãy quay lại, mô tả cụ thể hơn một chút (dạy gì, cho lớp nào) rồi thử lại.',
-    notReadyTitle: 'Tính năng tạo game đang được hoàn thiện',
-    notReady:
-      'Thông tin của bạn đã hợp lệ nhưng hệ thống chưa tạo được trò chơi lúc này. Bạn có thể quay lại sau, chưa có gì bị mất vì chưa gửi đi.',
   },
 
   editor: {
@@ -356,6 +370,8 @@ export const viText = {
       undo: 'Hoàn tác',
       undone: 'Đã khôi phục câu cũ.',
     },
+    // Game do AI mô phỏng tạo (A8): nhắc rõ trong trình soạn thảo, không chỉ ở trang tạo.
+    simulatedGame: 'Trò chơi này do AI mô phỏng tạo: các câu hỏi là bản mẫu của loại game này và có thể không khớp mô tả của bạn. Hãy sửa lại cho đúng bài học.',
     // Tải ảnh và âm thanh (UC-05 luồng 1a, 3a, 3b), gợi ý ảnh (FLD-11) và giọng đọc (FLD-12).
     media: {
       imageLegend: 'Ảnh minh họa',

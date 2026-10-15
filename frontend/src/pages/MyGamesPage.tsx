@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { isMock } from '../config/mockMode'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import ButtonLink from '../components/ButtonLink'
 import GameCard from '../components/GameCard'
@@ -43,6 +44,23 @@ export default function MyGamesPage() {
   usePageTitle(viText.myGames.title)
   const gamesQuery = useGames()
   const [params, setParams] = useSearchParams()
+  const location = useLocation()
+  const navigate = useNavigate()
+  // "Tạo N trò chơi" xong thì chuyển về đây kèm số game vừa tạo (qua trạng thái điều hướng): hiện thông báo một lần rồi xóa khỏi lịch sử để tải lại trang không hiện lại.
+  const [createdCount] = useState(() => {
+    const created = (location.state as { created?: unknown } | null)?.created
+
+    return typeof created === 'number' && created > 0 ? created : 0
+  })
+
+  const clearedRef = useRef(false)
+
+  useEffect(() => {
+    if (createdCount === 0 || clearedRef.current) return
+
+    clearedRef.current = true
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null })
+  }, [createdCount, location.pathname, location.search, navigate])
   // Ô tìm kiếm giữ chữ gõ ở state cục bộ (gõ không bị giật/nhảy con trỏ), rồi đồng bộ lên địa chỉ; khi địa chỉ đổi từ
   // ngoài (Quay lại, "Xóa bộ lọc") thì ô tìm kiếm theo địa chỉ.
   const urlQuery = params.get('q') ?? ''
@@ -98,6 +116,13 @@ export default function MyGamesPage() {
           {viText.nav.createGame}
         </ButtonLink>
       </header>
+
+      {createdCount > 0 ? (
+        <p role="status" className="rounded-2xl border-2 border-brand/30 bg-brand-soft/40 p-4 text-base font-semibold text-ink">
+          {viText.generator.createdMany.replace('{n}', String(createdCount))}
+          {isMock('ai') ? ` ${viText.generator.createdManyMock}` : ''}
+        </p>
+      ) : null}
 
       {gamesQuery.isPending ? <ListSkeleton /> : null}
 

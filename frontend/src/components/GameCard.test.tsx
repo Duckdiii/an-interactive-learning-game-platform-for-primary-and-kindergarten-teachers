@@ -1,8 +1,9 @@
-import { render, screen, within } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameSummary } from '../types/game-summary.types'
+import { clearNewGames, markNewGames, unmarkNewGame } from '../utils/newGames'
 import GameCard from './GameCard'
 
 const NOW = Date.parse('2026-10-13T12:00:00.000Z')
@@ -129,5 +130,31 @@ describe('GameCard', () => {
     expect(screen.getByText('Science · Grade 9')).toBeInTheDocument()
     expect(screen.getByText('Archived')).toBeInTheDocument()
     expect(screen.getByText('New Type')).toBeInTheDocument()
+  })
+})
+
+describe('GameCard: dấu "Mới"', () => {
+  afterEach(() => clearNewGames())
+
+  it('game vừa tạo trong phiên có chip "Mới"; game khác thì không', () => {
+    markNewGames(['g/1'])
+
+    const { unmount } = renderCard()
+
+    expect(screen.getByText('Mới')).toBeInTheDocument()
+    unmount()
+
+    renderCard({ gameId: 'g/2' })
+    expect(screen.queryByText('Mới')).not.toBeInTheDocument()
+  })
+
+  it('hết "Mới" ngay khi tập đánh dấu đổi (mở game), không cần tải lại', () => {
+    markNewGames(['g/1'])
+    renderCard()
+
+    expect(screen.getByText('Mới')).toBeInTheDocument()
+
+    act(() => unmarkNewGame('g/1'))
+    expect(screen.queryByText('Mới')).not.toBeInTheDocument()
   })
 })
