@@ -164,7 +164,7 @@ function oddOneOutRule(q: OddOneOutQuestion, c: Collector) {
   items.forEach((item, index) => checkText(c, `items[${index}].text`, L.itemText, item?.text, limits.itemText))
   checkUnique(c, 'items', L.itemTexts, items.map((item) => item?.text ?? ''))
   if (items.some((item, index) => item?.id !== POSITION_IDS[index])) c.add('items', 'badPositionalId', { label: L.itemTexts })
-  if (isBlank(q.oddOneOutId)) c.add('oddOneOutId', 'noCorrect')
+  if (isBlank(q.oddOneOutId)) c.add('oddOneOutId', 'noOddOne')
   else if (!items.some((item) => item?.id === q.oddOneOutId)) c.add('oddOneOutId', 'badRef', { label: L.oddOne })
 }
 
@@ -415,7 +415,8 @@ export function groupByQuestion(issues: ReadonlyArray<ValidationIssue>) {
 /** Câu tổng quát theo SRS để đặt trên đầu danh sách lỗi; null khi hợp lệ. */
 export function summarizeIssues(issues: ReadonlyArray<ValidationIssue>, mode: ValidationMode): string | null {
   if (issues.length === 0) return null
-  if (issues.some((issue) => issue.code === 'noCorrect')) return validationText.summaryNoCorrect
+  // Câu chưa có đáp án đúng (SRS UC-04 5a) cũng áp cho câu ODD_ONE_OUT chưa chọn mục khác loại.
+  if (issues.some((issue) => issue.code === 'noCorrect' || issue.code === 'noOddOne')) return validationText.summaryNoCorrect
 
   return mode === 'publish' ? validationText.summaryPublish : validationText.summarySave
 }

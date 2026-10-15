@@ -67,7 +67,7 @@ describe('mã mục theo vị trí a đến e', () => {
 
     expect(q.oddOneOutId).toBe('')
     expect(oddIndexOf(q)).toBe(-1)
-    expect(issuesOf(q).some((issue) => issue.field === 'oddOneOutId' && issue.code === 'noCorrect')).toBe(true)
+    expect(issuesOf(q).some((issue) => issue.field === 'oddOneOutId' && issue.code === 'noOddOne')).toBe(true)
   })
 
   it('mọi cách thêm/xóa/sửa đều giữ mã theo vị trí (bộ kiểm tra không báo mã sai)', () => {

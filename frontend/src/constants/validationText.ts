@@ -10,6 +10,7 @@ export type IssueCode =
   | 'range'
   | 'notInteger'
   | 'noCorrect'
+  | 'noOddOne'
   | 'badRef'
   | 'duplicate'
   | 'duplicateId'
@@ -34,6 +35,8 @@ export const ISSUE_TEMPLATES: Readonly<Record<IssueCode, string>> = {
   range: '{label} phải từ {min} đến {max}.',
   notInteger: '{label} phải là số nguyên.',
   noCorrect: 'chưa có đáp án đúng.',
+  // Riêng ODD_ONE_OUT: không có "đáp án đúng" mà là mục khác loại.
+  noOddOne: 'hãy chọn mục khác loại.',
   badRef: '{label} không khớp với danh sách.',
   duplicate: '{label} bị trùng nhau.',
   duplicateId: 'mã của {label} bị trùng nhau.',

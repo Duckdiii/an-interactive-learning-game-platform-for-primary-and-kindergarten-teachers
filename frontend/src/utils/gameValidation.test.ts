@@ -181,11 +181,22 @@ describe('AUDIO_VISUAL_MATCH', () => {
 })
 
 describe('ODD_ONE_OUT', () => {
+  it('chưa chọn mục khác loại: câu riêng "hãy chọn mục khác loại", còn QUIZ giữ câu "chưa có đáp án đúng"; câu tổng quát theo SRS dùng chung', () => {
+    const odd = run('ODD_ONE_OUT', (q) => delete q.oddOneOutId)
+    const quiz = run('QUIZ', (q) => delete q.correctOptionId)
+
+    expect(odd.find((issue) => issue.field === 'oddOneOutId')?.message).toBe('Câu 1: hãy chọn mục khác loại.')
+    expect(quiz.find((issue) => issue.field === 'correctOptionId')?.message).toBe('Câu 1: chưa có đáp án đúng.')
+    expect(has(odd, 'noCorrect', 'oddOneOutId')).toBe(false)
+    expect(has(quiz, 'noOddOne', 'correctOptionId')).toBe(false)
+    expect(summarizeIssues(odd, 'save')).toBe(validationText.summaryNoCorrect)
+  })
+
   it('3 đến 5 phần tử; phần tử khác loại thuộc danh sách; không trùng', () => {
     expect(has(run('ODD_ONE_OUT', (q) => (q.items = (q.items as Loose[]).slice(0, 2))), 'count', 'items')).toBe(true)
     expect(has(run('ODD_ONE_OUT', (q) => (q.items = list([], 6, (i) => ({ id: 'abcde'[i] ?? 'f', text: `Mục ${i}` })))), 'count', 'items')).toBe(true)
     expect(has(run('ODD_ONE_OUT', (q) => (q.oddOneOutId = 'e')), 'badRef', 'oddOneOutId')).toBe(true)
-    expect(has(run('ODD_ONE_OUT', (q) => delete q.oddOneOutId), 'noCorrect', 'oddOneOutId')).toBe(true)
+    expect(has(run('ODD_ONE_OUT', (q) => delete q.oddOneOutId), 'noOddOne', 'oddOneOutId')).toBe(true)
     expect(has(run('ODD_ONE_OUT', (q) => ((q.items as Loose[])[1].text = (q.items as Loose[])[0].text)), 'duplicate', 'items')).toBe(true)
   })
 })

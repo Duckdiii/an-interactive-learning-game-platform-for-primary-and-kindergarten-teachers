@@ -141,12 +141,13 @@ describe('form sửa câu ODD_ONE_OUT', () => {
 
     expect(itemRows()).toHaveLength(3)
     for (let index = 0; index < 3; index += 1) expect(oddRadio(index)).not.toBeChecked()
-    expect(screen.getByText(/chưa có đáp án đúng/i)).toBeInTheDocument()
+    expect(screen.getByText(/hãy chọn mục khác loại/i)).toBeInTheDocument()
+    expect(screen.queryByText(/đáp án đúng/i)).not.toBeInTheDocument()
     expect(listItems()[1]).toHaveTextContent('Cần sửa')
 
     await user.click(oddRadio(1))
 
-    await waitFor(() => expect(screen.queryByText(/chưa có đáp án đúng/i)).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText(/hãy chọn mục khác loại/i)).not.toBeInTheDocument())
   })
 
   it('xóa mục đứng TRƯỚC mục khác loại: lựa chọn đi theo đúng mục (Con cá), không trượt sang mục khác', async () => {
