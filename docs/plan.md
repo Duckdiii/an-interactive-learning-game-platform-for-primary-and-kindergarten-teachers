@@ -89,9 +89,10 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** tệp sai định dạng hoặc quá lớn bị từ chối bằng đúng câu UC-05 3a; tệp không an toàn bị từ chối bằng câu 3b; ảnh mới hiện ở vùng xem.
 - **Kiểm tra:** `vitest` (kiểm tra tệp, mock); ảnh các nhánh.
 
-### [ ] A6. AI làm lại một câu (UC-06, FLD-14)
+### [x] A6. AI làm lại một câu (UC-06, FLD-14)
 - **Mục tiêu:** nút **Yêu cầu AI làm lại** trên thẻ câu; hộp thoại nhập gợi ý (tối đa 500 ký tự); mock AI trễ, thử lại tối đa 2 lần, quá 5 giây tính timeout, từ chối nội dung không an toàn thì khôi phục câu cũ; câu mới vào bản đang soạn, **chưa lưu** cho tới khi bấm Lưu; nhãn "Dữ liệu mô phỏng".
-- **File dự kiến:** `components/editor/RegenerateQuestionDialog.tsx`, `services/aiService.ts` (mock), tests.
+- **File thực tế:** A6.1 `api/gamesApi.regenerateQuestion`, `constants/aiLimits.ts`, `services/{aiService,mock/mockAi}.ts`, `utils/regenerateErrors.ts`; A6.2 `editorReducer` (applyRegenerated, undoRegenerated, `undo` ngoài bản nháp), `useGameEditor.applyRegenerated`, `hooks/{useRegenerateQuestion,useCancellableOperation}.ts`; A6.3 `components/ui/Dialog.tsx`, `components/editor/RegenerateQuestionDialog.tsx`, `forms/RegenerateQuestionControls.tsx`, thông báo và nút Hoàn tác trong `pages/WorkspaceEditor.tsx`.
+- **Quyết định thêm khi duyệt A6:** frontend không tự thử lại (Backend đã thử 2 lần), nút Hoàn tác trong phiên (câu cũ không vào localStorage), chỉ kiểm duyệt đầu ra, câu chưa lưu khóa nút kèm "Hãy lưu trước", câu mới phải qua `validateGame`. Xem `docs/decisions.md` mục 11.
 - **Phụ thuộc:** A3.
 - **Hoàn thành khi:** câu khác không bị đổi; lỗi 5b, 5a đều giữ câu cũ và báo đúng câu của SRS; số lần thử lại đúng 2.
 - **Kiểm tra:** `vitest` (mock với bơm lỗi); ảnh tải, thành công, quá tải, không an toàn.

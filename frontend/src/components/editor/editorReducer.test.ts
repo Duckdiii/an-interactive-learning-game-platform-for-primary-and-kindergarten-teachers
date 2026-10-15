@@ -145,12 +145,50 @@ describe('editorReducer: AI làm lại một câu và hoàn tác', () => {
     expect(editorReducer(sameEdited, { type: 'undoRegenerated', index: 0, questionId: 'q1' })).toBe(sameEdited)
   })
 
-  it('lưu (chuẩn hóa trước khi gửi, hoặc đã lưu xong) và khôi phục bản sao lưu đều xóa mọi hoàn tác', () => {
+  it('chuẩn bị lưu (normalize) KHÔNG xóa hoàn tác: lưu lỗi thì câu AI vẫn chưa lưu; hoàn tác vẫn dùng được sau khi bản nháp bị cắt khoảng trắng', () => {
+    const start = createEditorState(quiz())
+    const applied = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start, '  Câu có khoảng trắng thừa  ') })
+    const normalized = editorReducer(applied, { type: 'normalize' })
+
+    expect(Object.keys(normalized.undo)).toEqual(['q1'])
+    expect((normalized.draft.questions[0] as { questionText: string }).questionText).toBe('Câu có khoảng trắng thừa')
+
+    const undone = editorReducer(normalized, { type: 'undoRegenerated', index: 0, questionId: 'q1' })
+
+    expect(undone.draft.questions[0]).toBe(start.draft.questions[0])
+  })
+
+  it('lưu xong: chỉ câu mà bản vừa lưu ĐÃ chứa mới hết hoàn tác; câu AI áp trong lúc đang lưu (bản lưu không có) vẫn còn hoàn tác', () => {
+    const start = createEditorState(quiz())
+    const first = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
+    // Gửi đi bản này...
+    const snapshot = first.draft
+    // ...trong lúc chờ, AI làm lại thêm câu 2.
+    const second = editorReducer(first, {
+      type: 'applyRegenerated',
+      index: 1,
+      questionId: 'q2',
+      question: { ...first.draft.questions[1], questionText: 'Câu 2 do AI' } as QuestionDsl,
+    })
+    const saved = editorReducer(second, { type: 'saved', snapshot })
+
+    expect(Object.keys(second.undo).sort()).toEqual(['q1', 'q2'])
+    expect(Object.keys(saved.undo)).toEqual(['q2'])
+    expect(saved.baseline).toBe(snapshot)
+  })
+
+  it('lưu xong khi bản lưu đã cắt khoảng trắng của câu AI: vẫn nhận ra và xóa hoàn tác của câu đó', () => {
+    const start = createEditorState(quiz())
+    const applied = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start, '  Câu AI  ') })
+    const normalized = editorReducer(applied, { type: 'normalize' })
+
+    expect(editorReducer(normalized, { type: 'saved', snapshot: normalized.draft }).undo).toEqual({})
+  })
+
+  it('khôi phục bản sao lưu xóa mọi hoàn tác', () => {
     const start = createEditorState(quiz())
     const applied = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
 
-    expect(editorReducer(applied, { type: 'normalize' }).undo).toEqual({})
-    expect(editorReducer(applied, { type: 'saved', snapshot: applied.draft }).undo).toEqual({})
     expect(editorReducer(applied, { type: 'restore', content: quiz() }).undo).toEqual({})
   })
 

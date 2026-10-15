@@ -33,7 +33,7 @@ export default function CommonFieldsHarness({ initial, gameType = 'QUIZ', store,
     },
     [store],
   )
-  const pendingApi = useMemo(() => ({ begin: pending ? pending.begin : () => () => {} }), [pending])
+  const pendingApi = useMemo(() => ({ begin: pending ? pending.begin : () => () => {}, pending: false }), [pending])
   const voiceApi = useMemo(() => ({ voice, setVoice }), [voice])
 
   return (

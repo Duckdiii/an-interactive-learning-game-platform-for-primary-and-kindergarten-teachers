@@ -184,7 +184,7 @@ describe('useGameEditor: hoàn tác', () => {
     expect(quizText(result.current.draft.questions[0])).toBe('Con hãy đếm các con vật trong hình')
   })
 
-  it('bấm Lưu thì hết hoàn tác', async () => {
+  it('lưu THÀNH CÔNG thì hết hoàn tác (câu đã lên máy chủ)', async () => {
     const { result, replacement } = setup()
 
     act(() => {
@@ -196,9 +196,48 @@ describe('useGameEditor: hoàn tác', () => {
       result.current.save()
     })
 
-    expect(result.current.regeneratedIds).toEqual([])
     await waitFor(() => expect(result.current.savedNotice).toBe(true))
+    expect(result.current.regeneratedIds).toEqual([])
     expect(quizText(getMockGame(GAME_ID).questions[0])).toBe('Con hãy đếm các con vật trong hình')
+  })
+
+  it('lưu LỖI (mất mạng) thì KHÔNG mất hoàn tác: câu AI vẫn chưa lưu và vẫn trả lại được câu cũ', async () => {
+    const { result, replacement, original } = setup()
+
+    act(() => {
+      result.current.applyRegenerated(0, 'q1', replacement)
+    })
+    setMockScenario('error')
+    act(() => {
+      result.current.save()
+    })
+
+    await waitFor(() => expect(result.current.saveError).not.toBeNull())
+    expect(result.current.regeneratedIds).toEqual(['q1'])
+
+    act(() => result.current.undoRegenerated(0, 'q1'))
+    expect(result.current.draft.questions[0]).toEqual(original)
+  })
+
+  it('AI áp xong trong lúc đang lưu (bản đang lưu không có câu đó): lưu xong câu ấy vẫn còn hoàn tác', async () => {
+    vi.stubEnv('VITE_MOCK_LATENCY_MS', '80')
+
+    const { result, replacement } = setup()
+
+    act(() => {
+      result.current.updateQuestion(1, 'q2', (question) => ({ ...question, points: 31 }))
+    })
+    act(() => {
+      result.current.save()
+    })
+    // Đang lưu: AI làm lại câu 1.
+    act(() => {
+      result.current.applyRegenerated(0, 'q1', replacement)
+    })
+
+    await waitFor(() => expect(result.current.saving).toBe(false), { timeout: 3000 })
+    expect(result.current.regeneratedIds).toEqual(['q1'])
+    expect(result.current.dirty).toBe(true)
   })
 })
 

@@ -48,9 +48,10 @@ export function resetMockAi() {
   generations.clear()
 }
 
-// Phần NỘI DUNG của câu (bỏ mã thẻ, thời gian và điểm: các giá trị này do giáo viên đặt và được giữ nguyên khi làm lại).
+// Phần NỘI DUNG của câu (bỏ mã thẻ, thời gian, điểm do giáo viên đặt và ảnh, giọng đọc do AI tự gán sau khi làm lại): câu đang hiện đã được gán ảnh và giọng nên so cả hai thì
+// không bao giờ nhận ra nó trùng câu mẫu gốc.
 const contentOf = (question: QuestionDsl) => {
-  const { id: _id, timeLimitSeconds: _time, points: _points, ...rest } = question
+  const { id: _id, timeLimitSeconds: _time, points: _points, imageUrl: _image, audioUrl: _audio, ...rest } = question
 
   return rest
 }

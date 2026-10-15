@@ -32,7 +32,7 @@ function setup(apply: () => ApplyRegeneratedResult = () => ({ ok: true }), getQu
   const probe = createPendingProbe()
   const applyRegenerated = vi.fn(apply)
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <PendingEditsContext.Provider value={{ begin: probe.begin }}>{children}</PendingEditsContext.Provider>
+    <PendingEditsContext.Provider value={{ begin: probe.begin, pending: false }}>{children}</PendingEditsContext.Provider>
   )
   const view = renderHook(() => useRegenerateQuestion({ gameId: 'g1', gameType: 'QUIZ', voice: 'MALE', getQuestion, applyRegenerated }), {
     wrapper,

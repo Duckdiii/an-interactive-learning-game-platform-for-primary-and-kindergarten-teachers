@@ -125,6 +125,8 @@ export function useGameEditor(game: GameResponse) {
   // Lỗi của từng câu tính TRỰC TIẾP trên bản đang soạn (không đợi bấm Lưu) để form hiện lỗi ngay dưới ô đang sửa.
   const liveIssues = useMemo(() => validateGame(state.draft, 'save', { baseline: state.baseline }), [state.draft, state.baseline])
 
+  const savedQuestionIds = useMemo(() => new Set(state.baseline.questions.map((question) => question.id)), [state.baseline])
+
   const edit = (action: Parameters<typeof dispatch>[0]) => {
     setLastSaveOk(false)
     // Sửa tiếp thì lỗi lưu lần trước không còn đúng nữa (đang lưu dở thì để nguyên, tránh mở khóa nút Lưu giữa chừng).
@@ -172,6 +174,8 @@ export function useGameEditor(game: GameResponse) {
       edit({ type: 'updateQuestion', index, questionId, update }),
     /** Mã các thẻ câu vừa được AI làm lại và còn hoàn tác được. */
     regeneratedIds: Object.keys(state.undo),
+    /** Mã các câu đã có trên máy chủ (theo bản đã lưu gần nhất): chỉ những câu này AI làm lại được. */
+    savedQuestionIds,
     /**
      * Đưa câu AI làm lại vào đúng thẻ, áp lên bản đang soạn HIỆN HÀNH (các thẻ khác và sửa tay chưa lưu giữ nguyên). Câu mới phải qua bộ kiểm tra
      * như lúc lưu (kèm bản đã lưu làm mốc); không hợp lệ thì KHÔNG áp, câu cũ giữ nguyên. `stale`: thẻ đã đổi chỗ hoặc không còn.

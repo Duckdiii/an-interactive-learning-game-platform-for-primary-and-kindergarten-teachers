@@ -14,7 +14,8 @@ export interface RegenerateUndo {
 export interface EditorState {
   baseline: GameDsl
   draft: GameDsl
-  // Theo mã thẻ câu. Một mục biến mất khi giáo viên sửa tiếp CHÍNH câu đó, khi lưu, hoặc khi khôi phục bản sao lưu.
+  // Theo mã thẻ câu. Một mục biến mất khi giáo viên sửa tiếp CHÍNH câu đó, khi câu đó ĐÃ ĐƯỢC LƯU thành công, hoặc khi khôi phục bản sao lưu.
+  // (Bấm Lưu mà lưu lỗi thì chưa mất: bản nháp vẫn chứa câu AI và chưa lưu.)
   undo: Readonly<Record<string, RegenerateUndo>>
 }
 
@@ -98,10 +99,26 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     }
     case 'restore':
       return { ...state, draft: action.content, undo: {} }
-    case 'saved':
-      return { ...state, baseline: action.snapshot, undo: {} }
-    case 'normalize':
-      // Chuẩn bị lưu: sau lần lưu thì không còn hoàn tác.
-      return { ...state, draft: trimContent(state.draft), undo: {} }
+    case 'saved': {
+      // Chỉ những câu AI vừa làm lại mà BẢN VỪA LƯU đã chứa mới hết hoàn tác. Câu AI áp trong lúc đang lưu (bản lưu không có) vẫn còn hoàn tác.
+      const remaining = Object.fromEntries(
+        Object.entries(state.undo).filter(([id, entry]) => {
+          const saved = action.snapshot.questions.find((question) => question.id === id)
+
+          return !(saved && deepEqual(saved, trimContent(entry.applied)))
+        }),
+      )
+
+      return { ...state, baseline: action.snapshot, undo: remaining }
+    }
+    case 'normalize': {
+      // Chuẩn bị lưu: cắt khoảng trắng bản nháp. Hoàn tác giữ nguyên (lưu lỗi thì câu AI vẫn chưa lưu), chỉ cập nhật "câu đang hiện" theo bản đã cắt để hoàn tác vẫn nhận ra thẻ chưa bị sửa.
+      const draft = trimContent(state.draft)
+      const undo = Object.fromEntries(
+        Object.entries(state.undo).map(([id, entry]) => [id, { ...entry, applied: draft.questions.find((question) => question.id === id) ?? entry.applied }]),
+      )
+
+      return { ...state, draft, undo }
+    }
   }
 }

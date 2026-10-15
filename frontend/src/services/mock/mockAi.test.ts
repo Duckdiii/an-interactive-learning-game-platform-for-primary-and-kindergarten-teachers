@@ -59,6 +59,17 @@ describe('mockRegenerateQuestion: câu mới', () => {
     expect(buildMockGameContents().find((game) => game.gameType === 'QUIZ')!.questions[0].id).toBe('q1')
   })
 
+  it('làm lại LIÊN TIẾP trên chính kết quả vừa nhận (câu hiện tại đã được gán ảnh và giọng): không bao giờ trả lại đúng câu đang hiện', async () => {
+    let current = firstQuestion('QUIZ')
+
+    for (let round = 0; round < 6; round += 1) {
+      const result = await mockRegenerateQuestion(requestFor('QUIZ', { current, questionId: current.id }))
+
+      expect(contentOf(result.question), `lần ${round + 1}`).not.toEqual(contentOf(current))
+      current = result.question
+    }
+  })
+
   it('gán ảnh theo mô tả hình và giọng đọc theo giọng đã chọn (nam hoặc nữ)', async () => {
     const female = await mockRegenerateQuestion(requestFor('QUIZ', { voice: 'FEMALE' }))
     const male = await mockRegenerateQuestion(requestFor('QUIZ', { voice: 'MALE' }))

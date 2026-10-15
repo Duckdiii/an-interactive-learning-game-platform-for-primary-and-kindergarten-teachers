@@ -10,6 +10,8 @@ import GameInfoForm from '../components/editor/GameInfoForm'
 import PlayTestBoundary from '../components/editor/PlayTestBoundary'
 import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
 import { PendingEditsContext } from '../components/editor/forms/PendingEditsContext'
+import { buttonClass } from '../components/buttonStyles'
+import RegenerateQuestionControls from '../components/editor/forms/RegenerateQuestionControls'
 import QuestionEditor from '../components/editor/forms/QuestionEditor'
 import { VoiceContext } from '../components/editor/forms/VoiceContext'
 import type { VoiceGender } from '../services/mediaService'
@@ -92,6 +94,8 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
   const [playing, setPlaying] = useState(false)
+  // Vừa nhờ AI làm lại (hoặc vừa hoàn tác) câu nào: để hiện thông báo kèm nút Hoàn tác. Nằm ở đây vì thẻ sửa câu được dựng lại sau khi áp câu mới.
+  const [regenNotice, setRegenNotice] = useState<{ kind: 'applied' | 'undone'; questionId: string } | null>(null)
   // Số ô chữ còn chữ vừa gõ chưa vào bản đang soạn (xem `PendingEditsContext`).
   const [pendingEdits, setPendingEdits] = useState(0)
   const beginEdit = useCallback(() => {
@@ -99,7 +103,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
 
     return () => setPendingEdits((count) => Math.max(0, count - 1))
   }, [])
-  const pendingApi = useMemo(() => ({ begin: beginEdit }), [beginEdit])
+  const pendingApi = useMemo(() => ({ begin: beginEdit, pending: pendingEdits > 0 }), [beginEdit, pendingEdits])
   // Giọng đọc đang chọn cho các lần tạo giọng đọc (FLD-12): giữ ở đây để đổi sang câu khác vẫn còn nguyên.
   const [voice, setVoice] = useState<VoiceGender>('FEMALE')
   const voiceApi = useMemo(() => ({ voice, setVoice }), [voice])
@@ -129,10 +133,16 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
 
   useUnsavedChangesGuard(editor.dirty || applying, saveText.leaveConfirm)
 
+  // Vừa áp câu AI làm lại (hoặc vừa hoàn tác): nút/hộp thoại đang giữ tiêu điểm vừa bị gỡ, đưa tiêu điểm tới thông báo để người dùng bàn phím và trình đọc màn hình không rơi về đầu trang.
+  useEffect(() => {
+    if (regenNotice) document.getElementById('regenerate-notice')?.focus()
+  }, [regenNotice])
+
   // Đưa tiêu điểm tới ô cần chú ý (sau khi khôi phục hoặc khi lưu bị chặn) để người dùng bàn phím và trình đọc màn hình không mất vị trí.
   const focusField = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.focus())
 
   const handleSave = () => {
+    setRegenNotice((notice) => (notice?.kind === 'undone' ? null : notice))
     const first = editor.save().find((issue) => issue.questionIndex === null)
 
     if (first) focusField(first.field === 'metadata.topic' ? 'game-topic' : 'game-title')
@@ -167,6 +177,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
 
   const choose = (next: number) => {
     setSelected(next)
+    setRegenNotice(null)
     // Điện thoại chỉ hiện một khung: chọn câu xong thì chuyển sang xem câu đó.
     setPane('preview')
     // Nút vừa bấm nằm trong khung danh sách sắp bị ẩn: đưa tiêu điểm sang khung mới để người dùng bàn phím không rơi về đầu trang.
@@ -208,9 +219,61 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     </div>
   )
 
+  const currentQuestionId = current ? draft.questions[index]?.id : undefined
+  const undoable = currentQuestionId !== undefined && editor.regeneratedIds.includes(currentQuestionId)
+  const noticeForCurrent = regenNotice !== null && regenNotice.questionId === currentQuestionId ? regenNotice.kind : null
+  const regenText = viText.editor.regenerate
+
+  const undoRegenerated = () => {
+    if (currentQuestionId === undefined) return
+
+    if (applying) return
+
+    editor.undoRegenerated(index, currentQuestionId)
+    setRegenNotice({ kind: 'undone', questionId: currentQuestionId })
+  }
+
   // Khung sửa (form theo loại game) nằm trên phần xem: sửa xong là phần xem bên dưới và danh sách câu cập nhật ngay.
   const preview = (
     <div className="space-y-6">
+      {/* Vùng thông báo luôn có mặt (chỉ đổi chữ) để trình đọc màn hình đọc được thông báo mới. */}
+      <div role="status" id="regenerate-notice" tabIndex={-1} className={undoable || noticeForCurrent === 'undone' ? undefined : 'sr-only'}>
+        {undoable || noticeForCurrent === 'undone' ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-brand/30 bg-brand-soft/40 p-4">
+            <div className="space-y-1 text-base">
+              {noticeForCurrent === 'undone' ? (
+                <p className="font-bold">{regenText.undone}</p>
+              ) : noticeForCurrent === 'applied' ? (
+                <>
+                  <p className="font-bold">{regenText.success}</p>
+                  <p>{regenText.appliedNote}</p>
+                </>
+              ) : (
+                <p>{regenText.undoable}</p>
+              )}
+              {undoable && isMock('ai') ? <MockBadge /> : null}
+            </div>
+            {undoable ? (
+              <div className="text-right">
+                <button
+                  type="button"
+                  aria-disabled={applying ? true : undefined}
+                  aria-describedby={applying ? 'regenerate-undo-hint' : undefined}
+                  onClick={undoRegenerated}
+                  className={[buttonClass('secondary'), applying ? 'cursor-not-allowed opacity-60' : ''].filter(Boolean).join(' ')}
+                >
+                  {regenText.undo}
+                </button>
+                {applying ? (
+                  <p id="regenerate-undo-hint" className="mt-1 text-sm text-ink-soft">
+                    {regenText.applyingHint}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
       {current ? (
         <QuestionEditor
           key={`${index}-${editor.revision}`}
@@ -218,7 +281,24 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           question={draft.questions[index]}
           number={index + 1}
           issues={issuesByQuestion.get(index) ?? []}
-          onUpdate={(update) => editor.updateQuestion(index, draft.questions[index].id, update)}
+          onUpdate={(update) => {
+            // Sửa tiếp thì thông báo "Đã khôi phục câu cũ." hết đúng nghĩa.
+            setRegenNotice((notice) => (notice?.kind === 'undone' ? null : notice))
+            editor.updateQuestion(index, draft.questions[index].id, update)
+          }}
+          headerAction={
+            <RegenerateQuestionControls
+              gameId={game.gameId}
+              gameType={draft.gameType}
+              index={index}
+              questionId={draft.questions[index].id}
+              saved={editor.savedQuestionIds.has(draft.questions[index].id)}
+              getQuestion={(position, questionId) => (draft.questions[position]?.id === questionId ? draft.questions[position] : undefined)}
+              applyRegenerated={editor.applyRegenerated}
+              restorePending={Boolean(editor.pendingRestore)}
+              onApplied={(questionId) => setRegenNotice({ kind: 'applied', questionId })}
+            />
+          }
         />
       ) : null}
       {previewCard}

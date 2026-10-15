@@ -20,7 +20,7 @@ function deferred<T>() {
 function setup(options?: Parameters<typeof useCancellableOperation>[0]) {
   const probe = createPendingProbe()
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <PendingEditsContext.Provider value={{ begin: probe.begin }}>{children}</PendingEditsContext.Provider>
+    <PendingEditsContext.Provider value={{ begin: probe.begin, pending: false }}>{children}</PendingEditsContext.Provider>
   )
   const view = renderHook(() => useCancellableOperation(options), { wrapper })
 
