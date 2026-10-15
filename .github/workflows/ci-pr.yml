@@ -64,7 +64,9 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
-      - run: npm run test
+      # Chỉ trên CI: giới hạn số luồng vitest (máy chạy CI ít nhân nên nhiều luồng làm test thời gian chập chờn, xem "Nợ kỹ thuật: test chập chờn" trong docs/plan.md).
+      # Chạy cục bộ vẫn dùng mặc định của vite.config.ts.
+      - run: npm run test -- --maxWorkers=2
       - run: npm run build
 
   secret-scan:
