@@ -49,6 +49,12 @@ Chụp trên trình duyệt thật ở chế độ dữ liệu mô phỏng (`VIT
 | `form-odd-one-out-mobile-390.jpg` | Form ODD_ONE_OUT, điện thoại 390px | Cùng form một cột, không tràn ngang |
 | `form-odd-one-out-error-desktop.jpg` | Form ODD_ONE_OUT | Vừa thêm mục mới còn trống: báo thiếu chữ đúng ô, ô được đánh dấu không hợp lệ |
 | `form-odd-one-out-error-mobile-390.jpg` | Form ODD_ONE_OUT, điện thoại 390px | Cùng trạng thái lỗi trên điện thoại |
+| `form-visual-cloze-desktop.jpg` | Form VISUAL_CLOZE | Câu 1: câu có chỗ trống, từ đúng, 2 từ sai, mô tả hình bắt buộc |
+| `form-visual-cloze-mobile-390.jpg` | Form VISUAL_CLOZE, điện thoại 390px | Cùng form một cột, không tràn ngang |
+| `form-visual-cloze-error-desktop.jpg` | Form VISUAL_CLOZE | Câu bị xóa chỗ trống: báo "đúng một chỗ trống", nút "Chèn chỗ trống" mở |
+| `form-visual-cloze-error-mobile-390.jpg` | Form VISUAL_CLOZE, điện thoại 390px | Cùng trạng thái lỗi trên điện thoại |
+| `form-visual-cloze-inserted-desktop.jpg` | Form VISUAL_CLOZE | Sau khi bấm "Chèn chỗ trống" tại vị trí con trỏ: câu hợp lệ trở lại, nút khóa |
+| `form-visual-cloze-inserted-mobile-390.jpg` | Form VISUAL_CLOZE, điện thoại 390px | Cùng trạng thái đã chèn trên điện thoại |
 
 Ảnh nhóm B (B1 đến B3) chụp bằng tập lệnh Playwright chạy qua Bash trên dev server ở chế độ mô phỏng (trình duyệt Chrome có sẵn của máy, không thêm thư viện vào dự án), ở 1280px và 390px; lỗi 2a và 2b do bản xuất bản mô phỏng chèn sẵn. Tập lệnh dùng bản `playwright-core` nằm trong bộ nhớ đệm npx của máy chụp nên không đưa vào kho; ảnh `b2-qr-*` chỉ chụp khung mã QR và nút tải.
 
