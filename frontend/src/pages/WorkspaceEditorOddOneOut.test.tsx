@@ -202,8 +202,10 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     fireEvent.change(itemBox(1), { target: { value: 'Con chó con' } })
     await user.click(removeButton('A'))
 
-    await waitFor(() => expect(itemRows()).toHaveLength(3))
-    await waitFor(() => expect(itemBox(0)).toHaveValue('Con chó con'))
+    // Chữ gõ dở đi theo mục; chờ đến khi chữ thật sự vào game (danh sách câu đổi) rồi mới khẳng định giá trị cuối.
+    await waitFor(() => expect(listItems()[1]).toHaveTextContent('Con chó con'), { timeout: 8000 })
+    expect(itemRows()).toHaveLength(3)
+    expect(itemBox(0)).toHaveValue('Con chó con')
     expect(itemBox(1)).toHaveValue('Con cá')
   })
 

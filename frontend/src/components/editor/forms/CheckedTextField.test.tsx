@@ -126,11 +126,12 @@ describe('CheckedTextField', () => {
 
   it('gõ lại đúng như cũ thì không cần kiểm tra và không đổi gì', async () => {
     const onCommit = vi.fn()
-    const user = userEvent.setup()
 
     render(<Harness initial="Xin chào" onCommit={onCommit} />)
-    await user.type(box(), 'x')
-    await user.type(box(), '{Backspace}')
+    // Hai lần sửa liên tiếp bằng fireEvent (đồng bộ): dùng userEvent thì giữa hai lần gõ có khoảng chờ bằng bộ hẹn giờ thật, khi máy bận dài hơn thời gian
+    // chờ gõ xong của ô nên ô đã kiểm tra và áp chữ trung gian "Xin chàox" (test chập chờn).
+    fireEvent.change(box(), { target: { value: 'Xin chàox' } })
+    fireEvent.change(box(), { target: { value: 'Xin chào' } })
     fireEvent.blur(box())
 
     await new Promise((resolve) => setTimeout(resolve, 500))

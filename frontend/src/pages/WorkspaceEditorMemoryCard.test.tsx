@@ -96,19 +96,18 @@ describe('form sửa câu MEMORY_CARD', () => {
   })
 
   it('thêm cặp đến 8 thì khóa kèm lời giải thích; xóa về 2 thì khóa nút Xóa', async () => {
-    const user = userEvent.setup()
-
     await openLoaded()
     // 3 cặp: còn xóa được (tối thiểu 2).
     expect(removeButton(1)).toBeEnabled()
 
-    for (let count = 3; count < 8; count += 1) await user.click(addButton())
+    // fireEvent (đồng bộ) thay cho userEvent: 11 lần bấm liên tiếp trên form lớn đã làm test quá chậm khi máy bận (userEvent chờ giữa các bước bằng bộ hẹn giờ thật).
+    for (let count = 3; count < 8; count += 1) fireEvent.click(addButton())
 
     expect(pairItems()).toHaveLength(8)
     expect(addButton()).toBeDisabled()
     expect(screen.getByText('Đã đủ 8 cặp, không thêm được nữa.')).toBeInTheDocument()
 
-    for (let count = 8; count > 2; count -= 1) await user.click(removeButton(count))
+    for (let count = 8; count > 2; count -= 1) fireEvent.click(removeButton(count))
 
     expect(pairItems()).toHaveLength(2)
     expect(removeButton(1)).toBeDisabled()
