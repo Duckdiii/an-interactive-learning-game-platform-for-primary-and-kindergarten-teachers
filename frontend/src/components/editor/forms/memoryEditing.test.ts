@@ -147,6 +147,19 @@ describe('không cho trùng và giới hạn độ dài', () => {
     expect(issuesOf(q).some((issue) => issue.field === 'pairs' && issue.code === 'duplicate')).toBe(true)
   })
 
+  it('so trùng chuẩn hóa như Backend: cắt khoảng trắng, gộp khoảng trắng thừa, không phân biệt hoa thường, giữ dấu; chữ và mô tả hình là hai loại nội dung khác nhau', () => {
+    const base = three()
+    const dup = (text: string) => issuesOf(setContentField(base, 1, 'text', text)).some((issue) => issue.field === 'pairs' && issue.code === 'duplicate')
+
+    expect(dup('  CAT  ')).toBe(true)
+    expect(dup('cát')).toBe(false)
+    // Khoảng trắng thừa Ở GIỮA cũng được gộp: "red   fish" trùng "Red fish".
+    const spaced = setContentField(base, 0, 'text', 'red   fish')
+
+    expect(issuesOf(setContentField(spaced, 1, 'text', 'Red fish')).some((issue) => issue.field === 'pairs' && issue.code === 'duplicate')).toBe(true)
+    expect(issuesOf(setContentField(setContentField(base, 1, 'text', ''), 1, 'visualPrompt', 'cat')).some((issue) => issue.code === 'duplicate')).toBe(false)
+  })
+
   it('chữ quá 100 ký tự bị báo đúng ô', () => {
     const q = setContentField(three(), 0, 'text', 'a'.repeat(101))
 

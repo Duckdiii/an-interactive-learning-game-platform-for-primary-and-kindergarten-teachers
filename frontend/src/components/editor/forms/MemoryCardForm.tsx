@@ -38,7 +38,7 @@ export default function MemoryCardForm({ gameType, question: raw, issues, onUpda
   const describedBy = ['memory-pairs-hint', listMessages.length > 0 ? 'memory-pairs-errors' : ''].filter(Boolean).join(' ')
 
   const handleAdd = () => {
-    // Chốt chặn: nút đã bị khóa khi đủ số cặp, nhưng bàn phím/trình đọc màn hình không được phép vượt giới hạn.
+    // Phòng thủ: nút đã bị khóa khi đủ số cặp nên thường không tới đây; giữ để không cấp mã cặp và đưa tiêu điểm vào ô không tồn tại nếu sau này đổi cách khóa nút.
     if (!canAdd) return
 
     const pairId = `p${nextNumber.current++}`
@@ -48,6 +48,7 @@ export default function MemoryCardForm({ gameType, question: raw, issues, onUpda
   }
 
   const handleRemove = (pairId: string) => {
+    // Phòng thủ (như nút Thêm): nút Xóa đã khóa khi chỉ còn số cặp tối thiểu.
     if (!canRemove) return
 
     const index = question.pairs.findIndex((pair) => pair.pairId === pairId)

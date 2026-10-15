@@ -166,6 +166,16 @@ describe('form sửa câu MEMORY_CARD', () => {
     expect(getMockGame(MEMORY_ID).questions[0]).toMatchObject({ pairs: [{ content: { text: 'cat' } }, { content: { text: 'dog' } }, { content: { text: 'bird' } }] })
   })
 
+  it('so trùng mặt thẻ: bỏ khoảng trắng đầu cuối và khoảng trắng thừa, không phân biệt hoa thường, GIỮ dấu tiếng Việt', async () => {
+    await openLoaded()
+    type(cardBox(1, 'Chữ trên thẻ'), '  CAT ')
+    expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
+
+    // Khác dấu thì là hai từ khác nhau: "cát" không trùng "cat".
+    type(cardBox(1, 'Chữ trên thẻ'), 'cát')
+    await waitFor(() => expect(screen.queryByText(/bị trùng nhau/)).not.toBeInTheDocument())
+  })
+
   it('chữ quá 100 ký tự bị báo ngay dưới đúng ô', async () => {
     await openLoaded()
     type(cardBox(0, 'Chữ trên thẻ'), 'a'.repeat(101))
@@ -201,6 +211,25 @@ describe('form sửa câu MEMORY_CARD', () => {
     type(time, '130')
 
     expect((await screen.findAllByText(/120/)).length).toBeGreaterThan(0)
+  })
+
+  it('game có thời gian 135 giây do Backend sinh: chỉ sửa chữ một thẻ rồi Lưu vẫn thành công và thời gian 135 giây được giữ nguyên', async () => {
+    const user = userEvent.setup()
+    const game = getMockGame(MEMORY_ID)
+
+    game.questions[0].timeLimitSeconds = 135
+    saveMockGame(MEMORY_ID, game)
+
+    await openLoaded()
+    type(cardBox(0, 'Chữ trên thẻ'), 'kitten')
+    await waitFor(() => expect(listItems()[0]).toHaveTextContent('kitten'))
+    await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
+
+    await user.click(saveButton())
+    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(getMockGame(MEMORY_ID).questions[0]).toMatchObject({ timeLimitSeconds: 135, pairs: [{ content: { text: 'kitten' } }, { content: { text: 'dog' } }, { content: { text: 'bird' } }] })
   })
 
   it('lưu: nội dung đã sửa (cặp mới có mã p4, bỏ khoảng trắng thừa) được ghi vào kho', async () => {
