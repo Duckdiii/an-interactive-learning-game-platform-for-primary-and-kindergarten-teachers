@@ -507,7 +507,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           />
         </>
       )}
-      {editor.publishResult ? <SharePanel result={editor.publishResult} hasUnsavedAfter={editor.dirty} onClose={closeSharePanel} /> : null}
+      {editor.publishResult ? <SharePanel result={editor.publishResult} gameTitle={draft.metadata.title} hasUnsavedAfter={editor.dirty} onClose={closeSharePanel} /> : null}
     </div>
     </VoiceContext.Provider>
     </PendingEditsContext.Provider>

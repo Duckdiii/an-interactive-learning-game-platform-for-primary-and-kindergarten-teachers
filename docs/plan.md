@@ -126,16 +126,18 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 - **Hoàn thành khi:** game thiếu đáp án không xuất bản được và liệt kê câu cần sửa; thành công đổi trạng thái sang "Đã đăng" và thẻ game có mã.
 - **Kiểm tra:** `vitest`; ảnh thành công, lỗi 2a/2b/2c.
 
-### [ ] B2. Mã QR (`qrcode.react` ĐÃ ĐƯỢC DUYỆT)
+### [x] B2. Mã QR (`qrcode.react` ĐÃ ĐƯỢC DUYỆT)
 - **Mục tiêu:** hiện QR cho `shareUrl` (và cho `joinUrl` ở nhóm C).
-- **File dự kiến:** `package.json` + lock (thêm `qrcode.react`), `components/ui/QrCode.tsx`, tests.
+- **File thực tế:** `package.json` + lock (`qrcode.react` ghim đúng `4.2.0`), `components/ui/QrCode.tsx` (+ test), `components/editor/SharePanel.tsx`, `constants/viText.ts` (`viText.qr`). Chưa dùng cho `joinUrl` (nhóm C, `QrCode` dùng lại được).
+- **Quyết định khi duyệt B2:** chỉ vẽ QR cho địa chỉ http/https đã qua `safeHttpUrl` (không hợp lệ thì không vẽ gì); nhãn truy cập mô tả, nền trắng nét đen, vùng yên tĩnh 4 ô; nút tải ảnh QR dạng SVG (PNG cần canvas, chưa làm); bản mô phỏng có ghi chú QR dẫn tới địa chỉ mô phỏng. Bundle: chunk `WorkspaceEditor` tăng 17,16 kB (gzip 6,51 kB), từ 65,53 lên 82,69 kB (gzip 19,52 lên 26,03 kB) gồm cả thư viện và hai thành phần mới; chunk `index` chỉ tăng 0,29 kB (gzip 0,12 kB). Cân nhắc nạp chậm hộp chia sẻ nếu cần giảm tải trang soạn thảo.
 - **Phụ thuộc:** B1. Bạn đã duyệt cài `qrcode.react` (có trong danh sách duyệt sẵn của `CLAUDE.md`); lý do: vẽ QR cho ShareCode và PIN, tự viết bộ tạo QR là không thực tế.
 - **Hoàn thành khi:** QR quét được ra đúng URL; có tên truy cập cho trình đọc màn hình.
 - **Kiểm tra:** `vitest` (render, giá trị); ảnh; (nếu có) thử quét bằng điện thoại.
 
-### [ ] B3. Soạn tin gửi phụ huynh
+### [x] B3. Soạn tin gửi phụ huynh
 - **Mục tiêu:** hộp văn bản mẫu có thể sửa (tên game, link, mã), nút sao chép; không gửi đi đâu.
-- **File dự kiến:** `components/editor/ParentMessage.tsx`, `utils/parentMessage.ts`, tests.
+- **File thực tế:** `components/editor/{ParentMessage,CopyField,SharePanel}.tsx`, `utils/parentMessage.ts`, `constants/viText.ts` (`editor.publish.parent`), tests.
+- **Quyết định khi duyệt B3:** văn bản mẫu (tên trò chơi, liên kết hoặc mã) nằm trong hộp chia sẻ, thu gọn mặc định, sửa được (tối đa 1000 ký tự) và chỉ sao chép, dùng cùng phương án dự phòng clipboard của B1; có lời nhắc không ghi thông tin cá nhân của học sinh; KHÔNG gửi qua dịch vụ ngoài (không Zalo ZNS) và không lưu.
 - **Phụ thuộc:** B1.
 - **Hoàn thành khi:** mẫu điền đúng dữ liệu game; sửa được; sao chép được; có lời nhắc không nhập thông tin cá nhân của học sinh.
 - **Kiểm tra:** `vitest`; ảnh.

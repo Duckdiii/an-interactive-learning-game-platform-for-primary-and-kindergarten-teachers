@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QRCodeSVG } from 'qrcode.react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -58,6 +58,8 @@ describe('QrCode', () => {
     expect(blob.type).toBe('image/svg+xml')
     expect(click).toHaveBeenCalledTimes(1)
     expect(names).toEqual(['qr-ABC123.svg'])
-    expect(revoke).toHaveBeenCalledWith('blob:qr')
+    // Chưa thu hồi ngay (Firefox, Safari có thể hủy tải), nhưng cuối cùng phải thu hồi.
+    expect(revoke).not.toHaveBeenCalled()
+    await waitFor(() => expect(revoke).toHaveBeenCalledWith('blob:qr'), { timeout: 3000 })
   })
 })

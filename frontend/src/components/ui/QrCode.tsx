@@ -16,6 +16,7 @@ interface QrCodeProps {
 const text = viText.qr
 // Nền trắng, nét đen và vùng yên tĩnh 4 ô (mức tối thiểu theo chuẩn QR) để máy quét đọc được cả khi in nhỏ hoặc chiếu lên màn hình.
 const QUIET_ZONE_MODULES = 4
+const REVOKE_DELAY_MS = 1000
 
 export default function QrCode({ value, label, fileName = 'ma-qr' }: QrCodeProps) {
   const url = safeHttpUrl(value)
@@ -35,7 +36,8 @@ export default function QrCode({ value, label, fileName = 'ma-qr' }: QrCodeProps
     link.href = href
     link.download = `${fileName}.svg`
     link.click()
-    URL.revokeObjectURL(href)
+    // Thu hồi chậm: một số trình duyệt (Firefox, Safari) hủy tải nếu địa chỉ bị thu hồi ngay sau khi bấm.
+    setTimeout(() => URL.revokeObjectURL(href), REVOKE_DELAY_MS)
   }
 
   return (
