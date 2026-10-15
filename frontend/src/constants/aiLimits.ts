@@ -7,6 +7,9 @@ export const AI_BACKEND_ATTEMPTS = 3
 // đến vài chục giây" theo openapi.yaml). Backend cũng tự thử lại dịch vụ AI tối đa 2 lần, nên chờ đủ lâu; giáo viên vẫn hủy được bất cứ lúc nào.
 export const GENERATE_GAME_TIMEOUT_MS = 60_000
 
+// Xuất bản (POST /games/{id}/publish) lưu nội dung mới nhất RỒI tạo mã chia sẻ trong một thao tác nên lâu hơn một lần lưu thường (GAME_REQUEST_TIMEOUT_MS = 15 giây).
+export const PUBLISH_REQUEST_TIMEOUT_MS = 20_000
+
 // Gợi ý điều chỉnh khi nhờ AI làm lại (openapi `feedback`, FLD-14).
 export const REGENERATE_FEEDBACK_MAX = 500
 

@@ -1,6 +1,7 @@
-import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS } from '../constants/aiLimits'
+import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS } from '../constants/aiLimits'
 import axiosInstance from './axiosInstance'
 import type { ApiSuccessResponse } from '../types/api'
+import type { PublishResult } from '../types/publish.types'
 import type { RegeneratedQuestion } from '../types/regenerate.types'
 import type { GenerateGameRequest } from '../utils/generateRequest'
 import type { GameEnvelopeBody, GameResponse } from '../types/game-response.types'
@@ -13,7 +14,7 @@ export const GAMES_REQUEST_TIMEOUT_MS = 10_000
 export const GAME_REQUEST_TIMEOUT_MS = 15_000
 
 // Hằng số thời gian chờ của lời gọi AI nằm ở `constants/aiLimits.ts` (dùng chung với AI mô phỏng); xuất lại ở đây cho nơi dùng API.
-export { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS }
+export { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS }
 
 export async function getGames(filters: GameFilters) {
   const response = await axiosInstance.get<ApiSuccessResponse<GameSummary[]>>(
@@ -82,6 +83,20 @@ export async function postGenerateGame(request: GenerateGameRequest, signal?: Ab
     timeout: GENERATE_GAME_TIMEOUT_MS,
     signal,
   })
+
+  return response.data.data
+}
+
+/**
+ * POST /games/{gameId}/publish: LƯU nội dung mới nhất rồi xuất bản trong một thao tác (UC-07). Gọi lại khi đã xuất bản vẫn 200 và giữ nguyên mã chia sẻ.
+ * Không tự thử lại: lỗi thì giáo viên bấm lại (an toàn vì thao tác lặp lại được).
+ */
+export async function postPublishGame(gameId: string, body: GameEnvelopeBody, signal?: AbortSignal) {
+  const response = await axiosInstance.post<ApiSuccessResponse<PublishResult>>(
+    `/games/${encodeURIComponent(gameId)}/publish`,
+    body,
+    { timeout: PUBLISH_REQUEST_TIMEOUT_MS, signal },
+  )
 
   return response.data.data
 }

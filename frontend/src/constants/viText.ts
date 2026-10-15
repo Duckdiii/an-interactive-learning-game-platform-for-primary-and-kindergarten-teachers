@@ -336,6 +336,13 @@ export const viText = {
         'Hiện chỉ chơi thử được trò chơi Trắc nghiệm và Nối cặp. Bạn vẫn xem được nội dung từng câu ở dưới; chơi thử cho loại này sẽ có sau.',
       unsupportedListLabel: 'Nội dung các câu hỏi',
     },
+    // Xuất bản (UC-07). Câu 2a, 2b, 2c là nguyên văn theo SRS.
+    publish: {
+      failed: 'Hệ thống chưa hoàn tất lưu trò chơi. Bạn hãy thử lại một lần nữa.',
+      shareFailed: 'Trò chơi đã lưu nhưng chưa thể tạo mã chia sẻ. Vui lòng thử xuất bản lại.',
+      invalid: 'Bạn hãy kiểm tra và điều chỉnh lại nội dung.',
+      conflict: 'Trò chơi đang có phòng chơi chưa kết thúc nên chưa xuất bản được. Hãy kết thúc phòng chơi rồi thử lại. Nội dung bạn đang soạn vẫn được giữ.',
+    },
     // AI làm lại một câu (UC-06). Câu 5a, 5b và thông báo thành công là nguyên văn theo SRS.
     regenerate: {
       success: 'Điều chỉnh trò chơi thành công.',

@@ -1,6 +1,9 @@
+import { resolveShareUrl } from '../../config/studentApp'
 import type { GameDsl } from '../../types/game-dsl.types'
 import type { GameResponse } from '../../types/game-response.types'
+import type { PublishResult } from '../../types/publish.types'
 import type { GameFilters, GameSummary } from '../../types/game-summary.types'
+import { validateGame } from '../../utils/gameValidation'
 import { buildMockGameContents } from './gameFixtures'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
@@ -73,7 +76,7 @@ const toSummary = (record: MockGameRecord): GameSummary => ({
   gradeLevel: record.content.metadata.gradeLevel,
   status: record.status,
   shareCode: record.shareCode,
-  shareUrl: record.shareCode ? `https://aigame.example/play/${record.shareCode}` : null,
+  shareUrl: record.shareCode ? resolveShareUrl(record.shareCode) : null,
   thumbnailUrl: record.content.questions[0]?.imageUrl ?? null,
   updatedAt: record.updatedAt,
 })
@@ -192,3 +195,38 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
 
 /** Game này do AI MÔ PHỎNG tạo (nội dung là bản mẫu, không khớp mô tả của giáo viên). */
 export const isMockGenerated = (gameId: string) => generated.has(gameId)
+
+const SHARE_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
+
+function newShareCode() {
+  const taken = new Set(records.map((record) => record.shareCode))
+
+  for (;;) {
+    const code = Array.from({ length: 6 }, () => SHARE_CODE_ALPHABET[Math.floor(Math.random() * SHARE_CODE_ALPHABET.length)]).join('')
+
+    if (!taken.has(code)) return code
+  }
+}
+
+/**
+ * Giống `POST /games/{id}/publish` khi gửi kèm nội dung (UC-07 luồng chính): kiểm tra dữ liệu theo chế độ XUẤT BẢN (400 nếu chưa hợp lệ, không đổi gì), từ chối 409 nếu game đang có
+ * phiên chưa kết thúc, rồi LƯU nội dung, đặt `PUBLISHED` và cấp mã chia sẻ. Gọi lại khi đã xuất bản vẫn thành công và giữ nguyên mã.
+ */
+export function publishMockGame(gameId: string, body: GameDsl, now: number = Date.now()): PublishResult {
+  const record = findRecord(gameId)
+
+  if (record.locked) throw conflictError()
+  if (body.gameType !== record.content.gameType) {
+    throw mockApiError(400, 'VALIDATION_ERROR', 'Không thể đổi loại trò chơi của một trò chơi đã tạo.')
+  }
+  if (validateGame(body, 'publish').length > 0) throw mockApiError(400, 'VALIDATION_ERROR', 'Dữ liệu trò chơi chưa hợp lệ để xuất bản.')
+
+  const { gameId: _gameId, status: _status, updatedAt: _updatedAt, ...content } = body as GameDsl & Record<string, unknown>
+
+  record.content = structuredClone(content) as GameDsl
+  record.status = 'PUBLISHED'
+  record.shareCode = record.shareCode ?? newShareCode()
+  record.updatedAt = new Date(now).toISOString()
+
+  return { gameId: record.gameId, status: 'PUBLISHED', shareCode: record.shareCode, shareUrl: resolveShareUrl(record.shareCode) }
+}
