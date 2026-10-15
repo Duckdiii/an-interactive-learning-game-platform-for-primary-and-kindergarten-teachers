@@ -5,8 +5,9 @@ import { parseApiError } from './apiError'
 const text = viText.editor.regenerate
 
 // Loại lỗi để giao diện chọn cách phản ứng: `unsafe` (5a) cho sửa gợi ý rồi thử lại, `busy` (5b) và `rateLimited` cho bấm "Thử lại",
-// `notSaved` (404) và `locked` (409) phải xử lý chỗ khác trước (lưu bản nháp, kết thúc phòng chơi) nên không có nút thử lại.
-export type RegenerateFailureKind = 'unsafe' | 'busy' | 'notSaved' | 'locked' | 'rateLimited' | 'other'
+// `notSaved` (404) và `locked` (409) phải xử lý chỗ khác trước (lưu bản nháp, kết thúc phòng chơi) nên không có nút thử lại; `invalid` là câu AI trả về
+// không qua được bộ kiểm tra dữ liệu (không dùng, giữ câu cũ), thử lại được.
+export type RegenerateFailureKind = 'unsafe' | 'busy' | 'notSaved' | 'locked' | 'rateLimited' | 'invalid' | 'other'
 
 export interface RegenerateFailure {
   kind: RegenerateFailureKind

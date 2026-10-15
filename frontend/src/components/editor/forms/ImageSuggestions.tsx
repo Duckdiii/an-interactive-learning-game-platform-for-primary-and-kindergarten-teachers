@@ -6,7 +6,7 @@ import { parseApiError } from '../../../utils/apiError'
 import Button from '../../Button'
 import MockBadge from '../../ui/MockBadge'
 import type { MediaToolsApi } from './MediaField'
-import { useMediaOperation } from './useMediaOperation'
+import { useCancellableOperation } from '../../../hooks/useCancellableOperation'
 
 const text = viText.editor.media
 
@@ -20,7 +20,7 @@ interface ImageSuggestionsProps {
 // Gợi ý ảnh theo "Mô tả hình ảnh" (FLD-11), mô phỏng nguồn Pexels với bộ lọc SafeSearch. Chỉ XEM: không đổi game cho tới khi giáo viên bấm "Dùng ảnh này".
 export default function ImageSuggestions({ idPrefix, visualPrompt, tools }: ImageSuggestionsProps) {
   // Tìm ảnh không đổi game nên không khóa Lưu/Chơi thử.
-  const op = useMediaOperation({ lockEditing: false })
+  const op = useCancellableOperation({ lockEditing: false })
   const [results, setResults] = useState<ImageSuggestion[] | null>(null)
   const query = visualPrompt?.trim() ?? ''
   const id = `${idPrefix}-suggestions`

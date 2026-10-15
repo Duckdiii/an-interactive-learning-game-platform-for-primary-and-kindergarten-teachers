@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { mockApiError } from '../services/mock/mockErrors'
-import { isCanceled, uploadErrorMessage } from './mediaErrors'
-import axios, { CanceledError } from 'axios'
+import axios from 'axios'
+import { uploadErrorMessage } from './mediaErrors'
 
 // Nguyên văn theo SRS UC-05.
 const INVALID_FILE =
@@ -22,12 +22,5 @@ describe('uploadErrorMessage', () => {
     expect(uploadErrorMessage(new axios.AxiosError('timeout', 'ECONNABORTED'))).toBe('Máy chủ phản hồi quá chậm. Hãy thử lại sau ít phút.')
     expect(uploadErrorMessage(mockApiError(500, 'INTERNAL_ERROR', 'x'))).toBe('Hệ thống đang gặp sự cố. Hãy thử lại sau ít phút.')
     expect(uploadErrorMessage(new Error('lạ'))).toBe('Chưa tải được tệp lên. Hãy thử lại.')
-  })
-})
-
-describe('isCanceled', () => {
-  it('nhận lỗi hủy của axios, không nhận lỗi khác', () => {
-    expect(isCanceled(new CanceledError('canceled'))).toBe(true)
-    expect(isCanceled(new Error('x'))).toBe(false)
   })
 })

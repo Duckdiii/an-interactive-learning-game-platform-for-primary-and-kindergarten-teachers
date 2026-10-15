@@ -328,6 +328,8 @@ export const viText = {
       notSaved: 'Câu hỏi này chưa có trên máy chủ nên chưa tạo lại được. Hãy lưu bản nháp rồi thử lại. Câu hiện tại vẫn được giữ nguyên.',
       locked: 'Trò chơi đang có phòng chơi chưa kết thúc nên chưa tạo lại được câu. Hãy kết thúc phòng chơi rồi thử lại. Câu hiện tại vẫn được giữ nguyên.',
       fallback: 'Chưa tạo lại được câu này. Câu hiện tại vẫn được giữ nguyên, vui lòng thử lại.',
+      // Câu AI trả về không qua được bộ kiểm tra dữ liệu như lúc lưu: không dùng, giữ câu cũ.
+      invalidResult: 'Câu AI tạo lại chưa hợp lệ nên chưa được dùng. Câu hiện tại vẫn được giữ nguyên, vui lòng thử lại.',
     },
     // Tải ảnh và âm thanh (UC-05 luồng 1a, 3a, 3b), gợi ý ảnh (FLD-11) và giọng đọc (FLD-12).
     media: {

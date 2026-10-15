@@ -37,6 +37,8 @@ function readRestorable(owner: string | null, gameId: string, baseline: GameDsl)
   return stored
 }
 
+export type ApplyRegeneratedResult = { ok: true } | { ok: false; reason: 'stale' | 'invalid' }
+
 // Toàn bộ logic của một phiên soạn thảo (trạng thái bản nháp, kiểm tra trước khi lưu, lưu, sao lưu và khôi phục) để trang chỉ
 // còn lo bố cục. Lưu thất bại KHÔNG bao giờ động tới bản đang soạn.
 export function useGameEditor(game: GameResponse) {
@@ -168,6 +170,33 @@ export function useGameEditor(game: GameResponse) {
     setTopic: (topic: string) => edit({ type: 'setTopic', topic }),
     updateQuestion: (index: number, questionId: string, update: (question: QuestionDsl) => QuestionDsl) =>
       edit({ type: 'updateQuestion', index, questionId, update }),
+    /** Mã các thẻ câu vừa được AI làm lại và còn hoàn tác được. */
+    regeneratedIds: Object.keys(state.undo),
+    /**
+     * Đưa câu AI làm lại vào đúng thẻ, áp lên bản đang soạn HIỆN HÀNH (các thẻ khác và sửa tay chưa lưu giữ nguyên). Câu mới phải qua bộ kiểm tra
+     * như lúc lưu (kèm bản đã lưu làm mốc); không hợp lệ thì KHÔNG áp, câu cũ giữ nguyên. `stale`: thẻ đã đổi chỗ hoặc không còn.
+     */
+    applyRegenerated: (index: number, questionId: string, question: QuestionDsl): ApplyRegeneratedResult => {
+      const { draft, baseline } = latest.current
+      const target = draft.questions[index]
+
+      if (!target || target.id !== questionId || question.id !== questionId) return { ok: false, reason: 'stale' }
+
+      const candidate = { ...draft, questions: draft.questions.map((item, position) => (position === index ? question : item)) } as GameDsl
+      const invalid = validateGame(candidate, 'save', { baseline }).some((issue) => issue.questionIndex === index)
+
+      if (invalid) return { ok: false, reason: 'invalid' }
+
+      edit({ type: 'applyRegenerated', index, questionId, question })
+      // Các ô nhập giữ chữ gõ dở thì dựng lại để hiện đúng nội dung mới.
+      setRevision((value) => value + 1)
+
+      return { ok: true }
+    },
+    undoRegenerated: (index: number, questionId: string) => {
+      edit({ type: 'undoRegenerated', index, questionId })
+      setRevision((value) => value + 1)
+    },
     save,
     validate,
     restore: () => {

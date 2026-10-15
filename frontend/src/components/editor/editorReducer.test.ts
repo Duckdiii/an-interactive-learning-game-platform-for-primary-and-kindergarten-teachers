@@ -91,3 +91,83 @@ describe('editorReducer: updateQuestion (bản vá áp lên câu hiện hành)',
     expect(editorReducer(start, { type: 'updateQuestion', index: 0, questionId: start.draft.questions[0].id, update: (question) => question })).toBe(start)
   })
 })
+
+describe('editorReducer: AI làm lại một câu và hoàn tác', () => {
+  const regenerated = (state: ReturnType<typeof createEditorState>, text = 'Câu do AI làm lại'): QuestionDsl => ({
+    ...state.draft.questions[0],
+    questionText: text,
+  }) as QuestionDsl
+
+  it('áp câu mới vào đúng thẻ, giữ nguyên thẻ khác, "chưa lưu", và nhớ câu cũ ở bộ nhớ hoàn tác (không nằm trong bản nháp)', () => {
+    const start = createEditorState(quiz())
+    const next = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
+
+    expect((next.draft.questions[0] as { questionText: string }).questionText).toBe('Câu do AI làm lại')
+    expect(next.draft.questions[1]).toBe(start.draft.questions[1])
+    expect(isDirty(next)).toBe(true)
+    expect(next.undo.q1.previous).toBe(start.draft.questions[0])
+    expect(next.undo.q1.applied).toBe(next.draft.questions[0])
+    // Bộ nhớ hoàn tác không lọt vào nội dung game (nơi duy nhất được sao lưu và gửi đi).
+    expect(JSON.stringify(next.draft)).not.toContain('previous')
+    expect(next.baseline).toBe(start.baseline)
+  })
+
+  it('thẻ không còn khớp mã hoặc vị trí, hoặc câu mới mang mã khác thì bỏ qua', () => {
+    const start = createEditorState(quiz())
+
+    expect(editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q2', question: regenerated(start) })).toBe(start)
+    expect(editorReducer(start, { type: 'applyRegenerated', index: 99, questionId: 'q1', question: regenerated(start) })).toBe(start)
+    expect(editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: { ...regenerated(start), id: 'q9' } })).toBe(start)
+  })
+
+  it('hoàn tác trả đúng câu cũ (cùng đối tượng), hết "chưa lưu", và chỉ hoàn tác được một lần', () => {
+    const start = createEditorState(quiz())
+    const applied = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
+    const undone = editorReducer(applied, { type: 'undoRegenerated', index: 0, questionId: 'q1' })
+
+    expect(undone.draft.questions[0]).toBe(start.draft.questions[0])
+    expect(isDirty(undone)).toBe(false)
+    expect(undone.undo).toEqual({})
+    expect(editorReducer(undone, { type: 'undoRegenerated', index: 0, questionId: 'q1' })).toBe(undone)
+  })
+
+  it('sửa tiếp CHÍNH câu đó thì mất khả năng hoàn tác; sửa câu khác thì còn', () => {
+    const start = createEditorState(quiz())
+    const applied = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
+    const otherEdited = editorReducer(applied, { type: 'updateQuestion', index: 1, questionId: 'q2', update: (question) => ({ ...question, points: 55 }) })
+    const sameEdited = editorReducer(applied, { type: 'updateQuestion', index: 0, questionId: 'q1', update: (question) => ({ ...question, points: 55 }) })
+    const noChange = editorReducer(applied, { type: 'updateQuestion', index: 0, questionId: 'q1', update: (question) => question })
+
+    expect(Object.keys(otherEdited.undo)).toEqual(['q1'])
+    expect(sameEdited.undo).toEqual({})
+    expect(noChange).toBe(applied)
+    // Đã sửa tiếp thì hoàn tác không còn làm gì (không mất phần vừa sửa).
+    expect(editorReducer(sameEdited, { type: 'undoRegenerated', index: 0, questionId: 'q1' })).toBe(sameEdited)
+  })
+
+  it('lưu (chuẩn hóa trước khi gửi, hoặc đã lưu xong) và khôi phục bản sao lưu đều xóa mọi hoàn tác', () => {
+    const start = createEditorState(quiz())
+    const applied = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
+
+    expect(editorReducer(applied, { type: 'normalize' }).undo).toEqual({})
+    expect(editorReducer(applied, { type: 'saved', snapshot: applied.draft }).undo).toEqual({})
+    expect(editorReducer(applied, { type: 'restore', content: quiz() }).undo).toEqual({})
+  })
+
+  it('làm lại nhiều thẻ thì mỗi thẻ hoàn tác riêng', () => {
+    const start = createEditorState(quiz())
+    const first = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
+    const second = editorReducer(first, {
+      type: 'applyRegenerated',
+      index: 1,
+      questionId: 'q2',
+      question: { ...first.draft.questions[1], questionText: 'Câu 2 do AI' } as QuestionDsl,
+    })
+    const undoFirst = editorReducer(second, { type: 'undoRegenerated', index: 0, questionId: 'q1' })
+
+    expect(Object.keys(second.undo).sort()).toEqual(['q1', 'q2'])
+    expect(undoFirst.draft.questions[0]).toBe(start.draft.questions[0])
+    expect((undoFirst.draft.questions[1] as { questionText: string }).questionText).toBe('Câu 2 do AI')
+    expect(Object.keys(undoFirst.undo)).toEqual(['q2'])
+  })
+})

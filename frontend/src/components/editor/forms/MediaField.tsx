@@ -13,7 +13,7 @@ import { setMediaUrl } from './commonEditing'
 import type { MediaUrlField } from './commonEditing'
 import type { QuestionFormProps } from './formTypes'
 import OperationStatus from './OperationStatus'
-import { useMediaOperation } from './useMediaOperation'
+import { useCancellableOperation } from '../../../hooks/useCancellableOperation'
 
 const text = viText.editor.media
 
@@ -21,13 +21,13 @@ type Activity = 'upload' | 'tool'
 
 /** Những gì công cụ đi kèm (gợi ý ảnh, tạo giọng đọc) được dùng chung với ô tải tệp. */
 export interface MediaToolsApi {
-  op: ReturnType<typeof useMediaOperation>
+  op: ReturnType<typeof useCancellableOperation>
   // Đang có thao tác của CÔNG CỤ chạy (không phải tải tệp).
   toolActive: boolean
   // Lỗi của thao tác công cụ vừa chạy (null nếu không có).
   toolError: string | null
   // Chạy một thao tác của công cụ: dùng chung bộ khóa với tải tệp nên hai việc không chạy chồng nhau.
-  runTool: ReturnType<typeof useMediaOperation>['run']
+  runTool: ReturnType<typeof useCancellableOperation>['run']
   // Gắn (hoặc gỡ, với undefined) đường dẫn vào câu hiện hành.
   apply: (url: string | undefined) => void
   // Có việc khác đang chạy: công cụ nên khóa nút.
@@ -64,7 +64,7 @@ function revokeIfBlob(url: string) {
 export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: MediaFieldProps) {
   const field = FIELD[kind]
   const isImage = kind === 'image'
-  const op = useMediaOperation()
+  const op = useCancellableOperation()
   const [selected, setSelected] = useState<Selected | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)

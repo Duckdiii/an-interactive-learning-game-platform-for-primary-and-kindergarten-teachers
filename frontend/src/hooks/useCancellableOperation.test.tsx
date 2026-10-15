@@ -2,9 +2,9 @@ import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { CanceledError } from 'axios'
 import { describe, expect, it, vi } from 'vitest'
-import { createPendingProbe } from '../../../test/probes'
-import { PendingEditsContext } from './PendingEditsContext'
-import { useMediaOperation } from './useMediaOperation'
+import { PendingEditsContext } from '../components/editor/forms/PendingEditsContext'
+import { createPendingProbe } from '../test/probes'
+import { useCancellableOperation } from './useCancellableOperation'
 
 function deferred<T>() {
   let resolve!: (value: T) => void
@@ -17,19 +17,19 @@ function deferred<T>() {
   return { promise, resolve, reject }
 }
 
-function setup(options?: Parameters<typeof useMediaOperation>[0]) {
+function setup(options?: Parameters<typeof useCancellableOperation>[0]) {
   const probe = createPendingProbe()
   const wrapper = ({ children }: { children: ReactNode }) => (
     <PendingEditsContext.Provider value={{ begin: probe.begin }}>{children}</PendingEditsContext.Provider>
   )
-  const view = renderHook(() => useMediaOperation(options), { wrapper })
+  const view = renderHook(() => useCancellableOperation(options), { wrapper })
 
   return { probe, ...view }
 }
 
 const describeError = (error: unknown) => (error instanceof Error ? error.message : 'lỗi')
 
-describe('useMediaOperation', () => {
+describe('useCancellableOperation', () => {
   it('chạy xong: trả kết quả, về idle, mở khóa', async () => {
     const { result, probe } = setup()
     const task = deferred<string>()

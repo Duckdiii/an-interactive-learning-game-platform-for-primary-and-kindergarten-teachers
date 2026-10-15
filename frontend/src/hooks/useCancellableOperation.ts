@@ -1,12 +1,15 @@
+import axios from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { isCanceled } from '../../../utils/mediaErrors'
-import { usePendingEdits } from './PendingEditsContext'
+import { usePendingEdits } from '../components/editor/forms/PendingEditsContext'
 
-export type MediaOperationState =
+export type OperationState =
   | { status: 'idle' }
   // `progress` là phần trăm (0 đến 100), hoặc null khi thao tác không biết tiến độ (hiện thanh chạy không xác định).
   | { status: 'working'; progress: number | null }
-  | { status: 'error'; message: string }
+  // `kind` do nơi gọi đặt (xem `describeError`), để giao diện chọn cách phản ứng theo loại lỗi (ví dụ có nút "Thử lại" hay không).
+  | { status: 'error'; message: string; kind?: string }
+
+const toFailure = (described: string | { message: string; kind?: string }) => (typeof described === 'string' ? { message: described } : described)
 
 export interface OperationContext {
   signal: AbortSignal
@@ -14,8 +17,8 @@ export interface OperationContext {
 }
 
 interface RunOptions<T> {
-  // Đổi lỗi thành câu hiển thị.
-  describeError: (error: unknown) => string
+  // Đổi lỗi thành câu hiển thị, kèm loại lỗi nếu nơi gọi cần phân biệt.
+  describeError: (error: unknown) => string | { message: string; kind?: string }
   // Kết quả về nhưng bị bỏ (đã hủy, hoặc màn hình đã đóng): để giải phóng tài nguyên đã tạo (ví dụ đường dẫn `blob:`).
   discard?: (result: T) => void
 }
@@ -26,13 +29,13 @@ interface HookOptions {
 }
 
 /**
- * Chạy MỘT thao tác bất đồng bộ có thể hủy của form (tải tệp, tạo giọng đọc, tìm ảnh): theo dõi tiến độ/lỗi, cho hủy bằng `cancel()`,
+ * Chạy MỘT thao tác bất đồng bộ có thể hủy của trình soạn thảo (tải tệp, tạo giọng đọc, tìm ảnh, AI làm lại câu): theo dõi tiến độ/lỗi, cho hủy bằng `cancel()`,
  * tự hủy khi form đóng (đổi câu, rời trang) và, nếu `lockEditing`, báo cho trang biết còn thay đổi chưa vào game (`PendingEditsContext`)
  * để không Lưu hoặc Chơi thử trên bản cũ. Kết quả chỉ được trả về khi thao tác còn hiệu lực; còn lại `run` trả undefined.
  */
-export function useMediaOperation({ lockEditing = true }: HookOptions = {}) {
+export function useCancellableOperation({ lockEditing = true }: HookOptions = {}) {
   const { begin } = usePendingEdits()
-  const [state, setState] = useState<MediaOperationState>({ status: 'idle' })
+  const [state, setState] = useState<OperationState>({ status: 'idle' })
   const controllerRef = useRef<AbortController | null>(null)
   const endLockRef = useRef<(() => void) | null>(null)
   const aliveRef = useRef(true)
@@ -85,7 +88,7 @@ export function useMediaOperation({ lockEditing = true }: HookOptions = {}) {
       } catch (error) {
         // Lỗi hủy không do `cancel()` gây ra (ví dụ tầng mạng tự hủy) cũng không phải sự cố: chỉ trở về trạng thái nghỉ, không để thanh tiến trình treo.
         if (aliveRef.current && !controller.signal.aborted) {
-          setState(isCanceled(error) ? { status: 'idle' } : { status: 'error', message: describeError(error) })
+          setState(axios.isCancel(error) ? { status: 'idle' } : { status: 'error', ...toFailure(describeError(error)) })
         }
 
         return undefined
