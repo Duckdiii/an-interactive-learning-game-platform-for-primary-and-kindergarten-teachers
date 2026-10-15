@@ -1,11 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from './axiosInstance'
-import { GAMES_REQUEST_TIMEOUT_MS, GAME_REQUEST_TIMEOUT_MS, fetchGame, getGames, saveGame } from './gamesApi'
+import {
+  AI_ATTEMPT_TIMEOUT_MS,
+  AI_BACKEND_ATTEMPTS,
+  GAMES_REQUEST_TIMEOUT_MS,
+  GAME_REQUEST_TIMEOUT_MS,
+  REGENERATE_QUESTION_TIMEOUT_MS,
+  fetchGame,
+  getGames,
+  postRegenerateQuestion,
+  saveGame,
+} from './gamesApi'
 
-vi.mock('./axiosInstance', () => ({ default: { get: vi.fn(), put: vi.fn() } }))
+vi.mock('./axiosInstance', () => ({ default: { get: vi.fn(), put: vi.fn(), post: vi.fn() } }))
 
 const mockedGet = vi.mocked(axiosInstance.get)
 const mockedPut = vi.mocked(axiosInstance.put)
+const mockedPost = vi.mocked(axiosInstance.post)
 
 describe('getGames', () => {
   beforeEach(() => {
@@ -62,5 +73,38 @@ describe('fetchGame và saveGame', () => {
     mockedGet.mockRejectedValue(new Error('mất mạng'))
 
     await expect(fetchGame('g1')).rejects.toThrow('mất mạng')
+  })
+})
+
+describe('postRegenerateQuestion', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockedPost.mockResolvedValue({ data: { success: true, data: { question: { id: 'q1' }, gameType: 'QUIZ' } } })
+  })
+
+  it('timeout của lời gọi dài hơn cả 3 lần gọi AI của Backend (1 + 2 lần thử lại, mỗi lần 5 giây), kể cả khoảng đệm', () => {
+    expect(AI_ATTEMPT_TIMEOUT_MS).toBe(5_000)
+    expect(AI_BACKEND_ATTEMPTS).toBe(3)
+    expect(REGENERATE_QUESTION_TIMEOUT_MS).toBeGreaterThan(AI_BACKEND_ATTEMPTS * AI_ATTEMPT_TIMEOUT_MS)
+  })
+
+  it('POST tới đúng địa chỉ (mã được mã hóa), kèm gợi ý đã cắt khoảng trắng, timeout riêng và tín hiệu hủy', async () => {
+    const controller = new AbortController()
+    const result = await postRegenerateQuestion('g 1', 'q/2', { feedback: '  làm dễ hơn  ', signal: controller.signal })
+
+    expect(result).toEqual({ question: { id: 'q1' }, gameType: 'QUIZ' })
+    expect(mockedPost).toHaveBeenCalledWith(
+      '/games/g%201/questions/q%2F2/regenerate',
+      { feedback: 'làm dễ hơn' },
+      { timeout: REGENERATE_QUESTION_TIMEOUT_MS, signal: controller.signal },
+    )
+  })
+
+  it('không có gợi ý (trống hoặc toàn khoảng trắng) thì không gửi thân yêu cầu', async () => {
+    await postRegenerateQuestion('g1', 'q1')
+    await postRegenerateQuestion('g1', 'q1', { feedback: '   ' })
+
+    expect(mockedPost.mock.calls[0][1]).toBeUndefined()
+    expect(mockedPost.mock.calls[1][1]).toBeUndefined()
   })
 })

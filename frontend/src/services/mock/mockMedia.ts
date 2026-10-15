@@ -65,7 +65,15 @@ const fold = (value: string) =>
     .replace(/đ/g, 'd')
     .toLowerCase()
 
-/** Ảnh gợi ý cho mô tả `query`: khớp từ khóa thì chỉ lấy ảnh khớp, không khớp thì trả bộ ảnh chung (tối đa 4). Kịch bản `empty` trả danh sách trống. */
+/** Ảnh mẫu khớp với mô tả `query` (thuần, không độ trễ): khớp từ khóa thì chỉ lấy ảnh khớp, không khớp thì trả bộ ảnh chung. */
+export function findMockImages(query: string): ImageSuggestion[] {
+  const words = fold(query)
+  const matched = CATALOG.filter((item) => item.keywords.some((keyword) => words.includes(keyword)))
+
+  return (matched.length > 0 ? matched : CATALOG).map(({ keywords: _keywords, ...item }) => item)
+}
+
+/** Ảnh gợi ý cho mô tả `query` (tối đa 4). Kịch bản `empty` trả danh sách trống. */
 export async function mockSuggestImages(query: string, signal?: AbortSignal): Promise<ImageSuggestion[]> {
   await mockWait(mockTotalDelayMs(), signal)
 
@@ -75,10 +83,7 @@ export async function mockSuggestImages(query: string, signal?: AbortSignal): Pr
   if (scenario === 'timeout') throw mockTimeoutError()
   if (scenario === 'empty') return []
 
-  const words = fold(query)
-  const matched = CATALOG.filter((item) => item.keywords.some((keyword) => words.includes(keyword)))
-
-  return (matched.length > 0 ? matched : CATALOG).map(({ keywords: _keywords, ...item }) => item)
+  return findMockImages(query)
 }
 
 // ---- Tạo giọng đọc (FLD-12): giả lập, luôn trả cùng một tệp mẫu ----

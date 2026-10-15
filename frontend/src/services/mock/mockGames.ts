@@ -123,6 +123,11 @@ export function saveMockGame(gameId: string, body: GameDsl): GameResponse {
   return toResponse(record)
 }
 
+/** Game có phiên chơi chưa kết thúc không (để dịch vụ mô phỏng khác trả 409 giống `saveMockGame`). */
+export function isMockGameLocked(gameId: string) {
+  return findRecord(gameId).locked
+}
+
 /** Chỉ cho test và kiểm tay: giả lập game đang có (hoặc hết) phiên chơi chưa kết thúc. */
 export function setMockGameLocked(gameId: string, locked: boolean) {
   findRecord(gameId).locked = locked

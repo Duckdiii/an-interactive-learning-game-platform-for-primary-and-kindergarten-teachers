@@ -320,6 +320,15 @@ export const viText = {
         'Hiện chỉ chơi thử được trò chơi Trắc nghiệm và Nối cặp. Bạn vẫn xem được nội dung từng câu ở dưới; chơi thử cho loại này sẽ có sau.',
       unsupportedListLabel: 'Nội dung các câu hỏi',
     },
+    // AI làm lại một câu (UC-06). Câu 5a, 5b và thông báo thành công là nguyên văn theo SRS.
+    regenerate: {
+      success: 'Điều chỉnh trò chơi thành công.',
+      unsafe: 'Nội dung tạo lại chưa đạt chuẩn an toàn học đường. Hệ thống đã khôi phục câu hỏi cũ, vui lòng thử lại với gợi ý mô tả khác.',
+      busy: 'Máy chủ trí tuệ nhân tạo đang bận xử lý dữ liệu. Yêu cầu tạo lại của giáo viên chưa thực hiện được, vui lòng thử lại sau ít phút.',
+      notSaved: 'Câu hỏi này chưa có trên máy chủ nên chưa tạo lại được. Hãy lưu bản nháp rồi thử lại. Câu hiện tại vẫn được giữ nguyên.',
+      locked: 'Trò chơi đang có phòng chơi chưa kết thúc nên chưa tạo lại được câu. Hãy kết thúc phòng chơi rồi thử lại. Câu hiện tại vẫn được giữ nguyên.',
+      fallback: 'Chưa tạo lại được câu này. Câu hiện tại vẫn được giữ nguyên, vui lòng thử lại.',
+    },
     // Tải ảnh và âm thanh (UC-05 luồng 1a, 3a, 3b), gợi ý ảnh (FLD-11) và giọng đọc (FLD-12).
     media: {
       imageLegend: 'Ảnh minh họa',
