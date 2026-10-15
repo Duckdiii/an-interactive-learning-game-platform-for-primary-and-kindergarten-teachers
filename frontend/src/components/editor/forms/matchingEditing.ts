@@ -1,4 +1,4 @@
-import type { MatchingPair, MatchingQuestion } from '../../../types/game-dsl.types'
+import type { MatchingQuestion } from '../../../types/game-dsl.types'
 import { TYPE_LIMITS } from '../../../utils/questionSpecs'
 
 // Các phép sửa câu MATCHING (hàm thuần, trả về bản mới, không đổi bản cũ). Số cặp theo giới hạn DSL (3 đến 6). Mã cặp (p1, p2...) chỉ cần
@@ -13,7 +13,7 @@ export const canAddPair = (question: MatchingQuestion) => question.pairs.length 
 export const canRemovePair = (question: MatchingQuestion) => question.pairs.length > LIMITS.min
 
 /** Mã cặp mới: `p<n>` với n nhỏ nhất (từ 1) chưa có cặp nào dùng. */
-export function nextPairId(pairs: ReadonlyArray<MatchingPair>) {
+export function nextPairId(pairs: ReadonlyArray<{ pairId: string }>) {
   const used = new Set(pairs.map((pair) => pair.pairId))
   let number = 1
 
@@ -30,7 +30,7 @@ export function addPair(question: MatchingQuestion, pairId: string = nextPairId(
 }
 
 /** Số nhỏ nhất mà mã `p<số>` chưa bao giờ được dùng (kể cả cặp đã xóa): form dùng làm mã cặp mới để một bản vá đang chờ của cặp đã xóa không bao giờ rơi nhầm vào cặp mới. */
-export function firstUnusedPairNumber(pairs: ReadonlyArray<MatchingPair>) {
+export function firstUnusedPairNumber(pairs: ReadonlyArray<{ pairId: string }>) {
   return pairs.reduce((max, pair) => Math.max(max, Number(pair.pairId.replace(/^p/, '')) || 0), 0) + 1
 }
 

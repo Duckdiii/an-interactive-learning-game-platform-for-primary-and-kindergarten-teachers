@@ -41,6 +41,10 @@ Chụp trên trình duyệt thật ở chế độ dữ liệu mô phỏng (`VIT
 | `b2-qr-mobile-390.jpg` | B2, điện thoại 390px | Mã QR vừa khít màn hình 390px |
 | `b3-parent-message-desktop.jpg` | B3 | Tin nhắn mẫu gửi phụ huynh: lời nhắc không ghi thông tin học sinh, văn bản sửa được, nút sao chép và đặt lại |
 | `b3-parent-message-mobile-390.jpg` | B3, điện thoại 390px | Cùng tin nhắn mẫu trên điện thoại |
+| `form-memory-card-desktop.jpg` | Form MEMORY_CARD | Câu 1 có 3 cặp thẻ: mỗi cặp một mặt thẻ (chữ, mô tả hình), nút xóa cặp |
+| `form-memory-card-mobile-390.jpg` | Form MEMORY_CARD, điện thoại 390px | Cùng form một cột, không tràn ngang |
+| `form-memory-card-error-desktop.jpg` | Form MEMORY_CARD | Vừa thêm cặp mới còn trống: báo "cần có chữ hoặc mô tả hình", cả hai ô được đánh dấu |
+| `form-memory-card-error-mobile-390.jpg` | Form MEMORY_CARD, điện thoại 390px | Cùng trạng thái lỗi trên điện thoại |
 
 Ảnh nhóm B (B1 đến B3) chụp bằng tập lệnh Playwright chạy qua Bash trên dev server ở chế độ mô phỏng (trình duyệt Chrome có sẵn của máy, không thêm thư viện vào dự án), ở 1280px và 390px; lỗi 2a và 2b do bản xuất bản mô phỏng chèn sẵn. Tập lệnh dùng bản `playwright-core` nằm trong bộ nhớ đệm npx của máy chụp nên không đưa vào kho; ảnh `b2-qr-*` chỉ chụp khung mã QR và nút tải.
 
