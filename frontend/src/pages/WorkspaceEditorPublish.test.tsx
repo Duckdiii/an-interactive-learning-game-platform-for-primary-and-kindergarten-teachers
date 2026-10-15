@@ -61,6 +61,8 @@ describe('xuất bản từ trình soạn thảo', () => {
     expect(code.value).toMatch(/^[A-Z0-9]{6}$/)
     expect(link.value).toMatch(/^https?:\/\/.+\/play\/[A-Z0-9]{6}$/)
     expect(within(dialog).getByText(/dữ liệu mô phỏng/i)).toBeInTheDocument()
+    expect(within(dialog).getByRole('img', { name: /Mã QR/ })).toBeInTheDocument()
+    expect(within(dialog).getByText(/dẫn tới địa chỉ MÔ PHỎNG/)).toBeInTheDocument()
     expect(getMockGame(DRAFT_ID).status).toBe('PUBLISHED')
 
     await user.click(within(dialog).getByRole('button', { name: 'Đóng' }))

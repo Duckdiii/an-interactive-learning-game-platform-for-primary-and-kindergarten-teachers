@@ -6,6 +6,7 @@ import { safeHttpUrl } from '../../utils/safeUrl'
 import Button from '../Button'
 import Dialog from '../ui/Dialog'
 import MockBadge from '../ui/MockBadge'
+import QrCode from '../ui/QrCode'
 import CopyField from './CopyField'
 
 interface SharePanelProps {
@@ -17,7 +18,7 @@ interface SharePanelProps {
 
 const text = viText.editor.publish
 
-// Hộp thoại sau khi xuất bản: mã chia sẻ và liên kết để sao chép. Liên kết CHỈ hiện khi là http/https (kể cả khi Backend trả về); mã QR làm ở bước B2.
+// Hộp thoại sau khi xuất bản: mã chia sẻ và liên kết để sao chép. Liên kết và mã QR CHỈ hiện khi địa chỉ là http/https (kể cả khi Backend trả về).
 export default function SharePanel({ result, hasUnsavedAfter, onClose }: SharePanelProps) {
   const url = safeHttpUrl(resolveShareUrl(result.shareCode, result.shareUrl))
 
@@ -28,6 +29,8 @@ export default function SharePanel({ result, hasUnsavedAfter, onClose }: SharePa
         {isMock('editor') ? <MockBadge /> : null}
         <CopyField id="share-code" label={text.codeLabel} value={result.shareCode} />
         {url ? <CopyField id="share-link" label={text.linkLabel} value={url} /> : null}
+        {url ? <QrCode value={url} label={viText.qr.shareLabel} fileName={`qr-${result.shareCode}`} /> : null}
+        {url && isMock('editor') ? <p className="text-sm text-ink-soft">{viText.qr.mockNote}</p> : null}
         <p className="text-sm text-ink-soft">{text.studentPagePending}</p>
         {hasUnsavedAfter ? (
           <p role="note" className="rounded-xl bg-sun-soft px-4 py-3 text-base text-ink ring-1 ring-sun">

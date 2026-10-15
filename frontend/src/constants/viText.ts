@@ -2,6 +2,12 @@
 // Quy ước viết: động từ rõ ràng ("Tạo trò chơi", không "Gửi"), cùng một việc luôn cùng một tên, lỗi nói rõ việc cần làm.
 
 export const viText = {
+  // Mã QR dùng chung (chia sẻ trò chơi, và phòng chơi ở nhóm C).
+  qr: {
+    download: 'Tải mã QR (SVG)',
+    shareLabel: 'Mã QR để học sinh vào chơi trò chơi này',
+    mockNote: 'Mã QR này dẫn tới địa chỉ MÔ PHỎNG (máy của bạn), chỉ để xem thử; điện thoại học sinh không mở được.',
+  },
   appName: 'AI Game Platform',
 
   // Dữ liệu mô phỏng (cờ VITE_USE_MOCK, xem config/mockMode.ts).
