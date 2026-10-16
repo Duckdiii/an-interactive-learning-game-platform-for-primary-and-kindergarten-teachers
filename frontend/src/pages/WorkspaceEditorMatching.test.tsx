@@ -343,10 +343,10 @@ describe('MATCHING: chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đ
 
 describe('các loại game còn lại: chỉ sửa trường chung, nội dung chữ chỉ đọc', () => {
   // mock-game-3 DRAG_DROP, 4 AUDIO_VISUAL_MATCH, 5 ORDERING, 6 MEMORY_CARD (đã có form), 7 SPOT_THE_TARGET, 8 WORD_SCRAMBLE, 9 ODD_ONE_OUT, 10 VISUAL_CLOZE.
-  const OTHER_IDS = [3, 4, 5, 7, 8].map((n) => `mock-game-${n}`)
+  const OTHER_IDS = [3, 4, 5, 7].map((n) => `mock-game-${n}`)
 
   // Cùng thứ tự với `OTHER_IDS`.
-  const OTHER_TYPES = ['DRAG_DROP', 'AUDIO_VISUAL_MATCH', 'ORDERING', 'SPOT_THE_TARGET', 'WORD_SCRAMBLE'] as const
+  const OTHER_TYPES = ['DRAG_DROP', 'AUDIO_VISUAL_MATCH', 'ORDERING', 'SPOT_THE_TARGET'] as const
 
   it.each(OTHER_IDS.map((gameId, position) => [gameId, OTHER_TYPES[position]] as const))('%s (%s): có thông báo, nội dung chỉ đọc và đủ 4 trường chung; không có ô sửa nội dung', async (gameId, type) => {
     await openLoaded(gameId)

@@ -226,7 +226,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` xong. "Phụ thuộc" ghi mã subtask phải
 ## Giai đoạn sau (đã thống nhất làm sau task này)
 
 - **Form sửa tay cho 8 loại game còn lại** (AUDIO_VISUAL_MATCH, ODD_ONE_OUT, SPOT_THE_TARGET, WORD_SCRAMBLE, MEMORY_CARD, DRAG_DROP, ORDERING, VISUAL_CLOZE): mỗi loại thêm mô tả trường vào `questionSpecs` và một thành phần form nhỏ nhờ khung ở A3.
-- **Tiến độ form 8 loại:** MEMORY_CARD, ODD_ONE_OUT và VISUAL_CLOZE xong (`forms/{MemoryCardForm,memoryEditing,OddOneOutForm,oddOneOutEditing,VisualClozeForm,clozeEditing}`; chơi thử vẫn "chưa hỗ trợ"); còn AUDIO_VISUAL_MATCH, SPOT_THE_TARGET, WORD_SCRAMBLE, DRAG_DROP, ORDERING.
+- **Tiến độ form 8 loại:** MEMORY_CARD, ODD_ONE_OUT, VISUAL_CLOZE và WORD_SCRAMBLE xong (`forms/{MemoryCardForm,memoryEditing,OddOneOutForm,oddOneOutEditing,VisualClozeForm,clozeEditing,WordScrambleForm,scrambleEditing}`; chơi thử vẫn "chưa hỗ trợ"); còn AUDIO_VISUAL_MATCH, ORDERING, DRAG_DROP, SPOT_THE_TARGET.
 - **Nợ kỹ thuật (từ review MEMORY_CARD):** `MemoryCardForm` và `MatchingForm` lặp phần danh sách cặp (thêm/xóa, mã cặp, tiêu điểm, lỗi cấp danh sách) và `memoryEditing`/`matchingEditing` lặp các hàm thêm/xóa; tách `PairListEditor` và hàm sinh dùng chung khi có form thứ ba cùng dạng (danh sách có thêm/xóa), để không sửa lệch hai nơi (bạn đã chốt: chưa tách bây giờ). Tương tự `OddOneOutForm`/`oddOneOutEditing` lặp phần danh sách mục theo vị trí (mã a đến e, khóa ổn định, chọn một) của `QuizForm`/`quizEditing`; gom cùng lúc.
 - Renderer chơi thử của 8 loại đó (renderer thuộc engine Canvas, ngoài phạm vi).
 

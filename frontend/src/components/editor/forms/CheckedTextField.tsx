@@ -126,7 +126,7 @@ export default function CheckedTextField({ id, label, value, limits, error, inva
     if (typed !== null && submittedRef.current !== typed) void commit(typed)
   }
 
-  const size = [...shown.trim()].length
+  const size = [...shown.trim().normalize('NFC')].length
   const safetyMessage =
     verdict === 'unsafe' ? `${text.unsafe} ${text.unsafeKept}` : verdict === 'unavailable' ? text.safetyUnavailable : undefined
   const shownError = safetyMessage ?? error
