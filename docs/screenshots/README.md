@@ -61,6 +61,12 @@ Chụp trên trình duyệt thật ở chế độ dữ liệu mô phỏng (`VIT
 | `form-word-scramble-reshuffled-mobile-390.jpg` | Form WORD_SCRAMBLE, điện thoại 390px | Cùng trạng thái sau khi xáo lại trên điện thoại |
 | `form-word-scramble-error-desktop.jpg` | Form WORD_SCRAMBLE | Dán từ có khoảng trắng: báo đúng một lần "không được có khoảng trắng" (lỗi hệ quả của các chữ xáo được ẩn) |
 | `form-word-scramble-error-mobile-390.jpg` | Form WORD_SCRAMBLE, điện thoại 390px | Cùng trạng thái lỗi trên điện thoại |
+| `form-audio-visual-match-desktop.jpg` | Form AUDIO_VISUAL_MATCH | Câu 1 "Cat": mô tả hình đúng, hình sai 1 đầy đủ (kèm nút Xóa) và đầu khung hình sai 2 |
+| `form-audio-visual-match-mobile-390.jpg` | Form AUDIO_VISUAL_MATCH, điện thoại 390px | Cùng form một cột, không tràn ngang (ảnh chụp đầu khung sửa câu) |
+| `form-audio-visual-match-max-desktop.jpg` | Form AUDIO_VISUAL_MATCH | Câu 3 có đủ 3 hình sai: nút "Thêm hình sai" khóa kèm lời giải thích |
+| `form-audio-visual-match-max-mobile-390.jpg` | Form AUDIO_VISUAL_MATCH, điện thoại 390px | Cùng trạng thái đủ 3 hình sai trên điện thoại |
+| `form-audio-visual-match-error-desktop.jpg` | Form AUDIO_VISUAL_MATCH | Hình sai 1 trùng hình đúng (khác hoa thường): báo "bị trùng nhau" ở danh sách và câu 3 đánh dấu "Cần sửa" |
+| `form-audio-visual-match-error-mobile-390.jpg` | Form AUDIO_VISUAL_MATCH, điện thoại 390px | Cùng trạng thái lỗi trên điện thoại |
 
 Ảnh nhóm B (B1 đến B3) chụp bằng tập lệnh Playwright chạy qua Bash trên dev server ở chế độ mô phỏng (trình duyệt Chrome có sẵn của máy, không thêm thư viện vào dự án), ở 1280px và 390px; lỗi 2a và 2b do bản xuất bản mô phỏng chèn sẵn. Tập lệnh dùng bản `playwright-core` nằm trong bộ nhớ đệm npx của máy chụp nên không đưa vào kho; ảnh `b2-qr-*` chỉ chụp khung mã QR và nút tải.
 

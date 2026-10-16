@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import type { GameType } from '../../../types/game-dsl.types'
 import type { QuestionFormProps } from './formTypes'
+import AudioVisualMatchForm from './AudioVisualMatchForm'
 import MatchingForm from './MatchingForm'
 import MemoryCardForm from './MemoryCardForm'
 import OddOneOutForm from './OddOneOutForm'
@@ -13,6 +14,7 @@ import WordScrambleForm from './WordScrambleForm'
 export const QUESTION_FORMS: Readonly<Partial<Record<GameType, ComponentType<QuestionFormProps>>>> = {
   QUIZ: QuizForm,
   MATCHING: MatchingForm,
+  AUDIO_VISUAL_MATCH: AudioVisualMatchForm,
   MEMORY_CARD: MemoryCardForm,
   ODD_ONE_OUT: OddOneOutForm,
   VISUAL_CLOZE: VisualClozeForm,
