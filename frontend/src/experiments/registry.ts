@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { createElement, type ReactNode } from 'react'
+import AudioLab from './audio/AudioLab'
 
 /** Môn học của một mục thử nghiệm (không dùng `Subject` của DSL: loại thử nghiệm không thuộc DSL). */
 export type ExperimentArea = 'MATH' | 'VIETNAMESE' | 'ENGLISH' | 'INFRA'
@@ -15,7 +16,9 @@ export interface ExperimentEntry {
  * Bảng đăng ký riêng của khu thử nghiệm. Cố ý KHÔNG dùng `GAME_TYPES` (DSL đang đóng băng 1.0.0):
  * thêm loại thử nghiệm là thêm một mục ở đây, không sửa DSL, schema hay openapi.
  */
-export const EXPERIMENT_ENTRIES: readonly ExperimentEntry[] = []
+export const EXPERIMENT_ENTRIES: readonly ExperimentEntry[] = [
+  { id: 'audio-lab', title: 'Âm thanh (T2.1)', area: 'INFRA', render: () => createElement(AudioLab) },
+]
 
 export function findExperiment(
   id: string,
