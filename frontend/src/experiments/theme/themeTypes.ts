@@ -9,8 +9,12 @@ export type AgeBand = (typeof AGE_BANDS)[number]
 export const KNOWN_MECHANICS = ['QUIZ', 'MATCHING', 'NUMBER_LINE', 'SYLLABLE_BUILDER', 'PREPOSITION_SCENE'] as const
 export type Mechanic = (typeof KNOWN_MECHANICS)[number]
 
-/** Màu theo vai trò, dạng `#RGB` hoặc `#RRGGBB`. Chữ (`text`) dùng chung cho mọi bề mặt. */
+/**
+ * Màu theo vai trò, dạng `#RGB` hoặc `#RRGGBB`. Chữ (`text`) dùng chung cho mọi bề mặt, trừ `onAccent` và
+ * `onDisabled`. Các vai trò khớp từng màu đang viết cứng trong renderer QUIZ/MATCHING (xem `themes/neutral.ts`).
+ */
 export interface ThemeColors {
+  /** Nền sân chơi; chỉ được vẽ khi `ThemeManifest.paintStageBackground` bật. */
   background: string
   surface: string
   surfaceSelected: string
@@ -21,8 +25,21 @@ export interface ThemeColors {
   text: string
   border: string
   accent: string
+  accentBorder: string
   /** Chữ trên nền `accent` (ví dụ nút «Xong rồi!»). */
   onAccent: string
+  /** Nút bị khóa. Không kiểm tương phản chữ/nền (WCAG miễn trừ thành phần bị vô hiệu hóa). */
+  disabledSurface: string
+  disabledBorder: string
+  onDisabled: string
+  /** Nút «Nghe lại»: chữ dùng `text`. */
+  audioSurface: string
+  audioBorder: string
+  /** Màu đường nối cặp đúng / cần thử lại sau khi chấm (không phải màu nền thẻ). */
+  lineCorrect: string
+  lineTryAgain: string
+  /** Bảng màu đường nối cặp trước khi chấm; cần ít nhất 6 màu (MATCHING có tối đa 6 cặp). */
+  linkColors: readonly string[]
 }
 
 export interface ThemeFont {
@@ -41,11 +58,16 @@ export interface ThemeAsset {
   alt: string
 }
 
+/** Số màu tối thiểu của `linkColors` (bằng số cặp tối đa của MATCHING). */
+export const MIN_LINK_COLORS = 6
+
 export interface ThemeManifest {
   id: string
   name: string
   ageBands: readonly AgeBand[]
   colors: ThemeColors
+  /** false: không vẽ nền sân (giữ nền trong suốt như renderer hiện tại). */
+  paintStageBackground: boolean
   font: ThemeFont
   compatibleMechanics: readonly Mechanic[]
   /** Cờ an toàn nội dung: theme cam kết không dùng hình ảnh/chủ đề bạo lực. Phải là `true`. */

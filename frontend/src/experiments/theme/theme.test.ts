@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { contrastRatio, isHarshRed, parseHex, toHsl } from './contrast'
+import { neutralTheme } from './themes/neutral'
 import { AGE_BANDS, KNOWN_MECHANICS, type ThemeManifest } from './themeTypes'
 import { validateTheme, type ThemeIssueCode } from './validateTheme'
 
@@ -10,7 +11,9 @@ function makeTheme(overrides: Partial<ThemeManifest> = {}): ThemeManifest {
     id: 'test',
     name: 'Theme thử',
     ageBands: ['PRESCHOOL', 'GRADE_1_2'],
+    paintStageBackground: false,
     colors: {
+      ...neutralTheme.colors,
       background: '#F8FAFC',
       surface: '#FFFFFF',
       surfaceSelected: '#DBEAFE',
@@ -143,6 +146,7 @@ describe('validateTheme', () => {
         surfaceSelected: white,
         surfaceCorrect: white,
         surfaceTryAgain: white,
+        audioSurface: white,
       }
       const small = makeTheme({ font: { family: 'sans-serif', baseSize: 23 } })
       small.colors = colors
@@ -154,7 +158,7 @@ describe('validateTheme', () => {
 
     it('ranh giới 4,5:1 ở chữ thường: #767676 trên trắng đạt, #777777 trượt', () => {
       const white = '#FFFFFF'
-      const base = { ...makeTheme().colors, background: white, surface: white, surfaceSelected: white }
+      const base = { ...makeTheme().colors, background: white, surface: white, surfaceSelected: white, audioSurface: white }
       const pass = makeTheme({ font: { family: 'sans-serif', baseSize: 16 } })
       pass.colors = { ...base, text: '#767676', surfaceCorrect: white, surfaceTryAgain: white }
       const fail = makeTheme({ font: { family: 'sans-serif', baseSize: 16 } })
@@ -173,6 +177,52 @@ describe('validateTheme', () => {
       const theme = makeTheme()
       theme.colors = { ...theme.colors, accent: '#93C5FD', onAccent: '#FFFFFF' }
       expect(validateTheme(theme)).toEqual([expect.objectContaining({ code: 'CONTRAST_LOW', path: 'colors.onAccent' })])
+    })
+  })
+
+  describe('vai trò màu mở rộng', () => {
+    it.each(['accentBorder', 'disabledSurface', 'disabledBorder', 'onDisabled', 'audioSurface', 'audioBorder', 'lineCorrect', 'lineTryAgain'] as const)(
+      'màu %s sai định dạng bị báo',
+      (key) => {
+        const theme = makeTheme()
+        theme.colors = { ...theme.colors, [key]: 'xanh' }
+        expect(validateTheme(theme).some((i) => i.code === 'COLOR_INVALID' && i.path === `colors.${key}`)).toBe(true)
+      },
+    )
+
+    it('nút khóa chữ nhạt trên nền nhạt KHÔNG bị báo tương phản (WCAG miễn trừ)', () => {
+      const theme = makeTheme()
+      theme.colors = { ...theme.colors, disabledSurface: '#FFFFFF', onDisabled: '#EEEEEE' }
+      expect(codes(theme)).toEqual([])
+    })
+
+    it('chữ trên nút «Nghe lại» được kiểm tương phản', () => {
+      const theme = makeTheme()
+      theme.colors = { ...theme.colors, text: '#CCCCCC', audioSurface: '#FFFFFF' }
+      expect(validateTheme(theme).some((i) => i.code === 'CONTRAST_LOW' && i.message.includes('audioSurface'))).toBe(true)
+    })
+
+    it('đường nối đỏ gắt bị chặn như màu phản hồi', () => {
+      const theme = makeTheme()
+      theme.colors = { ...theme.colors, lineTryAgain: '#DC2626' }
+      expect(validateTheme(theme)).toEqual([expect.objectContaining({ code: 'FEEDBACK_HARSH_RED', path: 'colors.lineTryAgain' })])
+    })
+
+    it('linkColors: đủ 6 màu thì hợp lệ, 5 màu thì báo thiếu', () => {
+      const six = makeTheme()
+      expect(six.colors.linkColors).toHaveLength(6)
+      expect(codes(six)).toEqual([])
+      const five = makeTheme()
+      five.colors = { ...five.colors, linkColors: five.colors.linkColors.slice(0, 5) }
+      expect(validateTheme(five)).toEqual([expect.objectContaining({ code: 'LINK_COLORS_TOO_FEW', path: 'colors.linkColors' })])
+    })
+
+    it('linkColors: màu sai chỉ rõ vị trí', () => {
+      const theme = makeTheme()
+      const bad = [...theme.colors.linkColors]
+      bad[2] = 'hồng'
+      theme.colors = { ...theme.colors, linkColors: bad }
+      expect(validateTheme(theme)).toEqual([expect.objectContaining({ code: 'COLOR_INVALID', path: 'colors.linkColors[2]' })])
     })
   })
 

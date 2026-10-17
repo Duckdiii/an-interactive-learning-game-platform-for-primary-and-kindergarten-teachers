@@ -1,5 +1,5 @@
 import { contrastRatio, isHarshRed, parseHex } from './contrast'
-import { AGE_BANDS, KNOWN_MECHANICS, type ThemeColors, type ThemeManifest } from './themeTypes'
+import { AGE_BANDS, KNOWN_MECHANICS, MIN_LINK_COLORS, type ThemeColors, type ThemeManifest } from './themeTypes'
 
 export type ThemeIssueCode =
   | 'ID_EMPTY'
@@ -8,6 +8,7 @@ export type ThemeIssueCode =
   | 'AGE_BAND_UNKNOWN'
   | 'AGE_BAND_DUPLICATE'
   | 'COLOR_INVALID'
+  | 'LINK_COLORS_TOO_FEW'
   | 'CONTRAST_LOW'
   | 'FEEDBACK_HARSH_RED'
   | 'FONT_FAMILY_EMPTY'
@@ -51,6 +52,9 @@ function hasActiveSvgContent(src: string): boolean {
   return /<script|\son[a-z]+\s*=|javascript:/i.test(decoded)
 }
 
+/** Các vai trò màu đơn (mọi trường của `ThemeColors` trừ bảng `linkColors`). */
+type ScalarColorKey = Exclude<keyof ThemeColors, 'linkColors'>
+
 const COLOR_KEYS = [
   'background',
   'surface',
@@ -60,18 +64,27 @@ const COLOR_KEYS = [
   'text',
   'border',
   'accent',
+  'accentBorder',
   'onAccent',
-] as const satisfies readonly (keyof ThemeColors)[]
+  'disabledSurface',
+  'disabledBorder',
+  'onDisabled',
+  'audioSurface',
+  'audioBorder',
+  'lineCorrect',
+  'lineTryAgain',
+] as const satisfies readonly ScalarColorKey[]
 
-/** Cặp (chữ, nền) phải đạt tương phản. */
+/** Cặp (chữ, nền) phải đạt tương phản. Nút khóa (`onDisabled`) cố ý không có mặt (WCAG miễn trừ). */
 const CONTRAST_PAIRS = [
   ['text', 'background'],
   ['text', 'surface'],
   ['text', 'surfaceSelected'],
   ['text', 'surfaceCorrect'],
   ['text', 'surfaceTryAgain'],
+  ['text', 'audioSurface'],
   ['onAccent', 'accent'],
-] as const satisfies readonly (readonly [keyof ThemeColors, keyof ThemeColors])[]
+] as const satisfies readonly (readonly [ScalarColorKey, ScalarColorKey])[]
 
 /**
  * Kiểm một theme; trả danh sách lỗi (rỗng nếu hợp lệ). Hàm thuần, không đọc môi trường.
@@ -102,11 +115,19 @@ export function validateTheme(theme: ThemeManifest): ThemeIssue[] {
   })
 
   // Màu: định dạng
-  const validColors = new Set<keyof ThemeColors>()
+  const validColors = new Set<ScalarColorKey>()
   for (const key of COLOR_KEYS) {
     if (parseHex(theme.colors[key])) validColors.add(key)
     else add('COLOR_INVALID', `colors.${key}`, `Màu "${theme.colors[key]}" không đúng dạng #RGB hoặc #RRGGBB.`)
   }
+  if (theme.colors.linkColors.length < MIN_LINK_COLORS) {
+    add('LINK_COLORS_TOO_FEW', 'colors.linkColors', `Cần ít nhất ${MIN_LINK_COLORS} màu đường nối.`)
+  }
+  theme.colors.linkColors.forEach((color, index) => {
+    if (!parseHex(color)) {
+      add('COLOR_INVALID', `colors.linkColors[${index}]`, `Màu "${color}" không đúng dạng #RGB hoặc #RRGGBB.`)
+    }
+  })
 
   // Font
   if (!theme.font.family.trim()) add('FONT_FAMILY_EMPTY', 'font.family', 'Theme thiếu họ phông chữ.')
@@ -131,7 +152,7 @@ export function validateTheme(theme: ThemeManifest): ThemeIssue[] {
   }
 
   // Phản hồi: không đỏ gắt (CLAUDE.md, quy ước UX cho trẻ mầm non/lớp 1)
-  for (const key of ['surfaceCorrect', 'surfaceTryAgain'] as const) {
+  for (const key of ['surfaceCorrect', 'surfaceTryAgain', 'lineCorrect', 'lineTryAgain'] as const) {
     if (validColors.has(key) && isHarshRed(theme.colors[key])) {
       add('FEEDBACK_HARSH_RED', `colors.${key}`, `Màu phản hồi "${key}" là đỏ gắt; dùng màu dịu hơn.`)
     }
