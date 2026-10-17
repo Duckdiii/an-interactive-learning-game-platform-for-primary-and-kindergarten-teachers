@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Layer, Text } from 'react-konva'
 import type { MatchingQuestion } from '../../types/game-dsl.types'
+import { useTheme } from '../../experiments/theme/useTheme'
 import type { MatchingStudentQuestion } from '../../types/game-student.types'
 import { measureWrappedTextHeight } from '../common/measureText'
 import { STAGE_WIDTH } from '../common/mediaLayout'
@@ -36,6 +37,7 @@ import {
   isCorrectLocally,
   sideDisplay,
 } from './matchingView'
+import { matchingLinkColor } from './matchingTheme'
 
 /**
  * Prop phụ thuộc `mode` (union) để sai là lỗi lúc build thay vì lỗi lúc chạy:
@@ -64,11 +66,6 @@ export type MatchingRendererProps =
 
 const PAIR_MATCHED_SOUND = '/sounds/pair-matched.wav'
 
-/** Màu theo ô trái, ổn định khi nối/gỡ. Cố ý không có đỏ hay xanh lá: hai màu đó dành cho kết quả. */
-const LINK_COLORS = ['#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#92400E', '#64748B']
-const CORRECT_COLOR = '#43A047'
-const WRONG_COLOR = '#F59E0B'
-
 const HEADING_PADDING = 8
 
 function buildView(question: MatchingQuestion | MatchingStudentQuestion): MatchingView {
@@ -86,6 +83,7 @@ export default function MatchingRenderer(props: MatchingRendererProps) {
 
 function MatchingBoard(props: MatchingRendererProps) {
   const { question } = props
+  const { colors } = useTheme()
   const { showFeedback } = useFeedback()
   const { image: illustration, reserveSpace: hasIllustration } = useIllustration(question.imageUrl)
   const playAudio = useQuestionAudio(question.audioUrl)
@@ -229,15 +227,15 @@ function MatchingBoard(props: MatchingRendererProps) {
   for (const link of state.links) {
     const color = result
       ? verdictOfLink(link, result) === 'correct'
-        ? CORRECT_COLOR
-        : WRONG_COLOR
-      : LINK_COLORS[(leftIndexById.get(link.leftPairId) ?? 0) % LINK_COLORS.length]
+        ? colors.lineCorrect
+        : colors.lineTryAgain
+      : matchingLinkColor(colors, leftIndexById.get(link.leftPairId) ?? 0)
     const line = lineBetween(link, color, false)
     if (line) lines.push(line)
   }
   if (result) {
     for (const link of missingCorrectLinks(state.links, result)) {
-      const line = lineBetween(link, CORRECT_COLOR, true)
+      const line = lineBetween(link, colors.lineCorrect, true)
       if (line) lines.push(line)
     }
   }
@@ -251,7 +249,7 @@ function MatchingBoard(props: MatchingRendererProps) {
     return link ? 'linked' : 'idle'
   }
   const accentOf = (link: PairLink | undefined) =>
-    link ? LINK_COLORS[(leftIndexById.get(link.leftPairId) ?? 0) % LINK_COLORS.length] : undefined
+    link ? matchingLinkColor(colors, leftIndexById.get(link.leftPairId) ?? 0) : undefined
 
   const showConfirm = layout.confirmButtonY !== null && state.phase !== 'done'
 
@@ -264,6 +262,7 @@ function MatchingBoard(props: MatchingRendererProps) {
           <Text
             text={headingText}
             fontSize={HEADING_FONT_SIZE}
+            fill={colors.text}
             x={LEFT_X}
             y={layout.headingY}
             width={HEADING_WIDTH}
@@ -286,7 +285,7 @@ function MatchingBoard(props: MatchingRendererProps) {
               {...cardRect(layout, 'left', index)}
               content={item.content}
               state={cardState(link, state.selectedLeftId === item.id)}
-              accent={accentOf(link) ?? LINK_COLORS[index % LINK_COLORS.length]}
+              accent={accentOf(link) ?? matchingLinkColor(colors, index)}
               onPress={() => handleTapLeft(item.id)}
               onImageFailed={() => markImageFailed(`left-${item.id}`)}
             />

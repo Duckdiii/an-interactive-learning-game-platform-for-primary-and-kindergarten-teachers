@@ -1,15 +1,13 @@
 import { useEffect } from 'react'
 import { Group, Image as KonvaImage, Rect, Text } from 'react-konva'
 import useImage from 'use-image'
+import { useTheme } from '../../experiments/theme/useTheme'
 import type { PairSide } from '../../types/game-dsl.types'
 import { CARD_FONT_SIZE, CARD_IMAGE_SIZE, CARD_PADDING, cardTextWidth } from './matchingLayout'
+import { matchingCardFill, type MatchingCardState } from './matchingTheme'
 import { sideDisplay } from './matchingView'
 
-/**
- * - idle: chưa làm gì. selected: ô trái đang được chọn. linked: đã nối (viền theo màu cặp).
- * - correct / wrong: sau khi chấm (xanh / vàng nhẹ, tuyệt đối không dùng đỏ).
- */
-export type MatchingCardState = 'idle' | 'selected' | 'linked' | 'correct' | 'wrong'
+export type { MatchingCardState }
 
 interface MatchingCardProps {
   x: number
@@ -28,14 +26,6 @@ interface MatchingCardProps {
   onImageFailed?: () => void
 }
 
-const FILL: Record<MatchingCardState, string> = {
-  idle: '#FFFFFF',
-  selected: '#DBEAFE',
-  linked: '#FFFFFF',
-  correct: '#A5D6A7',
-  wrong: '#FFE082',
-}
-
 /**
  * Một thẻ ở cột trái hoặc phải: chữ và/hoặc ảnh (ảnh bên trái, chữ bên phải). Cả thẻ là vùng chạm. Là
  * component riêng vì `useImage` là hook, không gọi được trong vòng lặp của renderer.
@@ -47,10 +37,11 @@ export default function MatchingCard({
   height,
   content,
   state,
-  accent = '#334155',
+  accent,
   onPress,
   onImageFailed,
 }: MatchingCardProps) {
+  const { colors } = useTheme()
   const [image, imageStatus] = useImage(content.imageUrl ?? '')
   const imageFailed = imageStatus === 'failed'
   // Ảnh lỗi thì chữ dự phòng thay chỗ ảnh (xem `sideDisplay`) và báo renderer tính lại bố cục.
@@ -70,8 +61,8 @@ export default function MatchingCard({
         width={width}
         height={height}
         cornerRadius={20}
-        fill={FILL[state]}
-        stroke={emphasised ? accent : '#334155'}
+        fill={matchingCardFill(colors, state)}
+        stroke={emphasised ? (accent ?? colors.border) : colors.border}
         strokeWidth={emphasised ? 8 : 3}
       />
       {hasImage && image && (
@@ -90,6 +81,7 @@ export default function MatchingCard({
           text={text}
           fontSize={CARD_FONT_SIZE}
           fontStyle="bold"
+          fill={colors.text}
           x={textX}
           y={CARD_PADDING}
           width={textWidth}
