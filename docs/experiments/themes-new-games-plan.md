@@ -1,6 +1,8 @@
 # Kế hoạch thử nghiệm: chủ đề (theme) và loại game mới
 
-Trạng thái: **GIAI ĐOẠN 0, CHỜ DUYỆT.** Nhánh `experiment/themes-and-new-games`, tạo từ `main` (`61201cd`). Đây là thử nghiệm để biết "hợp hay không", không phải tính năng chính thức; việc merge vào `main` do bạn quyết sau khi xem báo cáo (T6).
+Trạng thái: **ĐANG THỰC HIỆN (đã duyệt T0 đến T1.3; T1.4 đang làm).** Nhánh `experiment/themes-and-new-games`, tạo từ `main` (`61201cd`). Đây là thử nghiệm để biết "hợp hay không", không phải tính năng chính thức; việc merge vào `main` do bạn quyết sau khi xem báo cáo (T6).
+
+> **Điều chỉnh ngày 2026-10-18 (v2):** phạm vi mở rộng sang thử nghiệm **thư viện và công nghệ**. Mục 9 ở cuối file thay thế các ràng buộc "không thêm thư viện", "không tài nguyên ngoài", "không gọi backend", "không đổi DSL" ở những chỗ được nêu rõ trong đó; mọi chỗ khác của file này vẫn đúng. T0 đến T1.3 đã xong không đổi.
 
 ## 1. Baseline (đo trên `main`, chưa sửa gì)
 
@@ -169,3 +171,89 @@ Tổng ước lượng: khoảng 17–22 ngày làm việc (T0 0,5; T1 3,5; T2 2
 - **Q4.** Về nhật ký: dòng log mỗi subtask điền SHA ở commit sau (quy ước của repo) — chấp nhận thêm commit nhỏ điền SHA, hay gom vào subtask kế tiếp?
 - **Q5.** Thứ tự đã đổi (T5.1 trước T4, thêm T0): đồng ý? Có muốn cắt T4.3 / T2.3 để giảm phạm vi?
 - **Q6.** Với T1.4/T3 (sửa renderer sản phẩm bằng ThemeContext mặc định `neutral`): chấp nhận, hay muốn bản sao renderer trong `experiments/` để không chạm mã sản phẩm (đổi lại phải lặp mã và kết quả kém đại diện)?
+
+## 9. Điều chỉnh v2 (2026-10-18): thử nghiệm cả thư viện và công nghệ
+
+Bạn đã chọn (qua câu hỏi ngày 2026-10-18): dev tool `@axe-core/playwright` và `rollup-plugin-visualizer`; thư viện game Lottie/Rive, matter.js, PixiJS, Howler.js; dịch vụ ngoài gồm đánh giá trên giấy, thử thật TTS đám mây, thử thật AI sinh ảnh, và Backend/DSL mới. Mục này ghi cách thực hiện, chỗ phải đổi so với các ràng buộc cũ, và rủi ro. **Chưa cài gì, chưa viết mã cho phần mới**; chờ bạn duyệt mục này.
+
+### 9.1 Bảng công nghệ
+
+| Công nghệ | Loại | Dùng cho | Task |
+|---|---|---|---|
+| React, TypeScript, Vite, Konva + react-konva, Vitest + Testing Library | đã có | giữ nguyên | T1 đến T5 |
+| SVG tự vẽ bằng code, nạp qua `data:` URI, `img.decode()`, đưa vào `Konva.Image` | không cần thư viện | hình theme, nhân vật, vật phẩm | T1.3, T3 |
+| Web Audio API (`AudioContext`, `OscillatorNode`, `GainNode`, `resume()` sau lần chạm đầu) | API trình duyệt | AudioService, sfx | T2.1 |
+| Web Speech API (`speechSynthesis`) | API trình duyệt | chỉ thăm dò giọng, không vào luồng chính | T2.3 |
+| `document.fonts` + font hiện có (chờ `document.fonts.ready` trước khi vẽ canvas) | API trình duyệt | chữ tiếng Việt có dấu trên canvas | T3 |
+| `String.prototype.normalize('NFC')` | chuẩn JS | SYLLABLE_BUILDER (đã có tiền lệ ở WORD_SCRAMBLE) | T4.2 |
+| Playwright (`playwright-core`) + CDP `Emulation.setCPUThrottlingRate` | **thư viện mới (devDependency)** | chụp 3 viewport, đo FPS, phát hiện tràn | T5.2 |
+| `@axe-core/playwright` 4.14.0 (MPL-2.0) | **thư viện mới (devDependency)** | kiểm trợ năng tự động | T5.2 |
+| `rollup-plugin-visualizer` 7.1.1 (peer: rollup hoặc rolldown) | **thư viện mới (devDependency)** | sơ đồ bundle, so với nhánh gốc | T5.2 |
+| PixiJS | **thư viện mới (runtime, chỉ khu thử nghiệm)** | renderer song song để so với Konva | T7.1 |
+| Lottie (`lottie-web` hoặc `@lottiefiles/dotlottie-web`) / Rive | **thư viện mới (runtime, chỉ khu thử nghiệm)** | hoạt ảnh phản hồi đúng/sai | T7.2 |
+| matter.js | **thư viện mới (runtime, chỉ khu thử nghiệm)** | vật lý 2D cho PREPOSITION_SCENE | T7.3 |
+| Howler.js 2.2.4 | đã cài (đang dùng ở `sound.ts`) | so với Web Audio tổng hợp | T7.4 |
+| TTS đám mây | **dịch vụ ngoài** | giọng đọc tiếng Việt/Anh chất lượng cao | T8.1 |
+| AI sinh ảnh | **dịch vụ ngoài** | ảnh minh họa theo chủ đề | T8.2 |
+| Backend và DSL mới | **đổi contract đóng băng** | lưu loại game mới | T9 |
+
+### 9.2 Ràng buộc: đổi gì, giữ gì
+
+| Ràng buộc cũ | Trạng thái mới |
+|---|---|
+| Không thêm thư viện nếu chưa hỏi | **Đã duyệt** đúng danh sách ở 9.1, **ghim phiên bản chính xác** (không dùng `^`), ghi vào nhật ký. Thư viện ngoài danh sách vẫn phải hỏi |
+| Không tải tài nguyên ngoài | Giữ cho T0 đến T5. T7 chỉ dùng thư viện cài qua npm, hoạt ảnh/hình **tự sinh bằng code**. T8 là ngoại lệ có kiểm soát: kết quả sinh ra được lưu cục bộ và duyệt tay |
+| Không gọi backend | Giữ cho T0 đến T8. T9 là ngoại lệ, đi riêng (9.5) |
+| Không đổi DSL 1.0.0 | Giữ cho đến khi bạn duyệt **bản đề xuất** ở T9.1 (chỉ tài liệu); mọi code DSL/backend nằm sau bước đó |
+| Không để lộ secret | **Giữ nguyên, nghiêm ngặt hơn:** khóa API không bao giờ vào mã frontend hay biến `VITE_*` (bị đóng gói vào trình duyệt). T8 chạy bằng script Node cục bộ đọc khóa từ môi trường |
+| Mỗi subtask một commit, dừng chờ duyệt | Giữ nguyên |
+
+### 9.3 Thay đổi cho T5.2 (đo đạc)
+
+- `playwright-core` nay là **devDependency ghim phiên bản** (đổi so với quyết định cũ `--no-save`), vì `@axe-core/playwright` yêu cầu nó làm peer. Vẫn dùng Chrome có sẵn (`channel: 'chrome'`), không tải trình duyệt.
+- Axe chạy trên trang có DOM; **canvas của Konva không có cây DOM** nên axe chỉ kiểm phần quanh canvas (nút, nhãn, tương phản vùng DOM). Phần trong canvas vẫn do kiểm tra bố cục của T5.2 và báo cáo T6 đánh giá. Đây là giới hạn của công cụ, không phải lỗi.
+- `rollup-plugin-visualizer`: Vite 8 dùng Rolldown; plugin khai báo hỗ trợ `rolldown` nhưng **chưa kiểm chứng chạy với bản này**. Cấu hình chỉ bật khi `ANALYZE=1`, không ảnh hưởng build thường. Nếu không chạy được thì quay về đọc kích thước file trong `dist/`.
+- Số đo hiệu năng và ảnh chụp: **ưu tiên chạy bằng Playwright + Chrome có giao diện**. Cửa sổ trình duyệt nhúng của công cụ này bị ẩn nên Konva không vẽ đều (xem 9.6); không dùng nó để so pixel.
+
+### 9.4 T7. So sánh thư viện (mới)
+
+Dùng **một kịch bản đo chung** để công bằng: màn "kéo 5 vật vào 3 vùng, có phản hồi đúng/sai" (tái dùng dữ liệu của DRAG_DROP/PREPOSITION_SCENE), chạy ở 390/768/1280px, CPU giảm 4×. Chỉ số: FPS trung bình và thấp nhất, thời gian tới khung hình đầu, kích thước thêm vào bundle (gzip), kéo bằng cảm ứng, chữ tiếng Việt có dấu, mức dùng bộ nhớ, công sức viết, truy cập bằng bàn phím. Mỗi thư viện nằm trong `frontend/src/experiments/spikes/<tên>/`, **tải lười (`React.lazy`)** để không vào bundle thường, và gỡ được bằng cách xóa thư mục + dependency.
+
+- **T7.1 PixiJS** (công sức 2 đến 3 ngày): renderer song song cho kịch bản chung; so với Konva về FPS, kéo thả, vẽ chữ. Rủi ro: chữ tiếng Việt có dấu trên WebGL (cần bitmap/Canvas text), bundle lớn, hai hệ tọa độ song song làm khó tái dùng `ResponsiveStage`.
+- **T7.2 Lottie / Rive** (2 đến 3 ngày): hoạt ảnh đúng/sai (sao nảy, gật đầu). **Lottie:** tự viết JSON hoạt ảnh bằng code (không tải file ngoài); đo `lottie-web` (khá nặng) so với `@lottiefiles/dotlottie-web`; tích hợp với canvas Konva bằng lớp DOM chồng lên. **Rive:** cần file `.riv` tạo từ trình soạn thảo bên ngoài, **không tự sinh bằng code được**; nên T7.2 chỉ đánh giá Rive trên giấy (kích thước runtime WASM, quy trình thiết kế) **trừ khi bạn cung cấp file `.riv`** (hỏi ở Q10). Rủi ro: giấy phép/nguồn của file hoạt ảnh nếu lấy từ ngoài.
+- **T7.3 matter.js** (2 ngày): vật rơi/va chạm cho PREPOSITION_SCENE ("đặt con mèo dưới cái bàn": vật rơi xuống, dừng trên bàn) và hiệu ứng. Vẽ vẫn bằng Konva, matter chỉ tính vị trí. Rủi ro: vật lý làm kết quả "đúng/sai" không xác định nếu phụ thuộc mô phỏng; luật đáp án vẫn phải là hàm thuần trên tọa độ cuối, không dựa vào lần chạy vật lý.
+- **T7.4 Howler vs Web Audio** (1 ngày): đo độ trễ phát, mở khóa trên di động, xử lý khi không có file, kích thước. Howler đã cài nên chi phí thêm bằng 0; kết luận cho T2.1.
+
+Mỗi spike kết thúc bằng một bảng số đo trong `docs/experiments/results/` và một dòng khuyến nghị giữ/bỏ trong báo cáo T6. **Phaser:** có ở danh sách ban đầu nhưng bạn không chọn; không làm.
+
+### 9.5 T8 và T9. Dịch vụ ngoài và contract (mới, rủi ro cao, đi sau cùng)
+
+**T8. Thử thật có kiểm soát** (cần bạn cung cấp khóa và ngân sách; tôi không tự nhập khóa):
+- **T8.1 TTS đám mây** (2 ngày). Gợi ý dùng **Google Cloud Text-to-Speech** vì `CLAUDE.md` đã nhắc Google TTS cho dự án; bạn xác nhận nhà cung cấp ở Q8. Làm bằng **script Node cục bộ** sinh sẵn một bộ nhỏ file MP3 tiếng Việt/Anh (từ cần cho 3 loại game mới) vào thư mục thử nghiệm, kiểm nghe bằng tai, ghi chi phí; khóa chỉ đọc từ biến môi trường, không commit, không đưa vào trình duyệt. Test dùng mock, không gọi thật (theo `CLAUDE.md`).
+- **T8.2 AI sinh ảnh** (2 ngày). Script Node cục bộ sinh một bộ nhỏ ảnh minh họa theo chủ đề, **mỗi ảnh phải qua kiểm duyệt an toàn và được bạn xem duyệt tay** trước khi được commit; ghi chi phí và giấy phép/điều khoản sử dụng của nhà cung cấp. Đánh giá thẩm mỹ và độ an toàn cho trẻ em là việc của bạn và Cô Thơ.
+- Cả hai: **đặt trần chi phí do bạn quy định**, script dừng khi chạm trần, không có vòng lặp thử lại tự động tốn phí.
+
+**T9. Backend và DSL mới** (đi riêng, **hai bước**):
+- **T9.1 Bản đề xuất (chỉ tài liệu, 1 đến 2 ngày):** chạy `impact-analyzer` rồi viết `docs/experiments/dsl-1.1-proposal.md`: các trường mới cho 3 loại game (và `theme`/giọng đọc nếu cần), ảnh hưởng tới 4 nơi của DSL (`docs/game-json-dsl`, JSON Schema, record Java, `game-dsl.types.ts`), `openapi.yaml`, migration Flyway, strategy/factory/rule/validator, `GameDslSchemaTest`. **Không sửa gì ngoài file đề xuất.**
+- **T9.2 Cài đặt (chỉ sau khi bạn duyệt bản đề xuất, ước tính 5 đến 8 ngày):** theo thứ tự `openapi.yaml` trước, code sau (quy ước của dự án), migration mới (không sửa migration cũ), `backend-implementer` trong worktree riêng, `contract-guardian` + `migration-checker` + `backend-architect-reviewer` + `test-verifier`.
+- **Cảnh báo:** DSL 1.0.0 là contract đã đóng băng đồng bộ với cả nhóm (CLAUDE.md). Đổi nó trên nhánh thử nghiệm làm nhánh **không merge được** nếu nhóm không đồng ý; nên T9.2 chỉ làm khi bạn đã trao đổi với nhóm. Hiện chưa có controller game nào ở Backend (chỉ có `/api/auth`), nên "lưu loại game mới" chưa chạy được end-to-end ngay cả khi DSL xong.
+
+### 9.6 Phát hiện trong lúc làm T1.4 (cần ghi nhận)
+
+- Trình duyệt nhúng của công cụ này **ẩn cửa sổ**, nên `requestAnimationFrame` và việc nạp ảnh của Konva không ổn định: cùng một mã cho kết quả pixel khác nhau giữa các lần chạy ở các màn có ảnh (`Có ảnh`, quiz có ảnh); thậm chí ở một lần chạy, thẻ `Có ảnh` không có node ảnh nào cả với cả mã cũ. Các màn **không có ảnh đều trùng khít pixel** ở 390px (lần so sánh đầu). So pixel ở màn có ảnh phải chạy trong Chrome có giao diện bằng Playwright (T5.2) hoặc chờ bạn xem ảnh chụp.
+- Mã renderer thật (`games/`) nay import `experiments/theme`: nếu sau này merge thì phải chuyển thư mục theme ra ngoài `experiments/`. Đã ghi vào danh sách việc tích hợp ở T6.
+
+### 9.7 Thứ tự, công sức, câu hỏi
+
+- **Thứ tự mới:** `T1.4 → T2.1 → T2.2 → T2.3 → T3 → T5.1 → T4.1 → T4.2 → T4.3 → T5.2 (có axe, visualizer) → [điểm dừng đánh giá] → T7.1 → T7.2 → T7.3 → T7.4 → T8.1 → T8.2 → T9.1 → (T9.2 nếu được duyệt) → T6`.
+- **Điểm dừng đánh giá sau T5.2:** xem lại kết quả đo trước khi sang T7, để quyết còn cần thử PixiJS/Lottie/matter hay không (có thể Konva đã đủ).
+- **Công sức mới:** T5.2 tăng 1 ngày (axe, visualizer); T7 khoảng 7 đến 9 ngày; T8 khoảng 4 ngày (không kể chờ khóa/duyệt ảnh); T9.1 khoảng 1 đến 2 ngày; T9.2 khoảng 5 đến 8 ngày. **Tổng kế hoạch khoảng 35 đến 45 ngày** (trước đó 17 đến 22; gồm T9.2). Đây là khối lượng lớn cho một "thử nghiệm"; nếu cần cắt, thứ tự bỏ đề xuất: T9.2, T8.2, T7.2 (Rive), T7.1.
+- **Việc chỉ bạn làm được (thêm):** cung cấp khóa API và đặt trần chi phí cho T8; nghe thử TTS và xem duyệt ảnh AI; cung cấp file `.riv` nếu muốn thử Rive thật; trao đổi với nhóm trước T9.2; thử PixiJS/Konva trên điện thoại thật.
+
+**Câu hỏi cần bạn trả lời trước khi làm các phần mới:**
+- **Q7.** Đồng ý ghim phiên bản chính xác và cài `playwright-core` làm devDependency (thay `--no-save`)?
+- **Q8.** TTS: dùng Google Cloud TTS? Trần chi phí bao nhiêu? Khóa để ở đâu (gợi ý: `.env` cá nhân của bạn, không commit)?
+- **Q9.** AI sinh ảnh: nhà cung cấp nào (gợi ý ngang hàng với Gemini mà dự án đã dùng, hoặc OpenAI mà dự án đã có khóa kiểm duyệt)? Trần chi phí? Quy tắc duyệt ảnh?
+- **Q10.** Rive: bạn có file `.riv` để thử không, hay chỉ đánh giá trên giấy?
+- **Q11.** T9.2 (đổi backend/DSL thật): đã trao đổi với nhóm chưa, hay chỉ làm bản đề xuất T9.1 rồi dừng?
+- **Q12.** Chấp nhận điểm dừng đánh giá sau T5.2 và thứ tự cắt giảm ở trên?
