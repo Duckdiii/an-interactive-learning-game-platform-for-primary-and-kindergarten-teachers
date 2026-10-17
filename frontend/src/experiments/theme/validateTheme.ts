@@ -22,6 +22,8 @@ export type ThemeIssueCode =
   | 'ASSET_EXTERNAL'
   | 'ASSET_UNSAFE'
   | 'ASSET_ALT_EMPTY'
+  | 'BACKDROP_ASSET_MISSING'
+  | 'BACKDROP_WITHOUT_BACKGROUND'
 
 export interface ThemeIssue {
   code: ThemeIssueCode
@@ -57,6 +59,7 @@ type ScalarColorKey = Exclude<keyof ThemeColors, 'linkColors'>
 
 const COLOR_KEYS = [
   'background',
+  'onBackground',
   'surface',
   'surfaceSelected',
   'surfaceCorrect',
@@ -76,8 +79,8 @@ const COLOR_KEYS = [
 ] as const satisfies readonly ScalarColorKey[]
 
 /** Cặp (chữ, nền) phải đạt tương phản. Nút khóa (`onDisabled`) cố ý không có mặt (WCAG miễn trừ). */
-const CONTRAST_PAIRS = [
-  ['text', 'background'],
+export const CONTRAST_PAIRS = [
+  ['onBackground', 'background'],
   ['text', 'surface'],
   ['text', 'surfaceSelected'],
   ['text', 'surfaceCorrect'],
@@ -192,6 +195,16 @@ export function validateTheme(theme: ThemeManifest): ThemeIssue[] {
     }
     if (!asset.alt.trim()) add('ASSET_ALT_EMPTY', `${base}.alt`, 'Tài nguyên thiếu mô tả (alt).')
   })
+
+  // Họa tiết nền: phải trỏ tới một tài nguyên có thật và chỉ có nghĩa khi theme vẽ nền sân
+  if (theme.backdropAssetId !== undefined) {
+    if (!theme.assets.some((asset) => asset.id === theme.backdropAssetId)) {
+      add('BACKDROP_ASSET_MISSING', 'backdropAssetId', `Họa tiết nền "${theme.backdropAssetId}" không có trong assets.`)
+    }
+    if (!theme.paintStageBackground) {
+      add('BACKDROP_WITHOUT_BACKGROUND', 'backdropAssetId', 'Có họa tiết nền nhưng paintStageBackground đang tắt nên sẽ không được vẽ.')
+    }
+  }
 
   return issues
 }

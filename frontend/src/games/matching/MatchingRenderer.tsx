@@ -262,7 +262,7 @@ function MatchingBoard(props: MatchingRendererProps) {
           <Text
             text={headingText}
             fontSize={HEADING_FONT_SIZE}
-            fill={colors.text}
+            fill={colors.onBackground}
             x={LEFT_X}
             y={layout.headingY}
             width={HEADING_WIDTH}

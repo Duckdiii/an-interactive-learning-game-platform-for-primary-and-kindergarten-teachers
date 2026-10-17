@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Text } from 'react-konva'
+import { useTheme } from '../../experiments/theme/useTheme'
 import type { QuizQuestion } from '../../types/game-dsl.types'
 import { STAGE_WIDTH } from '../common/mediaLayout'
 import { measureWrappedTextHeight } from '../common/measureText'
@@ -43,6 +44,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
   const [revealCorrect, setRevealCorrect] = useState(
     () => initialLocalState(mode, selectedOptionId).revealCorrect,
   )
+  const { colors } = useTheme()
   const { showFeedback } = useFeedback()
   const { image: illustration, reserveSpace: hasIllustration } = useIllustration(question.imageUrl)
   const playAudio = useQuestionAudio(question.audioUrl)
@@ -135,6 +137,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
         <Text
           text={question.questionText}
           fontSize={QUESTION_FONT_SIZE}
+          fill={colors.onBackground}
           x={(STAGE_WIDTH - QUESTION_TEXT_WIDTH) / 2}
           y={layout.questionY}
           width={QUESTION_TEXT_WIDTH}

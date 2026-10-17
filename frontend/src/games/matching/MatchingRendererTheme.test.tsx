@@ -43,6 +43,7 @@ const themed: ThemeManifest = {
   name: 'Theme thử',
   colors: {
     background: '#010101',
+    onBackground: '#121212',
     surface: '#020202',
     surfaceSelected: '#030303',
     surfaceCorrect: '#040404',
@@ -137,7 +138,8 @@ describe('MatchingRenderer với theme', () => {
       expect(fillOf('apple')).toBe(c.surface)
       expect(strokeOf('apple')).toBe(c.border)
       expect(textFill('apple')).toBe(c.text)
-      expect(textFill('Nối từ với nghĩa')).toBe(c.text)
+      // Câu dẫn vẽ thẳng lên nền sân nên dùng onBackground, không phải text của thẻ.
+      expect(textFill('Nối từ với nghĩa')).toBe(c.onBackground)
       expect(fillOf(AUDIO)).toBe(c.audioSurface)
       expect(strokeOf(AUDIO)).toBe(c.audioBorder)
       expect(textFill(AUDIO)).toBe(c.text)

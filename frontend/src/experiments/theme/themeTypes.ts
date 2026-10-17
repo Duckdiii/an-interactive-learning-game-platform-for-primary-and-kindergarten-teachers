@@ -10,12 +10,14 @@ export const KNOWN_MECHANICS = ['QUIZ', 'MATCHING', 'NUMBER_LINE', 'SYLLABLE_BUI
 export type Mechanic = (typeof KNOWN_MECHANICS)[number]
 
 /**
- * Màu theo vai trò, dạng `#RGB` hoặc `#RRGGBB`. Chữ (`text`) dùng chung cho mọi bề mặt, trừ `onAccent` và
- * `onDisabled`. Các vai trò khớp từng màu đang viết cứng trong renderer QUIZ/MATCHING (xem `themes/neutral.ts`).
+ * Màu theo vai trò, dạng `#RGB` hoặc `#RRGGBB`. Chữ trên thẻ/nút nghe lại là `text`; chữ trên nền sân là
+ * `onBackground`; chữ trên nút chính/nút khóa là `onAccent`/`onDisabled`. Các vai trò khớp từng màu đang viết cứng trong renderer QUIZ/MATCHING (xem `themes/neutral.ts`).
  */
 export interface ThemeColors {
   /** Nền sân chơi; chỉ được vẽ khi `ThemeManifest.paintStageBackground` bật. */
   background: string
+  /** Chữ vẽ thẳng lên nền sân (câu hỏi, câu dẫn). Tách khỏi `text` vì nền tối cần chữ sáng còn thẻ vẫn sáng chữ tối. */
+  onBackground: string
   surface: string
   surfaceSelected: string
   /** Nền thẻ khi trả lời đúng. */
@@ -68,6 +70,8 @@ export interface ThemeManifest {
   colors: ThemeColors
   /** false: không vẽ nền sân (giữ nền trong suốt như renderer hiện tại). */
   paintStageBackground: boolean
+  /** Mã tài nguyên (trong `assets`) dùng làm ô họa tiết lặp phủ lên nền sân; bỏ trống = chỉ màu đặc. Cần `paintStageBackground`. */
+  backdropAssetId?: string
   font: ThemeFont
   compatibleMechanics: readonly Mechanic[]
   /** Cờ an toàn nội dung: theme cam kết không dùng hình ảnh/chủ đề bạo lực. Phải là `true`. */

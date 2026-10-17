@@ -2,6 +2,7 @@ import { createElement, type ReactNode } from 'react'
 import AudioLab from './audio/AudioLab'
 import TtsProbeLab from './audio/TtsProbeLab'
 import FeedbackLab from './feedback/FeedbackLab'
+import ThemeLab from './theme/ThemeLab'
 
 /** Môn học của một mục thử nghiệm (không dùng `Subject` của DSL: loại thử nghiệm không thuộc DSL). */
 export type ExperimentArea = 'MATH' | 'VIETNAMESE' | 'ENGLISH' | 'INFRA'
@@ -22,6 +23,7 @@ export const EXPERIMENT_ENTRIES: readonly ExperimentEntry[] = [
   { id: 'audio-lab', title: 'Âm thanh (T2.1)', area: 'INFRA', render: () => createElement(AudioLab) },
   { id: 'feedback-lab', title: 'Phản hồi (T2.2)', area: 'INFRA', render: () => createElement(FeedbackLab) },
   { id: 'tts-probe', title: 'Giọng đọc (T2.3)', area: 'INFRA', render: () => createElement(TtsProbeLab) },
+  { id: 'theme-lab', title: 'Theme (T3)', area: 'INFRA', render: () => createElement(ThemeLab) },
 ]
 
 export function findExperiment(

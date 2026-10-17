@@ -1,6 +1,8 @@
 import { Group, Rect, Text } from 'react-konva'
+import { useTheme } from '../../experiments/theme/useTheme'
 import type { TextChoice } from '../../types/game-dsl.types'
 import { OPTION_BUTTON_HEIGHT, OPTION_BUTTON_WIDTH, optionPosition } from './optionGrid'
+import { optionFill } from './optionTheme'
 
 interface OptionButtonProps {
   option: TextChoice
@@ -28,10 +30,9 @@ export default function OptionButton({
   locked,
   onClick,
 }: OptionButtonProps) {
+  const { colors } = useTheme()
   const { x, y } = optionPosition(index, originY)
-
-  // Sai: KHÔNG dùng đỏ gắt — chỉ tô vàng nhẹ để biết đã chọn. Đúng: luôn tô xanh để trẻ học được.
-  const fill = locked && isCorrect ? '#A5D6A7' : locked && isSelected ? '#FFE082' : '#FFFFFF'
+  const fill = optionFill(colors, { locked, isCorrect, isSelected })
 
   return (
     <Group x={x} y={y} onClick={onClick} onTap={onClick}>
@@ -40,13 +41,14 @@ export default function OptionButton({
         height={OPTION_BUTTON_HEIGHT}
         cornerRadius={20}
         fill={fill}
-        stroke="#334155"
+        stroke={colors.border}
         strokeWidth={3}
       />
       <Text
         text={option.text}
         fontSize={28}
         fontStyle="bold"
+        fill={colors.text}
         width={OPTION_BUTTON_WIDTH}
         height={OPTION_BUTTON_HEIGHT}
         align="center"

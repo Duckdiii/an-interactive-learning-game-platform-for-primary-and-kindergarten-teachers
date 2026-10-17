@@ -21,6 +21,7 @@ export const neutralTheme: ThemeManifest = {
   ageBands: ['PRESCHOOL', 'GRADE_1_2', 'GRADE_3_5'],
   colors: {
     background: '#FFFFFF',
+    onBackground: '#000000',
     surface: '#FFFFFF',
     surfaceSelected: '#DBEAFE',
     surfaceCorrect: '#A5D6A7',

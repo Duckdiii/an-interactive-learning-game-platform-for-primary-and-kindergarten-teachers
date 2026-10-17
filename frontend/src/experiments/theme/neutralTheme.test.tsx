@@ -25,6 +25,7 @@ describe('theme neutral', () => {
   it('ghim các giá trị lấy từ renderer hiện tại (mốc so sánh cho theme khác)', () => {
     expect(neutralTheme.colors).toEqual({
       background: '#FFFFFF',
+      onBackground: '#000000',
       surface: '#FFFFFF',
       surfaceSelected: '#DBEAFE',
       surfaceCorrect: '#A5D6A7',

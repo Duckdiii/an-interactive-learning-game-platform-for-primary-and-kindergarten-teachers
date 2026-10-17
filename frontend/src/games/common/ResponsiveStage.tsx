@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Layer, Rect, Stage } from 'react-konva'
-import { useTheme } from '../../experiments/theme/useTheme'
+import { Stage } from 'react-konva'
+import StageBackdrop from '../../experiments/theme/StageBackdrop'
 
 interface ResponsiveStageProps {
   /** Kích thước "thiết kế" — toạ độ của mọi phần tử con bên trong tính theo hệ này, không đổi. */
@@ -19,7 +19,6 @@ interface ResponsiveStageProps {
  */
 export default function ResponsiveStage({ width, height, children }: ResponsiveStageProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const { colors, paintStageBackground } = useTheme()
   const [scale, setScale] = useState(1)
 
   useEffect(() => {
@@ -42,12 +41,8 @@ export default function ResponsiveStage({ width, height, children }: ResponsiveS
   return (
     <div ref={containerRef} style={{ width: '100%' }}>
       <Stage width={width * scale} height={height * scale} scaleX={scale} scaleY={scale}>
-        {/* Chỉ theme có nền riêng mới vẽ; theme neutral giữ nền trong suốt như trước. */}
-        {paintStageBackground && (
-          <Layer listening={false}>
-            <Rect width={width} height={height} fill={colors.background} />
-          </Layer>
-        )}
+        {/* Chỉ theme có nền riêng mới vẽ (màu đặc + họa tiết); theme neutral giữ nền trong suốt như trước. */}
+        <StageBackdrop width={width} height={height} />
         {children}
       </Stage>
     </div>
