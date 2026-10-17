@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthLayout from './layouts/AuthLayout'
@@ -12,6 +13,13 @@ import NotFound from './pages/NotFound'
 import CanvasSandbox from './pages/dev/CanvasSandbox'
 import { ROUTES } from './routes/paths'
 
+// Khu thử nghiệm (nhánh experiment): điều kiện viết thẳng với import.meta.env để Vite gập hằng và bỏ hẳn
+// chunk khỏi bản build thường. Bật khi `npm run dev` hoặc build với VITE_EXPERIMENTS=1.
+const ExperimentsPage =
+  import.meta.env.DEV || import.meta.env.VITE_EXPERIMENTS === '1'
+    ? lazy(() => import('./experiments/ExperimentsPage'))
+    : null
+
 function App() {
   return (
     <Routes>
@@ -20,6 +28,17 @@ function App() {
           test Canvas Engine bằng fixture, xoá khi nối renderer vào WorkspaceEditor/GamePlayer thật. */}
       {import.meta.env.DEV && (
         <Route path="/dev/canvas-sandbox" element={<CanvasSandbox />} />
+      )}
+
+      {ExperimentsPage && (
+        <Route
+          path="/dev/experiments"
+          element={
+            <Suspense fallback={null}>
+              <ExperimentsPage />
+            </Suspense>
+          }
+        />
       )}
 
       <Route element={<AuthLayout />}>
