@@ -12,12 +12,14 @@
     "measure:experiments": "node scripts/experiments/measure.mjs"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-web": "0.80.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.103.2",
     "axios": "^1.20.0",
     "canvas-confetti": "^1.9.4",
     "howler": "^2.2.4",
     "konva": "^10.7.0",
+    "lottie-web": "5.13.0",
     "pixi.js": "8.21.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
