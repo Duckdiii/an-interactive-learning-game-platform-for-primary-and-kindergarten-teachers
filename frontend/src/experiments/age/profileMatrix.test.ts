@@ -3,7 +3,7 @@ import { AGE_BAND_ORDER } from './ageProfiles'
 import { ALL_THEMES } from '../theme/themes'
 import { ALL_MECHANICS, gameMatrix, MATRIX_CONTAINER_WIDTHS, PRODUCT_MECHANICS, themeMatrix } from './profileMatrix'
 
-const targetsOf = (mechanic: 'QUIZ' | 'MATCHING' | 'NUMBER_LINE' | 'SYLLABLE_BUILDER', width: number, band: string) =>
+const targetsOf = (mechanic: 'QUIZ' | 'MATCHING' | 'NUMBER_LINE' | 'SYLLABLE_BUILDER' | 'PREPOSITION_SCENE', width: number, band: string) =>
   gameMatrix(MATRIX_CONTAINER_WIDTHS, ALL_MECHANICS)
     .find((c) => c.mechanic === mechanic && c.containerWidth === width && c.band === band)!
     .issues.map((issue) => issue.target)
@@ -112,10 +112,24 @@ describe('gameMatrix: SYLLABLE_BUILDER (T4.2)', () => {
   })
 })
 
+describe('gameMatrix: PREPOSITION_SCENE (T4.3)', () => {
+  it('khung 768 và 1280: đạt cả ba nhóm tuổi', () => {
+    for (const width of [768, 1280]) {
+      for (const band of AGE_BAND_ORDER) expect(targetsOf('PREPOSITION_SCENE', width, band)).toEqual([])
+    }
+  })
+
+  it('khung 390: vật 100 đơn vị → 48,75px chỉ đạt lớp 3 đến 5 (48); trượt lớp 1 đến 2 (56) và mầm non (64); cảnh và nút «Done!» đạt', () => {
+    expect(targetsOf('PREPOSITION_SCENE', 390, 'GRADE_3_5')).toEqual([])
+    expect(targetsOf('PREPOSITION_SCENE', 390, 'GRADE_1_2')).toEqual(['item'])
+    expect(targetsOf('PREPOSITION_SCENE', 390, 'PRESCHOOL')).toEqual(['item'])
+  })
+})
+
 describe('theme và NUMBER_LINE', () => {
-  it('mọi theme khai báo tương thích NUMBER_LINE và SYLLABLE_BUILDER', () => {
+  it('mọi theme khai báo tương thích cả ba loại thử nghiệm T4', () => {
     for (const theme of ALL_THEMES) {
-      expect([theme.id, theme.compatibleMechanics]).toEqual([theme.id, expect.arrayContaining(['NUMBER_LINE', 'SYLLABLE_BUILDER'])])
+      expect([theme.id, theme.compatibleMechanics]).toEqual([theme.id, expect.arrayContaining(['NUMBER_LINE', 'SYLLABLE_BUILDER', 'PREPOSITION_SCENE'])])
     }
   })
 })

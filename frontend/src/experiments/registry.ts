@@ -4,6 +4,7 @@ import AudioLab from './audio/AudioLab'
 import TtsProbeLab from './audio/TtsProbeLab'
 import FeedbackLab from './feedback/FeedbackLab'
 import NumberLineLab from './games/numberLine/NumberLineLab'
+import PrepositionSceneLab from './games/prepositionScene/PrepositionSceneLab'
 import SyllableBuilderLab from './games/syllableBuilder/SyllableBuilderLab'
 import ThemeLab from './theme/ThemeLab'
 
@@ -29,6 +30,7 @@ export const EXPERIMENT_ENTRIES: readonly ExperimentEntry[] = [
   { id: 'theme-lab', title: 'Theme (T3)', area: 'INFRA', render: () => createElement(ThemeLab) },
   { id: 'number-line', title: 'Trục số (T4.1)', area: 'MATH', render: () => createElement(NumberLineLab) },
   { id: 'syllable-builder', title: 'Ghép tiếng (T4.2)', area: 'VIETNAMESE', render: () => createElement(SyllableBuilderLab) },
+  { id: 'preposition-scene', title: 'Vị trí (T4.3)', area: 'ENGLISH', render: () => createElement(PrepositionSceneLab) },
   { id: 'age-profiles', title: 'Hồ sơ độ tuổi (T5.1)', area: 'INFRA', render: () => createElement(AgeProfileLab) },
 ]
 

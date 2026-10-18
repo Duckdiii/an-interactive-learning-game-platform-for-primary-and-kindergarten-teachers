@@ -43,8 +43,8 @@ export const neutralTheme: ThemeManifest = {
   // Renderer hiện tại để nền sân trong suốt.
   paintStageBackground: false,
   font: { family: 'Arial', baseSize: 26 },
-  // Hai renderer sản phẩm, NUMBER_LINE (T4.1) và SYLLABLE_BUILDER (T4.2): đều đọc màu từ theme. Cơ chế thử nghiệm khác thêm vào khi có renderer.
-  compatibleMechanics: ['QUIZ', 'MATCHING', 'NUMBER_LINE', 'SYLLABLE_BUILDER'],
+  // Hai renderer sản phẩm và ba loại thử nghiệm T4 (NUMBER_LINE, SYLLABLE_BUILDER, PREPOSITION_SCENE): đều đọc màu từ theme. Cơ chế thử nghiệm khác thêm vào khi có renderer.
+  compatibleMechanics: ['QUIZ', 'MATCHING', 'NUMBER_LINE', 'SYLLABLE_BUILDER', 'PREPOSITION_SCENE'],
   contentSafety: { noViolence: true },
   assets: [],
 }

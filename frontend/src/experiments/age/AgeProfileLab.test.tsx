@@ -51,6 +51,14 @@ describe('AgeProfileLab', () => {
     expect(screen.getByTestId('game-SYLLABLE_BUILDER-390-PRESCHOOL')).toHaveTextContent('đạt')
   })
 
+  it('ma trận màn chơi: có hàng PREPOSITION_SCENE; 1280 đạt, 390 mầm non và lớp 1 đến 2 có 1 lỗi (vật kéo), lớp 3 đến 5 đạt', () => {
+    render(<AgeProfileLab />)
+    expect(screen.getByTestId('game-PREPOSITION_SCENE-1280-PRESCHOOL')).toHaveTextContent('đạt')
+    expect(screen.getByTestId('game-PREPOSITION_SCENE-390-PRESCHOOL')).toHaveTextContent('1 lỗi')
+    expect(screen.getByTestId('game-PREPOSITION_SCENE-390-GRADE_1_2')).toHaveTextContent('1 lỗi')
+    expect(screen.getByTestId('game-PREPOSITION_SCENE-390-GRADE_3_5')).toHaveTextContent('đạt')
+  })
+
   it('bảng theme: mọi ô đạt', () => {
     render(<AgeProfileLab />)
     for (const theme of ['neutral', 'space', 'ocean']) {

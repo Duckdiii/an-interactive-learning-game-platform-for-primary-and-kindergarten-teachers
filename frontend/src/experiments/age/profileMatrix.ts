@@ -2,6 +2,8 @@ import { mockMatchingQuestion } from '../../games/matching/MatchingRenderer.fixt
 import { mockQuizQuestion } from '../../games/quiz/QuizRenderer.fixtures'
 import { mockNumberLine10 } from '../games/numberLine/numberLineFixtures'
 import { numberLineFacts } from '../games/numberLine/numberLineFacts'
+import { mockPrepositionUnder } from '../games/prepositionScene/prepositionFixtures'
+import { prepositionFacts } from '../games/prepositionScene/prepositionFacts'
 import { mockSyllableMeo } from '../games/syllableBuilder/syllableFixtures'
 import { syllableFacts } from '../games/syllableBuilder/syllableFacts'
 import type { AgeBand } from '../theme/themeTypes'
@@ -13,18 +15,19 @@ import { validateAgainstProfile, type GameFacts, type ProfileIssue } from './val
 /** Chiều rộng khung chứa dùng để xét: điện thoại, máy tính bảng, máy tính (coi sân chiếm trọn khung: LẠC QUAN, bỏ qua lề trang). */
 export const MATRIX_CONTAINER_WIDTHS = [390, 768, 1280] as const
 
-export type MatrixMechanic = 'QUIZ' | 'MATCHING' | 'NUMBER_LINE' | 'SYLLABLE_BUILDER'
+export type MatrixMechanic = 'QUIZ' | 'MATCHING' | 'NUMBER_LINE' | 'SYLLABLE_BUILDER' | 'PREPOSITION_SCENE'
 
 /** Hai renderer sản phẩm hiện có; kết quả của chúng được ghim trong test nên mặc định không đổi khi thêm loại thử nghiệm. */
 export const PRODUCT_MECHANICS: readonly MatrixMechanic[] = ['QUIZ', 'MATCHING']
 /** Gồm cả loại thử nghiệm (T4.x). */
-export const ALL_MECHANICS: readonly MatrixMechanic[] = ['QUIZ', 'MATCHING', 'NUMBER_LINE', 'SYLLABLE_BUILDER']
+export const ALL_MECHANICS: readonly MatrixMechanic[] = ['QUIZ', 'MATCHING', 'NUMBER_LINE', 'SYLLABLE_BUILDER', 'PREPOSITION_SCENE']
 
 const FACTS: Record<MatrixMechanic, (containerWidth: number) => GameFacts> = {
   QUIZ: (w) => quizFacts(mockQuizQuestion, w),
   MATCHING: (w) => matchingFacts(mockMatchingQuestion, w),
   NUMBER_LINE: (w) => numberLineFacts(mockNumberLine10, w),
   SYLLABLE_BUILDER: (w) => syllableFacts(mockSyllableMeo, w),
+  PREPOSITION_SCENE: (w) => prepositionFacts(mockPrepositionUnder, w),
 }
 
 export interface GameCell {
