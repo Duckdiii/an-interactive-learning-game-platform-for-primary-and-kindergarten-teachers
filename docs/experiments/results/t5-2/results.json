@@ -1,0 +1,2693 @@
+{
+  "startedAt": "2026-10-18T07:14:34.246Z",
+  "node": "v20.19.6",
+  "cases": [
+    {
+      "name": "390-number-line-neutral",
+      "viewport": "390",
+      "lab": "number-line",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "0",
+          "width": 320.4,
+          "height": 89
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "+",
+          "width": 62.3,
+          "height": 53.4
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 133.5,
+          "height": 53.4
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 32,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "Circle",
+            "size": 32
+          },
+          {
+            "label": "+",
+            "size": 53.4
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 53.4
+          }
+        ],
+        "GRADE_1_2": [
+          {
+            "label": "Circle",
+            "size": 32
+          },
+          {
+            "label": "+",
+            "size": 53.4
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 53.4
+          }
+        ],
+        "GRADE_3_5": [
+          {
+            "label": "Circle",
+            "size": 32
+          }
+        ]
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-number-line-space",
+      "viewport": "390",
+      "lab": "number-line",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "0",
+          "width": 320.4,
+          "height": 89
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "+",
+          "width": 62.3,
+          "height": 53.4
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 133.5,
+          "height": 53.4
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 32,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "Circle",
+            "size": 32
+          },
+          {
+            "label": "+",
+            "size": 53.4
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 53.4
+          }
+        ],
+        "GRADE_1_2": [
+          {
+            "label": "Circle",
+            "size": 32
+          },
+          {
+            "label": "+",
+            "size": 53.4
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 53.4
+          }
+        ],
+        "GRADE_3_5": [
+          {
+            "label": "Circle",
+            "size": 32
+          }
+        ]
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 29.5,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-number-line-ocean",
+      "viewport": "390",
+      "lab": "number-line",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "0",
+          "width": 320.4,
+          "height": 89
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "+",
+          "width": 62.3,
+          "height": 53.4
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 133.5,
+          "height": 53.4
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 32,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "Circle",
+            "size": 32
+          },
+          {
+            "label": "+",
+            "size": 53.4
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 53.4
+          }
+        ],
+        "GRADE_1_2": [
+          {
+            "label": "Circle",
+            "size": 32
+          },
+          {
+            "label": "+",
+            "size": 53.4
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 53.4
+          }
+        ],
+        "GRADE_3_5": [
+          {
+            "label": "Circle",
+            "size": 32
+          }
+        ]
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 30.2,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-syllable-builder-neutral",
+      "viewport": "390",
+      "lab": "syllable-builder",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 133.5,
+          "height": 58.7
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 58.7,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 58.7
+          }
+        ],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-syllable-builder-space",
+      "viewport": "390",
+      "lab": "syllable-builder",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 133.5,
+          "height": 58.7
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 58.7,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 58.7
+          }
+        ],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 30.3,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-syllable-builder-ocean",
+      "viewport": "390",
+      "lab": "syllable-builder",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▲",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "▼",
+          "width": 97.9,
+          "height": 58.7
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 133.5,
+          "height": 58.7
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 58.7,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "▲",
+            "size": 58.7
+          },
+          {
+            "label": "▼",
+            "size": 58.7
+          },
+          {
+            "label": "Xong rồi!",
+            "size": 58.7
+          }
+        ],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 30.9,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-preposition-scene-neutral",
+      "viewport": "390",
+      "lab": "preposition-scene",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "table",
+          "width": 320.4,
+          "height": 169.1
+        },
+        {
+          "label": "cat",
+          "width": 44.5,
+          "height": 44.5
+        },
+        {
+          "label": "Done!",
+          "width": 133.5,
+          "height": 58.7
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 44.5,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "cat",
+            "size": 44.5
+          },
+          {
+            "label": "Done!",
+            "size": 58.7
+          }
+        ],
+        "GRADE_1_2": [
+          {
+            "label": "cat",
+            "size": 44.5
+          }
+        ],
+        "GRADE_3_5": [
+          {
+            "label": "cat",
+            "size": 44.5
+          }
+        ]
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-preposition-scene-space",
+      "viewport": "390",
+      "lab": "preposition-scene",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "table",
+          "width": 320.4,
+          "height": 169.1
+        },
+        {
+          "label": "cat",
+          "width": 44.5,
+          "height": 44.5
+        },
+        {
+          "label": "Done!",
+          "width": 133.5,
+          "height": 58.7
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 44.5,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "cat",
+            "size": 44.5
+          },
+          {
+            "label": "Done!",
+            "size": 58.7
+          }
+        ],
+        "GRADE_1_2": [
+          {
+            "label": "cat",
+            "size": 44.5
+          }
+        ],
+        "GRADE_3_5": [
+          {
+            "label": "cat",
+            "size": 44.5
+          }
+        ]
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 26.9,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-preposition-scene-ocean",
+      "viewport": "390",
+      "lab": "preposition-scene",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "table",
+          "width": 320.4,
+          "height": 169.1
+        },
+        {
+          "label": "cat",
+          "width": 44.5,
+          "height": 44.5
+        },
+        {
+          "label": "Done!",
+          "width": 133.5,
+          "height": 58.7
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 44.5,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "cat",
+            "size": 44.5
+          },
+          {
+            "label": "Done!",
+            "size": 58.7
+          }
+        ],
+        "GRADE_1_2": [
+          {
+            "label": "cat",
+            "size": 44.5
+          }
+        ],
+        "GRADE_3_5": [
+          {
+            "label": "cat",
+            "size": 44.5
+          }
+        ]
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 34.7,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "390-theme-lab",
+      "viewport": "390",
+      "lab": "theme-lab",
+      "theme": null,
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 388,
+          "clientWidth": 388
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.445,
+      "targets": [
+        {
+          "label": "🔊 Nghe lại",
+          "width": 133.5,
+          "height": 42.7
+        },
+        {
+          "label": "apple",
+          "width": 124.6,
+          "height": 49
+        },
+        {
+          "label": "dog",
+          "width": 124.6,
+          "height": 49
+        },
+        {
+          "label": "cat",
+          "width": 124.6,
+          "height": 49
+        },
+        {
+          "label": "mèo",
+          "width": 124.6,
+          "height": 49
+        },
+        {
+          "label": "táo",
+          "width": 124.6,
+          "height": 49
+        },
+        {
+          "label": "chó",
+          "width": 124.6,
+          "height": 49
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 42.7,
+      "failures": {
+        "PRESCHOOL": [
+          {
+            "label": "🔊 Nghe lại",
+            "size": 42.7
+          },
+          {
+            "label": "apple",
+            "size": 49
+          },
+          {
+            "label": "dog",
+            "size": 49
+          },
+          {
+            "label": "cat",
+            "size": 49
+          },
+          {
+            "label": "mèo",
+            "size": 49
+          },
+          {
+            "label": "táo",
+            "size": 49
+          },
+          {
+            "label": "chó",
+            "size": 49
+          }
+        ],
+        "GRADE_1_2": [
+          {
+            "label": "🔊 Nghe lại",
+            "size": 42.7
+          },
+          {
+            "label": "apple",
+            "size": 49
+          },
+          {
+            "label": "dog",
+            "size": 49
+          },
+          {
+            "label": "cat",
+            "size": 49
+          },
+          {
+            "label": "mèo",
+            "size": 49
+          },
+          {
+            "label": "táo",
+            "size": 49
+          },
+          {
+            "label": "chó",
+            "size": 49
+          }
+        ],
+        "GRADE_3_5": [
+          {
+            "label": "🔊 Nghe lại",
+            "size": 42.7
+          }
+        ]
+      },
+      "imageNodes": 0,
+      "themePatterns": null,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 8,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-number-line-neutral",
+      "viewport": "768",
+      "lab": "number-line",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "0",
+          "width": 660.6,
+          "height": 183.5
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 66.1,
+          "height": 66.1
+        },
+        {
+          "label": "+",
+          "width": 128.5,
+          "height": 110.1
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 275.3,
+          "height": 110.1
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 66.1,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-number-line-space",
+      "viewport": "768",
+      "lab": "number-line",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "0",
+          "width": 660.6,
+          "height": 183.5
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 66.1,
+          "height": 66.1
+        },
+        {
+          "label": "+",
+          "width": 128.5,
+          "height": 110.1
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 275.3,
+          "height": 110.1
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 66.1,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 28.5,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-number-line-ocean",
+      "viewport": "768",
+      "lab": "number-line",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "0",
+          "width": 660.6,
+          "height": 183.5
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 66.1,
+          "height": 66.1
+        },
+        {
+          "label": "+",
+          "width": 128.5,
+          "height": 110.1
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 275.3,
+          "height": 110.1
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 66.1,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 30.6,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-syllable-builder-neutral",
+      "viewport": "768",
+      "lab": "syllable-builder",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 201.9,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.9,
+          "height": 121.1
+        },
+        {
+          "label": "▲",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▲",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 275.3,
+          "height": 121.1
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 121.1,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-syllable-builder-space",
+      "viewport": "768",
+      "lab": "syllable-builder",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 201.9,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.9,
+          "height": 121.1
+        },
+        {
+          "label": "▲",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▲",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 275.3,
+          "height": 121.1
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 121.1,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 33,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-syllable-builder-ocean",
+      "viewport": "768",
+      "lab": "syllable-builder",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 201.9,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.9,
+          "height": 121.1
+        },
+        {
+          "label": "▲",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▲",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "▼",
+          "width": 201.8,
+          "height": 121.1
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 275.3,
+          "height": 121.1
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 121.1,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 30,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-preposition-scene-neutral",
+      "viewport": "768",
+      "lab": "preposition-scene",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "table",
+          "width": 660.6,
+          "height": 348.7
+        },
+        {
+          "label": "cat",
+          "width": 91.8,
+          "height": 91.8
+        },
+        {
+          "label": "Done!",
+          "width": 275.3,
+          "height": 121.1
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 91.8,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-preposition-scene-space",
+      "viewport": "768",
+      "lab": "preposition-scene",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "table",
+          "width": 660.6,
+          "height": 348.7
+        },
+        {
+          "label": "cat",
+          "width": 91.8,
+          "height": 91.8
+        },
+        {
+          "label": "Done!",
+          "width": 275.3,
+          "height": 121.1
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 91.8,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 34.2,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-preposition-scene-ocean",
+      "viewport": "768",
+      "lab": "preposition-scene",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "table",
+          "width": 660.6,
+          "height": 348.7
+        },
+        {
+          "label": "cat",
+          "width": 91.8,
+          "height": 91.8
+        },
+        {
+          "label": "Done!",
+          "width": 275.3,
+          "height": 121.1
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 91.8,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 33.5,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "768-theme-lab",
+      "viewport": "768",
+      "lab": "theme-lab",
+      "theme": null,
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 766,
+          "clientWidth": 766
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 0.918,
+      "targets": [
+        {
+          "label": "🔊 Nghe lại",
+          "width": 275.3,
+          "height": 88.1
+        },
+        {
+          "label": "apple",
+          "width": 256.9,
+          "height": 100.9
+        },
+        {
+          "label": "dog",
+          "width": 256.9,
+          "height": 100.9
+        },
+        {
+          "label": "cat",
+          "width": 256.9,
+          "height": 100.9
+        },
+        {
+          "label": "mèo",
+          "width": 256.9,
+          "height": 100.9
+        },
+        {
+          "label": "táo",
+          "width": 256.9,
+          "height": 100.9
+        },
+        {
+          "label": "chó",
+          "width": 256.9,
+          "height": 100.9
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 88.1,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": null,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 8,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-number-line-neutral",
+      "viewport": "1280",
+      "lab": "number-line",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "0",
+          "width": 720,
+          "height": 200
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 72,
+          "height": 72
+        },
+        {
+          "label": "+",
+          "width": 140,
+          "height": 120
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 300,
+          "height": 120
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 72,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-number-line-space",
+      "viewport": "1280",
+      "lab": "number-line",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "0",
+          "width": 720,
+          "height": 200
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 72,
+          "height": 72
+        },
+        {
+          "label": "+",
+          "width": 140,
+          "height": 120
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 300,
+          "height": 120
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 72,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 30.5,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-number-line-ocean",
+      "viewport": "1280",
+      "lab": "number-line",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "0",
+          "width": 720,
+          "height": 200
+        },
+        {
+          "label": "Circle",
+          "kind": "Circle",
+          "width": 72,
+          "height": 72
+        },
+        {
+          "label": "+",
+          "width": 140,
+          "height": 120
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 300,
+          "height": 120
+        }
+      ],
+      "targetCount": 4,
+      "smallestTarget": 72,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 30.4,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 10,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-syllable-builder-neutral",
+      "viewport": "1280",
+      "lab": "syllable-builder",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 300,
+          "height": 132
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 132,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-syllable-builder-space",
+      "viewport": "1280",
+      "lab": "syllable-builder",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 300,
+          "height": 132
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 132,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 32.7,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-syllable-builder-ocean",
+      "viewport": "1280",
+      "lab": "syllable-builder",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▲",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "▼",
+          "width": 220,
+          "height": 132
+        },
+        {
+          "label": "Xong rồi!",
+          "width": 300,
+          "height": 132
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 132,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 28,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 13,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-preposition-scene-neutral",
+      "viewport": "1280",
+      "lab": "preposition-scene",
+      "theme": "neutral",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "table",
+          "width": 720,
+          "height": 380
+        },
+        {
+          "label": "cat",
+          "width": 100,
+          "height": 100
+        },
+        {
+          "label": "Done!",
+          "width": 300,
+          "height": 132
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 100,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 0,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-preposition-scene-space",
+      "viewport": "1280",
+      "lab": "preposition-scene",
+      "theme": "space",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "table",
+          "width": 720,
+          "height": 380
+        },
+        {
+          "label": "cat",
+          "width": 100,
+          "height": 100
+        },
+        {
+          "label": "Done!",
+          "width": 300,
+          "height": 132
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 100,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 27.4,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-preposition-scene-ocean",
+      "viewport": "1280",
+      "lab": "preposition-scene",
+      "theme": "ocean",
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "table",
+          "width": 720,
+          "height": 380
+        },
+        {
+          "label": "cat",
+          "width": 100,
+          "height": 100
+        },
+        {
+          "label": "Done!",
+          "width": 300,
+          "height": 132
+        }
+      ],
+      "targetCount": 3,
+      "smallestTarget": 100,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": 1,
+      "themeLoadMs": 33.1,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 9,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    },
+    {
+      "name": "1280-theme-lab",
+      "viewport": "1280",
+      "lab": "theme-lab",
+      "theme": null,
+      "overflowFrame": false,
+      "overflowPage": false,
+      "overflowRaw": {
+        "frame": {
+          "scrollWidth": 1278,
+          "clientWidth": 1278
+        },
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      },
+      "console": [],
+      "stageScale": 1,
+      "targets": [
+        {
+          "label": "🔊 Nghe lại",
+          "width": 300,
+          "height": 96
+        },
+        {
+          "label": "apple",
+          "width": 280,
+          "height": 110
+        },
+        {
+          "label": "dog",
+          "width": 280,
+          "height": 110
+        },
+        {
+          "label": "cat",
+          "width": 280,
+          "height": 110
+        },
+        {
+          "label": "mèo",
+          "width": 280,
+          "height": 110
+        },
+        {
+          "label": "táo",
+          "width": 280,
+          "height": 110
+        },
+        {
+          "label": "chó",
+          "width": 280,
+          "height": 110
+        }
+      ],
+      "targetCount": 7,
+      "smallestTarget": 96,
+      "failures": {
+        "PRESCHOOL": [],
+        "GRADE_1_2": [],
+        "GRADE_3_5": []
+      },
+      "imageNodes": 0,
+      "themePatterns": null,
+      "themeLoadMs": null,
+      "axe": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 8,
+          "help": "All page content should be contained by landmarks"
+        },
+        {
+          "id": "landmark-one-main",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Document should have one main landmark"
+        }
+      ]
+    }
+  ],
+  "fps": [
+    {
+      "viewport": "390",
+      "lab": "number-line",
+      "throttle": 1,
+      "frames": 365,
+      "fps": 120.2,
+      "p95Ms": 8.9,
+      "worstMs": 9.9,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 361,
+      "drawsPerSecond": 120.3
+    },
+    {
+      "viewport": "390",
+      "lab": "number-line",
+      "throttle": 4,
+      "frames": 458,
+      "fps": 119.6,
+      "p95Ms": 14.1,
+      "worstMs": 20.5,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 241,
+      "drawsPerSecond": 80.3
+    },
+    {
+      "viewport": "390",
+      "lab": "syllable-builder",
+      "throttle": 1,
+      "frames": 361,
+      "fps": 120.2,
+      "p95Ms": 9.3,
+      "worstMs": 18.2,
+      "dropped": 0,
+      "action": "tap",
+      "draws": 360,
+      "drawsPerSecond": 120
+    },
+    {
+      "viewport": "390",
+      "lab": "syllable-builder",
+      "throttle": 4,
+      "frames": 235,
+      "fps": 77.3,
+      "p95Ms": 19.8,
+      "worstMs": 28.3,
+      "dropped": 0,
+      "action": "tap",
+      "draws": 232,
+      "drawsPerSecond": 77.3
+    },
+    {
+      "viewport": "390",
+      "lab": "preposition-scene",
+      "throttle": 1,
+      "frames": 362,
+      "fps": 120.2,
+      "p95Ms": 9.1,
+      "worstMs": 10.1,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 361,
+      "drawsPerSecond": 120.3
+    },
+    {
+      "viewport": "390",
+      "lab": "preposition-scene",
+      "throttle": 4,
+      "frames": 468,
+      "fps": 120.1,
+      "p95Ms": 14.3,
+      "worstMs": 20.3,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 241,
+      "drawsPerSecond": 80.3
+    },
+    {
+      "viewport": "768",
+      "lab": "number-line",
+      "throttle": 1,
+      "frames": 363,
+      "fps": 119.9,
+      "p95Ms": 8.9,
+      "worstMs": 13.7,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 361,
+      "drawsPerSecond": 120.3
+    },
+    {
+      "viewport": "768",
+      "lab": "number-line",
+      "throttle": 4,
+      "frames": 435,
+      "fps": 119.8,
+      "p95Ms": 14,
+      "worstMs": 18.1,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 241,
+      "drawsPerSecond": 80.3
+    },
+    {
+      "viewport": "768",
+      "lab": "syllable-builder",
+      "throttle": 1,
+      "frames": 361,
+      "fps": 120.3,
+      "p95Ms": 9.3,
+      "worstMs": 10.7,
+      "dropped": 0,
+      "action": "tap",
+      "draws": 360,
+      "drawsPerSecond": 120
+    },
+    {
+      "viewport": "768",
+      "lab": "syllable-builder",
+      "throttle": 4,
+      "frames": 186,
+      "fps": 61.5,
+      "p95Ms": 22.2,
+      "worstMs": 26.9,
+      "dropped": 0,
+      "action": "tap",
+      "draws": 181,
+      "drawsPerSecond": 60.3
+    },
+    {
+      "viewport": "768",
+      "lab": "preposition-scene",
+      "throttle": 1,
+      "frames": 362,
+      "fps": 120.2,
+      "p95Ms": 8.9,
+      "worstMs": 9.9,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 361,
+      "drawsPerSecond": 120.3
+    },
+    {
+      "viewport": "768",
+      "lab": "preposition-scene",
+      "throttle": 4,
+      "frames": 368,
+      "fps": 119.9,
+      "p95Ms": 14.2,
+      "worstMs": 21.1,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 181,
+      "drawsPerSecond": 60.3
+    },
+    {
+      "viewport": "1280",
+      "lab": "number-line",
+      "throttle": 1,
+      "frames": 362,
+      "fps": 120.1,
+      "p95Ms": 8.8,
+      "worstMs": 9.1,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 361,
+      "drawsPerSecond": 120.3
+    },
+    {
+      "viewport": "1280",
+      "lab": "number-line",
+      "throttle": 4,
+      "frames": 448,
+      "fps": 119.7,
+      "p95Ms": 13.8,
+      "worstMs": 19.5,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 241,
+      "drawsPerSecond": 80.3
+    },
+    {
+      "viewport": "1280",
+      "lab": "syllable-builder",
+      "throttle": 1,
+      "frames": 361,
+      "fps": 120.2,
+      "p95Ms": 9.4,
+      "worstMs": 13.6,
+      "dropped": 0,
+      "action": "tap",
+      "draws": 359,
+      "drawsPerSecond": 119.7
+    },
+    {
+      "viewport": "1280",
+      "lab": "syllable-builder",
+      "throttle": 4,
+      "frames": 169,
+      "fps": 56,
+      "p95Ms": 24.8,
+      "worstMs": 32.9,
+      "dropped": 0,
+      "action": "tap",
+      "draws": 159,
+      "drawsPerSecond": 53
+    },
+    {
+      "viewport": "1280",
+      "lab": "preposition-scene",
+      "throttle": 1,
+      "frames": 362,
+      "fps": 120.2,
+      "p95Ms": 8.9,
+      "worstMs": 9.5,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 361,
+      "drawsPerSecond": 120.3
+    },
+    {
+      "viewport": "1280",
+      "lab": "preposition-scene",
+      "throttle": 4,
+      "frames": 367,
+      "fps": 119.9,
+      "p95Ms": 14,
+      "worstMs": 17.3,
+      "dropped": 0,
+      "action": "drag",
+      "draws": 181,
+      "drawsPerSecond": 60.3
+    }
+  ],
+  "bundle": {
+    "normal": {
+      "raw": {
+        "index.js": 745160,
+        "index.css": 24504
+      },
+      "gzip": {
+        "index.js": 228256,
+        "index.css": 5501
+      }
+    },
+    "experiments": {
+      "raw": {
+        "ExperimentsPage.js": 87362,
+        "index.js": 761932,
+        "index.css": 24504,
+        "rolldown-runtime.js": 716
+      },
+      "gzip": {
+        "ExperimentsPage.js": 27473,
+        "index.js": 234458,
+        "index.css": 5501,
+        "rolldown-runtime.js": 428
+      }
+    }
+  },
+  "chrome": "155.0.8059.80"
+}

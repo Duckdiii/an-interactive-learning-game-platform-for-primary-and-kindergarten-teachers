@@ -26,6 +26,9 @@ vi.mock('../../feedback/FeedbackOverlay', () => ({ default: () => null }))
 
 const status = () => screen.getAllByRole('status').map((el) => el.textContent).join(' | ')
 
+// Lab dựng nhiều thành phần; khi cả bộ test chạy song song, test đầu tiên của file có lúc vượt 5 giây mặc định (đã gặp 3 lần).
+vi.setConfig({ testTimeout: 20_000 })
+
 describe('SyllableBuilderLab', () => {
   it('có đủ nút chọn mẫu, chế độ, theme và kiểu đặt dấu; mặc định preview và mẫu hợp lệ', () => {
     render(<SyllableBuilderLab />)
