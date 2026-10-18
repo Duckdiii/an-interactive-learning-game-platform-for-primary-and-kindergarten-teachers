@@ -267,8 +267,29 @@ describe('play', () => {
   it('sai mà không có correctValue: nhắc thử lại, không bịa số', async () => {
     render(<NumberLineRenderer mode="play" question={student} onAnswered={async () => ({ isCorrect: false })} />)
     press(CONFIRM)
-    await waitFor(() => expect(status()).toBe('Chưa đúng, thử lại nhé.'))
+    await waitFor(() => expect(status()).toBe('Chưa đúng rồi, cố gắng lên nhé.'))
     expect(ring()).toBeNull()
+  })
+
+  it('hai lần chạm «Xong rồi!» cùng lúc (trước khi vẽ lại) chỉ nộp một lần', async () => {
+    const onAnswered = vi.fn(async (): Promise<NumberLineAnswerResult> => ({ isCorrect: true }))
+    render(<NumberLineRenderer mode="play" question={student} onAnswered={onAnswered} />)
+    act(() => {
+      fireEvent.click(konvaText(CONFIRM))
+      fireEvent.click(konvaText(CONFIRM))
+    })
+    await waitFor(() => expect(status()).toBe('Đúng rồi!'))
+    expect(onAnswered).toHaveBeenCalledTimes(1)
+  })
+
+  it('cha trả kết quả sai dạng thì coi như chưa nhận được: mở khóa, không kẹt', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const onAnswered = vi.fn(async () => undefined as unknown as NumberLineAnswerResult)
+    render(<NumberLineRenderer mode="play" question={student} onAnswered={onAnswered} />)
+    press(CONFIRM)
+    await waitFor(() => expect(error).toHaveBeenCalled())
+    expect(slider().disabled).toBe(false)
+    error.mockRestore()
   })
 
   it('đang chấm thì khóa mọi thao tác (không đổi số, không nộp lần hai)', async () => {

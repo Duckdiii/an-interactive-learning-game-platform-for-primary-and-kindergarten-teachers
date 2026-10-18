@@ -3,7 +3,7 @@ import { AGE_BAND_ORDER } from './ageProfiles'
 import { ALL_THEMES } from '../theme/themes'
 import { ALL_MECHANICS, gameMatrix, MATRIX_CONTAINER_WIDTHS, PRODUCT_MECHANICS, themeMatrix } from './profileMatrix'
 
-const targetsOf = (mechanic: 'QUIZ' | 'MATCHING' | 'NUMBER_LINE', width: number, band: string) =>
+const targetsOf = (mechanic: 'QUIZ' | 'MATCHING' | 'NUMBER_LINE' | 'SYLLABLE_BUILDER', width: number, band: string) =>
   gameMatrix(MATRIX_CONTAINER_WIDTHS, ALL_MECHANICS)
     .find((c) => c.mechanic === mechanic && c.containerWidth === width && c.band === band)!
     .issues.map((issue) => issue.target)
@@ -80,7 +80,7 @@ describe('gameMatrix: NUMBER_LINE (T4.1)', () => {
   it('mặc định chỉ gồm hai renderer sản phẩm; thêm loại thử nghiệm phải nêu rõ', () => {
     expect(PRODUCT_MECHANICS).toEqual(['QUIZ', 'MATCHING'])
     expect(gameMatrix().some((c) => c.mechanic === 'NUMBER_LINE')).toBe(false)
-    expect(gameMatrix(MATRIX_CONTAINER_WIDTHS, ALL_MECHANICS)).toHaveLength(3 * MATRIX_CONTAINER_WIDTHS.length * AGE_BAND_ORDER.length)
+    expect(gameMatrix(MATRIX_CONTAINER_WIDTHS, ALL_MECHANICS)).toHaveLength(ALL_MECHANICS.length * MATRIX_CONTAINER_WIDTHS.length * AGE_BAND_ORDER.length)
   })
 
   it('khung 768 và 1280: đạt cả ba nhóm tuổi', () => {
@@ -100,8 +100,22 @@ describe('gameMatrix: NUMBER_LINE (T4.1)', () => {
   })
 })
 
+describe('gameMatrix: SYLLABLE_BUILDER (T4.2)', () => {
+  it('khung 768 và 1280: đạt cả ba nhóm tuổi', () => {
+    for (const width of [768, 1280]) {
+      for (const band of AGE_BAND_ORDER) expect(targetsOf('SYLLABLE_BUILDER', width, band)).toEqual([])
+    }
+  })
+
+  it('khung 390: nút 132 đơn vị → 64,4px nên đạt cả ba nhóm tuổi, kể cả mầm non (64)', () => {
+    for (const band of AGE_BAND_ORDER) expect(targetsOf('SYLLABLE_BUILDER', 390, band)).toEqual([])
+  })
+})
+
 describe('theme và NUMBER_LINE', () => {
-  it('mọi theme khai báo tương thích NUMBER_LINE', () => {
-    for (const theme of ALL_THEMES) expect([theme.id, theme.compatibleMechanics]).toEqual([theme.id, expect.arrayContaining(['NUMBER_LINE'])])
+  it('mọi theme khai báo tương thích NUMBER_LINE và SYLLABLE_BUILDER', () => {
+    for (const theme of ALL_THEMES) {
+      expect([theme.id, theme.compatibleMechanics]).toEqual([theme.id, expect.arrayContaining(['NUMBER_LINE', 'SYLLABLE_BUILDER'])])
+    }
   })
 })

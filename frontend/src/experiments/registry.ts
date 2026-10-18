@@ -4,6 +4,7 @@ import AudioLab from './audio/AudioLab'
 import TtsProbeLab from './audio/TtsProbeLab'
 import FeedbackLab from './feedback/FeedbackLab'
 import NumberLineLab from './games/numberLine/NumberLineLab'
+import SyllableBuilderLab from './games/syllableBuilder/SyllableBuilderLab'
 import ThemeLab from './theme/ThemeLab'
 
 /** Môn học của một mục thử nghiệm (không dùng `Subject` của DSL: loại thử nghiệm không thuộc DSL). */
@@ -27,6 +28,7 @@ export const EXPERIMENT_ENTRIES: readonly ExperimentEntry[] = [
   { id: 'tts-probe', title: 'Giọng đọc (T2.3)', area: 'INFRA', render: () => createElement(TtsProbeLab) },
   { id: 'theme-lab', title: 'Theme (T3)', area: 'INFRA', render: () => createElement(ThemeLab) },
   { id: 'number-line', title: 'Trục số (T4.1)', area: 'MATH', render: () => createElement(NumberLineLab) },
+  { id: 'syllable-builder', title: 'Ghép tiếng (T4.2)', area: 'VIETNAMESE', render: () => createElement(SyllableBuilderLab) },
   { id: 'age-profiles', title: 'Hồ sơ độ tuổi (T5.1)', area: 'INFRA', render: () => createElement(AgeProfileLab) },
 ]
 

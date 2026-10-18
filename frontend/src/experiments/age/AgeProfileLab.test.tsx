@@ -45,6 +45,12 @@ describe('AgeProfileLab', () => {
     expect(screen.getByTestId('game-NUMBER_LINE-390-GRADE_3_5')).toHaveTextContent('1 lỗi')
   })
 
+  it('ma trận màn chơi: có hàng SYLLABLE_BUILDER; đạt ở khung 1280 và 390 cho cả mầm non', () => {
+    render(<AgeProfileLab />)
+    expect(screen.getByTestId('game-SYLLABLE_BUILDER-1280-PRESCHOOL')).toHaveTextContent('đạt')
+    expect(screen.getByTestId('game-SYLLABLE_BUILDER-390-PRESCHOOL')).toHaveTextContent('đạt')
+  })
+
   it('bảng theme: mọi ô đạt', () => {
     render(<AgeProfileLab />)
     for (const theme of ['neutral', 'space', 'ocean']) {

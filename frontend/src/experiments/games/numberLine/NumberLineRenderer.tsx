@@ -116,6 +116,8 @@ function NumberLineBoard(props: NumberLineRendererProps) {
 
   // Kết quả chấm bất đồng bộ chỉ được áp nếu component còn sống (chưa đổi câu/đóng).
   const activeRef = useRef(true)
+  // Khóa đồng bộ: hai lần chạm đến trước khi React vẽ lại vẫn chỉ nộp một lần.
+  const submitLockRef = useRef(false)
   useEffect(() => {
     activeRef.current = true
     return () => {
@@ -154,7 +156,8 @@ function NumberLineBoard(props: NumberLineRendererProps) {
   }
 
   const submit = async () => {
-    if (props.mode === 'review' || !interactive) return
+    if (props.mode === 'review' || !interactive || submitLockRef.current) return
+    submitLockRef.current = true
     const value = state.value
     setSendFailed(false)
     dispatch({ type: 'submitStart' })
@@ -166,16 +169,27 @@ function NumberLineBoard(props: NumberLineRendererProps) {
       })
       return
     }
+    let answer: NumberLineAnswerResult
     try {
-      const answer = await props.onAnswered(value)
-      if (!activeRef.current) return
-      finish(answer)
+      answer = await props.onAnswered(value)
     } catch (error) {
       if (!activeRef.current) return
       console.error('NumberLineRenderer: onAnswered bị lỗi, mở khóa lại để thử lại', error)
+      submitLockRef.current = false
       setSendFailed(true)
       dispatch({ type: 'submitFailed' })
+      return
     }
+    if (!activeRef.current) return
+    // Cha trả sai dạng (không có isCorrect kiểu boolean) coi như chưa nhận được kết quả.
+    if (typeof answer?.isCorrect !== 'boolean') {
+      console.error('NumberLineRenderer: onAnswered trả kết quả sai dạng', answer)
+      submitLockRef.current = false
+      setSendFailed(true)
+      dispatch({ type: 'submitFailed' })
+      return
+    }
+    finish(answer)
   }
 
   // ---- màu ----
@@ -193,7 +207,7 @@ function NumberLineBoard(props: NumberLineRendererProps) {
       ? 'Đúng rồi!'
       : result.correctValue !== undefined
         ? `Gần đúng rồi. Số đúng là ${result.correctValue}.`
-        : 'Chưa đúng, thử lại nhé.'
+        : 'Chưa đúng rồi, cố gắng lên nhé.'
     : sendFailed
       ? 'Chưa gửi được, bấm Xong rồi để gửi lại nhé.'
       : ''
