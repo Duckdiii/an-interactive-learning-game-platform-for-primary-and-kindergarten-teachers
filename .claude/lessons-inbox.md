@@ -17,7 +17,26 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
-(trống)
+### 2026-10-19 — Viết README số đo trước khi đối chiếu với dữ liệu của lần chạy cuối
+- Lỗi: README của T7.2 và T7.4 ghi số và kết luận không khớp `results.json`/`measurements.md` (đỉnh 0,24 thay vì 0,25; khoảng «120 đến 180ms» không có trong dữ liệu, thực tế có ca 254ms; «lottie-web mượt hơn Konva ở tải nặng» từ một lượt đo dao động mạnh).
+- Phát hiện nhờ: `reviewer` đối chiếu từng con số (cả hai lần).
+- Nguyên nhân gốc: viết số từ trí nhớ của lượt chạy trước rồi chạy lại mà không cập nhật; nói chắc hơn bằng chứng.
+- Cách chặn: viết README SAU lần chạy cuối và chép số từ `measurements.md`; mọi so sánh chỉ nêu «chiều hướng» khi các lượt đo cho số khác nhau; chạy `reviewer` có yêu cầu đối chiếu số trước khi commit.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-10-19 — Playwright `page.evaluate`/`waitForFunction` tự tính là cử chỉ người dùng
+- Lỗi: ca đo «không có cử chỉ» (autoplay) của T7.4 cho kết quả sai (Howler vẫn có tiếng) vì Playwright chạy mã trong trang kèm `userGesture: true`.
+- Phát hiện nhờ: số đo trái với kỳ vọng nên tôi dò lại bằng thử riêng.
+- Nguyên nhân gốc: tin công cụ mặc định không ảnh hưởng điều kiện đang đo.
+- Cách chặn: khi đo hành vi phụ thuộc cử chỉ/kích hoạt người dùng, gọi qua CDP `Runtime.evaluate` với `userGesture: false`, thăm dò không bằng `waitForFunction`, và đặt cờ chính sách (ví dụ `--autoplay-policy`) rõ ràng.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-10-19 — Sửa tệp nhiều dòng bằng `sed`/`node -e` trong bash làm hỏng nội dung
+- Lỗi: nhiều lần (T4.2 đến T7.4) chuỗi có dấu nháy ngược, ký hiệu đô-la dạng thay thế của `String.replace` hoặc xuống dòng bị bash/JS biến đổi (chính mục này lúc ghi đã bị chèn nhầm tiêu đề «Chờ duyệt» vì lỗi đó): nhân đôi một khối trong test, mất thông báo trong chuỗi mẫu, cú pháp hỏng ở script đo.
+- Phát hiện nhờ: `tsc -b`, `node --check`, test đỏ.
+- Nguyên nhân gốc: dùng lệnh một dòng cho nội dung có ký tự đặc biệt.
+- Cách chặn: sửa bằng công cụ Edit/Write (hoặc script Write rồi chạy) khi nội dung có dấu nháy ngược, `${}` hay nhiều dòng; chạy `tsc -b`/`node --check` ngay sau mỗi lần sửa bằng script.
+- Trạng thái: CHỜ DUYỆT
 
 ## Đã xử lý
 
