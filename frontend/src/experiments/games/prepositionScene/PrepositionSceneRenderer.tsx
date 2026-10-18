@@ -8,6 +8,7 @@ import ResponsiveStage from '../../../games/common/ResponsiveStage'
 import { useQuestionAudio } from '../../../games/common/useQuestionAudio'
 import FeedbackOverlay from '../../feedback/FeedbackOverlay'
 import { useExperimentFeedback } from '../../feedback/useExperimentFeedback'
+import { usePrefersReducedMotion } from '../../feedback/usePrefersReducedMotion'
 import { useTheme } from '../../theme/useTheme'
 import {
   clampCenter,
@@ -29,22 +30,26 @@ import {
   INSTRUCTION_WIDTH,
   SCENE_X,
 } from './prepositionLayout'
+import { DROP_FRAME_MS, type DropSimulator } from './dropTypes'
 import { createPrepositionState, itemSize, prepositionReducer, startCenter } from './prepositionLogic'
 import type { PlacementAnswerResult, PrepositionSceneQuestion, PrepositionSceneStudentQuestion } from './prepositionTypes'
 
 /**
  * Prop phụ thuộc `mode` (union) như các renderer khác của dự án:
+ * - `dropSimulator` (preview/play, tuỳ chọn): thả rơi theo vật lý; đúng/sai vẫn chấm trên TOẠ ĐỘ CUỐI bằng hàm thuần.
  * - preview: giáo viên xem thử; `question` có quy tắc, renderer tự chấm cục bộ (`satisfies`).
  * - play: học sinh chơi; `question` KHÔNG có quy tắc; cha chấm (Backend) và PHẢI trả kết quả (kèm `correctCenter` nếu
  *   muốn chỉ chỗ đúng khi trẻ sai). Renderer không tự chấm ở mode này.
  * - review: xem lại, khóa sẵn; `selectedCenter` bỏ trống khi hết giờ/bỏ qua.
  */
 export type PrepositionSceneRendererProps =
-  | { mode: 'preview'; question: PrepositionSceneQuestion; onAnswered?: (center: Point) => void }
+  | { mode: 'preview'; question: PrepositionSceneQuestion; onAnswered?: (center: Point) => void; dropSimulator?: DropSimulator }
   | {
       mode: 'play'
       question: PrepositionSceneStudentQuestion
       onAnswered: (center: Point) => PlacementAnswerResult | Promise<PlacementAnswerResult>
+      /** Có thì buông tay là vật RƠI rồi nằm yên; vị trí nộp là vị trí nằm yên. Không có thì vật ở nguyên chỗ buông. */
+      dropSimulator?: DropSimulator
     }
   | { mode: 'review'; question: PrepositionSceneQuestion; selectedCenter?: Point }
 
@@ -105,12 +110,49 @@ function SceneBoard(props: PrepositionSceneRendererProps) {
       activeRef.current = false
     }
   }, [])
-  const interactive = mode !== 'review' && state.phase === 'idle'
   const done = state.phase === 'done'
 
-  // ---- kéo ----
+  // ---- kéo và thả rơi ----
   const [dragCenter, setDragCenter] = useState<Point | null>(null)
-  const center = dragCenter ?? state.center
+  const prefersReduced = usePrefersReducedMotion()
+  const dropSimulator = props.mode === 'review' ? undefined : props.dropSimulator
+  // Đang chạy hoạt ảnh rơi: danh sách khung và khung hiện tại. Trong lúc rơi không nhận thao tác.
+  const [drop, setDrop] = useState<{ frames: Point[]; index: number } | null>(null)
+  const dropping = drop !== null
+  // Khóa đồng bộ: hai lần chạm đến trước khi React vẽ lại chỉ chạy mô phỏng một lần.
+  const dropLockRef = useRef(false)
+  // Bàn phím đã dời vật nhưng chưa thả: chưa cho nộp (vị trí lơ lửng chưa phải chỗ nằm yên).
+  const [pendingRelease, setPendingRelease] = useState(false)
+  const sizeRef = useRef(size)
+  useEffect(() => {
+    sizeRef.current = size
+  })
+  const interactive = mode !== 'review' && state.phase === 'idle' && !dropping
+  const center = drop ? drop.frames[Math.min(drop.index, drop.frames.length - 1)] : (dragCenter ?? state.center)
+
+  useEffect(() => {
+    if (!drop) return
+    const frames = drop.frames
+    const t0 = performance.now()
+    let raf = 0
+    const tick = () => {
+      const index = Math.floor((performance.now() - t0) / DROP_FRAME_MS)
+      if (index >= frames.length - 1) {
+        // Hết hoạt ảnh: vị trí cuối trở thành vị trí đã đặt (nguồn duy nhất cho việc nộp và chấm).
+        dropLockRef.current = false
+        dispatch({ type: 'place', center: frames[frames.length - 1], size: sizeRef.current })
+        setDrop(null)
+        return
+      }
+      setDrop((current) => (current && current.index !== index ? { ...current, index } : current))
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+    // Chỉ chạy lại khi bắt đầu một lần rơi mới (đổi danh sách khung); `size` đọc qua ref để cha dựng lại câu hỏi
+    // (đối tượng mới, cùng nội dung) giữa lúc rơi không làm hoạt ảnh bắt đầu lại.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drop?.frames])
 
   // ---- bố cục ----
   const instructionHeight = useMemo(
@@ -121,7 +163,22 @@ function SceneBoard(props: PrepositionSceneRendererProps) {
   )
   const layout = computePrepositionLayout({ hasAudio: Boolean(question.audioUrl), instructionHeight, showConfirm: mode !== 'review' })
 
-  const place = (next: Point) => dispatch({ type: 'place', center: next, size })
+  // Đặt vật (kéo, chạm, nút bàn phím): có bộ mô phỏng thì buông tay là vật rơi; giảm chuyển động thì nhảy thẳng tới chỗ nằm yên.
+  const release = (from: Point) => {
+    if (!dropSimulator || dropLockRef.current) return
+    setPendingRelease(false)
+    const result = dropSimulator({ landmark: question.landmark, size, start: clampCenter(from, size) })
+    if (prefersReduced || result.frames.length < 2) return dispatch({ type: 'place', center: result.final, size })
+    dropLockRef.current = true
+    setDrop({ frames: result.frames, index: 0 })
+  }
+  // Kéo/chạm: buông là rơi. Bàn phím: nút nhích chỉ dời vật (không rơi từng lần, nếu không không bao giờ lên được mặt bàn);
+  // nút «Let go» mới thả.
+  const place = (next: Point) => (dropSimulator ? release(next) : dispatch({ type: 'place', center: next, size }))
+  const nudge = (next: Point) => {
+    dispatch({ type: 'place', center: next, size })
+    if (dropSimulator) setPendingRelease(true)
+  }
 
   const handleSceneTap = (event: KonvaEventObject<Event>) => {
     if (!interactive) return
@@ -179,9 +236,13 @@ function SceneBoard(props: PrepositionSceneRendererProps) {
   const itemFill = done && result ? (result.isCorrect ? colors.surfaceCorrect : colors.surfaceTryAgain) : colors.accent
   const itemStroke = done && result ? (result.isCorrect ? colors.lineCorrect : colors.lineTryAgain) : colors.accentBorder
   const itemTextFill = done && result ? colors.text : colors.onAccent
-  const canSubmit = interactive
+  const canSubmit = interactive && !pendingRelease
 
-  const announcement = result
+  const announcement = dropping
+    ? `The ${question.item.label} is falling.`
+    : pendingRelease
+      ? `The ${question.item.label} is held in the air. Press Let go to drop it.`
+      : result
     ? result.isCorrect
       ? 'Great job!'
       : result.correctCenter !== undefined
@@ -313,10 +374,15 @@ function SceneBoard(props: PrepositionSceneRendererProps) {
             ['Move down', 0, NUDGE_STEP],
           ] as const
         ).map(([label, dx, dy]) => (
-          <button key={label} type="button" disabled={!interactive} onClick={() => place({ x: state.center.x + dx, y: state.center.y + dy })}>
+          <button key={label} type="button" disabled={!interactive} onClick={() => nudge({ x: state.center.x + dx, y: state.center.y + dy })}>
             {label}
           </button>
         ))}
+        {dropSimulator && mode !== 'review' && (
+          <button type="button" disabled={!interactive || !pendingRelease} onClick={() => release(state.center)}>
+            Let go
+          </button>
+        )}
         {mode !== 'review' && (
           <button type="button" disabled={!canSubmit} onClick={() => void submit()}>
             Done!
@@ -324,7 +390,7 @@ function SceneBoard(props: PrepositionSceneRendererProps) {
         )}
       </div>
       <p role="status" className="sr-only" lang="en">
-        {noAnswer ? '' : `${describePlacement(question.landmark, question.item.label, size, state.center)} `}
+        {noAnswer || dropping ? '' : `${describePlacement(question.landmark, question.item.label, size, state.center)} `}
         {announcement}
       </p>
     </>

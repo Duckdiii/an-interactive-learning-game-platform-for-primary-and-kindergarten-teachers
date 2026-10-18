@@ -54,6 +54,30 @@ describe('PrepositionSceneLab', () => {
     expect(screen.queryByRole('button', { name: 'Done!' })).toBeNull()
   })
 
+  it('bật vật lý: nạp lười thư viện, lộ bộ mô phỏng cho bộ đo, rồi nhích vật là vật rơi tới chỗ nằm yên rồi mới nộp được', async () => {
+    delete window.__physicsHarness
+    render(<PrepositionSceneLab />)
+    expect(window.__physicsHarness).toBeUndefined() // chưa bật thì chưa nạp
+    fireEvent.click(screen.getByLabelText(/Thả rơi theo vật lý/))
+    // Nạp động matter-js lần đầu (biến đổi mã) có thể chậm khi cả bộ test chạy song song.
+    await waitFor(() => expect(window.__physicsHarness).toBeDefined(), { timeout: 10000 })
+    await waitFor(() => expect(screen.queryByText('(đang nạp…)')).toBeNull(), { timeout: 10000 }) // bộ mô phỏng đã vào trạng thái của lab
+    fireEvent.click(screen.getByRole('button', { name: 'Move down' }))
+    expect((screen.getByRole('button', { name: 'Done!' }) as HTMLButtonElement).disabled).toBe(true) // lơ lửng: chưa thả
+    fireEvent.click(screen.getByRole('button', { name: 'Let go' }))
+    expect((screen.getByRole('button', { name: 'Done!' }) as HTMLButtonElement).disabled).toBe(true) // đang rơi: khóa nộp
+    await waitFor(() => expect((screen.getByRole('button', { name: 'Done!' }) as HTMLButtonElement).disabled).toBe(false), { timeout: 3000 })
+    fireEvent.click(screen.getByRole('button', { name: 'Done!' }))
+    await waitFor(() => expect(screen.getByText('Trả lời gần nhất: preview: 110, 290')).toBeTruthy())
+  })
+
+  it('tắt vật lý: vật ở nguyên chỗ buông', () => {
+    render(<PrepositionSceneLab />)
+    fireEvent.click(screen.getByRole('button', { name: 'Move down' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Done!' }))
+    expect(screen.getByText('Trả lời gần nhất: preview: 110, 130')).toBeTruthy()
+  })
+
   it('đổi theme không làm mất lệnh', () => {
     render(<PrepositionSceneLab />)
     fireEvent.click(screen.getByRole('button', { name: 'Vũ trụ' }))

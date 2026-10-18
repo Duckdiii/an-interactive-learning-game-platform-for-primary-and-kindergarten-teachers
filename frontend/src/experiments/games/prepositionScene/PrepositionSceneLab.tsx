@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ThemeProvider from '../../theme/ThemeProvider'
 import { ALL_THEMES } from '../../theme/themes'
+import type { DropSimulator } from './dropTypes'
 import PrepositionSceneRenderer from './PrepositionSceneRenderer'
 import { PREPOSITION_FIXTURES } from './prepositionFixtures'
 import { idealCenter, satisfies } from './prepositionGeometry'
@@ -16,6 +17,28 @@ export default function PrepositionSceneLab() {
   const [mode, setMode] = useState<Mode>('preview')
   const [themeId, setThemeId] = useState(ALL_THEMES[0].id)
   const [lastAnswer, setLastAnswer] = useState('chưa trả lời')
+  const [physics, setPhysics] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
+  // Thư viện vật lý nạp lười (gói riêng) khi bật lần đầu; chưa nạp xong thì vật ở nguyên chỗ buông.
+  const [simulator, setSimulator] = useState<DropSimulator | null>(null)
+  useEffect(() => {
+    if (!physics || simulator) return
+    let alive = true
+    import('./matterDrop')
+      .then((module) => {
+        if (!alive) return
+        setSimulator(() => module.simulateDrop)
+        window.__physicsHarness = { simulate: module.simulateDrop }
+      })
+      .catch((error) => {
+        console.error('PrepositionSceneLab: không nạp được matter-js', error)
+        if (alive) setLoadFailed(true)
+      })
+    return () => {
+      alive = false
+    }
+  }, [physics, simulator])
+  const dropSimulator = physics ? (simulator ?? undefined) : undefined
 
   const question = PREPOSITION_FIXTURES[fixtureKey]
   const theme = ALL_THEMES.find((candidate) => candidate.id === themeId) ?? ALL_THEMES[0]
@@ -55,12 +78,20 @@ export default function PrepositionSceneLab() {
         ))}
       </div>
 
+      <label className="flex min-h-11 items-center gap-2">
+        <input type="checkbox" checked={physics} onChange={(event) => setPhysics(event.target.checked)} />
+        Thả rơi theo vật lý (matter-js)
+        {physics && !simulator && !loadFailed && <span role="status"> (đang nạp…)</span>}
+        {loadFailed && <span role="alert"> (không nạp được thư viện vật lý)</span>}
+      </label>
+
       <ThemeProvider theme={theme}>
-        {mode === 'preview' && <PrepositionSceneRenderer mode="preview" question={question} onAnswered={(center) => setLastAnswer(`preview: ${show(center)}`)} />}
+        {mode === 'preview' && <PrepositionSceneRenderer mode="preview" question={question} dropSimulator={dropSimulator} onAnswered={(center) => setLastAnswer(`preview: ${show(center)}`)} />}
         {mode === 'play' && (
           <PrepositionSceneRenderer
             mode="play"
             question={student}
+            dropSimulator={dropSimulator}
             onAnswered={(center) => {
               setLastAnswer(`play: ${show(center)}`)
               return grade(center)
@@ -77,4 +108,11 @@ export default function PrepositionSceneLab() {
       <p>Trả lời gần nhất: {lastAnswer}</p>
     </div>
   )
+}
+
+declare global {
+  interface Window {
+    /** Chỉ phục vụ bộ đo của khu thử nghiệm. */
+    __physicsHarness?: { simulate: DropSimulator }
+  }
 }

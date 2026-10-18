@@ -1,0 +1,379 @@
+{
+  "startedAt": "2026-10-18T18:32:51.704Z",
+  "node": "v20.19.6",
+  "bundle": {
+    "normal": [
+      {
+        "name": "index.js",
+        "raw": 745160,
+        "gzip": 228256
+      },
+      {
+        "name": "index.css",
+        "raw": 24832,
+        "gzip": 5545
+      }
+    ],
+    "experiments": [
+      {
+        "name": "dotlottie-player.wasm",
+        "raw": 1238072,
+        "gzip": 499366
+      },
+      {
+        "name": "index.js",
+        "raw": 378402,
+        "gzip": 119874
+      },
+      {
+        "name": "useQuestionAudio.js",
+        "raw": 375165,
+        "gzip": 112780
+      },
+      {
+        "name": "PixiNumberLineRenderer.js",
+        "raw": 284655,
+        "gzip": 84515
+      },
+      {
+        "name": "LottieWebPlayer.js",
+        "raw": 308401,
+        "gzip": 77954
+      },
+      {
+        "name": "ExperimentsPage.js",
+        "raw": 104255,
+        "gzip": 33515
+      },
+      {
+        "name": "Geometry.js",
+        "raw": 109697,
+        "gzip": 32783
+      },
+      {
+        "name": "matterDrop.js",
+        "raw": 85791,
+        "gzip": 26874
+      },
+      {
+        "name": "RenderTargetSystem.js",
+        "raw": 78085,
+        "gzip": 21791
+      },
+      {
+        "name": "DotLottiePlayer.js",
+        "raw": 63068,
+        "gzip": 14386
+      },
+      {
+        "name": "browserAll.js",
+        "raw": 42664,
+        "gzip": 11098
+      },
+      {
+        "name": "index.css",
+        "raw": 24832,
+        "gzip": 5545
+      },
+      {
+        "name": "init.js",
+        "raw": 15378,
+        "gzip": 4783
+      },
+      {
+        "name": "jsx-runtime.js",
+        "raw": 8243,
+        "gzip": 3113
+      },
+      {
+        "name": "BufferResource.js",
+        "raw": 11027,
+        "gzip": 2833
+      },
+      {
+        "name": "canvasUtils.js",
+        "raw": 6054,
+        "gzip": 2038
+      },
+      {
+        "name": "rolldown-runtime.js",
+        "raw": 716,
+        "gzip": 428
+      },
+      {
+        "name": "getTextureBatchBindGroup.js",
+        "raw": 342,
+        "gzip": 269
+      },
+      {
+        "name": "lottieHarness.js",
+        "raw": 452,
+        "gzip": 256
+      },
+      {
+        "name": "CanvasRenderer.js",
+        "raw": 85,
+        "gzip": 94
+      },
+      {
+        "name": "WebGPURenderer.js",
+        "raw": 85,
+        "gzip": 94
+      },
+      {
+        "name": "WebGLRenderer.js",
+        "raw": 84,
+        "gzip": 93
+      },
+      {
+        "name": "webworkerAll.js",
+        "raw": 72,
+        "gzip": 83
+      }
+    ]
+  },
+  "bench": [
+    {
+      "throttle": 1,
+      "loadMs": 24,
+      "calls": 275,
+      "meanMs": 0.15,
+      "p95Ms": 0.6,
+      "maxMs": 3.9,
+      "meanSteps": 34.53,
+      "unsettled": 0,
+      "nonDeterministic": 0,
+      "errors": [],
+      "external": []
+    },
+    {
+      "throttle": 4,
+      "loadMs": 23,
+      "calls": 275,
+      "meanMs": 0.89,
+      "p95Ms": 1.9,
+      "maxMs": 27.6,
+      "meanSteps": 34.53,
+      "unsettled": 0,
+      "nonDeterministic": 0,
+      "errors": [],
+      "external": []
+    }
+  ],
+  "flows": [
+    {
+      "id": "on",
+      "rule": "ON",
+      "throttle": 1,
+      "drop": {
+        "x": 360,
+        "y": 40
+      },
+      "fallMs": 583,
+      "playback": {
+        "frames": 71,
+        "fps": 121.5,
+        "p95Ms": 9.2,
+        "worstMs": 9.8,
+        "dropped": 0
+      },
+      "answer": "361, 100",
+      "verdict": "The cat is on the table. Great job!",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "under",
+      "rule": "UNDER",
+      "throttle": 1,
+      "drop": {
+        "x": 360,
+        "y": 250
+      },
+      "fallMs": 555,
+      "playback": {
+        "frames": 67,
+        "fps": 121.9,
+        "p95Ms": 9,
+        "worstMs": 9.9,
+        "dropped": 0
+      },
+      "answer": "361, 290",
+      "verdict": "The cat is under the table. Great job!",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "in",
+      "rule": "IN",
+      "throttle": 1,
+      "drop": {
+        "x": 360,
+        "y": 40
+      },
+      "fallMs": 865,
+      "playback": {
+        "frames": 104,
+        "fps": 120.2,
+        "p95Ms": 9.4,
+        "worstMs": 10.3,
+        "dropped": 0
+      },
+      "answer": "361, 274",
+      "verdict": "The ball is in the box. Great job!",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "next-to",
+      "rule": "NEXT_TO",
+      "throttle": 1,
+      "drop": {
+        "x": 590,
+        "y": 100
+      },
+      "fallMs": 823,
+      "playback": {
+        "frames": 98,
+        "fps": 118.9,
+        "p95Ms": 9.4,
+        "worstMs": 16.7,
+        "dropped": 0
+      },
+      "answer": "591, 290",
+      "verdict": "The dog is next to the box. Great job!",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "wrong-on-for-under",
+      "rule": "UNDER (cố ý thả lên bàn)",
+      "throttle": 1,
+      "drop": {
+        "x": 360,
+        "y": 40
+      },
+      "fallMs": 584,
+      "playback": {
+        "frames": 71,
+        "fps": 121.1,
+        "p95Ms": 9.1,
+        "worstMs": 9.6,
+        "dropped": 0
+      },
+      "answer": "361, 100",
+      "verdict": "The cat is on the table. Good try! The dashed place is the r",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "on",
+      "rule": "ON",
+      "throttle": 4,
+      "drop": {
+        "x": 360,
+        "y": 40
+      },
+      "fallMs": 569,
+      "playback": {
+        "frames": 69,
+        "fps": 120.1,
+        "p95Ms": 9.4,
+        "worstMs": 9.7,
+        "dropped": 0
+      },
+      "answer": "361, 100",
+      "verdict": "The cat is on the table. Great job!",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "under",
+      "rule": "UNDER",
+      "throttle": 4,
+      "drop": {
+        "x": 360,
+        "y": 250
+      },
+      "fallMs": 575,
+      "playback": {
+        "frames": 67,
+        "fps": 121.6,
+        "p95Ms": 9.3,
+        "worstMs": 10.6,
+        "dropped": 0
+      },
+      "answer": "361, 290",
+      "verdict": "The cat is under the table. Great job!",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "in",
+      "rule": "IN",
+      "throttle": 4,
+      "drop": {
+        "x": 360,
+        "y": 40
+      },
+      "fallMs": 896,
+      "playback": {
+        "frames": 105,
+        "fps": 120.8,
+        "p95Ms": 9.2,
+        "worstMs": 9.3,
+        "dropped": 0
+      },
+      "answer": "361, 274",
+      "verdict": "The ball is in the box. Great job!",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "next-to",
+      "rule": "NEXT_TO",
+      "throttle": 4,
+      "drop": {
+        "x": 590,
+        "y": 100
+      },
+      "fallMs": 843,
+      "playback": {
+        "frames": 99,
+        "fps": 121,
+        "p95Ms": 9,
+        "worstMs": 9.9,
+        "dropped": 0
+      },
+      "answer": "591, 290",
+      "verdict": "The dog is next to the box. Great job!",
+      "errors": [],
+      "external": []
+    },
+    {
+      "id": "wrong-on-for-under",
+      "rule": "UNDER (cố ý thả lên bàn)",
+      "throttle": 4,
+      "drop": {
+        "x": 360,
+        "y": 40
+      },
+      "fallMs": 570,
+      "playback": {
+        "frames": 69,
+        "fps": 120,
+        "p95Ms": 9.4,
+        "worstMs": 9.7,
+        "dropped": 0
+      },
+      "answer": "361, 100",
+      "verdict": "The cat is on the table. Good try! The dashed place is the r",
+      "errors": [],
+      "external": []
+    }
+  ],
+  "lazyFiles": [
+    "matterDrop-kTnF12LF.js"
+  ],
+  "chrome": "155.0.8059.80"
+}
