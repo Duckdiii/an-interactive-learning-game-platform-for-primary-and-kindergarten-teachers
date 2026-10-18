@@ -24,8 +24,6 @@ vi.mock('../../feedback/useExperimentFeedback', () => ({
 }))
 vi.mock('../../feedback/FeedbackOverlay', () => ({ default: () => null }))
 
-// Lab dựng nhiều thành phần; khi cả bộ test chạy song song, test đầu tiên của file có lúc vượt 5 giây mặc định (đã gặp 3 lần).
-vi.setConfig({ testTimeout: 20_000 })
 
 describe('NumberLineLab', () => {
   it('có đủ nút chọn mẫu, chế độ và theme; mặc định preview và mẫu hợp lệ', () => {

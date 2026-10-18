@@ -18,5 +18,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // Khi cả bộ test chạy song song, test đầu tiên của vài file dựng nhiều thành phần (các Lab, ThemeLab) có lúc vượt 5 giây mặc định.
+    testTimeout: 15_000,
   },
 })

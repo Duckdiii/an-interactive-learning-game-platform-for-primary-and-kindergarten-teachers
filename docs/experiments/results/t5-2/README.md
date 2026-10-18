@@ -47,4 +47,4 @@ Cần Chrome cài sẵn (playwright-core dùng `channel: 'chrome'`, không tải
 - Vùng chạm đọc từ node Konva đang hiện, có trình xử lý nhấp/chạm/nhấn xuống hoặc kéo được, kích thước không gồm nét viền (vùng bắt chạm thật của Konva lớn hơn nửa nét viền mỗi cạnh). Nhãn trong bảng là chữ đầu tiên trong node, nên điểm kéo của NUMBER_LINE hiện là «Circle».
 - Cảm ứng thật, trình đọc màn hình thật, âm thanh thật: chưa kiểm.
 - Ảnh sân chụp từ canvas Konva (`.konvajs-content`), không gồm phần DOM quanh nó.
-- Bốn file test của Lab được nâng thời hạn mỗi test lên 20 giây (`vi.setConfig`): test đầu tiên của mỗi file có lúc vượt 5 giây mặc định khi cả bộ chạy song song (gặp 4 lần trong ngày, qua khi chạy riêng). Đây là cách giảm triệu chứng, chưa tìm ra nguyên nhân gốc của sự chậm lúc nạp đầu.
+- Thời hạn mỗi test được nâng lên 15 giây ở `vite.config.ts` (`test.testTimeout`): test đầu tiên của vài file dựng nhiều thành phần (các Lab, ThemeLab) có lúc vượt 5 giây mặc định khi cả bộ chạy song song (gặp 5 lần trong ngày, qua khi chạy riêng). Đây là cách giảm triệu chứng, chưa tìm ra nguyên nhân gốc của sự chậm lúc nạp đầu.

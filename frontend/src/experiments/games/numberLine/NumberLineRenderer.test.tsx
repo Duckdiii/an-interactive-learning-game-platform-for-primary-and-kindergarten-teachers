@@ -163,6 +163,23 @@ describe('preview', () => {
     expect(marker()!.getAttribute('data-draggable')).toBe('false')
   })
 
+  it('đặt đúng thì KHÔNG hiện vòng chỉ chỗ đúng (preview, và play dù cha vẫn gửi correctValue)', async () => {
+    const { unmount } = render(<NumberLineRenderer mode="preview" question={mockNumberLine10} />)
+    fireEvent.change(slider(), { target: { value: '7' } })
+    press(CONFIRM)
+    expect(ring()).toBeNull()
+    unmount()
+    render(<NumberLineRenderer mode="play" question={toStudentQuestion(mockNumberLine10)} onAnswered={async () => ({ isCorrect: true, correctValue: 7 })} />)
+    press(CONFIRM)
+    await waitFor(() => expect(status()).toBe('Đúng rồi!'))
+    expect(ring()).toBeNull()
+  })
+
+  it('xem lại với lựa chọn cũ đúng: không vòng chỉ chỗ', () => {
+    render(<NumberLineRenderer mode="review" question={mockNumberLine10} selectedValue={7} />)
+    expect(ring()).toBeNull()
+  })
+
   it('sai: phản hồi nhẹ (vàng, không đỏ), chỉ luôn vạch đúng bằng vòng nét đứt', () => {
     render(<NumberLineRenderer mode="preview" question={mockNumberLine10} />)
     fireEvent.change(slider(), { target: { value: '3' } })

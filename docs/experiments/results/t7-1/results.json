@@ -1,0 +1,563 @@
+{
+  "startedAt": "2026-10-18T08:16:40.484Z",
+  "node": "v20.19.6",
+  "bundle": {
+    "normal": [
+      {
+        "name": "index.js",
+        "raw": 745160,
+        "gzip": 228256
+      },
+      {
+        "name": "index.css",
+        "raw": 24524,
+        "gzip": 5511
+      }
+    ],
+    "experiments": [
+      {
+        "name": "index.js",
+        "raw": 378328,
+        "gzip": 119884
+      },
+      {
+        "name": "useQuestionAudio.js",
+        "raw": 383339,
+        "gzip": 115367
+      },
+      {
+        "name": "PixiNumberLineRenderer.js",
+        "raw": 284621,
+        "gzip": 84502
+      },
+      {
+        "name": "Geometry.js",
+        "raw": 109697,
+        "gzip": 32783
+      },
+      {
+        "name": "ExperimentsPage.js",
+        "raw": 90507,
+        "gzip": 28341
+      },
+      {
+        "name": "RenderTargetSystem.js",
+        "raw": 78085,
+        "gzip": 21791
+      },
+      {
+        "name": "browserAll.js",
+        "raw": 42664,
+        "gzip": 11098
+      },
+      {
+        "name": "index.css",
+        "raw": 24524,
+        "gzip": 5511
+      },
+      {
+        "name": "init.js",
+        "raw": 15378,
+        "gzip": 4783
+      },
+      {
+        "name": "BufferResource.js",
+        "raw": 11027,
+        "gzip": 2833
+      },
+      {
+        "name": "canvasUtils.js",
+        "raw": 6054,
+        "gzip": 2038
+      },
+      {
+        "name": "rolldown-runtime.js",
+        "raw": 716,
+        "gzip": 428
+      },
+      {
+        "name": "getTextureBatchBindGroup.js",
+        "raw": 342,
+        "gzip": 269
+      },
+      {
+        "name": "CanvasRenderer.js",
+        "raw": 85,
+        "gzip": 94
+      },
+      {
+        "name": "WebGPURenderer.js",
+        "raw": 85,
+        "gzip": 94
+      },
+      {
+        "name": "WebGLRenderer.js",
+        "raw": 84,
+        "gzip": 93
+      },
+      {
+        "name": "webworkerAll.js",
+        "raw": 72,
+        "gzip": 83
+      }
+    ]
+  },
+  "cases": [
+    {
+      "engine": "konva",
+      "frame": 390,
+      "throttle": 1,
+      "readyMs": 56.3,
+      "renderer": "canvas 2D",
+      "idle": {
+        "rafFps": 119.5,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 381,
+        "fps": 119,
+        "p95Ms": 11.8,
+        "worstMs": 19.1,
+        "dropped": 0,
+        "drawsPerSecond": 60.3,
+        "movesPerSecond": 60.3
+      },
+      "heapMB": 5.6,
+      "markerPx": 32,
+      "errors": []
+    },
+    {
+      "engine": "konva",
+      "frame": 390,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "canvas 2D",
+      "idle": {
+        "rafFps": 119.5,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 280,
+        "fps": 50.6,
+        "p95Ms": 56,
+        "worstMs": 107.9,
+        "dropped": 71,
+        "drawsPerSecond": 20.3,
+        "movesPerSecond": 20.3
+      },
+      "heapMB": 5.4,
+      "markerPx": 32,
+      "errors": []
+    },
+    {
+      "engine": "pixi-demand",
+      "frame": 390,
+      "throttle": 1,
+      "readyMs": 440.1,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 118.5,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 371,
+        "fps": 117.4,
+        "p95Ms": 10.1,
+        "worstMs": 17,
+        "dropped": 0,
+        "drawsPerSecond": 64.3,
+        "movesPerSecond": 80.3
+      },
+      "heapMB": 7.6,
+      "markerPx": 32,
+      "errors": []
+    },
+    {
+      "engine": "pixi-demand",
+      "frame": 390,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 116.3,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 360,
+        "fps": 104.3,
+        "p95Ms": 21.9,
+        "worstMs": 59.5,
+        "dropped": 4,
+        "drawsPerSecond": 18.3,
+        "movesPerSecond": 20.3
+      },
+      "heapMB": 7.4,
+      "markerPx": 32,
+      "errors": []
+    },
+    {
+      "engine": "pixi-continuous",
+      "frame": 390,
+      "throttle": 1,
+      "readyMs": 432.3,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 119.9,
+        "drawsPerSecond": 121.5
+      },
+      "drag": {
+        "frames": 414,
+        "fps": 120,
+        "p95Ms": 9.4,
+        "worstMs": 18.1,
+        "dropped": 0,
+        "drawsPerSecond": 138.3,
+        "movesPerSecond": 80.3
+      },
+      "heapMB": 7.7,
+      "markerPx": 32,
+      "errors": []
+    },
+    {
+      "engine": "pixi-continuous",
+      "frame": 390,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 110.5,
+        "drawsPerSecond": 111
+      },
+      "drag": {
+        "frames": 178,
+        "fps": 46.2,
+        "p95Ms": 34.8,
+        "worstMs": 103.5,
+        "dropped": 13,
+        "drawsPerSecond": 60,
+        "movesPerSecond": 20.3
+      },
+      "heapMB": 7.5,
+      "markerPx": 32,
+      "errors": []
+    },
+    {
+      "engine": "konva",
+      "frame": 768,
+      "throttle": 1,
+      "readyMs": 51.2,
+      "renderer": "canvas 2D",
+      "idle": {
+        "rafFps": 119,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 368,
+        "fps": 120.3,
+        "p95Ms": 11.4,
+        "worstMs": 19.2,
+        "dropped": 0,
+        "drawsPerSecond": 60.3,
+        "movesPerSecond": 60.3
+      },
+      "heapMB": 5.5,
+      "markerPx": 66.1,
+      "errors": []
+    },
+    {
+      "engine": "konva",
+      "frame": 768,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "canvas 2D",
+      "idle": {
+        "rafFps": 117.9,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 285,
+        "fps": 49,
+        "p95Ms": 54.2,
+        "worstMs": 143.6,
+        "dropped": 75,
+        "drawsPerSecond": 20.3,
+        "movesPerSecond": 20.3
+      },
+      "heapMB": 5.4,
+      "markerPx": 66.1,
+      "errors": []
+    },
+    {
+      "engine": "pixi-demand",
+      "frame": 768,
+      "throttle": 1,
+      "readyMs": 451.4,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 116.5,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 360,
+        "fps": 119.3,
+        "p95Ms": 9.6,
+        "worstMs": 18.5,
+        "dropped": 0,
+        "drawsPerSecond": 50.3,
+        "movesPerSecond": 80.3
+      },
+      "heapMB": 7.6,
+      "markerPx": 66.1,
+      "errors": []
+    },
+    {
+      "engine": "pixi-demand",
+      "frame": 768,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 117.5,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 588,
+        "fps": 105.2,
+        "p95Ms": 21.1,
+        "worstMs": 122,
+        "dropped": 6,
+        "drawsPerSecond": 27.7,
+        "movesPerSecond": 40.3
+      },
+      "heapMB": 7.5,
+      "markerPx": 66.1,
+      "errors": []
+    },
+    {
+      "engine": "pixi-continuous",
+      "frame": 768,
+      "throttle": 1,
+      "readyMs": 430.1,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 120,
+        "drawsPerSecond": 121
+      },
+      "drag": {
+        "frames": 383,
+        "fps": 119.9,
+        "p95Ms": 9.5,
+        "worstMs": 19.5,
+        "dropped": 0,
+        "drawsPerSecond": 128.7,
+        "movesPerSecond": 80.3
+      },
+      "heapMB": 7.7,
+      "markerPx": 66.1,
+      "errors": []
+    },
+    {
+      "engine": "pixi-continuous",
+      "frame": 768,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 104.3,
+        "drawsPerSecond": 106
+      },
+      "drag": {
+        "frames": 198,
+        "fps": 47.7,
+        "p95Ms": 37.3,
+        "worstMs": 104.1,
+        "dropped": 20,
+        "drawsPerSecond": 66.7,
+        "movesPerSecond": 20.3
+      },
+      "heapMB": 7.5,
+      "markerPx": 66.1,
+      "errors": []
+    },
+    {
+      "engine": "konva",
+      "frame": 1280,
+      "throttle": 1,
+      "readyMs": 59.1,
+      "renderer": "canvas 2D",
+      "idle": {
+        "rafFps": 119.6,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 359,
+        "fps": 118.2,
+        "p95Ms": 11.5,
+        "worstMs": 18.7,
+        "dropped": 0,
+        "drawsPerSecond": 60.3,
+        "movesPerSecond": 60.3
+      },
+      "heapMB": 5.5,
+      "markerPx": 72,
+      "errors": []
+    },
+    {
+      "engine": "konva",
+      "frame": 1280,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "canvas 2D",
+      "idle": {
+        "rafFps": 119.2,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 287,
+        "fps": 51,
+        "p95Ms": 53.7,
+        "worstMs": 123.6,
+        "dropped": 74,
+        "drawsPerSecond": 20.3,
+        "movesPerSecond": 20.3
+      },
+      "heapMB": 5.4,
+      "markerPx": 72,
+      "errors": []
+    },
+    {
+      "engine": "pixi-demand",
+      "frame": 1280,
+      "throttle": 1,
+      "readyMs": 435.2,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 118.5,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 391,
+        "fps": 117.9,
+        "p95Ms": 9.4,
+        "worstMs": 17.1,
+        "dropped": 0,
+        "drawsPerSecond": 58.7,
+        "movesPerSecond": 100.3
+      },
+      "heapMB": 7.6,
+      "markerPx": 72,
+      "errors": []
+    },
+    {
+      "engine": "pixi-demand",
+      "frame": 1280,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 120,
+        "drawsPerSecond": 0
+      },
+      "drag": {
+        "frames": 370,
+        "fps": 120.4,
+        "p95Ms": 10.8,
+        "worstMs": 17.8,
+        "dropped": 0,
+        "drawsPerSecond": 58.7,
+        "movesPerSecond": 100.3
+      },
+      "heapMB": 7.6,
+      "markerPx": 72,
+      "errors": []
+    },
+    {
+      "engine": "pixi-continuous",
+      "frame": 1280,
+      "throttle": 1,
+      "readyMs": 406.6,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 120,
+        "drawsPerSecond": 121.5
+      },
+      "drag": {
+        "frames": 426,
+        "fps": 120,
+        "p95Ms": 9.3,
+        "worstMs": 17.5,
+        "dropped": 0,
+        "drawsPerSecond": 142.3,
+        "movesPerSecond": 120.3
+      },
+      "heapMB": 7.7,
+      "markerPx": 72,
+      "errors": []
+    },
+    {
+      "engine": "pixi-continuous",
+      "frame": 1280,
+      "throttle": 4,
+      "readyMs": null,
+      "renderer": "webgl",
+      "idle": {
+        "rafFps": 119.6,
+        "drawsPerSecond": 121
+      },
+      "drag": {
+        "frames": 482,
+        "fps": 94.1,
+        "p95Ms": 19.2,
+        "worstMs": 50.4,
+        "dropped": 1,
+        "drawsPerSecond": 161.3,
+        "movesPerSecond": 40.3
+      },
+      "heapMB": 7.6,
+      "markerPx": 72,
+      "errors": []
+    }
+  ],
+  "chrome": "155.0.8059.80",
+  "functional": [
+    {
+      "engine": "konva",
+      "values": {
+        "start": "0",
+        "afterPlus3": "3",
+        "afterMinus": "2",
+        "afterBandTap7": "7",
+        "afterDrag3": "3",
+        "statusWrong": "Gần đúng rồi. Số đúng là 7.",
+        "afterLockedBandTap9": "3",
+        "sliderDisabled": true
+      }
+    },
+    {
+      "engine": "pixi-demand",
+      "values": {
+        "start": "0",
+        "afterPlus3": "3",
+        "afterMinus": "2",
+        "afterBandTap7": "7",
+        "afterDrag3": "3",
+        "statusWrong": "Gần đúng rồi. Số đúng là 7.",
+        "afterLockedBandTap9": "3",
+        "sliderDisabled": true
+      }
+    },
+    {
+      "engine": "pixi-continuous",
+      "values": {
+        "start": "0",
+        "afterPlus3": "3",
+        "afterMinus": "2",
+        "afterBandTap7": "7",
+        "afterDrag3": "3",
+        "statusWrong": "Gần đúng rồi. Số đúng là 7.",
+        "afterLockedBandTap9": "3",
+        "sliderDisabled": true
+      }
+    }
+  ]
+}

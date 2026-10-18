@@ -110,9 +110,15 @@ function NumberLineBoard(props: NumberLineRendererProps) {
         }
       : null
   const result = mode === 'review' ? reviewResult : submitted
-  // Xem lại bài không chọn gì (hết giờ): vẫn chỉ vạch đúng để trẻ học.
-  const revealValue =
-    result?.correctValue ?? (props.mode === 'review' && props.selectedValue === undefined ? props.question.target : undefined)
+  // Chỉ chỉ vạch đúng khi trẻ SAI, hoặc xem lại bài không chọn gì (hết giờ): để trẻ học. Đặt đúng rồi thì không hiện
+  // vòng (tránh tưởng «gần đúng»), kể cả khi cha vẫn gửi `correctValue`.
+  const revealValue = result
+    ? result.isCorrect
+      ? undefined
+      : result.correctValue
+    : props.mode === 'review' && props.selectedValue === undefined
+      ? props.question.target
+      : undefined
 
   // Kết quả chấm bất đồng bộ chỉ được áp nếu component còn sống (chưa đổi câu/đóng).
   const activeRef = useRef(true)

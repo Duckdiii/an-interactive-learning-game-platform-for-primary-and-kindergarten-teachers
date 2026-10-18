@@ -1,9 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import AgeProfileLab from './AgeProfileLab'
 
-// Lab dựng nhiều thành phần; khi cả bộ test chạy song song, test đầu tiên của file có lúc vượt 5 giây mặc định (đã gặp 3 lần).
-vi.setConfig({ testTimeout: 20_000 })
 
 describe('AgeProfileLab', () => {
   it('bảng hồ sơ: ba nhóm với ngưỡng 64 / 56 / 48px', () => {
