@@ -33,7 +33,7 @@ export const oceanTheme: ThemeManifest = {
     linkColors: ['#0369A1', '#6D28D9', '#BE185D', '#0F766E', '#B45309', '#475569'],
   },
   font: { family: 'Arial', baseSize: 26 },
-  compatibleMechanics: ['QUIZ', 'MATCHING'],
+  compatibleMechanics: ['QUIZ', 'MATCHING', 'NUMBER_LINE'],
   contentSafety: { noViolence: true },
   assets: [
     { id: 'backdrop', kind: 'svg', src: oceanBackdropUri(), alt: 'Họa tiết bong bóng và sóng' },

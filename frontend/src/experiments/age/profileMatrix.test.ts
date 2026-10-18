@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { AGE_BAND_ORDER } from './ageProfiles'
-import { gameMatrix, MATRIX_CONTAINER_WIDTHS, themeMatrix } from './profileMatrix'
+import { ALL_THEMES } from '../theme/themes'
+import { ALL_MECHANICS, gameMatrix, MATRIX_CONTAINER_WIDTHS, PRODUCT_MECHANICS, themeMatrix } from './profileMatrix'
 
-const targetsOf = (mechanic: 'QUIZ' | 'MATCHING', width: number, band: string) =>
-  gameMatrix()
+const targetsOf = (mechanic: 'QUIZ' | 'MATCHING' | 'NUMBER_LINE', width: number, band: string) =>
+  gameMatrix(MATRIX_CONTAINER_WIDTHS, ALL_MECHANICS)
     .find((c) => c.mechanic === mechanic && c.containerWidth === width && c.band === band)!
     .issues.map((issue) => issue.target)
 
@@ -72,5 +73,35 @@ describe('themeMatrix', () => {
 
   it('mọi theme hiện có đều đạt mọi nhóm tuổi và cả hai cơ chế (cùng khai báo đủ nhóm tuổi, QUIZ và MATCHING)', () => {
     expect(themeMatrix().filter((c) => c.issues.length > 0)).toEqual([])
+  })
+})
+
+describe('gameMatrix: NUMBER_LINE (T4.1)', () => {
+  it('mặc định chỉ gồm hai renderer sản phẩm; thêm loại thử nghiệm phải nêu rõ', () => {
+    expect(PRODUCT_MECHANICS).toEqual(['QUIZ', 'MATCHING'])
+    expect(gameMatrix().some((c) => c.mechanic === 'NUMBER_LINE')).toBe(false)
+    expect(gameMatrix(MATRIX_CONTAINER_WIDTHS, ALL_MECHANICS)).toHaveLength(3 * MATRIX_CONTAINER_WIDTHS.length * AGE_BAND_ORDER.length)
+  })
+
+  it('khung 768 và 1280: đạt cả ba nhóm tuổi', () => {
+    for (const width of [768, 1280]) {
+      for (const band of AGE_BAND_ORDER) expect(targetsOf('NUMBER_LINE', width, band)).toEqual([])
+    }
+  })
+
+  it('khung 390 (tỉ lệ 0,4875): điểm kéo 72 → 35,1px trượt mọi nhóm; − + và «Xong rồi!» (120 → 58,5px) chỉ trượt mầm non', () => {
+    expect(targetsOf('NUMBER_LINE', 390, 'GRADE_3_5')).toEqual(['marker'])
+    expect(targetsOf('NUMBER_LINE', 390, 'GRADE_1_2')).toEqual(['marker'])
+    expect(targetsOf('NUMBER_LINE', 390, 'PRESCHOOL').sort()).toEqual(['confirmButton', 'marker', 'minusButton', 'plusButton'])
+  })
+
+  it('cả dải thang (200 → 97,5px) luôn đạt: có lối chạm lớn thay cho điểm kéo nhỏ', () => {
+    for (const band of AGE_BAND_ORDER) expect(targetsOf('NUMBER_LINE', 390, band)).not.toContain('band')
+  })
+})
+
+describe('theme và NUMBER_LINE', () => {
+  it('mọi theme khai báo tương thích NUMBER_LINE', () => {
+    for (const theme of ALL_THEMES) expect([theme.id, theme.compatibleMechanics]).toEqual([theme.id, expect.arrayContaining(['NUMBER_LINE'])])
   })
 })

@@ -33,7 +33,7 @@ export const spaceTheme: ThemeManifest = {
     linkColors: ['#60A5FA', '#C084FC', '#F472B6', '#22D3EE', '#FB923C', '#E2E8F0'],
   },
   font: { family: 'Arial', baseSize: 26 },
-  compatibleMechanics: ['QUIZ', 'MATCHING'],
+  compatibleMechanics: ['QUIZ', 'MATCHING', 'NUMBER_LINE'],
   contentSafety: { noViolence: true },
   assets: [
     { id: 'backdrop', kind: 'svg', src: spaceBackdropUri(), alt: 'Họa tiết sao lấp lánh' },

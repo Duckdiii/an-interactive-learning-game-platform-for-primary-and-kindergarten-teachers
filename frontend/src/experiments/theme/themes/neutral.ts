@@ -43,8 +43,8 @@ export const neutralTheme: ThemeManifest = {
   // Renderer hiện tại để nền sân trong suốt.
   paintStageBackground: false,
   font: { family: 'Arial', baseSize: 26 },
-  // Chỉ hai renderer đã có; cơ chế thử nghiệm khai báo ở theme của chính chúng.
-  compatibleMechanics: ['QUIZ', 'MATCHING'],
+  // Hai renderer sản phẩm và NUMBER_LINE (T4.1): cả ba đều đọc màu từ theme. Cơ chế thử nghiệm khác thêm vào khi có renderer.
+  compatibleMechanics: ['QUIZ', 'MATCHING', 'NUMBER_LINE'],
   contentSafety: { noViolence: true },
   assets: [],
 }

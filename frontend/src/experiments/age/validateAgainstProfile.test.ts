@@ -69,7 +69,7 @@ describe('validateAgainstProfile: theme', () => {
   })
 
   it('cơ chế chưa được theme hỗ trợ thì báo; không nêu cơ chế thì không kiểm', () => {
-    expect(themeCodes(spaceTheme, 'GRADE_1_2', 'NUMBER_LINE')).toEqual(['THEME_MECHANIC_UNSUPPORTED'])
+    expect(themeCodes(spaceTheme, 'GRADE_1_2', 'SYLLABLE_BUILDER')).toEqual(['THEME_MECHANIC_UNSUPPORTED'])
     expect(themeCodes(spaceTheme, 'GRADE_1_2')).toEqual([])
   })
 

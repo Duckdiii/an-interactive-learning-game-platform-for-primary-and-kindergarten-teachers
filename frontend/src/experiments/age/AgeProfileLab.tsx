@@ -1,5 +1,5 @@
 import { AGE_BAND_ORDER, AGE_PROFILES } from './ageProfiles'
-import { gameMatrix, MATRIX_CONTAINER_WIDTHS, themeMatrix } from './profileMatrix'
+import { ALL_MECHANICS, gameMatrix, MATRIX_CONTAINER_WIDTHS, themeMatrix } from './profileMatrix'
 
 /**
  * Bảng kiểm hồ sơ độ tuổi: màn QUIZ/MATCHING mẫu theo từng nhóm tuổi và chiều rộng khung (vùng chạm tính bằng px màn
@@ -7,7 +7,7 @@ import { gameMatrix, MATRIX_CONTAINER_WIDTHS, themeMatrix } from './profileMatri
  * khác là đề xuất chưa được chuyên gia xác nhận.
  */
 export default function AgeProfileLab() {
-  const games = gameMatrix()
+  const games = gameMatrix(MATRIX_CONTAINER_WIDTHS, ALL_MECHANICS)
   const themes = themeMatrix()
   const cell = (mechanic: string, containerWidth: number, band: string) =>
     games.find((c) => c.mechanic === mechanic && c.containerWidth === containerWidth && c.band === band)!
@@ -57,7 +57,7 @@ export default function AgeProfileLab() {
           </tr>
         </thead>
         <tbody>
-          {(['QUIZ', 'MATCHING'] as const).flatMap((mechanic) =>
+          {ALL_MECHANICS.flatMap((mechanic) =>
             MATRIX_CONTAINER_WIDTHS.map((width) => (
               <tr key={`${mechanic}-${width}`}>
                 <th scope="row" className="pr-3 text-left font-normal">{mechanic}</th>

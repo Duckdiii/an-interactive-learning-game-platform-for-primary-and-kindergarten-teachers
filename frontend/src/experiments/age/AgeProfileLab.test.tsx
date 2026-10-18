@@ -38,6 +38,13 @@ describe('AgeProfileLab', () => {
     expect(screen.getByTestId('game-MATCHING-390-GRADE_3_5')).toHaveTextContent('2 lỗi')
   })
 
+  it('ma trận màn chơi: có hàng NUMBER_LINE; 1280 đạt, 390 mầm non có 4 lỗi, lớp 3 đến 5 có 1 lỗi', () => {
+    render(<AgeProfileLab />)
+    expect(screen.getByTestId('game-NUMBER_LINE-1280-PRESCHOOL')).toHaveTextContent('đạt')
+    expect(screen.getByTestId('game-NUMBER_LINE-390-PRESCHOOL')).toHaveTextContent('4 lỗi')
+    expect(screen.getByTestId('game-NUMBER_LINE-390-GRADE_3_5')).toHaveTextContent('1 lỗi')
+  })
+
   it('bảng theme: mọi ô đạt', () => {
     render(<AgeProfileLab />)
     for (const theme of ['neutral', 'space', 'ocean']) {
