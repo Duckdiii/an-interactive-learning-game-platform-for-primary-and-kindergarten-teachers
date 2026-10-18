@@ -1,4 +1,5 @@
 import { createElement, type ReactNode } from 'react'
+import AgeProfileLab from './age/AgeProfileLab'
 import AudioLab from './audio/AudioLab'
 import TtsProbeLab from './audio/TtsProbeLab'
 import FeedbackLab from './feedback/FeedbackLab'
@@ -24,6 +25,7 @@ export const EXPERIMENT_ENTRIES: readonly ExperimentEntry[] = [
   { id: 'feedback-lab', title: 'Phản hồi (T2.2)', area: 'INFRA', render: () => createElement(FeedbackLab) },
   { id: 'tts-probe', title: 'Giọng đọc (T2.3)', area: 'INFRA', render: () => createElement(TtsProbeLab) },
   { id: 'theme-lab', title: 'Theme (T3)', area: 'INFRA', render: () => createElement(ThemeLab) },
+  { id: 'age-profiles', title: 'Hồ sơ độ tuổi (T5.1)', area: 'INFRA', render: () => createElement(AgeProfileLab) },
 ]
 
 export function findExperiment(
