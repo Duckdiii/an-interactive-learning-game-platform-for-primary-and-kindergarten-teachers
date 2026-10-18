@@ -1,0 +1,245 @@
+{
+  "startedAt": "2026-10-18T19:00:11.791Z",
+  "node": "v20.19.6",
+  "bundle": {
+    "howler": {
+      "raw": 45564,
+      "gzip": 10655
+    },
+    "webAudio": {
+      "raw": 5240,
+      "gzip": 1980
+    }
+  },
+  "chrome": "155.0.8059.80",
+  "latency": {
+    "rows": [
+      {
+        "label": "Howler (đã nạp, phát lại)",
+        "n": 30,
+        "min": 0.8,
+        "p50": 5.8,
+        "p95": 10.1,
+        "max": 11.6,
+        "silent": 0
+      },
+      {
+        "label": "Howler (tạo mới: tải + giải mã + phát)",
+        "n": 20,
+        "min": 7.6,
+        "p50": 13.5,
+        "p95": 21,
+        "max": 24.3,
+        "silent": 0
+      },
+      {
+        "label": "Web Audio (AudioService, tổng hợp)",
+        "n": 30,
+        "min": 12,
+        "p50": 21.2,
+        "p95": 27.2,
+        "max": 27.8,
+        "silent": 0
+      }
+    ],
+    "contexts": [
+      {
+        "state": "closed",
+        "sampleRate": 48000,
+        "baseLatency": 0.01,
+        "outputLatency": 0
+      },
+      {
+        "state": "running",
+        "sampleRate": 48000,
+        "baseLatency": 0.01,
+        "outputLatency": 0.04
+      },
+      {
+        "state": "running",
+        "sampleRate": 48000,
+        "baseLatency": 0.01,
+        "outputLatency": 0.04
+      }
+    ],
+    "errors": [],
+    "external": []
+  },
+  "overlap": [
+    {
+      "engine": "howler",
+      "calls": 20,
+      "accepted": 20,
+      "peak": 1.06,
+      "oscillators": 0,
+      "bufferSources": 20,
+      "errors": [],
+      "external": []
+    },
+    {
+      "engine": "synth",
+      "calls": 20,
+      "accepted": 5,
+      "peak": 0.23,
+      "oscillators": 15,
+      "bufferSources": 0,
+      "errors": [],
+      "external": []
+    }
+  ],
+  "unlock": [
+    {
+      "label": "Desktop (chuột)",
+      "errors": [
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+      ],
+      "external": [],
+      "howlerQueued": [
+        {
+          "waitMs": 1500,
+          "soundBeforeGesture": false,
+          "ctxBeforeGesture": "suspended",
+          "soundAfterGesture": true,
+          "latencyAfterGestureMs": 37.4,
+          "ctxAfter": "running"
+        },
+        {
+          "waitMs": 4000,
+          "soundBeforeGesture": false,
+          "ctxBeforeGesture": "suspended",
+          "soundAfterGesture": true,
+          "latencyAfterGestureMs": 86.2,
+          "ctxAfter": "running"
+        }
+      ],
+      "synthQueued": [
+        {
+          "waitMs": 1500,
+          "soundBeforeGesture": false,
+          "contextsBeforeGesture": 0,
+          "soundAfterTap": true,
+          "latencyAfterTapMs": 69.2,
+          "oscillatorsCreatedByTap": 3,
+          "unlocked": true
+        },
+        {
+          "waitMs": 2600,
+          "soundBeforeGesture": false,
+          "contextsBeforeGesture": 0,
+          "soundAfterTap": true,
+          "latencyAfterTapMs": 63.3,
+          "oscillatorsCreatedByTap": 3,
+          "unlocked": true
+        },
+        {
+          "waitMs": null,
+          "soundBeforeGesture": null,
+          "contextsBeforeGesture": 0,
+          "soundAfterTap": true,
+          "latencyAfterTapMs": 60.7,
+          "oscillatorsCreatedByTap": 3,
+          "unlocked": true
+        }
+      ],
+      "howlerSingleTapMs": [
+        78.6,
+        103.2,
+        120.4,
+        103.6,
+        104.1
+      ],
+      "synthSingleTapMs": [
+        61.2,
+        91.7,
+        57.2,
+        88.2,
+        67.8
+      ]
+    },
+    {
+      "label": "Giả lập Pixel 5 (cảm ứng)",
+      "errors": [
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+        "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+      ],
+      "external": [],
+      "howlerQueued": [
+        {
+          "waitMs": 1500,
+          "soundBeforeGesture": false,
+          "ctxBeforeGesture": "suspended",
+          "soundAfterGesture": true,
+          "latencyAfterGestureMs": 45.3,
+          "ctxAfter": "running"
+        },
+        {
+          "waitMs": 4000,
+          "soundBeforeGesture": false,
+          "ctxBeforeGesture": "suspended",
+          "soundAfterGesture": true,
+          "latencyAfterGestureMs": 86.7,
+          "ctxAfter": "running"
+        }
+      ],
+      "synthQueued": [
+        {
+          "waitMs": 1500,
+          "soundBeforeGesture": false,
+          "contextsBeforeGesture": 0,
+          "soundAfterTap": true,
+          "latencyAfterTapMs": 52.6,
+          "oscillatorsCreatedByTap": 3,
+          "unlocked": true
+        },
+        {
+          "waitMs": 2600,
+          "soundBeforeGesture": false,
+          "contextsBeforeGesture": 0,
+          "soundAfterTap": true,
+          "latencyAfterTapMs": 60.6,
+          "oscillatorsCreatedByTap": 3,
+          "unlocked": true
+        },
+        {
+          "waitMs": null,
+          "soundBeforeGesture": null,
+          "contextsBeforeGesture": 0,
+          "soundAfterTap": true,
+          "latencyAfterTapMs": 81.1,
+          "oscillatorsCreatedByTap": 3,
+          "unlocked": true
+        }
+      ],
+      "howlerSingleTapMs": [
+        106.4,
+        134.3,
+        132.6,
+        72.2,
+        141.5
+      ],
+      "synthSingleTapMs": [
+        39.7,
+        72.5,
+        56.4,
+        89.5,
+        95.2
+      ]
+    }
+  ],
+  "missing": {
+    "threw": false,
+    "playReturned": 1002,
+    "events": [
+      "loaderror: Decoding audio data failed"
+    ],
+    "fetched": "200 text/html",
+    "consoleMessages": []
+  }
+}

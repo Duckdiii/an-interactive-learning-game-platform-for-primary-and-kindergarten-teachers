@@ -1,5 +1,6 @@
 import { createElement, type ReactNode } from 'react'
 import AgeProfileLab from './age/AgeProfileLab'
+import AudioCompareLab from './audio/AudioCompareLab'
 import AudioLab from './audio/AudioLab'
 import EngineCompareLab from './engines/EngineCompareLab'
 import LottieLab from './engines/lottie/LottieLab'
@@ -35,6 +36,7 @@ export const EXPERIMENT_ENTRIES: readonly ExperimentEntry[] = [
   { id: 'preposition-scene', title: 'Vị trí (T4.3)', area: 'ENGLISH', render: () => createElement(PrepositionSceneLab) },
   { id: 'engine-compare', title: 'So engine (T7.1)', area: 'INFRA', render: () => createElement(EngineCompareLab) },
   { id: 'lottie-lab', title: 'Lottie (T7.2)', area: 'INFRA', render: () => createElement(LottieLab) },
+  { id: 'audio-compare', title: 'Howler và Web Audio (T7.4)', area: 'INFRA', render: () => createElement(AudioCompareLab) },
   { id: 'age-profiles', title: 'Hồ sơ độ tuổi (T5.1)', area: 'INFRA', render: () => createElement(AgeProfileLab) },
 ]
 
