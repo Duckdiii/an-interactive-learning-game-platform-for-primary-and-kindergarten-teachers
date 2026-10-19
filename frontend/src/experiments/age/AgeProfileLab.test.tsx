@@ -23,20 +23,13 @@ describe('AgeProfileLab', () => {
     expect(within(grade12).getAllByText('được')).toHaveLength(2)
   })
 
-  it('ma trận màn chơi: khung rộng đạt, khung 390 báo lỗi vùng chạm kèm chi tiết mở được', () => {
+  it('ma trận màn chơi: QUIZ và MATCHING đạt ở khung rộng và cả khung 390 (sau T5.4, tỉ lệ lạc quan 0,4875)', () => {
     render(<AgeProfileLab />)
     expect(screen.getByTestId('game-QUIZ-1280-PRESCHOOL')).toHaveTextContent('đạt')
     expect(screen.getByTestId('game-MATCHING-768-GRADE_1_2')).toHaveTextContent('đạt')
-    const failing = screen.getByTestId('game-QUIZ-390-GRADE_3_5')
-    expect(failing).toHaveTextContent('1 lỗi')
-    expect(failing).toHaveTextContent('audioButton')
-    expect(failing).toHaveTextContent('46.8px')
-  })
-
-  it('ma trận màn chơi: MATCHING 390 mầm non có 8 lỗi (6 thẻ + nút nghe lại + nút xác nhận)', () => {
-    render(<AgeProfileLab />)
-    expect(screen.getByTestId('game-MATCHING-390-PRESCHOOL')).toHaveTextContent('8 lỗi')
-    expect(screen.getByTestId('game-MATCHING-390-GRADE_3_5')).toHaveTextContent('2 lỗi')
+    expect(screen.getByTestId('game-QUIZ-390-GRADE_3_5')).toHaveTextContent('đạt')
+    expect(screen.getByTestId('game-MATCHING-390-PRESCHOOL')).toHaveTextContent('đạt')
+    expect(screen.getByTestId('game-MATCHING-390-GRADE_3_5')).toHaveTextContent('đạt')
   })
 
   it('ma trận màn chơi: có hàng NUMBER_LINE; đạt ở khung 1280 và 390 (tỉ lệ lạc quan 0,4875) cho cả mầm non', () => {

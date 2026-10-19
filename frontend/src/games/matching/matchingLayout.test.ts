@@ -146,7 +146,8 @@ describe('computeMatchingLayout', () => {
       showConfirmButton: true,
     })
 
-    expect(layout.stageHeight).toBeLessThan(1500)
+    // Thẻ và nút nay cao tối thiểu 144 (T5.4) nên canvas cao hơn trước (từng 1300; nay 1600); vẫn hữu hạn, cuộn được.
+    expect(layout.stageHeight).toBeLessThan(1650)
   })
 })
 

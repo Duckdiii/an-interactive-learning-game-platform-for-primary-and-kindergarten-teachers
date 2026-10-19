@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { AUDIO_BUTTON_HEIGHT } from '../../games/common/mediaLayout'
+import { CARD_MIN_HEIGHT, CONFIRM_BUTTON_HEIGHT as MATCHING_CONFIRM_BUTTON_HEIGHT } from '../../games/matching/matchingLayout'
 import { AGE_BAND_ORDER } from './ageProfiles'
 import { ALL_THEMES } from '../theme/themes'
 import { ALL_MECHANICS, gameMatrix, MATRIX_CONTAINER_WIDTHS, PRODUCT_MECHANICS, themeMatrix } from './profileMatrix'
@@ -35,34 +37,20 @@ describe('gameMatrix: phát hiện của thử nghiệm (ghim để không bị 
     }
   })
 
-  it('khung 390 (điện thoại): nút «Nghe lại» cao 96 đơn vị chỉ còn 46,8px nên trượt MỌI nhóm tuổi, kể cả lớp 3 đến 5 (48px)', () => {
-    for (const band of AGE_BAND_ORDER) expect(targetsOf('QUIZ', 390, band)).toEqual(['audioButton'])
-  })
-
-  it('khung 390: các ô đáp án QUIZ (cao 200) đạt cả ba nhóm; chỉ nút nghe lại trượt', () => {
-    for (const band of AGE_BAND_ORDER) {
-      expect(targetsOf('QUIZ', 390, band).some((target) => target.startsWith('option.'))).toBe(false)
+  it('khung 390 (điện thoại, tỉ lệ lạc quan 0,4875): QUIZ và MATCHING đạt cả ba nhóm tuổi sau T5.4 (nút nghe lại, nút xác nhận, thẻ đều 144 đơn vị → 70,2px)', () => {
+    for (const mechanic of ['QUIZ', 'MATCHING'] as const) {
+      for (const band of AGE_BAND_ORDER) expect(targetsOf(mechanic, 390, band)).toEqual([])
     }
   })
 
-  it('khung 390: thẻ MATCHING (cao tối thiểu 110 → 53,6px) trượt mầm non (64) và lớp 1 đến 2 (56) nhưng đạt lớp 3 đến 5 (48)', () => {
-    const cards = (band: string) => targetsOf('MATCHING', 390, band).filter((t) => t.startsWith('left.') || t.startsWith('right.'))
-    expect(cards('PRESCHOOL')).toHaveLength(6)
-    expect(cards('GRADE_1_2')).toHaveLength(6)
-    expect(cards('GRADE_3_5')).toEqual([])
+  it('hằng số bố cục sản phẩm giữ ≥ 144 đơn vị: ở khung 390 có lề trang (sân co ×0,445) 144 mới đạt 64px (ma trận lạc quan 0,4875 không thấy biên này)', () => {
+    expect(AUDIO_BUTTON_HEIGHT).toBeGreaterThanOrEqual(144)
+    expect(CARD_MIN_HEIGHT).toBeGreaterThanOrEqual(144)
+    expect(MATCHING_CONFIRM_BUTTON_HEIGHT).toBeGreaterThanOrEqual(144)
   })
 
-  it('khung 390: nút «Xong rồi!» và «Nghe lại» của MATCHING trượt mọi nhóm tuổi', () => {
-    for (const band of AGE_BAND_ORDER) {
-      const targets = targetsOf('MATCHING', 390, band)
-      expect(targets).toContain('confirmButton')
-      expect(targets).toContain('audioButton')
-    }
-  })
-
-  it('không có lỗi nào ngoài vùng chạm với dữ liệu mẫu (chữ ngắn, 3 cặp, không đồng hồ)', () => {
-    const codes = new Set(gameMatrix().flatMap((c) => c.issues.map((i) => i.code)))
-    expect([...codes]).toEqual(['TOUCH_TARGET_TOO_SMALL'])
+  it('không có lỗi nào (kể cả vùng chạm) với dữ liệu mẫu của hai renderer sản phẩm (chữ ngắn, 3 cặp, không đồng hồ)', () => {
+    expect(gameMatrix().flatMap((c) => c.issues)).toEqual([])
   })
 })
 

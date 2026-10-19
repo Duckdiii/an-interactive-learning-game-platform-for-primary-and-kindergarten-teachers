@@ -22,6 +22,8 @@ Kết quả đo lại: **cả 9 ca ba game × ba theme ở khung 390 đạt 0/0/
 - Bộ đo `measure.mjs` nay cộng thêm `hitStrokeWidth` (số) của node và con cháu vào vùng chạm đo được; trước đó nó chỉ đọc hình vẽ nên sẽ không thấy vùng bắt chạm mở rộng.
 - **Kiểm bằng chuột thật trên Chrome** (đo thủ công một lần bằng script tạm, **không lưu nên không tái lập được**; khung 768, chỉ lệch theo phương ngang): kéo bắt đầu cách tâm điểm kéo trục số 0, 50 và 66 đơn vị đều kéo được (hình vẽ chỉ bán kính 36), cách 90 thì không; với vật giới từ: cách tâm 0, 60 và 70 đơn vị kéo được (nửa cạnh vật 50), cách 90 thì không. Đúng với vùng bắt chạm 72 đơn vị thiết kế.
 
+> **Cập nhật:** phần «chưa sửa» về QUIZ, MATCHING và nút «Nghe lại» dùng chung đã được xử lý ở [`T5.4`](../t5-4-product-touch-targets/README.md).
+
 ## Giới hạn, chưa kiểm chứng
 
 - **Chưa sửa QUIZ, MATCHING và nút «Nghe lại» dùng chung** (`games/common/mediaLayout.ts`, nút 96 đơn vị; thẻ MATCHING 110): đó là mã renderer sản phẩm, đổi chúng sẽ động tới bố cục và test đang chạy của `main`; cần bạn đồng ý. Cũng vì nút nghe lại chưa sửa, **ba game mới khi có `audioUrl` vẫn có nút «Nghe lại» 96 đơn vị → 42,7px ở khung 390** (có test cho NUMBER_LINE; hai game kia dùng cùng nút nên cùng kết quả, chưa có test riêng).

@@ -7,6 +7,6 @@ export const STAGE_WIDTH = 800
 /** Ảnh minh hoạ cấp câu hỏi (`imageUrl`), vuông, căn giữa. */
 export const ILLUSTRATION_SIZE = 140
 
-/** Nút nghe lại cao 96 (>= 64px quy ước); trên màn nhỏ canvas thu nhỏ nên cần dư để còn dễ chạm. */
+/** Nút nghe lại cao 144: ở khung điện thoại 390px (sân co ×0,445) mới đạt 64px quy ước (xem results/t5-4 của thử nghiệm). */
 export const AUDIO_BUTTON_WIDTH = 300
-export const AUDIO_BUTTON_HEIGHT = 96
+export const AUDIO_BUTTON_HEIGHT = 144

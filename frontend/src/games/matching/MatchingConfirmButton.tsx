@@ -11,7 +11,7 @@ interface MatchingConfirmButtonProps {
   onPress: () => void
 }
 
-/** Nút «Xong rồi!» lớn (96px) nộp bài sau khi nối đủ mọi cặp. Màu xanh dương: xanh lá dành cho «đúng». */
+/** Nút «Xong rồi!» lớn (144 đơn vị) nộp bài sau khi nối đủ mọi cặp. Màu xanh dương: xanh lá dành cho «đúng». */
 export default function MatchingConfirmButton({ y, label, enabled, onPress }: MatchingConfirmButtonProps) {
   const { colors } = useTheme()
   const press = enabled ? onPress : undefined

@@ -10,8 +10,8 @@ import { AUDIO_BUTTON_HEIGHT, ILLUSTRATION_SIZE, STAGE_WIDTH } from '../common/m
 export const CARD_WIDTH = 280
 export const LEFT_X = 40
 export const RIGHT_X = STAGE_WIDTH - LEFT_X - CARD_WIDTH
-/** Chiều cao tối thiểu của thẻ, lớn hơn nhiều so với vùng chạm tối thiểu 64px của dự án. */
-export const CARD_MIN_HEIGHT = 110
+/** Chiều cao tối thiểu của thẻ: 144 để đạt vùng chạm 64px ở khung điện thoại 390px (sân co ×0,445). */
+export const CARD_MIN_HEIGHT = 144
 export const CARD_PADDING = 16
 export const CARD_IMAGE_SIZE = 80
 export const CARD_FONT_SIZE = 26
@@ -21,7 +21,7 @@ export const HEADING_FONT_SIZE = 30
 export const HEADING_WIDTH = STAGE_WIDTH - 80
 
 export const CONFIRM_BUTTON_WIDTH = 300
-export const CONFIRM_BUTTON_HEIGHT = 96
+export const CONFIRM_BUTTON_HEIGHT = 144
 
 const TOP_PADDING = 20
 const BOTTOM_PADDING = 40

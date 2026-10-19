@@ -46,9 +46,11 @@ describe('numberLineFacts', () => {
     }
   })
 
-  it('có nút nghe lại (96 đơn vị → 46,8px ở khung 390) thì chỉ nút đó còn trượt, nên bị nêu tên', () => {
-    const issues = validateAgainstProfile({ kind: 'game', facts: numberLineFacts({ ...mockNumberLine10, audioUrl: '/a.wav' }, 390) }, AGE_PROFILES.PRESCHOOL)
-    expect(issues.map((i) => i.target)).toEqual(['audioButton'])
+  it('có nút nghe lại (dùng chung, nay 144 đơn vị): vẫn đạt ở khung 390 theo tỉ lệ lạc quan, và nút đó có trong vùng chạm', () => {
+    const facts = numberLineFacts({ ...mockNumberLine10, audioUrl: '/a.wav' }, 390)
+    expect(facts.touchTargets.map((t) => t.id)).toContain('audioButton')
+    expect(validateAgainstProfile({ kind: 'game', facts }, AGE_PROFILES.PRESCHOOL)).toEqual([])
+    for (const target of facts.touchTargets) expect(Math.min(target.width, target.height), target.id).toBeGreaterThanOrEqual(144)
   })
 
   it('ticksOf đếm số vạch', () => {
