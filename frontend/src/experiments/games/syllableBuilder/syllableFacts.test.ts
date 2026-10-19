@@ -35,12 +35,18 @@ describe('syllableFacts', () => {
     expect(facts.texts).toEqual([{ id: 'question', text: mockSyllableMeo.questionText, kind: 'question' }])
   })
 
-  it('khung 1280 và 390 đều đạt cả ba nhóm (nút 132 đơn vị → 64,4px ở khung 390)', () => {
+  it('khung 1280 và 390 đều đạt cả ba nhóm (nút 144 đơn vị → 70,2px ở khung 390)', () => {
     for (const profile of Object.values(AGE_PROFILES)) {
       expect(validateAgainstProfile({ kind: 'game', facts: syllableFacts(mockSyllableMeo, 1280) }, profile)).toEqual([])
     }
     for (const profile of Object.values(AGE_PROFILES)) {
       expect(validateAgainstProfile({ kind: 'game', facts: syllableFacts(mockSyllableMeo, 390) }, profile)).toEqual([])
+    }
+  })
+
+  it('mọi vùng chạm (không kể nút nghe lại dùng chung của sản phẩm) có cạnh ngắn ≥ 144 đơn vị: ở khung 390px có lề trang (sân co ×0,445) mới đạt 64px', () => {
+    for (const target of syllableFacts(mockSyllableMeo, 800).touchTargets) {
+      expect(Math.min(target.width, target.height), target.id).toBeGreaterThanOrEqual(144)
     }
   })
 })

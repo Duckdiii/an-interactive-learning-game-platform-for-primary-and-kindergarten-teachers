@@ -14,6 +14,13 @@ export const LINE_THICKNESS = 8
 export const TICK_HEIGHT = 28
 export const LABEL_FONT_SIZE = 26
 export const MARKER_RADIUS = 36
+/**
+ * Vùng bắt chạm của điểm kéo rộng 144 đơn vị (bán kính 72) dù hình vẽ chỉ 72: ở khung điện thoại 390px (sân co ×0,445) 144 đơn vị
+ * mới đạt 64px. Dùng `hitStrokeWidth` của Konva nên không đổi hình vẽ.
+ */
+export const MARKER_HIT_RADIUS = 72
+/** `hitStrokeWidth` để vùng bắt chạm của vòng tròn đạt `MARKER_HIT_RADIUS` (nét viền tính từ mép, mỗi bên một nửa). */
+export const MARKER_HIT_STROKE = (MARKER_HIT_RADIUS - MARKER_RADIUS) * 2
 /** Vòng nét đứt chỉ vạch đúng lớn hơn điểm kéo một chút để bao quanh khi hai cái trùng nhau. */
 export const REVEAL_RING_RADIUS = MARKER_RADIUS + 10
 export const REVEAL_RING_STROKE = 6
@@ -21,11 +28,12 @@ export const REVEAL_RING_STROKE = 6
 export const LABEL_OFFSET_Y = REVEAL_RING_RADIUS + REVEAL_RING_STROKE / 2 + 6
 export const LABEL_WIDTH = 60
 
-export const STEP_BUTTON_WIDTH = 140
-export const STEP_BUTTON_HEIGHT = 120
+// Nút cao/rộng 144 đơn vị: ở khung 390px (sân co ×0,445) mới đạt 64px (xem results/t5-2, mục 3).
+export const STEP_BUTTON_WIDTH = 144
+export const STEP_BUTTON_HEIGHT = 144
 export const VALUE_BOX_WIDTH = 220
 export const CONFIRM_BUTTON_WIDTH = 300
-export const CONFIRM_BUTTON_HEIGHT = 120
+export const CONFIRM_BUTTON_HEIGHT = 144
 export const QUESTION_FONT_SIZE = 32
 export const QUESTION_WIDTH = STAGE_WIDTH - 80
 

@@ -4,7 +4,7 @@ import { AGE_PROFILES } from '../../age/ageProfiles'
 import { validateAgainstProfile } from '../../age/validateAgainstProfile'
 import { mockNumberLine10, mockNumberLineWithAudio } from './numberLineFixtures'
 import { numberLineFacts, ticksOf } from './numberLineFacts'
-import { BAND_HEIGHT, BAND_WIDTH, CONFIRM_BUTTON_HEIGHT, CONFIRM_BUTTON_WIDTH, MARKER_RADIUS, STEP_BUTTON_HEIGHT, STEP_BUTTON_WIDTH } from './numberLineLayout'
+import { BAND_HEIGHT, BAND_WIDTH, CONFIRM_BUTTON_HEIGHT, CONFIRM_BUTTON_WIDTH, MARKER_HIT_RADIUS, STEP_BUTTON_HEIGHT, STEP_BUTTON_WIDTH } from './numberLineLayout'
 import { toStudentQuestion } from './numberLineLogic'
 
 const sizeOf = (facts: ReturnType<typeof numberLineFacts>, id: string) => facts.touchTargets.find((t) => t.id === id)
@@ -13,7 +13,7 @@ describe('numberLineFacts', () => {
   it('lấy kích thước từ hằng số bố cục thật', () => {
     const facts = numberLineFacts(mockNumberLine10, 800)
     expect(sizeOf(facts, 'band')).toMatchObject({ width: BAND_WIDTH, height: BAND_HEIGHT })
-    expect(sizeOf(facts, 'marker')).toMatchObject({ width: MARKER_RADIUS * 2, height: MARKER_RADIUS * 2 })
+    expect(sizeOf(facts, 'marker')).toMatchObject({ width: MARKER_HIT_RADIUS * 2, height: MARKER_HIT_RADIUS * 2 })
     expect(sizeOf(facts, 'minusButton')).toMatchObject({ width: STEP_BUTTON_WIDTH, height: STEP_BUTTON_HEIGHT })
     expect(sizeOf(facts, 'plusButton')).toMatchObject({ width: STEP_BUTTON_WIDTH, height: STEP_BUTTON_HEIGHT })
     expect(sizeOf(facts, 'confirmButton')).toMatchObject({ width: CONFIRM_BUTTON_WIDTH, height: CONFIRM_BUTTON_HEIGHT })
@@ -38,17 +38,26 @@ describe('numberLineFacts', () => {
     expect(facts.texts).toEqual([{ id: 'question', text: mockNumberLine10.questionText, kind: 'question' }])
   })
 
-  it('đạt hồ sơ ở khung 1280 cho cả ba nhóm tuổi; ở 390 thì báo vùng chạm nhỏ (số đo, không phải lỗi tính)', () => {
+  it('đạt hồ sơ ở khung 1280 và ở khung 390 theo tỉ lệ lạc quan 0,4875 (144 đơn vị → 70,2px) cho ba nhóm tuổi', () => {
     for (const band of Object.values(AGE_PROFILES)) {
-      expect(validateAgainstProfile({ kind: 'game', facts: numberLineFacts(mockNumberLine10, 1280) }, band)).toEqual([])
+      for (const width of [1280, 390]) {
+        expect(validateAgainstProfile({ kind: 'game', facts: numberLineFacts(mockNumberLine10, width) }, band)).toEqual([])
+      }
     }
-    const small = validateAgainstProfile({ kind: 'game', facts: numberLineFacts(mockNumberLine10, 390) }, AGE_PROFILES.PRESCHOOL)
-    expect(small.length).toBeGreaterThan(0)
-    // Điểm kéo (72 đơn vị) là chỗ nhỏ nhất, nên phải bị nêu tên.
-    expect(small.some((i) => i.target === 'marker')).toBe(true)
+  })
+
+  it('có nút nghe lại (96 đơn vị → 46,8px ở khung 390) thì chỉ nút đó còn trượt, nên bị nêu tên', () => {
+    const issues = validateAgainstProfile({ kind: 'game', facts: numberLineFacts({ ...mockNumberLine10, audioUrl: '/a.wav' }, 390) }, AGE_PROFILES.PRESCHOOL)
+    expect(issues.map((i) => i.target)).toEqual(['audioButton'])
   })
 
   it('ticksOf đếm số vạch', () => {
     expect(ticksOf(mockNumberLine10)).toBe(11)
+  })
+
+  it('mọi vùng chạm (không kể nút nghe lại dùng chung của sản phẩm) có cạnh ngắn ≥ 144 đơn vị: ở khung 390px có lề trang (sân co ×0,445) mới đạt 64px', () => {
+    for (const target of numberLineFacts(mockNumberLine10, 800).touchTargets) {
+      expect(Math.min(target.width, target.height), target.id).toBeGreaterThanOrEqual(144)
+    }
   })
 })

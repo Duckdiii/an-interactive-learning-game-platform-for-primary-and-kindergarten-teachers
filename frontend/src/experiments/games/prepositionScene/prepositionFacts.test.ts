@@ -5,7 +5,7 @@ import { validateAgainstProfile } from '../../age/validateAgainstProfile'
 import { mockPrepositionUnder, mockPrepositionWithAudio } from './prepositionFixtures'
 import { prepositionFacts } from './prepositionFacts'
 import { SCENE_HEIGHT, SCENE_WIDTH } from './prepositionGeometry'
-import { CONFIRM_BUTTON_HEIGHT, CONFIRM_BUTTON_WIDTH } from './prepositionLayout'
+import { CONFIRM_BUTTON_HEIGHT, CONFIRM_BUTTON_WIDTH, ITEM_MIN_TOUCH, itemHitStroke } from './prepositionLayout'
 import { toStudentQuestion } from './prepositionLogic'
 
 const sizeOf = (facts: ReturnType<typeof prepositionFacts>, id: string) => facts.touchTargets.find((t) => t.id === id)
@@ -14,7 +14,8 @@ describe('prepositionFacts', () => {
   it('cảnh, vật và nút xác nhận lấy kích thước từ hằng số thật', () => {
     const facts = prepositionFacts(mockPrepositionUnder, 800)
     expect(sizeOf(facts, 'scene')).toMatchObject({ width: SCENE_WIDTH, height: SCENE_HEIGHT })
-    expect(sizeOf(facts, 'item')).toMatchObject({ width: mockPrepositionUnder.item.width, height: mockPrepositionUnder.item.height })
+    // Vật 100: vùng bắt chạm rộng ra thành ITEM_MIN_TOUCH (144) bằng hitStrokeWidth.
+    expect(sizeOf(facts, 'item')).toMatchObject({ width: ITEM_MIN_TOUCH, height: ITEM_MIN_TOUCH })
     expect(sizeOf(facts, 'confirmButton')).toMatchObject({ width: CONFIRM_BUTTON_WIDTH, height: CONFIRM_BUTTON_HEIGHT })
   })
 
@@ -34,12 +35,24 @@ describe('prepositionFacts', () => {
     expect(facts.texts).toEqual([{ id: 'question', text: 'Put the cat under the table.', kind: 'question' }])
   })
 
-  it('khung 1280 đạt cả ba nhóm; khung 390: vật 100 đơn vị → 48,75px chỉ trượt lớp 1 đến 2 (56) và mầm non (64)', () => {
+  it('vùng bắt chạm của vật: vật nhỏ được nới tới 144; vật đã đủ lớn giữ nguyên', () => {
+    expect(itemHitStroke({ width: 100, height: 100 })).toBe(ITEM_MIN_TOUCH - 100)
+    expect(itemHitStroke({ width: 160, height: 150 })).toBe(0)
+    expect(itemHitStroke({ width: 200, height: 100 })).toBe(ITEM_MIN_TOUCH - 100) // theo cạnh ngắn
+  })
+
+  it('đạt cả ba nhóm ở khung 1280 và ở khung 390 theo tỉ lệ lạc quan 0,4875 (vật 144 → 70,2px, nút 144 → 70,2px)', () => {
     const issues = (width: number, band: keyof typeof AGE_PROFILES) =>
       validateAgainstProfile({ kind: 'game', facts: prepositionFacts(mockPrepositionUnder, width) }, AGE_PROFILES[band]).map((i) => i.target)
-    for (const band of ['PRESCHOOL', 'GRADE_1_2', 'GRADE_3_5'] as const) expect(issues(1280, band)).toEqual([])
-    expect(issues(390, 'GRADE_3_5')).toEqual([])
-    expect(issues(390, 'GRADE_1_2')).toEqual(['item'])
-    expect(issues(390, 'PRESCHOOL')).toEqual(['item'])
+    for (const band of ['PRESCHOOL', 'GRADE_1_2', 'GRADE_3_5'] as const) {
+      expect(issues(1280, band)).toEqual([])
+      expect(issues(390, band)).toEqual([])
+    }
+  })
+
+  it('mọi vùng chạm (không kể nút nghe lại dùng chung của sản phẩm) có cạnh ngắn ≥ 144 đơn vị: ở khung 390px có lề trang (sân co ×0,445) mới đạt 64px', () => {
+    for (const target of prepositionFacts(mockPrepositionUnder, 800).touchTargets) {
+      expect(Math.min(target.width, target.height), target.id).toBeGreaterThanOrEqual(144)
+    }
   })
 })

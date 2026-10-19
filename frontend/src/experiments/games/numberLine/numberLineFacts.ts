@@ -6,7 +6,7 @@ import {
   BAND_WIDTH,
   CONFIRM_BUTTON_HEIGHT,
   CONFIRM_BUTTON_WIDTH,
-  MARKER_RADIUS,
+  MARKER_HIT_RADIUS,
   STEP_BUTTON_HEIGHT,
   STEP_BUTTON_WIDTH,
 } from './numberLineLayout'
@@ -24,7 +24,7 @@ export function numberLineFacts(
 ): GameFacts {
   const touchTargets: TouchTarget[] = [
     { id: 'band', width: BAND_WIDTH, height: BAND_HEIGHT },
-    { id: 'marker', width: MARKER_RADIUS * 2, height: MARKER_RADIUS * 2 },
+    { id: 'marker', width: MARKER_HIT_RADIUS * 2, height: MARKER_HIT_RADIUS * 2 },
     { id: 'minusButton', width: STEP_BUTTON_WIDTH, height: STEP_BUTTON_HEIGHT },
     { id: 'plusButton', width: STEP_BUTTON_WIDTH, height: STEP_BUTTON_HEIGHT },
   ]

@@ -6,10 +6,10 @@ Ngày 2026-10-19. Nhánh `experiment/themes-and-new-games` (tạo từ `main` `6
 
 ## 1. Tóm tắt
 
-1. **Konva đủ cho phần lớn nhu cầu đã thử.** Cả 3 loại game mới (trục số, ghép tiếng, đặt vật theo giới từ), hai theme có nền họa tiết SVG, hiệu ứng phản hồi và kéo-thả đều chạy tốt bằng Konva ở CPU thường (≈ 120 fps, không khung rớt); chữ tiếng Việt có dấu vẽ đúng. **Ở CPU giả lập chậm 4× kết quả mâu thuẫn giữa hai phép đo** (49 đến 120 fps khi kéo, 56 đến 77 fps khi chạm nút liên tục), nên **chưa chứng minh Konva đủ trên máy yếu** (mục 2). Hai thứ **không** đạt là vùng chạm ở khung hẹp 390px và việc chưa thử trên thiết bị cảm ứng, trình đọc màn hình, iOS thật (mục 2 và 7).
+1. **Konva đủ cho phần lớn nhu cầu đã thử.** Cả 3 loại game mới (trục số, ghép tiếng, đặt vật theo giới từ), hai theme có nền họa tiết SVG, hiệu ứng phản hồi và kéo-thả đều chạy tốt bằng Konva ở CPU thường (≈ 120 fps, không khung rớt); chữ tiếng Việt có dấu vẽ đúng. **Ở CPU giả lập chậm 4× kết quả mâu thuẫn giữa hai phép đo** (49 đến 120 fps khi kéo, 56 đến 77 fps khi chạm nút liên tục), nên **chưa chứng minh Konva đủ trên máy yếu** (mục 2). Hai thứ **chưa** đạt là vùng chạm ở khung hẹp 390px của QUIZ/MATCHING sản phẩm (ba game mới đã được sửa ở T5.3) và việc chưa thử trên thiết bị cảm ứng, trình đọc màn hình, iOS thật (mục 2 và 7).
 2. **Chưa có lý do đủ mạnh để thêm thư viện đồ họa/vật lý cho sản phẩm** (đề xuất bỏ, mục 5). PixiJS mượt hơn Konva ở CPU chậm 4× (mức chênh chưa ước lượng được) nhưng thêm ≈ 158 KB gzip, phải viết mỗi cảnh hai lần và không có đường lùi khi thiếu WebGL; việc bỏ Pixi dựa vào chi phí đó, **không** phải vào chuyện Konva đã chứng minh đủ; Lottie/dotlottie không đem lại gì cho hiệu ứng đơn giản; `matter-js` cho **cùng** vị trí cuối với một hàm 8 dòng. Khuyến nghị bỏ bốn thư viện này; Rive thì hoãn vì chưa có dữ liệu (mục 5).
 3. **Nên giữ** hạ tầng theme, hiệu ứng phản hồi chung, `AudioService` (âm tổng hợp), hồ sơ độ tuổi và bộ đo tự động; Howler vẫn cần cho lời đọc từ tệp. Hạ tầng theme phải **dời ra khỏi `experiments/`** trước khi merge vì mã renderer thật đã import nó.
-4. **Vấn đề lớn nhất phát hiện:** ở khung 390px (điện thoại dọc) vùng chạm của cả 3 game mới và của ThemeLab (QUIZ, MATCHING) **có chỗ trượt** ngưỡng 64/56/48px bạn chốt (NUMBER_LINE trượt cả ba ngưỡng với điểm kéo 32px; PREPOSITION_SCENE và ThemeLab trượt cả ba; SYLLABLE_BUILDER chỉ trượt 64px, 58,7px); ma trận dự đoán ở T5.1 lạc quan hơn thực tế vì lề trang. Chưa sửa.
+4. **Vấn đề lớn nhất phát hiện (đã sửa một phần):** ở khung 390px (điện thoại dọc) vùng chạm của cả 3 game mới và của ThemeLab (QUIZ, MATCHING) **có chỗ trượt** ngưỡng 64/56/48px bạn chốt (NUMBER_LINE trượt cả ba ngưỡng với điểm kéo 32px; PREPOSITION_SCENE và ThemeLab trượt cả ba; SYLLABLE_BUILDER chỉ trượt 64px, 58,7px); ma trận dự đoán ở T5.1 lạc quan hơn thực tế vì lề trang. **T5.3 (2026-10-19) đã sửa ba game mới** (nút 144 đơn vị, vùng bắt chạm điểm kéo/vật kéo 144) và đo lại: 9/9 ca đạt ở 390px (nhỏ nhất 64,1px). **Còn lại: QUIZ, MATCHING và nút «Nghe lại» dùng chung (42,7 đến 49px), chưa sửa vì là mã sản phẩm.**
 5. **Đưa 3 loại game vào sản phẩm là việc lớn và chưa chạy được đầu-cuối:** phải đổi DSL đã đóng băng (4 nơi) cùng `openapi.yaml`, thêm migration V5, ~70 tệp (ước lượng thô), và Backend hiện chưa có controller game, phiên chơi hay chấm điểm (mục 6 và `dsl-1.1-proposal.md`). Chỉ làm khi nhóm đồng ý.
 6. **Chưa làm:** T8 (giọng đọc đám mây, ảnh AI; chờ Q8/Q9 của bạn), T9.2 (đổi DSL thật; chờ nhóm), Rive (chưa có tệp `.riv`, chỉ đánh giá trên giấy).
 
@@ -25,7 +25,7 @@ Ngày 2026-10-19. Nhánh `experiment/themes-and-new-games` (tạo từ `main` `6
 | **Bố cục không đè nhau** | Hàm bố cục thuần có test duyệt mọi tổ hợp (kích thước, theme, chữ dài) cho từng game | Đủ ở mức test; ảnh chụp chỉ ở một số trạng thái |
 | **Bundle** | Build thường của nhánh 228,3 KB gzip so với `main` 227,6 KB (+0,7 KB; số của `main` đo tay) | Hạ tầng theme gần như không tốn ở sản phẩm |
 
-**Vùng chạm ở khung 390px (đo thật, T5.2):** nhỏ nhất NUMBER_LINE 32,0px (điểm kéo), PREPOSITION_SCENE 44,5px (vật kéo), SYLLABLE_BUILDER 58,7px (sáu nút ▲▼), ThemeLab 42,7px («Nghe lại»); ở 768 và 1280 mọi ca đạt cả ba nhóm tuổi (nhỏ nhất 66,1px). Chi tiết: SYLLABLE_BUILDER (nút 132 đơn vị) cần nút khoảng 144 đơn vị (hoặc sân chiếm trọn khung) để đạt 64px; còn **điểm kéo NUMBER_LINE (32px) và vật kéo PREPOSITION_SCENE (44,5px) không đạt chỉ bằng cách bỏ lề**: phải phóng to vùng bắt chạm hoặc đổi bố cục ở khung hẹp. Đây là **thiếu sót của bố cục**, không phải của Konva.
+**Vùng chạm ở khung 390px (đo thật, T5.2, TRƯỚC khi sửa ở T5.3):** nhỏ nhất NUMBER_LINE 32,0px (điểm kéo), PREPOSITION_SCENE 44,5px (vật kéo), SYLLABLE_BUILDER 58,7px (sáu nút ▲▼), ThemeLab 42,7px («Nghe lại»); ở 768 và 1280 mọi ca đạt cả ba nhóm tuổi (nhỏ nhất 66,1px). Chi tiết: SYLLABLE_BUILDER (nút 132 đơn vị) cần nút khoảng 144 đơn vị (hoặc sân chiếm trọn khung) để đạt 64px; còn **điểm kéo NUMBER_LINE (32px) và vật kéo PREPOSITION_SCENE (44,5px) không đạt chỉ bằng cách bỏ lề**: phải phóng to vùng bắt chạm hoặc đổi bố cục ở khung hẹp. Đây là **thiếu sót của bố cục**, không phải của Konva. **Sau T5.3** (`results/t5-3-touch-targets/`) ba game mới đạt 64,1px ở 390 (nút 144 đơn vị; điểm kéo và vật kéo nới vùng bắt chạm bằng `hitStrokeWidth`, kiểm bằng chuột thật); phần còn lại là QUIZ/MATCHING sản phẩm và nút «Nghe lại» dùng chung.
 
 ## 3. Kết quả theo từng phần
 
@@ -78,7 +78,7 @@ Kiểm thử của nhánh: 72 tệp test, 1746 test qua (164 test gốc của `m
 | Gói | Nội dung | Ước tính | Phụ thuộc/rủi ro |
 | --- | --- | --- | --- |
 | A. Hạ tầng dùng chung | Dời theme ra ngoài `experiments/`; giữ `AudioService`, hiệu ứng, hồ sơ độ tuổi, bộ đo (và 3 devDependency của bộ đo: `playwright-core`, `@axe-core/playwright`, `rollup-plugin-visualizer`); nếu bỏ 4 thư viện (Pixi, lottie-web, dotlottie, matter-js) thì phải gỡ cả renderer Pixi, phòng so engine/Lottie, prop `dropSimulator` và các script `compare-*.mjs` phụ thuộc chúng (hoặc giữ chúng ở nhánh thử nghiệm riêng để còn chạy lại số đo) | 3 đến 5 ngày **chưa tính** phần gỡ này | Conflict với `everyone/UI` (đã sửa nhiều chỗ khác); mã renderer thật ở T1.4/T3 đã sửa |
-| B. Sửa vùng chạm khung hẹp | Bố cục nút/thẻ để đạt 64/56/48px ở 390px cho QUIZ, MATCHING và game mới | 1 đến 2 ngày | Đổi bố cục renderer sản phẩm; cần đo lại bằng `measure.mjs` |
+| B. Sửa vùng chạm khung hẹp | **Đã làm cho ba game mới (T5.3).** Còn QUIZ, MATCHING và nút «Nghe lại» dùng chung (`mediaLayout.ts`) để đạt 64/56/48px ở 390px | phần còn lại khoảng 1 ngày (ước tính thô) | Đổi bố cục renderer sản phẩm; cần đo lại bằng `measure.mjs` |
 | C. Lời đọc | Xử lý tệp âm thanh thiếu/lỗi cho `useQuestionAudio`; (T8.1) giọng đọc đám mây nếu bạn chọn | 1 ngày (xử lý thiếu) + T8.1 chưa ước | T8.1 chờ Q8; cần khóa API đặt ngoài Frontend |
 | D. Ba loại game vào sản phẩm | DSL 1.1 (4 nơi) + `openapi.yaml` + migration V5 + entity/strategy/factory/luật Layer 2 + cổng luật chấm sang Java + chuyển renderer sang `games/` (đổi sang Backend chấm) | 5 đến 8 ngày theo kế hoạch T9.2; **có thể hơn** vì còn cổng luật chấm tiếng Việt và chưa có phiên chơi | Phải được nhóm duyệt đổi 2 contract đã đóng băng; chưa chạy đầu-cuối vì Backend chưa có controller game |
 
@@ -93,7 +93,7 @@ Tổng của kế hoạch ban đầu là 17 đến 22 ngày, sau khi mở rộng
 - **T8 chưa làm** (giọng đọc đám mây, ảnh AI): chờ Q8, Q9; cần khóa API (script Node cục bộ, không bao giờ trong mã Frontend/biến `VITE_*`).
 - **T9.2 chưa làm** và chưa trao đổi nhóm (Q11); `dsl-1.1-proposal.md` mới là đề xuất.
 - **Chưa `npm ci` sạch** để lặp lại số bundle; Node 20.19.6 (một số devDependency khai báo Node cao hơn, chỉ cảnh báo).
-- **Thư mục `.playwright-mcp/`** (244 tệp, ≈ 12 MB) chưa nằm trong `.gitignore`; chưa bao giờ được commit.
+- Thư mục `.playwright-mcp/` (244 tệp, ≈ 12 MB) nay đã nằm trong `.gitignore` (T5.3); chưa bao giờ được commit.
 
 ## 8. Câu hỏi mở
 
@@ -101,7 +101,7 @@ Tổng của kế hoạch ban đầu là 17 đến 22 ngày, sau khi mở rộng
 1. Giữ/bỏ từng phần ở mục 5; có merge vào `main` không, và gói nào trước (A, B)?
 2. Q8: nhà cung cấp, hạn mức chi phí và nơi để khóa cho TTS đám mây (T8.1); Q9: nhà cung cấp, hạn mức và quy tắc duyệt ảnh AI (T8.2). Nếu không có thì T8 bỏ.
 3. Q11: đã trao đổi nhóm về đổi DSL chưa?
-4. Thêm `.playwright-mcp/` vào `.gitignore`? Giữ hay bỏ `testTimeout` 15 giây?
+4. Có sửa nốt vùng chạm của QUIZ, MATCHING và nút «Nghe lại» dùng chung (mã sản phẩm) không? Giữ hay bỏ `testTimeout` 15 giây? (`.playwright-mcp/` đã được ignore ở T5.3.)
 5. Duyệt 3 mục trong `.claude/lessons-inbox.md`?
 
 **Cho thầy/Cô Thơ (chuyên môn):**

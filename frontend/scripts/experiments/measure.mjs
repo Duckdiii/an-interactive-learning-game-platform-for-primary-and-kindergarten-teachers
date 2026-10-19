@@ -32,12 +32,14 @@ import {
 } from './analysis.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
-const OUT_DIR = path.resolve(ROOT, '../docs/experiments/results/t5-2')
-const SHOT_DIR = path.join(OUT_DIR, 'shots')
 const PORT = 4178
 
 const args = new Set(process.argv.slice(2))
 const onlyLab = process.argv.find((a) => a.startsWith('--lab='))?.slice(6)
+// `--out=<tên thư mục>` ghi vào docs/experiments/results/<tên> (mặc định t5-2): để đo lại mà không ghi đè kết quả cũ.
+const outName = process.argv.find((a) => a.startsWith('--out='))?.slice(6) ?? 't5-2'
+const OUT_DIR = path.resolve(ROOT, '../docs/experiments/results', outName)
+const SHOT_DIR = path.join(OUT_DIR, 'shots')
 
 // Trang thử nghiệm có khung chiều rộng cố định (nút 390/768/1280px); `ResponsiveStage` co theo khung, không theo cửa sổ.
 // Cửa sổ luôn đủ rộng cho khung lớn nhất; ca khác nhau ở khung được chọn.
@@ -103,6 +105,23 @@ const readTargets = () => {
     const draggable = Boolean(node.draggable && node.draggable())
     if (!(handles || draggable) || !node.isListening() || !node.isVisible()) return
     const rect = node.getClientRect({ skipShadow: true, skipStroke: true })
+    // Vùng bắt chạm mở rộng bằng `hitStrokeWidth` (số) của node hoặc con cháu: mép ngoài thêm nửa bề rộng đó mỗi cạnh
+    // (tính theo toạ độ màn hình = nhân hệ số co của sân).
+    let hitExtra = 0
+    // Con cháu chỉ tính khi node là nhóm kéo được (vật kéo có hình vẽ là con); nhóm có trình xử lý khác thì không, để không
+    // phóng đại vùng của cả nhóm theo con của nó.
+    const candidates = [node, ...(draggable && node.find ? node.find(() => true) : [])]
+    for (const candidate of candidates) {
+      const hit = candidate.hitStrokeWidth ? candidate.hitStrokeWidth() : 'auto'
+      if (typeof hit === 'number' && hit > 0) hitExtra = Math.max(hitExtra, hit / 2)
+    }
+    if (hitExtra > 0) {
+      const scale = stage.scaleX()
+      rect.x -= hitExtra * scale
+      rect.y -= hitExtra * scale
+      rect.width += hitExtra * 2 * scale
+      rect.height += hitExtra * 2 * scale
+    }
     const text = node.findOne ? node.findOne('Text') : null
     out.push({
       label: (text && text.text()) || (node.name && node.name()) || node.className,

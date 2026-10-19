@@ -8,8 +8,8 @@ import { SYLLABLE_SLOTS, type SyllableSlot } from './syllableTypes'
  */
 export const SLOT_WIDTH = 220
 export const SLOT_GAP = 24
-/** 132 đơn vị → 64,4px ở khung 390 (hệ số 0,4875): vừa đủ ngưỡng 64px của nhóm mầm non. */
-export const SLOT_BUTTON_HEIGHT = 132
+// Cao 144 đơn vị: ở khung 390px (sân co ×0,445) mới đạt 64px (xem results/t5-2, mục 3).
+export const SLOT_BUTTON_HEIGHT = 144
 export const SLOT_VALUE_HEIGHT = 100
 export const SLOT_INNER_GAP = 12
 export const SLOT_HEIGHT = SLOT_BUTTON_HEIGHT * 2 + SLOT_VALUE_HEIGHT + SLOT_INNER_GAP * 2
@@ -22,7 +22,7 @@ export const MESSAGE_FONT_SIZE = 24
 export const MESSAGE_WIDTH = STAGE_WIDTH - 80
 
 export const CONFIRM_BUTTON_WIDTH = 300
-export const CONFIRM_BUTTON_HEIGHT = 132
+export const CONFIRM_BUTTON_HEIGHT = 144
 export const QUESTION_FONT_SIZE = 32
 export const QUESTION_WIDTH = STAGE_WIDTH - 80
 

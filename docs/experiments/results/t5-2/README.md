@@ -1,5 +1,7 @@
 # T5.2: đo tự động khu thử nghiệm (2026-10-18)
 
+> **Cập nhật 2026-10-19:** vùng chạm ở khung 390px của ba game mới đã được sửa và đo lại ở [`../t5-3-touch-targets`](../t5-3-touch-targets/README.md); các số vùng chạm của ba game ở dưới là số **trước khi sửa** (giữ để so sánh). QUIZ/MATCHING sản phẩm chưa sửa.
+
 Số liệu thô: [`measurements.md`](measurements.md) (bảng đầy đủ) và [`results.json`](results.json); ảnh sân từng ca ở `shots/` (JPEG, tên `khung-loại game-theme`). Tệp này là phần diễn giải và các giới hạn.
 
 ## Cách chạy lại

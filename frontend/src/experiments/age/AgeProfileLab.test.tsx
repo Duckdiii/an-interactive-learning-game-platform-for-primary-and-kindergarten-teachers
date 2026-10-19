@@ -39,11 +39,11 @@ describe('AgeProfileLab', () => {
     expect(screen.getByTestId('game-MATCHING-390-GRADE_3_5')).toHaveTextContent('2 lỗi')
   })
 
-  it('ma trận màn chơi: có hàng NUMBER_LINE; 1280 đạt, 390 mầm non có 4 lỗi, lớp 3 đến 5 có 1 lỗi', () => {
+  it('ma trận màn chơi: có hàng NUMBER_LINE; đạt ở khung 1280 và 390 (tỉ lệ lạc quan 0,4875) cho cả mầm non', () => {
     render(<AgeProfileLab />)
     expect(screen.getByTestId('game-NUMBER_LINE-1280-PRESCHOOL')).toHaveTextContent('đạt')
-    expect(screen.getByTestId('game-NUMBER_LINE-390-PRESCHOOL')).toHaveTextContent('4 lỗi')
-    expect(screen.getByTestId('game-NUMBER_LINE-390-GRADE_3_5')).toHaveTextContent('1 lỗi')
+    expect(screen.getByTestId('game-NUMBER_LINE-390-PRESCHOOL')).toHaveTextContent('đạt')
+    expect(screen.getByTestId('game-NUMBER_LINE-390-GRADE_3_5')).toHaveTextContent('đạt')
   })
 
   it('ma trận màn chơi: có hàng SYLLABLE_BUILDER; đạt ở khung 1280 và 390 cho cả mầm non', () => {
@@ -52,11 +52,10 @@ describe('AgeProfileLab', () => {
     expect(screen.getByTestId('game-SYLLABLE_BUILDER-390-PRESCHOOL')).toHaveTextContent('đạt')
   })
 
-  it('ma trận màn chơi: có hàng PREPOSITION_SCENE; 1280 đạt, 390 mầm non và lớp 1 đến 2 có 1 lỗi (vật kéo), lớp 3 đến 5 đạt', () => {
+  it('ma trận màn chơi: có hàng PREPOSITION_SCENE; đạt ở khung 1280 và 390 (tỉ lệ lạc quan 0,4875) cho cả mầm non', () => {
     render(<AgeProfileLab />)
     expect(screen.getByTestId('game-PREPOSITION_SCENE-1280-PRESCHOOL')).toHaveTextContent('đạt')
-    expect(screen.getByTestId('game-PREPOSITION_SCENE-390-PRESCHOOL')).toHaveTextContent('1 lỗi')
-    expect(screen.getByTestId('game-PREPOSITION_SCENE-390-GRADE_1_2')).toHaveTextContent('1 lỗi')
+    expect(screen.getByTestId('game-PREPOSITION_SCENE-390-PRESCHOOL')).toHaveTextContent('đạt')
     expect(screen.getByTestId('game-PREPOSITION_SCENE-390-GRADE_3_5')).toHaveTextContent('đạt')
   })
 

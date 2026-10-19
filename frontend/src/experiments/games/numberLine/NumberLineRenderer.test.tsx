@@ -4,6 +4,7 @@ import ThemeProvider from '../../theme/ThemeProvider'
 import { neutralTheme } from '../../theme/themes/neutral'
 import NumberLineRenderer from './NumberLineRenderer'
 import { mockNumberLine10, mockNumberLineEstimate, mockNumberLineWithAudio } from './numberLineFixtures'
+import { MARKER_HIT_RADIUS, MARKER_HIT_STROKE, MARKER_RADIUS } from './numberLineLayout'
 import { toStudentQuestion } from './numberLineLogic'
 import type { NumberLineAnswerResult } from './numberLineTypes'
 
@@ -78,6 +79,16 @@ beforeEach(() => {
   h.circles = { marker: undefined, ring: undefined }
   h.trigger.mockClear()
   h.pointerX = 0
+})
+
+describe('vùng chạm', () => {
+  it('điểm kéo có vùng bắt chạm 144 đơn vị (bán kính 72) dù hình vẽ chỉ 72, để đạt 64px ở khung điện thoại 390px', () => {
+    render(<NumberLineRenderer mode="preview" question={mockNumberLine10} />)
+    const props = h.circles.marker!
+    expect(props.radius).toBe(MARKER_RADIUS)
+    expect(props.hitStrokeWidth).toBe(MARKER_HIT_STROKE)
+    expect((props.radius as number) + (props.hitStrokeWidth as number) / 2).toBe(MARKER_HIT_RADIUS)
+  })
 })
 
 describe('preview', () => {

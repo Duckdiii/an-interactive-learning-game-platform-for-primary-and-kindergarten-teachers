@@ -89,10 +89,8 @@ describe('gameMatrix: NUMBER_LINE (T4.1)', () => {
     }
   })
 
-  it('khung 390 (tỉ lệ 0,4875): điểm kéo 72 → 35,1px trượt mọi nhóm; − + và «Xong rồi!» (120 → 58,5px) chỉ trượt mầm non', () => {
-    expect(targetsOf('NUMBER_LINE', 390, 'GRADE_3_5')).toEqual(['marker'])
-    expect(targetsOf('NUMBER_LINE', 390, 'GRADE_1_2')).toEqual(['marker'])
-    expect(targetsOf('NUMBER_LINE', 390, 'PRESCHOOL').sort()).toEqual(['confirmButton', 'marker', 'minusButton', 'plusButton'])
+  it('khung 390 (tỉ lệ 0,4875): nút − + «Xong rồi!» 144 đơn vị và vùng bắt chạm điểm kéo 144 → 70,2px nên đạt cả ba nhóm, kể cả mầm non (64)', () => {
+    for (const band of AGE_BAND_ORDER) expect(targetsOf('NUMBER_LINE', 390, band)).toEqual([])
   })
 
   it('cả dải thang (200 → 97,5px) luôn đạt: có lối chạm lớn thay cho điểm kéo nhỏ', () => {
@@ -107,7 +105,7 @@ describe('gameMatrix: SYLLABLE_BUILDER (T4.2)', () => {
     }
   })
 
-  it('khung 390: nút 132 đơn vị → 64,4px nên đạt cả ba nhóm tuổi, kể cả mầm non (64)', () => {
+  it('khung 390: nút 144 đơn vị → 70,2px nên đạt cả ba nhóm tuổi, kể cả mầm non (64)', () => {
     for (const band of AGE_BAND_ORDER) expect(targetsOf('SYLLABLE_BUILDER', 390, band)).toEqual([])
   })
 })
@@ -119,10 +117,8 @@ describe('gameMatrix: PREPOSITION_SCENE (T4.3)', () => {
     }
   })
 
-  it('khung 390: vật 100 đơn vị → 48,75px chỉ đạt lớp 3 đến 5 (48); trượt lớp 1 đến 2 (56) và mầm non (64); cảnh và nút «Done!» đạt', () => {
-    expect(targetsOf('PREPOSITION_SCENE', 390, 'GRADE_3_5')).toEqual([])
-    expect(targetsOf('PREPOSITION_SCENE', 390, 'GRADE_1_2')).toEqual(['item'])
-    expect(targetsOf('PREPOSITION_SCENE', 390, 'PRESCHOOL')).toEqual(['item'])
+  it('khung 390: vùng bắt chạm của vật (100 + 44 = 144 đơn vị → 70,2px) và nút «Done!» (144) đạt cả ba nhóm, kể cả mầm non (64)', () => {
+    for (const band of AGE_BAND_ORDER) expect(targetsOf('PREPOSITION_SCENE', 390, band)).toEqual([])
   })
 })
 

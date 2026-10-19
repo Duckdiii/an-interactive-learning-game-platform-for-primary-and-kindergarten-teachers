@@ -4,7 +4,7 @@ import ThemeProvider from '../../theme/ThemeProvider'
 import { neutralTheme } from '../../theme/themes/neutral'
 import PrepositionSceneRenderer from './PrepositionSceneRenderer'
 import { mockPrepositionIn, mockPrepositionNextTo, mockPrepositionUnder, mockPrepositionWithAudio } from './prepositionFixtures'
-import { computePrepositionLayout, SCENE_X } from './prepositionLayout'
+import { computePrepositionLayout, ITEM_MIN_TOUCH, itemHitStroke, SCENE_X } from './prepositionLayout'
 import { toStudentQuestion } from './prepositionLogic'
 import type { PlacementAnswerResult } from './prepositionTypes'
 
@@ -38,8 +38,8 @@ vi.mock('react-konva', () => ({
       </div>
     )
   },
-  Rect: ({ fill, stroke, dash }: { fill?: string; stroke?: string; dash?: number[] }) => (
-    <i data-testid="rect" data-fill={fill} data-stroke={stroke} data-dash={dash ? 'yes' : 'no'} />
+  Rect: ({ fill, stroke, dash, hitStrokeWidth }: { fill?: string; stroke?: string; dash?: number[]; hitStrokeWidth?: number }) => (
+    <i data-testid="rect" data-fill={fill} data-stroke={stroke} data-dash={dash ? 'yes' : 'no'} data-hit={hitStrokeWidth === undefined ? undefined : String(hitStrokeWidth)} />
   ),
   Text: ({ text, fill, fontSize }: { text?: string; fill?: string; fontSize?: number }) => (
     <span data-konva="text" data-fill={fill} data-size={fontSize}>
@@ -91,6 +91,15 @@ beforeEach(() => {
   h.groups = {}
   h.trigger.mockClear()
   h.pointer = { x: 0, y: 0 }
+})
+
+describe('vùng chạm', () => {
+  it('hình vẽ của vật có vùng bắt chạm nới tới 144 đơn vị (vật 100 + hitStrokeWidth 44), để đạt 64px ở khung điện thoại 390px', () => {
+    render(<PrepositionSceneRenderer mode="preview" question={mockPrepositionUnder} />)
+    const visible = itemEl()!.querySelector('[data-testid="rect"]')!
+    expect(visible.getAttribute('data-hit')).toBe(String(itemHitStroke(mockPrepositionUnder.item)))
+    expect(100 + Number(visible.getAttribute('data-hit'))).toBe(ITEM_MIN_TOUCH)
+  })
 })
 
 describe('preview', () => {

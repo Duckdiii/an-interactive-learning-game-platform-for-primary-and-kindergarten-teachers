@@ -36,6 +36,7 @@ import {
   LINE_LEFT,
   LINE_RIGHT,
   LINE_THICKNESS,
+  MARKER_HIT_STROKE,
   MARKER_RADIUS,
   QUESTION_FONT_SIZE,
   QUESTION_WIDTH,
@@ -280,6 +281,7 @@ function NumberLineBoard(props: NumberLineRendererProps) {
                   fill={markerFill}
                   stroke={markerStroke}
                   strokeWidth={6}
+                  hitStrokeWidth={MARKER_HIT_STROKE}
                   draggable={interactive}
                   onDragMove={(event) => {
                     const node = event.target

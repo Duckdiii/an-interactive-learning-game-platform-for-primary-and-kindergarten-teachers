@@ -1,7 +1,7 @@
 import { AUDIO_BUTTON_HEIGHT, AUDIO_BUTTON_WIDTH, STAGE_WIDTH } from '../../../games/common/mediaLayout'
 import type { GameFacts, TextItem, TouchTarget } from '../../age/validateAgainstProfile'
 import { SCENE_HEIGHT, SCENE_WIDTH } from './prepositionGeometry'
-import { CONFIRM_BUTTON_HEIGHT, CONFIRM_BUTTON_WIDTH } from './prepositionLayout'
+import { CONFIRM_BUTTON_HEIGHT, CONFIRM_BUTTON_WIDTH, itemHitStroke } from './prepositionLayout'
 import type { PrepositionSceneQuestion, PrepositionSceneStudentQuestion } from './prepositionTypes'
 
 /**
@@ -15,7 +15,7 @@ export function prepositionFacts(
 ): GameFacts {
   const touchTargets: TouchTarget[] = [
     { id: 'scene', width: SCENE_WIDTH, height: SCENE_HEIGHT },
-    { id: 'item', width: question.item.width, height: question.item.height },
+    { id: 'item', width: question.item.width + itemHitStroke(question.item), height: question.item.height + itemHitStroke(question.item) },
   ]
   if (question.audioUrl) touchTargets.push({ id: 'audioButton', width: AUDIO_BUTTON_WIDTH, height: AUDIO_BUTTON_HEIGHT })
   if (includeConfirm) touchTargets.push({ id: 'confirmButton', width: CONFIRM_BUTTON_WIDTH, height: CONFIRM_BUTTON_HEIGHT })

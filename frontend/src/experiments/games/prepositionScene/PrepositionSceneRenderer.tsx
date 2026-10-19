@@ -28,6 +28,7 @@ import {
   computePrepositionLayout,
   INSTRUCTION_FONT_SIZE,
   INSTRUCTION_WIDTH,
+  itemHitStroke,
   SCENE_X,
 } from './prepositionLayout'
 import { DROP_FRAME_MS, type DropSimulator } from './dropTypes'
@@ -315,7 +316,7 @@ function SceneBoard(props: PrepositionSceneRendererProps) {
                   setDragCenter(null)
                 }}
               >
-                <Rect width={size.width} height={size.height} cornerRadius={24} fill={itemFill} stroke={itemStroke} strokeWidth={6} />
+                <Rect width={size.width} height={size.height} cornerRadius={24} fill={itemFill} stroke={itemStroke} strokeWidth={6} hitStrokeWidth={itemHitStroke(question.item)} />
                 <Text
                   text={question.item.label}
                   width={size.width}

@@ -8,7 +8,12 @@ import { SCENE_HEIGHT, SCENE_WIDTH } from './prepositionGeometry'
  */
 export const SCENE_X = (STAGE_WIDTH - SCENE_WIDTH) / 2
 export const CONFIRM_BUTTON_WIDTH = 300
-export const CONFIRM_BUTTON_HEIGHT = 132
+export const CONFIRM_BUTTON_HEIGHT = 144 // đạt 64px ở khung 390px (sân co ×0,445)
+
+/** Vùng chạm tối thiểu của vật kéo (đơn vị thiết kế): 144 để đạt 64px ở khung 390px. */
+export const ITEM_MIN_TOUCH = 144
+/** `hitStrokeWidth` của hình vẽ vật để cạnh ngắn nhất của vùng bắt chạm đạt `ITEM_MIN_TOUCH` (0 nếu vật đã đủ lớn). */
+export const itemHitStroke = (item: { width: number; height: number }): number => Math.max(0, ITEM_MIN_TOUCH - Math.min(item.width, item.height))
 export const INSTRUCTION_FONT_SIZE = 32
 export const INSTRUCTION_WIDTH = STAGE_WIDTH - 80
 
