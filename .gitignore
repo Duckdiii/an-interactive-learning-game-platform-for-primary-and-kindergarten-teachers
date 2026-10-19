@@ -60,3 +60,7 @@ logs/
 /frontend/.tts-out/
 /frontend/.tts-ledger.json
 /docs/experiments/results/t8-1-tts/**/*.mp3
+
+# === T8.2: ảnh AI sinh ở máy cục bộ (chờ duyệt, bản kê, sổ cái số ảnh); khóa API KHÔNG nằm ở đây ===
+/frontend/.img-out/
+/frontend/.img-ledger.json
