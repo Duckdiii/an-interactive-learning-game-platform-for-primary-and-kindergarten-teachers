@@ -55,3 +55,8 @@ logs/
 
 # === Phiên Playwright MCP của Claude (ảnh chụp, nhật ký trình duyệt); không bao giờ commit ===
 /.playwright-mcp/
+
+# === T8.1: giọng đọc sinh bằng Google TTS ở máy cục bộ (âm thanh và sổ cái ký tự); khóa API KHÔNG nằm ở đây ===
+/frontend/.tts-out/
+/frontend/.tts-ledger.json
+/docs/experiments/results/t8-1-tts/**/*.mp3

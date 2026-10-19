@@ -11,7 +11,7 @@ Ngày 2026-10-19. Nhánh `experiment/themes-and-new-games` (tạo từ `main` `6
 3. **Nên giữ** hạ tầng theme, hiệu ứng phản hồi chung, `AudioService` (âm tổng hợp), hồ sơ độ tuổi và bộ đo tự động; Howler vẫn cần cho lời đọc từ tệp. Hạ tầng theme phải **dời ra khỏi `experiments/`** trước khi merge vì mã renderer thật đã import nó.
 4. **Vấn đề lớn nhất phát hiện (đã sửa một phần):** ở khung 390px (điện thoại dọc) vùng chạm của cả 3 game mới và của ThemeLab (QUIZ, MATCHING) **có chỗ trượt** ngưỡng 64/56/48px bạn chốt (NUMBER_LINE trượt cả ba ngưỡng với điểm kéo 32px; PREPOSITION_SCENE và ThemeLab trượt cả ba; SYLLABLE_BUILDER chỉ trượt 64px, 58,7px); ma trận dự đoán ở T5.1 lạc quan hơn thực tế vì lề trang. **T5.3 (2026-10-19) đã sửa ba game mới** (nút 144 đơn vị, vùng bắt chạm điểm kéo/vật kéo 144) và **T5.4 đã sửa QUIZ, MATCHING và nút «Nghe lại» dùng chung** (mã sản phẩm, trên nhánh thử nghiệm, không merge `main`); đo lại: mọi ca đạt ở 390px (nhỏ nhất 64,1px, không trượt ngưỡng nào). Còn lại là thử trên thiết bị thật.
 5. **Đưa 3 loại game vào sản phẩm là việc lớn và chưa chạy được đầu-cuối:** phải đổi DSL đã đóng băng (4 nơi) cùng `openapi.yaml`, thêm migration V5, ~70 tệp (ước lượng thô), và Backend hiện chưa có controller game, phiên chơi hay chấm điểm (mục 6 và `dsl-1.1-proposal.md`). Chỉ làm khi nhóm đồng ý.
-6. **Chưa làm:** T8 (giọng đọc đám mây, ảnh AI; chờ Q8/Q9 của bạn), T9.2 (đổi DSL thật; chờ nhóm), Rive (chưa có tệp `.riv`, chỉ đánh giá trên giấy).
+6. **Chưa làm xong:** T8.1 (giọng đọc Google Cloud TTS): **script cục bộ và test đã xong nhưng chưa gọi API thật, chưa có âm thanh để nghe** (xem `results/t8-1-tts/`); T8.2 (ảnh AI; chờ Q9); T9.2 (đổi DSL thật; chờ nhóm), Rive (chưa có tệp `.riv`, chỉ đánh giá trên giấy).
 
 ## 2. Konva có đủ không? Bằng chứng theo từng tiêu chí
 
@@ -79,7 +79,7 @@ Kiểm thử của nhánh: 72 tệp test, 1746 test qua (164 test gốc của `m
 | --- | --- | --- | --- |
 | A. Hạ tầng dùng chung | Dời theme ra ngoài `experiments/`; giữ `AudioService`, hiệu ứng, hồ sơ độ tuổi, bộ đo (và 3 devDependency của bộ đo: `playwright-core`, `@axe-core/playwright`, `rollup-plugin-visualizer`); nếu bỏ 4 thư viện (Pixi, lottie-web, dotlottie, matter-js) thì phải gỡ cả renderer Pixi, phòng so engine/Lottie, prop `dropSimulator` và các script `compare-*.mjs` phụ thuộc chúng (hoặc giữ chúng ở nhánh thử nghiệm riêng để còn chạy lại số đo) | 3 đến 5 ngày **chưa tính** phần gỡ này | Conflict với `everyone/UI` (đã sửa nhiều chỗ khác); mã renderer thật ở T1.4/T3 đã sửa |
 | B. Sửa vùng chạm khung hẹp | **Đã làm xong (T5.3 cho ba game mới, T5.4 cho QUIZ, MATCHING và nút «Nghe lại» dùng chung)**; khi merge phải đối chiếu ba hằng số (`AUDIO_BUTTON_HEIGHT`, `CARD_MIN_HEIGHT`, `CONFIRM_BUTTON_HEIGHT` của MATCHING) với nhánh đích và chấp nhận một test gốc đổi cận | đã xong; còn công đối chiếu khi merge | Đổi bố cục renderer sản phẩm; cần đo lại bằng `measure.mjs` |
-| C. Lời đọc | Xử lý tệp âm thanh thiếu/lỗi cho `useQuestionAudio`; (T8.1) giọng đọc đám mây nếu bạn chọn | 1 ngày (xử lý thiếu) + T8.1 chưa ước | T8.1 chờ Q8; cần khóa API đặt ngoài Frontend |
+| C. Lời đọc | Xử lý tệp âm thanh thiếu/lỗi cho `useQuestionAudio`; (T8.1) giọng đọc đám mây: script cục bộ đã có, chưa chạy thật | 1 ngày (xử lý thiếu) + tích hợp giọng chưa ước | T8.1 chờ bạn chạy bằng khóa của bạn và nghe thử; khóa chỉ ở script Node cục bộ, không ở Frontend |
 | D. Ba loại game vào sản phẩm | DSL 1.1 (4 nơi) + `openapi.yaml` + migration V5 + entity/strategy/factory/luật Layer 2 + cổng luật chấm sang Java + chuyển renderer sang `games/` (đổi sang Backend chấm) | 5 đến 8 ngày theo kế hoạch T9.2; **có thể hơn** vì còn cổng luật chấm tiếng Việt và chưa có phiên chơi | Phải được nhóm duyệt đổi 2 contract đã đóng băng; chưa chạy đầu-cuối vì Backend chưa có controller game |
 
 Tổng của kế hoạch ban đầu là 17 đến 22 ngày, sau khi mở rộng 35 đến 45 ngày; phần đã làm trong nhánh này nằm trong phạm vi đó, chưa đo lại thời gian thật.
@@ -90,7 +90,7 @@ Tổng của kế hoạch ban đầu là 17 đến 22 ngày, sau khi mở rộng
 - **Một lượt đo mỗi ca**, chưa có khoảng tin cậy; ở nhiều ca (Pixi 4×, chạm 12 hoạt ảnh, độ trễ lần chạm) các lượt cho số khác nhau nên chỉ có «chiều hướng».
 - **Nội dung sư phạm/ngôn ngữ chưa ai xác nhận:** quy tắc ghép vần, kiểu đặt dấu `modern`, từ điển nhỏ, quy tắc on/under/in/next to, giới hạn chữ/lựa chọn theo tuổi, giới hạn an toàn của hiệu ứng và âm thanh.
 - **Thẩm mỹ:** hai theme, hoạt ảnh, âm thanh chưa được đánh giá bởi người; ảnh chụp lấy từ canvas.
-- **T8 chưa làm** (giọng đọc đám mây, ảnh AI): chờ Q8, Q9; cần khóa API (script Node cục bộ, không bao giờ trong mã Frontend/biến `VITE_*`).
+- **T8.1 mới có script, chưa chạy thật** (Google Cloud TTS, chỉ hạn mức miễn phí, bạn tự điền khóa): chưa có tệp âm thanh, chưa nghe, chưa có số chi phí/độ trễ thật, hình dạng API chưa kiểm với API thật. **T8.2 (ảnh AI) chưa làm**: chờ Q9. Khóa chỉ ở script Node cục bộ, không bao giờ trong mã Frontend/biến `VITE_*`.
 - **T9.2 chưa làm** và chưa trao đổi nhóm (Q11); `dsl-1.1-proposal.md` mới là đề xuất.
 - **Chưa `npm ci` sạch** để lặp lại số bundle; Node 20.19.6 (một số devDependency khai báo Node cao hơn, chỉ cảnh báo).
 - Thư mục `.playwright-mcp/` (244 tệp, ≈ 12 MB) nay đã nằm trong `.gitignore` (T5.3); chưa bao giờ được commit.
@@ -99,7 +99,7 @@ Tổng của kế hoạch ban đầu là 17 đến 22 ngày, sau khi mở rộng
 
 **Cho bạn:**
 1. Giữ/bỏ từng phần ở mục 5; có merge vào `main` không, và gói nào trước (A, B)?
-2. Q8: nhà cung cấp, hạn mức chi phí và nơi để khóa cho TTS đám mây (T8.1); Q9: nhà cung cấp, hạn mức và quy tắc duyệt ảnh AI (T8.2). Nếu không có thì T8 bỏ.
+2. T8.1: chạy `node scripts/experiments/tts-google.mjs --run` bằng khóa của bạn rồi nghe thử (hướng dẫn ở `results/t8-1-tts/README.md`); Q9: nhà cung cấp, hạn mức và quy tắc duyệt ảnh AI (T8.2); nếu không có thì T8.2 bỏ.
 3. Q11: đã trao đổi nhóm về đổi DSL chưa?
 4. Giữ hay bỏ `testTimeout` 15 giây? Chấp nhận canvas MATCHING cao hơn (thẻ và nút 144 đơn vị) đổi lấy vùng chạm đạt 64px? (`.playwright-mcp/` đã được ignore ở T5.3.)
 5. Duyệt 3 mục trong `.claude/lessons-inbox.md`?
