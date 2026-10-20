@@ -1,17 +1,24 @@
 # T8.3: giọng đọc cục bộ bằng VieNeu-TTS (mã nguồn mở, không khóa, không thẻ) (2026-10-19)
 
-**Trạng thái: script và test đã xong; CHƯA CHẠY VỚI MÔ HÌNH THẬT lần nào** (chưa cài `vieneu`). Chưa có tệp âm thanh nào được sinh, chưa nghe thử, chưa có số đo thời gian hay kích thước thật. Việc cài, chạy và **nghe bằng tai** là việc của bạn (và của thầy/Cô Thơ).
+**Trạng thái (2026-10-20): script và test đã xong; ĐÃ CÀI VÀ CHẠY VỚI MÔ HÌNH THẬT trên máy bạn (theo yêu cầu của bạn), sinh được 10 tệp âm thanh; CHƯA AI NGHE THỬ** (tôi không nghe được âm thanh, nên không có nhận xét nào về chất lượng giọng, dấu thanh hay độ hợp trẻ nhỏ). Việc **nghe bằng tai** và chọn giọng là việc của bạn (và của thầy/Cô Thơ). Số đo thật ở mục «Kết quả chạy thật».
+
+## Kết quả chạy thật (máy của bạn, CPU, 2026-10-20)
+
+- **Cài đặt đã làm:** môi trường `<thư-mục-venv>` (ngoài repo, Python 3.13.5 qua `uv venv`), `uv pip install vieneu` → **vieneu 3.8.3** cùng 83 gói (tải 48 gói mất khoảng 3 phút 17 giây, cài khoảng 27 giây; không báo lỗi, không cần eSpeak NG, `ffmpeg` hay GPU). Lần chạy đầu thư viện tự tải mô hình từ Hugging Face: **`pnnbao-ump/VieNeu-TTS-v3-Turbo`, khoảng 494 MB** trong `%USERPROFILE%\.cache\huggingface\hub` (không nằm trong repo).
+- **`--list-voices` chạy được: 25 giọng**, mỗi giọng là cặp (nhãn, id), nhãn ghi giới tính, miền (Bắc/Trung/Nam) và phong cách (ví dụ «Trúc Ly — Nữ · Bắc · Phong cách tự nhiên»), id là tên giọng (ví dụ `Trúc Ly`); `--voice=` nhận được id. 10 giọng đầu có dấu ⭐ (theo thư viện).
+- **`--run --voice="Trúc Ly" --voice="Ngọc Huyền"`: 10/10 câu xong**, 164 ký tự, **11,12 giây âm thanh**, tổng 1.067.960 byte (khoảng 1 MB; **`.wav` 48 kHz, mono, 16 bit** theo tiêu đề tệp, khoảng 96 KB mỗi giây âm thanh). **Thời gian sinh mỗi câu 1,8 đến 5,4 giây (trung bình 2,6 giây)** trên CPU, cho câu 0,56 đến 2,08 giây âm thanh (câu dài nhất «Ghép tiếng chỉ con vật kêu meo meo.» mất 3,3 giây và 5,4 giây cho hai giọng). Số liệu từng câu ở `manifest.json`. Chưa đo thời gian nạp mô hình lúc khởi động (lần đầu gồm cả thời gian tải).
+- Tệp âm thanh ở `frontend/.tts-out/vieneu/` (đã bị `.gitignore`); tên như `vi_syllable_answer__0-Truc_Ly.wav` (số sau `__` là thứ tự giọng).
 
 **Vì sao VieNeu-TTS:** bạn không muốn dùng thẻ và giọng Web Speech chưa tự nhiên; theo trang mô hình của tác giả, VieNeu-TTS v3 Turbo dùng giấy phép Apache-2.0 (kể cả giọng có sẵn), chạy được trên CPU, có nhiều giọng tiếng Việt. Chất lượng, tốc độ và «dùng thương mại được» đều là **lời tự nhận của tác giả, tôi chưa kiểm chứng**; dữ liệu huấn luyện không công khai (tập dữ liệu bị khóa), nên nếu sản phẩm có yêu cầu pháp lý chặt, bạn phải tự cân nhắc.
 
 ## Cài đặt (làm NGOÀI repo; không đụng `package.json`)
 
-Theo hướng dẫn trên [GitHub của VieNeu-TTS](https://github.com/pnnbao97/VieNeu-TTS) và [PyPI](https://pypi.org/project/vieneu/) (tôi chưa chạy thử các bước này; đối chiếu README của bản bạn cài, vì các nguồn không thống nhất về bản mô hình mặc định và yêu cầu eSpeak NG):
+Theo hướng dẫn trên [GitHub của VieNeu-TTS](https://github.com/pnnbao97/VieNeu-TTS) và [PyPI](https://pypi.org/project/vieneu/). Hai lệnh dưới đây **đã chạy thành công trên máy bạn ngày 2026-10-20** (Windows 11, Python 3.13.5, `uv`); mô hình mặc định tải về là `VieNeu-TTS-v3-Turbo` và không cần eSpeak NG hay `ffmpeg`:
 
 ```powershell
-# Tạo môi trường riêng ngoài repo, rồi cài gói (tải từ PyPI; lần chạy đầu thư viện tự tải mô hình, tôi chưa biết dung lượng)
-uv venv D:\tools\vieneu-venv
-uv pip install --python D:\tools\vieneu-venv\Scripts\python.exe vieneu
+# Tạo môi trường riêng ngoài repo, rồi cài gói (tải từ PyPI; lần chạy đầu thư viện tự tải mô hình, mô hình khoảng 494 MB)
+uv venv <thư-mục-venv>
+uv pip install --python <thư-mục-venv>\Scripts\python.exe vieneu
 ```
 
 Nếu `pip install vieneu` báo lỗi build trên Windows, hãy gửi lỗi cho tôi trước. Một số nguồn gợi ý thêm một chỉ mục gói của bên thứ ba (`--extra-index-url ...`); **tôi không khuyến nghị** dùng nó khi chưa tự kiểm nguồn, vì chỉ mục phụ có thể cài nhầm gói giả cùng tên. Cần Python 3.10 trở lên (máy này có 3.13.5).
@@ -21,7 +28,7 @@ Nếu `pip install vieneu` báo lỗi build trên Windows, hãy gửi lỗi cho 
 ```bash
 cd frontend
 # BẮT BUỘC (trừ khi chỉ chạy thử): trỏ tới python.exe của môi trường đã cài vieneu. Script không tự đoán lệnh `python` (trên Windows nó có thể là bản giả của Microsoft Store).
-export VIENEU_PYTHON="D:/tools/vieneu-venv/Scripts/python.exe"     # PowerShell: $env:VIENEU_PYTHON = "D:\tools\vieneu-venv\Scripts\python.exe"
+export VIENEU_PYTHON="<thư-mục-venv>/Scripts/python.exe"     # PowerShell: $env:VIENEU_PYTHON = "<thư-mục-venv>\Scripts\python.exe"
 
 node scripts/experiments/tts-vieneu.mjs                       # chạy thử: chỉ lập kế hoạch, không gọi Python
 node scripts/experiments/tts-vieneu.mjs --list-voices         # liệt kê giọng (lần đầu có thể tải mô hình)
@@ -51,14 +58,14 @@ Cờ: `--voice=` (lặp được; không chỉ định thì dùng giọng mặc 
 
 ## Giới hạn, chưa kiểm chứng
 
-- **Hình dạng API `vieneu` (viết theo trang PyPI):** `Vieneu()`, `list_preset_voices()` trả cặp `(nhãn, id)`, `infer(text, voice=...)`, `save(audio, path)`, và `voice` nhận nhãn hay id **chưa kiểm với thư viện thật**. Nếu lần chạy thật báo lỗi, gửi nguyên văn để tôi sửa.
-- Tên mô hình mặc định (Turbo hay bản 0.3B), dung lượng tải về, thời gian sinh trên máy bạn, yêu cầu eSpeak NG: chưa biết.
-- Theo trang tác giả, đầu ra là `.wav` 48 kHz (chưa kiểm với thư viện thật); tệp `.wav` như vậy thường lớn hơn nhiều so với `.mp3`; đổi sang `.mp3` cần công cụ như `ffmpeg` (máy này chưa có; sẽ hỏi bạn trước khi dùng) hoặc để nguyên `.wav` (Howler phát được `.wav`).
+- **Hình dạng API `vieneu` đã được kiểm với thư viện thật ở mức đã chạy:** `Vieneu()`, `list_preset_voices()` trả cặp `(nhãn, id)`, `infer(text, voice=...)` với `voice` là id (tên giọng), `save(audio, path)` ra `.wav` hợp lệ. **Chưa kiểm:** `voice` nhận nhãn có biểu tượng/mô tả hay không (script cho phép nhãn hoặc id, chỉ id được thử), tiếng Anh (`--lang=en`), giọng khác ngoài hai giọng đã chạy.
+- **Chưa biết:** chất lượng giọng khi nghe (dấu thanh «mèo», «Giỏi lắm!»), độ hợp trẻ mầm non, câu dài hơn, thời gian nạp mô hình lúc khởi động, hành vi trên máy yếu hơn.
+- Tệp `.wav` 48 kHz mono 16 bit khoảng 96 KB mỗi giây âm thanh (bộ 10 câu khoảng 1 MB); đổi sang `.mp3` cần công cụ như `ffmpeg` (máy này chưa có; sẽ hỏi bạn trước khi dùng) hoặc để nguyên `.wav` (Howler phát được `.wav`).
 - Chưa tích hợp vào theme/renderer/`AudioService`; chỉ để nghe thử.
 - Không thêm thư viện nào vào dự án (Node dùng `node:child_process`, `node:fs`, `node:path`; test thêm `node:os`); `vieneu` là công cụ ngoài, cài riêng.
 
 ## Việc bạn cần làm sau khi chạy
 
 - Nghe các tệp trong `frontend/.tts-out/vieneu/`: giọng nào hợp trẻ mầm non; dấu thanh của «mèo» (tệp `vi-syllable-answer`), «Giỏi lắm!», «Thử lại nhé!»; câu dài có bị ngắt lạ không.
-- Gửi tôi: thông báo lỗi nguyên văn (nếu có), tên giọng chọn, thời gian sinh và kích thước từ `manifest.json`.
+- Gửi tôi nhận xét khi nghe: giọng nào hợp, giọng nào nghe lạ, tốc độ đọc, và (nếu muốn thử thêm) giọng khác trong 25 giọng (`--list-voices`) hoặc `--lang=en` cho câu tiếng Anh.
 - Cân nhắc giấy phép: đọc lại trang mô hình và điều khoản trước khi dùng giọng nào trong sản phẩm.

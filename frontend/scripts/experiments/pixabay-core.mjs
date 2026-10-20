@@ -1,16 +1,17 @@
 /**
- * T8.2: lõi của script tìm và tải ảnh minh họa từ Pexels API (đúng cách sản phẩm sẽ làm: Backend lấy `visualPrompt` tiếng Anh, gọi Pexels
- * để lấy ảnh; xem docs/game-json-dsl-v1.0.0.md). Chạy cục bộ bằng Node, KHÔNG dùng trong trình duyệt. Có duyệt TAY trước khi dùng.
+ * T8.2: lõi của script tìm và tải ảnh minh họa từ Pixabay API (tạm thay Pexels vì Pexels đang tạm dừng cấp khóa; cùng ý tưởng sản phẩm:
+ * từ khóa tiếng Anh → tìm ảnh → tải về; xem docs/game-json-dsl-v1.0.0.md). Chạy cục bộ bằng Node, KHÔNG dùng trong trình duyệt. Có duyệt TAY.
  *
- * Nguyên tắc (xem docs/experiments/results/t8-2-pexels/README.md):
- * - Khóa chỉ từ biến môi trường `PEXELS_API_KEY` (hoặc tệp frontend/.env.pexels.local, bị .gitignore), chỉ gửi tới api.pexels.com bằng header
- *   `Authorization`, KHÔNG gửi tới máy chủ ảnh, KHÔNG in, KHÔNG ghi; mọi thông báo lỗi bị lọc khóa.
- * - Mặc định chỉ lập kế hoạch (dry-run); chỉ gọi mạng khi có `--run`. API miễn phí nhưng có hạn mức: trần số lần tìm mỗi lần chạy và theo tháng
- *   (sổ cái cục bộ ghi TRƯỚC mỗi lần gọi), không thử lại tự động, một lỗi (kể cả 429) là dừng.
- * - Từ khóa CỐ ĐỊNH trong mã (không nhận văn bản tự do từ dòng lệnh). Ảnh chỉ tải từ đúng máy chủ images.pexels.com bằng https, không theo
- *   chuyển hướng, giới hạn kích thước, kiểm đúng dạng ảnh (JPEG/PNG/WebP) rồi mới lưu ở thư mục CHỜ DUYỆT.
+ * Nguyên tắc (xem docs/experiments/results/t8-2-pixabay/README.md):
+ * - Khóa chỉ từ biến môi trường `PIXABAY_API_KEY` (hoặc tệp frontend/.env.pixabay.local, bị .gitignore). Pixabay CHỈ nhận khóa ở tham số
+ *   `key` của URL (tài liệu không nói header), nên URL tìm kiếm chứa khóa: URL KHÔNG BAO GIỜ được in/ghi, mọi thông báo lỗi bị lọc khóa,
+ *   và khóa không bao giờ gửi tới máy chủ ảnh (URL ảnh không chứa khóa).
+ * - Mặc định chỉ lập kế hoạch (dry-run); chỉ gọi mạng khi có `--run`. Trần số lần tìm mỗi lần chạy và theo tháng (sổ cái cục bộ ghi TRƯỚC
+ *   mỗi lần gọi), không thử lại tự động, một lỗi (kể cả 429) là dừng. Luôn bật `safesearch`.
+ * - Từ khóa CỐ ĐỊNH trong mã. Ảnh chỉ tải từ pixabay.com / cdn.pixabay.com bằng https, theo tối đa 3 lần chuyển hướng và CHỈ trong các máy
+ *   chủ đó, giới hạn kích thước, kiểm đúng dạng ảnh (JPEG/PNG/WebP) rồi mới lưu ở thư mục CHỜ DUYỆT. Pixabay cấm hotlink lâu dài: ta tải về.
  * - KHÔNG có kiểm duyệt tự động: chỉ khi bạn xem ảnh và chạy `--approve=<khóa> --reviewer=<tên>` ảnh mới được sao sang thư mục «đã duyệt»
- *   (kèm tên nhiếp ảnh gia và đường dẫn gốc để ghi nguồn). Script KHÔNG tự commit gì.
+ *   (kèm tên tác giả và đường dẫn gốc để ghi nguồn). Script KHÔNG tự commit gì.
  * Hàm nhận `fetchFn`, `io`... qua tham số để test bằng bản giả, không gọi mạng thật.
  */
 import { createHash } from 'node:crypto'
@@ -18,16 +19,24 @@ import path from 'node:path'
 import { isInside, monthKey, redact, REQUEST_TIMEOUT_MS } from './tts-core.mjs'
 
 export { isInside, redact }
-export const KEY_ENV = 'PEXELS_API_KEY'
-export const API_BASE = 'https://api.pexels.com/v1'
-export const IMAGE_HOST = 'images.pexels.com'
+export const KEY_ENV = 'PIXABAY_API_KEY'
+export const API_BASE = 'https://pixabay.com/api/'
+export const IMAGE_HOSTS = ['pixabay.com', 'cdn.pixabay.com']
+export const PAGE_HOSTS = ['pixabay.com', 'www.pixabay.com']
+export const IMAGE_TYPES = ['illustration', 'photo', 'vector']
+export const DEFAULT_IMAGE_TYPE = 'illustration'
+/** Tài liệu Pixabay: per_page tối thiểu 3 (nên khi cần ít hơn, vẫn gửi 3 và chỉ giữ số ảnh cần). */
+export const MIN_PER_QUERY = 3
 export const DEFAULT_PER_QUERY = 3
 export const MAX_PER_QUERY = 5
 export const DEFAULT_RUN_CAP = 6
 export const DEFAULT_MONTHLY_CAP = 100
 export const MAX_DOWNLOADS_PER_RUN = 30
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024
+export const MAX_REDIRECTS = 3
 export const IMAGE_TIMEOUT_MS = Math.max(REQUEST_TIMEOUT_MS, 30000)
+const MAX_URL_LENGTH = 400
+const REDIRECT_STATUSES = [301, 302, 303, 307, 308]
 
 /** Từ khóa cố định, lấy từ các vật trong ba game mới (mèo, chó, bóng, hộp, bàn, ong). */
 export const QUERIES = [
@@ -75,64 +84,89 @@ function parseUrl(text) {
     return null
   }
 }
-/** Chỉ https, đúng máy chủ ảnh, không tài khoản, không cổng lạ. */
-export function isPexelsImageUrl(text) {
+const plainHttps = (url) => url.protocol === 'https:' && url.username === '' && url.password === '' && url.port === ''
+/** Chỉ https, đúng máy chủ ảnh (pixabay.com hoặc cdn.pixabay.com), không tài khoản, không cổng lạ. */
+export function isImageUrl(text) {
   const url = parseUrl(text)
-  return Boolean(url && url.protocol === 'https:' && url.hostname === IMAGE_HOST && url.username === '' && url.password === '' && url.port === '')
+  return Boolean(url && plainHttps(url) && IMAGE_HOSTS.includes(url.hostname))
 }
-/** Địa chỉ trang Pexels (trang ảnh, trang nhiếp ảnh gia): https và máy chủ là pexels.com hoặc www.pexels.com. */
-export function isPexelsPageUrl(text) {
+/** Địa chỉ trang Pixabay (trang ảnh): https và máy chủ là pixabay.com hoặc www.pixabay.com. */
+export function isPageUrl(text) {
   const url = parseUrl(text)
-  return Boolean(url && url.protocol === 'https:' && (url.hostname === 'www.pexels.com' || url.hostname === 'pexels.com') && url.username === '' && url.password === '' && url.port === '')
+  return Boolean(url && plainHttps(url) && PAGE_HOSTS.includes(url.hostname))
 }
 
-// Bỏ mọi ký tự điều khiển (C0, DEL, C1) và ký tự định dạng/ẩn (bidi như U+202E, độ rộng 0 như U+200B): dữ liệu từ Pexels do người dùng đặt.
+// Bỏ mọi ký tự điều khiển (C0, DEL, C1) và ký tự định dạng/ẩn (bidi như U+202E, độ rộng 0 như U+200B): dữ liệu từ Pixabay do người dùng đặt.
 const isControl = (char) => /^[\p{Cc}\p{Cf}]$/u.test(char)
 const clip = (value, n) => [...String(value ?? '')].map((char) => (isControl(char) ? ' ' : char)).join('').trim().slice(0, n)
-const MAX_URL_LENGTH = 300
 
 /** Giữ ảnh hợp lệ từ phản hồi tìm kiếm, bỏ ảnh thiếu/sai dạng/địa chỉ lạ. */
-export function normalizePhotos(data, perQuery) {
-  if (!data || !Array.isArray(data.photos)) return null
-  const photos = []
-  for (const photo of data.photos) {
-    if (photos.length >= perQuery) break
-    const src = photo?.src?.large
-    if (!Number.isInteger(photo?.id) || photo.id <= 0 || !isPexelsImageUrl(src) || !isPexelsPageUrl(photo?.url)) continue
-    photos.push({
-      photoId: photo.id,
+export function normalizeHits(data, perQuery) {
+  if (!data || !Array.isArray(data.hits)) return null
+  const hits = []
+  for (const hit of data.hits) {
+    if (hits.length >= perQuery) break
+    const src = hit?.largeImageURL
+    if (!Number.isInteger(hit?.id) || hit.id <= 0 || !isImageUrl(src) || !isPageUrl(hit?.pageURL)) continue
+    hits.push({
+      pixabayId: hit.id,
       src,
-      pexelsUrl: photo.url,
-      photographer: clip(photo.photographer, 100),
-      photographerUrl: isPexelsPageUrl(photo.photographer_url) ? photo.photographer_url : null,
-      alt: clip(photo.alt, 200),
+      pageUrl: hit.pageURL,
+      user: clip(hit.user, 100),
+      userId: Number.isInteger(hit.user_id) && hit.user_id > 0 ? hit.user_id : null,
+      tags: clip(hit.tags, 200),
+      imageType: clip(hit.type, 20),
     })
   }
-  return photos
+  return hits
 }
 
-/** Một lần tìm (KHÔNG thử lại). Trả { photos, latencyMs, remaining }; lỗi thì ném Error đã lọc khóa. */
-export async function searchOne({ fetchFn, apiKey, query, perQuery, clock = () => performance.now() }) {
+/** Hủy thân phản hồi không dùng đến (không để kết nối treo đến khi GC); không có luồng thì bỏ qua. */
+async function discardBody(response) {
+  try {
+    await response.body?.cancel?.()
+  } catch {
+    /* bỏ qua */
+  }
+}
+
+/** Một lần tìm (KHÔNG thử lại). Trả { hits, latencyMs, remaining }; lỗi thì ném Error đã lọc khóa. URL chứa khóa nên không bao giờ được in. */
+export async function searchOne({ fetchFn, apiKey, query, perQuery, imageType = DEFAULT_IMAGE_TYPE, clock = () => performance.now() }) {
   const t0 = clock()
-  const url = `${API_BASE}/search?${new URLSearchParams({ query, per_page: String(perQuery) })}`
+  const params = new URLSearchParams({ key: apiKey, q: query, image_type: imageType, safesearch: 'true', per_page: String(Math.max(perQuery, MIN_PER_QUERY)), lang: 'en' })
   let response
   try {
-    response = await fetchFn(url, { method: 'GET', headers: { Authorization: apiKey }, redirect: 'error', signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
+    response = await fetchFn(`${API_BASE}?${params}`, { method: 'GET', redirect: 'error', signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
   } catch (error) {
-    throw new Error(`Pexels: lỗi mạng hoặc quá hạn: ${redact(error?.message ?? error, [apiKey]).slice(0, 200)}`)
+    throw new Error(`Pixabay: lỗi mạng hoặc quá hạn: ${redactKey(error?.message ?? error, apiKey).slice(0, 200)}`)
   }
   const latencyMs = clock() - t0
   if (!response.ok) {
-    // Chỉ mã trạng thái: thân lỗi có thể nhắc lại khóa dạng che mà redact không bắt được.
-    if (response.status === 429) throw new Error('Pexels trả 429: hết hạn mức gọi API (200 lần mỗi giờ, 20.000 lần mỗi tháng theo tài liệu); chờ rồi chạy lại')
-    throw new Error(`Pexels trả ${response.status}`)
+    await discardBody(response)
+    // Chỉ mã trạng thái: thân lỗi có thể nhắc lại khóa.
+    if (response.status === 429) throw new Error('Pixabay trả 429: vượt hạn mức (100 yêu cầu mỗi 60 giây theo tài liệu); chờ rồi chạy lại')
+    throw new Error(`Pixabay trả ${response.status}`)
   }
   const data = await response.json()
-  const photos = normalizePhotos(data, perQuery)
-  if (photos === null) throw new Error('Pexels: phản hồi tìm kiếm sai dạng (không có danh sách photos)')
+  const hits = normalizeHits(data, perQuery)
+  if (hits === null) throw new Error('Pixabay: phản hồi tìm kiếm sai dạng (không có danh sách hits)')
   const remainingHeader = response.headers?.get?.('x-ratelimit-remaining')
   const remaining = remainingHeader !== null && remainingHeader !== undefined && Number.isFinite(Number(remainingHeader)) ? Number(remainingHeader) : null
-  return { photos, latencyMs, remaining }
+  return { hits, latencyMs, remaining }
+}
+
+/** Các dạng của khóa có thể xuất hiện trong thông báo lỗi kèm URL: nguyên văn, mã hóa URL (chữ hoa/thường), dạng `URLSearchParams` (`+` cho khoảng trắng). */
+export function keyVariants(apiKey) {
+  const raw = String(apiKey ?? '')
+  if (raw === '') return []
+  const percent = encodeURIComponent(raw)
+  const form = new URLSearchParams({ key: raw }).toString().slice(4)
+  const lowerHex = percent.replace(/%[0-9A-F]{2}/g, (m) => m.toLowerCase())
+  return [...new Set([raw, percent, form, lowerHex])]
+}
+/** Lọc khóa ở mọi dạng trên (thông báo lỗi của fetch có thể kèm URL). */
+export function redactKey(text, apiKey) {
+  return redact(text, keyVariants(apiKey))
 }
 
 /** Dạng ảnh theo ĐẦU TỆP (không tin Content-Type): jpg, png, webp hoặc null. */
@@ -162,17 +196,38 @@ async function readLimited(response) {
   return Buffer.concat(chunks)
 }
 
-/** Tải một ảnh từ máy chủ ảnh (KHÔNG gửi khóa, KHÔNG theo chuyển hướng). Trả { bytes, ext, latencyMs }. */
+/**
+ * Tải một ảnh (KHÔNG gửi khóa). Chuyển hướng được theo TỪNG BƯỚC, tối đa MAX_REDIRECTS lần, và mỗi địa chỉ đích phải là máy chủ ảnh cho phép
+ * (https); đích lạ hoặc quá nhiều bước là lỗi. Trả { bytes, ext, latencyMs }.
+ */
 export async function downloadImage({ fetchFn, url, clock = () => performance.now() }) {
-  if (!isPexelsImageUrl(url)) throw new Error('địa chỉ ảnh không thuộc images.pexels.com (https)')
+  if (!isImageUrl(url)) throw new Error('địa chỉ ảnh không thuộc pixabay.com/cdn.pixabay.com (https)')
   const t0 = clock()
+  let current = url
   let response
-  try {
-    response = await fetchFn(url, { method: 'GET', redirect: 'error', signal: AbortSignal.timeout(IMAGE_TIMEOUT_MS) })
-  } catch (error) {
-    throw new Error(`tải ảnh lỗi mạng hoặc quá hạn: ${clip(error?.message ?? error, 150)}`)
+  for (let hop = 0; ; hop += 1) {
+    try {
+      response = await fetchFn(current, { method: 'GET', redirect: 'manual', signal: AbortSignal.timeout(IMAGE_TIMEOUT_MS) })
+    } catch (error) {
+      throw new Error(`tải ảnh lỗi mạng hoặc quá hạn: ${clip(error?.message ?? error, 150)}`)
+    }
+    if (!REDIRECT_STATUSES.includes(response.status)) break
+    await discardBody(response)
+    if (hop >= MAX_REDIRECTS) throw new Error(`tải ảnh bị chuyển hướng quá ${MAX_REDIRECTS} lần`)
+    const location = response.headers?.get?.('location')
+    let next = null
+    try {
+      next = location ? new URL(location, current).href : null
+    } catch {
+      next = null
+    }
+    if (!next || !isImageUrl(next)) throw new Error('tải ảnh bị chuyển hướng tới địa chỉ không được phép')
+    current = next
   }
-  if (!response.ok) throw new Error(`tải ảnh trả ${response.status}`)
+  if (!response.ok) {
+    await discardBody(response)
+    throw new Error(`tải ảnh trả ${response.status}`)
+  }
   const declared = Number(response.headers?.get?.('content-length'))
   if (Number.isFinite(declared) && declared > MAX_IMAGE_BYTES) throw new Error(`ảnh lớn hơn ${MAX_IMAGE_BYTES} byte`)
   const bytes = await readLimited(response)
@@ -182,11 +237,11 @@ export async function downloadImage({ fetchFn, url, clock = () => performance.no
   return { bytes, ext, latencyMs: clock() - t0 }
 }
 
-/** Khóa/tên tệp ổn định cho một ứng viên: `<id>-<photoId>`, chỉ ký tự an toàn. */
-export const candidateKey = (id, photoId) => `${id}-${photoId}`.replace(/[^A-Za-z0-9_-]/g, '_')
+/** Khóa/tên tệp ổn định cho một ứng viên: `<id>-<pixabayId>`, chỉ ký tự an toàn. */
+export const candidateKey = (id, pixabayId) => `${id}-${pixabayId}`.replace(/[^A-Za-z0-9_-]/g, '_')
 
 export function parseArgs(argv) {
-  const args = { run: false, only: [], approve: null, reviewer: null, perQuery: DEFAULT_PER_QUERY, runCap: DEFAULT_RUN_CAP, monthlyCap: DEFAULT_MONTHLY_CAP, outDir: '.img-out', ledger: '.img-ledger.json', approvedDir: null, errors: [] }
+  const args = { run: false, only: [], approve: null, reviewer: null, type: DEFAULT_IMAGE_TYPE, perQuery: DEFAULT_PER_QUERY, runCap: DEFAULT_RUN_CAP, monthlyCap: DEFAULT_MONTHLY_CAP, outDir: '.img-out', ledger: '.img-ledger.json', approvedDir: null, errors: [] }
   const intValue = (value) => value !== undefined && /^\d+$/.test(value)
   for (const raw of argv) {
     const [flag, value] = raw.includes('=') ? [raw.slice(0, raw.indexOf('=')), raw.slice(raw.indexOf('=') + 1)] : [raw, undefined]
@@ -195,6 +250,7 @@ export function parseArgs(argv) {
     else if (flag === '--only' && value) args.only.push(value)
     else if (flag === '--approve' && value) args.approve = value
     else if (flag === '--reviewer' && value) args.reviewer = value
+    else if (flag === '--type' && IMAGE_TYPES.includes(value)) args.type = value
     else if (flag === '--per-query' && intValue(value) && Number(value) >= 1 && Number(value) <= MAX_PER_QUERY) args.perQuery = Number(value)
     else if (flag === '--max-searches' && intValue(value)) args.runCap = Number(value)
     else if (flag === '--monthly-cap' && intValue(value)) args.monthlyCap = Number(value)
@@ -208,7 +264,7 @@ export function parseArgs(argv) {
 
 /**
  * Chạy một lượt. `io`: readJson(path)->obj|null (ném lỗi nếu tệp hỏng), writeJson, writeFile(path, Buffer), copyFile(from, to),
- * removeFile, hashFile(path)->hex|null, mkdir, assertPath?(path). Trả { mode, ... }. Không bao giờ in/ghi khóa.
+ * removeFile, hashFile(path)->hex|null, mkdir, assertPath?(path, kind). Trả { mode, ... }. Không bao giờ in/ghi khóa.
  */
 export async function run({ argv, env, fetchFn, io, now = () => new Date(), clock, log = () => {}, defaultApprovedDir = null }) {
   const args = parseArgs(argv)
@@ -218,7 +274,7 @@ export async function run({ argv, env, fetchFn, io, now = () => new Date(), cloc
   try {
     return await runChecked({ args, env, fetchFn, io, now, clock, log })
   } catch (error) {
-    return { mode: 'error', error: redact(error?.message ?? error, [env?.[KEY_ENV] || '']).slice(0, 300) }
+    return { mode: 'error', error: redactKey(error?.message ?? error, env?.[KEY_ENV] || '').slice(0, 300) }
   }
 }
 
@@ -231,12 +287,14 @@ async function runChecked({ args, env, fetchFn, io, now, clock, log }) {
   // Sổ cái chỉ được là tệp .json riêng của script (không ghi đè được tệp nguồn nào qua --ledger).
   const ledgerPath = path.posix.normalize(args.ledger.replace(/\\/g, '/'))
   if (!/^(\.img-ledger[A-Za-z0-9_.-]*\.json|\.img-out\/[A-Za-z0-9_./-]+\.json)$/.test(ledgerPath)) return { mode: 'error', error: '--ledger phải là .img-ledger*.json hoặc một tệp .json trong .img-out' }
+  // Sổ cái không được trùng tên bản kê (tránh ghi đè bản kê bằng sổ cái).
+  if (path.posix.basename(ledgerPath) === 'manifest.json') return { mode: 'error', error: '--ledger không được là manifest.json' }
   args.ledger = ledgerPath
   io.assertPath?.(args.outDir, 'out')
   io.assertPath?.(args.ledger, 'ledger')
   if (args.approvedDir) io.assertPath?.(args.approvedDir, 'approved')
   const apiKey = env?.[KEY_ENV] || ''
-  const say = (line) => log(redact(line, [apiKey]))
+  const say = (line) => log(redactKey(line, apiKey))
   const manifestPath = `${args.outDir}/manifest.json`
 
   // ---- duyệt tay: sao ảnh đã chờ duyệt sang thư mục «đã duyệt» (không cần khóa, không gọi mạng) ----
@@ -262,11 +320,11 @@ async function runChecked({ args, env, fetchFn, io, now, clock, log }) {
     item.status = 'approved'
     item.approval = { reviewer: args.reviewer.trim().slice(0, 80), at: now().toISOString() }
     await io.writeJson(manifestPath, manifest)
-    const current = manifest.items.filter((it) => it.status === 'approved').map(({ key, id, query, file, sha256, photographer, photographerUrl, pexelsUrl, alt, approval }) => ({ key, id, query, file, sha256, photographer, photographerUrl, pexelsUrl, alt, approval }))
+    const current = manifest.items.filter((it) => it.status === 'approved').map(({ key, id, query, imageType, file, sha256, user, userId, pageUrl, tags, approval }) => ({ key, id, query, imageType, file, sha256, user, userId, pageUrl, tags, approval }))
     const merged = new Map(existing.approved.map((entry) => [entry.key, entry]))
     for (const entry of current) merged.set(entry.key, entry)
     await io.writeJson(approvedPath, { approved: [...merged.values()] })
-    say(`Đã duyệt ${item.file} (người xem: ${item.approval.reviewer}). Việc commit ảnh là của bạn; khi dùng, ghi nguồn «Photo by ${item.photographer} on Pexels».`)
+    say(`Đã duyệt ${item.file} (người xem: ${item.approval.reviewer}). Việc commit ảnh là của bạn; khi dùng, nên ghi nguồn «Image by ${item.user} from Pixabay» (giấy phép không bắt buộc).`)
     return { mode: 'approve', item }
   }
 
@@ -280,8 +338,8 @@ async function runChecked({ args, env, fetchFn, io, now, clock, log }) {
   if (issue) return { mode: 'error', error: `${issue} (${args.ledger}); sửa hoặc xóa tệp thủ công sau khi kiểm số lần đã tìm` }
   const used = usedThisMonth(ledgerBefore, now())
   const budget = checkBudget({ count: chosen.length, perQuery: args.perQuery, runCap: args.runCap, monthlyCap: args.monthlyCap, used })
-  const plan = { searches: chosen.length, ids: chosen.map((q) => q.id), perQuery: args.perQuery, maxDownloads: chosen.length * args.perQuery, usedThisMonth: used, runCap: args.runCap, monthlyCap: args.monthlyCap }
-  say(`Kế hoạch: ${chosen.length} lần tìm (${plan.ids.join(', ')}), tối đa ${args.perQuery} ảnh mỗi từ khóa; đã tìm tháng này ${used}; trần mỗi lần ${args.runCap}, trần tháng ${args.monthlyCap}.`)
+  const plan = { searches: chosen.length, ids: chosen.map((q) => q.id), imageType: args.type, perQuery: args.perQuery, maxDownloads: chosen.length * args.perQuery, usedThisMonth: used, runCap: args.runCap, monthlyCap: args.monthlyCap }
+  say(`Kế hoạch: ${chosen.length} lần tìm (${plan.ids.join(', ')}), loại ${args.type}, tối đa ${args.perQuery} ảnh mỗi từ khóa; đã tìm tháng này ${used}; trần mỗi lần ${args.runCap}, trần tháng ${args.monthlyCap}.`)
   if (!budget.ok) return { mode: 'refused', plan, error: budget.reason }
   // Không tìm lại từ khóa đã có ảnh được duyệt (sẽ gây nhầm lẫn); muốn làm lại thì xóa ảnh đã duyệt và mục bản kê thủ công.
   // Kiểm ngay ở bước lập kế hoạch để dry-run cũng báo trước.
@@ -289,10 +347,10 @@ async function runChecked({ args, env, fetchFn, io, now, clock, log }) {
   const alreadyApproved = chosen.filter((job) => (manifest.items ?? []).some((it) => it.id === job.id && it.status === 'approved')).map((job) => job.id)
   if (alreadyApproved.length > 0) return { mode: 'error', plan, error: `đã có ảnh được duyệt, không tìm lại: ${alreadyApproved.join(', ')}` }
   if (!args.run) {
-    say('Chạy thử (dry-run): chưa gọi Pexels. Thêm --run để tìm và tải ảnh.')
+    say('Chạy thử (dry-run): chưa gọi Pixabay. Thêm --run để tìm và tải ảnh.')
     return { mode: 'dry-run', plan }
   }
-  if (!apiKey) return { mode: 'error', plan, error: `thiếu ${KEY_ENV} (biến môi trường hoặc tệp .env.pexels.local)` }
+  if (!apiKey) return { mode: 'error', plan, error: `thiếu ${KEY_ENV} (biến môi trường hoặc tệp .env.pixabay.local)` }
 
   // ---- tìm và tải thật: ghi sổ cái TRƯỚC mỗi lần tìm, một lỗi là dừng, lưu vào thư mục chờ duyệt ----
   await io.mkdir(`${args.outDir}/pending`)
@@ -305,7 +363,7 @@ async function runChecked({ args, env, fetchFn, io, now, clock, log }) {
     try {
       await io.writeJson(manifestPath, manifest)
     } catch (error) {
-      stopped = stopped ?? `không ghi được bản kê: ${redact(error?.message ?? error, [apiKey]).slice(0, 150)}`
+      stopped = stopped ?? `không ghi được bản kê: ${redactKey(error?.message ?? error, apiKey).slice(0, 150)}`
     }
   }
   for (const job of chosen) {
@@ -314,17 +372,17 @@ async function runChecked({ args, env, fetchFn, io, now, clock, log }) {
       await io.writeJson(args.ledger, ledger)
     } catch (error) {
       // Không ghi được sổ cái thì KHÔNG gọi mạng; vẫn trả kết quả các từ khóa đã xong trước đó.
-      stopped = `không ghi được sổ cái nên dừng trước «${job.id}»: ${redact(error?.message ?? error, [apiKey]).slice(0, 150)}`
+      stopped = `không ghi được sổ cái nên dừng trước «${job.id}»: ${redactKey(error?.message ?? error, apiKey).slice(0, 150)}`
       break
     }
     let found
     try {
-      found = await searchOne({ fetchFn, apiKey, query: job.query, perQuery: args.perQuery, clock })
+      found = await searchOne({ fetchFn, apiKey, query: job.query, perQuery: args.perQuery, imageType: args.type, clock })
       remaining = found.remaining ?? remaining
       searchesDone += 1
     } catch (error) {
-      stopped = `dừng sau lỗi khi tìm «${job.id}»: ${redact(error.message, [apiKey])}`
-      results.push({ id: job.id, status: 'error', error: redact(error.message, [apiKey]) })
+      stopped = `dừng sau lỗi khi tìm «${job.id}»: ${redactKey(error.message, apiKey)}`
+      results.push({ id: job.id, status: 'error', error: redactKey(error.message, apiKey) })
       break
     }
     // Ứng viên chờ duyệt cũ của cùng từ khóa không còn hợp lệ khi tìm lại: xóa tệp và mục để không duyệt nhầm ảnh cũ.
@@ -338,25 +396,25 @@ async function runChecked({ args, env, fetchFn, io, now, clock, log }) {
       }
     }
     manifest.items = (manifest.items ?? []).filter((it) => it.id !== job.id)
-    if (found.photos.length === 0) {
+    if (found.hits.length === 0) {
       results.push({ id: job.id, status: 'no-results' })
       say(`không có ảnh hợp lệ cho «${job.query}»`)
       await saveManifest()
       if (stopped) break
       continue
     }
-    for (const photo of found.photos) {
-      const key = candidateKey(job.id, photo.photoId)
-      const entry = { key, id: job.id, query: job.query, photoId: photo.photoId, pexelsUrl: photo.pexelsUrl, photographer: photo.photographer, photographerUrl: photo.photographerUrl, alt: photo.alt, at: now().toISOString() }
+    for (const hit of found.hits) {
+      const key = candidateKey(job.id, hit.pixabayId)
+      const entry = { key, id: job.id, query: job.query, imageType: hit.imageType, pixabayId: hit.pixabayId, pageUrl: hit.pageUrl, user: hit.user, userId: hit.userId, tags: hit.tags, at: now().toISOString() }
       try {
-        const image = await downloadImage({ fetchFn, url: photo.src, clock })
+        const image = await downloadImage({ fetchFn, url: hit.src, clock })
         entry.file = `${key}.${image.ext}`
         await io.writeFile(`${args.outDir}/pending/${entry.file}`, image.bytes)
         Object.assign(entry, { bytes: image.bytes.length, latencyMs: Math.round(image.latencyMs), sha256: createHash('sha256').update(image.bytes).digest('hex'), status: 'pending-review' })
-        say(`ok  ${entry.file}: ${entry.bytes} byte, ${entry.latencyMs} ms; ảnh của ${entry.photographer || '(không rõ)'}; CHỜ BẠN XEM`)
+        say(`ok  ${entry.file}: ${entry.bytes} byte, ${entry.latencyMs} ms; tác giả ${entry.user || '(không rõ)'}; CHỜ BẠN XEM`)
       } catch (error) {
         entry.status = 'error'
-        entry.error = redact(error.message, [apiKey])
+        entry.error = redactKey(error.message, apiKey)
         stopped = `dừng sau lỗi ở ${key}: ${entry.error}`
       }
       manifest.items.push(entry)

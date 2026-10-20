@@ -1,0 +1,133 @@
+{
+  "startedAt": "2026-10-20T05:08:19.432Z",
+  "provider": "VieNeu-TTS (cục bộ)",
+  "plan": {
+    "jobs": 10,
+    "chars": 164,
+    "maxJobs": 20,
+    "voices": [
+      "Trúc Ly",
+      "Ngọc Huyền"
+    ]
+  },
+  "results": [
+    {
+      "id": "vi-numberline",
+      "lang": "vi",
+      "voice": "Trúc Ly",
+      "chars": 23,
+      "file": "vi_numberline__0-Truc_Ly.wav",
+      "ok": true,
+      "bytes": 122924,
+      "seconds": 1.28,
+      "latencyMs": 3141
+    },
+    {
+      "id": "vi-numberline",
+      "lang": "vi",
+      "voice": "Ngọc Huyền",
+      "chars": 23,
+      "file": "vi_numberline__1-Ngoc_Huyen.wav",
+      "ok": true,
+      "bytes": 145964,
+      "seconds": 1.52,
+      "latencyMs": 2404
+    },
+    {
+      "id": "vi-syllable-hint",
+      "lang": "vi",
+      "voice": "Trúc Ly",
+      "chars": 35,
+      "file": "vi_syllable_hint__0-Truc_Ly.wav",
+      "ok": true,
+      "bytes": 169004,
+      "seconds": 1.76,
+      "latencyMs": 3301
+    },
+    {
+      "id": "vi-syllable-hint",
+      "lang": "vi",
+      "voice": "Ngọc Huyền",
+      "chars": 35,
+      "file": "vi_syllable_hint__1-Ngoc_Huyen.wav",
+      "ok": true,
+      "bytes": 199724,
+      "seconds": 2.08,
+      "latencyMs": 5405
+    },
+    {
+      "id": "vi-syllable-answer",
+      "lang": "vi",
+      "voice": "Trúc Ly",
+      "chars": 3,
+      "file": "vi_syllable_answer__0-Truc_Ly.wav",
+      "ok": true,
+      "bytes": 53804,
+      "seconds": 0.56,
+      "latencyMs": 1826
+    },
+    {
+      "id": "vi-syllable-answer",
+      "lang": "vi",
+      "voice": "Ngọc Huyền",
+      "chars": 3,
+      "file": "vi_syllable_answer__1-Ngoc_Huyen.wav",
+      "ok": true,
+      "bytes": 61484,
+      "seconds": 0.64,
+      "latencyMs": 2400
+    },
+    {
+      "id": "vi-correct",
+      "lang": "vi",
+      "voice": "Trúc Ly",
+      "chars": 9,
+      "file": "vi_correct__0-Truc_Ly.wav",
+      "ok": true,
+      "bytes": 69164,
+      "seconds": 0.72,
+      "latencyMs": 2106
+    },
+    {
+      "id": "vi-correct",
+      "lang": "vi",
+      "voice": "Ngọc Huyền",
+      "chars": 9,
+      "file": "vi_correct__1-Ngoc_Huyen.wav",
+      "ok": true,
+      "bytes": 76844,
+      "seconds": 0.8,
+      "latencyMs": 2170
+    },
+    {
+      "id": "vi-tryagain",
+      "lang": "vi",
+      "voice": "Trúc Ly",
+      "chars": 12,
+      "file": "vi_tryagain__0-Truc_Ly.wav",
+      "ok": true,
+      "bytes": 76844,
+      "seconds": 0.8,
+      "latencyMs": 1794
+    },
+    {
+      "id": "vi-tryagain",
+      "lang": "vi",
+      "voice": "Ngọc Huyền",
+      "chars": 12,
+      "file": "vi_tryagain__1-Ngoc_Huyen.wav",
+      "ok": true,
+      "bytes": 92204,
+      "seconds": 0.96,
+      "latencyMs": 1936
+    }
+  ],
+  "totals": {
+    "jobs": 10,
+    "ok": 10,
+    "chars": 164,
+    "bytes": 1067960,
+    "seconds": 11.12
+  },
+  "stopped": null
+}

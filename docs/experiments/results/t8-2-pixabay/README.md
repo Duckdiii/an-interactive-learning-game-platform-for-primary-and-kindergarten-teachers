@@ -1,0 +1,59 @@
+# T8.2: ảnh minh họa từ Pixabay API (script cục bộ, duyệt tay) (2026-10-20)
+
+**Trạng thái: script và test đã xong; chưa có kết quả gọi API thật** (xem «Việc bạn cần làm»). Chưa có ảnh nào được xem hay duyệt. Việc chạy, **xem ảnh bằng mắt** và duyệt là việc của bạn (và của thầy/Cô Thơ).
+
+**Vì sao Pixabay, và vì sao chỉ là tạm thời:** thiết kế sản phẩm đã chốt là Backend lấy ảnh từ **Pexels** (`docs/game-json-dsl-v1.0.0.md` dòng 80, `docs/openapi/openapi.yaml`, entity `QuestionGame`). Ngày 2026-10-20 trang cấp khóa của Pexels báo «New API key issuance is currently paused», nên bạn quyết định **tạm thay Pexels bằng Pixabay** cho thử nghiệm. Đây chỉ là thử nghiệm trên nhánh này: **chưa đổi gì ở contract hay tài liệu sản phẩm**; nếu sản phẩm thật dùng Pixabay thì cần nhóm đồng ý và sửa các tài liệu trên. Script Pexels cũ (khóa ở header, máy chủ ảnh `images.pexels.com`) còn trong lịch sử git (commit `115db00`), khôi phục được khi Pexels mở lại.
+
+## Cách chạy
+
+```bash
+cd frontend
+# 1) Khóa Pixabay đặt CHỈ ở máy bạn, trong tệp đã bị .gitignore (KHÔNG có tiền tố VITE_), đúng một dòng:
+#    PIXABAY_API_KEY=<khóa của bạn>      (tệp: frontend/.env.pixabay.local; hoặc đặt biến môi trường PIXABAY_API_KEY)
+
+# 2) Chạy thử: chỉ lập kế hoạch, không gọi mạng. Không có khóa vẫn chạy được.
+node scripts/experiments/pixabay-search.mjs
+
+# 3) Tìm và tải thật (có trần số lần tìm). Ảnh ra frontend/.img-out/pending/ (đã bị .gitignore)
+node scripts/experiments/pixabay-search.mjs --run --only=cat --only=dog
+
+# 4) Mở ảnh trong frontend/.img-out/pending/ và XEM BẰNG MẮT. Chọn ảnh phù hợp, rồi (khóa là tên tệp không có đuôi, ví dụ cat-1234567):
+node scripts/experiments/pixabay-search.mjs --approve=cat-1234567 --reviewer="Tên người đã xem"
+```
+
+Cờ: `--only=<id>` (lặp được; id: cat, dog, ball, box, table, bee), `--type=illustration|photo|vector` (mặc định `illustration`: hình vẽ, gần phong cách game hơn ảnh chụp), `--per-query=N` (số ảnh ứng viên mỗi từ khóa, 1 đến 5, mặc định 3; API nhận tối thiểu 3 nên script luôn xin ít nhất 3 và chỉ giữ N), `--max-searches=N` (trần số lần tìm mỗi lần, mặc định 6), `--monthly-cap=N` (trần cộng dồn theo tháng UTC, mặc định 100), `--out=` (chỉ được là `.img-out` hoặc thư mục con của nó, sau khi chuẩn hóa `..`), `--ledger=` (chỉ được là `.img-ledger*.json` hoặc một tệp `.json` trong `.img-out`), `--approved-dir=` (chỉ được nằm trong `docs/experiments/results/t8-2-pixabay/`). `--run` **không nhận giá trị** và **không dùng cùng `--approve`**. Không chọn `--only`: lấy các từ khóa đầu tiên trong giới hạn trần mỗi lần. `safesearch` luôn bật.
+
+Từ khóa cố định trong mã: `cat`, `dog`, `beach ball`, `cardboard box`, `wooden table`, `bee` (từ các vật của ba game thử nghiệm). Dòng lệnh **không nhận văn bản tìm kiếm tự do**.
+
+## Cách kiểm soát
+
+- **Khóa nằm trong URL (khác Pexels).** Theo tài liệu Pixabay tôi đọc ngày 2026-10-20, khóa là tham số `key` của URL (tài liệu không nói header), nên **URL tìm kiếm chứa khóa và không bao giờ được in hay ghi**; mọi thông báo lỗi, log, kết quả và bản kê đều bị lọc khóa, cả dạng nguyên văn, mã hóa URL (chữ hoa và thường), dạng `URLSearchParams` (`+` cho khoảng trắng) (thông báo lỗi của `fetch` có thể kèm URL). Khóa **không bao giờ gửi tới máy chủ ảnh** (địa chỉ ảnh không chứa khóa). Chỉ đọc từ biến môi trường hoặc ĐÚNG biến `PIXABAY_API_KEY` trong `frontend/.env.pixabay.local` (không nạp biến khác); lỗi HTTP chỉ in mã trạng thái, không in thân lỗi.
+- **Hạn mức API:** tài liệu ghi 100 yêu cầu mỗi 60 giây theo khóa, kết quả phải được cache 24 giờ và **không gửi hàng loạt truy vấn tự động**. Script chỉ có 6 từ khóa cố định và trần mặc định 6 lần tìm mỗi lần, 100 mỗi tháng, ghi vào sổ cái cục bộ `frontend/.img-ledger.json` **trước** mỗi lần tìm (lỗi vẫn tính); sổ cái hỏng thì từ chối chạy; **không thử lại tự động**; một lỗi (kể cả 429) là dừng cả lượt; không ghi được sổ cái thì không gọi mạng. Script **không tự cache 24 giờ**: đừng chạy lại cùng một từ khóa liên tục. Sổ cái chỉ là rào chắn cho người dùng trung thực (bạn tự nâng trần được, hai tiến trình song song có thể đếm thiếu). Số lần còn lại do Pixabay báo (`X-RateLimit-Remaining`) được **in ra màn hình** ở cuối lượt chạy.
+- **Dữ liệu từ API không được tin:** chỉ tải ảnh có địa chỉ `https://pixabay.com/...` hoặc `https://cdn.pixabay.com/...` (không tài khoản, không cổng lạ); **chuyển hướng được theo từng bước, tối đa 3 lần, và mỗi đích phải thuộc hai máy chủ đó** (đích lạ, http, thiếu `Location` hoặc quá 3 bước là lỗi); giới hạn 8 MB mỗi ảnh (đọc theo luồng và ngắt ngay khi vượt) và 30 ảnh mỗi lần chạy; nội dung phải bắt đầu bằng đúng đầu tệp JPEG/PNG/WebP (không tin `Content-Type`); id ảnh phải là số nguyên dương; trang ảnh phải thuộc `pixabay.com`; địa chỉ dài quá 400 ký tự bị bỏ (biên được kiểm: 400 nhận, 401 bỏ); tên tác giả và thẻ mô tả (do người dùng Pixabay đặt) được cắt độ dài và bỏ ký tự điều khiển, ký tự định dạng/ẩn (bidi, độ rộng 0). Dùng ảnh cỡ `largeImageURL` (tối đa 1280 px theo tài liệu), không xin quyền «full API access». Pixabay cấm hotlink lâu dài: script **tải ảnh về** thay vì lưu địa chỉ.
+- **KHÔNG có kiểm duyệt tự động.** `safesearch` chỉ lọc theo cờ của Pixabay, không thay mắt người. **Duyệt tay bắt buộc:** ảnh tải về chỉ nằm ở thư mục «chờ duyệt» (bị `.gitignore`). Chỉ khi bạn chạy `--approve=<khóa> --reviewer=<tên>` ảnh mới được sao sang `docs/experiments/results/t8-2-pixabay/approved/` (kèm `approved.json`: tên tác giả, mã tác giả, đường dẫn trang ảnh, thẻ mô tả, loại ảnh, người xem, thời điểm). Chỉ duyệt được ảnh đang «chờ duyệt» và **phải đúng ảnh đã tải** (bản kê lưu `sha256`, lúc duyệt tính lại hash của tệp chờ duyệt; lệch hoặc thiếu thì từ chối). `approved.json` được **gộp theo khóa ảnh** (không làm mất dòng ghi nguồn đã có; tệp có sẵn mà hỏng thì từ chối trước khi sao ảnh). Không tìm lại từ khóa đã có ảnh được duyệt (dry-run cũng báo trước); tìm lại từ khóa khác đang chờ duyệt thì **xóa ngay các ứng viên cũ** của từ khóa đó, trước khi tải ảnh mới (tải lỗi thì ứng viên cũ đã mất). **Script không bao giờ tự commit**; thư mục «đã duyệt» không bị `.gitignore`, nên việc `git add` là quyết định của bạn.
+- **Đường dẫn ghi** chỉ trong `frontend/` hoặc `docs/experiments/results/`, kiểm ngay đầu lượt và ghim hẹp theo loại (thư mục ra `.img-out`, sổ cái `.img-ledger*.json`/`.json` trong `.img-out`, thư mục đã duyệt `docs/experiments/results/t8-2-pixabay/`); đường dẫn được chuẩn hóa `..` trước khi so. Kiểm theo chữ, không theo `realpath` (liên kết tượng trưng trong `.img-out` có thể trỏ ra ngoài). Mặc định **dry-run**.
+
+## Giấy phép, ghi nguồn (chưa kiểm chứng đầy đủ, việc của bạn)
+
+Theo trang tóm tắt giấy phép Pixabay tôi đọc ngày 2026-10-20: dùng miễn phí, **không bắt buộc ghi nguồn** (được cảm ơn), chỉnh sửa được; **không được bán lại hoặc phân phối nguyên bản** (không có sáng tạo thêm), không dùng nội dung có logo/thương hiệu nhận ra được cho hàng hóa hay dịch vụ, không dùng theo cách bất hợp pháp hoặc phi đạo đức (đặc biệt với người nhận ra được), không dùng gây hiểu lầm hay làm nhãn hiệu. Trang đó **không nói gì về nội dung do AI sinh hay sản phẩm trẻ em**, và một số ảnh có thể chịu quyền của bên thứ ba (bản quyền, thương hiệu, quyền riêng tư): người dùng tự chịu trách nhiệm. Tài liệu API yêu cầu **ghi rõ nguồn khi hiển thị kết quả tìm kiếm** cho người dùng cuối. Bản tôi đọc là tóm tắt tự động, không phải điều khoản pháp lý đầy đủ (Terms of Service mới là văn bản ràng buộc), nên trước khi đưa bất kỳ ảnh nào vào sản phẩm bạn cần **đọc lại giấy phép và điều khoản API** và ghi kết luận ở đây. Script lưu sẵn tên tác giả và đường dẫn gốc của từng ảnh được duyệt để ghi nguồn sau này.
+
+## Việc bạn cần làm
+
+- **Đặt khóa đúng tệp:** khóa Pixabay phải nằm ở `frontend/.env.pixabay.local` (dòng `PIXABAY_API_KEY=<khóa>`), **không phải** `.env.pexels.local` (script chỉ đọc tệp Pixabay; thiếu khóa thì báo `thiếu PIXABAY_API_KEY`).
+- Chạy `node scripts/experiments/pixabay-search.mjs --run --only=cat`, xem ảnh trong `frontend/.img-out/pending/`: có phù hợp trẻ mầm non/lớp 1, đúng vật, **không có người nhận ra được** hay chi tiết đáng sợ, nền gọn, hợp với hai theme (Vũ trụ, Đại dương) và với trục số/ghép tiếng/giới từ hay không. Nhờ thầy/Cô Thơ xem.
+- Quyết duyệt/bỏ từng ảnh; quyết có commit ảnh đã duyệt hay không.
+
+## Kiểm tra đã làm
+
+- `pixabay-core.test.mjs`: 58 test (dùng `fetch` giả và `io` trong bộ nhớ; không gọi mạng thật, theo CLAUDE.md): từ khóa cố định, trần mỗi lần/tải/tháng, sổ cái (kể cả hỏng, kể cả không ghi được), khóa ở tham số `key` của URL và không ở nơi nào khác (header, thân, máy chủ ảnh, log, kết quả, bản kê, sổ cái), lọc khóa dạng nguyên văn lẫn mã hóa URL khỏi lỗi mạng, `per_page` tối thiểu 3, `--type`, kiểm địa chỉ ảnh/trang (http, máy chủ giả mạo, tài khoản, cổng, `www`), kiểm đầu tệp ảnh và kích thước, đọc luồng ngắt khi vượt trần, chuyển hướng từng bước trong máy chủ cho phép (mã 301/302/303/307/308, địa chỉ tương đối, đích lạ, quá 3 bước), một lỗi là dừng (401/429/500, lỗi tải, lỗi ghi bản kê), sổ cái ghi trước khi tìm, dry-run không gọi mạng/không ghi, duyệt tay (cần người xem, chỉ ảnh đang chờ, tên tệp lạ, hash lệch/thiếu, gộp `approved.json`), chuẩn hóa `--out`, tên `--ledger`.
+- Chạy CLI thật không có khóa: dry-run, `--run` thiếu khóa, `--out=.img-out/../src` và `--approved-dir=public` bị từ chối.
+- Chèn lỗi thử 66 chỗ có nghĩa (khóa ra khỏi URL hay vào header, theo chuyển hướng tự động, kiểm đích chuyển hướng và số bước, máy chủ/giao thức ảnh, đầu tệp ảnh, kích thước và đọc luồng, hủy thân phản hồi, các dạng khóa bị lọc, 429, sổ cái ghi sau/ghi lỗi, không dừng sau lỗi, hash/trạng thái/người xem/tên tệp, gộp `approved.json`, chuẩn hóa `--out`, tên `--ledger`, ký tự điều khiển/bidi, biên độ dài URL, trần, log/lỗi không lọc khóa...): đều làm test đỏ, sau khi thêm test cho các chỗ sống sót ở các vòng. `reviewer` và `security-auditor` đã rà; các điểm đáng sửa đã sửa (thêm dạng `+` và mã chữ thường vào bộ lọc khóa, hủy thân phản hồi không dùng, sổ cái không được trùng `manifest.json`, biên độ dài URL, tên test).
+
+## Giới hạn, chưa kiểm chứng
+
+- **Hình dạng API (địa chỉ `https://pixabay.com/api/`, tham số `key`/`q`/`image_type`/`safesearch`/`per_page`/`lang`, phản hồi `hits[].id/pageURL/largeImageURL/user/user_id/tags/type`, máy chủ ảnh `pixabay.com`/`cdn.pixabay.com`, tiêu đề `X-RateLimit-Remaining`) viết theo tài liệu Pixabay tôi đọc ngày 2026-10-20, chưa kiểm với API thật.** Nếu API trả lỗi 4xx hoặc sai dạng, báo lại để sửa. Việc `largeImageURL` có chuyển hướng hay không, và có cần tiêu đề đặc biệt khi tải ảnh hay không, **chưa biết**; script đã cho phép chuyển hướng trong hai máy chủ của Pixabay.
+- Chưa biết: ảnh nào Pixabay trả cho các từ khóa này, chất lượng và độ phù hợp trẻ em, kích thước tệp thật, độ trễ.
+- Chưa có tích hợp vào theme/renderer; ảnh chỉ là thử nghiệm. Hai theme hiện dùng SVG vẽ bằng code, không dùng ảnh ngoài.
+- Không thêm thư viện nào (dùng `fetch`, `node:fs`, `node:path`, `node:crypto`).
+- **Dữ liệu từ Pixabay chưa được thoát HTML:** tên tác giả và thẻ mô tả do người dùng Pixabay đặt, được lưu nguyên (đã bỏ ký tự điều khiển) vào `approved.json`. Nếu sau này hiển thị chúng trong giao diện thì phải thoát HTML. Chưa kiểm: `pixabay.com` (ngoài `cdn.pixabay.com`) có cần nằm trong danh sách máy chủ ảnh hay không (script cho phép cả hai; chỉ ảnh đúng đầu tệp mới được lưu).
+- **Chưa sửa (ghi chú):** trần chỉ là rào chắn cho người dùng trung thực; không dùng `realpath`/`lstat` (liên kết tượng trưng); khe TOCTOU nhỏ giữa lúc kiểm hash và lúc sao ảnh; `sha256` nằm cùng bản kê trong `.img-out` nên không chống được người đã có quyền ghi ở đó; phản hồi tìm kiếm JSON không giới hạn kích thước đọc; `--reviewer` chỉ là tên tự khai, `approved.json` không phải bằng chứng an toàn với bên thứ ba; lớp CLI `pixabay-search.mjs` (đọc tệp env, ghi/sao tệp thật, mã thoát) không có test tự động.

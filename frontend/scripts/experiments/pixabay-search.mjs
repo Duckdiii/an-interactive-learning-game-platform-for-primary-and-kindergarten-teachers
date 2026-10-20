@@ -1,22 +1,22 @@
 /**
- * T8.2: tìm và tải ảnh minh họa từ Pexels API, có duyệt tay (CHẠY CỤC BỘ bằng Node, không dùng trong trình duyệt).
+ * T8.2: tìm và tải ảnh minh họa từ Pixabay API, có duyệt tay (CHẠY CỤC BỘ bằng Node, không dùng trong trình duyệt).
  *
- *   node scripts/experiments/pexels-search.mjs                                  # chạy thử: chỉ lập kế hoạch, không gọi mạng
- *   node scripts/experiments/pexels-search.mjs --run --only=cat --only=dog      # tìm và tải ảnh về frontend/.img-out/pending/
- *   node scripts/experiments/pexels-search.mjs --approve=cat-123 --reviewer="Tên"   # sau khi BẠN xem ảnh
+ *   node scripts/experiments/pixabay-search.mjs                                  # chạy thử: chỉ lập kế hoạch, không gọi mạng
+ *   node scripts/experiments/pixabay-search.mjs --run --only=cat --only=dog      # tìm và tải ảnh về frontend/.img-out/pending/
+ *   node scripts/experiments/pixabay-search.mjs --approve=cat-123 --reviewer="Tên"   # sau khi BẠN xem ảnh
  *
- * Khóa: biến môi trường PEXELS_API_KEY, hoặc tệp frontend/.env.pexels.local (đã bị .gitignore). Không bao giờ để khóa trong mã,
- * log hay biến VITE_*. Xem docs/experiments/results/t8-2-pexels/README.md.
+ * Khóa: biến môi trường PIXABAY_API_KEY, hoặc tệp frontend/.env.pixabay.local (đã bị .gitignore). Không bao giờ để khóa trong mã,
+ * log hay biến VITE_*. Xem docs/experiments/results/t8-2-pixabay/README.md.
  */
 import { createHash } from 'node:crypto'
 import fs from 'node:fs/promises'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { isInside, KEY_ENV, parseEnvVar, run } from './pexels-core.mjs'
+import { isInside, KEY_ENV, parseEnvVar, run } from './pixabay-core.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
-const ENV_FILE = path.join(ROOT, '.env.pexels.local')
+const ENV_FILE = path.join(ROOT, '.env.pixabay.local')
 // Chỉ đọc ĐÚNG biến khóa từ tệp (không nạp biến khác); biến đã có trong môi trường được ưu tiên.
 if (existsSync(ENV_FILE) && !process.env[KEY_ENV]) {
   try {
@@ -32,7 +32,7 @@ const ALLOWED_ROOTS = [ROOT, path.resolve(ROOT, '../docs/experiments/results')]
 const PINNED = {
   out: [path.join(ROOT, '.img-out')],
   ledger: [ROOT], // tên tệp đã được lõi giới hạn ở `.img-ledger*.json` hoặc `.json` trong `.img-out`
-  approved: [path.resolve(ROOT, '../docs/experiments/results/t8-2-pexels')],
+  approved: [path.resolve(ROOT, '../docs/experiments/results/t8-2-pixabay')],
 }
 const resolve = (p, kind) => {
   const full = path.isAbsolute(p) ? p : path.join(ROOT, p)
@@ -72,12 +72,12 @@ const io = {
   mkdir: async (dir) => fs.mkdir(resolve(dir), { recursive: true }),
 }
 
-const defaultApprovedDir = path.resolve(ROOT, '../docs/experiments/results/t8-2-pexels/approved')
+const defaultApprovedDir = path.resolve(ROOT, '../docs/experiments/results/t8-2-pixabay/approved')
 const result = await run({ argv: process.argv.slice(2), env: process.env, fetchFn: fetch, io, log: (line) => console.log(line), defaultApprovedDir })
 if (result.error) {
   console.error(`LỖI (${result.mode}): ${result.error}`)
   process.exitCode = 1
 } else if (result.mode === 'run') {
   const remaining = result.totals.rateLimitRemaining
-  console.log(`Xong: ${result.totals.searches} lần tìm, ${result.totals.pending} ảnh chờ bạn xem ở ${resolve(result.outDir)}/pending (bị .gitignore). Chưa có ảnh nào được duyệt hay commit.${remaining === null ? '' : ` Pexels báo còn ${remaining} lần gọi trong kỳ hạn mức.`}`)
+  console.log(`Xong: ${result.totals.searches} lần tìm, ${result.totals.pending} ảnh chờ bạn xem ở ${resolve(result.outDir)}/pending (bị .gitignore). Chưa có ảnh nào được duyệt hay commit.${remaining === null ? '' : ` Pixabay báo còn ${remaining} lần gọi trong kỳ hạn mức.`}`)
 }
