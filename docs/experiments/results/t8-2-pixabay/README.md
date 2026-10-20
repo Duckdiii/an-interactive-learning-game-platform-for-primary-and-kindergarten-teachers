@@ -1,6 +1,14 @@
 # T8.2: ảnh minh họa từ Pixabay API (script cục bộ, duyệt tay) (2026-10-20)
 
-**Trạng thái: script và test đã xong; chưa có kết quả gọi API thật** (xem «Việc bạn cần làm»). Chưa có ảnh nào được xem hay duyệt. Việc chạy, **xem ảnh bằng mắt** và duyệt là việc của bạn (và của thầy/Cô Thơ).
+**Trạng thái (2026-10-20): script và test đã xong; ĐÃ GỌI PIXABAY THẬT MỘT LẦN (từ khóa `cat`, 1 lần tìm), tải được 3 ảnh về chờ duyệt; CHƯA AI DUYỆT ẢNH NÀO.** Việc **xem ảnh bằng mắt** và duyệt là việc của bạn (và của thầy/Cô Thơ). Số đo thật và quan sát ở mục «Kết quả chạy thật».
+
+## Kết quả chạy thật (2026-10-20, `--run --only=cat`)
+
+- **1 lần tìm, 3 ảnh tải về, không lỗi.** Pixabay báo còn 99 lần gọi (khớp hạn mức 100 yêu cầu mỗi 60 giây theo tài liệu; số này là của cửa sổ 60 giây, không phải hạn mức tháng). Sổ cái ghi `searches: 1`.
+- **API đúng như tài liệu ở mức đã chạy:** khóa ở tham số `key`, phản hồi có `hits[]` với `id`, `pageURL`, `largeImageURL`, `user`, `tags`, `type`; `type` của cả 3 ảnh là `illustration`; tải `largeImageURL` thành công và qua kiểm đầu tệp (1 PNG, 2 JPEG). Script không ghi lại có chuyển hướng hay không nên **chưa biết ảnh có bị chuyển hướng**; việc cho phép chuyển hướng trong hai máy chủ của Pixabay chưa bị thử thách.
+- **Số đo:** `cat-8575768.png` 903.260 byte (1024×1280), tải 3,5 giây; `cat-8415620.jpg` 61.524 byte (1280×1280), 0,7 giây; `cat-9317796.jpg` 144.390 byte (896×1280), 1,0 giây. Ảnh lớn nhất tối đa 1280 px theo `largeImageURL`.
+- **Quan sát (của tôi, chỉ để bạn tham khảo; việc duyệt là của bạn):** cả 3 ảnh là hình vẽ phẳng, gần phong cách game hơn ảnh chụp, nhưng **không ảnh nào là «một vật ở giữa trên nền trơn»**: ảnh 1 là mèo đen ló đầu (bố cục cắt, nền vàng), ảnh 2 là mèo ngồi trên chồng sách (thêm nhiều vật khác), ảnh 3 là hai mèo ló sau tấm màn (áp phích, bố cục dọc, nền nhiều mảng). **Thẻ của ảnh 1 có `ai generated`**: Pixabay có chứa hình do AI sinh, và trang giấy phép tôi đọc không nói gì về nội dung AI; script không lọc được theo thẻ này, người duyệt cần xem thẻ từng ảnh (có trong `.img-out/manifest.json` và `approved.json`).
+- Ảnh tải về nằm ở `frontend/.img-out/pending/` (đã bị `.gitignore`).
 
 **Vì sao Pixabay, và vì sao chỉ là tạm thời:** thiết kế sản phẩm đã chốt là Backend lấy ảnh từ **Pexels** (`docs/game-json-dsl-v1.0.0.md` dòng 80, `docs/openapi/openapi.yaml`, entity `QuestionGame`). Ngày 2026-10-20 trang cấp khóa của Pexels báo «New API key issuance is currently paused», nên bạn quyết định **tạm thay Pexels bằng Pixabay** cho thử nghiệm. Đây chỉ là thử nghiệm trên nhánh này: **chưa đổi gì ở contract hay tài liệu sản phẩm**; nếu sản phẩm thật dùng Pixabay thì cần nhóm đồng ý và sửa các tài liệu trên. Script Pexels cũ (khóa ở header, máy chủ ảnh `images.pexels.com`) còn trong lịch sử git (commit `115db00`), khôi phục được khi Pexels mở lại.
 
@@ -51,8 +59,8 @@ Theo trang tóm tắt giấy phép Pixabay tôi đọc ngày 2026-10-20: dùng m
 
 ## Giới hạn, chưa kiểm chứng
 
-- **Hình dạng API (địa chỉ `https://pixabay.com/api/`, tham số `key`/`q`/`image_type`/`safesearch`/`per_page`/`lang`, phản hồi `hits[].id/pageURL/largeImageURL/user/user_id/tags/type`, máy chủ ảnh `pixabay.com`/`cdn.pixabay.com`, tiêu đề `X-RateLimit-Remaining`) viết theo tài liệu Pixabay tôi đọc ngày 2026-10-20, chưa kiểm với API thật.** Nếu API trả lỗi 4xx hoặc sai dạng, báo lại để sửa. Việc `largeImageURL` có chuyển hướng hay không, và có cần tiêu đề đặc biệt khi tải ảnh hay không, **chưa biết**; script đã cho phép chuyển hướng trong hai máy chủ của Pixabay.
-- Chưa biết: ảnh nào Pixabay trả cho các từ khóa này, chất lượng và độ phù hợp trẻ em, kích thước tệp thật, độ trễ.
+- **Hình dạng API đã được kiểm ở mức đã chạy một lần với từ khóa `cat`** (tham số `key`/`q`/`image_type`/`safesearch`/`per_page`/`lang`, phản hồi `hits[]`, `X-RateLimit-Remaining`, tải `largeImageURL`). **Chưa kiểm:** các từ khóa còn lại (`dog`, `beach ball`, `cardboard box`, `wooden table`, `bee`), `--type=photo`/`vector`, lỗi 4xx/429 thật, và việc `largeImageURL` có chuyển hướng hay không (script không ghi lại số bước chuyển hướng; máy chủ ảnh thực tế chưa được log). Nếu gặp lỗi, báo lại để sửa.
+- Chưa biết: ảnh của các từ khóa khác, độ phù hợp trẻ em của từng ảnh (cần người xem), tỷ lệ ảnh do AI sinh trong kết quả.
 - Chưa có tích hợp vào theme/renderer; ảnh chỉ là thử nghiệm. Hai theme hiện dùng SVG vẽ bằng code, không dùng ảnh ngoài.
 - Không thêm thư viện nào (dùng `fetch`, `node:fs`, `node:path`, `node:crypto`).
 - **Dữ liệu từ Pixabay chưa được thoát HTML:** tên tác giả và thẻ mô tả do người dùng Pixabay đặt, được lưu nguyên (đã bỏ ký tự điều khiển) vào `approved.json`. Nếu sau này hiển thị chúng trong giao diện thì phải thoát HTML. Chưa kiểm: `pixabay.com` (ngoài `cdn.pixabay.com`) có cần nằm trong danh sách máy chủ ảnh hay không (script cho phép cả hai; chỉ ảnh đúng đầu tệp mới được lưu).
