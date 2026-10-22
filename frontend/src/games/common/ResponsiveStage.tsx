@@ -8,6 +8,8 @@ interface ResponsiveStageProps {
   width: number
   height: number
   children: ReactNode
+  /** Phóng to tối đa bấy nhiêu lần khi khung chứa rộng hơn `width`. Mặc định 1 (không phóng to), đúng hành vi cũ của mọi renderer. */
+  maxScale?: number
 }
 
 /**
@@ -17,7 +19,7 @@ interface ResponsiveStageProps {
  * Không phóng to vượt kích thước thiết kế trên màn hình lớn hơn (scale tối đa 1).
  * Dùng chung cho mọi renderer, không chỉ riêng Quiz.
  */
-export default function ResponsiveStage({ width, height, children }: ResponsiveStageProps) {
+export default function ResponsiveStage({ width, height, children, maxScale = 1 }: ResponsiveStageProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
 
@@ -28,7 +30,7 @@ export default function ResponsiveStage({ width, height, children }: ResponsiveS
     const updateScale = () => {
       const availableWidth = container.clientWidth
       if (availableWidth > 0) {
-        setScale(Math.min(1, availableWidth / width))
+        setScale(Math.min(maxScale, availableWidth / width))
       }
     }
 
@@ -36,7 +38,7 @@ export default function ResponsiveStage({ width, height, children }: ResponsiveS
     const observer = new ResizeObserver(updateScale)
     observer.observe(container)
     return () => observer.disconnect()
-  }, [width])
+  }, [width, maxScale])
 
   return (
     <div ref={containerRef} style={{ width: '100%' }}>

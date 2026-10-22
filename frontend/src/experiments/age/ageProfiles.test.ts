@@ -35,6 +35,18 @@ describe('AGE_PROFILES', () => {
     expect(b.maxOptions).toBeLessThanOrEqual(c.maxOptions)
   })
 
+  it('gợi ý theo thời gian: trẻ càng nhỏ gợi ý càng sớm (5–7 giây); nhóm lớn nhất tắt gợi ý', () => {
+    const [a, b, c] = AGE_BANDS.map((band) => AGE_PROFILES[band].hintDelaySeconds)
+    expect(a).toBe(5)
+    expect(b).toBe(7)
+    expect(c).toBeNull()
+    for (const delay of [a, b]) {
+      expect(delay).toBeGreaterThanOrEqual(5)
+      expect(delay).toBeLessThanOrEqual(7)
+    }
+    expect(a!).toBeLessThan(b!)
+  })
+
   it('giới hạn không vượt giới hạn của DSL (câu ≤ 200 ký tự) và đủ cho MATCHING tối thiểu 3 cặp', () => {
     for (const band of AGE_BANDS) {
       expect(AGE_PROFILES[band].maxQuestionChars).toBeLessThanOrEqual(200)

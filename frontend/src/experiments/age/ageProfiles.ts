@@ -25,6 +25,11 @@ export interface AgeProfile {
   maxQuestionChars: number
   /** Số lựa chọn tối đa cùng lúc trên màn. */
   maxOptions: number
+  /**
+   * Sau bao nhiêu giây trẻ KHÔNG chạm gì thì trò làm sáng nhẹ đáp án gợi ý (chỉ trò có gợi ý, ví dụ Vườn hoa). `null` = tắt gợi ý theo thời gian
+   * (nhóm lớn tự làm bài, không lộ đáp án). ĐỀ XUẤT của thử nghiệm, chưa được chuyên gia sư phạm xác nhận.
+   */
+  hintDelaySeconds: number | null
 }
 
 export const AGE_PROFILES: Readonly<Record<AgeBand, AgeProfile>> = {
@@ -37,6 +42,7 @@ export const AGE_PROFILES: Readonly<Record<AgeBand, AgeProfile>> = {
     maxCharsPerCard: 12,
     maxQuestionChars: 60,
     maxOptions: 3,
+    hintDelaySeconds: 5,
   },
   GRADE_1_2: {
     band: 'GRADE_1_2',
@@ -47,6 +53,7 @@ export const AGE_PROFILES: Readonly<Record<AgeBand, AgeProfile>> = {
     maxCharsPerCard: 20,
     maxQuestionChars: 100,
     maxOptions: 4,
+    hintDelaySeconds: 7,
   },
   GRADE_3_5: {
     band: 'GRADE_3_5',
@@ -57,6 +64,7 @@ export const AGE_PROFILES: Readonly<Record<AgeBand, AgeProfile>> = {
     maxCharsPerCard: 30,
     maxQuestionChars: 200,
     maxOptions: 4,
+    hintDelaySeconds: null,
   },
 }
 

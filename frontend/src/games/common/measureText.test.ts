@@ -45,6 +45,13 @@ describe('measureWrappedTextHeight', () => {
     expect(textCtor).toHaveBeenCalledWith({ text: 'x', fontSize: 26, width: 200, fontStyle: 'bold' })
   })
 
+  it('truyền fontFamily cho node tạm khi có; không có thì không đặt (giữ mặc định của Konva)', () => {
+    measureWrappedTextHeight({ text: 'x', fontSize: 26, width: 200, fontFamily: '"Nunito", Arial' })
+    expect(textCtor).toHaveBeenLastCalledWith({ text: 'x', fontSize: 26, width: 200, fontFamily: '"Nunito", Arial' })
+    measureWrappedTextHeight({ text: 'x', fontSize: 26, width: 200 })
+    expect(textCtor).toHaveBeenLastCalledWith({ text: 'x', fontSize: 26, width: 200 })
+  })
+
   it('trả null khi Konva ném lỗi (không đo được, ví dụ không có Canvas)', () => {
     nextHeight = () => {
       throw new Error('measureText is not available')

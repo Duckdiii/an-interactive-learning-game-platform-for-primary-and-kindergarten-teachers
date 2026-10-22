@@ -7,6 +7,8 @@ interface MeasureTextOptions {
   width: number
   /** Kiểu chữ của node thật (ví dụ `'bold'`): chữ đậm rộng hơn nên wrap khác chữ thường. */
   fontStyle?: string
+  /** Họ phông của node thật: font tùy chỉnh rộng hơn hay hẹp hơn Arial nên số dòng wrap khác. Bỏ trống = mặc định của Konva. */
+  fontFamily?: string
 }
 
 /**
@@ -20,9 +22,10 @@ export function measureWrappedTextHeight({
   fontSize,
   width,
   fontStyle,
+  fontFamily,
 }: MeasureTextOptions): number | null {
   try {
-    const node = new Konva.Text({ text, fontSize, width, ...(fontStyle ? { fontStyle } : {}) })
+    const node = new Konva.Text({ text, fontSize, width, ...(fontStyle ? { fontStyle } : {}), ...(fontFamily ? { fontFamily } : {}) })
     const height = node.height()
     node.destroy()
     return Number.isFinite(height) && height > 0 ? height : null
