@@ -1,0 +1,2699 @@
+[
+  {
+    "slug": "cat-face",
+    "name": "con mèo",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "meo",
+      "mèo",
+      "cat"
+    ]
+  },
+  {
+    "slug": "dog-face",
+    "name": "con chó",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "cho",
+      "chó",
+      "dog",
+      "cún"
+    ]
+  },
+  {
+    "slug": "cow-face",
+    "name": "con bò",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "bo",
+      "cow"
+    ]
+  },
+  {
+    "slug": "pig-face",
+    "name": "con heo",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "lon",
+      "lợn",
+      "con lợn",
+      "pig"
+    ]
+  },
+  {
+    "slug": "horse-face",
+    "name": "con ngựa",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "ngua",
+      "horse"
+    ]
+  },
+  {
+    "slug": "rabbit-face",
+    "name": "con thỏ",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "tho",
+      "rabbit"
+    ]
+  },
+  {
+    "slug": "mouse-face",
+    "name": "con chuột",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "chuot",
+      "mouse"
+    ]
+  },
+  {
+    "slug": "hamster",
+    "name": "con chuột hamster",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "hamster"
+    ]
+  },
+  {
+    "slug": "ewe",
+    "name": "con cừu",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "cuu",
+      "sheep"
+    ]
+  },
+  {
+    "slug": "goat",
+    "name": "con dê",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "de",
+      "goat"
+    ]
+  },
+  {
+    "slug": "water-buffalo",
+    "name": "con trâu",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "trau",
+      "buffalo"
+    ]
+  },
+  {
+    "slug": "ox",
+    "name": "con bò đực",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "bo duc",
+      "ox"
+    ]
+  },
+  {
+    "slug": "elephant",
+    "name": "con voi",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "voi",
+      "elephant"
+    ]
+  },
+  {
+    "slug": "lion",
+    "name": "con sư tử",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "su tu",
+      "lion"
+    ]
+  },
+  {
+    "slug": "tiger-face",
+    "name": "con hổ",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "ho",
+      "cop",
+      "cọp",
+      "tiger"
+    ]
+  },
+  {
+    "slug": "monkey-face",
+    "name": "con khỉ",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "khi",
+      "monkey"
+    ]
+  },
+  {
+    "slug": "bear",
+    "name": "con gấu",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "gau",
+      "bear"
+    ]
+  },
+  {
+    "slug": "panda",
+    "name": "con gấu trúc",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "gau truc",
+      "panda"
+    ]
+  },
+  {
+    "slug": "giraffe",
+    "name": "con hươu cao cổ",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "huou cao co",
+      "giraffe"
+    ]
+  },
+  {
+    "slug": "zebra",
+    "name": "con ngựa vằn",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "ngua van",
+      "zebra"
+    ]
+  },
+  {
+    "slug": "fox",
+    "name": "con cáo",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "cao",
+      "fox"
+    ]
+  },
+  {
+    "slug": "wolf",
+    "name": "con sói",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "soi",
+      "wolf"
+    ]
+  },
+  {
+    "slug": "deer",
+    "name": "con nai",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "nai",
+      "deer"
+    ]
+  },
+  {
+    "slug": "kangaroo",
+    "name": "con chuột túi",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "chuot tui",
+      "kangaroo"
+    ]
+  },
+  {
+    "slug": "koala",
+    "name": "con gấu túi",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "gau tui",
+      "koala"
+    ]
+  },
+  {
+    "slug": "hippopotamus",
+    "name": "con hà mã",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "ha ma",
+      "hippo"
+    ]
+  },
+  {
+    "slug": "rhinoceros",
+    "name": "con tê giác",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "te giac",
+      "rhino"
+    ]
+  },
+  {
+    "slug": "camel",
+    "name": "con lạc đà",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "lac da",
+      "camel"
+    ]
+  },
+  {
+    "slug": "chipmunk",
+    "name": "con sóc",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "soc",
+      "squirrel",
+      "chipmunk"
+    ]
+  },
+  {
+    "slug": "hedgehog",
+    "name": "con nhím",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "nhim",
+      "hedgehog"
+    ]
+  },
+  {
+    "slug": "bat",
+    "name": "con dơi",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "doi",
+      "bat"
+    ]
+  },
+  {
+    "slug": "dragon",
+    "name": "con rồng",
+    "category": "Con vật nuôi và thú",
+    "aliases": [
+      "rong",
+      "dragon"
+    ]
+  },
+  {
+    "slug": "chicken",
+    "name": "con gà",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ga",
+      "chicken"
+    ]
+  },
+  {
+    "slug": "rooster",
+    "name": "con gà trống",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ga trong",
+      "rooster"
+    ]
+  },
+  {
+    "slug": "baby-chick",
+    "name": "con gà con",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ga con",
+      "chick"
+    ]
+  },
+  {
+    "slug": "duck",
+    "name": "con vịt",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "vit",
+      "duck"
+    ]
+  },
+  {
+    "slug": "goose",
+    "name": "con ngỗng",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ngong",
+      "goose"
+    ]
+  },
+  {
+    "slug": "eagle",
+    "name": "con đại bàng",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "dai bang",
+      "eagle"
+    ]
+  },
+  {
+    "slug": "owl",
+    "name": "con cú",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "cu",
+      "owl"
+    ]
+  },
+  {
+    "slug": "parrot",
+    "name": "con vẹt",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "vet",
+      "parrot"
+    ]
+  },
+  {
+    "slug": "penguin",
+    "name": "con chim cánh cụt",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "chim canh cut",
+      "penguin"
+    ]
+  },
+  {
+    "slug": "dove",
+    "name": "con bồ câu",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "bo cau",
+      "dove"
+    ]
+  },
+  {
+    "slug": "bird",
+    "name": "con chim",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "chim",
+      "bird"
+    ]
+  },
+  {
+    "slug": "peacock",
+    "name": "con công",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "peacock"
+    ]
+  },
+  {
+    "slug": "swan",
+    "name": "con thiên nga",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "thien nga",
+      "swan"
+    ]
+  },
+  {
+    "slug": "turkey",
+    "name": "con gà tây",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ga tay",
+      "turkey"
+    ]
+  },
+  {
+    "slug": "frog",
+    "name": "con ếch",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ech",
+      "frog"
+    ]
+  },
+  {
+    "slug": "turtle",
+    "name": "con rùa",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "rua",
+      "turtle"
+    ]
+  },
+  {
+    "slug": "snake",
+    "name": "con rắn",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ran",
+      "snake"
+    ]
+  },
+  {
+    "slug": "crocodile",
+    "name": "con cá sấu",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ca sau",
+      "crocodile"
+    ]
+  },
+  {
+    "slug": "lizard",
+    "name": "con thằn lằn",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "than lan",
+      "lizard"
+    ]
+  },
+  {
+    "slug": "fish",
+    "name": "con cá",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ca",
+      "fish"
+    ]
+  },
+  {
+    "slug": "tropical-fish",
+    "name": "cá nhiệt đới",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ca nhiet doi",
+      "tropical fish"
+    ]
+  },
+  {
+    "slug": "dolphin",
+    "name": "cá heo",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ca heo",
+      "dolphin"
+    ]
+  },
+  {
+    "slug": "whale",
+    "name": "cá voi",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ca voi",
+      "whale"
+    ]
+  },
+  {
+    "slug": "shark",
+    "name": "cá mập",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "ca map",
+      "shark"
+    ]
+  },
+  {
+    "slug": "octopus",
+    "name": "con bạch tuộc",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "bach tuoc",
+      "octopus"
+    ]
+  },
+  {
+    "slug": "crab",
+    "name": "con cua",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "cua",
+      "crab"
+    ]
+  },
+  {
+    "slug": "shrimp",
+    "name": "con tôm",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "tom",
+      "shrimp"
+    ]
+  },
+  {
+    "slug": "snail",
+    "name": "con ốc sên",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "oc sen",
+      "snail"
+    ]
+  },
+  {
+    "slug": "spiral-shell",
+    "name": "vỏ ốc",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "vo oc",
+      "shell"
+    ]
+  },
+  {
+    "slug": "jellyfish",
+    "name": "con sứa",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "jellyfish"
+    ]
+  },
+  {
+    "slug": "seal",
+    "name": "con hải cẩu",
+    "category": "Chim, bò sát, thủy sinh",
+    "aliases": [
+      "hai cau",
+      "seal"
+    ]
+  },
+  {
+    "slug": "honeybee",
+    "name": "con ong",
+    "category": "Côn trùng",
+    "aliases": [
+      "ong",
+      "bee"
+    ]
+  },
+  {
+    "slug": "butterfly",
+    "name": "con bướm",
+    "category": "Côn trùng",
+    "aliases": [
+      "buom",
+      "butterfly"
+    ]
+  },
+  {
+    "slug": "lady-beetle",
+    "name": "con bọ rùa",
+    "category": "Côn trùng",
+    "aliases": [
+      "bo rua",
+      "ladybug"
+    ]
+  },
+  {
+    "slug": "ant",
+    "name": "con kiến",
+    "category": "Côn trùng",
+    "aliases": [
+      "kien",
+      "ant"
+    ]
+  },
+  {
+    "slug": "spider",
+    "name": "con nhện",
+    "category": "Côn trùng",
+    "aliases": [
+      "nhen",
+      "spider"
+    ]
+  },
+  {
+    "slug": "bug",
+    "name": "con bọ",
+    "category": "Côn trùng",
+    "aliases": [
+      "bug"
+    ]
+  },
+  {
+    "slug": "cricket",
+    "name": "con dế",
+    "category": "Côn trùng",
+    "aliases": [
+      "cricket"
+    ]
+  },
+  {
+    "slug": "mosquito",
+    "name": "con muỗi",
+    "category": "Côn trùng",
+    "aliases": [
+      "mosquito"
+    ]
+  },
+  {
+    "slug": "worm",
+    "name": "con giun",
+    "category": "Côn trùng",
+    "aliases": [
+      "giun",
+      "worm"
+    ]
+  },
+  {
+    "slug": "beetle",
+    "name": "con bọ cánh cứng",
+    "category": "Côn trùng",
+    "aliases": [
+      "bo canh cung",
+      "beetle"
+    ]
+  },
+  {
+    "slug": "red-apple",
+    "name": "quả táo",
+    "category": "Trái cây",
+    "aliases": [
+      "tao",
+      "apple"
+    ]
+  },
+  {
+    "slug": "banana",
+    "name": "quả chuối",
+    "category": "Trái cây",
+    "aliases": [
+      "chuoi",
+      "banana"
+    ]
+  },
+  {
+    "slug": "grapes",
+    "name": "chùm nho",
+    "category": "Trái cây",
+    "aliases": [
+      "nho",
+      "grapes"
+    ]
+  },
+  {
+    "slug": "watermelon",
+    "name": "quả dưa hấu",
+    "category": "Trái cây",
+    "aliases": [
+      "dua hau",
+      "watermelon"
+    ]
+  },
+  {
+    "slug": "strawberry",
+    "name": "quả dâu tây",
+    "category": "Trái cây",
+    "aliases": [
+      "dau tay",
+      "strawberry"
+    ]
+  },
+  {
+    "slug": "pineapple",
+    "name": "quả dứa",
+    "category": "Trái cây",
+    "aliases": [
+      "dua",
+      "thom",
+      "thơm",
+      "pineapple"
+    ]
+  },
+  {
+    "slug": "mango",
+    "name": "quả xoài",
+    "category": "Trái cây",
+    "aliases": [
+      "xoai",
+      "mango"
+    ]
+  },
+  {
+    "slug": "peach",
+    "name": "quả đào",
+    "category": "Trái cây",
+    "aliases": [
+      "dao",
+      "peach"
+    ]
+  },
+  {
+    "slug": "pear",
+    "name": "quả lê",
+    "category": "Trái cây",
+    "aliases": [
+      "le",
+      "pear"
+    ]
+  },
+  {
+    "slug": "cherries",
+    "name": "quả anh đào",
+    "category": "Trái cây",
+    "aliases": [
+      "anh dao",
+      "cherry"
+    ]
+  },
+  {
+    "slug": "lemon",
+    "name": "quả chanh",
+    "category": "Trái cây",
+    "aliases": [
+      "chanh",
+      "lemon"
+    ]
+  },
+  {
+    "slug": "coconut",
+    "name": "quả dừa",
+    "category": "Trái cây",
+    "aliases": [
+      "coconut"
+    ]
+  },
+  {
+    "slug": "kiwi-fruit",
+    "name": "quả kiwi",
+    "category": "Trái cây",
+    "aliases": [
+      "kiwi"
+    ]
+  },
+  {
+    "slug": "melon",
+    "name": "quả dưa lưới",
+    "category": "Trái cây",
+    "aliases": [
+      "dua luoi",
+      "melon"
+    ]
+  },
+  {
+    "slug": "tangerine",
+    "name": "quả cam",
+    "category": "Trái cây",
+    "aliases": [
+      "cam",
+      "quyt",
+      "quýt",
+      "quả quýt",
+      "orange",
+      "tangerine"
+    ]
+  },
+  {
+    "slug": "green-apple",
+    "name": "quả táo xanh",
+    "category": "Trái cây",
+    "aliases": [
+      "tao xanh",
+      "green apple"
+    ]
+  },
+  {
+    "slug": "blueberries",
+    "name": "quả việt quất",
+    "category": "Trái cây",
+    "aliases": [
+      "viet quat",
+      "blueberry"
+    ]
+  },
+  {
+    "slug": "avocado",
+    "name": "quả bơ",
+    "category": "Trái cây",
+    "aliases": [
+      "avocado"
+    ]
+  },
+  {
+    "slug": "carrot",
+    "name": "củ cà rốt",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "ca rot",
+      "carrot"
+    ]
+  },
+  {
+    "slug": "tomato",
+    "name": "quả cà chua",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "ca chua",
+      "tomato"
+    ]
+  },
+  {
+    "slug": "ear-of-corn",
+    "name": "bắp ngô",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "ngo",
+      "bap",
+      "corn"
+    ]
+  },
+  {
+    "slug": "potato",
+    "name": "củ khoai tây",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "khoai tay",
+      "potato"
+    ]
+  },
+  {
+    "slug": "broccoli",
+    "name": "súp lơ xanh",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "sup lo",
+      "broccoli"
+    ]
+  },
+  {
+    "slug": "eggplant",
+    "name": "quả cà tím",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "ca tim",
+      "eggplant"
+    ]
+  },
+  {
+    "slug": "cucumber",
+    "name": "quả dưa chuột",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "dua chuot",
+      "cucumber"
+    ]
+  },
+  {
+    "slug": "hot-pepper",
+    "name": "quả ớt",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "ot",
+      "chili"
+    ]
+  },
+  {
+    "slug": "garlic",
+    "name": "củ tỏi",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "toi",
+      "garlic"
+    ]
+  },
+  {
+    "slug": "onion",
+    "name": "củ hành",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "hanh",
+      "onion"
+    ]
+  },
+  {
+    "slug": "mushroom",
+    "name": "cây nấm",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "mushroom"
+    ]
+  },
+  {
+    "slug": "leafy-green",
+    "name": "rau xanh",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "rau",
+      "vegetable"
+    ]
+  },
+  {
+    "slug": "bread",
+    "name": "bánh mì",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "banh mi",
+      "bread"
+    ]
+  },
+  {
+    "slug": "egg",
+    "name": "quả trứng",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "trung",
+      "egg"
+    ]
+  },
+  {
+    "slug": "cooked-rice",
+    "name": "bát cơm",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "com",
+      "rice"
+    ]
+  },
+  {
+    "slug": "glass-of-milk",
+    "name": "ly sữa",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "sua",
+      "milk"
+    ]
+  },
+  {
+    "slug": "cheese-wedge",
+    "name": "miếng phô mai",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "pho mai",
+      "cheese"
+    ]
+  },
+  {
+    "slug": "pizza",
+    "name": "bánh pizza",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "pizza"
+    ]
+  },
+  {
+    "slug": "birthday-cake",
+    "name": "bánh kem",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "banh kem",
+      "cake"
+    ]
+  },
+  {
+    "slug": "ice-cream",
+    "name": "cây kem",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "kem",
+      "ice cream"
+    ]
+  },
+  {
+    "slug": "candy",
+    "name": "cái kẹo",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "keo",
+      "candy"
+    ]
+  },
+  {
+    "slug": "cookie",
+    "name": "bánh quy",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "banh quy",
+      "cookie"
+    ]
+  },
+  {
+    "slug": "honey-pot",
+    "name": "hũ mật ong",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "mat ong",
+      "honey"
+    ]
+  },
+  {
+    "slug": "hamburger",
+    "name": "bánh hamburger",
+    "category": "Rau củ và thức ăn",
+    "aliases": [
+      "hamburger"
+    ]
+  },
+  {
+    "slug": "pencil",
+    "name": "cái bút chì",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "but chi",
+      "pencil"
+    ]
+  },
+  {
+    "slug": "pen",
+    "name": "cái bút",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "but",
+      "pen"
+    ]
+  },
+  {
+    "slug": "open-book",
+    "name": "quyển sách",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "sach",
+      "book"
+    ]
+  },
+  {
+    "slug": "books",
+    "name": "chồng sách",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "nhieu sach",
+      "books"
+    ]
+  },
+  {
+    "slug": "notebook",
+    "name": "quyển vở",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "vo",
+      "notebook"
+    ]
+  },
+  {
+    "slug": "straight-ruler",
+    "name": "cái thước",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "thuoc",
+      "ruler"
+    ]
+  },
+  {
+    "slug": "triangular-ruler",
+    "name": "ê ke",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "e ke",
+      "triangle ruler"
+    ]
+  },
+  {
+    "slug": "scissors",
+    "name": "cái kéo",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "keo cat",
+      "scissors"
+    ]
+  },
+  {
+    "slug": "paintbrush",
+    "name": "cọ vẽ",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "co ve",
+      "brush"
+    ]
+  },
+  {
+    "slug": "artist-palette",
+    "name": "bảng màu",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "bang mau",
+      "palette"
+    ]
+  },
+  {
+    "slug": "crayon",
+    "name": "bút sáp màu",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "but sap",
+      "crayon"
+    ]
+  },
+  {
+    "slug": "backpack",
+    "name": "cặp sách",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "cap sach",
+      "backpack"
+    ]
+  },
+  {
+    "slug": "paperclip",
+    "name": "cái kẹp giấy",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "kep giay",
+      "paperclip"
+    ]
+  },
+  {
+    "slug": "pushpin",
+    "name": "cái ghim",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "ghim",
+      "pushpin"
+    ]
+  },
+  {
+    "slug": "memo",
+    "name": "tờ giấy ghi chú",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "giay",
+      "note",
+      "memo"
+    ]
+  },
+  {
+    "slug": "abacus",
+    "name": "bàn tính",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "ban tinh",
+      "abacus"
+    ]
+  },
+  {
+    "slug": "laptop",
+    "name": "máy tính xách tay",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "may tinh",
+      "laptop"
+    ]
+  },
+  {
+    "slug": "microscope",
+    "name": "kính hiển vi",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "kinh hien vi",
+      "microscope"
+    ]
+  },
+  {
+    "slug": "telescope",
+    "name": "kính thiên văn",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "kinh thien van",
+      "telescope"
+    ]
+  },
+  {
+    "slug": "globe-showing-asia-australia",
+    "name": "trái đất",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "trai dat",
+      "qua dia cau",
+      "địa cầu",
+      "dia cau",
+      "globe",
+      "earth"
+    ]
+  },
+  {
+    "slug": "bar-chart",
+    "name": "biểu đồ cột",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "bieu do",
+      "chart"
+    ]
+  },
+  {
+    "slug": "light-bulb",
+    "name": "bóng đèn",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "bong den",
+      "bulb"
+    ]
+  },
+  {
+    "slug": "magnifying-glass-tilted-left",
+    "name": "kính lúp",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "kinh lup",
+      "magnifier"
+    ]
+  },
+  {
+    "slug": "school",
+    "name": "trường học",
+    "category": "Đồ dùng học tập",
+    "aliases": [
+      "truong",
+      "school"
+    ]
+  },
+  {
+    "slug": "automobile",
+    "name": "xe ô tô",
+    "category": "Phương tiện",
+    "aliases": [
+      "o to",
+      "xe hoi",
+      "car"
+    ]
+  },
+  {
+    "slug": "bus",
+    "name": "xe buýt",
+    "category": "Phương tiện",
+    "aliases": [
+      "xe buyt",
+      "bus"
+    ]
+  },
+  {
+    "slug": "taxi",
+    "name": "xe taxi",
+    "category": "Phương tiện",
+    "aliases": [
+      "taxi"
+    ]
+  },
+  {
+    "slug": "police-car",
+    "name": "xe cảnh sát",
+    "category": "Phương tiện",
+    "aliases": [
+      "canh sat",
+      "police car"
+    ]
+  },
+  {
+    "slug": "ambulance",
+    "name": "xe cứu thương",
+    "category": "Phương tiện",
+    "aliases": [
+      "cuu thuong",
+      "ambulance"
+    ]
+  },
+  {
+    "slug": "fire-engine",
+    "name": "xe cứu hỏa",
+    "category": "Phương tiện",
+    "aliases": [
+      "cuu hoa",
+      "fire engine"
+    ]
+  },
+  {
+    "slug": "delivery-truck",
+    "name": "xe tải",
+    "category": "Phương tiện",
+    "aliases": [
+      "xe tai",
+      "truck"
+    ]
+  },
+  {
+    "slug": "tractor",
+    "name": "máy kéo",
+    "category": "Phương tiện",
+    "aliases": [
+      "may keo",
+      "tractor"
+    ]
+  },
+  {
+    "slug": "bicycle",
+    "name": "xe đạp",
+    "category": "Phương tiện",
+    "aliases": [
+      "xe dap",
+      "bicycle"
+    ]
+  },
+  {
+    "slug": "motor-scooter",
+    "name": "xe máy",
+    "category": "Phương tiện",
+    "aliases": [
+      "xe may",
+      "scooter"
+    ]
+  },
+  {
+    "slug": "motorcycle",
+    "name": "xe mô tô",
+    "category": "Phương tiện",
+    "aliases": [
+      "mo to",
+      "motorcycle"
+    ]
+  },
+  {
+    "slug": "train",
+    "name": "tàu hỏa",
+    "category": "Phương tiện",
+    "aliases": [
+      "tau hoa",
+      "train"
+    ]
+  },
+  {
+    "slug": "airplane",
+    "name": "máy bay",
+    "category": "Phương tiện",
+    "aliases": [
+      "may bay",
+      "airplane"
+    ]
+  },
+  {
+    "slug": "helicopter",
+    "name": "máy bay trực thăng",
+    "category": "Phương tiện",
+    "aliases": [
+      "truc thang",
+      "helicopter"
+    ]
+  },
+  {
+    "slug": "rocket",
+    "name": "tên lửa",
+    "category": "Phương tiện",
+    "aliases": [
+      "ten lua",
+      "rocket"
+    ]
+  },
+  {
+    "slug": "sailboat",
+    "name": "thuyền buồm",
+    "category": "Phương tiện",
+    "aliases": [
+      "thuyen buom",
+      "sailboat"
+    ]
+  },
+  {
+    "slug": "ship",
+    "name": "tàu thủy",
+    "category": "Phương tiện",
+    "aliases": [
+      "tau thuy",
+      "ship"
+    ]
+  },
+  {
+    "slug": "speedboat",
+    "name": "ca nô",
+    "category": "Phương tiện",
+    "aliases": [
+      "ca no",
+      "speedboat"
+    ]
+  },
+  {
+    "slug": "horizontal-traffic-light",
+    "name": "đèn giao thông",
+    "category": "Phương tiện",
+    "aliases": [
+      "den giao thong",
+      "traffic light"
+    ]
+  },
+  {
+    "slug": "bus-stop",
+    "name": "trạm xe buýt",
+    "category": "Phương tiện",
+    "aliases": [
+      "tram xe buyt",
+      "bus stop"
+    ]
+  },
+  {
+    "slug": "sun",
+    "name": "mặt trời",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "mat troi",
+      "sun"
+    ]
+  },
+  {
+    "slug": "crescent-moon",
+    "name": "mặt trăng",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "mat trang",
+      "moon"
+    ]
+  },
+  {
+    "slug": "star",
+    "name": "ngôi sao",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "sao",
+      "star"
+    ]
+  },
+  {
+    "slug": "cloud",
+    "name": "đám mây",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "may",
+      "cloud"
+    ]
+  },
+  {
+    "slug": "rainbow",
+    "name": "cầu vồng",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "cau vong",
+      "rainbow"
+    ]
+  },
+  {
+    "slug": "umbrella-with-rain-drops",
+    "name": "cái ô và mưa",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "mua",
+      "rain"
+    ]
+  },
+  {
+    "slug": "snowflake",
+    "name": "bông tuyết",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "tuyet",
+      "snow"
+    ]
+  },
+  {
+    "slug": "droplet",
+    "name": "giọt nước",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "giot nuoc",
+      "water drop"
+    ]
+  },
+  {
+    "slug": "fire",
+    "name": "ngọn lửa",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "lua",
+      "fire"
+    ]
+  },
+  {
+    "slug": "high-voltage",
+    "name": "tia chớp",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "chop",
+      "lightning"
+    ]
+  },
+  {
+    "slug": "sunflower",
+    "name": "hoa hướng dương",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "huong duong",
+      "sunflower"
+    ]
+  },
+  {
+    "slug": "rose",
+    "name": "hoa hồng",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "hoa hong",
+      "rose"
+    ]
+  },
+  {
+    "slug": "tulip",
+    "name": "hoa tulip",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "tulip"
+    ]
+  },
+  {
+    "slug": "cherry-blossom",
+    "name": "hoa anh đào",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "hoa dao",
+      "cherry blossom"
+    ]
+  },
+  {
+    "slug": "blossom",
+    "name": "bông hoa",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "hoa",
+      "flower"
+    ]
+  },
+  {
+    "slug": "hibiscus",
+    "name": "hoa dâm bụt",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "dam but",
+      "hibiscus"
+    ]
+  },
+  {
+    "slug": "herb",
+    "name": "lá cỏ",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "co",
+      "herb"
+    ]
+  },
+  {
+    "slug": "four-leaf-clover",
+    "name": "cỏ bốn lá",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "co bon la",
+      "clover"
+    ]
+  },
+  {
+    "slug": "maple-leaf",
+    "name": "lá phong",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "la phong",
+      "maple"
+    ]
+  },
+  {
+    "slug": "fallen-leaf",
+    "name": "lá rụng",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "la rung",
+      "leaf"
+    ]
+  },
+  {
+    "slug": "deciduous-tree",
+    "name": "cái cây",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "cay",
+      "tree"
+    ]
+  },
+  {
+    "slug": "evergreen-tree",
+    "name": "cây thông",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "thong",
+      "pine"
+    ]
+  },
+  {
+    "slug": "palm-tree",
+    "name": "cây dừa",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "cay dua",
+      "palm"
+    ]
+  },
+  {
+    "slug": "cactus",
+    "name": "cây xương rồng",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "xuong rong",
+      "cactus"
+    ]
+  },
+  {
+    "slug": "seedling",
+    "name": "cây non",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "cay non",
+      "seedling"
+    ]
+  },
+  {
+    "slug": "mountain",
+    "name": "ngọn núi",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "nui",
+      "mountain"
+    ]
+  },
+  {
+    "slug": "water-wave",
+    "name": "sóng nước",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "song",
+      "wave"
+    ]
+  },
+  {
+    "slug": "volcano",
+    "name": "núi lửa",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "nui lua",
+      "volcano"
+    ]
+  },
+  {
+    "slug": "desert-island",
+    "name": "hòn đảo",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "island"
+    ]
+  },
+  {
+    "slug": "comet",
+    "name": "sao chổi",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "sao choi",
+      "comet"
+    ]
+  },
+  {
+    "slug": "ringed-planet",
+    "name": "hành tinh",
+    "category": "Thiên nhiên và thời tiết",
+    "aliases": [
+      "hanh tinh",
+      "planet"
+    ]
+  },
+  {
+    "slug": "red-circle",
+    "name": "hình tròn đỏ",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron do",
+      "red circle"
+    ]
+  },
+  {
+    "slug": "blue-circle",
+    "name": "hình tròn xanh",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron xanh",
+      "blue circle"
+    ]
+  },
+  {
+    "slug": "yellow-circle",
+    "name": "hình tròn vàng",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron vang",
+      "yellow circle"
+    ]
+  },
+  {
+    "slug": "green-circle",
+    "name": "hình tròn xanh lá",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron xanh la",
+      "green circle"
+    ]
+  },
+  {
+    "slug": "orange-circle",
+    "name": "hình tròn cam",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron cam",
+      "orange circle"
+    ]
+  },
+  {
+    "slug": "purple-circle",
+    "name": "hình tròn tím",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron tim",
+      "purple circle"
+    ]
+  },
+  {
+    "slug": "red-square",
+    "name": "hình vuông đỏ",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "vuong do",
+      "red square"
+    ]
+  },
+  {
+    "slug": "blue-square",
+    "name": "hình vuông xanh",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "vuong xanh",
+      "blue square"
+    ]
+  },
+  {
+    "slug": "yellow-square",
+    "name": "hình vuông vàng",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "vuong vang",
+      "yellow square"
+    ]
+  },
+  {
+    "slug": "green-square",
+    "name": "hình vuông xanh lá",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "vuong xanh la",
+      "green square"
+    ]
+  },
+  {
+    "slug": "red-triangle",
+    "name": "hình tam giác đỏ",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tam giac",
+      "triangle"
+    ]
+  },
+  {
+    "slug": "large-orange-diamond",
+    "name": "hình thoi cam",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "hinh thoi",
+      "diamond"
+    ]
+  },
+  {
+    "slug": "heart-suit",
+    "name": "hình trái tim",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "trai tim",
+      "heart"
+    ]
+  },
+  {
+    "slug": "yellow-heart",
+    "name": "trái tim vàng",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tim vang",
+      "yellow heart"
+    ]
+  },
+  {
+    "slug": "blue-heart",
+    "name": "trái tim xanh",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tim xanh",
+      "blue heart"
+    ]
+  },
+  {
+    "slug": "green-heart",
+    "name": "trái tim xanh lá",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tim xanh la",
+      "green heart"
+    ]
+  },
+  {
+    "slug": "black-circle",
+    "name": "hình tròn đen",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron den",
+      "black circle"
+    ]
+  },
+  {
+    "slug": "white-circle",
+    "name": "hình tròn trắng",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron trang",
+      "white circle"
+    ]
+  },
+  {
+    "slug": "brown-circle",
+    "name": "hình tròn nâu",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "tron nau",
+      "brown circle"
+    ]
+  },
+  {
+    "slug": "sparkles",
+    "name": "lấp lánh",
+    "category": "Hình khối và màu sắc",
+    "aliases": [
+      "lap lanh",
+      "sparkles"
+    ]
+  },
+  {
+    "slug": "teacher",
+    "name": "cô giáo",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "giao vien",
+      "teacher"
+    ]
+  },
+  {
+    "slug": "student",
+    "name": "học sinh",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "hoc sinh",
+      "student"
+    ]
+  },
+  {
+    "slug": "health-worker",
+    "name": "bác sĩ",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "bac si",
+      "doctor"
+    ]
+  },
+  {
+    "slug": "farmer",
+    "name": "bác nông dân",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "nong dan",
+      "farmer"
+    ]
+  },
+  {
+    "slug": "cook",
+    "name": "đầu bếp",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "dau bep",
+      "cook"
+    ]
+  },
+  {
+    "slug": "firefighter",
+    "name": "lính cứu hỏa",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "firefighter"
+    ]
+  },
+  {
+    "slug": "police-officer",
+    "name": "chú công an",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "cong an",
+      "police"
+    ]
+  },
+  {
+    "slug": "pilot",
+    "name": "phi công",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "phi cong",
+      "pilot"
+    ]
+  },
+  {
+    "slug": "astronaut",
+    "name": "phi hành gia",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "phi hanh gia",
+      "astronaut"
+    ]
+  },
+  {
+    "slug": "artist",
+    "name": "họa sĩ",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "hoa si",
+      "artist"
+    ]
+  },
+  {
+    "slug": "mechanic",
+    "name": "thợ máy",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "tho may",
+      "mechanic"
+    ]
+  },
+  {
+    "slug": "factory-worker",
+    "name": "công nhân",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "cong nhan",
+      "worker"
+    ]
+  },
+  {
+    "slug": "baby",
+    "name": "em bé",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "em be",
+      "baby"
+    ]
+  },
+  {
+    "slug": "boy",
+    "name": "bé trai",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "be trai",
+      "boy"
+    ]
+  },
+  {
+    "slug": "girl",
+    "name": "bé gái",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "be gai",
+      "girl"
+    ]
+  },
+  {
+    "slug": "man",
+    "name": "người đàn ông",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "dan ong",
+      "man"
+    ]
+  },
+  {
+    "slug": "woman",
+    "name": "người phụ nữ",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "phu nu",
+      "woman"
+    ]
+  },
+  {
+    "slug": "old-man",
+    "name": "ông",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "grandfather"
+    ]
+  },
+  {
+    "slug": "old-woman",
+    "name": "bà",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "grandmother"
+    ]
+  },
+  {
+    "slug": "waving-hand",
+    "name": "bàn tay vẫy",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "ban tay",
+      "hand"
+    ]
+  },
+  {
+    "slug": "thumbs-up",
+    "name": "ngón tay cái",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "ngon cai",
+      "thumbs up"
+    ]
+  },
+  {
+    "slug": "clapping-hands",
+    "name": "vỗ tay",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "vo tay",
+      "clap"
+    ]
+  },
+  {
+    "slug": "eyes",
+    "name": "đôi mắt",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "mat",
+      "eyes"
+    ]
+  },
+  {
+    "slug": "ear",
+    "name": "cái tai",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "tai",
+      "ear"
+    ]
+  },
+  {
+    "slug": "nose",
+    "name": "cái mũi",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "mui",
+      "nose"
+    ]
+  },
+  {
+    "slug": "mouth",
+    "name": "cái miệng",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "mieng",
+      "mouth"
+    ]
+  },
+  {
+    "slug": "tongue",
+    "name": "cái lưỡi",
+    "category": "Nghề nghiệp và con người",
+    "aliases": [
+      "luoi",
+      "tongue"
+    ]
+  },
+  {
+    "slug": "house",
+    "name": "ngôi nhà",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "nha",
+      "house"
+    ]
+  },
+  {
+    "slug": "house-with-garden",
+    "name": "nhà có vườn",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "nha vuon",
+      "garden house"
+    ]
+  },
+  {
+    "slug": "bed",
+    "name": "cái giường",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "giuong",
+      "bed"
+    ]
+  },
+  {
+    "slug": "couch-and-lamp",
+    "name": "ghế sofa",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "ghe sofa",
+      "couch"
+    ]
+  },
+  {
+    "slug": "chair",
+    "name": "cái ghế",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "ghe",
+      "chair"
+    ]
+  },
+  {
+    "slug": "door",
+    "name": "cái cửa",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "door"
+    ]
+  },
+  {
+    "slug": "window",
+    "name": "cửa sổ",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "cua so",
+      "window"
+    ]
+  },
+  {
+    "slug": "toilet",
+    "name": "bồn cầu",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "ve sinh",
+      "toilet"
+    ]
+  },
+  {
+    "slug": "shower",
+    "name": "vòi hoa sen",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "voi sen",
+      "shower"
+    ]
+  },
+  {
+    "slug": "bathtub",
+    "name": "bồn tắm",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "bon tam",
+      "bathtub"
+    ]
+  },
+  {
+    "slug": "toothbrush",
+    "name": "bàn chải đánh răng",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "ban chai",
+      "toothbrush"
+    ]
+  },
+  {
+    "slug": "soap",
+    "name": "xà phòng",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "xa phong",
+      "soap"
+    ]
+  },
+  {
+    "slug": "teddy-bear",
+    "name": "gấu bông",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "gau bong",
+      "teddy bear"
+    ]
+  },
+  {
+    "slug": "soccer-ball",
+    "name": "quả bóng đá",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "bong da",
+      "soccer ball"
+    ]
+  },
+  {
+    "slug": "basketball",
+    "name": "quả bóng rổ",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "bong ro",
+      "basketball"
+    ]
+  },
+  {
+    "slug": "kite",
+    "name": "con diều",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "dieu",
+      "kite"
+    ]
+  },
+  {
+    "slug": "balloon",
+    "name": "quả bóng bay",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "bong bay",
+      "balloon"
+    ]
+  },
+  {
+    "slug": "wrapped-gift",
+    "name": "hộp quà",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "qua",
+      "gift"
+    ]
+  },
+  {
+    "slug": "musical-note",
+    "name": "nốt nhạc",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "not nhac",
+      "music note"
+    ]
+  },
+  {
+    "slug": "guitar",
+    "name": "đàn ghi-ta",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "ghi ta",
+      "guitar"
+    ]
+  },
+  {
+    "slug": "drum",
+    "name": "cái trống",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "trong",
+      "drum"
+    ]
+  },
+  {
+    "slug": "alarm-clock",
+    "name": "đồng hồ báo thức",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "dong ho",
+      "alarm clock"
+    ]
+  },
+  {
+    "slug": "telephone",
+    "name": "điện thoại bàn",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "dien thoai",
+      "telephone"
+    ]
+  },
+  {
+    "slug": "television",
+    "name": "cái ti vi",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "ti vi",
+      "television"
+    ]
+  },
+  {
+    "slug": "key",
+    "name": "chìa khóa",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "chia khoa",
+      "key"
+    ]
+  },
+  {
+    "slug": "cup-with-straw",
+    "name": "ly nước",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "ly",
+      "cup"
+    ]
+  },
+  {
+    "slug": "fork-and-knife-with-plate",
+    "name": "dĩa và dao",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "dia dao",
+      "tableware"
+    ]
+  },
+  {
+    "slug": "umbrella",
+    "name": "cái ô",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "o",
+      "umbrella"
+    ]
+  },
+  {
+    "slug": "crown",
+    "name": "vương miện",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "vuong mien",
+      "crown"
+    ]
+  },
+  {
+    "slug": "trophy",
+    "name": "chiếc cúp",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "trophy"
+    ]
+  },
+  {
+    "slug": "1st-place-medal",
+    "name": "huy chương vàng",
+    "category": "Đồ vật trong nhà",
+    "aliases": [
+      "huy chuong",
+      "medal"
+    ]
+  },
+  {
+    "slug": "keycap-0",
+    "name": "số 0",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "khong",
+      "zero"
+    ]
+  },
+  {
+    "slug": "keycap-1",
+    "name": "số 1",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "mot",
+      "one"
+    ]
+  },
+  {
+    "slug": "keycap-2",
+    "name": "số 2",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "hai",
+      "two"
+    ]
+  },
+  {
+    "slug": "keycap-3",
+    "name": "số 3",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "ba",
+      "three"
+    ]
+  },
+  {
+    "slug": "keycap-4",
+    "name": "số 4",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "bon",
+      "four"
+    ]
+  },
+  {
+    "slug": "keycap-5",
+    "name": "số 5",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "nam",
+      "five"
+    ]
+  },
+  {
+    "slug": "keycap-6",
+    "name": "số 6",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "sau",
+      "six"
+    ]
+  },
+  {
+    "slug": "keycap-7",
+    "name": "số 7",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "bay",
+      "seven"
+    ]
+  },
+  {
+    "slug": "keycap-8",
+    "name": "số 8",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "tam",
+      "eight"
+    ]
+  },
+  {
+    "slug": "keycap-9",
+    "name": "số 9",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "chin",
+      "nine"
+    ]
+  },
+  {
+    "slug": "keycap-10",
+    "name": "số 10",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "muoi",
+      "ten"
+    ]
+  },
+  {
+    "slug": "plus",
+    "name": "dấu cộng",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "cong",
+      "plus"
+    ]
+  },
+  {
+    "slug": "minus",
+    "name": "dấu trừ",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "tru",
+      "minus"
+    ]
+  },
+  {
+    "slug": "multiply",
+    "name": "dấu nhân",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "nhan",
+      "multiply"
+    ]
+  },
+  {
+    "slug": "divide",
+    "name": "dấu chia",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "chia",
+      "divide"
+    ]
+  },
+  {
+    "slug": "check-mark-button",
+    "name": "dấu tích",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "tich",
+      "check"
+    ]
+  },
+  {
+    "slug": "cross-mark",
+    "name": "dấu nhân sai",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "sai",
+      "cross"
+    ]
+  },
+  {
+    "slug": "red-question-mark",
+    "name": "dấu hỏi",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "hoi",
+      "question mark"
+    ]
+  },
+  {
+    "slug": "red-exclamation-mark",
+    "name": "dấu chấm than",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "cham than",
+      "exclamation"
+    ]
+  },
+  {
+    "slug": "grinning-face",
+    "name": "mặt cười",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "cuoi",
+      "smile"
+    ]
+  },
+  {
+    "slug": "smiling-face-with-smiling-eyes",
+    "name": "mặt vui",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "vui",
+      "happy"
+    ]
+  },
+  {
+    "slug": "face-with-tears-of-joy",
+    "name": "mặt cười nước mắt",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "cuoi ra nuoc mat",
+      "joy"
+    ]
+  },
+  {
+    "slug": "thinking-face",
+    "name": "mặt suy nghĩ",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "suy nghi",
+      "thinking"
+    ]
+  },
+  {
+    "slug": "star-struck",
+    "name": "mặt mắt sao",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "ngac nhien",
+      "star struck"
+    ]
+  },
+  {
+    "slug": "party-popper",
+    "name": "pháo giấy",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "phao giay",
+      "party"
+    ]
+  },
+  {
+    "slug": "confetti-ball",
+    "name": "quả cầu pháo giấy",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "confetti"
+    ]
+  },
+  {
+    "slug": "glowing-star",
+    "name": "ngôi sao sáng",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "sao sang",
+      "glowing star"
+    ]
+  },
+  {
+    "slug": "sparkling-heart",
+    "name": "trái tim lấp lánh",
+    "category": "Số, dấu và cảm xúc",
+    "aliases": [
+      "tim lap lanh",
+      "sparkling heart"
+    ]
+  },
+  {
+    "slug": "speaker-high-volume",
+    "name": "cái loa",
+    "category": "Giao diện",
+    "aliases": [
+      "loa",
+      "am thanh",
+      "âm thanh",
+      "speaker",
+      "volume"
+    ]
+  },
+  {
+    "slug": "wood",
+    "name": "khúc gỗ",
+    "category": "Giao diện",
+    "aliases": [
+      "go",
+      "gỗ",
+      "wood",
+      "log"
+    ]
+  },
+  {
+    "slug": "speech-balloon",
+    "name": "bóng thoại",
+    "category": "Giao diện",
+    "aliases": [
+      "bong thoai",
+      "speech bubble",
+      "speech balloon"
+    ]
+  }
+]
