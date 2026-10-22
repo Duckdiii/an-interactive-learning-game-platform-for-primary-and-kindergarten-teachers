@@ -7,6 +7,7 @@ import LottieLab from './engines/lottie/LottieLab'
 import TtsProbeLab from './audio/TtsProbeLab'
 import FeedbackLab from './feedback/FeedbackLab'
 import NumberLineLab from './games/numberLine/NumberLineLab'
+import BeeGardenLab from './games/numberLine/beeGarden/BeeGardenLab'
 import PrepositionSceneLab from './games/prepositionScene/PrepositionSceneLab'
 import SyllableBuilderLab from './games/syllableBuilder/SyllableBuilderLab'
 import ThemeLab from './theme/ThemeLab'
@@ -32,6 +33,7 @@ export const EXPERIMENT_ENTRIES: readonly ExperimentEntry[] = [
   { id: 'tts-probe', title: 'Giọng đọc (T2.3)', area: 'INFRA', render: () => createElement(TtsProbeLab) },
   { id: 'theme-lab', title: 'Theme (T3)', area: 'INFRA', render: () => createElement(ThemeLab) },
   { id: 'number-line', title: 'Trục số (T4.1)', area: 'MATH', render: () => createElement(NumberLineLab) },
+  { id: 'bee-garden', title: 'Vườn hoa của ong (Trục số mới)', area: 'MATH', render: () => createElement(BeeGardenLab) },
   { id: 'syllable-builder', title: 'Ghép tiếng (T4.2)', area: 'VIETNAMESE', render: () => createElement(SyllableBuilderLab) },
   { id: 'preposition-scene', title: 'Vị trí (T4.3)', area: 'ENGLISH', render: () => createElement(PrepositionSceneLab) },
   { id: 'engine-compare', title: 'So engine (T7.1)', area: 'INFRA', render: () => createElement(EngineCompareLab) },
