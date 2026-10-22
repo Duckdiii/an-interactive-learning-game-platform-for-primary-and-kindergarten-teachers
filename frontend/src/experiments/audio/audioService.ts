@@ -1,5 +1,5 @@
 import type { AudioContextLike, GainNodeLike } from './audioContextTypes'
-import { ATTACK_SECONDS, MAX_PEAK, RELEASE_SECONDS, soundPlan, type SoundName } from './tones'
+import { ATTACK_SECONDS, MAX_PEAK, RELEASE_SECONDS, soundPlan, type PlayableSound } from './tones'
 
 export const DEFAULT_VOLUME = 0.6
 /** Số lệnh phát tối đa được giữ khi chưa mở khóa; lệnh cũ nhất bị bỏ khi đầy. */
@@ -50,8 +50,8 @@ export class AudioService {
   private muted = false
   private volume = DEFAULT_VOLUME
   private unlocked = false
-  private queue: { name: SoundName; at: number }[] = []
-  private readonly lastPlayedAt = new Map<SoundName, number>()
+  private queue: { name: PlayableSound; at: number }[] = []
+  private readonly lastPlayedAt = new Map<PlayableSound, number>()
   private activeNotes = 0
   /** Tăng mỗi khi bỏ/đổi context: `onended` của nốt thuộc context cũ không được đụng bộ đếm của context mới. */
   private generation = 0
@@ -179,7 +179,7 @@ export class AudioService {
    * ngắt, ví dụ iOS) thì xếp hàng (giữ vài lệnh gần nhất, bỏ lệnh quá cũ) và phát khi mở khóa lại thành công;
    * KHÔNG tự dựng AudioContext, nhưng nếu context đã có thì thử `resume()` lại (hợp lệ khi gọi từ cử chỉ).
    */
-  play(name: SoundName): boolean {
+  play(name: PlayableSound): boolean {
     if (this.muted) return false
     const at = this.now()
     const last = this.lastPlayedAt.get(name)
@@ -206,6 +206,16 @@ export class AudioService {
     return this.schedule(name, at)
   }
 
+  /**
+   * Đồ thị âm thanh đang chạy (context và nút master) cho âm nền dựng nút riêng (ong vo ve, gió, chim); `null` nếu chưa mở khóa hoặc context không chạy.
+   * Nối nút vào `master` để tắt tiếng, âm lượng và trần biên độ của dịch vụ áp dụng luôn cho âm nền. `generation` đổi khi context bị thay.
+   */
+  getGraph(): { context: AudioContextLike; master: GainNodeLike; generation: number } | null {
+    const context = this.context
+    if (!context || context.state !== 'running') return null
+    return { context, master: this.ensureMaster(context), generation: this.generation }
+  }
+
   /** Đóng AudioContext và bỏ mọi lệnh chờ. Dùng khi rời trang. */
   async dispose(): Promise<void> {
     const context = this.context
@@ -223,7 +233,7 @@ export class AudioService {
     }
   }
 
-  private enqueue(name: SoundName, at: number) {
+  private enqueue(name: PlayableSound, at: number) {
     // Mỗi âm chỉ giữ lệnh mới nhất: bấm "Đúng" ba lần trước khi mở khóa không được thành chín nốt chồng nhau.
     this.queue = this.queue.filter((item) => item.name !== name)
     this.queue.push({ name, at })
@@ -246,7 +256,7 @@ export class AudioService {
     return this.master
   }
 
-  private schedule(name: SoundName, at: number): boolean {
+  private schedule(name: PlayableSound, at: number): boolean {
     const context = this.context
     if (!context) return false
     const plan = soundPlan(name)
@@ -256,34 +266,49 @@ export class AudioService {
     const generation = this.generation
     const t0 = context.currentTime + START_LEAD_SECONDS
     for (const step of plan) {
-      const oscillator = context.createOscillator()
-      const envelope = context.createGain()
       const noteStart = t0 + step.start
-      const noteEnd = noteStart + step.duration
-      const stopAt = noteEnd + RELEASE_SECONDS
-
-      oscillator.type = step.type
-      oscillator.frequency.value = step.freq
-      // Lên nhanh, giữ, rồi tắt dần về 0: không có bước nhảy biên độ nào gây tiếng "tách".
-      envelope.gain.setValueAtTime(0, noteStart)
-      envelope.gain.linearRampToValueAtTime(step.peak, noteStart + ATTACK_SECONDS)
-      envelope.gain.setValueAtTime(step.peak, Math.max(noteStart + ATTACK_SECONDS, noteEnd))
-      envelope.gain.linearRampToValueAtTime(0, stopAt)
-
-      oscillator.connect(envelope)
-      envelope.connect(master)
-      this.activeNotes += 1
-      oscillator.onended = () => {
-        // Nốt của context đã bỏ: bộ đếm đã được đặt lại, không trừ nhầm vào context mới.
-        if (generation === this.generation) this.activeNotes -= 1
-        oscillator.disconnect()
-        envelope.disconnect()
-      }
-      oscillator.start(noteStart)
-      oscillator.stop(stopAt + 0.02)
+      this.playVoice(context, master, generation, step.freq, step.type, step.peak, noteStart, step.duration, step.shape ?? 'hold')
     }
     this.lastPlayedAt.set(name, at)
     return true
+  }
+
+  /** Một bộ dao động với đường biên độ `hold` (lên, giữ, tắt dần) hoặc `pluck` (lên nhanh rồi tắt dần đều tới hết `duration`). */
+  private playVoice(
+    context: AudioContextLike,
+    master: GainNodeLike,
+    generation: number,
+    freq: number,
+    type: OscillatorType,
+    peak: number,
+    noteStart: number,
+    duration: number,
+    shape: 'hold' | 'pluck',
+  ) {
+    const oscillator = context.createOscillator()
+    const envelope = context.createGain()
+    const noteEnd = noteStart + duration
+    const stopAt = shape === 'pluck' ? noteEnd : noteEnd + RELEASE_SECONDS
+
+    oscillator.type = type
+    oscillator.frequency.value = freq
+    // Lên nhanh rồi (giữ rồi) tắt dần về 0: không có bước nhảy biên độ nào gây tiếng "tách".
+    envelope.gain.setValueAtTime(0, noteStart)
+    envelope.gain.linearRampToValueAtTime(peak, noteStart + ATTACK_SECONDS)
+    if (shape === 'hold') envelope.gain.setValueAtTime(peak, Math.max(noteStart + ATTACK_SECONDS, noteEnd))
+    envelope.gain.linearRampToValueAtTime(0, stopAt)
+
+    oscillator.connect(envelope)
+    envelope.connect(master)
+    this.activeNotes += 1
+    oscillator.onended = () => {
+      // Nốt của context đã bỏ: bộ đếm đã được đặt lại, không trừ nhầm vào context mới.
+      if (generation === this.generation) this.activeNotes -= 1
+      oscillator.disconnect()
+      envelope.disconnect()
+    }
+    oscillator.start(noteStart)
+    oscillator.stop(stopAt + 0.02)
   }
 }
 

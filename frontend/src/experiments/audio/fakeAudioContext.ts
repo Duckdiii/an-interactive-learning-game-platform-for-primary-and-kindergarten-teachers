@@ -1,4 +1,8 @@
 import type {
+  AudioBufferLike,
+  AudioBufferSourceNodeLike,
+  BiquadFilterNodeLike,
+  StereoPannerNodeLike,
   AudioContextLike,
   AudioNodeLike,
   AudioParamLike,
@@ -61,6 +65,39 @@ export class FakeOscillator extends FakeNode implements OscillatorNodeLike {
   }
 }
 
+export class FakeStereoPanner extends FakeNode implements StereoPannerNodeLike {
+  readonly pan = new FakeParam()
+}
+
+export class FakeBiquad extends FakeNode implements BiquadFilterNodeLike {
+  type: BiquadFilterType = 'lowpass'
+  readonly frequency = new FakeParam()
+  readonly Q = new FakeParam()
+}
+
+export class FakeBuffer implements AudioBufferLike {
+  readonly data: Float32Array
+  constructor(length: number) {
+    this.data = new Float32Array(length)
+  }
+  getChannelData() {
+    return this.data
+  }
+}
+
+export class FakeBufferSource extends FakeNode implements AudioBufferSourceNodeLike {
+  buffer: AudioBufferLike | null = null
+  loop = false
+  startedAt: number | null = null
+  stoppedAt: number | null = null
+  start(when = 0) {
+    this.startedAt = when
+  }
+  stop(when = 0) {
+    this.stoppedAt = when
+  }
+}
+
 export interface FakeContextOptions {
   /** Trạng thái ban đầu và trạng thái sau `resume()`: mặc định 'suspended' rồi 'running'. */
   initialState?: string
@@ -75,8 +112,12 @@ export class FakeAudioContext implements AudioContextLike {
   state: string
   currentTime = 10
   readonly destination: AudioNodeLike = new FakeNode()
+  readonly sampleRate = 8000
   readonly oscillators: FakeOscillator[] = []
   readonly gains: FakeGain[] = []
+  readonly panners: FakeStereoPanner[] = []
+  readonly filters: FakeBiquad[] = []
+  readonly sources: FakeBufferSource[] = []
   resumeCalls = 0
   closeCalls = 0
   /** Test đổi giữa chừng để giả lập "resume bị từ chối rồi sau đó được". */
@@ -124,5 +165,27 @@ export class FakeAudioContext implements AudioContextLike {
     const oscillator = new FakeOscillator()
     this.oscillators.push(oscillator)
     return oscillator
+  }
+
+  createStereoPanner() {
+    const panner = new FakeStereoPanner()
+    this.panners.push(panner)
+    return panner
+  }
+
+  createBiquadFilter() {
+    const filter = new FakeBiquad()
+    this.filters.push(filter)
+    return filter
+  }
+
+  createBuffer(_channels: number, length: number) {
+    return new FakeBuffer(length)
+  }
+
+  createBufferSource() {
+    const source = new FakeBufferSource()
+    this.sources.push(source)
+    return source
   }
 }

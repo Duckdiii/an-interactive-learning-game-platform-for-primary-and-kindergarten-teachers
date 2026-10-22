@@ -25,12 +25,39 @@ export interface OscillatorNodeLike extends AudioNodeLike {
   stop(when?: number): void
 }
 
+export interface StereoPannerNodeLike extends AudioNodeLike {
+  /** -1 hoàn toàn trái, 0 giữa, 1 hoàn toàn phải. */
+  readonly pan: AudioParamLike
+}
+
+export interface BiquadFilterNodeLike extends AudioNodeLike {
+  type: BiquadFilterType
+  readonly frequency: AudioParamLike
+  readonly Q: AudioParamLike
+}
+
+export interface AudioBufferLike {
+  getChannelData(channel: number): Float32Array
+}
+
+export interface AudioBufferSourceNodeLike extends AudioNodeLike {
+  buffer: AudioBufferLike | null
+  loop: boolean
+  start(when?: number): void
+  stop(when?: number): void
+}
+
 export interface AudioContextLike {
   readonly state: string
   readonly currentTime: number
+  readonly sampleRate: number
   readonly destination: AudioNodeLike
   resume(): Promise<void>
   close(): Promise<void>
   createGain(): GainNodeLike
   createOscillator(): OscillatorNodeLike
+  createStereoPanner(): StereoPannerNodeLike
+  createBiquadFilter(): BiquadFilterNodeLike
+  createBuffer(channels: number, length: number, sampleRate: number): AudioBufferLike
+  createBufferSource(): AudioBufferSourceNodeLike
 }

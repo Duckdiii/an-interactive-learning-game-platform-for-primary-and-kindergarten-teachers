@@ -132,6 +132,21 @@ describe('AudioService: phát âm', () => {
     })
   })
 
+  it('phát được nốt đếm: đúng một dao động với tần số của nốt đó', async () => {
+    const { service, context } = await unlocked()
+    expect(service.play('count3')).toBe(true)
+    expect(context().oscillators).toHaveLength(1)
+    expect(context().oscillators[0].frequency.value).toBeCloseTo(soundPlan('count3')[0].freq, 5)
+  })
+
+  it('các nốt đếm khác nhau không chặn nhau (khoảng nghỉ tối thiểu tính riêng từng tên âm)', async () => {
+    const { service, context } = await unlocked()
+    expect(service.play('count0')).toBe(true)
+    expect(service.play('count1')).toBe(true)
+    expect(service.play('count0')).toBe(false) // cùng nốt, quá sát nhau
+    expect(context().oscillators).toHaveLength(2)
+  })
+
   it('mỗi nốt có envelope: 0 → đỉnh → giữ → 0, không bước nhảy đột ngột', async () => {
     const { service, context } = await unlocked()
     service.play('tryAgain')
