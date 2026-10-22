@@ -67,3 +67,9 @@ logs/
 # Tệp khóa API của T8.2 (đã bị che sẵn bởi *.local; ghi tường minh để không ai gỡ nhầm)
 /frontend/.env.pexels.local
 /frontend/.env.pixabay.local
+
+# Giọng đọc mẫu của game thử nghiệm «Vườn hoa» (sinh cục bộ bằng VieNeu-TTS, không commit)
+/frontend/public/experiments-demo-audio/
+
+# Ảnh chụp màn hình kiểm thử Vườn hoa của ong (nặng, chỉ giữ cục bộ, không commit)
+/docs/experiments/results/t10-bee-garden/
