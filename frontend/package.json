@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test:drag-drop": "node --experimental-strip-types --test scripts/drag-drop.test.mjs"
+    "test:drag-drop": "node --experimental-strip-types --test scripts/drag-drop.test.mjs",
+    "test:word-scramble": "node --experimental-strip-types --test scripts/word-scramble.test.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
