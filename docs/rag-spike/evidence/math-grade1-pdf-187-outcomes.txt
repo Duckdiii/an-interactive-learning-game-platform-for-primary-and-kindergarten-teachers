@@ -1,16 +1,16 @@
-Lớp
-1 2 3 4 5 6 7 8 9 10 11 12
- x x  x  x x x  x x
- x x x
-  x
-x x x x x
-    x      x
- x x x
- x x x x x x x x x x x
- x x x x x x x x x x x
-M x x x x x x x x x x x x
-c lớp
-LỚP 1
-Yêu cầu cần đạt
-– Đếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong
-phạm vi 100.
+Lớp 
+1 2 3 4 5 6 7 8 9 10 11 12 
+ x x  x  x x x  x x 
+ x x x         
+  x          
+x x x x x        
+    x      x  
+ x x x         
+ x x x x x x x x x x x 
+ x x x x x x x x x x x 
+M x x x x x x x x x x x x 
+c lớp 
+LỚP 1 
+Yêu cầu cần đạt 
+– Đếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong 
+phạm vi 100.  

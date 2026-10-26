@@ -28,8 +28,7 @@ public record CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeL
 
     public record SourceFragment(int pdfPage, int printedPage, String region, String text) {
         public SourceFragment {
-            if (pdfPage < 1 || printedPage < 1 || !("RIGHT".equals(region) || "CENTER_RIGHT".equals(region)
-                    || "CENTER_LEFT".equals(region) || "LEFT".equals(region) || "VISUAL_RIGHT".equals(region))
+            if (pdfPage < 1 || printedPage < 1 || !("RIGHT".equals(region) || "LEFT".equals(region))
                     || text == null || text.isBlank()) {
                 throw new IllegalArgumentException("Invalid source fragment");
             }
@@ -50,7 +49,7 @@ public record CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeL
         metadata.put("gradeLevel", gradeLevel.name());
         metadata.put("topic", topic);
         metadata.put("outcomeText", text);
-        metadata.put("contentType", control ? "control" : "curriculum_outcome");
+        metadata.put("contentType", "curriculum_outcome");
         metadata.put("control", Boolean.toString(control));
         metadata.put("sourceDocument", source.sourceDocument());
         metadata.put("sourceSha256", source.sourceSha256());
@@ -66,8 +65,6 @@ public record CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeL
     }
 
     static String normalize(String text) {
-        return Normalizer.normalize(text, Normalizer.Form.NFC)
-                .replaceAll("(?m)^\\s*[-–—]\\s*", "")
-                .replaceAll("[\\s\\p{Z}]+", "");
+        return Normalizer.normalize(text, Normalizer.Form.NFC).replaceAll("[\\s\\p{Z}]+", "");
     }
 }

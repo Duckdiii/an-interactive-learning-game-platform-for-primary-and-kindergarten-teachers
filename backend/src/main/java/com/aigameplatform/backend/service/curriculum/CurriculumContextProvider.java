@@ -9,29 +9,19 @@ public interface CurriculumContextProvider {
 
     Evidence retrieve(String topic, Subject subject, GradeLevel gradeLevel);
 
-    record Evidence(Status status, String context) {
+    record Evidence(boolean sufficient, String context) {
         public Evidence {
-            if (status == null || (status == Status.FOUND && (context == null || context.isBlank()))) {
+            if (sufficient && (context == null || context.isBlank())) {
                 throw new IllegalArgumentException("Sufficient curriculum evidence requires context");
             }
         }
 
-        public enum Status { FOUND, INSUFFICIENT_EVIDENCE, UNSUPPORTED_SCOPE }
-
-        public boolean sufficient() {
-            return status == Status.FOUND;
-        }
-
         public static Evidence found(String context) {
-            return new Evidence(Status.FOUND, context);
+            return new Evidence(true, context);
         }
 
         public static Evidence insufficient() {
-            return new Evidence(Status.INSUFFICIENT_EVIDENCE, "");
-        }
-
-        public static Evidence unsupported() {
-            return new Evidence(Status.UNSUPPORTED_SCOPE, "");
+            return new Evidence(false, "");
         }
     }
 }

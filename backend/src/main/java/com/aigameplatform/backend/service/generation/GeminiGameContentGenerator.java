@@ -1,6 +1,9 @@
 package com.aigameplatform.backend.service.generation;
 
 import com.aigameplatform.backend.entity.enums.GameType;
+import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.exception.GenerationScopeUnsupportedException;
 import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import dev.langchain4j.data.message.SystemMessage;
@@ -12,17 +15,13 @@ import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-/** Gemini structured-output adapter for every registered game strategy. */
+/** First production generator adapter: the reviewed RAG pilot's QUIZ / Mathematics Grade 1 vertical slice. */
 @Component
 @ConditionalOnProperty(name = "app.ai.gemini.game-generation.enabled", havingValue = "true")
 public class GeminiGameContentGenerator implements GameContentGenerator {
-
-    private static final Logger log = LoggerFactory.getLogger(GeminiGameContentGenerator.class);
 
     private final ChatModel model;
     private final GameContentStrategyRegistry strategies;
@@ -34,9 +33,13 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
 
     @Override
     public String generate(GenerationAttempt attempt) {
+        if (attempt.gameType() != GameType.QUIZ || attempt.subject() != Subject.MATH
+                || attempt.gradeLevel() != GradeLevel.GRADE_1) {
+            throw new GenerationScopeUnsupportedException(
+                    "Gemini generation pilot currently supports QUIZ / Mathematics Grade 1");
+        }
         GameContentStrategy<?, ?> strategy = strategies.get(attempt.gameType());
-        String systemPrompt = strategy.buildPrompt(attempt.topic(), attempt.subject(), attempt.gradeLevel(),
-                attempt.curriculumContext());
+        String systemPrompt = strategy.buildPrompt(attempt.topic(), attempt.gradeLevel(), attempt.curriculumContext());
         String userPrompt = attempt.isRetry()
                 ? retryPrompt(attempt)
                 : "Tạo nội dung game theo yêu cầu trong system prompt. Chỉ trả về JSON theo schema đã cung cấp.";
@@ -55,10 +58,6 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         } catch (AiServiceUnavailableException exception) {
             throw exception;
         } catch (RuntimeException exception) {
-            GeminiProviderFailureDetails details = GeminiProviderFailureDetails.from(exception);
-            log.error("Gemini generation failed: gameType={}, attempt={}, httpStatus={}, providerCode={}, "
-                            + "providerMessage={}, correlationId={}", attempt.gameType(), attempt.attemptNumber(),
-                    details.httpStatus(), details.providerCode(), details.providerMessage(), details.correlationId());
             throw new AiServiceUnavailableException("Gemini request failed", exception);
         }
     }

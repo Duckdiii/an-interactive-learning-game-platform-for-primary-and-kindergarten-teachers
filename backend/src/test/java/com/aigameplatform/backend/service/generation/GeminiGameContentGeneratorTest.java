@@ -18,7 +18,6 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
@@ -65,33 +64,18 @@ class GeminiGameContentGeneratorTest {
     }
 
     @Test
-    void everyRegisteredGameTypeReceivesTheRetrievedCurriculumContext() {
-        List<ChatRequest> sent = new ArrayList<>();
-        ChatModel fakeModel = new ChatModel() {
-            @Override
-            public ChatResponse doChat(ChatRequest request) {
-                sent.add(request);
-                return ChatResponse.builder().aiMessage(AiMessage.from(OUTPUT)).build();
-            }
-        };
-        var registry = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
-        var generator = new GeminiGameContentGenerator(fakeModel, registry);
+    void pilotGeneratorRejectsUnsupportedGameTypesWithAClientError() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        GenerationAttempt quizAttempt = attempt(new QuizGameStrategy(MAPPER), CURRICULUM, 1, null, List.of());
+        GenerationAttempt otherGame = new GenerationAttempt(GameType.WORD_SCRAMBLE, quizAttempt.topic(),
+                quizAttempt.subject(), quizAttempt.gradeLevel(), quizAttempt.structuredSchema(), CURRICULUM,
+                1, null, List.of());
 
-        for (Subject subject : Subject.values()) {
-            for (GameType type : GameType.values()) {
-                var strategy = registry.get(type);
-                generator.generate(new GenerationAttempt(type, "topic", subject, GradeLevel.GRADE_1,
-                        strategy.getStructuredSchema(), CURRICULUM, 1, null, List.of()));
-            }
-        }
-
-        assertThat(sent).hasSize(GameType.values().length * Subject.values().length);
-        List<String> prompts = sent.stream()
-                .map(request -> SystemMessage.findFirst(request.messages()).orElseThrow().text()).toList();
-        assertThat(prompts).allSatisfy(prompt -> assertThat(prompt).contains(CURRICULUM));
-        assertThat(prompts).anySatisfy(prompt -> assertThat(prompt).contains("Môn: Toán"));
-        assertThat(prompts).anySatisfy(prompt -> assertThat(prompt).contains("Môn: Tiếng Việt"));
-        assertThat(prompts).anySatisfy(prompt -> assertThat(prompt).contains("Môn: Tiếng Anh"));
+        assertThatThrownBy(() -> generator.generate(otherGame))
+                .isInstanceOf(GenerationScopeUnsupportedException.class);
+        assertThat(sent).hasValue(null);
     }
 
     private static ChatModel modelCapturing(AtomicReference<ChatRequest> sent) {

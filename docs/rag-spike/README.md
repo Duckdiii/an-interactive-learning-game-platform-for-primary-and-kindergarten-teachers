@@ -1,54 +1,80 @@
-# Curriculum RAG
+# Chạy spike RAG Toán lớp 1
 
-## Trạng thái ngày 23/10/2026
+Trạng thái: spike live Toán lớp 1 **đạt bộ tiêu chí exploratory**: Hit@3 10/10, zero leakage, 3/3 negative bị từ chối và 5/5 control probes đúng scope. Ngưỡng 0.855 được chọn sau lần chạy đầu trên cùng bộ query; cần đánh giá holdout trước khi coi kết quả tổng quát. Pilot QUIZ / Toán lớp 1 đã nối retrieval vào `GameGenerationService` và system prompt Gemini qua feature flag. Fake Gemini test xác nhận context/citation và schema; live smoke sinh quiz từ chủ đề trong corpus và từ chối chủ đề ngoài corpus đều pass. Xem [kiểm tra nguồn](source-audit.md), [contract context](context-contract.md), [kế hoạch tích hợp orchestration](integration-plan.md) và [bảng đánh giá](evaluation.md).
 
-Phạm vi: **Toán, Tiếng Việt, Tiếng Anh lớp 1–5**, đủ 15 môn/lớp. Tiếng Anh lớp 1–2 là chương trình làm quen tự chọn. Mầm non chưa nằm trong corpus này.
+## Điền cấu hình trên máy
 
-Đã sửa cách đọc số hàng nghìn (`1.000`, `10.000`, khoảng trắng thường/không ngắt), gồm số quá lớn gây tràn `int`. Ingest bắt buộc xác minh toàn bộ PDF/hash/trang/nội dung trước khi truy cập embedding hoặc database. Công cụ so sánh Gemini chọn đúng corpus và query theo môn/lớp, thay vì luôn lấy Toán lớp 1.
+Mở `backend/.env`; file này đã được Git ignore. Không sửa `.env.example` để lưu key thật.
 
-**Chưa hoàn tất online:** Supabase trả `XX000: FATAL: (ENOTFOUND) tenant/user … not found` với cấu hình local. Ingest mới chưa hoàn tất; cần cập nhật kết nối trong `.env`, ingest Toán lớp 3 v2 rồi chạy lại retrieval/live generation. Không gửi secret vào chat hoặc Git.
+1. Vào [Google AI Studio / API keys](https://aistudio.google.com/apikey), chọn/tạo key cho project bạn dùng; điền vào `GEMINI_API_KEY`. [Hướng dẫn chính thức](https://ai.google.dev/gemini-api/docs/api-key).
+2. Vào project Supabase của nhóm, chọn **Connect**, chọn **Session pooler**. Lấy host, port 5432, database `postgres`, username được hiển thị. [Hướng dẫn kết nối chính thức](https://supabase.com/docs/guides/database/connecting-to-postgres).
+3. Điền `DB_URL` theo dạng JDBC bên dưới, `DB_USERNAME` đúng như dashboard hiển thị, `DB_PASSWORD` là mật khẩu database. Đây không phải anon key hay service_role API key. Nếu project do Duy quản lý, cần thông tin kết nối của project nhóm.
+4. Giữ `GEMINI_EMBEDDING_MODEL=gemini-embedding-001`. `GEMINI_MODEL` của chat không cần cho spike retrieval. Đường dẫn `CURRICULUM_PDF` đã được điền theo file người dùng cung cấp.
 
-## Tài liệu nguồn hoàn toàn bằng chữ
-
-- [Mục lục 15 môn/lớp](evidence/text/README.md): nội dung đầy đủ, môn/lớp/chủ đề, hash PDF và trang nguồn.
-- `evidence/text/*-pdf-*.md`: 63 tài liệu trang nguồn; `evidence/text/raw-pages/*.txt`: text PDFBox nguyên trạng.
-- Đã thay cả 22 ảnh bằng tài liệu chữ; `docs/rag-spike` không còn file ảnh. PDF gốc được giữ nguyên làm nguồn đối chiếu.
-- Corpus: 497 outcome + 61 controls = 558 chunk. PDFBox kiểm tra trực tiếp 552 chunk; 6 bản chép phân số/ký hiệu có hồ sơ chữ riêng trong `backend/src/main/resources/curriculum/spike/text-transcriptions.jsonl`.
-- Hồ sơ ghi hash nguồn, chunk, trang PDF/trang in, văn bản, người đối chiếu và ngày. Thiếu hồ sơ hoặc khác nội dung thì không được ingest. Đối chiếu do Codex AI thực hiện, **không phải giáo viên phê duyệt**.
-- `math-g3-022` được khôi phục từ “về” theo nguồn; dataset đổi sang `math-grade3-outcomes-v2`. Chỉ mục v1 không được coi là v2.
-
-## Kiểm chứng hiện tại và kết quả lịch sử
-
-**Backend hiện tại: 575 tests, 0 failures, 0 errors, 1 live opt-in class skipped; JaCoCo gate 70% đạt.** Live opt-in được mở rộng thành 30 ca: một ca có evidence và một ca thiếu evidence cho mỗi môn/lớp; chưa có kết quả online mới.
-
-[Replay verifier hiện tại](results/offline-candidate-replay-2026-10-23.json) trên 195 bộ candidate lịch sử: 15/15 scope đạt gate, Hit@3 148/150 (98,67%), negative rejection 45/45, false accept 0, leakage 0. **Replay không chạy lại vector retrieval hoặc gọi provider; không phải holdout độc lập.**
-
-[Bảng đọc/đối chiếu mẫu](results/manual-retrieval-review-2026-10-23.md): Codex AI đọc q01/q05 của cả 15 scope, tổng 30 query; 30/30 có ít nhất một outcome trực tiếp liên quan và đúng môn/lớp. Một số top-k có candidate lân cận khác kỹ năng; không dùng chúng thay bằng chứng trực tiếp. Đây là review AI, không thay teacher review.
-
-[Lượt online ngày 14/10](results/live-2026-10-14T05-46-12.101293900Z.json): Hit@3 148/150, negatives 45/45, controls 15/15, leakage 0. Kết quả này **là lịch sử**, fingerprint cũ `105bbe82d4af2136c5027ea0a926ba10d85993a0a8991fcc4050bf51938d2781`, không chứng minh mã/corpus hiện tại đã chạy online. Hai miss English lớp 3/4 q03 được giữ nguyên; không sửa nhãn/ngưỡng để làm đẹp số liệu.
-
-Giữ `gemini-embedding-001`, dimension 768, topK 3, minScore 0.855. [Trạng thái hiện tại](results/verification-2026-10-23.json) và [status đầy đủ](results/status.json) phân biệt lịch sử/offline/online.
-
-## Chạy lại
-
-Từ repository root của worktree này, dùng file cấu hình local có kết nối hợp lệ:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Extract -EnvFile "C:\path\to\local.env"
-node scripts/export-rag-text.mjs
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Ingest -SkipBuild -EnvFile "C:\path\to\local.env"
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Evaluate -SkipBuild -EnvFile "C:\path\to\local.env"
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-rag-live.ps1 -EnvFile "C:\path\to\local.env"
+```dotenv
+GEMINI_API_KEY=điền_key_của_bạn
+DB_URL=jdbc:postgresql://HOST_TRONG_DASHBOARD:5432/postgres?sslmode=require
+DB_USERNAME=USERNAME_TRONG_DASHBOARD
+DB_PASSWORD=điền_mật_khẩu_database
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
+RAG_MIN_SCORE=0.855
 ```
 
-`Extract` chỉ đọc PDF; `Ingest` ghi embedding sau khi xác minh nguồn. Chỉ chạy `Migrate` khi cần setup schema. Live test tắt Flyway, không tạo schema và dùng datasource read-only; đi qua service, strategy, Gemini thật, factory và chuỗi kiểm duyệt. Kết quả JSON/Markdown ở `results/live-generation-*`; đây là service integration, chưa phải HTTP API E2E. Launcher yêu cầu `OPENAI_API_KEY` để kiểm tra safety đầy đủ.
+Copy host vào URL JDBC, không dán nguyên URI `postgresql://user:password@...`. Mật khẩu ở ô riêng. Không dùng Transaction pooler cổng 6543. Runner cần tài khoản database có quyền chạy Flyway, đọc/ghi bảng; bảng bật RLS và không mở API công khai.
 
-## Các phần còn cần xác nhận
+## Bật pilot sinh game có RAG
 
-Teacher/pedagogical review vẫn pending. Đối chiếu nguồn của AI không chứng minh mọi game đều phù hợp sư phạm. Checker claim vẫn advisory; cảnh báo hoặc checker không dùng được không tự biến thành curriculum approval.
+Sau khi xác nhận Gemini chat key/model và bảng/vector đã nạp đủ, đặt trong `backend/.env`:
 
-`metadata.curriculumReview` đã có ở Backend, schema, TypeScript và đặc tả DSL. Quyết định product/FE và xác nhận của Duy về semantics/versioning còn pending; không tự coi là đồng đội đã phê duyệt. Không thêm endpoint hoặc tự gửi tin nhắn cho đồng đội.
+```dotenv
+GEMINI_GAME_GENERATION_ENABLED=true
+CURRICULUM_RAG_ENABLED=true
+GEMINI_MODEL=gemini-3.5-flash-lite
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
+CURRICULUM_RAG_MIN_SCORE=0.855
+```
 
-Holdout độc lập chưa xác lập: bộ đã lộ có overlap development và thiếu lịch sử review/freeze độc lập. Không tính replay hoặc bộ đã lộ là holdout. Các kết quả/audit cũ được giữ như lịch sử; dùng `evidence/text/` cho bản nguồn hiện tại.
+Pilot chỉ nhận `QUIZ + MATH + GRADE_1`. Với flag RAG bật, yêu cầu ngoài scope, không đủ evidence, hoặc retrieval không dùng được sẽ dừng rõ ràng trước khi gọi Gemini. Để sinh game khi chưa bật RAG, tắt `CURRICULUM_RAG_ENABLED` và bật `GEMINI_GAME_GENERATION_ENABLED`. Live smoke dùng tạm `gemini-3.5-flash-lite` vì `GEMINI_MODEL` trong `.env` còn trống; `.env` không bị sửa. Duy cần review contract trước khi merge; benchmark holdout còn là bước tiếp theo.
 
-Không commit, push hoặc tạo PR trong lượt sửa này.
+## Lệnh PowerShell từ thư mục gốc repo
+
+```powershell
+# Chỉ in trạng thái đã cấu hình hay chưa; không in giá trị secret.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode CheckConfig
+
+# Bước này không cần Gemini/database. Xác minh lại đúng nguồn trước khi nạp.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Extract -SkipBuild
+
+# Chạy Flyway của project: V1 bật vector; V5 tạo bảng. Không sửa V1–V4.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Migrate -SkipBuild
+
+# Nạp 23 yêu cầu và 5 đoạn đối chứng; xác minh nguồn trước khi gọi embedding API.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Ingest -SkipBuild
+
+# Chạy lại: cùng ID được bỏ qua, không gọi embedding lại cho các ID đã có.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Ingest -SkipBuild
+
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Query -Topic 'Phép cộng nhẩm trong phạm vi 10' -SkipBuild
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode Evaluate -SkipBuild
+```
+
+Lần đầu bỏ `-SkipBuild` để compile và tạo classpath. Script dùng Maven có sẵn hoặc Maven trong wrapper cache, rồi mới dùng `mvnw.cmd`. Có thể truyền `-EnvFile 'đường_dẫn_file.env'` và `-PdfPath 'đường_dẫn_PDF'`. Biến môi trường process được ưu tiên so với file.
+
+Mã thoát: 0 thành công; 1 lỗi vận hành; 2 cấu hình còn thiếu; 3 query không đủ căn cứ; 4 kết quả đánh giá chưa đạt. Không chạy Spring application nên không cần cấu hình JWT/OpenAI Moderation cho runner này.
+
+## Lưu trữ và nạp lại
+
+- LangChain4j core/Gemini 1.20.1 được giữ nguyên; PgVector integration dùng bản tương ứng 1.20.1-beta30. PDFBox 3.0.8 phục vụ kiểm tra theo trang/cột.
+- Bảng do Flyway quản lý, vector 768 chiều; `PgVectorEmbeddingStore` không tự tạo bảng/extension, không xoá bảng trước khi chạy.
+- Cùng embedding model 001 và 768 chiều; tài liệu dùng `RETRIEVAL_DOCUMENT`, query dùng `RETRIEVAL_QUERY`. Vectors tài liệu được chuẩn hoá. [Tài liệu Google](https://ai.google.dev/gemini-api/docs/embeddings).
+- ID UUID được xác định từ SHA nguồn, phiên bản bộ dữ liệu, chunk ID, model, dimension và nội dung. Nạp lại bỏ qua các ID đã tồn tại; thư viện còn upsert theo primary key nếu có lần nạp đồng thời.
+- Nếu dữ liệu/model thay đổi, phải review và tạo phiên bản mới; không trộn vector khác model vào cùng phạm vi retrieval. Bộ dữ liệu phải đủ 28 ID đúng trước khi query/evaluate.
+- Metadata lọc bắt buộc `subject`, `gradeLevel`, `contentType`, phiên bản dữ liệu/chương trình, SHA nguồn và embedding model. Dữ liệu đối chứng không bị loại bằng cờ `control`, để kiểm tra bộ lọc môn/lớp có tác dụng thực sự.
+
+## Kết quả và giới hạn
+
+Extraction lưu tại `backend/target/curriculum-spike/extracted/`. Báo cáo live mới được tạo ở `docs/rag-spike/results/live-*.json` sau khi chạy đủ query và đối chứng. Mỗi báo cáo ghi model, dimension, ngưỡng, nguồn, thời điểm, đoạn trả về, score, latency và kết quả gate; yêu cầu đọc thủ công trước khi dẫn kết luận chất lượng.
+
+`FOUND` nghĩa là có ứng viên vượt ngưỡng tương đồng, không chứng minh mọi yêu cầu trong câu giáo viên nhập đều được chương trình hỗ trợ. Đặc biệt, similarity có thể không phân biệt được “không nhớ” và “có nhớ”. Negative queries được đo riêng để phát hiện vấn đề này. Nếu negative gate không đạt, cần nghiên cứu xác nhận phạm vi/reranking trước khi đưa vào luồng sinh game.
+
+Đánh giá retrieval không chứng minh Gemini luôn sinh đúng chương trình. Chưa chạy so sánh live sinh game có/không RAG; pilot mới hoàn thiện prompt QUIZ và chưa mở rộng prompt cho 10 strategy.
