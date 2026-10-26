@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl;
 import com.aigameplatform.backend.dto.dsl.VisualClozeQuestionDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.VisualClozeQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import tools.jackson.databind.json.JsonMapper;
@@ -22,8 +23,8 @@ public class VisualClozeGameStrategy extends GameContentStrategy<VisualClozeQues
     }
 
     @Override
-    protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        return "Khối lớp: " + grade + ". Chủ đề: " + topic
+    protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
+        return "Môn: " + subjectLabel(subject) + ", " + gradeLabel(grade) + ". Chủ đề: " + topic
                 + ". Mỗi câu tạo sentenceTemplate có một chỗ trống được biểu diễn bằng ___, một visualPrompt hỗ trợ suy luận, "
                 + "correctAnswer và 1–3 distractors khác đáp án nhưng cùng mức độ.";
     }

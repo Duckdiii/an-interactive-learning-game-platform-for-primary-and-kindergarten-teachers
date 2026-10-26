@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.strategy;
 import static org.assertj.core.api.Assertions.*;
 
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -11,7 +12,7 @@ class GameContentStrategyRagTest {
     void contextOverloadPreservesExistingPromptAndAddsGrounding() {
         var strategy = new QuizGameStrategy(new JsonMapper()) {
             @Override
-            protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
+            protected String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade) {
                 return "Questions about " + topic + " for " + grade;
             }
         };

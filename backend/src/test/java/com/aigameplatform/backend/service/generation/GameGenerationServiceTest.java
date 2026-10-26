@@ -10,6 +10,7 @@ import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.exception.AiGenerationTimeoutException;
 import com.aigameplatform.backend.exception.CurriculumEvidenceNotFoundException;
 import com.aigameplatform.backend.exception.CurriculumServiceUnavailableException;
+import com.aigameplatform.backend.exception.GenerationScopeUnsupportedException;
 import com.aigameplatform.backend.service.curriculum.CurriculumContextProvider;
 import com.aigameplatform.backend.exception.UnsafeContentException;
 import com.aigameplatform.backend.service.factory.GameDslRequest;
@@ -92,12 +93,21 @@ class GameGenerationServiceTest {
 
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
             ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled) {
+        return service(generator, maxRetries, moderation, curriculum, null, ragEnabled);
+    }
+
+    private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
+            ContentModerationClient moderation, CurriculumContextProvider curriculum,
+            CurriculumEvidenceReviewer reviewer, boolean ragEnabled) {
         DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
         if (generator != null) {
             beans.registerSingleton("generator", generator);
         }
         if (curriculum != null) {
             beans.registerSingleton("curriculumContextProvider", curriculum);
+        }
+        if (reviewer != null) {
+            beans.registerSingleton("curriculumEvidenceReviewer", reviewer);
         }
         List<AbstractGameValidator> validators = new ArrayList<>(GameTestFixtures.schemaAndBusinessRuleValidators(MAPPER));
         validators.add(new SafetyGameValidator(
@@ -108,7 +118,8 @@ class GameGenerationServiceTest {
                 new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)),
                 new AiOutputValidator(MAPPER),
                 GameTestFixtures.factoryRegistry(random),
-                validation, MAPPER, beans.getBeanProvider(CurriculumContextProvider.class), ragEnabled, maxRetries);
+                validation, MAPPER, beans.getBeanProvider(CurriculumContextProvider.class),
+                beans.getBeanProvider(CurriculumEvidenceReviewer.class), ragEnabled, maxRetries);
     }
 
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries) {
@@ -133,6 +144,47 @@ class GameGenerationServiceTest {
         assertThat(generator.attempts).hasSize(1);
     }
 
+    @Test
+    void curriculumReviewWarningsAreReturnedWithoutBlockingGeneration() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        var review = new com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview(
+                com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview.Status.REVIEWED,
+                List.of(new com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview.Claim(
+                        "q1", "Adds with carrying", com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview.ClaimStatus.UNSUPPORTED,
+                        "The retrieved outcome does not mention carrying", List.of("math-g1-007"))),
+                List.of(new com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview.Warning(
+                        "q1", "Adds with carrying", com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview.ClaimStatus.UNSUPPORTED,
+                        "The retrieved outcome does not mention carrying", List.of("math-g1-007"))));
+        var reviewer = (CurriculumEvidenceReviewer) (game, context) -> review;
+        var curriculum = (CurriculumContextProvider) (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("[math-g1-007] Addition within 10");
+
+        GameDsl game = service(generator, 0, moderation(false, false), curriculum, reviewer, true)
+                .generate(GameType.QUIZ, REQUEST);
+
+        assertThat(game.metadata().curriculumReview()).isEqualTo(review);
+        assertThat(generator.attempts).hasSize(1);
+    }
+
+    @Test
+    void unavailableCurriculumReviewerDoesNotBlockGeneration() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        var reviewer = (CurriculumEvidenceReviewer) (game, context) -> {
+            throw new IllegalStateException("review service unavailable");
+        };
+        var curriculum = (CurriculumContextProvider) (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("[math-g1-007] Addition within 10");
+
+        GameDsl game = service(generator, 0, moderation(false, false), curriculum, reviewer, true)
+                .generate(GameType.QUIZ, REQUEST);
+
+        assertThat(game.metadata().curriculumReview().status()).isEqualTo(
+                com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview.Status.UNAVAILABLE);
+        assertThat(game.metadata().curriculumReview().warnings()).hasSize(1);
+        assertThat(game.metadata().curriculumReview().warnings().getFirst().chunkIds())
+                .containsExactly("math-g1-007");
+        assertThat(generator.attempts).hasSize(1);
+    }
     @Test
     void theFirstRequestCarriesTheTeacherInputAndTheSchemaButNoFeedback() throws IOException {
         ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
@@ -199,6 +251,35 @@ class GameGenerationServiceTest {
     }
 
     @Test
+    void curriculumScopeAndGameTypeAreResolvedByTheirRegistries() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.WORD_SCRAMBLE));
+        CurriculumContextProvider curriculum = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("Vietnamese G1 evidence with source");
+        GameDslRequest request = new GameDslRequest("Từ chỉ đồ vật", Subject.VIETNAMESE, GradeLevel.GRADE_1);
+
+        service(generator, 0, moderation(false, false), curriculum, true)
+                .generate(GameType.WORD_SCRAMBLE, request);
+
+        assertThat(generator.attempts).hasSize(1);
+        assertThat(generator.attempts.getFirst().gameType()).isEqualTo(GameType.WORD_SCRAMBLE);
+        assertThat(generator.attempts.getFirst().subject()).isEqualTo(Subject.VIETNAMESE);
+        assertThat(generator.attempts.getFirst().curriculumContext()).contains("Vietnamese G1 evidence");
+    }
+
+    @Test
+    void unsupportedCurriculumScopeStopsBeforeCallingTheGenerator() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        CurriculumContextProvider curriculum = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.unsupported();
+
+        assertThatThrownBy(() -> service(generator, 0, moderation(false, false), curriculum, true)
+                .generate(GameType.QUIZ, REQUEST))
+                .isInstanceOf(GenerationScopeUnsupportedException.class)
+                .hasMessageContaining("curriculum scope");
+        assertThat(generator.attempts).isEmpty();
+    }
+
+    @Test
     void curriculumRetrievalErrorsFailClosedBeforeCallingTheGenerator() throws IOException {
         ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
         CurriculumContextProvider curriculum = (topic, subject, grade) -> {
@@ -213,20 +294,6 @@ class GameGenerationServiceTest {
     }
 
     @Test
-    void ragPilotRejectsSubjectsAndGradesOutsideItsReviewedDataset() {
-        ScriptedGenerator generator = new ScriptedGenerator();
-        CurriculumContextProvider curriculum = (topic, subject, grade) ->
-                CurriculumContextProvider.Evidence.found("some context");
-        GameDslRequest outOfScope = new GameDslRequest("alphabet", Subject.ENGLISH, GradeLevel.GRADE_1);
-
-        assertThatThrownBy(() -> service(generator, 2, moderation(false, false), curriculum, true)
-                .generate(GameType.QUIZ, outOfScope))
-                .isInstanceOf(CurriculumEvidenceNotFoundException.class)
-                .hasMessageContaining("QUIZ / Mathematics Grade 1");
-        assertThat(generator.attempts).isEmpty();
-    }
-
-    @Test
     void enabledRagWithoutProviderIsReportedUnavailable() {
         ScriptedGenerator generator = new ScriptedGenerator();
 
@@ -234,19 +301,6 @@ class GameGenerationServiceTest {
                 .generate(GameType.QUIZ, REQUEST))
                 .isInstanceOf(CurriculumServiceUnavailableException.class)
                 .hasMessageContaining("not configured");
-        assertThat(generator.attempts).isEmpty();
-    }
-
-    @Test
-    void ragPilotRejectsGameTypesOutsideQuiz() {
-        ScriptedGenerator generator = new ScriptedGenerator();
-        CurriculumContextProvider curriculum = (topic, subject, grade) ->
-                CurriculumContextProvider.Evidence.found("some context");
-
-        assertThatThrownBy(() -> service(generator, 2, moderation(false, false), curriculum, true)
-                .generate(GameType.WORD_SCRAMBLE, REQUEST))
-                .isInstanceOf(CurriculumEvidenceNotFoundException.class)
-                .hasMessageContaining("QUIZ / Mathematics Grade 1");
         assertThat(generator.attempts).isEmpty();
     }
 

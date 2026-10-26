@@ -42,6 +42,12 @@ class CurriculumSpikeTest {
     }
 
     @Test
+    void ignoresTableListMarkersWhenMatchingSourceFragmentsToOutcomeText() {
+        assertThat(CurriculumChunk.normalize("– Outcome one.\n— Outcome two.\n- Outcome three."))
+                .isEqualTo(CurriculumChunk.normalize("Outcome one. Outcome two. Outcome three."));
+    }
+
+    @Test
     void filtersSubjectAndGradeBeforeRankingEvenWhenControlsAreCloser() {
         var store = new InMemoryEmbeddingStore<TextSegment>();
         put(store, chunk("right", Subject.MATH, GradeLevel.GRADE_1, false), new float[]{0.8f, 0.6f});
@@ -172,4 +178,5 @@ class CurriculumSpikeTest {
         return new CurriculumRAGService.RetrievedChunk(id, subject, grade, "addition", "Outcome " + id,
                 0.9, "curriculum.pdf", List.of(1), List.of(1), "32/2018/TT-BGDDT");
     }
+
 }

@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.dsl.QuestionDsl;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.QuestionGame;
 import com.aigameplatform.backend.service.factory.GameDefaults;
 import com.aigameplatform.backend.service.factory.Ids;
@@ -54,18 +55,31 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
         this.dslType = dslType;
         this.entityType = entityType;
         this.jsonMapper = jsonMapper;
+        this.promptTemplate = """
+                Bạn là trợ lý tạo nội dung trò chơi giáo dục cho học sinh. Viết nội dung bằng ngôn ngữ phù hợp với môn học,
+                độ tuổi và cấp lớp được yêu cầu. Chỉ dùng kiến thức trong phạm vi chủ đề và căn cứ chương trình được cung cấp.
+                Không tự thêm kiến thức vượt cấp. Sinh JSON đúng schema; không thêm giải thích ngoài JSON.
+                """;
     }
 
     public String buildPrompt(String topic, GradeLevel grade) {
+        return buildPrompt(topic, null, grade);
+    }
+
+    public String buildPrompt(String topic, Subject subject, GradeLevel grade) {
         if (promptTemplate == null) {
             throw new IllegalStateException("promptTemplate chưa được cấu hình cho " + getSupportedType());
         }
-        return promptTemplate + "\n\n" + buildTypeSpecificInstruction(topic, grade);
+        return promptTemplate + "\n\n" + buildTypeSpecificInstruction(topic, subject, grade);
     }
 
     /** Adds reviewed curriculum evidence while preserving all existing two-argument callers. */
     public String buildPrompt(String topic, GradeLevel grade, String curriculumContext) {
-        String prompt = buildPrompt(topic, grade);
+        return buildPrompt(topic, null, grade, curriculumContext);
+    }
+
+    public String buildPrompt(String topic, Subject subject, GradeLevel grade, String curriculumContext) {
+        String prompt = buildPrompt(topic, subject, grade);
         if (curriculumContext == null || curriculumContext.isBlank()) return prompt;
         return prompt + "\n\n" + """
                 Căn cứ chương trình chính thức dưới đây để sinh câu hỏi. Giữ đúng phạm vi kiến thức,
@@ -84,7 +98,21 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
         return jsonSchemaDefinition;
     }
 
-    protected abstract String buildTypeSpecificInstruction(String topic, GradeLevel grade);
+    protected static String subjectLabel(Subject subject) {
+        if (subject == null) return "môn học được yêu cầu";
+        return switch (subject) {
+            case MATH -> "Toán";
+            case VIETNAMESE -> "Tiếng Việt";
+            case ENGLISH -> "Tiếng Anh";
+        };
+    }
+
+    protected static String gradeLabel(GradeLevel grade) {
+        if (grade == null) return "cấp lớp được yêu cầu";
+        return grade == GradeLevel.KINDERGARTEN ? "mẫu giáo" : "lớp " + grade.name().substring("GRADE_".length());
+    }
+
+    protected abstract String buildTypeSpecificInstruction(String topic, Subject subject, GradeLevel grade);
 
     public abstract GameType getSupportedType();
 
