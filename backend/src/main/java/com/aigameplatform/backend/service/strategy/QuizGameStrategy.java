@@ -21,6 +21,14 @@ public class QuizGameStrategy extends GameContentStrategy<QuizQuestionDsl, QuizQ
 
     public QuizGameStrategy(JsonMapper jsonMapper) {
         super(QuizQuestionDsl.class, QuizQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn là trợ lý tạo câu hỏi trắc nghiệm Toán lớp 1 bằng tiếng Việt cho học sinh 6–7 tuổi.
+                Tạo đúng 4 câu hỏi cho chủ đề được cung cấp. Mỗi câu có 4 lựa chọn khác nhau và đúng một đáp án.
+                Tuân thủ căn cứ chương trình chính thức được cung cấp; giữ nguyên giới hạn số, phép tính và kỹ năng.
+                Nếu căn cứ không hỗ trợ chủ đề, không tự suy diễn hoặc mở rộng kiến thức.
+                Dùng ngữ cảnh ngắn, từ vựng quen thuộc, câu hỏi rõ ràng và phù hợp lứa tuổi.
+                Chỉ tạo dữ liệu câu hỏi, không thêm lời dẫn ngoài JSON.
+                """);
     }
 
     @Override
