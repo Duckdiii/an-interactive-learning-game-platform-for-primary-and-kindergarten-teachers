@@ -18,6 +18,7 @@ public record GenerationAttempt(
         Subject subject,
         GradeLevel gradeLevel,
         String structuredSchema,
+        String curriculumContext,
         int attemptNumber,
         String previousOutput,
         List<ValidationError> previousErrors) {

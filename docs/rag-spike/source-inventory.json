@@ -1,0 +1,100 @@
+[
+  {
+    "file": "02-bgddt.pdf",
+    "bytes": 15597891,
+    "sha256": "6909d8f4efab118844a5eb02192448b27ece1c73c82e67bdb965e7e262e066b2",
+    "classification": "digital_competency",
+    "ragUse": "excluded"
+  },
+  {
+    "file": "131-qd-.signed.pdf",
+    "bytes": 700169,
+    "sha256": "f0b8d1edb734200d55a0bcb1e4bc3c464850f618288f9e70edb1ad4d8e4f9ec4",
+    "classification": "digital_transformation_policy",
+    "ragUse": "excluded"
+  },
+  {
+    "file": "17-bgddt.pdf",
+    "bytes": 8203245,
+    "sha256": "1d40c0513a1fdff35245c633ffc382122a18d2d5c0fbc96fcb426a51a8f9fea6",
+    "classification": "curriculum_amendment",
+    "ragUse": "applicability_review_only"
+  },
+  {
+    "file": "20-bgddt.pdf",
+    "bytes": 949511,
+    "sha256": "242913c886242173dd05d16ce63b306dce584cf1c238cd1c2b914e261af18c08",
+    "classification": "curriculum_amendment",
+    "ragUse": "applicability_review_only"
+  },
+  {
+    "file": "27_2020_TT-BGDDT_320659.doc",
+    "bytes": 1327616,
+    "sha256": "df3079aa0a6583e8e95ed928e686ac56ca910e3e94db72d7707792f1a818827c",
+    "classification": "assessment",
+    "ragUse": "excluded"
+  },
+  {
+    "file": "28_2016_TT-BGDDT_323937.doc",
+    "bytes": 114176,
+    "sha256": "14c6d449edbc0302d1bf286f7740e31a5b3efc763a598877c6d12d955e9e576c",
+    "classification": "early_childhood_curriculum",
+    "ragUse": "excluded_from_grade1_spike"
+  },
+  {
+    "file": "37-bgddt.pdf",
+    "bytes": 2995057,
+    "sha256": "d43016bbbcb89f44943744a587a6a8f3ac4aa5ba243028fab570d53330f8db93",
+    "classification": "equipment",
+    "ragUse": "excluded"
+  },
+  {
+    "file": "51_2020_TT-BGDDT_469972.doc",
+    "bytes": 35328,
+    "sha256": "0d557ea612b4dbbcae33e3cdca5a019f3753e366c3e508a347dfa1ad164c287e",
+    "classification": "early_childhood_curriculum",
+    "ragUse": "excluded_from_grade1_spike"
+  },
+  {
+    "file": "830.signed.pdf",
+    "bytes": 1072039,
+    "sha256": "279a8bbc859c14591a0cd953b72012762ca0b461e88f1cd36fed88da12215797",
+    "classification": "child_online_safety",
+    "ragUse": "excluded"
+  },
+  {
+    "file": "thong-tu-22-2021-tt-bgddt_aa5fb7d10a.pdf",
+    "bytes": 4025325,
+    "sha256": "6f488b6394655ddc3a61bbb1ca10fba8c4a489d560bd9170369cede8ae05273a",
+    "classification": "assessment",
+    "ragUse": "excluded"
+  },
+  {
+    "file": "Thông tư 132022TT-BGDĐT (ngày 03082022)..pdf",
+    "bytes": 2851289,
+    "sha256": "62ceeae5c15897470d4c949bd9c532650fe9d7013f90a0503d5cbbcad50f575c",
+    "classification": "curriculum_amendment",
+    "ragUse": "applicability_review_only"
+  },
+  {
+    "file": "Thông tư 262023TT-BGDĐT Sửa đổi, bổ sung một số quy định tại Danh mục thiết bị dạy học tối thiểu.pdf",
+    "bytes": 10731121,
+    "sha256": "8be33303b731ba5c6eda28dc27b62e84dce2aa0edd2b8b4165fa65c33404deb0",
+    "classification": "equipment",
+    "ragUse": "excluded"
+  },
+  {
+    "file": "Thông-tư-17-2009-TT-BGDĐT.doc",
+    "bytes": 983040,
+    "sha256": "ec912552817b6da184853be35263ef88d96afa710683d1d166f11846b08d774e",
+    "classification": "early_childhood_curriculum",
+    "ragUse": "excluded_from_grade1_spike"
+  },
+  {
+    "file": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "bytes": 14971349,
+    "sha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "classification": "curriculum",
+    "ragUse": "reviewed_outcomes_only"
+  }
+]

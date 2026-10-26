@@ -33,6 +33,17 @@
 		<jacoco.version>0.8.12</jacoco.version>
 	</properties>
 	<dependencies>
+		<!-- RAG spike: keep the integration aligned with the existing LangChain4j release. -->
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-pgvector</artifactId>
+			<version>1.20.1-beta30</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.8</version>
+		</dependency>
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-google-ai-gemini</artifactId>

@@ -47,6 +47,18 @@ class GameContentStrategyTest {
     }
 
     @Test
+    void visualClozePromptUsesTheSupportedGradeAndQuestionShape() {
+        var strategy = new VisualClozeGameStrategy(MAPPER);
+        strategy.setPromptTemplate("Generate Visual Cloze JSON");
+
+        String prompt = strategy.buildPrompt("plant parts",
+                com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_2);
+
+        assertThat(prompt).contains("GRADE_2", "plant parts", "sentenceTemplate", "visualPrompt",
+                "correctAnswer", "distractors");
+    }
+
+    @Test
     void anExplicitlyAssignedSchemaStillWins() {
         GameContentStrategy strategy = new QuizGameStrategy(MAPPER);
         strategy.setJsonSchemaDefinition("{\"custom\":true}");

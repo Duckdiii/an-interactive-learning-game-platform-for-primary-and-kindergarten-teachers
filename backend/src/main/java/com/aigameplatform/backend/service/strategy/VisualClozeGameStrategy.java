@@ -23,8 +23,9 @@ public class VisualClozeGameStrategy extends GameContentStrategy<VisualClozeQues
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho VISUAL_CLOZE");
+        return "Khối lớp: " + grade + ". Chủ đề: " + topic
+                + ". Mỗi câu tạo sentenceTemplate có một chỗ trống được biểu diễn bằng ___, một visualPrompt hỗ trợ suy luận, "
+                + "correctAnswer và 1–3 distractors khác đáp án nhưng cùng mức độ.";
     }
 
     @Override
