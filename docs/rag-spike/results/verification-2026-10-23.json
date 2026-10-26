@@ -1,0 +1,29 @@
+{
+    "asOf":  "2026-10-23",
+    "codeFingerprintSha256":  "1654a276eddca3b328c5dd8e3a31298ffed2ead7091407dbb69d7a23ccb41762",
+    "fingerprintFiles":  99,
+    "sourceVerification":  "558/558; 552 PDF text layer + 6 separately recorded AI source transcriptions; no teacher approval",
+    "textDocumentation":  "15 scope Markdown, 63 source-page Markdown, raw source TXT; 0 images under docs/rag-spike",
+    "currentMathGrade3Dataset":  "math-grade3-outcomes-v2; missing source word về restored in math-g3-022",
+    "databaseStatus":  "BLOCKED_CONFIGURATION: SQLState XX000, ENOTFOUND tenant/user not found; source preflight passed; no database writes completed",
+    "ingest":  "NOT_COMPLETED; Math Grade 3 v2 must be ingested before new live retrieval/generation can be claimed",
+    "liveRetrieval":  "NOT_RUN_CURRENT_FINGERPRINT",
+    "liveGeneration":  "30 opt-in service cases prepared; NOT_RUN_CURRENT_FINGERPRINT",
+    "offlineReplay":  {
+                          "scopeCount":  15,
+                          "queries":  195,
+                          "positiveHitAt3":  "148/150",
+                          "negativeRejected":  "45/45",
+                          "falseAcceptances":  0,
+                          "leakage":  0,
+                          "measurement":  "CURRENT_VERIFIER_ON_HISTORICAL_CANDIDATES; NOT_LIVE_RETRIEVAL; NOT_INDEPENDENT_HOLDOUT",
+                          "report":  "offline-candidate-replay-2026-10-23.json"
+                      },
+    "sourceTranscriptReview":  "6/6 explicitly checked by Codex AI on 2026-10-23; exact source/page/text records retained; not pedagogical approval",
+    "sampledRetrievalReview":  "30 historical positive queries, q01 and q05 for each of 15 scopes, read by Codex AI; 30/30 contain directly relevant same-scope evidence; neighboring extra candidates noted; not teacher approval",
+    "teacherReview":  "PENDING",
+    "productContractReview":  "PENDING_DUY_AND_FE; existing additive advisory contract retained",
+    "tests":  "575 tests; 0 failures; 0 errors; 1 live opt-in class skipped",
+    "review":  "Independent read-only review and followup completed; no Important introduced finding",
+    "coverage":  "2611/3524 lines (74.09%); gate 70% PASS"
+}

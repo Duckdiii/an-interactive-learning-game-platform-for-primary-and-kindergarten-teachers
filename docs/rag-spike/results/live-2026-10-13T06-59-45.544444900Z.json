@@ -1,0 +1,780 @@
+{
+  "measurementStatus" : "LIVE_COMPLETED",
+  "measuredAtUtc" : "2026-10-13T06:59:45.544444900Z",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "queryEmbeddingCacheHits" : 4,
+  "queryEmbeddingProviderMisses" : 13,
+  "queryEmbeddingCacheFile" : "backend/target/curriculum-spike/query-embedding-cache.jsonl",
+  "manualReview" : "PENDING: inspect returned text and source pages before citing quality conclusions",
+  "scopeCount" : 1,
+  "scopeResults" : [ {
+    "subject" : "MATH",
+    "dataset" : {
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "curriculumVersion" : "32/2018/TT-BGDDT",
+      "datasetVersion" : "math-grade3-outcomes-v1",
+      "pdfPageCount" : 1555
+    },
+    "controlsStatus" : "PASS",
+    "gradeLevel" : "GRADE_3",
+    "summary" : {
+      "positiveQueries" : 10,
+      "hits" : 9,
+      "hitAt3" : 0.9,
+      "leakedChunks" : 0,
+      "negativeQueries" : 3,
+      "negativeRejections" : 3,
+      "retrievalGatePassed" : true,
+      "negativeGatePassed" : true,
+      "passed" : true
+    },
+    "controlProbes" : [ {
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "control-math-g1-g3-001",
+      "primaryScopeChunkIds" : [ "math-g3-001", "math-g3-004" ]
+    }, {
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "control-math-g1-g3-002",
+      "primaryScopeChunkIds" : [ "math-g3-003", "math-g3-002", "math-g3-008" ]
+    }, {
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "control-vietnamese-g1-g3-001",
+      "primaryScopeChunkIds" : [ "math-g3-004" ]
+    }, {
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "control-vietnamese-g1-g3-002",
+      "primaryScopeChunkIds" : [ "math-g3-049", "math-g3-050" ]
+    } ],
+    "queries" : [ {
+      "queryId" : "q01",
+      "topic" : "Đọc và viết số trong phạm vi một trăm nghìn",
+      "expectedChunkIds" : [ "math-g3-001" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-001",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Đọc, viết được các số trong phạm vi 10 000; trong phạm vi 100 000.",
+        "score" : 0.902056781611768,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-001",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Đọc, viết được các số trong phạm vi 10 000; trong phạm vi 100 000.",
+        "score" : 0.902056781611768,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-002",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Nhận biết được số tròn nghìn, tròn mười nghìn.",
+        "score" : 0.873173647579807,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-003",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Nhận biết được cấu tạo thập phân của một số.",
+        "score" : 0.871850740650437,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1671,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đọc và viết số trong phạm vi một trăm nghìn",
+        "chunkId" : "math-g3-001",
+        "outcomeText" : "Đọc, viết được các số trong phạm vi 10 000; trong phạm vi 100 000."
+      } ]
+    }, {
+      "queryId" : "q02",
+      "topic" : "Số La Mã trong phạm vi 20",
+      "expectedChunkIds" : [ "math-g3-004" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-004",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Nhận biết được chữ số La Mã và viết được các số tự nhiên trong phạm vi 20 bằng cách sử dụng chữ số La Mã.",
+        "score" : 0.874383064272514,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-004",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Nhận biết được chữ số La Mã và viết được các số tự nhiên trong phạm vi 20 bằng cách sử dụng chữ số La Mã.",
+        "score" : 0.874383064272514,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 685,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Số La Mã trong phạm vi 20",
+        "chunkId" : "math-g3-004",
+        "outcomeText" : "Nhận biết được chữ số La Mã và viết được các số tự nhiên trong phạm vi 20 bằng cách sử dụng chữ số La Mã."
+      } ]
+    }, {
+      "queryId" : "q03",
+      "topic" : "So sánh và sắp xếp tối đa bốn số đến 100 000",
+      "expectedChunkIds" : [ "math-g3-006", "math-g3-007" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-007",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / So sánh các số",
+        "text" : "Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi 100 000).",
+        "score" : 0.888300314920169,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-006",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / So sánh các số",
+        "text" : "Xác định được số lớn nhất hoặc số bé nhất trong một nhóm có không quá 4 số (trong phạm vi 100 000).",
+        "score" : 0.882223960481091,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-005",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / So sánh các số",
+        "text" : "Nhận biết được cách so sánh hai số trong phạm vi 100 000.",
+        "score" : 0.872469927921419,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-007",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / So sánh các số",
+        "text" : "Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi 100 000).",
+        "score" : 0.888300314920169,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-006",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / So sánh các số",
+        "text" : "Xác định được số lớn nhất hoặc số bé nhất trong một nhóm có không quá 4 số (trong phạm vi 100 000).",
+        "score" : 0.882223960481091,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-005",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Số tự nhiên / So sánh các số",
+        "text" : "Nhận biết được cách so sánh hai số trong phạm vi 100 000.",
+        "score" : 0.872469927921419,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 948,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "So sánh và sắp xếp tối đa bốn số đến 100 000",
+        "chunkId" : "math-g3-007",
+        "outcomeText" : "Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi 100 000)."
+      }, {
+        "requestedCondition" : "So sánh và sắp xếp tối đa bốn số đến 100 000",
+        "chunkId" : "math-g3-006",
+        "outcomeText" : "Xác định được số lớn nhất hoặc số bé nhất trong một nhóm có không quá 4 số (trong phạm vi 100 000)."
+      }, {
+        "requestedCondition" : "So sánh và sắp xếp tối đa bốn số đến 100 000",
+        "chunkId" : "math-g3-005",
+        "outcomeText" : "Nhận biết được cách so sánh hai số trong phạm vi 100 000."
+      } ]
+    }, {
+      "queryId" : "q04",
+      "topic" : "Cộng trừ số có năm chữ số và hai lượt nhớ không liên tiếp",
+      "expectedChunkIds" : [ "math-g3-009" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-009",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép cộng, phép trừ",
+        "text" : "Thực hiện được phép cộng, phép trừ các số có đến 5 chữ số (có nhớ không quá hai lượt và không liên tiếp).",
+        "score" : 0.893109901988739,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-009",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép cộng, phép trừ",
+        "text" : "Thực hiện được phép cộng, phép trừ các số có đến 5 chữ số (có nhớ không quá hai lượt và không liên tiếp).",
+        "score" : 0.893109901988739,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 877,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Cộng trừ số có năm chữ số và hai lượt nhớ không liên tiếp",
+        "chunkId" : "math-g3-009",
+        "outcomeText" : "Thực hiện được phép cộng, phép trừ các số có đến 5 chữ số (có nhớ không quá hai lượt và không liên tiếp)."
+      } ]
+    }, {
+      "queryId" : "q05",
+      "topic" : "Nhân số có một chữ số và không quá hai lượt nhớ",
+      "expectedChunkIds" : [ "math-g3-012" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-012",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép nhân, phép chia",
+        "text" : "Thực hiện được phép nhân với số có một chữ số (có nhớ không quá hai lượt và không liên tiếp).",
+        "score" : 0.893816986804254,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 196 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-009",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép cộng, phép trừ",
+        "text" : "Thực hiện được phép cộng, phép trừ các số có đến 5 chữ số (có nhớ không quá hai lượt và không liên tiếp).",
+        "score" : 0.858093779811965,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-012",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép nhân, phép chia",
+        "text" : "Thực hiện được phép nhân với số có một chữ số (có nhớ không quá hai lượt và không liên tiếp).",
+        "score" : 0.893816986804254,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 196 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-016",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Tính nhẩm",
+        "text" : "Thực hiện được cộng, trừ, nhân, chia nhẩm trong những trường hợp đơn giản.",
+        "score" : 0.863549240018865,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 196 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-009",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép cộng, phép trừ",
+        "text" : "Thực hiện được phép cộng, phép trừ các số có đến 5 chữ số (có nhớ không quá hai lượt và không liên tiếp).",
+        "score" : 0.858093779811965,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 958,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhân số có một chữ số và không quá hai lượt nhớ",
+        "chunkId" : "math-g3-012",
+        "outcomeText" : "Thực hiện được phép nhân với số có một chữ số (có nhớ không quá hai lượt và không liên tiếp)."
+      }, {
+        "requestedCondition" : "Nhân số có một chữ số và không quá hai lượt nhớ",
+        "chunkId" : "math-g3-009",
+        "outcomeText" : "Thực hiện được phép cộng, phép trừ các số có đến 5 chữ số (có nhớ không quá hai lượt và không liên tiếp)."
+      } ]
+    }, {
+      "queryId" : "q06",
+      "topic" : "Tính giá trị biểu thức có ngoặc, làm trong ngoặc trước",
+      "expectedChunkIds" : [ "math-g3-019" ],
+      "negative" : false,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "UNSUPPORTED_EXPLICIT_CONSTRAINT",
+      "returned" : [ ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-019",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Biểu thức số",
+        "text" : "Tính được giá trị của biểu thức số có đến hai dấu phép tính và có dấu ngoặc theo nguyên tắc thực hiện trong dấu ngoặc trước.",
+        "score" : 0.892718898016424,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 196 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-018",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Biểu thức số",
+        "text" : "Tính được giá trị của biểu thức số có đến hai dấu phép tính và không có dấu ngoặc.",
+        "score" : 0.872109899869766,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 196 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-017",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Biểu thức số",
+        "text" : "Làm quen với biểu thức số.",
+        "score" : 0.86213649808479,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 196 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1025,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q07",
+      "topic" : "Nhận biết một phần hai, một phần ba đến một phần chín",
+      "expectedChunkIds" : [ "math-g3-022" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-022",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Phân số",
+        "text" : "Nhận biết được 1/2; 1/3;...;1/9 thông qua các hình ảnh trực quan.",
+        "score" : 0.907321171125069,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-023",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Phân số",
+        "text" : "Xác định được 1/2; 1/3;...;1/9 của một nhóm đồ vật (đối tượng) bằng việc chia thành các phần đều nhau.",
+        "score" : 0.90093306400166,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-022",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Phân số",
+        "text" : "Nhận biết được 1/2; 1/3;...;1/9 thông qua các hình ảnh trực quan.",
+        "score" : 0.907321171125069,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-023",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Phân số",
+        "text" : "Xác định được 1/2; 1/3;...;1/9 của một nhóm đồ vật (đối tượng) bằng việc chia thành các phần đều nhau.",
+        "score" : 0.90093306400166,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 853,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhận biết một phần hai, một phần ba đến một phần chín",
+        "chunkId" : "math-g3-022",
+        "outcomeText" : "Nhận biết được 1/2; 1/3;...;1/9 thông qua các hình ảnh trực quan."
+      }, {
+        "requestedCondition" : "Nhận biết một phần hai, một phần ba đến một phần chín",
+        "chunkId" : "math-g3-023",
+        "outcomeText" : "Xác định được 1/2; 1/3;...;1/9 của một nhóm đồ vật (đối tượng) bằng việc chia thành các phần đều nhau."
+      } ]
+    }, {
+      "queryId" : "q08",
+      "topic" : "Nhận biết góc vuông, tam giác và tứ giác",
+      "expectedChunkIds" : [ "math-g3-025", "math-g3-026" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-026",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Hình học trực quan / Hình phẳng",
+        "text" : "Nhận biết được tam giác, tứ giác.",
+        "score" : 0.900784610201937,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-025",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Hình học trực quan / Điểm, góc",
+        "text" : "Nhận biết được góc, góc vuông, góc không vuông.",
+        "score" : 0.892174001987267,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-027",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Hình học trực quan / Hình phẳng",
+        "text" : "Nhận biết được một số yếu tố cơ bản như đỉnh, cạnh, góc của hình chữ nhật, hình vuông; tâm, bán kính, đường kính của hình tròn.",
+        "score" : 0.88200782164672,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-026",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Hình học trực quan / Hình phẳng",
+        "text" : "Nhận biết được tam giác, tứ giác.",
+        "score" : 0.900784610201937,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-025",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Hình học trực quan / Điểm, góc",
+        "text" : "Nhận biết được góc, góc vuông, góc không vuông.",
+        "score" : 0.892174001987267,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-027",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Hình học trực quan / Hình phẳng",
+        "text" : "Nhận biết được một số yếu tố cơ bản như đỉnh, cạnh, góc của hình chữ nhật, hình vuông; tâm, bán kính, đường kính của hình tròn.",
+        "score" : 0.88200782164672,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 197 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 886,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhận biết góc vuông, tam giác và tứ giác",
+        "chunkId" : "math-g3-026",
+        "outcomeText" : "Nhận biết được tam giác, tứ giác."
+      }, {
+        "requestedCondition" : "Nhận biết góc vuông, tam giác và tứ giác",
+        "chunkId" : "math-g3-025",
+        "outcomeText" : "Nhận biết được góc, góc vuông, góc không vuông."
+      }, {
+        "requestedCondition" : "Nhận biết góc vuông, tam giác và tứ giác",
+        "chunkId" : "math-g3-027",
+        "outcomeText" : "Nhận biết được một số yếu tố cơ bản như đỉnh, cạnh, góc của hình chữ nhật, hình vuông; tâm, bán kính, đường kính của hình tròn."
+      } ]
+    }, {
+      "queryId" : "q09",
+      "topic" : "Nhận biết tiền Việt Nam trong phạm vi một trăm nghìn đồng",
+      "expectedChunkIds" : [ "math-g3-039" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-039",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đo lường / Đại lượng và đơn vị",
+        "text" : "Nhận biết được mệnh giá của các tờ tiền Việt Nam (trong phạm vi 100 000 đồng); nhận biết được tờ tiền hai trăm nghìn đồng và năm trăm nghìn đồng (không yêu cầu học sinh đọc, viết số chỉ mệnh giá).",
+        "score" : 0.888179192786139,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 198 ],
+        "printedPages" : [ 32 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-039",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đo lường / Đại lượng và đơn vị",
+        "text" : "Nhận biết được mệnh giá của các tờ tiền Việt Nam (trong phạm vi 100 000 đồng); nhận biết được tờ tiền hai trăm nghìn đồng và năm trăm nghìn đồng (không yêu cầu học sinh đọc, viết số chỉ mệnh giá).",
+        "score" : 0.888179192786139,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 198 ],
+        "printedPages" : [ 32 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 814,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhận biết tiền Việt Nam trong phạm vi một trăm nghìn đồng",
+        "chunkId" : "math-g3-039",
+        "outcomeText" : "Nhận biết được mệnh giá của các tờ tiền Việt Nam (trong phạm vi 100 000 đồng); nhận biết được tờ tiền hai trăm nghìn đồng và năm trăm nghìn đồng (không yêu cầu học sinh đọc, viết số chỉ mệnh giá)."
+      } ]
+    }, {
+      "queryId" : "q10",
+      "topic" : "Thu thập, phân loại và ghi chép số liệu theo tiêu chí cho trước",
+      "expectedChunkIds" : [ "math-g3-048" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g3-048",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Thống kê / Thu thập và phân loại",
+        "text" : "Nhận biết được cách thu thập, phân loại, ghi chép số liệu thống kê (trong một số tình huống đơn giản) theo các tiêu chí cho trước.",
+        "score" : 0.909416186458549,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 199 ],
+        "printedPages" : [ 33 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-049",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Thống kê / Đọc bảng số liệu",
+        "text" : "Đọc và mô tả được các số liệu ở dạng bảng.",
+        "score" : 0.869820392559875,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 199 ],
+        "printedPages" : [ 33 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-050",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Thống kê / Nhận xét số liệu",
+        "text" : "Nêu được một số nhận xét đơn giản từ bảng số liệu.",
+        "score" : 0.867550988647078,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 199 ],
+        "printedPages" : [ 33 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-048",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Thống kê / Thu thập và phân loại",
+        "text" : "Nhận biết được cách thu thập, phân loại, ghi chép số liệu thống kê (trong một số tình huống đơn giản) theo các tiêu chí cho trước.",
+        "score" : 0.909416186458549,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 199 ],
+        "printedPages" : [ 33 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-049",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Thống kê / Đọc bảng số liệu",
+        "text" : "Đọc và mô tả được các số liệu ở dạng bảng.",
+        "score" : 0.869820392559875,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 199 ],
+        "printedPages" : [ 33 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-050",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Thống kê / Nhận xét số liệu",
+        "text" : "Nêu được một số nhận xét đơn giản từ bảng số liệu.",
+        "score" : 0.867550988647078,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 199 ],
+        "printedPages" : [ 33 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 811,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Thu thập, phân loại và ghi chép số liệu theo tiêu chí cho trước",
+        "chunkId" : "math-g3-048",
+        "outcomeText" : "Nhận biết được cách thu thập, phân loại, ghi chép số liệu thống kê (trong một số tình huống đơn giản) theo các tiêu chí cho trước."
+      }, {
+        "requestedCondition" : "Thu thập, phân loại và ghi chép số liệu theo tiêu chí cho trước",
+        "chunkId" : "math-g3-049",
+        "outcomeText" : "Đọc và mô tả được các số liệu ở dạng bảng."
+      }, {
+        "requestedCondition" : "Thu thập, phân loại và ghi chép số liệu theo tiêu chí cho trước",
+        "chunkId" : "math-g3-050",
+        "outcomeText" : "Nêu được một số nhận xét đơn giản từ bảng số liệu."
+      } ]
+    }, {
+      "queryId" : "q11",
+      "topic" : "Chia cho số có hai chữ số trong phạm vi chương trình lớp 3",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "UNSUPPORTED_EXPLICIT_CONSTRAINT",
+      "returned" : [ ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-013",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép nhân, phép chia",
+        "text" : "Thực hiện được phép chia cho số có một chữ số.",
+        "score" : 0.902336574758322,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 196 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-014",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép nhân, phép chia",
+        "text" : "Nhận biết và thực hiện được phép chia hết và phép chia có dư.",
+        "score" : 0.893947972035715,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 196 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g3-011",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Các phép tính / Phép nhân, phép chia",
+        "text" : "Vận dụng được các bảng nhân, bảng chia 2, 3,..., 9 trong thực hành tính.",
+        "score" : 0.888606486082229,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 195 ],
+        "printedPages" : [ 29 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 899,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q12",
+      "topic" : "Chứng minh hai tam giác đồng dạng",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1172,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q13",
+      "topic" : "Tính chu vi hình tròn",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "UNSUPPORTED_EXPLICIT_CONSTRAINT",
+      "returned" : [ ],
+      "candidates" : [ {
+        "chunkId" : "math-g3-044",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đo lường / Chu vi",
+        "text" : "Tính được chu vi của hình tam giác, hình tứ giác, hình chữ nhật, hình vuông khi biết độ dài các cạnh.",
+        "score" : 0.864642727173595,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 198 ],
+        "printedPages" : [ 32 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 741,
+      "evidenceSupports" : [ ]
+    } ]
+  } ],
+  "passed" : true
+}

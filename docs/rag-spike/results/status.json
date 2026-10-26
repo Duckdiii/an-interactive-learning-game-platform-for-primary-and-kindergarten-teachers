@@ -1,7 +1,8 @@
 {
     "schemaVersion":  "curriculum-rag-status-v2",
-    "asOf":  "2026-10-12",
-    "overallStatus":  "CORPUS_AND_INDEX_PRESENT_FOR_15_OF_15; TWO_SELECTIVE_CORPUS_CLEANUPS_PENDING; EVALUATION_INCOMPLETE_AND_FAILING",
+    "asOf":  "2026-10-23",
+    "overallStatus":  "CODE_AND_TEXT_SOURCE_FIXES_VERIFIED; CURRENT_LIVE_RUN_AND_MATH_G3_V2_INGEST_BLOCKED_DB_CONFIGURATION; TEACHER_REVIEW_PENDING",
+    "latestAudit":  "docs/rag-spike/README.md",
     "scope":  {
                   "count":  15,
                   "definition":  "MATH, VIETNAMESE, ENGLISH x primary grades 1-5; English G1-G2 optional familiarization",
@@ -12,9 +13,9 @@
                    "primaryOutcomeChunks":  497,
                    "controlChunks":  61,
                    "totalSourceVerifiedChunks":  558,
-                   "indexedScopes":  "15/15",
-                   "indexedChunks":  "558/558",
-                   "sourceAndPageVerification":  "PDFBox exact source/page and ordered fragment checks 558/558; 25 cross-page joins and 6 visual transcriptions reviewed by Codex AI; teacher/pedagogical review pending",
+                   "indexedScopes":  "NOT_VERIFIED_CURRENT_DATABASE; MATH_GRADE3_V2_INGEST_PENDING",
+                   "indexedChunks":  "NOT_VERIFIED_CURRENT_DATABASE",
+                   "sourceAndPageVerification":  "552/558 chunks checked against PDFBox text; 6/558 separately recorded AI source transcriptions tied to source SHA/chunk/PDF and printed page/exact text; all 558 source records checked; teacher/pedagogical review pending",
                    "contextFindings":  {
                                            "parentTitleContinuation":  "math-g5-053 topic continues onto PDF page 212; source index still has abbreviated topic",
                                            "sameScopeDuplicate":  "vietnamese-g5-011 and vietnamese-g5-030 are one identical source row on PDF page 93; both retained pending one-row index cleanup",
@@ -30,12 +31,15 @@
                                                "removedByHash":  0,
                                                "primaryOutcomeRowsMatchingControlHashes":  31,
                                                "uniqueRows":  451
-                                           }
+                                           },
+                   "historicalIndexedScopes":  "15/15",
+                   "historicalIndexedChunks":  "558/558"
                },
     "ingestRepeat":  {
                          "written":  0,
                          "skipped":  558,
-                         "assessment":  "Idempotent across all 15 scopes"
+                         "assessment":  "Idempotent across all 15 scopes",
+                         "measurementStatus":  "HISTORICAL_2026_10_14_DATASET_VERSIONS"
                      },
     "embedding":  {
                       "model":  "gemini-embedding-001",
@@ -44,20 +48,40 @@
                       "queryTaskType":  "RETRIEVAL_QUERY"
                   },
     "exploratoryRetrieval":  {
-                                 "evaluatedScopes":  "8/15",
-                                 "queries":  104,
-                                 "positiveHitAt3":  "80/80",
-                                 "falseRejections":  "0/80",
-                                 "negativeRejections":  "19/24",
-                                 "falseAcceptances":  "5/24",
-                                 "controlsExcluded":  "33/33",
+                                 "evaluatedScopes":  "15/15",
+                                 "queries":  195,
+                                 "positiveHitAt3":  "148/150",
+                                 "falseRejections":  "2/150",
+                                 "negativeRejections":  "45/45",
+                                 "falseAcceptances":  "0/45",
+                                 "controlsExcluded":  "15/15 scopes; all probes PASS",
                                  "leakedChunks":  0,
                                  "threshold":  0.855,
-                                 "gate":  "FAIL",
-                                 "notRunScopes":  "7/15; quota blocked"
+                                 "topK":  3,
+                                 "gate":  "PASS_PER_SCOPE",
+                                 "notRunScopes":  "0/15",
+                                 "report":  "docs/rag-spike/results/live-2026-10-14T05-46-12.101293900Z.json",
+                                 "remainingPositiveMisses":  [
+                                                                 "ENGLISH GRADE_3 q03 (english-g3-003)",
+                                                                 "ENGLISH GRADE_4 q03 (english-g4-003)"
+                                                             ],
+                                 "interpretation":  "Both q03 queries omit the skill needed to select a specific English outcome; partial retrieved evidence is rejected. Labels and threshold unchanged.",
+                                 "measurementStatus":  "HISTORICAL_2026_10_14_NOT_CURRENT_CODE_OR_CORPUS",
+                                 "measurementFingerprintSha256":  "105bbe82d4af2136c5027ea0a926ba10d85993a0a8991fcc4050bf51938d2781"
                              },
-    "calibration":  "NOT_RUN",
+    "calibration":  {
+                        "status":  "TOP_K_CALIBRATION_COMPLETED; DEFAULT_REMAINS_3",
+                        "threshold":  0.855,
+                        "model":  "gemini-embedding-001",
+                        "dimension":  768,
+                        "topK5Reports":  [
+                                             "live-2026-10-13T07-44-47.724649300Z.json",
+                                             "live-2026-10-13T07-45-04.494520700Z.json"
+                                         ],
+                        "result":  "ENGLISH GRADE_3 and GRADE_4 q03 remained misses; 9/10 positive, 3/3 negative rejected in each scope; no cutoff or labels changed."
+                    },
     "holdout":  {
+                    "measurementStatus":  "HISTORICAL_EXPOSED_NOT_INDEPENDENT_HOLDOUT",
                     "evaluatedScopes":  "3/15 (MATH GRADE_1-GRADE_3)",
                     "queries":  36,
                     "positiveHitAt3":  "18/18",
@@ -74,32 +98,33 @@
                        "strategyTypesAttempted":  "10/10 in one strategy-level comparison",
                        "pairedSchemaValidOutputs":  "6/10",
                        "providerFailures":  "4/10",
-                       "fullProductionEndToEnd":  "0/15 scopes; NOT_RUN",
+                       "fullProductionEndToEnd":  "NOT_RUN_CURRENT_FINGERPRINT; BLOCKED_DB_TENANT_CONFIGURATION",
                        "serviceIntegration":  "PASS_OFFLINE_LOCAL_GEMINI_STUB; 30/30 positive/insufficient service cases through GameGenerationService; not live provider or HTTP API",
                        "httpApiE2E":  "NOT_RUN; no generation endpoint",
                        "priorSingleQuizSmoke":  "MATH GRADE_1 passed; one in-corpus and one out-of-scope smoke case",
                        "curriculumAlignmentReview":  "NOT_REVIEWED",
                        "aiReview":  "ADVISORY; live evaluation NOT_RUN",
                        "teacherReview":  "PENDING",
-                       "providerFailureDiagnostics":  "Status, provider code/message and a surfaced correlation ID are now safely logged with credential redaction; old 4 failures remain unexplained until one controlled live probe."
+                       "providerFailureDiagnostics":  "Status, provider code/message and a surfaced correlation ID are safely logged with credential redaction; no live game-generation probe has explained the four historical GEMINI_WITH_RAG failures. Embedding retrieval provider availability was separately confirmed.",
+                       "liveMatrix":  "30 cases prepared in CurriculumRagGeminiLiveSmokeTest; launch scripts/test-rag-live.ps1"
                    },
     "blockers":  [
                      {
-                         "status":  "BLOCKED",
+                         "status":  "HISTORICAL_RESOLVED",
                          "service":  "Gemini embeddings",
                          "metric":  "embed_content_free_tier_requests",
                          "limit":  "1000 requests/day",
                          "lastProviderRetryDelay":  "19h 2m 50.8s at 2026-10-12T04:57Z",
                          "firstRetrievalScopeNotRun":  "ENGLISH/GRADE_3",
                          "checkedAtUtc":  "2026-10-12T08:24Z",
-                         "note":  "The last provider retry delay was 19h 2m 50.8s at 2026-10-12T04:57Z; checked again at 08:24Z and the estimated window has not elapsed. Do not rerun provider calls yet."
+                         "note":  "Historical quota notice from 2026-10-12; provider access later recovered. Final full benchmark completed on 2026-10-14."
                      }
                  ],
     "evidence":  {
                      "scopeMatrixCsv":  "scope-coverage.csv",
                      "scopeMatrixJson":  "scope-coverage.json",
                      "runCheckpoint":  "full-curriculum-run-2026-10-12.json",
-                     "consolidatedReport":  "curriculum-rag-summary.md",
+                     "consolidatedReport":  "../README.md",
                      "chunkAuditCsv":  "../evidence/chunk-audit/all-558-chunks.csv"
                  },
     "historicalInitialMathG1ToG3Status":  {
@@ -238,14 +263,14 @@
                                                                                         "assessment":  "Idempotent; no database rows changed"
                                                                                     },
                                                                "queryEncodingDiagnosis":  {
-                                                                                              "correctQuery":  "PhÃ©p cá»™ng nháº©m trong pháº¡m vi 10",
+                                                                                              "correctQuery":  "PhÃƒÂ©p cÃ¡Â»â„¢ng nhÃ¡ÂºÂ©m trong phÃ¡ÂºÂ¡m vi 10",
                                                                                               "correctQueryScore075":  0.895729657396445,
                                                                                               "correctQueryScore0855":  0.895729657396445,
-                                                                                              "corruptedProbeQuery":  "PhÃ©p c?ng nh?m trong ph?m vi 10",
+                                                                                              "corruptedProbeQuery":  "PhÃƒÂ©p c?ng nh?m trong ph?m vi 10",
                                                                                               "corruptedQueryScore":  0.854824668423837,
                                                                                               "pgVectorScoreFormula":  "(1 + cosineSimilarity) / 2",
-                                                                                              "cleanCosine":  0.79145932671005992,
-                                                                                              "corruptedCosine":  0.70964932174596129,
+                                                                                              "cleanCosine":  0.7914593267100599,
+                                                                                              "corruptedCosine":  0.7096493217459613,
                                                                                               "interpretation":  "Different query strings; not evidence of same-query model/index drift"
                                                                                           },
                                                                "currentFullScopeStatus":  "Current corpus checkpoint 2026-10-12: all 15 curriculum scopes source-verified (497 primary outcomes + 61 controls = 558 chunks) and all 558 IDs are indexed in Supabase. Exploratory retrieval ran on 8/15 scopes: positive Hit@3 80/80, negative rejection 19/24, false acceptance 5/24, controls 33/33 excluded, leakage 0; aggregate FAIL. Seven scopes are NOT_RUN due to Gemini embedding free-tier 1000 requests/day quota. See scope-coverage.csv/json and full-curriculum-run-2026-10-12.json.",
@@ -276,14 +301,14 @@
                                                                                            "notRunScopes":  "7/15, provider daily quota",
                                                                                            "report":  "results/scope-coverage.json"
                                                                                        },
-                                                               "currentHoldoutStatus":  "36 queries across 3 scopes; positive Hit@3 18/18; false rejection 0/18; negative rejection 9/9; near-miss rejection 3/9; false acceptance 6/18; leakage 0; FAIL; threshold unchanged",
-                                                               "currentQuotaBlocker":  {
-                                                                                           "status":  "BLOCKED",
-                                                                                           "quotaMetric":  "embed_content_free_tier_requests",
-                                                                                           "limit":  "1000 requests/day",
-                                                                                           "providerRetryAfter":  "19h 2m 50.8s at 2026-10-12T04:57Z",
-                                                                                           "firstNotRunScope":  "ENGLISH/GRADE_3"
-                                                                                       }
+                                                               "historicalExposedHoldoutStatus":  "36 queries across 3 scopes; positive Hit@3 18/18; false rejection 0/18; negative rejection 9/9; near-miss rejection 3/9; false acceptance 6/18; leakage 0; FAIL; threshold unchanged",
+                                                               "historicalQuotaBlocker":  {
+                                                                                              "status":  "HISTORICAL_RESOLVED",
+                                                                                              "quotaMetric":  "embed_content_free_tier_requests",
+                                                                                              "limit":  "1000 requests/day",
+                                                                                              "providerRetryAfter":  "19h 2m 50.8s at 2026-10-12T04:57Z",
+                                                                                              "firstNotRunScope":  "ENGLISH/GRADE_3"
+                                                                                          }
                                                            },
                                               "scopeDenominator":  15,
                                               "scopeDefinition":  "MATH, VIETNAMESE, ENGLISH x primary grades 1-5; English G1-G2 optional familiarization",
@@ -348,7 +373,7 @@
                                                      "developmentQueries":  11,
                                                      "classification":  "quality failures; metadata scope/version correct; provider quota separate",
                                                      "labelsChanged":  false,
-                                                     "report":  "../evidence/false-acceptance-analysis-2026-10-12.md"
+                                                     "report":  "../README.md"
                                                  },
                           "evidenceGuard":  {
                                                 "status":  "CODED_REGRESSION_TESTED_LIVE_NOT_RUN",
@@ -414,9 +439,9 @@
                                                 "cases":  30,
                                                 "matrix":  "production-e2e-matrix.csv; production-e2e-matrix.json"
                                             },
-                          "resumeRunbook":  "resume-runbook-2026-10-12.md",
-                          "liveQuotaStatus":  "BLOCKED by provider daily embedding quota; no calls repeated",
-                          "evidenceGateLiveStatus":  "FULL_RETRIEVAL_BENCHMARK_NOT_RUN; q01 gate traversed during 4 strategy retries without output metrics",
+                          "resumeRunbook":  "README.md",
+                          "historicalQuotaStatus":  "Earlier provider daily quota blocker; resolved before the final 2026-10-14 run",
+                          "historicalEvidenceGateLiveStatus":  "Earlier full retrieval benchmark was not run; superseded by final 2026-10-14 run",
                           "priorLiveResults":  "Exploratory and holdout failures remain FAIL; no historical result changed",
                           "holdoutCoverage":  {
                                                   "status":  "PREPARED_NOT_RUN",
@@ -443,13 +468,13 @@
                                                     "providerFailedStrategies":  4,
                                                     "productionE2Ecases":  "0/30",
                                                     "productionE2EScopes":  "0/15",
-                                                    "quota":  "No live rerun; provider quota not confirmed available",
+                                                    "quota":  "Embedding provider quota/access is confirmed available for retrieval by the live provider query and final benchmark; the four historical game-generation failures remain unresolved",
                                                     "attempted":  4,
                                                     "result":  "4/4 InvalidRequestException at GEMINI_WITH_RAG; no generated outputs",
                                                     "cacheHits":  "4 total",
                                                     "embeddingProviderMisses":  0,
                                                     "checkpoint":  "generation-comparison/batch-2026-10-12T06-03-36.023121900Z.json through batch-2026-10-12T06-04-28.315900300Z.json",
-                                                    "blocker":  "No production game-generation endpoint; embedding quota retry time has not elapsed",
+                                                    "blocker":  "No production game-generation endpoint; embedding quota/access blocker is resolved for retrieval, but no live game-generation probe has explained the four historical failures",
                                                     "queryEncoding":  "Direct PowerShell UTF-8 topic was mangled; new retries use q01 fixture and pass retrieval"
                                                 },
                           "buildEnvironment":  {
@@ -489,5 +514,121 @@
                                                      "realGemini":  "NOT_RUN",
                                                      "httpApiE2E":  "NOT_RUN_NO_ENDPOINT"
                                                  }
-                      }
+                      },
+    "latestCodeCheckpoint":  {
+                                 "asOf":  "2026-10-23",
+                                 "baseCommit":  "19e65209787a713216ca1ba6523026f5810280dc",
+                                 "codeState":  "Uncommitted fixes in isolated worktree; no commit/push",
+                                 "retrievalThreshold":  0.855,
+                                 "evidenceGuard":  {
+                                                       "implementation":  "Check explicit constraints per outcome; only individually supporting chunk IDs enter generation context; reject explicit selected-scope mismatch; apply math constraint rules to MATH only",
+                                                       "offlineCandidateReplay":  {
+                                                                                      "status":  "PASS_DEVELOPMENT_ONLY",
+                                                                                      "cases":  11,
+                                                                                      "falseAcceptancesAfterGuard":  0,
+                                                                                      "embeddingCalls":  0,
+                                                                                      "source":  "Stored raw exploratory and exposed holdout reports referenced by README.md",
+                                                                                      "holdoutClaim":  "None; exposed cases are development data"
+                                                                                  },
+                                                       "ruleBoundaryRegression":  {
+                                                                                      "positiveCases":  15,
+                                                                                      "unsupportedCases":  15,
+                                                                                      "falseBlocks":  0,
+                                                                                      "falseAccepts":  0,
+                                                                                      "classification":  "Offline source-text regression only"
+                                                                                  }
+                                                   },
+                                 "tests":  {
+                                               "focusedCurriculumRag":  "Red/green regressions for grouped/overflow numeric bounds, source preflight/transcriptions, selected comparison corpus; 195-candidate historical replay PASS",
+                                               "backendSuite":  "575 tests; 0 failures; 0 errors; 1 live opt-in class skipped",
+                                               "coverage":  "2611/3524 lines (74.09%); gate 70% PASS",
+                                               "runtime":  "JDK 25.0.3; compiler release 21; full Maven test lifecycle with JaCoCo enabled."
+                                           },
+                                 "liveProbe":  {
+                                                   "configurationPresence":  "Required values loaded from backend/.env; only presence booleans inspected",
+                                                   "status":  "HISTORICAL_STALE_FINGERPRINT",
+                                                   "diagnosis":  "Sandboxed TCP/JDBC was blocked; same read-only JDBC probe succeeded with approved network access. No endpoint, SSL, credential, schema, or data changes.",
+                                                   "database":  "15 scope groups, 558 rows, all vectors 768 dimensions; vector extension in extensions schema",
+                                                   "probe":  "MATH/GRADE_1 FOUND, 3 chunks; report probe-2026-10-13T07-06-35.107249700Z.json",
+                                                   "updatedCodeRetrieval":  "15/15 measured; 13/15 scope gates pass; 195 queries; 147/150 positive hits; 42/45 negatives rejected; 3 false accepts; leakage 0; controls 15/15",
+                                                   "runRangeUtc":  "2026-10-13T07:07:07Z through 2026-10-13T07:08:30Z",
+                                                   "threshold":  0.855,
+                                                   "model":  "gemini-embedding-001",
+                                                   "dimension":  768,
+                                                   "topK":  3,
+                                                   "providerMisses":  0,
+                                                   "manualReview":  "NOT_REVIEWED: returned text/source pages and all benchmark labels require independent review",
+                                                   "measuredCodeConfigFingerprintSha256":  "6d221325a7b075292996f45a049c6022a3fd4372c3c8ae7a610d7d7017133599",
+                                                   "metricInterpretation":  "Historical live measurement; not evidence for latest code fingerprint."
+                                               },
+                                 "scopeMatrix":  "Current offline replay and DB configuration blocker recorded in scope-coverage.csv/JSON",
+                                 "codeFingerprint":  {
+                                                         "baseCommit":  "19e65209787a713216ca1ba6523026f5810280dc",
+                                                         "sha256":  "1654a276eddca3b328c5dd8e3a31298ffed2ead7091407dbb69d7a23ccb41762",
+                                                         "benchmarkInputFiles":  99,
+                                                         "dirtyWorktree":  true
+                                                     },
+                                 "codeConfigFingerprintSha256":  "1654a276eddca3b328c5dd8e3a31298ffed2ead7091407dbb69d7a23ccb41762",
+                                 "fingerprintMethod":  "SHA-256 over the sorted 98 benchmark inputs (all curriculum and generation Java source, curriculum resource fixtures, application.yml, pom.xml, and scripts/rag-spike.ps1); each repository-relative path + tab + file SHA-256 + LF, then SHA-256 of the UTF-8 bytes.",
+                                 "liveEvaluation":  {
+                                                        "report":  "docs/rag-spike/results/live-2026-10-14T05-46-12.101293900Z.json",
+                                                        "scopes":  "15/15",
+                                                        "queries":  195,
+                                                        "positiveHitAt3":  "148/150",
+                                                        "negativeRejections":  "45/45",
+                                                        "falseAcceptances":  0,
+                                                        "falseRejections":  2,
+                                                        "scopeGates":  "15/15",
+                                                        "controls":  "15/15 PASS",
+                                                        "leakage":  0,
+                                                        "topK":  3,
+                                                        "threshold":  0.855,
+                                                        "providerEmbeddingMisses":  0,
+                                                        "status":  "HISTORICAL_NOT_CURRENT_CODE_OR_CORPUS",
+                                                        "measuredFingerprintSha256":  "105bbe82d4af2136c5027ea0a926ba10d85993a0a8991fcc4050bf51938d2781",
+                                                        "currentCodeRerun":  "NOT_RUN_CURRENT: Supabase XX000 ENOTFOUND tenant/user not found; no current database rows verified",
+                                                        "priorMetricsAreCurrent":  false
+                                                    },
+                                 "topKCalibration":  {
+                                                         "topK5":  "No q03 hit recovery in ENGLISH GRADE_3 or GRADE_4; both 9/10 positive and 3/3 negative rejection.",
+                                                         "decision":  "Retain default topK 3; fixed minScore 0.855 excludes relevant expected chunks."
+                                                     },
+                                 "holdout":  {
+                                                 "status":  "AI_PROVENANCE_AUDIT_PARTIAL; INDEPENDENCE_NOT_ESTABLISHED; NOT_RUN",
+                                                 "labels":  "AI provenance audit only; 18 files/216 rows reviewed, 35 exact normalized development overlaps, no independent review/freeze history. Not a holdout result and not teacher-reviewed. See docs/rag-spike/README.md."
+                                             },
+                                 "fingerprintFiles":  99,
+                                 "crossReview":  "Two independent read-only code reviews completed, including follow-up review; linked-condition, action, fraction-boundary and candidate-composition findings fixed with regressions; no Important correctness or contract findings remain.",
+                                 "liveRerunBlocker":  "BLOCKED_CONFIGURATION: SQLState XX000, ENOTFOUND tenant/user not found; source preflight passed; no database writes completed",
+                                 "reviewWarnings":  "Final independent reviews found no Important correctness or integration findings. Reviewer C verified updated result/status wording; AI evidence audit is not teacher review."
+                             },
+    "currentVerification":  {
+                                "asOf":  "2026-10-23",
+                                "codeFingerprintSha256":  "1654a276eddca3b328c5dd8e3a31298ffed2ead7091407dbb69d7a23ccb41762",
+                                "fingerprintFiles":  99,
+                                "sourceVerification":  "558/558; 552 PDF text layer + 6 separately recorded AI source transcriptions; no teacher approval",
+                                "textDocumentation":  "15 scope Markdown, 63 source-page Markdown, raw source TXT; 0 images under docs/rag-spike",
+                                "currentMathGrade3Dataset":  "math-grade3-outcomes-v2; missing source word về restored in math-g3-022",
+                                "databaseStatus":  "BLOCKED_CONFIGURATION: SQLState XX000, ENOTFOUND tenant/user not found; source preflight passed; no database writes completed",
+                                "ingest":  "NOT_COMPLETED; Math Grade 3 v2 must be ingested before new live retrieval/generation can be claimed",
+                                "liveRetrieval":  "NOT_RUN_CURRENT_FINGERPRINT",
+                                "liveGeneration":  "30 opt-in service cases prepared; NOT_RUN_CURRENT_FINGERPRINT",
+                                "offlineReplay":  {
+                                                      "scopeCount":  15,
+                                                      "queries":  195,
+                                                      "positiveHitAt3":  "148/150",
+                                                      "negativeRejected":  "45/45",
+                                                      "falseAcceptances":  0,
+                                                      "leakage":  0,
+                                                      "measurement":  "CURRENT_VERIFIER_ON_HISTORICAL_CANDIDATES; NOT_LIVE_RETRIEVAL; NOT_INDEPENDENT_HOLDOUT",
+                                                      "report":  "offline-candidate-replay-2026-10-23.json"
+                                                  },
+                                "sourceTranscriptReview":  "6/6 explicitly checked by Codex AI on 2026-10-23; exact source/page/text records retained; not pedagogical approval",
+                                "sampledRetrievalReview":  "30 historical positive queries, q01 and q05 for each of 15 scopes, read by Codex AI; 30/30 contain directly relevant same-scope evidence; neighboring extra candidates noted; not teacher approval",
+                                "teacherReview":  "PENDING",
+                                "productContractReview":  "PENDING_DUY_AND_FE; existing additive advisory contract retained",
+                                "tests":  "575 tests; 0 failures; 0 errors; 1 live opt-in class skipped",
+                                "review":  "Independent read-only review and followup completed; no Important introduced finding",
+                                "coverage":  "2611/3524 lines (74.09%); gate 70% PASS"
+                            }
 }

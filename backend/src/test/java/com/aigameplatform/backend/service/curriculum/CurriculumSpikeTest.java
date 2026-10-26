@@ -178,4 +178,5 @@ class CurriculumSpikeTest {
         return new CurriculumRAGService.RetrievedChunk(id, subject, grade, "addition", "Outcome " + id,
                 0.9, "curriculum.pdf", List.of(1), List.of(1), "32/2018/TT-BGDDT");
     }
+
 }

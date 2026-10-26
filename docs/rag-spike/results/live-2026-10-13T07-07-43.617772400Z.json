@@ -1,0 +1,1015 @@
+{
+  "measurementStatus" : "LIVE_COMPLETED",
+  "measuredAtUtc" : "2026-10-13T07:07:43.617772400Z",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "queryEmbeddingCacheHits" : 17,
+  "queryEmbeddingProviderMisses" : 0,
+  "queryEmbeddingCacheFile" : "backend/target/curriculum-spike/query-embedding-cache.jsonl",
+  "manualReview" : "PENDING: inspect returned text and source pages before citing quality conclusions",
+  "scopeCount" : 1,
+  "scopeResults" : [ {
+    "queries" : [ {
+      "queryId" : "q01",
+      "topic" : "Đọc đúng các tiếng (bao gồm cả một số tiếng có vần khó, ít dùng). Thuộc bảng chữ cái tiếng Việt; biết phân biệt tên chữ cái (a, bê, xê,...) và âm (a, bờ, cờ,...) mà chữ cái và con chữ biểu hiện.",
+      "expectedChunkIds" : [ "vietnamese-g2-001" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED_COMPOUND_REQUEST",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-001",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc đúng các tiếng (bao gồm cả một số tiếng có vần khó, ít dùng). Thuộc bảng chữ cái tiếng Việt; biết phân biệt tên chữ cái (a, bê, xê,...) và âm (a, bờ, cờ,...) mà chữ cái và con chữ biểu hiện.",
+        "score" : 0.931026006289136,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-001",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc đúng các tiếng (bao gồm cả một số tiếng có vần khó, ít dùng). Thuộc bảng chữ cái tiếng Việt; biết phân biệt tên chữ cái (a, bê, xê,...) và âm (a, bờ, cờ,...) mà chữ cái và con chữ biểu hiện.",
+        "score" : 0.931026006289136,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-017",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Biết đọc thầm.",
+        "score" : 0.883496156778969,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-002",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ ngắt nhịp thơ.",
+        "score" : 0.881298543039424,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 536,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đọc đúng các tiếng (bao gồm cả một số tiếng có vần khó, ít dùng). Thuộc bảng chữ cái tiếng Việt",
+        "chunkId" : "vietnamese-g2-001",
+        "outcomeText" : "Đọc đúng các tiếng (bao gồm cả một số tiếng có vần khó, ít dùng). Thuộc bảng chữ cái tiếng Việt; biết phân biệt tên chữ cái (a, bê, xê,...) và âm (a, bờ, cờ,...) mà chữ cái và con chữ biểu hiện."
+      }, {
+        "requestedCondition" : "biết phân biệt tên chữ cái (a, bê, xê,...) và âm (a, bờ, cờ,...) mà chữ cái và con chữ biểu hiện.",
+        "chunkId" : "vietnamese-g2-001",
+        "outcomeText" : "Đọc đúng các tiếng (bao gồm cả một số tiếng có vần khó, ít dùng). Thuộc bảng chữ cái tiếng Việt; biết phân biệt tên chữ cái (a, bê, xê,...) và âm (a, bờ, cờ,...) mà chữ cái và con chữ biểu hiện."
+      } ]
+    }, {
+      "queryId" : "q02",
+      "topic" : "Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ ngắt nhịp thơ.",
+      "expectedChunkIds" : [ "vietnamese-g2-002" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-002",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ ngắt nhịp thơ.",
+        "score" : 0.921733866323953,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-024",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 30 – 45 chữ.",
+        "score" : 0.886689123235702,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-039",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói và nghe / Nói",
+        "text" : "Nói ngắn gọn về một câu chuyện hoặc bài thơ đã đọc theo lựa chọn của cá nhân (tên văn bản, nội dung văn bản, nhân vật yêu thích).",
+        "score" : 0.872718430227732,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 81 ],
+        "printedPages" : [ 25 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-002",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ ngắt nhịp thơ.",
+        "score" : 0.921733866323953,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-024",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 30 – 45 chữ.",
+        "score" : 0.886689123235702,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-039",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói và nghe / Nói",
+        "text" : "Nói ngắn gọn về một câu chuyện hoặc bài thơ đã đọc theo lựa chọn của cá nhân (tên văn bản, nội dung văn bản, nhân vật yêu thích).",
+        "score" : 0.872718430227732,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 81 ],
+        "printedPages" : [ 25 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 153,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ ngắt nhịp thơ.",
+        "chunkId" : "vietnamese-g2-002",
+        "outcomeText" : "Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ ngắt nhịp thơ."
+      }, {
+        "requestedCondition" : "Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ ngắt nhịp thơ.",
+        "chunkId" : "vietnamese-g2-024",
+        "outcomeText" : "Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 30 – 45 chữ."
+      }, {
+        "requestedCondition" : "Đọc đúng và rõ ràng các đoạn văn, câu chuyện, bài thơ, văn bản thông tin ngắn. Tốc độ đọc khoảng 60 – 70 tiếng trong 1 phút. Biết ngắt hơi ở chỗ có dấu câu, chỗ ngắt nhịp thơ.",
+        "chunkId" : "vietnamese-g2-039",
+        "outcomeText" : "Nói ngắn gọn về một câu chuyện hoặc bài thơ đã đọc theo lựa chọn của cá nhân (tên văn bản, nội dung văn bản, nhân vật yêu thích)."
+      } ]
+    }, {
+      "queryId" : "q03",
+      "topic" : "Bước đầu phân biệt được lời nhân vật trong đối thoại và lời người kể chuyện để đọc với ngữ điệu phù hợp.",
+      "expectedChunkIds" : [ "vietnamese-g2-003" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-003",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Bước đầu phân biệt được lời nhân vật trong đối thoại và lời người kể chuyện để đọc với ngữ điệu phù hợp.",
+        "score" : 0.914162205390256,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-021",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được thái độ, tình cảm giữa các nhân vật thể hiện qua hành động, lời thoại.",
+        "score" : 0.857371071153864,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-042",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói và nghe / Nói nghe tương tác",
+        "text" : "Biết trao đổi trong nhóm về các nhân vật trong một câu chuyện dựa vào gợi ý.",
+        "score" : 0.856497247047739,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 82 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-003",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Bước đầu phân biệt được lời nhân vật trong đối thoại và lời người kể chuyện để đọc với ngữ điệu phù hợp.",
+        "score" : 0.914162205390256,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-021",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được thái độ, tình cảm giữa các nhân vật thể hiện qua hành động, lời thoại.",
+        "score" : 0.857371071153864,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-042",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói và nghe / Nói nghe tương tác",
+        "text" : "Biết trao đổi trong nhóm về các nhân vật trong một câu chuyện dựa vào gợi ý.",
+        "score" : 0.856497247047739,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 82 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 137,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Bước đầu phân biệt được lời nhân vật trong đối thoại và lời người kể chuyện để đọc với ngữ điệu phù hợp.",
+        "chunkId" : "vietnamese-g2-003",
+        "outcomeText" : "Bước đầu phân biệt được lời nhân vật trong đối thoại và lời người kể chuyện để đọc với ngữ điệu phù hợp."
+      }, {
+        "requestedCondition" : "Bước đầu phân biệt được lời nhân vật trong đối thoại và lời người kể chuyện để đọc với ngữ điệu phù hợp.",
+        "chunkId" : "vietnamese-g2-021",
+        "outcomeText" : "Nhận biết được thái độ, tình cảm giữa các nhân vật thể hiện qua hành động, lời thoại."
+      }, {
+        "requestedCondition" : "Bước đầu phân biệt được lời nhân vật trong đối thoại và lời người kể chuyện để đọc với ngữ điệu phù hợp.",
+        "chunkId" : "vietnamese-g2-042",
+        "outcomeText" : "Biết trao đổi trong nhóm về các nhân vật trong một câu chuyện dựa vào gợi ý."
+      } ]
+    }, {
+      "queryId" : "q04",
+      "topic" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+      "expectedChunkIds" : [ "vietnamese-g2-004" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-008",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.914449610861193,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.909647012549345,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-025",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.",
+        "score" : 0.879728244389869,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-008",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.914449610861193,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.909647012549345,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-025",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.",
+        "score" : 0.879728244389869,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 150,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "chunkId" : "vietnamese-g2-008",
+        "outcomeText" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?"
+      }, {
+        "requestedCondition" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "chunkId" : "vietnamese-g2-004",
+        "outcomeText" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?"
+      }, {
+        "requestedCondition" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "chunkId" : "vietnamese-g2-025",
+        "outcomeText" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý."
+      } ]
+    }, {
+      "queryId" : "q05",
+      "topic" : "Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý.",
+      "expectedChunkIds" : [ "vietnamese-g2-005" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-005",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý.",
+        "score" : 0.906265957579414,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-025",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.",
+        "score" : 0.892592873713262,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nêu được các thông tin bổ ích đối với bản thân từ văn bản.",
+        "score" : 0.867745235361497,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-005",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý.",
+        "score" : 0.906265957579414,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-025",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.",
+        "score" : 0.892592873713262,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nêu được các thông tin bổ ích đối với bản thân từ văn bản.",
+        "score" : 0.867745235361497,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 140,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý.",
+        "chunkId" : "vietnamese-g2-005",
+        "outcomeText" : "Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý."
+      }, {
+        "requestedCondition" : "Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý.",
+        "chunkId" : "vietnamese-g2-025",
+        "outcomeText" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý."
+      }, {
+        "requestedCondition" : "Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý.",
+        "chunkId" : "vietnamese-g2-027",
+        "outcomeText" : "Nêu được các thông tin bổ ích đối với bản thân từ văn bản."
+      } ]
+    }, {
+      "queryId" : "q06",
+      "topic" : "Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện.",
+      "expectedChunkIds" : [ "vietnamese-g2-006" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-006",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện.",
+        "score" : 0.904634736858528,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-026",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được trình tự các sự việc, hiện tượng nêu trong văn bản.",
+        "score" : 0.866013234822378,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-008",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.861715360867395,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-006",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện.",
+        "score" : 0.904634736858528,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-026",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được trình tự các sự việc, hiện tượng nêu trong văn bản.",
+        "score" : 0.866013234822378,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-008",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.861715360867395,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 221,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện.",
+        "chunkId" : "vietnamese-g2-006",
+        "outcomeText" : "Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện."
+      }, {
+        "requestedCondition" : "Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện.",
+        "chunkId" : "vietnamese-g2-026",
+        "outcomeText" : "Nhận biết được trình tự các sự việc, hiện tượng nêu trong văn bản."
+      }, {
+        "requestedCondition" : "Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện.",
+        "chunkId" : "vietnamese-g2-008",
+        "outcomeText" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?"
+      } ]
+    }, {
+      "queryId" : "q07",
+      "topic" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương đương với các văn bản đã học.",
+      "expectedChunkIds" : [ "vietnamese-g2-007" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-007",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương đương với các văn bản đã học.",
+        "score" : 0.908716734382222,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-029",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin có kiểu văn bản và độ dài tương đương với các văn bản đã học.",
+        "score" : 0.87824223677277,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-024",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 30 – 45 chữ.",
+        "score" : 0.862320915472191,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-007",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương đương với các văn bản đã học.",
+        "score" : 0.908716734382222,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-029",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin có kiểu văn bản và độ dài tương đương với các văn bản đã học.",
+        "score" : 0.87824223677277,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-024",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 30 – 45 chữ.",
+        "score" : 0.862320915472191,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 161,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương đương với các văn bản đã học.",
+        "chunkId" : "vietnamese-g2-007",
+        "outcomeText" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương đương với các văn bản đã học."
+      }, {
+        "requestedCondition" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương đương với các văn bản đã học.",
+        "chunkId" : "vietnamese-g2-029",
+        "outcomeText" : "Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin có kiểu văn bản và độ dài tương đương với các văn bản đã học."
+      }, {
+        "requestedCondition" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương đương với các văn bản đã học.",
+        "chunkId" : "vietnamese-g2-024",
+        "outcomeText" : "Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 30 – 45 chữ."
+      } ]
+    }, {
+      "queryId" : "q08",
+      "topic" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+      "expectedChunkIds" : [ "vietnamese-g2-008" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-008",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.91566168831241,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.908114863664507,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-025",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.",
+        "score" : 0.880292482221937,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-008",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.91566168831241,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "score" : 0.908114863664507,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 78 ],
+        "printedPages" : [ 22 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-025",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.",
+        "score" : 0.880292482221937,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 424,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "chunkId" : "vietnamese-g2-008",
+        "outcomeText" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?"
+      }, {
+        "requestedCondition" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "chunkId" : "vietnamese-g2-004",
+        "outcomeText" : "Biết nêu và trả lời câu hỏi về một số chi tiết nội dung trong văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?"
+      }, {
+        "requestedCondition" : "Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?",
+        "chunkId" : "vietnamese-g2-025",
+        "outcomeText" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý."
+      } ]
+    }, {
+      "queryId" : "q09",
+      "topic" : "Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động.",
+      "expectedChunkIds" : [ "vietnamese-g2-009" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-009",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động.",
+        "score" : 0.928517677749657,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79, 80 ],
+        "printedPages" : [ 23, 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nêu được các thông tin bổ ích đối với bản thân từ văn bản.",
+        "score" : 0.885365444280875,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-025",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.",
+        "score" : 0.885005505967585,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-009",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động.",
+        "score" : 0.928517677749657,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79, 80 ],
+        "printedPages" : [ 23, 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nêu được các thông tin bổ ích đối với bản thân từ văn bản.",
+        "score" : 0.885365444280875,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-025",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.",
+        "score" : 0.885005505967585,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79 ],
+        "printedPages" : [ 23 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 160,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động.",
+        "chunkId" : "vietnamese-g2-009",
+        "outcomeText" : "Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động."
+      }, {
+        "requestedCondition" : "Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động.",
+        "chunkId" : "vietnamese-g2-027",
+        "outcomeText" : "Nêu được các thông tin bổ ích đối với bản thân từ văn bản."
+      }, {
+        "requestedCondition" : "Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động.",
+        "chunkId" : "vietnamese-g2-025",
+        "outcomeText" : "Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý."
+      } ]
+    }, {
+      "queryId" : "q10",
+      "topic" : "Viết thành thạo chữ viết thường, viết đúng chữ viết hoa.",
+      "expectedChunkIds" : [ "vietnamese-g2-010" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g2-010",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Viết / Kĩ thuật viết",
+        "text" : "Viết thành thạo chữ viết thường, viết đúng chữ viết hoa.",
+        "score" : 0.912786718407877,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-011",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Viết / Kĩ thuật viết",
+        "text" : "Viết hoa chữ cái đầu câu, viết đúng tên người, tên địa lí phổ biến ở địa phương.",
+        "score" : 0.900818409866172,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-031",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Viết / Kĩ thuật viết",
+        "text" : "Trình bày bài viết sạch sẽ, đúng quy định.",
+        "score" : 0.874889531938118,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-010",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Viết / Kĩ thuật viết",
+        "text" : "Viết thành thạo chữ viết thường, viết đúng chữ viết hoa.",
+        "score" : 0.912786718407877,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-011",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Viết / Kĩ thuật viết",
+        "text" : "Viết hoa chữ cái đầu câu, viết đúng tên người, tên địa lí phổ biến ở địa phương.",
+        "score" : 0.900818409866172,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-031",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Viết / Kĩ thuật viết",
+        "text" : "Trình bày bài viết sạch sẽ, đúng quy định.",
+        "score" : 0.874889531938118,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 80 ],
+        "printedPages" : [ 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 187,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Viết thành thạo chữ viết thường, viết đúng chữ viết hoa.",
+        "chunkId" : "vietnamese-g2-010",
+        "outcomeText" : "Viết thành thạo chữ viết thường, viết đúng chữ viết hoa."
+      }, {
+        "requestedCondition" : "Viết thành thạo chữ viết thường, viết đúng chữ viết hoa.",
+        "chunkId" : "vietnamese-g2-011",
+        "outcomeText" : "Viết hoa chữ cái đầu câu, viết đúng tên người, tên địa lí phổ biến ở địa phương."
+      }, {
+        "requestedCondition" : "Viết thành thạo chữ viết thường, viết đúng chữ viết hoa.",
+        "chunkId" : "vietnamese-g2-031",
+        "outcomeText" : "Trình bày bài viết sạch sẽ, đúng quy định."
+      } ]
+    }, {
+      "queryId" : "q11",
+      "topic" : "Tìm hiểu yêu cầu cần đạt về nội dung Tiếng Việt của lớp liền kề, không thuộc lớp đang tra cứu.",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "REQUESTED_SCOPE_MISMATCH",
+      "returned" : [ ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g2-038",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói và nghe / Nói",
+        "text" : "Biết nói và đáp lại lời chào hỏi, chia tay, cảm ơn, xin lỗi, lời mời, lời đề nghị, chúc mừng, chia buồn, an ủi, khen ngợi, bày tỏ sự ngạc nhiên; đồng ý, không đồng ý, từ chối phù hợp với đối tượng người nghe.",
+        "score" : 0.887103643468388,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 81 ],
+        "printedPages" : [ 25 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-009",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động.",
+        "score" : 0.885734491730745,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 79, 80 ],
+        "printedPages" : [ 23, 24 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g2-040",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_2",
+        "topic" : "Nói và nghe / Nghe",
+        "text" : "Có thói quen và thái độ chú ý nghe người khác nói. Đặt được câu hỏi về những gì chưa rõ khi nghe.",
+        "score" : 0.883683540214312,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 82 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 473,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q12",
+      "topic" : "Tính diện tích hình tròn theo bán kính.",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 100,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q13",
+      "topic" : "Học sinh thực hiện hoạt động trải nghiệm để rèn luyện kĩ năng.",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 105,
+      "evidenceSupports" : [ ]
+    } ],
+    "controlProbes" : [ {
+      "controlChunkId" : "vietnamese-g2-control-001",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeChunkIds" : [ "vietnamese-g2-001", "vietnamese-g2-002", "vietnamese-g2-017" ]
+    }, {
+      "controlChunkId" : "vietnamese-g2-control-002",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeChunkIds" : [ "vietnamese-g2-025", "vietnamese-g2-005" ]
+    }, {
+      "controlChunkId" : "vietnamese-g2-control-003",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeChunkIds" : [ ]
+    }, {
+      "controlChunkId" : "vietnamese-g2-control-004",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeChunkIds" : [ ]
+    } ],
+    "summary" : {
+      "positiveQueries" : 10,
+      "hits" : 10,
+      "hitAt3" : 1.0,
+      "leakedChunks" : 0,
+      "negativeQueries" : 3,
+      "negativeRejections" : 3,
+      "retrievalGatePassed" : true,
+      "negativeGatePassed" : true,
+      "passed" : true
+    },
+    "gradeLevel" : "GRADE_2",
+    "controlsStatus" : "PASS",
+    "dataset" : {
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "curriculumVersion" : "32/2018/TT-BGDDT",
+      "datasetVersion" : "vietnamese-grade2-outcomes-v1",
+      "pdfPageCount" : 1555
+    },
+    "subject" : "VIETNAMESE"
+  } ],
+  "passed" : true
+}

@@ -181,6 +181,8 @@ class GameGenerationServiceTest {
         assertThat(game.metadata().curriculumReview().status()).isEqualTo(
                 com.aigameplatform.backend.service.curriculum.CurriculumEvidenceReview.Status.UNAVAILABLE);
         assertThat(game.metadata().curriculumReview().warnings()).hasSize(1);
+        assertThat(game.metadata().curriculumReview().warnings().getFirst().chunkIds())
+                .containsExactly("math-g1-007");
         assertThat(generator.attempts).hasSize(1);
     }
     @Test

@@ -135,7 +135,13 @@ public class GameGenerationService {
         } catch (RuntimeException exception) {
             log.warn("Curriculum evidence review unavailable; returning game with an advisory warning: {}",
                     exception.getMessage());
-            review = CurriculumEvidenceReview.unavailable("Chưa kiểm tra được nội dung đối chiếu với chương trình.");
+            var chunkIds = curriculumChunkIds(context);
+            if (chunkIds.isEmpty()) {
+                log.warn("Curriculum review warning has no source chunk citations; omitting optional review metadata");
+                return game;
+            }
+            review = CurriculumEvidenceReview.unavailable(
+                    "Chưa kiểm tra được nội dung đối chiếu với chương trình.", chunkIds);
         }
         if (review.status() == CurriculumEvidenceReview.Status.REVIEWED && review.warnings().isEmpty()) {
             log.info("Curriculum evidence review found no unsupported claims (advisory only)");
@@ -152,6 +158,13 @@ public class GameGenerationService {
             log.warn("Could not attach curriculum advisory to generated game: {}", exception.getMessage());
             return game;
         }
+    }
+
+    private static List<String> curriculumChunkIds(String context) {
+        var matcher = java.util.regex.Pattern.compile("\\[([A-Za-z0-9._:-]+)]").matcher(context);
+        var chunkIds = new java.util.LinkedHashSet<String>();
+        while (matcher.find()) chunkIds.add(matcher.group(1));
+        return List.copyOf(chunkIds);
     }
 
     private String retrieveCurriculumContext(GameType type, GameDslRequest request) {

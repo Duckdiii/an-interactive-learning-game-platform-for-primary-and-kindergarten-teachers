@@ -1,0 +1,106 @@
+{
+  "measuredAtUtc" : "2026-10-13T07:06:35.107249700Z",
+  "measurementStatus" : "LIVE_SINGLE_QUERY",
+  "subject" : "MATH",
+  "gradeLevel" : "GRADE_1",
+  "topic" : "C?ng tr? nh?m trong ph?m vi 10",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "queryEmbeddingCacheHits" : 1,
+  "queryEmbeddingProviderMisses" : 0,
+  "latencyMillis" : 547,
+  "dataset" : {
+    "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "curriculumVersion" : "32/2018/TT-BGDDT",
+    "datasetVersion" : "math-grade1-spike-v1",
+    "pdfPageCount" : 1555
+  },
+  "result" : {
+    "status" : "FOUND",
+    "chunks" : [ {
+      "chunkId" : "math-g1-002",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Số tự nhiên / Chục và đơn vị",
+      "text" : "Nhận biết được chục và đơn vị, số tròn chục.",
+      "score" : 0.861177337141886,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-007",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm trong phạm vi 10.",
+      "score" : 0.859553403420805,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-008",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục.",
+      "score" : 0.858963991517187,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "reasonCode" : "SUPPORTED",
+    "candidates" : [ {
+      "chunkId" : "math-g1-002",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Số tự nhiên / Chục và đơn vị",
+      "text" : "Nhận biết được chục và đơn vị, số tròn chục.",
+      "score" : 0.861177337141886,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-007",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm trong phạm vi 10.",
+      "score" : 0.859553403420805,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    }, {
+      "chunkId" : "math-g1-008",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Các phép tính với số tự nhiên / Tính nhẩm",
+      "text" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục.",
+      "score" : 0.858963991517187,
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "pdfPages" : [ 188 ],
+      "printedPages" : [ 22 ],
+      "curriculumVersion" : "32/2018/TT-BGDDT"
+    } ],
+    "evidenceSupports" : [ {
+      "requestedCondition" : "C?ng tr? nh?m trong ph?m vi 10",
+      "chunkId" : "math-g1-002",
+      "outcomeText" : "Nhận biết được chục và đơn vị, số tròn chục."
+    }, {
+      "requestedCondition" : "C?ng tr? nh?m trong ph?m vi 10",
+      "chunkId" : "math-g1-007",
+      "outcomeText" : "Thực hiện được việc cộng, trừ nhẩm trong phạm vi 10."
+    }, {
+      "requestedCondition" : "C?ng tr? nh?m trong ph?m vi 10",
+      "chunkId" : "math-g1-008",
+      "outcomeText" : "Thực hiện được việc cộng, trừ nhẩm các số tròn chục."
+    } ]
+  }
+}

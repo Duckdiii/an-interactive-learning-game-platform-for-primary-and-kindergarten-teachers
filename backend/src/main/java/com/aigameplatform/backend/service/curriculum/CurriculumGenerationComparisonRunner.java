@@ -40,9 +40,13 @@ import java.util.Map;
 import java.util.Set;
 import tools.jackson.databind.json.JsonMapper;
 
-/** One-shot matched Gemini comparison for the single currently indexed scope. */
+/** One-shot matched Gemini comparison for the selected primary subject and grade. */
 public final class CurriculumGenerationComparisonRunner {
     private CurriculumGenerationComparisonRunner() { }
+
+    static CurriculumDataset loadDataset(Subject subject, GradeLevel grade) throws java.io.IOException {
+        return new CurriculumDatasetCatalog(CurriculumDataset.loadAllReviewed()).select(subject, grade).getFirst();
+    }
 
     public static void main(String[] args) {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
@@ -67,13 +71,13 @@ public final class CurriculumGenerationComparisonRunner {
             String topic;
             if (args.length == topicStart + 2 && "--query-id".equals(args[topicStart])) {
                 String queryId = args[topicStart + 1];
-                topic = CurriculumEvaluation.loadQueries().stream().filter(q -> q.queryId().equals(queryId))
+                topic = CurriculumEvaluation.loadQueries(subject, grade).stream().filter(q -> q.queryId().equals(queryId))
                         .findFirst().orElseThrow(() -> new IllegalArgumentException("Unknown UTF-8 benchmark query ID"))
                         .topic();
             } else {
                 topic = String.join(" ", Arrays.copyOfRange(args, topicStart, args.length));
             }
-            var dataset = CurriculumDataset.loadDefault();
+            var dataset = loadDataset(subject, grade);
             var catalog = new CurriculumDatasetCatalog(List.of(dataset));
             var jsonMapper = new JsonMapper();
             var strategies = new GameContentStrategyRegistry(List.of(
@@ -97,7 +101,7 @@ public final class CurriculumGenerationComparisonRunner {
                 stage = "indexed corpus verification";
                 CurriculumSpikeDatabase.requireCompleteDataset(database, dataset, config.embeddingModel());
                 var rag = new CurriculumRAGService(CurriculumSpikeDatabase.store(database), queryModel, catalog,
-                        config.embeddingModel(), RagSpikeConfig.TOP_K, config.minScore());
+                        config.embeddingModel(), config.topK(), config.minScore());
                 Path outputDir = Path.of("..", "docs", "rag-spike", "results", "generation-comparison");
                 List<GameType> gameTypes = allTypes ? Arrays.asList(GameType.values()) : List.of(gameType);
                 var batch = new LinkedHashMap<String, Object>();

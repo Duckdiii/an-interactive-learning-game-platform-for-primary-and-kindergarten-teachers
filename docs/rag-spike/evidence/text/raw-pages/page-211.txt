@@ -1,0 +1,24 @@
+Nội dung Yêu cầu cần đạt 
+Một số yếu tố Thu thập, phân loại, sắp Thực hiện được việc thu thập, phân loại, so sánh, sắp xếp số liệu thống kê 
+thống kê xếp các số liệu  theo các tiêu chí cho trước. 
+Đọc, mô tả biểu đồ thống – Đọc và mô tả được các số liệu ở dạng biểu đồ hình quạt tròn. 
+kê hình quạt tròn. Biểu – Sắp xếp được số liệu vào biểu đồ hình quạt tròn (không yêu cầu học 
+diễn số liệu bằng biểu đồ sinh vẽ hình).  
+thống kê hình quạt tròn – Lựa chọn được cách biểu diễn (bằng dãy số liệu, bảng số liệu, hoặc 
+ bằng biểu đồ) các số liệu thống kê. 
+Hình thành và giải quyết – Nêu được một số nhận xét đơn giản từ biểu đồ hình quạt tròn. 
+vấn đề đơn giản xuất hiện – Làm quen với việc phát hiện vấn đề hoặc quy luật đơn giản dựa trên 
+từ các số liệu và biểu đồ quan sát các số liệu từ biểu đồ hình quạt tròn. 
+thống kê hình quạt tròn đã – Giải quyết được những vấn đề đơn giản liên quan đến các số liệu thu được từ 
+có biểu đồ hình quạt tròn. 
+ – Nhận biết được mối liên hệ giữa thống kê với các kiến thức khác trong 
+môn Toán và trong thực tiễn (ví dụ: số thập phân, tỉ số phần trăm,...). 
+Một số yếu tố xác suất 
+Một số yếu tố xác Tỉ số mô tả số lần lặp lại Sử dụng được tỉ số để mô tả số lần lặp lại của một khả năng xảy ra (nhiều 
+suất của một khả năng xảy ra lần) của một sự kiện trong một thí nghiệm so với tổng số lần thực hiện thí 
+(nhiều lần) của một sự kiện 2
+nghiệm đó ở những trường hợp đơn giản (ví dụ: sử dụng tỉ số  để mô tả 
+trong một thí nghiệm so 5
+với tổng số lần thực hiện 2 lần xảy ra khả năng “mặt sấp đồng xu xuất hiện” của khi tung đồng xu 5 
+thí nghiệm đó ở những lần). 
+45 

@@ -33,8 +33,9 @@ public record CurriculumEvidenceReview(Status status, List<Claim> claims, List<W
         }
     }
 
-    public static CurriculumEvidenceReview unavailable(String reason) {
+    public static CurriculumEvidenceReview unavailable(String reason, List<String> chunkIds) {
         return new CurriculumEvidenceReview(Status.UNAVAILABLE, List.of(),
-                List.of(new Warning("unavailable", "Curriculum evidence review", ClaimStatus.UNCERTAIN, reason, List.of())));
+                List.of(new Warning("unavailable", "Curriculum evidence review", ClaimStatus.UNCERTAIN,
+                        reason, chunkIds)));
     }
 }

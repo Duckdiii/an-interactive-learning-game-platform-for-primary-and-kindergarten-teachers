@@ -14,11 +14,21 @@ public final class CurriculumEvaluation {
                                 CurriculumRAGService.Status status, String reasonCode,
                                 List<CurriculumRAGService.RetrievedChunk> returned,
                                 List<CurriculumRAGService.RetrievedChunk> candidates,
-                                boolean hit, int leakedChunks, long latencyMillis) {
+                                boolean hit, int leakedChunks, long latencyMillis,
+                                List<CurriculumEvidenceVerifier.EvidenceSupport> evidenceSupports) {
         public EvaluationRow {
             expectedChunkIds = List.copyOf(expectedChunkIds);
             returned = List.copyOf(returned);
             candidates = List.copyOf(candidates);
+            evidenceSupports = List.copyOf(evidenceSupports);
+        }
+        public EvaluationRow(String queryId, String topic, List<String> expectedChunkIds, boolean negative,
+                             CurriculumRAGService.Status status, String reasonCode,
+                             List<CurriculumRAGService.RetrievedChunk> returned,
+                             List<CurriculumRAGService.RetrievedChunk> candidates,
+                             boolean hit, int leakedChunks, long latencyMillis) {
+            this(queryId, topic, expectedChunkIds, negative, status, reasonCode, returned, candidates,
+                    hit, leakedChunks, latencyMillis, List.of());
         }
     }
     public record Summary(int positiveQueries, int hits, double hitAt3, int leakedChunks,
@@ -78,7 +88,8 @@ public final class CurriculumEvaluation {
         int leakage = (int) result.chunks().stream()
                 .filter(c -> c.subject() != subject || c.gradeLevel() != gradeLevel).count();
         return new EvaluationRow(query.queryId(), query.topic(), query.expectedChunkIds(), query.negative(),
-                result.status(), result.reasonCode(), result.chunks(), result.candidates(), hit, leakage, millis);
+                result.status(), result.reasonCode(), result.chunks(), result.candidates(), hit, leakage, millis,
+                result.evidenceSupports());
     }
 
     public static Summary summarize(List<EvaluationRow> rows) {

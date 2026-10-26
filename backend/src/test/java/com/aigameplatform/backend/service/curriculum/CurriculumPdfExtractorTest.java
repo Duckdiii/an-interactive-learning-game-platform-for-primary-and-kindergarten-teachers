@@ -21,7 +21,7 @@ class CurriculumPdfExtractorTest {
     @TempDir Path directory;
 
     @Test
-    void recordsVisualTranscriptionForAFragmentWhosePdfTextLayoutCannotBeCompared() throws Exception {
+    void neverLabelsAnUncheckedVisualFragmentAsSourceVerified() throws Exception {
         Path pdf = directory.resolve("visual-source.pdf");
         try (var doc = new PDDocument()) {
             var page = new PDPage();
@@ -46,10 +46,33 @@ class CurriculumPdfExtractorTest {
                 new CurriculumDataset(source, List.of(chunk)), directory.resolve("visual-output"));
 
         assertThat(verification.chunks()).singleElement().satisfies(result -> {
-            assertThat(result.sourceFragmentsMatched()).isTrue();
-            assertThat(result.sourceVerificationMethod()).isEqualTo("VISUAL_TRANSCRIPTION");
+            assertThat(result.sourceFragmentsMatched()).isFalse();
+            assertThat(result.sourceVerificationMethod()).isEqualTo("TEXT_TRANSCRIPTION_PENDING");
         });
-        assertThat(verification.evaluationStatus()).contains("VISUAL_TRANSCRIPTION_REVIEWED");
+        assertThat(verification.verifiedChunks()).isZero();
+        assertThat(verification.evaluationStatus()).contains("TEXT_TRANSCRIPTION_PENDING")
+                .doesNotContain("VISUAL_TRANSCRIPTION_REVIEWED");
+        assertThat(Files.readString(directory.resolve("visual-output/outcomes.md")))
+                .contains("Visually transcribed fraction outcome.", "TEXT_TRANSCRIPTION_PENDING", "PDF 1");
+
+        var checked = new CurriculumPdfExtractor.TextTranscription(sha, "fraction", 1, 1,
+                "Visually transcribed fraction outcome.", "Fixture source reviewer", "2026-10-23", "AI_SOURCE_TRANSCRIPTION");
+        var reviewed = new CurriculumPdfExtractor().verifyAndExtract(pdf, new CurriculumDataset(source, List.of(chunk)),
+                directory.resolve("reviewed-output"), List.of(checked));
+        assertThat(reviewed.verifiedChunks()).isEqualTo(1);
+        assertThat(reviewed.chunks()).singleElement().satisfies(result -> {
+            assertThat(result.sourceFragmentsMatched()).isTrue();
+            assertThat(result.sourceVerificationMethod()).isEqualTo("AI_REVIEWED_TEXT_TRANSCRIPTION");
+            assertThat(result.pedagogicalReview()).isEqualTo("NOT_REVIEWED");
+        });
+        assertThat(Files.readString(directory.resolve("reviewed-output/outcomes.md")))
+                .contains("Fixture source reviewer", "2026-10-23", "Teacher review: NOT_REVIEWED");
+
+        var changed = new CurriculumChunk("fraction", Subject.MATH, GradeLevel.GRADE_3, "fractions", "Fabricated outcome.",
+                false, List.of(new CurriculumChunk.SourceFragment(1, 1, "VISUAL_RIGHT", "Fabricated outcome.")));
+        assertThatThrownBy(() -> new CurriculumPdfExtractor().verifyAndExtract(pdf,
+                new CurriculumDataset(source, List.of(changed)), directory.resolve("tampered-output"), List.of(checked)))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("differs from reviewed");
     }
     @Test
     void validatesFragmentsInTheirPagesAndRejectsADifferentSource() throws Exception {
@@ -73,6 +96,8 @@ class CurriculumPdfExtractorTest {
         var verification = new CurriculumPdfExtractor().verifyAndExtract(pdf,
                 new CurriculumDataset(source, List.of(chunk)), directory.resolve("output"));
         assertThat(verification.verifiedChunks()).isEqualTo(1);
+        assertThat(Files.readString(directory.resolve("output/outcomes.md")))
+                .contains("Outcome alpha.", "PDF 1", "GRADE_1", "source.pdf");
         assertThat(verification.chunks()).singleElement().satisfies(result -> {
             assertThat(result.chunkId()).isEqualTo("alpha");
             assertThat(result.sourceFragmentsMatched()).isTrue();

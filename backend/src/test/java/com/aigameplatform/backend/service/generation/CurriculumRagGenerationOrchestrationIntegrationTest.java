@@ -220,7 +220,7 @@ class CurriculumRagGenerationOrchestrationIntegrationTest {
                 }
             };
             return new CurriculumRAGService(store, deterministicModel,
-                    new CurriculumDatasetCatalog(datasets), "gemini-embedding-001", RagSpikeConfig.TOP_K, 0.855);
+                    new CurriculumDatasetCatalog(datasets), "gemini-embedding-001", RagSpikeConfig.DEFAULT_TOP_K, 0.855);
         }
 
         @Bean @Primary

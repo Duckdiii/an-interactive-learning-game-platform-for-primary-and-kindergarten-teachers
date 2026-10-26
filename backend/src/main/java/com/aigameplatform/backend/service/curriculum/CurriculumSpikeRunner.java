@@ -59,15 +59,18 @@ public final class CurriculumSpikeRunner {
         if ("--extract".equals(mode) || "--ingest".equals(mode)) {
             String path = args.length > 1 ? args[1] : config.pdfPath();
             if (path.isBlank()) throw new IllegalArgumentException("Set CURRICULUM_PDF or supply a PDF path");
-            if ("--extract".equals(mode)) {
-                var results = new ArrayList<Map<String, Object>>();
-                for (var dataset : datasets) {
-                    var verification = new CurriculumPdfExtractor().verifyAndExtract(Path.of(path), dataset,
-                            Path.of("target", "curriculum-spike", "extracted", dataset.source().datasetVersion()));
-                    results.add(Map.of("scope", dataset.chunks().stream().filter(c -> !c.control()).findFirst()
-                                    .map(c -> c.subject() + "/" + c.gradeLevel()).orElse("UNKNOWN"),
-                            "verification", verification));
+            var results = new ArrayList<Map<String, Object>>();
+            for (var dataset : datasets) {
+                var verification = new CurriculumPdfExtractor().verifyAndExtract(Path.of(path), dataset,
+                        Path.of("target", "curriculum-spike", "extracted", dataset.source().datasetVersion()));
+                if ("--ingest".equals(mode) && verification.verifiedChunks() != dataset.chunks().size()) {
+                    throw new IllegalStateException("Source verification is incomplete; review text transcriptions before ingestion");
                 }
+                results.add(Map.of("scope", dataset.chunks().stream().filter(c -> !c.control()).findFirst()
+                                .map(c -> c.subject() + "/" + c.gradeLevel()).orElse("UNKNOWN"),
+                        "verification", verification));
+            }
+            if ("--extract".equals(mode)) {
                 System.out.println(mapper.writeValueAsString(results));
                 return 0;
             }
@@ -107,7 +110,7 @@ public final class CurriculumSpikeRunner {
                     RagSpikeConfig.DIMENSION, GoogleAiEmbeddingModel.TaskType.RETRIEVAL_QUERY.name(),
                     Path.of("target", "curriculum-spike", "query-embedding-cache.jsonl"));
             var service = new CurriculumRAGService(store, queryModel, catalog, config.embeddingModel(),
-                    RagSpikeConfig.TOP_K, config.minScore());
+                    config.topK(), config.minScore());
             if (mode.startsWith("--evaluate-holdout")) {
                 String holdoutVersion = "--evaluate-holdout-v2".equals(mode) ? "v2"
                         : args.length == 4 ? args[3] : "v1";
@@ -123,7 +126,7 @@ public final class CurriculumSpikeRunner {
                     String scope = primary.subject().name().toLowerCase() + "-g" + primary.gradeLevel().name().substring(6);
                     var runId = scope + "-holdout-" + holdoutVersion + "-" + Instant.now().toString().replace(':', '-');
                     var run = new CurriculumHoldout.Run(runId, "FRESH_HOLDOUT_" + holdoutVersion.toUpperCase(), Instant.now(), primary.subject(),
-                            primary.gradeLevel(), config.embeddingModel(), RagSpikeConfig.DIMENSION, RagSpikeConfig.TOP_K,
+                            primary.gradeLevel(), config.embeddingModel(), RagSpikeConfig.DIMENSION, config.topK(),
                             config.minScore(), dataset.source().sourceSha256(),
                             sha256Resource(CurriculumDataset.resourceRootFor(primary.subject(), primary.gradeLevel()), "holdout-" + holdoutVersion + ".jsonl"),
                             queryModel.cacheHits() - cacheHitsBefore, queryModel.providerMisses() - providerMissesBefore,
@@ -155,7 +158,7 @@ public final class CurriculumSpikeRunner {
                 probe.put("topic", topic);
                 probe.put("embeddingModel", config.embeddingModel());
                 probe.put("embeddingDimension", RagSpikeConfig.DIMENSION);
-                probe.put("topK", RagSpikeConfig.TOP_K);
+                probe.put("topK", config.topK());
                 probe.put("minScore", config.minScore());
                 probe.put("queryEmbeddingCacheHits", queryModel.cacheHits());
                 probe.put("queryEmbeddingProviderMisses", queryModel.providerMisses());
@@ -203,7 +206,7 @@ public final class CurriculumSpikeRunner {
             report.put("measuredAtUtc", Instant.now().toString());
             report.put("embeddingModel", config.embeddingModel());
             report.put("embeddingDimension", RagSpikeConfig.DIMENSION);
-            report.put("topK", RagSpikeConfig.TOP_K);
+            report.put("topK", config.topK());
             report.put("minScore", config.minScore());
             report.put("queryEmbeddingCacheHits", queryModel.cacheHits());
             report.put("queryEmbeddingProviderMisses", queryModel.providerMisses());
@@ -243,19 +246,23 @@ public final class CurriculumSpikeRunner {
     }
 
     private static String holdoutCsv(java.util.List<CurriculumHoldout.Row> rows) {
-        var csv = new StringBuilder("queryId,kind,topic,expectedChunkIds,sourceDocument,sourceSha256,sourcePdfPage,returnedChunkIdsAndScores,candidateChunkIdsAndScores,evidenceReason,hitAt3,rejected,falseRejection,falseAcceptance,leakedChunks,latencyMillis,goldRationale\n");
+        var csv = new StringBuilder("queryId,kind,topic,expectedChunkIds,sourceDocument,sourceSha256,sourcePdfPage,returnedChunkIdsAndScores,candidateChunkIdsAndScores,evidenceReason,evidenceSupports,hitAt3,rejected,falseRejection,falseAcceptance,leakedChunks,latencyMillis,goldRationale\n");
         for (var row : rows) {
             var q = row.query();
             String returned = row.returned().stream().map(c -> c.chunkId() + ":" + c.score())
                     .collect(java.util.stream.Collectors.joining(";"));
             String candidates = row.candidates().stream().map(c -> c.chunkId() + ":" + c.score())
                     .collect(java.util.stream.Collectors.joining(";"));
+            String evidenceSupports = row.evidenceSupports().stream().map(s -> s.requestedCondition()
+                            + " => [" + s.chunkId() + "] " + s.outcomeText())
+                    .collect(java.util.stream.Collectors.joining(";"));
             boolean hitAt3 = row.hit();
             csv.append(csv(q.queryId())).append(',').append(csv(q.kind().name())).append(',')
                     .append(csv(q.topic())).append(',').append(csv(String.join(";", q.expectedChunkIds()))).append(',')
                     .append(csv(q.sourceDocument())).append(',').append(csv(q.sourceSha256())).append(',')
                     .append(q.sourcePdfPage()).append(',').append(csv(returned)).append(',').append(csv(candidates)).append(',')
-                    .append(csv(row.reasonCode())).append(',').append(hitAt3).append(',').append(row.rejected()).append(',')
+                    .append(csv(row.reasonCode())).append(',').append(csv(evidenceSupports)).append(',')
+                    .append(hitAt3).append(',').append(row.rejected()).append(',')
                     .append(row.falseRejection()).append(',')
                     .append(row.falseAcceptance()).append(',').append(row.leakedChunks()).append(',')
                     .append(row.latencyMillis()).append(',').append(csv(q.goldRationale())).append('\n');

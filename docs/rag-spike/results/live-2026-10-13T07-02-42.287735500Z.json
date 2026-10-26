@@ -1,0 +1,770 @@
+{
+  "measurementStatus" : "LIVE_COMPLETED",
+  "measuredAtUtc" : "2026-10-13T07:02:42.279507300Z",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "queryEmbeddingCacheHits" : 6,
+  "queryEmbeddingProviderMisses" : 11,
+  "queryEmbeddingCacheFile" : "backend/target/curriculum-spike/query-embedding-cache.jsonl",
+  "manualReview" : "PENDING: inspect returned text and source pages before citing quality conclusions",
+  "scopeCount" : 1,
+  "scopeResults" : [ {
+    "controlsStatus" : "PASS",
+    "dataset" : {
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "curriculumVersion" : "32/2018/TT-BGDDT",
+      "datasetVersion" : "english-grade5-foreign-language-outcomes-v1",
+      "pdfPageCount" : 1555
+    },
+    "subject" : "ENGLISH",
+    "queries" : [ {
+      "queryId" : "q01",
+      "topic" : "Nhận biết trọng âm từ bằng kỹ năng nghe",
+      "expectedChunkIds" : [ "english-g5-001" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe và nhận biết trọng âm từ.",
+        "text" : "Nghe và nhận biết trọng âm từ.",
+        "score" : 0.909893907510294,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe và nhận biết trọng âm từ.",
+        "text" : "Nghe và nhận biết trọng âm từ.",
+        "score" : 0.909893907510294,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1499,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhận biết trọng âm từ bằng kỹ năng nghe",
+        "chunkId" : "english-g5-001",
+        "outcomeText" : "Nghe và nhận biết trọng âm từ."
+      } ]
+    }, {
+      "queryId" : "q02",
+      "topic" : "Làm theo chỉ dẫn đơn giản",
+      "expectedChunkIds" : [ "english-g5-002" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-002",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu và làm theo những chỉ dẫn đơn giản.",
+        "text" : "Nghe hiểu và làm theo những chỉ dẫn đơn giản.",
+        "score" : 0.880574342301779,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học.",
+        "text" : "Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học.",
+        "score" : 0.865801673285381,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-002",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu và làm theo những chỉ dẫn đơn giản.",
+        "text" : "Nghe hiểu và làm theo những chỉ dẫn đơn giản.",
+        "score" : 0.880574342301779,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học.",
+        "text" : "Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học.",
+        "score" : 0.865801673285381,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 828,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Làm theo chỉ dẫn đơn giản",
+        "chunkId" : "english-g5-002",
+        "outcomeText" : "Nghe hiểu và làm theo những chỉ dẫn đơn giản."
+      }, {
+        "requestedCondition" : "Làm theo chỉ dẫn đơn giản",
+        "chunkId" : "english-g5-006",
+        "outcomeText" : "Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học."
+      } ]
+    }, {
+      "queryId" : "q03",
+      "topic" : "Trả lời câu hỏi về chủ đề chương trình",
+      "expectedChunkIds" : [ "english-g5-003" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "score" : 0.864698130730841,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "text" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "score" : 0.859749621175989,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "text" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "score" : 0.857940547018092,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "score" : 0.864698130730841,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "text" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "score" : 0.859749621175989,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "text" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "score" : 0.857940547018092,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 823,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Trả lời câu hỏi về chủ đề chương trình",
+        "chunkId" : "english-g5-008",
+        "outcomeText" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp)."
+      }, {
+        "requestedCondition" : "Trả lời câu hỏi về chủ đề chương trình",
+        "chunkId" : "english-g5-003",
+        "outcomeText" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình."
+      }, {
+        "requestedCondition" : "Trả lời câu hỏi về chủ đề chương trình",
+        "chunkId" : "english-g5-009",
+        "outcomeText" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc."
+      } ]
+    }, {
+      "queryId" : "q04",
+      "topic" : "Nghe hội thoại hoặc độc thoại 45–60 từ",
+      "expectedChunkIds" : [ "english-g5-004" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+        "text" : "Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+        "score" : 0.903154969161502,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-005",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+        "text" : "Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+        "score" : 0.86941093293212,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "text" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "score" : 0.866162821296169,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+        "text" : "Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+        "score" : 0.903154969161502,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-005",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+        "text" : "Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+        "score" : 0.86941093293212,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "text" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "score" : 0.866162821296169,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 895,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nghe hội thoại hoặc độc thoại 45–60 từ",
+        "chunkId" : "english-g5-004",
+        "outcomeText" : "Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình."
+      }, {
+        "requestedCondition" : "Nghe hội thoại hoặc độc thoại 45–60 từ",
+        "chunkId" : "english-g5-005",
+        "outcomeText" : "Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp)."
+      }, {
+        "requestedCondition" : "Nghe hội thoại hoặc độc thoại 45–60 từ",
+        "chunkId" : "english-g5-003",
+        "outcomeText" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình."
+      } ]
+    }, {
+      "queryId" : "q05",
+      "topic" : "Nghe hiểu nội dung chính của câu chuyện ngắn",
+      "expectedChunkIds" : [ "english-g5-005" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-005",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+        "text" : "Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+        "score" : 0.90529205137063,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+        "text" : "Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+        "score" : 0.877741480884152,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "text" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "score" : 0.864293906403564,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-005",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+        "text" : "Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+        "score" : 0.90529205137063,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+        "text" : "Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+        "score" : 0.877741480884152,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nghe / Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "text" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+        "score" : 0.864293906403564,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1279 ],
+        "printedPages" : [ 30 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 840,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nghe hiểu nội dung chính của câu chuyện ngắn",
+        "chunkId" : "english-g5-005",
+        "outcomeText" : "Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp)."
+      }, {
+        "requestedCondition" : "Nghe hiểu nội dung chính của câu chuyện ngắn",
+        "chunkId" : "english-g5-004",
+        "outcomeText" : "Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình."
+      }, {
+        "requestedCondition" : "Nghe hiểu nội dung chính của câu chuyện ngắn",
+        "chunkId" : "english-g5-003",
+        "outcomeText" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình."
+      } ]
+    }, {
+      "queryId" : "q06",
+      "topic" : "Nói chỉ dẫn và đề nghị trong và ngoài lớp",
+      "expectedChunkIds" : [ "english-g5-006" ],
+      "negative" : false,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "REQUESTED_SCOPE_MISMATCH",
+      "returned" : [ ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học.",
+        "text" : "Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học.",
+        "score" : 0.903702832495762,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "score" : 0.862349011637168,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 894,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q07",
+      "topic" : "Hỏi đáp về chủ đề quen thuộc và nhu cầu hằng ngày",
+      "expectedChunkIds" : [ "english-g5-007" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+        "text" : "Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+        "score" : 0.868579104546534,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "text" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "score" : 0.85688673157804,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+        "text" : "Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+        "score" : 0.868579104546534,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "text" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "score" : 0.85688673157804,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1046,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Hỏi đáp về chủ đề quen thuộc và nhu cầu hằng ngày",
+        "chunkId" : "english-g5-007",
+        "outcomeText" : "Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày."
+      }, {
+        "requestedCondition" : "Hỏi đáp về chủ đề quen thuộc và nhu cầu hằng ngày",
+        "chunkId" : "english-g5-009",
+        "outcomeText" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc."
+      } ]
+    }, {
+      "queryId" : "q08",
+      "topic" : "Nói về chủ đề chương trình có trợ giúp",
+      "expectedChunkIds" : [ "english-g5-008" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "score" : 0.869220839139548,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+        "score" : 0.869220839139548,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 780,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nói về chủ đề chương trình có trợ giúp",
+        "chunkId" : "english-g5-008",
+        "outcomeText" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp)."
+      } ]
+    }, {
+      "queryId" : "q09",
+      "topic" : "Trả lời phỏng vấn đơn giản",
+      "expectedChunkIds" : [ "english-g5-009" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "text" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "score" : 0.878416959523029,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+        "text" : "Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+        "score" : 0.863640291114459,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "text" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+        "score" : 0.878416959523029,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Nói / Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+        "text" : "Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+        "score" : 0.863640291114459,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 764,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Trả lời phỏng vấn đơn giản",
+        "chunkId" : "english-g5-009",
+        "outcomeText" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc."
+      }, {
+        "requestedCondition" : "Trả lời phỏng vấn đơn giản",
+        "chunkId" : "english-g5-007",
+        "outcomeText" : "Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày."
+      } ]
+    }, {
+      "queryId" : "q10",
+      "topic" : "Đọc hiểu văn bản 60–80 từ",
+      "expectedChunkIds" : [ "english-g5-011" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g5-011",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Đọc hiểu các đoạn văn bản ngắn, đơn giản khoảng 60 - 80 từ về các chủ đề quen thuộc.",
+        "text" : "Đọc hiểu các đoạn văn bản ngắn, đơn giản khoảng 60 - 80 từ về các chủ đề quen thuộc.",
+        "score" : 0.8966016567094,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Đọc những đoạn văn bản ngắn, đơn giản đã được chuẩn bị trước về những chủ đề quen thuộc như bạn bè, gia đình, nhà trường, …",
+        "text" : "Đọc những đoạn văn bản ngắn, đơn giản đã được chuẩn bị trước về những chủ đề quen thuộc như bạn bè, gia đình, nhà trường, …",
+        "score" : 0.872588091632624,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-012",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Ðọc hiểu các thông điệp ngắn, đơn giản trên bưu thiếp; các chỉ dẫn ngắn, đơn giản.",
+        "text" : "Ðọc hiểu các thông điệp ngắn, đơn giản trên bưu thiếp; các chỉ dẫn ngắn, đơn giản.",
+        "score" : 0.869611396866465,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g5-011",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Đọc hiểu các đoạn văn bản ngắn, đơn giản khoảng 60 - 80 từ về các chủ đề quen thuộc.",
+        "text" : "Đọc hiểu các đoạn văn bản ngắn, đơn giản khoảng 60 - 80 từ về các chủ đề quen thuộc.",
+        "score" : 0.8966016567094,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Đọc những đoạn văn bản ngắn, đơn giản đã được chuẩn bị trước về những chủ đề quen thuộc như bạn bè, gia đình, nhà trường, …",
+        "text" : "Đọc những đoạn văn bản ngắn, đơn giản đã được chuẩn bị trước về những chủ đề quen thuộc như bạn bè, gia đình, nhà trường, …",
+        "score" : 0.872588091632624,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g5-012",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Ðọc hiểu các thông điệp ngắn, đơn giản trên bưu thiếp; các chỉ dẫn ngắn, đơn giản.",
+        "text" : "Ðọc hiểu các thông điệp ngắn, đơn giản trên bưu thiếp; các chỉ dẫn ngắn, đơn giản.",
+        "score" : 0.869611396866465,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1280 ],
+        "printedPages" : [ 31 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 910,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đọc hiểu văn bản 60–80 từ",
+        "chunkId" : "english-g5-011",
+        "outcomeText" : "Đọc hiểu các đoạn văn bản ngắn, đơn giản khoảng 60 - 80 từ về các chủ đề quen thuộc."
+      }, {
+        "requestedCondition" : "Đọc hiểu văn bản 60–80 từ",
+        "chunkId" : "english-g5-010",
+        "outcomeText" : "Đọc những đoạn văn bản ngắn, đơn giản đã được chuẩn bị trước về những chủ đề quen thuộc như bạn bè, gia đình, nhà trường, …"
+      }, {
+        "requestedCondition" : "Đọc hiểu văn bản 60–80 từ",
+        "chunkId" : "english-g5-012",
+        "outcomeText" : "Ðọc hiểu các thông điệp ngắn, đơn giản trên bưu thiếp; các chỉ dẫn ngắn, đơn giản."
+      } ]
+    }, {
+      "queryId" : "n01",
+      "topic" : "Viết câu tiếng Anh bằng thì hiện tại hoàn thành",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 74,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "n02",
+      "topic" : "Giải bài toán cộng các số tự nhiên trong phạm vi 100",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 82,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "n03",
+      "topic" : "Viết chương trình Python dùng vòng lặp",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 70,
+      "evidenceSupports" : [ ]
+    } ],
+    "controlProbes" : [ {
+      "primaryScopeChunkIds" : [ "english-g5-002", "english-g5-006", "english-g5-003" ],
+      "controlChunkId" : "english-g5-013",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true
+    }, {
+      "primaryScopeChunkIds" : [ "english-g5-002", "english-g5-005", "english-g5-003" ],
+      "controlChunkId" : "english-g5-014",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true
+    }, {
+      "primaryScopeChunkIds" : [ ],
+      "controlChunkId" : "english-g5-015",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true
+    }, {
+      "primaryScopeChunkIds" : [ ],
+      "controlChunkId" : "english-g5-016",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true
+    } ],
+    "summary" : {
+      "positiveQueries" : 10,
+      "hits" : 9,
+      "hitAt3" : 0.9,
+      "leakedChunks" : 0,
+      "negativeQueries" : 3,
+      "negativeRejections" : 3,
+      "retrievalGatePassed" : true,
+      "negativeGatePassed" : true,
+      "passed" : true
+    },
+    "gradeLevel" : "GRADE_5"
+  } ],
+  "passed" : true
+}

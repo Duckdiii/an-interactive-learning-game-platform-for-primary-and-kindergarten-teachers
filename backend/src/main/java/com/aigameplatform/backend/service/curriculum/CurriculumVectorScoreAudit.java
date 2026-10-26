@@ -97,7 +97,7 @@ public final class CurriculumVectorScoreAudit {
         artifact.put("dimension", RagSpikeConfig.DIMENSION);
         artifact.put("localNormalization", "No application-side vector normalization is called before retrieval or storage");
         artifact.put("scoreInterpretation", "LangChain4j PgVectorEmbeddingStore computes score=(2-cosine_distance)/2; since cosine_distance=1-cosine_similarity, the displayed relevance is (1+cosine_similarity)/2");
-        artifact.put("retriever", Map.of("topK", RagSpikeConfig.TOP_K, "filterSubject", "MATH",
+        artifact.put("retriever", Map.of("topK", RagSpikeConfig.DEFAULT_TOP_K, "filterSubject", "MATH",
                 "filterGradeLevel", "GRADE_1", "filterContentType", "curriculum_outcome",
                 "filterDatasetVersion", dataset.source().datasetVersion(), "minScoreRuns", List.of(0.75, 0.855)));
         artifact.put("scope", Map.of("subject", "MATH", "gradeLevel", "GRADE_1"));

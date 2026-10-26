@@ -7,6 +7,16 @@ import org.junit.jupiter.api.Test;
 
 class RagSpikeConfigTest {
     @Test
+    void keepsTopKAtThreeByDefaultAndAcceptsBoundedCalibrationValues() {
+        assertThat(RagSpikeConfig.from(Map.of()).topK()).isEqualTo(3);
+        assertThat(RagSpikeConfig.from(Map.of("CURRICULUM_RAG_TOP_K", "5")).topK()).isEqualTo(5);
+        assertThatThrownBy(() -> RagSpikeConfig.from(Map.of("CURRICULUM_RAG_TOP_K", "0")))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> RagSpikeConfig.from(Map.of("CURRICULUM_RAG_TOP_K", "51")))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void reportsMissingConfigurationWithoutPrintingSecretValues() {
         var config = RagSpikeConfig.from(Map.of("GEMINI_API_KEY", "private-test-key"));
         assertThat(config.safeStatus().toString()).doesNotContain("private-test-key");

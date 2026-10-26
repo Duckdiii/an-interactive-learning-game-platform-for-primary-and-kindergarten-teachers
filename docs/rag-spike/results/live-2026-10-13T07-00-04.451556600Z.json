@@ -1,0 +1,993 @@
+{
+  "measurementStatus" : "LIVE_COMPLETED",
+  "measuredAtUtc" : "2026-10-13T07:00:04.451556600Z",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "queryEmbeddingCacheHits" : 0,
+  "queryEmbeddingProviderMisses" : 17,
+  "queryEmbeddingCacheFile" : "backend/target/curriculum-spike/query-embedding-cache.jsonl",
+  "manualReview" : "PENDING: inspect returned text and source pages before citing quality conclusions",
+  "scopeCount" : 1,
+  "scopeResults" : [ {
+    "queries" : [ {
+      "queryId" : "q01",
+      "topic" : "Số tự nhiên / Số và cấu tạo thập phân: Đọc, viết được các số có nhiều chữ số (đến lớp triệu).",
+      "expectedChunkIds" : [ "math-g4-001" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-001",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Đọc, viết được các số có nhiều chữ số (đến lớp triệu).",
+        "score" : 0.920646256341947,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-004",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Làm quen với dãy số tự nhiên và đặc điểm.",
+        "score" : 0.885846854179164,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-002",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Nhận biết được cấu tạo thập phân của một số và giá trị theo vị trí của từng chữ số trong mỗi số.",
+        "score" : 0.883589771448528,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-001",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Đọc, viết được các số có nhiều chữ số (đến lớp triệu).",
+        "score" : 0.920646256341947,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-004",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Làm quen với dãy số tự nhiên và đặc điểm.",
+        "score" : 0.885846854179164,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-002",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Nhận biết được cấu tạo thập phân của một số và giá trị theo vị trí của từng chữ số trong mỗi số.",
+        "score" : 0.883589771448528,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1768,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Số tự nhiên / Số và cấu tạo thập phân: Đọc, viết được các số có nhiều chữ số (đến lớp triệu).",
+        "chunkId" : "math-g4-001",
+        "outcomeText" : "Đọc, viết được các số có nhiều chữ số (đến lớp triệu)."
+      }, {
+        "requestedCondition" : "Số tự nhiên / Số và cấu tạo thập phân: Đọc, viết được các số có nhiều chữ số (đến lớp triệu).",
+        "chunkId" : "math-g4-004",
+        "outcomeText" : "Làm quen với dãy số tự nhiên và đặc điểm."
+      }, {
+        "requestedCondition" : "Số tự nhiên / Số và cấu tạo thập phân: Đọc, viết được các số có nhiều chữ số (đến lớp triệu).",
+        "chunkId" : "math-g4-002",
+        "outcomeText" : "Nhận biết được cấu tạo thập phân của một số và giá trị theo vị trí của từng chữ số trong mỗi số."
+      } ]
+    }, {
+      "queryId" : "q02",
+      "topic" : "Số tự nhiên / So sánh số: Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi lớp triệu).",
+      "expectedChunkIds" : [ "math-g4-006" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-006",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / So sánh số",
+        "text" : "Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi lớp triệu).",
+        "score" : 0.923043560014836,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200, 201 ],
+        "printedPages" : [ 34, 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-005",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / So sánh số",
+        "text" : "Nhận biết được cách so sánh hai số trong phạm vi lớp triệu.",
+        "score" : 0.897274022394581,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-046",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Thống kê / Sắp xếp số liệu",
+        "text" : "Nhận biết được cách sắp xếp dãy số liệu thống kê theo các tiêu chí cho trước.",
+        "score" : 0.889448486555661,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204, 205 ],
+        "printedPages" : [ 38, 39 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-006",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / So sánh số",
+        "text" : "Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi lớp triệu).",
+        "score" : 0.923043560014836,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200, 201 ],
+        "printedPages" : [ 34, 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-005",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / So sánh số",
+        "text" : "Nhận biết được cách so sánh hai số trong phạm vi lớp triệu.",
+        "score" : 0.897274022394581,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-046",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Thống kê / Sắp xếp số liệu",
+        "text" : "Nhận biết được cách sắp xếp dãy số liệu thống kê theo các tiêu chí cho trước.",
+        "score" : 0.889448486555661,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204, 205 ],
+        "printedPages" : [ 38, 39 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 798,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Số tự nhiên / So sánh số: Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi lớp triệu).",
+        "chunkId" : "math-g4-006",
+        "outcomeText" : "Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi lớp triệu)."
+      }, {
+        "requestedCondition" : "Số tự nhiên / So sánh số: Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi lớp triệu).",
+        "chunkId" : "math-g4-005",
+        "outcomeText" : "Nhận biết được cách so sánh hai số trong phạm vi lớp triệu."
+      }, {
+        "requestedCondition" : "Số tự nhiên / So sánh số: Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi lớp triệu).",
+        "chunkId" : "math-g4-046",
+        "outcomeText" : "Nhận biết được cách sắp xếp dãy số liệu thống kê theo các tiêu chí cho trước."
+      } ]
+    }, {
+      "queryId" : "q03",
+      "topic" : "Số tự nhiên / Làm tròn số: Làm tròn được số đến tròn chục, tròn trăm, tròn nghìn, tròn mười nghìn, tròn trăm nghìn (ví dụ: làm tròn số 12 345 đến hàng trăm thì được số 12 300).",
+      "expectedChunkIds" : [ "math-g4-007" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-007",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Làm tròn số",
+        "text" : "Làm tròn được số đến tròn chục, tròn trăm, tròn nghìn, tròn mười nghìn, tròn trăm nghìn (ví dụ: làm tròn số 12 345 đến hàng trăm thì được số 12 300).",
+        "score" : 0.911765252291793,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-007",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Làm tròn số",
+        "text" : "Làm tròn được số đến tròn chục, tròn trăm, tròn nghìn, tròn mười nghìn, tròn trăm nghìn (ví dụ: làm tròn số 12 345 đến hàng trăm thì được số 12 300).",
+        "score" : 0.911765252291793,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-004",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Số và cấu tạo thập phân",
+        "text" : "Làm quen với dãy số tự nhiên và đặc điểm.",
+        "score" : 0.862347394265757,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 200 ],
+        "printedPages" : [ 34 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 753,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Số tự nhiên / Làm tròn số: Làm tròn được số đến tròn chục, tròn trăm, tròn nghìn, tròn mười nghìn, tròn trăm nghìn (ví dụ: làm tròn số 12 345 đến hàng trăm thì được số 12 300).",
+        "chunkId" : "math-g4-007",
+        "outcomeText" : "Làm tròn được số đến tròn chục, tròn trăm, tròn nghìn, tròn mười nghìn, tròn trăm nghìn (ví dụ: làm tròn số 12 345 đến hàng trăm thì được số 12 300)."
+      } ]
+    }, {
+      "queryId" : "q04",
+      "topic" : "Số tự nhiên / Biểu thức số và biểu thức chữ: Vận dụng được tính chất phân phối của phép nhân đối với phép cộng trong tính giá trị của biểu thức.",
+      "expectedChunkIds" : [ "math-g4-018" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-018",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Biểu thức số và biểu thức chữ",
+        "text" : "Vận dụng được tính chất phân phối của phép nhân đối với phép cộng trong tính giá trị của biểu thức.",
+        "score" : 0.931215928931344,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-015",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Tính nhẩm",
+        "text" : "Vận dụng được tính chất của phép tính để tính nhẩm và tính bằng cách thuận tiện nhất.",
+        "score" : 0.889941553260941,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-017",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Biểu thức số và biểu thức chữ",
+        "text" : "Làm quen với biểu thức chứa một, hai, ba chữ và tính được giá trị của biểu thức chứa một, hai, hoặc ba chữ (trường hợp đơn giản).",
+        "score" : 0.889506345936322,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-018",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Biểu thức số và biểu thức chữ",
+        "text" : "Vận dụng được tính chất phân phối của phép nhân đối với phép cộng trong tính giá trị của biểu thức.",
+        "score" : 0.931215928931344,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-015",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Tính nhẩm",
+        "text" : "Vận dụng được tính chất của phép tính để tính nhẩm và tính bằng cách thuận tiện nhất.",
+        "score" : 0.889941553260941,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-017",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Biểu thức số và biểu thức chữ",
+        "text" : "Làm quen với biểu thức chứa một, hai, ba chữ và tính được giá trị của biểu thức chứa một, hai, hoặc ba chữ (trường hợp đơn giản).",
+        "score" : 0.889506345936322,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 962,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Số tự nhiên / Biểu thức số và biểu thức chữ: Vận dụng được tính chất phân phối của phép nhân đối với phép cộng trong tính giá trị của biểu thức.",
+        "chunkId" : "math-g4-018",
+        "outcomeText" : "Vận dụng được tính chất phân phối của phép nhân đối với phép cộng trong tính giá trị của biểu thức."
+      }, {
+        "requestedCondition" : "Số tự nhiên / Biểu thức số và biểu thức chữ: Vận dụng được tính chất phân phối của phép nhân đối với phép cộng trong tính giá trị của biểu thức.",
+        "chunkId" : "math-g4-015",
+        "outcomeText" : "Vận dụng được tính chất của phép tính để tính nhẩm và tính bằng cách thuận tiện nhất."
+      }, {
+        "requestedCondition" : "Số tự nhiên / Biểu thức số và biểu thức chữ: Vận dụng được tính chất phân phối của phép nhân đối với phép cộng trong tính giá trị của biểu thức.",
+        "chunkId" : "math-g4-017",
+        "outcomeText" : "Làm quen với biểu thức chứa một, hai, ba chữ và tính được giá trị của biểu thức chứa một, hai, hoặc ba chữ (trường hợp đơn giản)."
+      } ]
+    }, {
+      "queryId" : "q05",
+      "topic" : "Số tự nhiên / Giải quyết vấn đề với phép tính: Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).",
+      "expectedChunkIds" : [ "math-g4-019" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-019",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Giải quyết vấn đề với phép tính",
+        "text" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).",
+        "score" : 0.92429522481821,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-029",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Các phép tính",
+        "text" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán (có đến hai hoặc ba bước tính) liên quan đến 4 phép tính với phân số (ví dụ: bài toán liên quan đến tìm phân số của một số).",
+        "score" : 0.878910058037105,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-010",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Phép nhân, phép chia",
+        "text" : "Tính được số trung bình cộng của hai hay nhiều số.",
+        "score" : 0.86689808006569,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-019",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Giải quyết vấn đề với phép tính",
+        "text" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).",
+        "score" : 0.92429522481821,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-029",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Các phép tính",
+        "text" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán (có đến hai hoặc ba bước tính) liên quan đến 4 phép tính với phân số (ví dụ: bài toán liên quan đến tìm phân số của một số).",
+        "score" : 0.878910058037105,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-010",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Phép nhân, phép chia",
+        "text" : "Tính được số trung bình cộng của hai hay nhiều số.",
+        "score" : 0.86689808006569,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 889,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Số tự nhiên / Giải quyết vấn đề với phép tính: Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).",
+        "chunkId" : "math-g4-019",
+        "outcomeText" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị)."
+      }, {
+        "requestedCondition" : "Số tự nhiên / Giải quyết vấn đề với phép tính: Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).",
+        "chunkId" : "math-g4-029",
+        "outcomeText" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán (có đến hai hoặc ba bước tính) liên quan đến 4 phép tính với phân số (ví dụ: bài toán liên quan đến tìm phân số của một số)."
+      }, {
+        "requestedCondition" : "Số tự nhiên / Giải quyết vấn đề với phép tính: Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).",
+        "chunkId" : "math-g4-010",
+        "outcomeText" : "Tính được số trung bình cộng của hai hay nhiều số."
+      } ]
+    }, {
+      "queryId" : "q06",
+      "topic" : "Phân số / Tính chất cơ bản: Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có một mẫu số chia hết cho mẫu số còn lại.",
+      "expectedChunkIds" : [ "math-g4-024" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-024",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Tính chất cơ bản",
+        "text" : "Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có một mẫu số chia hết cho mẫu số còn lại.",
+        "score" : 0.903503841770419,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-024",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Tính chất cơ bản",
+        "text" : "Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có một mẫu số chia hết cho mẫu số còn lại.",
+        "score" : 0.903503841770419,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 739,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Phân số / Tính chất cơ bản: Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có một mẫu số chia hết cho mẫu số còn lại.",
+        "chunkId" : "math-g4-024",
+        "outcomeText" : "Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có một mẫu số chia hết cho mẫu số còn lại."
+      } ]
+    }, {
+      "queryId" : "q07",
+      "topic" : "Phân số / So sánh phân số: Xác định được phân số lớn nhất, bé nhất (trong một nhóm có không quá 4 phân số) trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại.",
+      "expectedChunkIds" : [ "math-g4-026" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED_COMPOUND_REQUEST",
+      "returned" : [ {
+        "chunkId" : "math-g4-026",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / So sánh phân số",
+        "text" : "Xác định được phân số lớn nhất, bé nhất (trong một nhóm có không quá 4 phân số) trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại.",
+        "score" : 0.920301023977499,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-025",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / So sánh phân số",
+        "text" : "So sánh và sắp xếp được thứ tự các phân số trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại.",
+        "score" : 0.900320464296355,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-024",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Tính chất cơ bản",
+        "text" : "Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có một mẫu số chia hết cho mẫu số còn lại.",
+        "score" : 0.871485018651056,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-026",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / So sánh phân số",
+        "text" : "Xác định được phân số lớn nhất, bé nhất (trong một nhóm có không quá 4 phân số) trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại.",
+        "score" : 0.920301023977499,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-025",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / So sánh phân số",
+        "text" : "So sánh và sắp xếp được thứ tự các phân số trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại.",
+        "score" : 0.900320464296355,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-024",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Tính chất cơ bản",
+        "text" : "Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có một mẫu số chia hết cho mẫu số còn lại.",
+        "score" : 0.871485018651056,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 937,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Phân số / So sánh phân số: Xác định được phân số lớn nhất, bé nhất (trong một nhóm có không quá 4 phân số) trong những trường hợp sau: các phân số có cùng mẫu số",
+        "chunkId" : "math-g4-026",
+        "outcomeText" : "Xác định được phân số lớn nhất, bé nhất (trong một nhóm có không quá 4 phân số) trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại."
+      }, {
+        "requestedCondition" : "Phân số / So sánh phân số: Xác định được phân số lớn nhất, bé nhất (trong một nhóm có không quá 4 phân số) trong những trường hợp sau: các phân số có cùng mẫu số",
+        "chunkId" : "math-g4-025",
+        "outcomeText" : "So sánh và sắp xếp được thứ tự các phân số trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại."
+      }, {
+        "requestedCondition" : "có một mẫu số chia hết cho các mẫu số còn lại.",
+        "chunkId" : "math-g4-026",
+        "outcomeText" : "Xác định được phân số lớn nhất, bé nhất (trong một nhóm có không quá 4 phân số) trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại."
+      }, {
+        "requestedCondition" : "có một mẫu số chia hết cho các mẫu số còn lại.",
+        "chunkId" : "math-g4-025",
+        "outcomeText" : "So sánh và sắp xếp được thứ tự các phân số trong những trường hợp sau: các phân số có cùng mẫu số; có một mẫu số chia hết cho các mẫu số còn lại."
+      }, {
+        "requestedCondition" : "có một mẫu số chia hết cho các mẫu số còn lại.",
+        "chunkId" : "math-g4-024",
+        "outcomeText" : "Thực hiện được việc quy đồng mẫu số hai phân số trong trường hợp có một mẫu số chia hết cho mẫu số còn lại."
+      } ]
+    }, {
+      "queryId" : "q08",
+      "topic" : "Hình học / Thực hành hình học: Thực hiện được việc đo, vẽ, lắp ghép, tạo lập một số hình phẳng và hình khối đã học.",
+      "expectedChunkIds" : [ "math-g4-034" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-034",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Hình học / Thực hành hình học",
+        "text" : "Thực hiện được việc đo, vẽ, lắp ghép, tạo lập một số hình phẳng và hình khối đã học.",
+        "score" : 0.921207430908326,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-035",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Hình học / Thực hành hình học",
+        "text" : "Giải quyết được một số vấn đề liên quan đến đo góc, vẽ hình, lắp ghép, tạo lập hình gắn với một số hình phẳng và hình khối đã học.",
+        "score" : 0.906964856255399,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-033",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Hình học / Thực hành hình học",
+        "text" : "Thực hiện được việc vẽ đường thẳng vuông góc, đường thẳng song song bằng thước thẳng và êke.",
+        "score" : 0.879181604678465,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-034",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Hình học / Thực hành hình học",
+        "text" : "Thực hiện được việc đo, vẽ, lắp ghép, tạo lập một số hình phẳng và hình khối đã học.",
+        "score" : 0.921207430908326,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-035",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Hình học / Thực hành hình học",
+        "text" : "Giải quyết được một số vấn đề liên quan đến đo góc, vẽ hình, lắp ghép, tạo lập hình gắn với một số hình phẳng và hình khối đã học.",
+        "score" : 0.906964856255399,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-033",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Hình học / Thực hành hình học",
+        "text" : "Thực hiện được việc vẽ đường thẳng vuông góc, đường thẳng song song bằng thước thẳng và êke.",
+        "score" : 0.879181604678465,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 744,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Hình học / Thực hành hình học: Thực hiện được việc đo, vẽ, lắp ghép, tạo lập một số hình phẳng và hình khối đã học.",
+        "chunkId" : "math-g4-034",
+        "outcomeText" : "Thực hiện được việc đo, vẽ, lắp ghép, tạo lập một số hình phẳng và hình khối đã học."
+      }, {
+        "requestedCondition" : "Hình học / Thực hành hình học: Thực hiện được việc đo, vẽ, lắp ghép, tạo lập một số hình phẳng và hình khối đã học.",
+        "chunkId" : "math-g4-035",
+        "outcomeText" : "Giải quyết được một số vấn đề liên quan đến đo góc, vẽ hình, lắp ghép, tạo lập hình gắn với một số hình phẳng và hình khối đã học."
+      }, {
+        "requestedCondition" : "Hình học / Thực hành hình học: Thực hiện được việc đo, vẽ, lắp ghép, tạo lập một số hình phẳng và hình khối đã học.",
+        "chunkId" : "math-g4-033",
+        "outcomeText" : "Thực hiện được việc vẽ đường thẳng vuông góc, đường thẳng song song bằng thước thẳng và êke."
+      } ]
+    }, {
+      "queryId" : "q09",
+      "topic" : "Đo lường / Tính toán và ước lượng: Thực hiện được việc ước lượng các kết quả đo lường trong một số trường hợp đơn giản (ví dụ: con bò cân nặng khoảng 3 tạ,...).",
+      "expectedChunkIds" : [ "math-g4-043" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-043",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Đo lường / Tính toán và ước lượng",
+        "text" : "Thực hiện được việc ước lượng các kết quả đo lường trong một số trường hợp đơn giản (ví dụ: con bò cân nặng khoảng 3 tạ,...).",
+        "score" : 0.944309939756423,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-044",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Đo lường / Tính toán và ước lượng",
+        "text" : "Giải quyết được một số vấn đề thực tiễn liên quan đến đo độ dài, diện tích, khối lượng, dung tích, thời gian, tiền Việt Nam.",
+        "score" : 0.894203787200198,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-042",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Đo lường / Tính toán và ước lượng",
+        "text" : "Thực hiện được việc chuyển đổi và tính toán với các số đo độ dài (mm, cm, dm, m, km); diện tích (mm2, cm2, dm2, m2); khối lượng (g, kg, yến, tạ, tấn); dung tích (ml, l); thời gian (giây, phút, giờ, ngày, tuần lễ, tháng, năm, thế kỉ); tiền Việt Nam đã học.",
+        "score" : 0.884434277936616,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-043",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Đo lường / Tính toán và ước lượng",
+        "text" : "Thực hiện được việc ước lượng các kết quả đo lường trong một số trường hợp đơn giản (ví dụ: con bò cân nặng khoảng 3 tạ,...).",
+        "score" : 0.944309939756423,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-044",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Đo lường / Tính toán và ước lượng",
+        "text" : "Giải quyết được một số vấn đề thực tiễn liên quan đến đo độ dài, diện tích, khối lượng, dung tích, thời gian, tiền Việt Nam.",
+        "score" : 0.894203787200198,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-042",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Đo lường / Tính toán và ước lượng",
+        "text" : "Thực hiện được việc chuyển đổi và tính toán với các số đo độ dài (mm, cm, dm, m, km); diện tích (mm2, cm2, dm2, m2); khối lượng (g, kg, yến, tạ, tấn); dung tích (ml, l); thời gian (giây, phút, giờ, ngày, tuần lễ, tháng, năm, thế kỉ); tiền Việt Nam đã học.",
+        "score" : 0.884434277936616,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 850,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đo lường / Tính toán và ước lượng: Thực hiện được việc ước lượng các kết quả đo lường trong một số trường hợp đơn giản (ví dụ: con bò cân nặng khoảng 3 tạ,...).",
+        "chunkId" : "math-g4-043",
+        "outcomeText" : "Thực hiện được việc ước lượng các kết quả đo lường trong một số trường hợp đơn giản (ví dụ: con bò cân nặng khoảng 3 tạ,...)."
+      }, {
+        "requestedCondition" : "Đo lường / Tính toán và ước lượng: Thực hiện được việc ước lượng các kết quả đo lường trong một số trường hợp đơn giản (ví dụ: con bò cân nặng khoảng 3 tạ,...).",
+        "chunkId" : "math-g4-044",
+        "outcomeText" : "Giải quyết được một số vấn đề thực tiễn liên quan đến đo độ dài, diện tích, khối lượng, dung tích, thời gian, tiền Việt Nam."
+      }, {
+        "requestedCondition" : "Đo lường / Tính toán và ước lượng: Thực hiện được việc ước lượng các kết quả đo lường trong một số trường hợp đơn giản (ví dụ: con bò cân nặng khoảng 3 tạ,...).",
+        "chunkId" : "math-g4-042",
+        "outcomeText" : "Thực hiện được việc chuyển đổi và tính toán với các số đo độ dài (mm, cm, dm, m, km); diện tích (mm2, cm2, dm2, m2); khối lượng (g, kg, yến, tạ, tấn); dung tích (ml, l); thời gian (giây, phút, giờ, ngày, tuần lễ, tháng, năm, thế kỉ); tiền Việt Nam đã học."
+      } ]
+    }, {
+      "queryId" : "q10",
+      "topic" : "Xác suất / Kiểm đếm: Kiểm đếm được số lần lặp lại của một khả năng xảy ra (nhiều lần) của một sự kiện khi thực hiện (nhiều lần) thí nghiệm, trò chơi đơn giản (ví dụ: trong một vài trò chơi như tung đồng xu, lấy bóng từ hộp kín,...).",
+      "expectedChunkIds" : [ "math-g4-053" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-053",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Xác suất / Kiểm đếm",
+        "text" : "Kiểm đếm được số lần lặp lại của một khả năng xảy ra (nhiều lần) của một sự kiện khi thực hiện (nhiều lần) thí nghiệm, trò chơi đơn giản (ví dụ: trong một vài trò chơi như tung đồng xu, lấy bóng từ hộp kín,...).",
+        "score" : 0.90049363890506,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 205 ],
+        "printedPages" : [ 39 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-053",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Xác suất / Kiểm đếm",
+        "text" : "Kiểm đếm được số lần lặp lại của một khả năng xảy ra (nhiều lần) của một sự kiện khi thực hiện (nhiều lần) thí nghiệm, trò chơi đơn giản (ví dụ: trong một vài trò chơi như tung đồng xu, lấy bóng từ hộp kín,...).",
+        "score" : 0.90049363890506,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 205 ],
+        "printedPages" : [ 39 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 746,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Xác suất / Kiểm đếm: Kiểm đếm được số lần lặp lại của một khả năng xảy ra (nhiều lần) của một sự kiện khi thực hiện (nhiều lần) thí nghiệm, trò chơi đơn giản (ví dụ: trong một vài trò chơi như tung đồng xu, lấy bóng từ hộp kín,...).",
+        "chunkId" : "math-g4-053",
+        "outcomeText" : "Kiểm đếm được số lần lặp lại của một khả năng xảy ra (nhiều lần) của một sự kiện khi thực hiện (nhiều lần) thí nghiệm, trò chơi đơn giản (ví dụ: trong một vài trò chơi như tung đồng xu, lấy bóng từ hộp kín,...)."
+      } ]
+    }, {
+      "queryId" : "q11",
+      "topic" : "Chia số tự nhiên cho số có ba chữ số ở lớp 4",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "UNSUPPORTED_EXPLICIT_CONSTRAINT",
+      "returned" : [ ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-012",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Phép nhân, phép chia",
+        "text" : "Thực hiện được phép chia cho số có không quá hai chữ số.",
+        "score" : 0.895749122638478,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-010",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Phép nhân, phép chia",
+        "text" : "Tính được số trung bình cộng của hai hay nhiều số.",
+        "score" : 0.882290169366811,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-013",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Phép nhân, phép chia",
+        "text" : "Thực hiện được phép nhân với 10; 100; 1000;... và phép chia cho 10; 100; 1000;...",
+        "score" : 0.882112680108252,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 201 ],
+        "printedPages" : [ 35 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 866,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q12",
+      "topic" : "Tính diện tích hình tròn ở lớp 4",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "UNSUPPORTED_EXPLICIT_CONSTRAINT",
+      "returned" : [ ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-044",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Đo lường / Tính toán và ước lượng",
+        "text" : "Giải quyết được một số vấn đề thực tiễn liên quan đến đo độ dài, diện tích, khối lượng, dung tích, thời gian, tiền Việt Nam.",
+        "score" : 0.855072572190804,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 204 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 810,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q13",
+      "topic" : "Tính tỉ số phần trăm ở lớp 4",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "math-g4-029",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Các phép tính",
+        "text" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán (có đến hai hoặc ba bước tính) liên quan đến 4 phép tính với phân số (ví dụ: bài toán liên quan đến tìm phân số của một số).",
+        "score" : 0.868450458854465,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-019",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Giải quyết vấn đề với phép tính",
+        "text" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).",
+        "score" : 0.865577373358323,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-022",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Tính chất cơ bản",
+        "text" : "Nhận biết được tính chất cơ bản của phân số.",
+        "score" : 0.863352450434616,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "math-g4-029",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Các phép tính",
+        "text" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán (có đến hai hoặc ba bước tính) liên quan đến 4 phép tính với phân số (ví dụ: bài toán liên quan đến tìm phân số của một số).",
+        "score" : 0.868450458854465,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 203 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-019",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Số tự nhiên / Giải quyết vấn đề với phép tính",
+        "text" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị).",
+        "score" : 0.865577373358323,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "math-g4-022",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_4",
+        "topic" : "Phân số / Tính chất cơ bản",
+        "text" : "Nhận biết được tính chất cơ bản của phân số.",
+        "score" : 0.863352450434616,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 202 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 852,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Tính tỉ số phần trăm ở lớp 4",
+        "chunkId" : "math-g4-029",
+        "outcomeText" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán (có đến hai hoặc ba bước tính) liên quan đến 4 phép tính với phân số (ví dụ: bài toán liên quan đến tìm phân số của một số)."
+      }, {
+        "requestedCondition" : "Tính tỉ số phần trăm ở lớp 4",
+        "chunkId" : "math-g4-019",
+        "outcomeText" : "Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai hoặc ba bước tính (trong phạm vi các số và phép tính đã học) liên quan đến thành phần và kết quả của phép tính; liên quan đến các mối quan hệ so sánh trực tiếp hoặc các mối quan hệ phụ thuộc trực tiếp và đơn giản (ví dụ: bài toán liên quan đến tìm số trung bình cộng của hai số; tìm hai số khi biết tổng và hiệu của hai số đó; bài toán liên quan đến rút về đơn vị)."
+      }, {
+        "requestedCondition" : "Tính tỉ số phần trăm ở lớp 4",
+        "chunkId" : "math-g4-022",
+        "outcomeText" : "Nhận biết được tính chất cơ bản của phân số."
+      } ]
+    } ],
+    "subject" : "MATH",
+    "dataset" : {
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "curriculumVersion" : "32/2018/TT-BGDDT",
+      "datasetVersion" : "math-grade4-outcomes-v1",
+      "pdfPageCount" : 1555
+    },
+    "controlsStatus" : "PASS",
+    "gradeLevel" : "GRADE_4",
+    "summary" : {
+      "positiveQueries" : 10,
+      "hits" : 10,
+      "hitAt3" : 1.0,
+      "leakedChunks" : 0,
+      "negativeQueries" : 3,
+      "negativeRejections" : 2,
+      "retrievalGatePassed" : true,
+      "negativeGatePassed" : false,
+      "passed" : false
+    },
+    "controlProbes" : [ {
+      "primaryScopeChunkIds" : [ ],
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "control-math-g4-001"
+    }, {
+      "primaryScopeChunkIds" : [ "math-g4-006", "math-g4-001", "math-g4-005" ],
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "control-math-g4-002"
+    }, {
+      "primaryScopeChunkIds" : [ ],
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "control-english-g4-003"
+    }, {
+      "primaryScopeChunkIds" : [ ],
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeLeakage" : 0,
+      "controlChunkId" : "control-english-g4-004"
+    } ]
+  } ],
+  "passed" : false
+}

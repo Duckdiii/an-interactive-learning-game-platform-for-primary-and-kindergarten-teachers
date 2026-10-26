@@ -1,0 +1,28 @@
+{
+  "measuredAtUtc" : "2026-10-15T13:44:56.258217200Z",
+  "measurementStatus" : "LIVE_SINGLE_QUERY",
+  "subject" : "MATH",
+  "gradeLevel" : "GRADE_1",
+  "topic" : "@C:\\Users\\loann\\AppData\\Local\\Temp\\rag-query-5bbb7984b6a047c9a730708b85e6402d.args",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "queryEmbeddingCacheHits" : 0,
+  "queryEmbeddingProviderMisses" : 1,
+  "latencyMillis" : 1140,
+  "dataset" : {
+    "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "curriculumVersion" : "32/2018/TT-BGDDT",
+    "datasetVersion" : "math-grade1-spike-v1",
+    "pdfPageCount" : 1555
+  },
+  "result" : {
+    "status" : "INSUFFICIENT_EVIDENCE",
+    "chunks" : [ ],
+    "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+    "candidates" : [ ],
+    "evidenceSupports" : [ ]
+  }
+}

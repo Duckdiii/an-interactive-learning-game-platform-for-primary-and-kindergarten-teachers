@@ -61,6 +61,7 @@ public class CurriculumRagConfiguration {
                                                CurriculumDatasetCatalog catalog,
                                                DataSource dataSource,
                                                @Value("${app.curriculum-rag.embedding-model:gemini-embedding-001}") String modelName,
+                                               @Value("${app.curriculum-rag.top-k:3}") int topK,
                                                @Value("${app.curriculum-rag.min-score:0.855}") double minScore) {
         try {
             for (CurriculumDataset dataset : catalog.activeDatasets()) {
@@ -70,7 +71,7 @@ public class CurriculumRagConfiguration {
             throw new IllegalStateException("Could not verify the reviewed curriculum embeddings", exception);
         }
         return new CurriculumRAGService(store, queryModel, catalog, modelName,
-                RagSpikeConfig.TOP_K, minScore);
+                topK, minScore);
     }
 
     @Bean

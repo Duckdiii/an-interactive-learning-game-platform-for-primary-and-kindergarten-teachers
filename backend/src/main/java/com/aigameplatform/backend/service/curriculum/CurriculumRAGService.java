@@ -64,15 +64,22 @@ public final class CurriculumRAGService {
     }
 
     public record RetrievalResult(Status status, List<RetrievedChunk> chunks, String reasonCode,
-                                  List<RetrievedChunk> candidates) {
+                                  List<RetrievedChunk> candidates,
+                                  List<CurriculumEvidenceVerifier.EvidenceSupport> evidenceSupports) {
         public RetrievalResult {
             chunks = List.copyOf(chunks);
             candidates = candidates == null ? chunks : List.copyOf(candidates);
+            evidenceSupports = evidenceSupports == null ? List.of() : List.copyOf(evidenceSupports);
             reasonCode = reasonCode == null ? "UNSPECIFIED" : reasonCode;
         }
 
+        public RetrievalResult(Status status, List<RetrievedChunk> chunks, String reasonCode,
+                               List<RetrievedChunk> candidates) {
+            this(status, chunks, reasonCode, candidates, List.of());
+        }
+
         public RetrievalResult(Status status, List<RetrievedChunk> chunks) {
-            this(status, chunks, status == Status.FOUND ? "SUPPORTED" : "INSUFFICIENT_EVIDENCE", chunks);
+            this(status, chunks, status == Status.FOUND ? "SUPPORTED" : "INSUFFICIENT_EVIDENCE", chunks, List.of());
         }
 
         public String curriculumContext() {
@@ -126,11 +133,15 @@ public final class CurriculumRAGService {
         if (candidates.isEmpty()) {
             return new RetrievalResult(Status.INSUFFICIENT_EVIDENCE, List.of(), "NO_CANDIDATE_EVIDENCE", List.of());
         }
-        var decision = new CurriculumEvidenceVerifier().verify(topic, candidates);
+        var decision = new CurriculumEvidenceVerifier().verify(topic, subject, gradeLevel, candidates);
         if (!decision.supported()) {
-            return new RetrievalResult(Status.INSUFFICIENT_EVIDENCE, List.of(), decision.reasonCode(), candidates);
+            return new RetrievalResult(Status.INSUFFICIENT_EVIDENCE, List.of(), decision.reasonCode(), candidates,
+                    decision.evidenceSupports());
         }
-        return new RetrievalResult(Status.FOUND, candidates, decision.reasonCode(), candidates);
+        var verified = candidates.stream()
+                .filter(candidate -> decision.supportingChunkIds().contains(candidate.chunkId())).toList();
+        return new RetrievalResult(Status.FOUND, verified, decision.reasonCode(), candidates,
+                decision.evidenceSupports());
     }
 
     private static List<Integer> pages(String pages) {

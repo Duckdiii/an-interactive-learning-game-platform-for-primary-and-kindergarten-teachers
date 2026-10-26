@@ -1,4 +1,4 @@
-﻿{
+{
     "runId":  "full-corpus-2026-10-12-post-ingest-and-retrieval",
     "runDate":  "2026-10-12",
     "totalScopes":  15,
@@ -66,7 +66,7 @@
                                                      "developmentQueries":  11,
                                                      "classification":  "quality failures; metadata scope/version correct; provider quota separate",
                                                      "labelsChanged":  false,
-                                                     "report":  "../evidence/false-acceptance-analysis-2026-10-12.md"
+                                                     "report":  "../README.md"
                                                  },
                           "evidenceGuard":  {
                                                 "status":  "CODED_UNIT_TESTED_NOT_LIVE",
@@ -135,7 +135,7 @@
                                                 "reason":  "quota not confirmed; no calls repeated",
                                                 "blocker":  "No backend game-generation endpoint; embedding quota retry time has not elapsed"
                                             },
-                          "resumeRunbook":  "resume-runbook-2026-10-12.md",
+                          "resumeRunbook":  "README.md",
                           "liveQuotaStatus":  "BLOCKED by provider daily embedding quota; no calls repeated",
                           "holdoutCoverage":  {
                                                   "status":  "PREPARED_NOT_RUN",

@@ -32,6 +32,11 @@ class CurriculumCatalogRetrievalTest {
         assertThat(result.chunks()).extracting(CurriculumRAGService.RetrievedChunk::text)
                 .containsExactly("Vietnamese outcome");
         assertThat(result.curriculumContext()).contains("vietnamese.pdf", "Vietnamese outcome");
+        assertThat(result.evidenceSupports()).singleElement().satisfies(support -> {
+            assertThat(support.chunkId()).isEqualTo(vietnamese.chunks().getFirst().chunkId());
+            assertThat(support.outcomeText()).isEqualTo(vietnamese.chunks().getFirst().text());
+            assertThat(support.requestedCondition()).isEqualTo("language");
+        });
     }
 
     @Test
@@ -62,6 +67,30 @@ class CurriculumCatalogRetrievalTest {
         assertThat(result.status()).isEqualTo(CurriculumRAGService.Status.INSUFFICIENT_EVIDENCE);
         assertThat(result.reasonCode()).isEqualTo("UNSUPPORTED_EXPLICIT_CONSTRAINT");
         assertThat(result.candidates()).hasSize(1);
+        assertThat(result.chunks()).isEmpty();
+        assertThat(result.curriculumContext()).isEmpty();
+    }
+
+    @Test
+    void doesNotPassUnverifiedNeighboringOutcomesIntoGenerationContext() {
+        var math = new CurriculumSource("math.pdf", "a".repeat(64), "32/2018/TT-BGDDT", "math-g1-v1", 2);
+        var noCarry = new CurriculumChunk("math-g1-v1", Subject.MATH, GradeLevel.GRADE_1, "addition",
+                "Thực hiện phép cộng không nhớ các số trong phạm vi 100.", false,
+                List.of(new CurriculumChunk.SourceFragment(1, 1, "RIGHT",
+                        "Thực hiện phép cộng không nhớ các số trong phạm vi 100.")));
+        var carryWithinTen = new CurriculumChunk("math-g1-v1", Subject.MATH, GradeLevel.GRADE_1, "addition",
+                "Thực hiện phép cộng có nhớ trong phạm vi 10.", false,
+                List.of(new CurriculumChunk.SourceFragment(1, 1, "RIGHT",
+                        "Thực hiện phép cộng có nhớ trong phạm vi 10.")));
+        var store = new InMemoryEmbeddingStore<TextSegment>();
+        add(store, noCarry, math, 0.95f);
+        add(store, carryWithinTen, math, 0.94f);
+        var retriever = new CurriculumRAGService(store, queryModel(), math, MODEL_NAME, 3, 0.7);
+
+        var result = retriever.retrieve("Cộng có nhớ trong phạm vi 100", Subject.MATH, GradeLevel.GRADE_1);
+
+        assertThat(result.status()).isEqualTo(CurriculumRAGService.Status.INSUFFICIENT_EVIDENCE);
+        assertThat(result.candidates()).hasSize(2);
         assertThat(result.chunks()).isEmpty();
         assertThat(result.curriculumContext()).isEmpty();
     }

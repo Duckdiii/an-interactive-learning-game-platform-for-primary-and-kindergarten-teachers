@@ -6,18 +6,22 @@ import java.util.Map;
 
 /** Secrets are read from the process environment and never included in diagnostic output. */
 public record RagSpikeConfig(String apiKey, String dbUrl, String dbUser, String dbPassword,
-                             String embeddingModel, double minScore, String pdfPath) {
+                             String embeddingModel, int topK, double minScore, String pdfPath) {
     public static final int DIMENSION = 768;
-    public static final int TOP_K = 3;
+    public static final int DEFAULT_TOP_K = 3;
+    public static final int MAX_TOP_K = 50;
 
     public static RagSpikeConfig from(Map<String, String> environment) {
+        int topK = Integer.parseInt(environment.getOrDefault("CURRICULUM_RAG_TOP_K", "" + DEFAULT_TOP_K));
+        if (topK < 1 || topK > MAX_TOP_K)
+            throw new IllegalArgumentException("CURRICULUM_RAG_TOP_K must be between 1 and " + MAX_TOP_K);
         double minScore = Double.parseDouble(environment.getOrDefault("RAG_MIN_SCORE", "0.855"));
         if (!Double.isFinite(minScore) || minScore < 0 || minScore > 1)
             throw new IllegalArgumentException("RAG_MIN_SCORE must be finite and between 0 and 1");
         return new RagSpikeConfig(environment.getOrDefault("GEMINI_API_KEY", ""),
                 environment.getOrDefault("DB_URL", ""), environment.getOrDefault("DB_USERNAME", ""),
                 environment.getOrDefault("DB_PASSWORD", ""),
-                environment.getOrDefault("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001"), minScore,
+                environment.getOrDefault("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001"), topK, minScore,
                 environment.getOrDefault("CURRICULUM_PDF", ""));
     }
 

@@ -1,0 +1,23 @@
+Nội dung Yêu cầu cần đạt 
+– Thực hiện được phép nhân với số có một chữ số (có nhớ không quá hai 
+lượt và không liên tiếp). 
+– Thực hiện được phép chia cho số có một chữ số. 
+– Nhận biết và thực hiện được phép chia hết và phép chia có dư. 
+– Nhận biết được tính chất giao hoán, tính chất kết hợp của phép nhân và 
+mối quan hệ giữa phép nhân với phép chia trong thực hành tính. 
+Tính nhẩm  Thực hiện được cộng, trừ, nhân, chia nhẩm trong những trường hợp  
+đơn giản. 
+Biểu thức số  – Làm quen với biểu thức số. 
+– Tính được giá trị của biểu thức số có đến hai dấu phép tính và không có 
+dấu ngoặc. 
+– Tính được giá trị của biểu thức số có đến hai dấu phép tính và có dấu 
+ngoặc theo nguyên tắc thực hiện trong dấu ngoặc trước. 
+– Xác định được thành phần chưa biết của phép tính thông qua các giá trị 
+đã biết. 
+ Thực hành giải quyết vấn Giải quyết được một số vấn đề gắn với việc giải các bài toán có đến hai 
+đề liên quan đến các phép bước tính (trong phạm vi các số và phép tính đã học) liên quan đến ý 
+tính đã học nghĩa thực tế của phép tính; liên quan đến thành phần và kết quả của phép 
+tính; liên quan đến các mối quan hệ so sánh trực tiếp và đơn giản (chẳng 
+hạn: gấp một số lên một số lần, giảm một số đi một số lần, so sánh số lớn 
+gấp mấy lần số bé).  
+30 

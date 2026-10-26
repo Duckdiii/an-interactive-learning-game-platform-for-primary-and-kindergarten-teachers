@@ -1,0 +1,878 @@
+{
+  "measurementStatus" : "LIVE_COMPLETED",
+  "measuredAtUtc" : "2026-10-13T07:02:14.000601700Z",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "queryEmbeddingCacheHits" : 7,
+  "queryEmbeddingProviderMisses" : 10,
+  "queryEmbeddingCacheFile" : "backend/target/curriculum-spike/query-embedding-cache.jsonl",
+  "manualReview" : "PENDING: inspect returned text and source pages before citing quality conclusions",
+  "scopeCount" : 1,
+  "scopeResults" : [ {
+    "summary" : {
+      "positiveQueries" : 10,
+      "hits" : 9,
+      "hitAt3" : 0.9,
+      "leakedChunks" : 0,
+      "negativeQueries" : 3,
+      "negativeRejections" : 3,
+      "retrievalGatePassed" : true,
+      "negativeGatePassed" : true,
+      "passed" : true
+    },
+    "gradeLevel" : "GRADE_3",
+    "controlsStatus" : "PASS",
+    "dataset" : {
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "curriculumVersion" : "32/2018/TT-BGDDT",
+      "datasetVersion" : "english-grade3-foreign-language-outcomes-v1",
+      "pdfPageCount" : 1555
+    },
+    "subject" : "ENGLISH",
+    "queries" : [ {
+      "queryId" : "q01",
+      "topic" : "Nghe hiểu từ và cụm từ quen thuộc",
+      "expectedChunkIds" : [ "english-g3-001" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "text" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "score" : 0.893984463624694,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "text" : "Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "score" : 0.873761495001021,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275, 1276 ],
+        "printedPages" : [ 26, 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "text" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "score" : 0.873744967812893,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "text" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "score" : 0.893984463624694,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "text" : "Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "score" : 0.873761495001021,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275, 1276 ],
+        "printedPages" : [ 26, 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "text" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "score" : 0.873744967812893,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1503,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nghe hiểu từ và cụm từ quen thuộc",
+        "chunkId" : "english-g3-001",
+        "outcomeText" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản."
+      }, {
+        "requestedCondition" : "Nghe hiểu từ và cụm từ quen thuộc",
+        "chunkId" : "english-g3-004",
+        "outcomeText" : "Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng."
+      }, {
+        "requestedCondition" : "Nghe hiểu từ và cụm từ quen thuộc",
+        "chunkId" : "english-g3-010",
+        "outcomeText" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản."
+      } ]
+    }, {
+      "queryId" : "q02",
+      "topic" : "Làm theo chỉ dẫn rất đơn giản trong lớp",
+      "expectedChunkIds" : [ "english-g3-002" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-002",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu và làm theo những chỉ dẫn rất đơn giản trong lớp học.",
+        "text" : "Nghe hiểu và làm theo những chỉ dẫn rất đơn giản trong lớp học.",
+        "score" : 0.899105559052368,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-013",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Viết / Viết các từ, cụm từ rất đơn giản.",
+        "text" : "Viết các từ, cụm từ rất đơn giản.",
+        "score" : 0.860153960362959,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1277 ],
+        "printedPages" : [ 28 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "text" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "score" : 0.856378039046368,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-002",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu và làm theo những chỉ dẫn rất đơn giản trong lớp học.",
+        "text" : "Nghe hiểu và làm theo những chỉ dẫn rất đơn giản trong lớp học.",
+        "score" : 0.899105559052368,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-013",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Viết / Viết các từ, cụm từ rất đơn giản.",
+        "text" : "Viết các từ, cụm từ rất đơn giản.",
+        "score" : 0.860153960362959,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1277 ],
+        "printedPages" : [ 28 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "text" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "score" : 0.856378039046368,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 869,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Làm theo chỉ dẫn rất đơn giản trong lớp",
+        "chunkId" : "english-g3-002",
+        "outcomeText" : "Nghe hiểu và làm theo những chỉ dẫn rất đơn giản trong lớp học."
+      }, {
+        "requestedCondition" : "Làm theo chỉ dẫn rất đơn giản trong lớp",
+        "chunkId" : "english-g3-013",
+        "outcomeText" : "Viết các từ, cụm từ rất đơn giản."
+      }, {
+        "requestedCondition" : "Làm theo chỉ dẫn rất đơn giản trong lớp",
+        "chunkId" : "english-g3-001",
+        "outcomeText" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản."
+      } ]
+    }, {
+      "queryId" : "q03",
+      "topic" : "Trả lời câu hỏi về chủ đề quen thuộc",
+      "expectedChunkIds" : [ "english-g3-003" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp).",
+        "score" : 0.861572201730808,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi thường dùng trong lớp học.",
+        "text" : "Hỏi và trả lời các câu hỏi thường dùng trong lớp học.",
+        "score" : 0.859405669081453,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "text" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "score" : 0.856682683503708,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp).",
+        "score" : 0.861572201730808,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi thường dùng trong lớp học.",
+        "text" : "Hỏi và trả lời các câu hỏi thường dùng trong lớp học.",
+        "score" : 0.859405669081453,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "text" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "score" : 0.856682683503708,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 778,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Trả lời câu hỏi về chủ đề quen thuộc",
+        "chunkId" : "english-g3-008",
+        "outcomeText" : "Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp)."
+      }, {
+        "requestedCondition" : "Trả lời câu hỏi về chủ đề quen thuộc",
+        "chunkId" : "english-g3-007",
+        "outcomeText" : "Hỏi và trả lời các câu hỏi thường dùng trong lớp học."
+      }, {
+        "requestedCondition" : "Trả lời câu hỏi về chủ đề quen thuộc",
+        "chunkId" : "english-g3-006",
+        "outcomeText" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác."
+      } ]
+    }, {
+      "queryId" : "q04",
+      "topic" : "Nghe hội thoại 20–30 từ",
+      "expectedChunkIds" : [ "english-g3-004" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "text" : "Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "score" : 0.892004299973198,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275, 1276 ],
+        "printedPages" : [ 26, 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "text" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "score" : 0.863818446472964,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe và trả lời các câu hỏi rất đơn giản về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "text" : "Nghe và trả lời các câu hỏi rất đơn giản về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "score" : 0.857812169361249,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-004",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "text" : "Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "score" : 0.892004299973198,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275, 1276 ],
+        "printedPages" : [ 26, 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-001",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "text" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản.",
+        "score" : 0.863818446472964,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-003",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nghe / Nghe và trả lời các câu hỏi rất đơn giản về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "text" : "Nghe và trả lời các câu hỏi rất đơn giản về các chủ đề quen thuộc được nói chậm và rõ ràng.",
+        "score" : 0.857812169361249,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1275 ],
+        "printedPages" : [ 26 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 884,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nghe hội thoại 20–30 từ",
+        "chunkId" : "english-g3-004",
+        "outcomeText" : "Nghe hiểu các đoạn hội thoại ngắn, rất đơn giản khoảng 20 - 30 từ về các chủ đề quen thuộc được nói chậm và rõ ràng."
+      }, {
+        "requestedCondition" : "Nghe hội thoại 20–30 từ",
+        "chunkId" : "english-g3-001",
+        "outcomeText" : "Nghe hiểu các từ và cụm từ quen thuộc, đơn giản."
+      }, {
+        "requestedCondition" : "Nghe hội thoại 20–30 từ",
+        "chunkId" : "english-g3-003",
+        "outcomeText" : "Nghe và trả lời các câu hỏi rất đơn giản về các chủ đề quen thuộc được nói chậm và rõ ràng."
+      } ]
+    }, {
+      "queryId" : "q05",
+      "topic" : "Hỏi đáp rất đơn giản về bản thân",
+      "expectedChunkIds" : [ "english-g3-006" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "text" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "score" : 0.873313027105332,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "text" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "score" : 0.873313027105332,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 643,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Hỏi đáp rất đơn giản về bản thân",
+        "chunkId" : "english-g3-006",
+        "outcomeText" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác."
+      } ]
+    }, {
+      "queryId" : "q06",
+      "topic" : "Hỏi đáp câu hỏi thường dùng trong lớp",
+      "expectedChunkIds" : [ "english-g3-007" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi thường dùng trong lớp học.",
+        "text" : "Hỏi và trả lời các câu hỏi thường dùng trong lớp học.",
+        "score" : 0.896080310123635,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "text" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "score" : 0.87546739116336,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp).",
+        "score" : 0.860920800045186,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-007",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi thường dùng trong lớp học.",
+        "text" : "Hỏi và trả lời các câu hỏi thường dùng trong lớp học.",
+        "score" : 0.896080310123635,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-006",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "text" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác.",
+        "score" : 0.87546739116336,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-008",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Nói / Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp).",
+        "text" : "Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp).",
+        "score" : 0.860920800045186,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 699,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Hỏi đáp câu hỏi thường dùng trong lớp",
+        "chunkId" : "english-g3-007",
+        "outcomeText" : "Hỏi và trả lời các câu hỏi thường dùng trong lớp học."
+      }, {
+        "requestedCondition" : "Hỏi đáp câu hỏi thường dùng trong lớp",
+        "chunkId" : "english-g3-006",
+        "outcomeText" : "Hỏi và trả lời các câu hỏi rất đơn giản về bản thân và những người khác."
+      }, {
+        "requestedCondition" : "Hỏi đáp câu hỏi thường dùng trong lớp",
+        "chunkId" : "english-g3-008",
+        "outcomeText" : "Nói về một số chủ đề quen thuộc, sử dụng các từ và cụm từ rất đơn giản (có sự trợ giúp)."
+      } ]
+    }, {
+      "queryId" : "q07",
+      "topic" : "Đọc đúng chữ cái trong từ",
+      "expectedChunkIds" : [ "english-g3-009" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc đúng chữ cái trong bảng chữ cái, chữ cái trong từ.",
+        "text" : "Đọc đúng chữ cái trong bảng chữ cái, chữ cái trong từ.",
+        "score" : 0.913871588024123,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "text" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "score" : 0.858505953809029,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-009",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc đúng chữ cái trong bảng chữ cái, chữ cái trong từ.",
+        "text" : "Đọc đúng chữ cái trong bảng chữ cái, chữ cái trong từ.",
+        "score" : 0.913871588024123,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "text" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "score" : 0.858505953809029,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 896,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đọc đúng chữ cái trong từ",
+        "chunkId" : "english-g3-009",
+        "outcomeText" : "Đọc đúng chữ cái trong bảng chữ cái, chữ cái trong từ."
+      }, {
+        "requestedCondition" : "Đọc đúng chữ cái trong từ",
+        "chunkId" : "english-g3-010",
+        "outcomeText" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản."
+      } ]
+    }, {
+      "queryId" : "q08",
+      "topic" : "Đọc hiểu câu ngắn",
+      "expectedChunkIds" : [ "english-g3-011" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-011",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu các câu ngắn, rất đơn giản.",
+        "text" : "Đọc hiểu các câu ngắn, rất đơn giản.",
+        "score" : 0.879744987136918,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-012",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình.",
+        "text" : "Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình.",
+        "score" : 0.871824980208058,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276, 1277 ],
+        "printedPages" : [ 27, 28 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "text" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "score" : 0.867523423607014,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-011",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu các câu ngắn, rất đơn giản.",
+        "text" : "Đọc hiểu các câu ngắn, rất đơn giản.",
+        "score" : 0.879744987136918,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-012",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình.",
+        "text" : "Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình.",
+        "score" : 0.871824980208058,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276, 1277 ],
+        "printedPages" : [ 27, 28 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "text" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "score" : 0.867523423607014,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 1082,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đọc hiểu câu ngắn",
+        "chunkId" : "english-g3-011",
+        "outcomeText" : "Đọc hiểu các câu ngắn, rất đơn giản."
+      }, {
+        "requestedCondition" : "Đọc hiểu câu ngắn",
+        "chunkId" : "english-g3-012",
+        "outcomeText" : "Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình."
+      }, {
+        "requestedCondition" : "Đọc hiểu câu ngắn",
+        "chunkId" : "english-g3-010",
+        "outcomeText" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản."
+      } ]
+    }, {
+      "queryId" : "q09",
+      "topic" : "Đọc hiểu văn bản khoảng 30–40 từ",
+      "expectedChunkIds" : [ "english-g3-012" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-012",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình.",
+        "text" : "Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình.",
+        "score" : 0.897004917137485,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276, 1277 ],
+        "printedPages" : [ 27, 28 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-011",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu các câu ngắn, rất đơn giản.",
+        "text" : "Đọc hiểu các câu ngắn, rất đơn giản.",
+        "score" : 0.881069162205493,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "text" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "score" : 0.879680318605763,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-012",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình.",
+        "text" : "Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình.",
+        "score" : 0.897004917137485,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276, 1277 ],
+        "printedPages" : [ 27, 28 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-011",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu các câu ngắn, rất đơn giản.",
+        "text" : "Đọc hiểu các câu ngắn, rất đơn giản.",
+        "score" : 0.881069162205493,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "english-g3-010",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Đọc / Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "text" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+        "score" : 0.879680318605763,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1276 ],
+        "printedPages" : [ 27 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 799,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đọc hiểu văn bản khoảng 30–40 từ",
+        "chunkId" : "english-g3-012",
+        "outcomeText" : "Đọc hiểu các văn bản ngắn, rất đơn giản khoảng 30 - 40 từ về các chủ đề trong nội dung Chương trình."
+      }, {
+        "requestedCondition" : "Đọc hiểu văn bản khoảng 30–40 từ",
+        "chunkId" : "english-g3-011",
+        "outcomeText" : "Đọc hiểu các câu ngắn, rất đơn giản."
+      }, {
+        "requestedCondition" : "Đọc hiểu văn bản khoảng 30–40 từ",
+        "chunkId" : "english-g3-010",
+        "outcomeText" : "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản."
+      } ]
+    }, {
+      "queryId" : "q10",
+      "topic" : "Điền tên và địa chỉ vào mẫu đơn giản",
+      "expectedChunkIds" : [ "english-g3-014" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "english-g3-014",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Viết / Điền thông tin cá nhân vào các mẫu rất đơn giản (tên, địa chỉ…).",
+        "text" : "Điền thông tin cá nhân vào các mẫu rất đơn giản (tên, địa chỉ…).",
+        "score" : 0.901871928023881,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1277 ],
+        "printedPages" : [ 28 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "english-g3-014",
+        "subject" : "ENGLISH",
+        "gradeLevel" : "GRADE_3",
+        "topic" : "Viết / Điền thông tin cá nhân vào các mẫu rất đơn giản (tên, địa chỉ…).",
+        "text" : "Điền thông tin cá nhân vào các mẫu rất đơn giản (tên, địa chỉ…).",
+        "score" : 0.901871928023881,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 1277 ],
+        "printedPages" : [ 28 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 822,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Điền tên và địa chỉ vào mẫu đơn giản",
+        "chunkId" : "english-g3-014",
+        "outcomeText" : "Điền thông tin cá nhân vào các mẫu rất đơn giản (tên, địa chỉ…)."
+      } ]
+    }, {
+      "queryId" : "n01",
+      "topic" : "Viết câu tiếng Anh bằng thì hiện tại hoàn thành",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 125,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "n02",
+      "topic" : "Giải bài toán cộng các số tự nhiên trong phạm vi 100",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 143,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "n03",
+      "topic" : "Viết chương trình Python dùng vòng lặp",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 110,
+      "evidenceSupports" : [ ]
+    } ],
+    "controlProbes" : [ {
+      "primaryScopeChunkIds" : [ "english-g3-009", "english-g3-001" ],
+      "controlChunkId" : "english-g3-016",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true
+    }, {
+      "primaryScopeChunkIds" : [ "english-g3-001", "english-g3-004", "english-g3-009" ],
+      "controlChunkId" : "english-g3-017",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true
+    }, {
+      "primaryScopeChunkIds" : [ ],
+      "controlChunkId" : "english-g3-018",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true
+    }, {
+      "primaryScopeChunkIds" : [ ],
+      "controlChunkId" : "english-g3-019",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true
+    } ]
+  } ],
+  "passed" : true
+}

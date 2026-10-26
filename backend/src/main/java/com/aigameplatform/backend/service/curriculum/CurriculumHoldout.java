@@ -21,12 +21,22 @@ public final class CurriculumHoldout {
     }
     public record Row(Query query, List<CurriculumRAGService.RetrievedChunk> returned,
                       List<CurriculumRAGService.RetrievedChunk> candidates, String reasonCode,
-                      boolean rejected, int leakedChunks, long latencyMillis) {
-        public Row { returned = List.copyOf(returned); candidates = List.copyOf(candidates); }
+                      boolean rejected, int leakedChunks, long latencyMillis,
+                      List<CurriculumEvidenceVerifier.EvidenceSupport> evidenceSupports) {
+        public Row {
+            returned = List.copyOf(returned);
+            candidates = List.copyOf(candidates);
+            evidenceSupports = List.copyOf(evidenceSupports);
+        }
+        public Row(Query query, List<CurriculumRAGService.RetrievedChunk> returned,
+                   List<CurriculumRAGService.RetrievedChunk> candidates, String reasonCode,
+                   boolean rejected, int leakedChunks, long latencyMillis) {
+            this(query, returned, candidates, reasonCode, rejected, leakedChunks, latencyMillis, List.of());
+        }
         public Row(Query query, List<CurriculumRAGService.RetrievedChunk> returned,
                    boolean rejected, int leakedChunks, long latencyMillis) {
             this(query, returned, returned, rejected ? "INSUFFICIENT_EVIDENCE" : "SUPPORTED",
-                    rejected, leakedChunks, latencyMillis);
+                    rejected, leakedChunks, latencyMillis, List.of());
         }
         public boolean hit() { return query.kind() == Kind.POSITIVE && returned.stream().limit(3)
                 .anyMatch(c -> query.expectedChunkIds().contains(c.chunkId())); }
@@ -113,7 +123,8 @@ public final class CurriculumHoldout {
             rows.add(new Row(q, result.chunks(), result.candidates(), result.reasonCode(),
                     result.status() == CurriculumRAGService.Status.INSUFFICIENT_EVIDENCE,
                     (int) result.chunks().stream().filter(c -> c.subject() != subject
-                            || c.gradeLevel() != gradeLevel).count(), (System.nanoTime() - start) / 1_000_000));
+                            || c.gradeLevel() != gradeLevel).count(), (System.nanoTime() - start) / 1_000_000,
+                    result.evidenceSupports()));
         }
         return List.copyOf(rows);
     }

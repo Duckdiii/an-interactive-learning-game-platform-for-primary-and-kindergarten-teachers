@@ -19,7 +19,7 @@ $ragRoot = Split-Path -Parent $PSScriptRoot
 $ragBackend = Join-Path $ragRoot 'backend'
 if (-not $EnvFile) { $EnvFile = Join-Path $ragBackend '.env' }
 $ragAllowedKeys = @('GEMINI_API_KEY','GEMINI_MODEL','DB_URL','DB_USERNAME','DB_PASSWORD',
-    'GEMINI_EMBEDDING_MODEL','RAG_MIN_SCORE','CURRICULUM_PDF')
+    'GEMINI_EMBEDDING_MODEL','RAG_MIN_SCORE','CURRICULUM_RAG_TOP_K','CURRICULUM_PDF')
 if (Test-Path -LiteralPath $EnvFile) {
     foreach ($ragLine in [System.IO.File]::ReadAllLines((Resolve-Path -LiteralPath $EnvFile).Path)) {
         if ($ragLine -match '^\s*([A-Z][A-Z0-9_]*)\s*=(.*)$' -and $ragAllowedKeys -contains $Matches[1]) {

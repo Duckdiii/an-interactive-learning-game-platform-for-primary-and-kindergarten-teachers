@@ -1,0 +1,109 @@
+# VIETNAMESE GRADE_2 — PDF 79
+
+Source: Thông-tư-32-2018-TT-BGDĐT.pdf
+
+SHA-256: cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013
+
+This is a text replacement for the earlier page image. PDFBox text below is uncorrected; stacked fractions and superscripts may be reordered. The separately checked UTF-8 outcomes follow. AI transcription review does not constitute teacher approval.
+
+## Source text (PDFBox)
+
+```text
+Yêu cầu cần đạt Nội dung 
+– Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý. văn bản hướng dẫn thực hiện một 
+Đọc hiểu hình thức hoạt động, bưu thiếp, danh sách, mục 
+lục sách, thời khoá biểu, thời gian 
+– Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện. 
+biểu 
+– Nhận biết được hình dáng, điệu bộ, hành động của nhân vật qua ngôn ngữ và hình ảnh. 
+5. Thông tin bằng hình ảnh (phương 
+– Nhận biết được thái độ, tình cảm giữa các nhân vật thể hiện qua hành động, lời thoại. tiện giao tiếp phi ngôn ngữ)  
+– Nhận biết được vần trong thơ.  KIẾN THỨC VĂN HỌC 
+Liên hệ, so sánh, kết nối 1. Đề tài (viết, kể về điều gì) 
+Nêu được nhân vật yêu thích nhất và giải thích được vì sao. 2. Hình dáng, điệu bộ, lời thoại của 
+Đọc mở rộng nhân vật 
+– Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương 3. Tình cảm, thái độ giữa các nhân 
+đương với các văn bản đã học. vật 
+– Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài 4. Vần trong thơ 
+thơ, đoạn văn có độ dài khoảng 30 – 45 chữ. NGỮ LIỆU 
+Văn bản thông tin 1.1. Văn bản văn học 
+Đọc hiểu nội dung – Cổ tích, ngụ ngôn, truyện ngắn; 
+– Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? đoạn (bài) văn miêu tả 
+Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao? – Bài thơ, đồng dao, ca dao, vè 
+– Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng Độ dài của văn bản: truyện khoảng 
+chú ý dựa vào gợi ý. 180 – 200 chữ, bài miêu tả khoảng 
+Đọc hiểu hình thức 150 –180 chữ, thơ khoảng 70 – 90 
+chữ 
+– Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm 
+23 
+
+```
+
+## Outcome transcriptions and citations
+
+### vietnamese-g2-005 — Đọc hiểu / Văn bản văn học
+
+Hiểu điều tác giả muốn nói qua văn bản đơn giản dựa vào gợi ý.
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-006 — Đọc hiểu / Văn bản văn học
+
+Nhận biết được địa điểm, thời gian, các sự việc chính của câu chuyện.
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-007 — Đọc hiểu / Đọc mở rộng
+
+Trong 1 năm học, đọc tối thiểu 35 văn bản văn học có thể loại và độ dài tương đương với các văn bản đã học.
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-008 — Đọc hiểu / Văn bản thông tin
+
+Biết nêu và trả lời được câu hỏi về các chi tiết nổi bật của văn bản như: Ai? Cái gì? Làm gì? Khi nào? Ở đâu? Như thế nào? Vì sao?
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-009 — Đọc hiểu / Văn bản thông tin
+
+Nhận biết được một số loại văn bản thông tin đơn giản, thông dụng qua đặc điểm của văn bản: mục lục sách, danh sách học sinh, thời khoá biểu, thời gian biểu, văn bản giới thiệu loài vật, đồ vật hoặc văn bản hướng dẫn thực hiện một hoạt động.
+
+PDF 79; printed page 23; method LEFT.
+PDF 80; printed page 24; method LEFT.
+
+### vietnamese-g2-020 — Đọc hiểu / Văn bản văn học
+
+Nhận biết được hình dáng, điệu bộ, hành động của nhân vật qua ngôn ngữ và hình ảnh.
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-021 — Đọc hiểu / Văn bản văn học
+
+Nhận biết được thái độ, tình cảm giữa các nhân vật thể hiện qua hành động, lời thoại.
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-022 — Đọc hiểu / Văn bản văn học
+
+Nhận biết được vần trong thơ.
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-023 — Đọc hiểu / Văn bản văn học
+
+Nêu được nhân vật yêu thích nhất và giải thích được vì sao.
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-024 — Đọc hiểu / Đọc mở rộng
+
+Thuộc lòng ít nhất 6 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 30 – 45 chữ.
+
+PDF 79; printed page 23; method LEFT.
+
+### vietnamese-g2-025 — Đọc hiểu / Văn bản thông tin
+
+Dựa vào gợi ý, trả lời được: Văn bản viết về cái gì và có những thông tin nào đáng chú ý dựa vào gợi ý.
+
+PDF 79; printed page 23; method LEFT.

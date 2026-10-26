@@ -78,4 +78,5 @@ app:
   curriculum-rag:
     enabled: ${CURRICULUM_RAG_ENABLED:false}
     embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
+    top-k: ${CURRICULUM_RAG_TOP_K:3}
     min-score: ${CURRICULUM_RAG_MIN_SCORE:0.855}

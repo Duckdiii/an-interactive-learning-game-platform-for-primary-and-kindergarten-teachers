@@ -1,0 +1,941 @@
+{
+  "measurementStatus" : "LIVE_COMPLETED",
+  "measuredAtUtc" : "2026-10-13T07:08:01.877696100Z",
+  "embeddingModel" : "gemini-embedding-001",
+  "embeddingDimension" : 768,
+  "topK" : 3,
+  "minScore" : 0.855,
+  "queryEmbeddingCacheHits" : 17,
+  "queryEmbeddingProviderMisses" : 0,
+  "queryEmbeddingCacheFile" : "backend/target/curriculum-spike/query-embedding-cache.jsonl",
+  "manualReview" : "PENDING: inspect returned text and source pages before citing quality conclusions",
+  "scopeCount" : 1,
+  "scopeResults" : [ {
+    "controlProbes" : [ {
+      "controlChunkId" : "vietnamese-g5-control-001",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeChunkIds" : [ "vietnamese-g5-001" ]
+    }, {
+      "controlChunkId" : "vietnamese-g5-control-002",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeChunkIds" : [ "vietnamese-g5-005", "vietnamese-g5-029", "vietnamese-g5-006" ]
+    }, {
+      "controlChunkId" : "vietnamese-g5-control-003",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeChunkIds" : [ ]
+    }, {
+      "controlChunkId" : "vietnamese-g5-control-004",
+      "primaryScopeLeakage" : 0,
+      "controlExcludedFromPrimary" : true,
+      "primaryScopeChunkIds" : [ ]
+    } ],
+    "summary" : {
+      "positiveQueries" : 10,
+      "hits" : 10,
+      "hitAt3" : 1.0,
+      "leakedChunks" : 0,
+      "negativeQueries" : 3,
+      "negativeRejections" : 3,
+      "retrievalGatePassed" : true,
+      "negativeGatePassed" : true,
+      "passed" : true
+    },
+    "gradeLevel" : "GRADE_5",
+    "controlsStatus" : "PASS",
+    "dataset" : {
+      "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+      "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+      "curriculumVersion" : "32/2018/TT-BGDDT",
+      "datasetVersion" : "vietnamese-grade5-outcomes-v1",
+      "pdfPageCount" : 1555
+    },
+    "subject" : "VIETNAMESE",
+    "queries" : [ {
+      "queryId" : "q01",
+      "topic" : "Đọc đúng và diễn cảm các văn bản truyện, kịch bản, bài thơ, bài miêu tả, tốc độ đọc khoảng 90 – 100 tiếng trong 1 phút.",
+      "expectedChunkIds" : [ "vietnamese-g5-001" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-001",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc đúng và diễn cảm các văn bản truyện, kịch bản, bài thơ, bài miêu tả, tốc độ đọc khoảng 90 – 100 tiếng trong 1 phút.",
+        "score" : 0.910782623884842,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-026",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Thuộc lòng ít nhất 10 – 12 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 100 chữ.",
+        "score" : 0.871360936201527,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-021",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc thầm với tốc độ nhanh hơn lớp 4.",
+        "score" : 0.868634155138606,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-001",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc đúng và diễn cảm các văn bản truyện, kịch bản, bài thơ, bài miêu tả, tốc độ đọc khoảng 90 – 100 tiếng trong 1 phút.",
+        "score" : 0.910782623884842,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-026",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Thuộc lòng ít nhất 10 – 12 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 100 chữ.",
+        "score" : 0.871360936201527,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-021",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc thầm với tốc độ nhanh hơn lớp 4.",
+        "score" : 0.868634155138606,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 440,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Đọc đúng và diễn cảm các văn bản truyện, kịch bản, bài thơ, bài miêu tả, tốc độ đọc khoảng 90 – 100 tiếng trong 1 phút.",
+        "chunkId" : "vietnamese-g5-001",
+        "outcomeText" : "Đọc đúng và diễn cảm các văn bản truyện, kịch bản, bài thơ, bài miêu tả, tốc độ đọc khoảng 90 – 100 tiếng trong 1 phút."
+      }, {
+        "requestedCondition" : "Đọc đúng và diễn cảm các văn bản truyện, kịch bản, bài thơ, bài miêu tả, tốc độ đọc khoảng 90 – 100 tiếng trong 1 phút.",
+        "chunkId" : "vietnamese-g5-026",
+        "outcomeText" : "Thuộc lòng ít nhất 10 – 12 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 100 chữ."
+      }, {
+        "requestedCondition" : "Đọc đúng và diễn cảm các văn bản truyện, kịch bản, bài thơ, bài miêu tả, tốc độ đọc khoảng 90 – 100 tiếng trong 1 phút.",
+        "chunkId" : "vietnamese-g5-021",
+        "outcomeText" : "Đọc thầm với tốc độ nhanh hơn lớp 4."
+      } ]
+    }, {
+      "queryId" : "q02",
+      "topic" : "Sử dụng được một số từ điển tiếng Việt thông dụng để tìm từ, nghĩa của từ, cách dùng từ và tra cứu thông tin khác.",
+      "expectedChunkIds" : [ "vietnamese-g5-002" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-002",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Sử dụng được một số từ điển tiếng Việt thông dụng để tìm từ, nghĩa của từ, cách dùng từ và tra cứu thông tin khác.",
+        "score" : 0.903051317359919,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-002",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Sử dụng được một số từ điển tiếng Việt thông dụng để tìm từ, nghĩa của từ, cách dùng từ và tra cứu thông tin khác.",
+        "score" : 0.903051317359919,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 116,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Sử dụng được một số từ điển tiếng Việt thông dụng để tìm từ, nghĩa của từ, cách dùng từ và tra cứu thông tin khác.",
+        "chunkId" : "vietnamese-g5-002",
+        "outcomeText" : "Sử dụng được một số từ điển tiếng Việt thông dụng để tìm từ, nghĩa của từ, cách dùng từ và tra cứu thông tin khác."
+      } ]
+    }, {
+      "queryId" : "q03",
+      "topic" : "Biết đọc theo những cách khác nhau (đọc lướt và đọc kĩ).",
+      "expectedChunkIds" : [ "vietnamese-g5-003" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-003",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Biết đọc theo những cách khác nhau (đọc lướt và đọc kĩ).",
+        "score" : 0.909216629106999,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-021",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc thầm với tốc độ nhanh hơn lớp 4.",
+        "score" : 0.870864420109801,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản.",
+        "score" : 0.868872117281635,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-003",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Biết đọc theo những cách khác nhau (đọc lướt và đọc kĩ).",
+        "score" : 0.909216629106999,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-021",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc thầm với tốc độ nhanh hơn lớp 4.",
+        "score" : 0.870864420109801,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản.",
+        "score" : 0.868872117281635,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 121,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Biết đọc theo những cách khác nhau (đọc lướt và đọc kĩ).",
+        "chunkId" : "vietnamese-g5-003",
+        "outcomeText" : "Biết đọc theo những cách khác nhau (đọc lướt và đọc kĩ)."
+      }, {
+        "requestedCondition" : "Biết đọc theo những cách khác nhau (đọc lướt và đọc kĩ).",
+        "chunkId" : "vietnamese-g5-021",
+        "outcomeText" : "Đọc thầm với tốc độ nhanh hơn lớp 4."
+      }, {
+        "requestedCondition" : "Biết đọc theo những cách khác nhau (đọc lướt và đọc kĩ).",
+        "chunkId" : "vietnamese-g5-027",
+        "outcomeText" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản."
+      } ]
+    }, {
+      "queryId" : "q04",
+      "topic" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+      "expectedChunkIds" : [ "vietnamese-g5-004" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản.",
+        "score" : 0.890162648030592,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+        "score" : 0.889790841628279,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-029",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "score" : 0.887574499408565,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản.",
+        "score" : 0.890162648030592,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+        "score" : 0.889790841628279,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-029",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "score" : 0.887574499408565,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 119,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+        "chunkId" : "vietnamese-g5-027",
+        "outcomeText" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản."
+      }, {
+        "requestedCondition" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+        "chunkId" : "vietnamese-g5-004",
+        "outcomeText" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản."
+      }, {
+        "requestedCondition" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+        "chunkId" : "vietnamese-g5-029",
+        "outcomeText" : "Nhận biết được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản."
+      } ]
+    }, {
+      "queryId" : "q05",
+      "topic" : "Chỉ ra được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+      "expectedChunkIds" : [ "vietnamese-g5-005" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-005",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Chỉ ra được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "score" : 0.913130554176933,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-029",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "score" : 0.908986927606332,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-032",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được cách triển khai ý tưởng và thông tin trong văn bản theo trật tự thời gian hoặc theo tầm quan trọng.",
+        "score" : 0.872044809137251,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93, 94 ],
+        "printedPages" : [ 37, 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-005",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Chỉ ra được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "score" : 0.913130554176933,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-029",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "score" : 0.908986927606332,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-032",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được cách triển khai ý tưởng và thông tin trong văn bản theo trật tự thời gian hoặc theo tầm quan trọng.",
+        "score" : 0.872044809137251,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93, 94 ],
+        "printedPages" : [ 37, 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 124,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Chỉ ra được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "chunkId" : "vietnamese-g5-005",
+        "outcomeText" : "Chỉ ra được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản."
+      }, {
+        "requestedCondition" : "Chỉ ra được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "chunkId" : "vietnamese-g5-029",
+        "outcomeText" : "Nhận biết được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản."
+      }, {
+        "requestedCondition" : "Chỉ ra được mối liên hệ giữa các chi tiết. Biết tóm tắt văn bản.",
+        "chunkId" : "vietnamese-g5-032",
+        "outcomeText" : "Nhận biết được cách triển khai ý tưởng và thông tin trong văn bản theo trật tự thời gian hoặc theo tầm quan trọng."
+      } ]
+    }, {
+      "queryId" : "q06",
+      "topic" : "Hiểu chủ đề của văn bản.",
+      "expectedChunkIds" : [ "vietnamese-g5-006" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-006",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu chủ đề của văn bản.",
+        "score" : 0.905701876459497,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-028",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào nhan đề và các đề mục lớn, xác định được đề tài, thông tin chính của văn bản.",
+        "score" : 0.892165906951325,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-031",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được bố cục (phần đầu, phần giữa (chính), phần cuối) và các yếu tố (nhan đề, đoạn văn, câu chủ đề) của một văn bản thông tin đơn giản.",
+        "score" : 0.891011235655736,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-006",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu chủ đề của văn bản.",
+        "score" : 0.905701876459497,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-028",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Dựa vào nhan đề và các đề mục lớn, xác định được đề tài, thông tin chính của văn bản.",
+        "score" : 0.892165906951325,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-031",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được bố cục (phần đầu, phần giữa (chính), phần cuối) và các yếu tố (nhan đề, đoạn văn, câu chủ đề) của một văn bản thông tin đơn giản.",
+        "score" : 0.891011235655736,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 120,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Hiểu chủ đề của văn bản.",
+        "chunkId" : "vietnamese-g5-006",
+        "outcomeText" : "Hiểu chủ đề của văn bản."
+      }, {
+        "requestedCondition" : "Hiểu chủ đề của văn bản.",
+        "chunkId" : "vietnamese-g5-028",
+        "outcomeText" : "Dựa vào nhan đề và các đề mục lớn, xác định được đề tài, thông tin chính của văn bản."
+      }, {
+        "requestedCondition" : "Hiểu chủ đề của văn bản.",
+        "chunkId" : "vietnamese-g5-031",
+        "outcomeText" : "Nhận biết được bố cục (phần đầu, phần giữa (chính), phần cuối) và các yếu tố (nhan đề, đoạn văn, câu chủ đề) của một văn bản thông tin đơn giản."
+      } ]
+    }, {
+      "queryId" : "q07",
+      "topic" : "Nhận biết được văn bản viết theo tưởng tượng và văn bản viết về người thật, việc thật.",
+      "expectedChunkIds" : [ "vietnamese-g5-007" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-007",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được văn bản viết theo tưởng tượng và văn bản viết về người thật, việc thật.",
+        "score" : 0.922898926654372,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản.",
+        "score" : 0.862309467328147,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-006",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu chủ đề của văn bản.",
+        "score" : 0.861787145073359,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-007",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được văn bản viết theo tưởng tượng và văn bản viết về người thật, việc thật.",
+        "score" : 0.922898926654372,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-027",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản thông tin",
+        "text" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản.",
+        "score" : 0.862309467328147,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-006",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu chủ đề của văn bản.",
+        "score" : 0.861787145073359,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 147,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nhận biết được văn bản viết theo tưởng tượng và văn bản viết về người thật, việc thật.",
+        "chunkId" : "vietnamese-g5-007",
+        "outcomeText" : "Nhận biết được văn bản viết theo tưởng tượng và văn bản viết về người thật, việc thật."
+      }, {
+        "requestedCondition" : "Nhận biết được văn bản viết theo tưởng tượng và văn bản viết về người thật, việc thật.",
+        "chunkId" : "vietnamese-g5-027",
+        "outcomeText" : "Nhận biết được những chi tiết tiêu biểu và các thông tin chính của văn bản."
+      }, {
+        "requestedCondition" : "Nhận biết được văn bản viết theo tưởng tượng và văn bản viết về người thật, việc thật.",
+        "chunkId" : "vietnamese-g5-006",
+        "outcomeText" : "Hiểu chủ đề của văn bản."
+      } ]
+    }, {
+      "queryId" : "q08",
+      "topic" : "Hiểu từ ngữ, hình ảnh, biện pháp so sánh, nhân hoá trong văn bản.",
+      "expectedChunkIds" : [ "vietnamese-g5-008" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-008",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu từ ngữ, hình ảnh, biện pháp so sánh, nhân hoá trong văn bản.",
+        "score" : 0.912454394210067,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-006",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu chủ đề của văn bản.",
+        "score" : 0.8698064837409,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+        "score" : 0.869732851675681,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-008",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu từ ngữ, hình ảnh, biện pháp so sánh, nhân hoá trong văn bản.",
+        "score" : 0.912454394210067,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-006",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Hiểu chủ đề của văn bản.",
+        "score" : 0.8698064837409,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+        "score" : 0.869732851675681,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 117,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Hiểu từ ngữ, hình ảnh, biện pháp so sánh, nhân hoá trong văn bản.",
+        "chunkId" : "vietnamese-g5-008",
+        "outcomeText" : "Hiểu từ ngữ, hình ảnh, biện pháp so sánh, nhân hoá trong văn bản."
+      }, {
+        "requestedCondition" : "Hiểu từ ngữ, hình ảnh, biện pháp so sánh, nhân hoá trong văn bản.",
+        "chunkId" : "vietnamese-g5-006",
+        "outcomeText" : "Hiểu chủ đề của văn bản."
+      }, {
+        "requestedCondition" : "Hiểu từ ngữ, hình ảnh, biện pháp so sánh, nhân hoá trong văn bản.",
+        "chunkId" : "vietnamese-g5-004",
+        "outcomeText" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản."
+      } ]
+    }, {
+      "queryId" : "q09",
+      "topic" : "Nêu những điều học được từ câu chuyện, bài thơ, màn kịch; lựa chọn điều tâm đắc nhất và giải thích vì sao.",
+      "expectedChunkIds" : [ "vietnamese-g5-009" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED_COMPOUND_REQUEST",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-009",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nêu những điều học được từ câu chuyện, bài thơ, màn kịch; lựa chọn điều tâm đắc nhất và giải thích vì sao.",
+        "score" : 0.912130003960263,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-009",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nêu những điều học được từ câu chuyện, bài thơ, màn kịch; lựa chọn điều tâm đắc nhất và giải thích vì sao.",
+        "score" : 0.912130003960263,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 112,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Nêu những điều học được từ câu chuyện, bài thơ, màn kịch",
+        "chunkId" : "vietnamese-g5-009",
+        "outcomeText" : "Nêu những điều học được từ câu chuyện, bài thơ, màn kịch; lựa chọn điều tâm đắc nhất và giải thích vì sao."
+      }, {
+        "requestedCondition" : "lựa chọn điều tâm đắc nhất và giải thích vì sao.",
+        "chunkId" : "vietnamese-g5-009",
+        "outcomeText" : "Nêu những điều học được từ câu chuyện, bài thơ, màn kịch; lựa chọn điều tâm đắc nhất và giải thích vì sao."
+      } ]
+    }, {
+      "queryId" : "q10",
+      "topic" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học.",
+      "expectedChunkIds" : [ "vietnamese-g5-010" ],
+      "negative" : false,
+      "status" : "FOUND",
+      "reasonCode" : "SUPPORTED",
+      "returned" : [ {
+        "chunkId" : "vietnamese-g5-010",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học.",
+        "score" : 0.912286753835017,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-013",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có kiểu văn bản và độ dài tương đương với các văn bản đã học.",
+        "score" : 0.887680048160237,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 94 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-026",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Thuộc lòng ít nhất 10 – 12 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 100 chữ.",
+        "score" : 0.864827269914339,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-010",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học.",
+        "score" : 0.912286753835017,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-013",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có kiểu văn bản và độ dài tương đương với các văn bản đã học.",
+        "score" : 0.887680048160237,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 94 ],
+        "printedPages" : [ 38 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-026",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Đọc mở rộng",
+        "text" : "Thuộc lòng ít nhất 10 – 12 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 100 chữ.",
+        "score" : 0.864827269914339,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 93 ],
+        "printedPages" : [ 37 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : true,
+      "leakedChunks" : 0,
+      "latencyMillis" : 119,
+      "evidenceSupports" : [ {
+        "requestedCondition" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học.",
+        "chunkId" : "vietnamese-g5-010",
+        "outcomeText" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học."
+      }, {
+        "requestedCondition" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học.",
+        "chunkId" : "vietnamese-g5-013",
+        "outcomeText" : "Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có kiểu văn bản và độ dài tương đương với các văn bản đã học."
+      }, {
+        "requestedCondition" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học.",
+        "chunkId" : "vietnamese-g5-026",
+        "outcomeText" : "Thuộc lòng ít nhất 10 – 12 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 100 chữ."
+      } ]
+    }, {
+      "queryId" : "q11",
+      "topic" : "Tìm hiểu yêu cầu cần đạt về nội dung Tiếng Việt của lớp liền kề, không thuộc lớp đang tra cứu.",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "REQUESTED_SCOPE_MISMATCH",
+      "returned" : [ ],
+      "candidates" : [ {
+        "chunkId" : "vietnamese-g5-021",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Đọc thầm với tốc độ nhanh hơn lớp 4.",
+        "score" : 0.88526211806525,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-002",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc / Kĩ thuật đọc",
+        "text" : "Sử dụng được một số từ điển tiếng Việt thông dụng để tìm từ, nghĩa của từ, cách dùng từ và tra cứu thông tin khác.",
+        "score" : 0.884069804307064,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      }, {
+        "chunkId" : "vietnamese-g5-004",
+        "subject" : "VIETNAMESE",
+        "gradeLevel" : "GRADE_5",
+        "topic" : "Đọc hiểu / Văn bản văn học",
+        "text" : "Nhận biết được một số chi tiết tiêu biểu và nội dung chính của văn bản. Hiểu được nội dung hàm ẩn dễ nhận biết của văn bản.",
+        "score" : 0.883576740296255,
+        "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+        "pdfPages" : [ 92 ],
+        "printedPages" : [ 36 ],
+        "curriculumVersion" : "32/2018/TT-BGDDT"
+      } ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 143,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q12",
+      "topic" : "Tính diện tích hình tròn theo bán kính.",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 112,
+      "evidenceSupports" : [ ]
+    }, {
+      "queryId" : "q13",
+      "topic" : "Học sinh thực hiện hoạt động trải nghiệm để rèn luyện kĩ năng.",
+      "expectedChunkIds" : [ ],
+      "negative" : true,
+      "status" : "INSUFFICIENT_EVIDENCE",
+      "reasonCode" : "NO_CANDIDATE_EVIDENCE",
+      "returned" : [ ],
+      "candidates" : [ ],
+      "hit" : false,
+      "leakedChunks" : 0,
+      "latencyMillis" : 93,
+      "evidenceSupports" : [ ]
+    } ]
+  } ],
+  "passed" : true
+}
