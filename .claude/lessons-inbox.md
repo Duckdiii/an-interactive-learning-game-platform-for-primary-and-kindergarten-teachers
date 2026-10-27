@@ -89,6 +89,14 @@ Mẫu một mục:
 - Cách chặn: trước khi giao agent thực thi, nếu phần cần sửa chưa commit thì hỏi người dùng commit trước (sau `pre-commit-checker`), hoặc trong bản giao việc chỉ rõ nhánh gốc và danh sách tệp cần chép; không dựa vào `git -C`.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-10-27 — `isolation: worktree` luôn tạo từ `main`, kể cả khi đã commit trên nhánh làm việc
+- Lỗi: đã commit P1 lên `everyone/UI` (67add76) rồi giao P2.1 cho `frontend-implementer` với `isolation: worktree`, nhưng worktree vẫn tạo từ `main` (e09913d), không có `frontend/src/player/`. Agent dừng hỏi; lúc được duyệt reset thì worktree đã bị tự xóa (không có thay đổi), mất hai lượt.
+- Phát hiện nhờ: báo cáo của agent.
+- Nguyên nhân gốc: mục trên chỉ chặn "code chưa commit"; giả định sai rằng worktree tạo từ HEAD của nhánh đang làm.
+- Cách chặn: phiên chính tự tạo worktree từ đúng commit ở đường dẫn ngắn (`git worktree add C:/wt-<bước> -b tmp/<bước> <sha>`, tránh lỗi "Filename too long"), giao agent KHÔNG kèm `isolation`, chỉ làm trong đường dẫn đó; xong thì phiên chính xem diff, chép vào cây chính, gỡ junction `node_modules` bằng `rmdir` rồi `git worktree remove` và xóa nhánh tạm. Có thể ghi điều này vào prompt `frontend-implementer`/`backend-implementer`.
+- Bổ sung (P2.2): agent thực thi vẫn bị cô lập trong worktree riêng của nó nên lệnh `cmd`/`powershell` tạo junction `node_modules` ở worktree phiên chính tạo bị chặn; phiên chính phải tự tạo junction trước khi giao (`New-Item -ItemType Junction`), và tự gỡ bằng `cmd /c rmdir` sau khi chép kết quả.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-10-11 — Agent kiểm tra diff bỏ sót thay đổi chưa commit

@@ -1,0 +1,76 @@
+import { describe, expect, it } from 'vitest'
+import type { MatchingStudentQuestion, StudentQuizQuestion } from '../../types/game-student.types'
+import { REVIEW_DESCRIBERS } from './describers'
+
+const quiz: StudentQuizQuestion = {
+  id: 'q1',
+  timeLimitSeconds: 30,
+  points: 10,
+  questionText: '1 + 2 = ?',
+  options: [
+    { id: 'a', text: '3' },
+    { id: 'b', text: '4' },
+  ],
+}
+const matching: MatchingStudentQuestion = {
+  id: 'q1',
+  timeLimitSeconds: 30,
+  points: 10,
+  leftItems: [
+    { id: 'l1', text: 'Chó' },
+    { id: 'l2', visualPrompt: 'con mèo' },
+  ],
+  rightItems: [
+    { id: 'r1', text: 'Gâu' },
+    { id: 'r2', text: 'Meo' },
+  ],
+}
+const expected = { matches: [{ leftPairId: 'l1', rightPairId: 'r1' }, { leftPairId: 'l2', rightPairId: 'r2' }] }
+const quizDescriber = REVIEW_DESCRIBERS.QUIZ!
+const matchingDescriber = REVIEW_DESCRIBERS.MATCHING!
+
+describe('describer QUIZ', () => {
+  it('câu hỏi, lựa chọn đúng và sai theo chữ', () => {
+    expect(quizDescriber.prompt(quiz as never)).toBe('1 + 2 = ?')
+    expect(quizDescriber.chosen(quiz as never, { selectedOptionId: 'b' } as never, { selectedOptionId: 'a' })).toBe('4')
+    expect(quizDescriber.correct(quiz as never, { selectedOptionId: 'a' })).toBe('3')
+  })
+
+  it('id lạ thì "?"; đáp án đúng null hoặc sai hình dạng thì không có', () => {
+    expect(quizDescriber.chosen(quiz as never, { selectedOptionId: 'z' } as never, null)).toBe('?')
+    expect(quizDescriber.correct(quiz as never, { selectedOptionId: 'z' })).toBe('?')
+    expect(quizDescriber.correct(quiz as never, null)).toBeNull()
+    expect(quizDescriber.correct(quiz as never, { selectedOptionId: 5 })).toBeNull()
+  })
+})
+
+describe('describer MATCHING', () => {
+  it('nối đủ cặp: "Nối đúng cả N cặp"', () => {
+    expect(matchingDescriber.chosen(matching as never, expected as never, expected)).toBe('Nối đúng cả 2 cặp')
+  })
+
+  it('nối thiếu hoặc sai cặp: đếm cặp trùng', () => {
+    const answer = { matches: [{ leftPairId: 'l1', rightPairId: 'r1' }, { leftPairId: 'l2', rightPairId: 'r1' }] }
+
+    expect(matchingDescriber.chosen(matching as never, answer as never, expected)).toBe('Nối đúng 1/2 cặp')
+    expect(matchingDescriber.chosen(matching as never, { matches: [] } as never, expected)).toBe('Nối đúng 0/2 cặp')
+  })
+
+  it('đáp án đúng liệt kê "trái – phải" theo nội dung hiển thị', () => {
+    expect(matchingDescriber.correct(matching as never, expected)).toBe('Chó – Gâu; con mèo – Meo')
+  })
+
+  it('đáp án đúng sai hình dạng thì không có, không ném lỗi', () => {
+    expect(matchingDescriber.correct(matching as never, null)).toBeNull()
+    expect(matchingDescriber.correct(matching as never, { matches: 'x' })).toBeNull()
+    expect(matchingDescriber.correct(matching as never, { matches: [{ leftPairId: 1 }] })).toBeNull()
+    // Không có đáp án đúng thì không được khẳng định "nối đúng".
+    expect(matchingDescriber.chosen(matching as never, expected as never, null)).toBe('Đã nối 2 cặp')
+  })
+
+  it('một cặp đúng gửi lặp hai lần không được tính thành "nối đúng cả"', () => {
+    const doubled = { matches: [expected.matches[0], expected.matches[0]] }
+
+    expect(matchingDescriber.chosen(matching as never, doubled as never, expected)).toBe('Nối đúng 1/2 cặp')
+  })
+})

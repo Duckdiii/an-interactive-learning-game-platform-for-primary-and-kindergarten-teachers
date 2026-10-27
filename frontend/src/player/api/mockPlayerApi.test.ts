@@ -22,6 +22,16 @@ function collectKeys(value: unknown, found = new Set<string>()): Set<string> {
   return found
 }
 
+describe('biệt danh', () => {
+  it('chứa từ cấm thì 422 UNSAFE_CONTENT, không phân biệt hoa thường', async () => {
+    const api = new MockPlayerApi()
+
+    await expect(api.createSession('MOCK00', 'Bạn NGU ngốc')).rejects.toMatchObject({ response: { status: 422, data: { error: { code: 'UNSAFE_CONTENT' } } } })
+    await expect(api.createSession('MOCK00', 'nói bậy')).rejects.toMatchObject({ response: { status: 422 } })
+    await expect(api.createSession('MOCK00', 'Sao Băng')).resolves.toMatchObject({ nickname: 'Sao Băng' })
+  })
+})
+
 async function openSession(api: MockPlayerApi, shareCode: string) {
   const { sessionId } = await api.createSession(shareCode, 'Bé An')
 
@@ -217,6 +227,21 @@ describe('MockPlayerApi: không lộ đáp án qua vị trí hay id', () => {
     const orders = await correctAnswers('ORDERING', (answer) => (answer.order as string[]).join(','))
 
     expect(orders.has('s1,s2,s3')).toBe(false)
+  })
+})
+
+describe('MockPlayerApi: mã thử lỗi', () => {
+  it.each([
+    ['MOCKNP', 'GAME_NOT_PUBLISHED'],
+    ['mockex', 'GAME_EXPIRED'],
+    ['MOCKDS', 'GAME_DISABLED'],
+    ['ZZZZZZ', 'SHARE_CODE_NOT_FOUND'],
+  ])('%s: getPublishInfo và createSession cùng 404 %s', async (code, errorCode) => {
+    const api = new MockPlayerApi()
+    const expected = { response: { status: 404, data: { error: { code: errorCode } } } }
+
+    await expect(api.getPublishInfo(code)).rejects.toMatchObject(expected)
+    await expect(api.createSession(code, 'Bé An')).rejects.toMatchObject(expected)
   })
 })
 

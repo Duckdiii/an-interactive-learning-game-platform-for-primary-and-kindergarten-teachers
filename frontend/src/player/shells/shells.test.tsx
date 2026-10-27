@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import { PROFILES } from '../profile/profiles'
 import type { AgeBand } from '../profile/types'
 import { UiProfileProvider } from '../profile/UiProfileContext'
@@ -68,6 +68,38 @@ describe('chỗ chừa chung', () => {
     renderShell(band, { feedback: 'Giỏi quá!', mascot: <span>nhân vật</span> })
     expect(screen.getByRole('status')).toHaveTextContent('Giỏi quá!')
     expect(screen.getByText('nhân vật')).toBeInTheDocument()
+  })
+})
+
+describe('chân khung (P2.6)', () => {
+  const MOUSE_ONLY = '[@media(hover:hover)_and_(pointer:fine)]:block'
+
+  it.each(['be', 'hocSinh'] as const)('%s: chân khung dính đáy, dòng phím tắt chỉ hiện trên thiết bị có chuột', (band) => {
+    renderShell(band, { feedback: 'Giỏi quá!', showHotkeyHint: true })
+
+    const footer = screen.getByRole('status')
+    const hint = screen.getByText(/Phím tắt: Enter câu tiếp/)
+
+    expect(footer).toHaveClass('sticky', 'bottom-0', 'bg-play-page', 'z-10')
+    expect(hint).toHaveClass('hidden', MOUSE_ONLY)
+  })
+
+  it('chưa có phản hồi: chân khung chỉ hiện trên thiết bị có chuột', () => {
+    renderShell('hocSinh', { showHotkeyHint: true })
+
+    expect(screen.getByRole('status')).toHaveClass('hidden', MOUSE_ONLY)
+  })
+
+  it('nút Tạm dừng chỉ ở khung Học sinh và chỉ khi được đưa onPause', () => {
+    const onPause = vi.fn()
+    const { unmount } = renderShell('be', { onPause })
+
+    expect(screen.queryByRole('button', { name: 'Tạm dừng' })).not.toBeInTheDocument()
+    unmount()
+
+    renderShell('hocSinh', { onPause })
+    fireEvent.click(screen.getByRole('button', { name: 'Tạm dừng' }))
+    expect(onPause).toHaveBeenCalledTimes(1)
   })
 })
 

@@ -29,6 +29,10 @@ export interface UiProfile {
     hintAfterMs: number | null
     /** Có hiện đồng hồ đếm giờ không. */
     timer: boolean
+    /** Có hỏi biệt danh trước khi chơi không (Bé thì hệ thống tự đặt). */
+    askNickname: boolean
+    /** Điện thoại dọc mà loại game cần màn ngang thì chặn bằng màn nhắc xoay máy (Bé); khung kia để trẻ tự quyết. */
+    enforceLandscape: boolean
   }
   audio: {
     /** Tự đọc lời nhắc khi vào câu mới (Bé chưa đọc được chữ). */

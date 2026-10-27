@@ -14,6 +14,7 @@ const WorkspaceEditor = lazy(() => import('./pages/WorkspaceEditor'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const PlayPage = lazy(() => import('./player/pages/PlayPage'))
+const JoinPage = lazy(() => import('./player/pages/JoinPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
 
@@ -43,6 +44,7 @@ function App() {
 
         {/* Học sinh vào bằng mã, không cần tài khoản: nằm ngoài ProtectedRoute. */}
         <Route path={ROUTES.play} element={<PlayPage />} />
+        <Route path={ROUTES.join} element={<JoinPage />} />
 
         <Route
           element={

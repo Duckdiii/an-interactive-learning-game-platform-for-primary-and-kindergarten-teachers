@@ -4,6 +4,7 @@ import type { QuizQuestion } from '../../types/game-dsl.types'
 import type { StudentQuizQuestion } from '../../types/game-student.types'
 import type { AnswerResult } from '../common/answerResult'
 import { STAGE_WIDTH } from '../common/mediaLayout'
+import { isInsideDialog, isPlainShortcut } from '../common/keyboard'
 import { measureWrappedTextHeight } from '../common/measureText'
 import OptionButton from '../common/OptionButton'
 import QuestionAudioButton from '../common/QuestionAudioButton'
@@ -138,6 +139,28 @@ export default function QuizRenderer(props: QuizRendererProps) {
       setLocked(false)
     }
   }
+
+  // Phím riêng của QUIZ ở mode play: 1…n chạm lựa chọn thứ n, đúng đường nộp như chạm (handleSelect không nộp khi đã khoá).
+  const keyTarget = useRef({ select: handleSelect, optionIds: question.options.map((option) => option.id) })
+  useEffect(() => {
+    keyTarget.current = { select: handleSelect, optionIds: question.options.map((option) => option.id) }
+  })
+  const isPlay = mode === 'play'
+  useEffect(() => {
+    if (!isPlay) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.repeat || !/^[1-9]$/.test(event.key) || !isPlainShortcut(event) || isInsideDialog(event)) return
+
+      const optionId = keyTarget.current.optionIds[Number(event.key) - 1]
+
+      if (optionId !== undefined) void keyTarget.current.select(optionId)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isPlay])
 
   // Ở mode play CHỈ tin đáp án đúng do máy chủ trả sau khi chấm, kể cả khi cha lỡ truyền cả correctOptionId vào question.
   const correctId = props.mode === 'play' ? revealedCorrectId : props.question.correctOptionId

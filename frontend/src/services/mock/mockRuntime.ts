@@ -73,7 +73,8 @@ export const mockTimeoutError = () => new AxiosError('timeout of 15000ms exceede
 export async function runMock<T>(produce: (current: MockScenario) => T | Promise<T>): Promise<T> {
   await mockDelay()
 
-  if (scenario === 'error') throw mockNetworkError()
+  // `navigator.onLine === false` (chế độ Offline của DevTools) cũng như mất mạng thật: thử mất mạng giữa chừng mà không cần đổi kịch bản.
+  if (scenario === 'error' || !navigator.onLine) throw mockNetworkError()
   if (scenario === 'timeout') throw mockTimeoutError()
 
   return produce(scenario)

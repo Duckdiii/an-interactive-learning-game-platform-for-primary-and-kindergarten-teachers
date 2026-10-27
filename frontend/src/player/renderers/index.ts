@@ -25,3 +25,17 @@ const RENDERERS: ReadonlyMap<GameType, AnyPlayableRenderer> = new Map([
 ])
 
 export const getPlayableRenderer = (gameType: GameType) => RENDERERS.get(gameType)
+
+/** Loại game cần màn ngang để chơi thoải mái (nối cặp, lật thẻ, kéo thả, sắp xếp). Khung Bé trên điện thoại dọc thì nhắc xoay máy (xem `device/RotatePrompt`). */
+export const PLAYABLE_ORIENTATION: Readonly<Record<GameType, 'any' | 'landscape'>> = {
+  QUIZ: 'any',
+  AUDIO_VISUAL_MATCH: 'any',
+  ODD_ONE_OUT: 'any',
+  SPOT_THE_TARGET: 'any',
+  VISUAL_CLOZE: 'any',
+  WORD_SCRAMBLE: 'any',
+  MATCHING: 'landscape',
+  MEMORY_CARD: 'landscape',
+  DRAG_DROP: 'landscape',
+  ORDERING: 'landscape',
+}

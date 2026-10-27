@@ -4,6 +4,9 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../App'
 import { MockPlayerApi } from '../api/mockPlayerApi'
+import { setAudioLockSimulated } from '../audio/audioLock'
+import { mockApiError } from '../../services/mock/mockErrors'
+import { setMockScenario } from '../../services/mock/mockRuntime'
 
 // Đường chạy trọn vẹn của trang chơi với MockPlayerApi: vào chơi -> từng câu -> phản hồi -> màn xong. Konva thay bằng DOM thường.
 vi.mock('react-konva', () => ({
@@ -19,7 +22,7 @@ vi.mock('react-konva', () => ({
   Line: () => null,
 }))
 vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
-vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() } }))
+vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() }, Howler: { ctx: undefined } }))
 vi.mock('../../games/common/measureText', () => ({ measureWrappedTextHeight: () => null }))
 vi.mock('../../games/common/sound', () => ({ playSound: vi.fn() }))
 vi.mock('../../games/common/useFeedback', () => ({ useFeedback: () => ({ showFeedback: vi.fn() }) }))
@@ -40,6 +43,17 @@ function openPlay(code: string) {
 }
 
 const start = async () => fireEvent.click(await screen.findByRole('button', { name: 'Bắt đầu' }))
+const typeNickname = (value: string) => fireEvent.change(screen.getByLabelText('Biệt danh'), { target: { value } })
+const submitNickname = async (value: string) => {
+  typeNickname(value)
+  fireEvent.click(await screen.findByRole('button', { name: 'Tiếp tục' }))
+}
+// Khung Học sinh: biệt danh rồi mới tới màn vào.
+const startStudent = async () => {
+  await screen.findByLabelText('Biệt danh')
+  await submitNickname('Sao Băng')
+  await start()
+}
 const tap = (text: string) => fireEvent.click(screen.getByText(text))
 const next = async (name = 'Câu tiếp theo') => fireEvent.click(await screen.findByRole('button', { name }))
 
@@ -49,6 +63,11 @@ configure({ asyncUtilTimeout: 10_000 })
 
 beforeEach(() => vi.stubEnv('VITE_PLAYER_API', 'mock'))
 afterEach(() => {
+  setMockScenario('normal')
+  // Phiên đã lưu sống qua test (MockPlayerApi là một instance chung), nên phải xóa để test sau bắt đầu sạch.
+  sessionStorage.clear()
+  setAudioLockSimulated(false)
+  vi.restoreAllMocks()
   vi.useRealTimers()
   vi.stubEnv('VITE_PLAYER_API', '')
 })
@@ -74,9 +93,23 @@ describe('trang chơi, khung Bé (QUIZ, Mầm non)', () => {
     tap('9')
     await next('Xem kết quả')
 
-    expect(await screen.findByRole('heading', { name: 'Hoàn thành!' })).toBeInTheDocument()
-    expect(screen.getByText('2/3 câu đúng')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Bé làm tốt lắm!' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /trên 5 sao$/ })).toBeInTheDocument()
     expect(screen.queryByText(/điểm/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Bé làm đúng/)).not.toBeInTheDocument()
+
+    // Khóa phụ huynh: giữ nút 3 giây mới thấy lời nhắn.
+    const gate = screen.getByRole('button', { name: 'Dành cho phụ huynh' })
+
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    fireEvent.pointerDown(gate)
+    act(() => {
+      vi.advanceTimersByTime(3000)
+    })
+    vi.useRealTimers()
+
+    expect(screen.getByRole('region', { name: 'Dành cho phụ huynh' })).toHaveTextContent('Bé làm đúng 2/3 câu')
+    expect(screen.queryByRole('button', { name: 'Xem lại đáp án' })).not.toBeInTheDocument()
   })
 
   it('khung Bé không bị tính hết giờ dù trẻ nghĩ lâu', async () => {
@@ -114,9 +147,55 @@ describe('trang chơi, khung Bé (QUIZ, Mầm non)', () => {
 })
 
 describe('trang chơi, khung Học sinh (MOCK10: QUIZ giáo viên ghi đè)', () => {
+  it('chơi hết 3 câu: biệt danh, số câu đúng, điểm; chơi lại về màn vào không hỏi lại biệt danh', async () => {
+    openPlay('MOCK10')
+    await startStudent()
+    for (const answer of ['3', '4', '9']) {
+      await screen.findByText(answer)
+      tap(answer)
+      await next(answer === '9' ? 'Xem kết quả' : 'Câu tiếp theo')
+    }
+
+    expect(await screen.findByRole('heading', { name: 'Hoàn thành!' })).toBeInTheDocument()
+    expect(screen.getByText('Sao Băng')).toBeInTheDocument()
+    expect(screen.getByText('2/3 câu đúng')).toBeInTheDocument()
+    expect(screen.getByText(/^\d+ điểm$/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Chơi lại' }))
+
+    expect(await screen.findByRole('button', { name: 'Bắt đầu' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('Biệt danh')).not.toBeInTheDocument()
+  })
+
+  it('xem lại đáp án: lọc câu sai, thấy đáp án đúng, quay lại kết quả', async () => {
+    openPlay('MOCK10')
+    await startStudent()
+    for (const answer of ['3', '4', '9']) {
+      await screen.findByText(answer)
+      tap(answer)
+      await next(answer === '9' ? 'Xem kết quả' : 'Câu tiếp theo')
+    }
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Xem lại đáp án' }))
+
+    expect(await screen.findByRole('heading', { name: 'Xem lại đáp án' })).toBeInTheDocument()
+    expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    expect(screen.getByRole('button', { name: 'Tất cả (3)' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Câu sai (1)' }))
+
+    expect(screen.getAllByRole('listitem')).toHaveLength(1)
+    expect(screen.getByText(/Đáp án đúng:/)).toBeInTheDocument()
+    expect(screen.getByText('Chỉ hiện đáp án đúng.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Quay lại kết quả' }))
+
+    expect(await screen.findByRole('heading', { name: 'Hoàn thành!' })).toBeInTheDocument()
+  })
+
   it('có đồng hồ và điểm; trả lời đúng thì cộng điểm', async () => {
     openPlay('MOCK10')
-    await start()
+    await startStudent()
 
     expect(await screen.findByRole('timer')).toHaveTextContent('30 giây')
     expect(screen.getByText('Câu 1/3')).toBeInTheDocument()
@@ -129,7 +208,7 @@ describe('trang chơi, khung Học sinh (MOCK10: QUIZ giáo viên ghi đè)', ()
   it('hết giờ thì tự nộp "hết giờ", báo "Hết giờ." và cho sang câu sau', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     openPlay('MOCK10')
-    await start()
+    await startStudent()
     await screen.findByRole('timer')
 
     await act(async () => {
@@ -173,7 +252,7 @@ describe('nhân vật theo theme', () => {
 
   it('khung Học sinh: không có nhân vật', async () => {
     openPlay('MOCK10')
-    await start()
+    await startStudent()
     await screen.findByRole('timer')
 
     expect(screen.queryByRole('img', { name: /^Nhân vật/ })).not.toBeInTheDocument()
@@ -203,7 +282,7 @@ describe('gợi ý và chuỗi đúng', () => {
   it('khung Học sinh: không gợi ý', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     openPlay('MOCK10')
-    await start()
+    await startStudent()
     await screen.findByRole('timer')
 
     await act(async () => {
@@ -215,7 +294,7 @@ describe('gợi ý và chuỗi đúng', () => {
 
   it('khung Học sinh: đúng hai câu liên tiếp thì nhắc chuỗi', async () => {
     openPlay('MOCK10')
-    await start()
+    await startStudent()
 
     await screen.findByText('3')
     tap('3')
@@ -266,5 +345,421 @@ describe('trang chơi, các tình huống khác', () => {
 
     expect(await screen.findByText(/chưa chơi được/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Bắt đầu' })).not.toBeInTheDocument()
+  })
+})
+
+describe('màn trước khi chơi (P2.2)', () => {
+  it('khung Học sinh: biệt danh, intro có công tắc và cách chơi, rồi vào câu; phiên tạo với biệt danh đã nhập', async () => {
+    const spy = vi.spyOn(MockPlayerApi.prototype, 'createSession')
+    openPlay('MOCK10')
+
+    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument()
+    await submitNickname('Sao Băng')
+
+    expect(await screen.findByRole('switch', { name: 'Tự đọc đề bài' })).not.toBeChecked()
+    expect(screen.getByText('Mỗi câu là một màn chơi.')).toBeInTheDocument()
+    expect(screen.getByText('Trả lời đúng và nhanh được nhiều điểm hơn.')).toBeInTheDocument()
+    expect(screen.getByText('Chơi xong được xem lại đáp án.')).toBeInTheDocument()
+    await start()
+
+    expect(await screen.findByRole('timer')).toBeInTheDocument()
+    expect(spy).toHaveBeenCalledWith('MOCK10', 'Sao Băng')
+  })
+
+  it('biệt danh rỗng thì báo lỗi, không gọi API', async () => {
+    const spy = vi.spyOn(MockPlayerApi.prototype, 'createSession')
+    openPlay('MOCK10')
+    await screen.findByLabelText('Biệt danh')
+    await submitNickname('   ')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Bạn hãy gõ một biệt danh nhé.')
+    expect(screen.getByLabelText('Biệt danh')).toHaveAttribute('aria-invalid', 'true')
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  it('biệt danh có từ cấm: sau Bắt đầu quay lại màn biệt danh với thông báo của máy chủ, chữ còn nguyên', async () => {
+    openPlay('MOCK10')
+    await screen.findByLabelText('Biệt danh')
+    await submitNickname('ngu ngốc')
+    await start()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Biệt danh có từ không phù hợp. Bạn chọn biệt danh khác nhé.')
+    expect(screen.getByLabelText('Biệt danh')).toHaveValue('ngu ngốc')
+    expect(screen.getByLabelText('Biệt danh')).toHaveFocus()
+
+    // Gõ lại biệt danh hợp lệ: qua màn vào lần nữa rồi chơi được.
+    await submitNickname('Sao Băng')
+    await start()
+    expect(await screen.findByText('Câu 1/3')).toBeInTheDocument()
+  })
+
+  it('lỗi 400 khi TẢI CÂU HỎI (không phải khi tạo phiên): báo lỗi thường, không quay về màn biệt danh', async () => {
+    vi.spyOn(MockPlayerApi.prototype, 'getGameForStudent').mockRejectedValueOnce(mockApiError(400, 'VALIDATION_ERROR', 'x'))
+    openPlay('MOCK10')
+    await screen.findByLabelText('Biệt danh')
+    await submitNickname('Sao Băng')
+    await start()
+
+    expect(await screen.findByRole('button', { name: 'Thử lại' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('Biệt danh')).toBeNull()
+  })
+
+  it('khung Bé: không có màn biệt danh, chào bé rồi vào câu', async () => {
+    openPlay('MOCK00')
+
+    expect(await screen.findByRole('heading', { name: /^Chào bé!/ })).toBeInTheDocument()
+    expect(screen.queryByLabelText('Biệt danh')).not.toBeInTheDocument()
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+    await start()
+
+    expect(await screen.findByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
+  })
+
+  it('âm thanh bị chặn: khung Bé thấy "Chạm để bắt đầu", chạm xong thấy câu hỏi', async () => {
+    setAudioLockSimulated(true)
+    openPlay('MOCK00')
+    await start()
+
+    fireEvent.click(await screen.findByRole('button', { name: /Chạm để bắt đầu/ }))
+
+    expect(await screen.findByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
+  })
+
+  it('khung Học sinh tắt tự đọc thì không chặn dù âm thanh bị khóa', async () => {
+    setAudioLockSimulated(true)
+    openPlay('MOCK10')
+    await startStudent()
+
+    expect(await screen.findByRole('timer')).toBeInTheDocument()
+    expect(screen.queryByText('Chạm để bắt đầu')).not.toBeInTheDocument()
+  })
+})
+
+describe('lỗi và mất mạng (P2.5)', () => {
+  it('mất mạng giữa lúc nộp: báo đang nối lại, mạng về thì có kết quả và điểm chỉ tính một lần', async () => {
+    openPlay('MOCK10')
+    await startStudent()
+    await screen.findByText('Câu 1/3')
+
+    setMockScenario('error')
+    tap('3')
+
+    expect((await screen.findByText(/Mất kết nối/)).closest('[role="status"]')).toHaveTextContent('Mất kết nối. Đang thử nối lại… Tiến độ của bạn vẫn được giữ.')
+
+    setMockScenario('normal')
+    act(() => {
+      window.dispatchEvent(new Event('online'))
+    })
+
+    const message = await screen.findByText(/^Chính xác! \+\d+ điểm$/)
+    const points = /\+(\d+)/.exec(message.textContent ?? '')![1]
+
+    expect(screen.getByText(`${points} điểm`)).toBeInTheDocument()
+    expect(screen.queryByText(/Mất kết nối/)).not.toBeInTheDocument()
+
+    await next()
+    expect(await screen.findByText('Câu 2/3')).toBeInTheDocument()
+    expect(screen.getByText(`${points} điểm`)).toBeInTheDocument()
+  })
+
+  it('khung Bé nói ngắn hơn khi nối lại mạng', async () => {
+    openPlay('MOCK00')
+    await start()
+    await screen.findByRole('img', { name: 'Câu 1/3' })
+
+    setMockScenario('error')
+    tap('3')
+
+    expect((await screen.findByText(/Đang nối lại/)).closest('[role="status"]')).toHaveTextContent('Đang nối lại mạng, con chờ một chút nhé.')
+  })
+
+  it('tạo phiên lỗi mạng ở khung Học sinh: có Nhập lại mã và Thử lại; mạng về thì Thử lại vào được câu', async () => {
+    openPlay('MOCK10')
+    await screen.findByLabelText('Biệt danh')
+    await submitNickname('Sao Băng')
+    setMockScenario('error')
+    await start()
+
+    expect(await screen.findByRole('heading', { name: 'Chưa kết nối được' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Nhập lại mã' })).toHaveAttribute('href', '/join')
+    expect(screen.getByText('Mã lỗi: NET-01')).toBeInTheDocument()
+
+    setMockScenario('normal')
+    fireEvent.click(screen.getByRole('button', { name: 'Thử lại' }))
+
+    expect(await screen.findByText('Câu 1/3')).toBeInTheDocument()
+  })
+
+  it('đang ở màn lỗi vào chơi thì tự thử lại khi có mạng', async () => {
+    openPlay('MOCK00')
+    await screen.findByRole('button', { name: 'Bắt đầu' })
+    setMockScenario('error')
+    await start()
+    await screen.findByText(/mã lỗi NET-01/)
+
+    setMockScenario('normal')
+    act(() => {
+      window.dispatchEvent(new Event('online'))
+    })
+
+    expect(await screen.findByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
+  })
+
+  it('tải lại trang giữa chừng: không hỏi lại biệt danh, vào thẳng câu chưa làm', async () => {
+    const created = vi.spyOn(MockPlayerApi.prototype, 'createSession')
+    const first = openPlay('MOCK10')
+    await startStudent()
+    await screen.findByText('Câu 1/3')
+    tap('3')
+    await screen.findByText(/^Chính xác!/)
+    first.unmount()
+
+    openPlay('MOCK10')
+
+    expect(await screen.findByRole('button', { name: 'Bắt đầu' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('Biệt danh')).not.toBeInTheDocument()
+    await start()
+
+    expect(await screen.findByText('Câu 2/3')).toBeInTheDocument()
+    expect(created).toHaveBeenCalledTimes(1)
+  })
+
+  it('phiên đã lưu không còn trên máy chủ (404): bỏ phiên cũ, tạo phiên mới', async () => {
+    sessionStorage.setItem('player:session:MOCK00', JSON.stringify({ sessionId: 'mock-session-gone', participantId: 'p', nickname: 'Bạn nhỏ 1111' }))
+    const created = vi.spyOn(MockPlayerApi.prototype, 'createSession')
+    openPlay('MOCK00')
+    await start()
+
+    expect(await screen.findByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
+    expect(created).toHaveBeenCalledTimes(1)
+    expect(sessionStorage.getItem('player:session:MOCK00')).not.toContain('mock-session-gone')
+  })
+
+  it('Chơi lại xóa phiên đã lưu: lượt sau là phiên mới', async () => {
+    const created = vi.spyOn(MockPlayerApi.prototype, 'createSession')
+    openPlay('MOCK10')
+    await startStudent()
+    for (const answer of ['3', '4', '9']) {
+      await screen.findByText(answer)
+      tap(answer)
+      await next(answer === '9' ? 'Xem kết quả' : 'Câu tiếp theo')
+    }
+    expect(sessionStorage.getItem('player:session:MOCK10')).not.toBeNull()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Chơi lại' }))
+    expect(sessionStorage.getItem('player:session:MOCK10')).toBeNull()
+
+    await start()
+
+    expect(await screen.findByText('Câu 1/3')).toBeInTheDocument()
+    expect(created).toHaveBeenCalledTimes(2)
+  })
+})
+
+// Giả lập `window.matchMedia`: chỉ truy vấn "điện thoại dọc" (có `portrait`) theo `portrait`; truy vấn khác luôn false.
+function stubPortraitPhone(initial: boolean) {
+  let portrait = initial
+  const listeners = new Set<() => void>()
+
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    get matches() {
+      return query.includes('portrait') && portrait
+    },
+    media: query,
+    addEventListener: (_: string, listener: () => void) => listeners.add(listener),
+    removeEventListener: (_: string, listener: () => void) => listeners.delete(listener),
+  }))
+
+  return (value: boolean) =>
+    act(() => {
+      portrait = value
+      listeners.forEach((listener) => listener())
+    })
+}
+
+const ROTATE_TITLE = 'Xoay ngang điện thoại để chơi nhé!'
+
+describe('thiết bị: điện thoại dọc (P2.6)', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('khung Bé, MATCHING, điện thoại dọc: nhắc xoay máy; xoay ngang thì tự vào câu', async () => {
+    const rotate = stubPortraitPhone(true)
+    openPlay('MOCK01')
+    await start()
+
+    expect(await screen.findByRole('heading', { name: ROTATE_TITLE })).toBeInTheDocument()
+    // Câu nằm phía sau lớp phủ, bị khóa (inert) cho tới khi xoay ngang.
+    expect((await screen.findByRole('img', { name: /^Câu 1\// })).closest('[inert]')).not.toBeNull()
+
+    rotate(false)
+
+    expect(screen.queryByRole('heading', { name: ROTATE_TITLE })).not.toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /^Câu 1\// }).closest('[inert]')).toBeNull()
+  })
+
+  it('lỡ xoay dọc giữa câu: câu không bị dựng lại (vẫn là cùng phần tử), xoay ngang lại thì chơi tiếp', async () => {
+    const rotate = stubPortraitPhone(false)
+    openPlay('MOCK01')
+    await start()
+    const progress = await screen.findByRole('img', { name: /^Câu 1\// })
+
+    rotate(true)
+    expect(screen.getByRole('heading', { name: ROTATE_TITLE })).toBeInTheDocument()
+    rotate(false)
+
+    expect(screen.getByRole('img', { name: /^Câu 1\// })).toBe(progress)
+  })
+
+  it('"Người lớn: vẫn chơi màn dọc" bỏ màn nhắc và vào câu', async () => {
+    stubPortraitPhone(true)
+    openPlay('MOCK01')
+    await start()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Người lớn: vẫn chơi màn dọc' }))
+
+    expect(await screen.findByRole('img', { name: /^Câu 1\// })).toBeInTheDocument()
+  })
+
+  it('khung Học sinh (MATCHING) và QUIZ ở khung Bé không bị chặn', async () => {
+    stubPortraitPhone(true)
+    const student = openPlay('MOCK11')
+    await startStudent()
+
+    expect(await screen.findByText(/^Câu 1\//)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: ROTATE_TITLE })).not.toBeInTheDocument()
+    student.unmount()
+    sessionStorage.clear()
+
+    openPlay('MOCK00')
+    await start()
+
+    expect(await screen.findByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: ROTATE_TITLE })).not.toBeInTheDocument()
+  })
+})
+
+const press = (key: string, target: Element | Window = window) => fireEvent.keyDown(target, { key })
+
+describe('phím tắt (P2.6)', () => {
+  it('Enter sau khi có kết quả sang câu sau; chưa có kết quả thì không làm gì', async () => {
+    openPlay('MOCK00')
+    await start()
+    await screen.findByRole('img', { name: 'Câu 1/3' })
+
+    press('Enter')
+    expect(screen.getByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
+
+    tap('3')
+    await screen.findByText('Giỏi quá!')
+    press('Enter')
+
+    expect(await screen.findByRole('img', { name: 'Câu 2/3' })).toBeInTheDocument()
+  })
+
+  it('QUIZ: phím 1 chọn lựa chọn đầu và nộp như chạm', async () => {
+    const submit = vi.spyOn(MockPlayerApi.prototype, 'submitInteraction')
+    openPlay('MOCK00')
+    await start()
+    await screen.findByRole('img', { name: 'Câu 1/3' })
+
+    press('1')
+
+    expect(await screen.findByRole('button', { name: 'Câu tiếp theo' })).toBeInTheDocument()
+    expect(submit).toHaveBeenCalledTimes(1)
+
+    press('2') // đã khóa: không nộp thêm
+    expect(submit).toHaveBeenCalledTimes(1)
+  })
+
+  it('đang tạm dừng: phím 1 (kể cả khi focus rơi về body) không nộp câu phía sau', async () => {
+    const submit = vi.spyOn(MockPlayerApi.prototype, 'submitInteraction')
+    openPlay('MOCK00')
+    await start()
+    await screen.findByRole('img', { name: 'Câu 1/3' })
+
+    press('Escape')
+    expect(screen.getByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    press('1', document.body)
+
+    expect(submit).not.toHaveBeenCalled()
+  })
+
+  it('thời gian tạm dừng không tính vào thời gian làm bài gửi lên máy chủ', async () => {
+    const submit = vi.spyOn(MockPlayerApi.prototype, 'submitInteraction')
+    openPlay('MOCK10')
+    await startStudent()
+    await screen.findByText(/^Câu 1\//)
+
+    // Giả lập 20 giây trôi qua trong lúc tạm dừng bằng cách đẩy Date.now (không dùng fake timers để mock vẫn chạy bình thường).
+    const realNow = Date.now.bind(Date)
+    let offset = 0
+    vi.spyOn(Date, 'now').mockImplementation(() => realNow() + offset)
+
+    press('Escape')
+    offset = 20_000
+    press('Escape')
+    press('1')
+
+    await screen.findByRole('button', { name: 'Câu tiếp theo' })
+    expect(submit.mock.calls[0][3]).toBeLessThan(10_000)
+  })
+
+  it('Esc tạm dừng: hộp thoại hiện, đồng hồ đứng; Esc lần nữa chơi tiếp', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    openPlay('MOCK10')
+    await startStudent()
+    await screen.findByRole('timer')
+
+    press('Escape')
+    expect(screen.getByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
+    const before = screen.getByRole('timer').textContent
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5_000)
+    })
+    expect(screen.getByRole('timer')).toHaveTextContent(before!)
+
+    press('Escape')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3_000)
+    })
+    expect(screen.getByRole('timer')).not.toHaveTextContent(before!)
+  })
+
+  it('khung Học sinh có nút Tạm dừng và Chơi tiếp; khung Bé không có nút', async () => {
+    openPlay('MOCK10')
+    await startStudent()
+    fireEvent.click(await screen.findByRole('button', { name: 'Tạm dừng' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Chơi tiếp' }))
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('khung Bé: không có nút Tạm dừng nhưng Esc vẫn chạy', async () => {
+    openPlay('MOCK00')
+    await start()
+    await screen.findByRole('img', { name: 'Câu 1/3' })
+
+    expect(screen.queryByRole('button', { name: 'Tạm dừng' })).not.toBeInTheDocument()
+    press('Escape')
+    expect(screen.getByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
+  })
+
+  it('đang gõ trong ô nhập thì phím tắt không kích hoạt', async () => {
+    openPlay('MOCK00')
+    await start()
+    await screen.findByRole('img', { name: 'Câu 1/3' })
+
+    const input = document.body.appendChild(document.createElement('input'))
+
+    press('Escape', input)
+    press('1', input)
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Câu tiếp theo' })).not.toBeInTheDocument()
+    input.remove()
   })
 })

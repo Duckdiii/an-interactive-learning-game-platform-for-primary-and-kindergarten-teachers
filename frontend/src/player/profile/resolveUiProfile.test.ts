@@ -48,13 +48,14 @@ describe('resolveAgeBand', () => {
 describe('PROFILES', () => {
   it('khung Bé: vùng chạm 64 px, không đồng hồ, chạm là chấm, phản hồi nhẹ nhàng', () => {
     expect(PROFILES.be.tokens.minTouch).toBeGreaterThanOrEqual(64)
-    expect(PROFILES.be.interaction).toMatchObject({ timer: false, tapToSubmit: true })
+    expect(PROFILES.be.interaction).toMatchObject({ timer: false, tapToSubmit: true, askNickname: false })
     expect(PROFILES.be.feedback).toBe('garden')
     expect(PROFILES.be.audio.autoReadPrompt).toBe(true)
   })
 
   it('khung Học sinh: có đồng hồ và điểm', () => {
     expect(PROFILES.hocSinh.interaction.timer).toBe(true)
+    expect(PROFILES.hocSinh.interaction.askNickname).toBe(true)
     expect(PROFILES.hocSinh.feedback).toBe('score')
   })
 })

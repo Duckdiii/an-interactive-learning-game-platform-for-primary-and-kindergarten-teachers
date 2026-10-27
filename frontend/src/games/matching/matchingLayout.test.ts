@@ -15,6 +15,7 @@ import {
   computeMatchingLayout,
   estimateTextHeight,
   lineAnchor,
+  minCardHeightFor,
   type MatchingLayoutInput,
 } from './matchingLayout'
 
@@ -224,5 +225,63 @@ describe('cardContentHeight và cardTextWidth', () => {
     expect(cardContentHeight({ hasImage: false, textHeight: 30 })).toBe(30 + 2 * CARD_PADDING)
     expect(cardContentHeight({ hasImage: true, textHeight: 30 })).toBe(CARD_IMAGE_SIZE + 2 * CARD_PADDING)
     expect(cardContentHeight({ hasImage: true, textHeight: 200 })).toBe(200 + 2 * CARD_PADDING)
+  })
+})
+
+describe('vùng chạm theo độ rộng màn hình (minCardHeight)', () => {
+  const WIDTHS = [320, 360, 390, 414, 600, 768, 844, 1024, 1280]
+  const PAIR_COUNTS = [3, 4, 5, 6] // giới hạn của DSL: MATCHING 3–6 cặp
+  const EPS = 1e-9
+
+  it('mọi ô đủ minTouch sau khi co, các hàng không đè nhau, nút Xong không đè ô', () => {
+    for (const minTouch of [48, 64]) {
+      for (const width of WIDTHS) {
+        const scale = Math.min(1, width / STAGE_WIDTH)
+        for (const pairCount of PAIR_COUNTS) {
+          for (const hasIllustration of [false, true]) {
+            for (const hasAudio of [false, true]) {
+              for (const cardContentHeights of [[], [150, 90, 260]]) {
+                const label = JSON.stringify({ minTouch, width, pairCount, hasIllustration, hasAudio, cardContentHeights })
+                const layout = computeMatchingLayout({
+                  hasIllustration,
+                  hasAudio,
+                  headingHeight: 36,
+                  pairCount,
+                  cardContentHeights,
+                  showConfirmButton: true,
+                  minCardHeight: minCardHeightFor(minTouch, scale),
+                })
+
+                expect(layout.rowHeight * scale, label).toBeGreaterThanOrEqual(minTouch - EPS)
+                expect(CARD_WIDTH * scale, label).toBeGreaterThanOrEqual(minTouch)
+
+                for (let i = 1; i < pairCount; i++) {
+                  const previous = cardRect(layout, 'left', i - 1)
+                  expect(cardRect(layout, 'left', i).y, label).toBeGreaterThanOrEqual(previous.y + previous.height + ROW_GAP)
+                }
+
+                const last = cardRect(layout, 'right', pairCount - 1)
+                expect(layout.confirmButtonY, label).toBeGreaterThanOrEqual(last.y + last.height)
+                expect(layout.stageHeight, label).toBeGreaterThanOrEqual((layout.confirmButtonY ?? 0) + CONFIRM_BUTTON_HEIGHT)
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  it('không đưa minCardHeight thì giữ nguyên bố cục cũ (trình soạn của giáo viên)', () => {
+    for (const input of COMBOS) {
+      expect(computeMatchingLayout({ ...input, minCardHeight: undefined })).toEqual(computeMatchingLayout(input))
+      expect(computeMatchingLayout({ ...input, minCardHeight: 0 })).toEqual(computeMatchingLayout(input))
+    }
+  })
+
+  it('màn nhỏ: ô cao hơn mức cũ, màn rộng (scale 1) thì giữ CARD_MIN_HEIGHT', () => {
+    const input = { hasIllustration: false, hasAudio: false, headingHeight: 0, pairCount: 3, cardContentHeights: [], showConfirmButton: true }
+
+    expect(computeMatchingLayout({ ...input, minCardHeight: minCardHeightFor(64, 390 / STAGE_WIDTH) }).rowHeight).toBeGreaterThan(CARD_MIN_HEIGHT)
+    expect(computeMatchingLayout({ ...input, minCardHeight: minCardHeightFor(64, 1) }).rowHeight).toBe(CARD_MIN_HEIGHT)
   })
 })

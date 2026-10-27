@@ -56,3 +56,10 @@ logs/
 
 # Ảnh chụp và nhật ký do Playwright MCP tạo khi kiểm tra giao diện
 /.playwright-mcp/
+
+# File do script sinh ảnh/âm thanh và các lượt thử nghiệm tạo ra
+/frontend/.img-out/
+/frontend/.tts-out/
+/frontend/.img-ledger.json
+/frontend/public/experiments-demo-audio/
+/docs/experiments/

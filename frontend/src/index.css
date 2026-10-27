@@ -100,3 +100,23 @@
     animation: none;
   }
 }
+
+/* Vùng an toàn (tai thỏ, góc bo) cho màn phía học sinh: đệm = max(đệm cũ, env). Đổi đệm cũ qua --play-pad-x/--play-pad-y (mặc định 1rem/2rem;
+   play-safe-t/b mặc định 0,75rem). Cần viewport-fit=cover trong index.html thì env() mới khác 0. */
+@utility play-safe-x {
+  padding-left: max(var(--play-pad-x, 1rem), env(safe-area-inset-left));
+  padding-right: max(var(--play-pad-x, 1rem), env(safe-area-inset-right));
+}
+
+@utility play-safe-y {
+  padding-top: max(var(--play-pad-y, 2rem), env(safe-area-inset-top));
+  padding-bottom: max(var(--play-pad-y, 2rem), env(safe-area-inset-bottom));
+}
+
+@utility play-safe-t {
+  padding-top: max(var(--play-pad-y, 0.75rem), env(safe-area-inset-top));
+}
+
+@utility play-safe-b {
+  padding-bottom: max(var(--play-pad-y, 0.75rem), env(safe-area-inset-bottom));
+}

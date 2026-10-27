@@ -16,6 +16,10 @@ export interface ShellProps {
   mascot?: ReactNode
   /** Thanh phản hồi sau khi máy chủ chấm (isCorrect, correctAnswer). */
   feedback?: ReactNode
+  /** Hiện dòng gợi ý phím tắt ở chân khung (vẫn chỉ hiện trên thiết bị có chuột). */
+  showHotkeyHint?: boolean
+  /** Có thì khung có nút "Tạm dừng" (chỉ khung Học sinh vẽ nút; phím Esc do trang chơi lo). */
+  onPause?: () => void
   /** Vùng trò chơi: renderer chiếm toàn bộ phần còn lại của màn hình. */
   children?: ReactNode
 }

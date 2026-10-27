@@ -8,10 +8,16 @@ import type { PlayerApi } from './PlayerApi'
 
 // Phía học sinh MÔ PHỎNG (nhóm "sessions"): mỗi trong 10 game mẫu có mã chia sẻ MOCK00..MOCK09 (theo thứ tự của gameFixtures). Đáp án và
 // việc chấm nằm hết trong lớp này; mọi thứ trả ra ngoài đi qua `MOCK_HANDLERS[...].toStudent` nên không chứa trường [ĐA].
+// Mã thử lỗi (getPublishInfo và createSession đều đi qua gameOf): MOCKNP = GAME_NOT_PUBLISHED, MOCKEX = GAME_EXPIRED, MOCKDS = GAME_DISABLED
+// (cùng 404); mã lạ khác là SHARE_CODE_NOT_FOUND. Mã chơi được: MOCK00..MOCK09, MOCK10, MOCK11.
+// Thử lỗi mạng: `?mock=error` (lỗi ngay khi mở trang); giữa chừng thì `window.__mock.setScenario('error')` rồi `'normal'`,
+// hoặc bật Offline rồi Online trong DevTools (Network).
+// Biệt danh chứa từ cấm (ngu, bậy; không phân biệt hoa thường) = 422 UNSAFE_CONTENT.
 // Điểm theo FLD-16: points × (1 − 0.5 × tỉ lệ thời gian đã dùng). Mô phỏng KHÔNG áp TIMEOUT theo đồng hồ (xem API-CONTRACT.md 2.5a).
 
 const SCORE_TIME_FACTOR = 0.5
 const NICKNAME_MAX = 20
+const BANNED_NICKNAME_WORDS = ['ngu', 'bậy']
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000
 
 interface MockSession {
@@ -30,6 +36,12 @@ export const mockShareCodes = () => buildMockGameContents().map((_, index) => `M
 const OVERRIDDEN_CODES: Readonly<Record<string, { gameIndex: number; uiOverride: UiOverride }>> = {
   MOCK10: { gameIndex: 0, uiOverride: 'HOC_SINH' },
   MOCK11: { gameIndex: 1, uiOverride: 'HOC_SINH' },
+}
+
+const ERROR_CODES: Readonly<Record<string, { code: string; message: string }>> = {
+  MOCKNP: { code: 'GAME_NOT_PUBLISHED', message: 'Trò chơi chưa được xuất bản.' },
+  MOCKEX: { code: 'GAME_EXPIRED', message: 'Trò chơi đã hết hạn.' },
+  MOCKDS: { code: 'GAME_DISABLED', message: 'Trò chơi đang tạm đóng.' },
 }
 
 export class MockPlayerApi implements PlayerApi {
@@ -59,6 +71,12 @@ export class MockPlayerApi implements PlayerApi {
 
       if (name.length < 1 || name.length > NICKNAME_MAX) {
         throw mockApiError(400, 'VALIDATION_ERROR', `Biệt danh phải có từ 1 đến ${NICKNAME_MAX} ký tự.`)
+      }
+
+      const lowered = name.normalize('NFC').toLowerCase()
+
+      if (BANNED_NICKNAME_WORDS.some((word) => lowered.includes(word))) {
+        throw mockApiError(422, 'UNSAFE_CONTENT', 'Biệt danh có từ không phù hợp. Bạn chọn biệt danh khác nhé.')
       }
 
       const sessionId = `mock-session-${this.nextId}`
@@ -125,6 +143,10 @@ export class MockPlayerApi implements PlayerApi {
 
   private gameOf(shareCode: string) {
     const code = normalizeCode(shareCode)
+    const failure = ERROR_CODES[code]
+
+    if (failure) throw mockApiError(404, failure.code, failure.message)
+
     const game = this.games[OVERRIDDEN_CODES[code]?.gameIndex ?? mockShareCodes().indexOf(code)]
 
     if (!game) throw mockApiError(404, 'SHARE_CODE_NOT_FOUND', 'Mã không đúng hoặc trò chơi hiện không thể truy cập.')

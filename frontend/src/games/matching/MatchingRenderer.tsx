@@ -26,6 +26,7 @@ import {
   computeMatchingLayout,
   estimateTextHeight,
   lineAnchor,
+  minCardHeightFor,
 } from './matchingLayout'
 import { canSubmit, createMatchingState, matchingReducer } from './matchingReducer'
 import { missingCorrectLinks, verdictOfLink, type MatchingResult } from './matchingResult'
@@ -47,7 +48,7 @@ import {
  *   `correctAnswer.matches` để hiện đáp án đúng cho trẻ học khi trả lời sai.
  * - review: xem lại, `matches` là các cặp học sinh đã nối (rỗng nếu hết giờ/bỏ qua); khoá sẵn, không nút nộp.
  */
-export type MatchingRendererProps =
+type MatchingModeProps =
   | {
       mode: 'preview'
       question: MatchingQuestion
@@ -64,6 +65,12 @@ export type MatchingRendererProps =
       submitOnComplete?: boolean
     }
   | { mode: 'review'; question: MatchingQuestion; matches: PairLink[] }
+
+/**
+ * `minTouchPx` (cả 3 mode): vùng chạm tối thiểu SAU khi canvas co theo màn hình; có thì chiều cao hàng được nới để thẻ không thấp hơn số này.
+ * Bỏ trống thì bố cục như cũ (trình soạn của giáo viên).
+ */
+export type MatchingRendererProps = MatchingModeProps & { minTouchPx?: number }
 
 const PAIR_MATCHED_SOUND = '/sounds/pair-matched.wav'
 
@@ -150,7 +157,11 @@ function MatchingBoard(props: MatchingRendererProps) {
     [view, failedImages],
   )
 
+  // Hệ số co do ResponsiveStage đo (1 trước khi đo xong); chỉ dùng để nới chiều cao hàng theo `minTouchPx`.
+  const [scale, setScale] = useState(1)
+
   const layout = computeMatchingLayout({
+    minCardHeight: props.minTouchPx ? minCardHeightFor(props.minTouchPx, scale) : undefined,
     hasIllustration,
     hasAudio: Boolean(question.audioUrl),
     headingHeight,
@@ -273,7 +284,7 @@ function MatchingBoard(props: MatchingRendererProps) {
   const showConfirm = layout.confirmButtonY !== null && state.phase !== 'done'
 
   return (
-    <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
+    <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight} onScaleChange={setScale}>
       <Layer>
         {layout.illustrationY !== null && <QuestionIllustration image={illustration} y={layout.illustrationY} />}
 

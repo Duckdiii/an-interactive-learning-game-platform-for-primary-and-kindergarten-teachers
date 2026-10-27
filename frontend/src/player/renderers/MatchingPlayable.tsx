@@ -9,6 +9,7 @@ export default function MatchingPlayable({ question, profile, onSubmit }: Playab
     <MatchingRenderer
       mode="play"
       question={question}
+      minTouchPx={profile.tokens.minTouch}
       submitOnComplete={interactionRules(profile).autoSubmitWhenComplete}
       onAnswered={async (matches) => {
         const result = await onSubmit({ matches })
