@@ -68,6 +68,27 @@ Mẫu một mục:
 - Cách chặn: mỗi test hồi quy phải được chạy một lần với bản chưa sửa (hoặc chèn lỗi) để thấy nó đỏ; test bất đồng bộ phải chờ một nhịp (hoặc `waitFor`) trước khi kiểm.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-10-27 — `vi.unstubAllEnvs()` trong test làm mất cấu hình độ trễ 0 của test-setup
+- Lỗi: test mô phỏng đầu tiên của P1 dùng `afterEach(vi.unstubAllEnvs)`; nó gỡ luôn `VITE_MOCK_LATENCY_MS=0` do `test-setup.ts` đặt, nên mỗi lời gọi mô phỏng chờ 400 ms và 31 test chạy 90 giây thay vì 3 giây.
+- Phát hiện nhờ: thời gian chạy `vitest` bất thường (tests 91 giây), không phải do test đỏ.
+- Nguyên nhân gốc: không biết `test-setup.ts` đặt biến môi trường bằng `vi.stubEnv` nên `unstubAllEnvs` gỡ cả phần này.
+- Cách chặn: trong test không dùng `vi.unstubAllEnvs()`; đặt lại từng biến đã đổi bằng `vi.stubEnv(tên, giá trị mặc định)`; để ý thời gian chạy test mới.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-10-27 — Dùng xáo "không phần tử nào ở yên" (derangement) cho mọi loại game
+- Lỗi: mock dùng `seededDerangement` cho AUDIO_VISUAL_MATCH, VISUAL_CLOZE, ORDERING (đáp án đúng đặt đầu mảng rồi xáo): đáp án đúng không bao giờ đứng đầu; id bước ORDERING đánh theo thứ tự đúng nên tự lộ đáp án.
+- Phát hiện nhờ: `reviewer` đọc mã, không phải test (test kiểm khóa JSON không bắt được).
+- Nguyên nhân gốc: dùng lại hàm sẵn có mà không xét tính chất của nó; test chỉ kiểm tên khóa, không kiểm lộ qua vị trí/id.
+- Cách chặn: derangement chỉ dùng khi hợp đồng yêu cầu (MATCHING); loại khác dùng `seededShuffle`; test chống lộ phải kiểm cả vị trí/id qua nhiều phiên, và phải chèn lỗi để thấy đỏ.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-10-27 — Giao agent thực thi khi code còn chưa commit
+- Lỗi: giao `frontend-implementer` (chạy trong worktree riêng) sửa code P1 đang chưa commit; worktree tạo từ `main` nên không có code đó, lệnh `git -C <cây chính>` trong bản giao việc bị chặn, agent phải tự `git reset --hard` nhánh worktree về `everyone/UI` rồi chép tệp bằng `diff -rq`.
+- Phát hiện nhờ: báo cáo của agent.
+- Nguyên nhân gốc: giả định worktree có trạng thái giống cây chính; không kiểm `isolation: worktree` tạo từ đâu.
+- Cách chặn: trước khi giao agent thực thi, nếu phần cần sửa chưa commit thì hỏi người dùng commit trước (sau `pre-commit-checker`), hoặc trong bản giao việc chỉ rõ nhánh gốc và danh sách tệp cần chép; không dựa vào `git -C`.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-10-11 — Agent kiểm tra diff bỏ sót thay đổi chưa commit

@@ -114,9 +114,13 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 - Cột "Người thực hiện": ghi tên người đang ra lệnh cho agent, lấy từ `git config user.name` (chạy lệnh này để biết, không tự đoán). Cột "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`).
 - Không tự commit. Cột "Mã Commit SHA" ghi `TODO` để user cập nhật sau khi commit; nhắc user làm việc này trong câu báo cáo cuối.
 
+## Trước mỗi task: chọn công cụ
+
+Ở tin nhắn đầu tiên của task, ghi bảng ngắn "Công cụ dự định": skill, MCP, subagent sẽ dùng và lý do một dòng; công cụ phù hợp mà không dùng thì nêu lý do. Repo có `.codegraph/`: tìm hiểu code bằng CodeGraph trước khi grep hay đọc file. Cuối task đối chiếu với dòng "Công cụ đã dùng".
+
 ## Subagent (`.claude/agents/`)
 
-Phiên chính điều phối: lập kế hoạch, quyết định thiết kế, ghi `ai-usage-log.md`, duyệt kết quả cuối. Việc kiểm tra giao cho subagent chỉ đọc (không có `Edit`/`Write`, nên chạy song song được); việc cài đặt giao cho agent thực thi (xem dưới). Subagent không thấy hội thoại, nên **không giao** việc ghi `ai-usage-log.md`, quyết định thiết kế hay việc nhỏ.
+Phiên chính là **AI Orchestrator**: lập kế hoạch, chọn công cụ, viết bản giao việc, quyết định thiết kế, xem diff của agent và đưa vào cây chính, ghi `ai-usage-log.md`, báo cáo. Khảo sát giao cho `codebase-explorer` / `impact-analyzer`; cài đặt giao cho agent thực thi (xem dưới); kiểm tra giao cho subagent chỉ đọc theo bảng định tuyến (không có `Edit`/`Write`, nên chạy song song được). Phiên chính chỉ tự sửa khi việc nhỏ (khoảng dưới 20 dòng, một file, không có quyết định thiết kế mới) hoặc cần ngữ cảnh hội thoại. Subagent không thấy hội thoại, nên **không giao** việc ghi `ai-usage-log.md` hay quyết định thiết kế.
 
 Tự chạy (chỉ đọc, rẻ):
 - `test-verifier`: chạy `tsc`/lint/test/build (frontend), `./mvnw test` (backend) và báo kết quả gọn.

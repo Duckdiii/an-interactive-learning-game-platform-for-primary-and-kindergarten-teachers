@@ -13,6 +13,7 @@ const MyGamesPage = lazy(() => import('./pages/MyGamesPage'))
 const WorkspaceEditor = lazy(() => import('./pages/WorkspaceEditor'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
+const PlayPage = lazy(() => import('./player/pages/PlayPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
 
@@ -39,6 +40,9 @@ function App() {
           <Route path={ROUTES.login} element={<LoginPage />} />
           <Route path={ROUTES.register} element={<RegisterPage />} />
         </Route>
+
+        {/* Học sinh vào bằng mã, không cần tài khoản: nằm ngoài ProtectedRoute. */}
+        <Route path={ROUTES.play} element={<PlayPage />} />
 
         <Route
           element={

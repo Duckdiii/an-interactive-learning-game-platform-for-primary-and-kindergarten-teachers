@@ -24,6 +24,19 @@
   --color-eng-ink: #6d28d9;
 }
 
+/* Màu phía học sinh: giá trị đến lúc chạy từ bảng màu duy nhất (games/common/palette.ts) qua biến --play-*, do usePlayerRootStyle đặt. Không có màu cứng ở đây. */
+@theme inline {
+  --color-play-page: var(--play-page);
+  --color-play-surface: var(--play-surface);
+  --color-play-ink: var(--play-ink);
+  --color-play-ink-soft: var(--play-ink-soft);
+  --color-play-outline: var(--play-outline);
+  --color-play-primary: var(--play-primary);
+  --color-play-primary-strong: var(--play-primary-strong);
+  --color-play-primary-ink: var(--play-primary-ink);
+  --color-play-accent: var(--play-accent);
+}
+
 @layer base {
   * {
     box-sizing: border-box;

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh – Giới thiệu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button,input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F7FB; display: flex; flex-direction: column">
+  <div style="height: 200px; flex: none; margin: 16px 16px 0; box-sizing: border-box; border: 3px dashed #6B7FA8; border-radius: 20px; background: repeating-linear-gradient(45deg, #FFFFFF 0 14px, #EEF2F8 14px 28px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #3A4A6B; text-align: center">
+    <strong style="font-size: 18px">Ảnh bìa và nhân vật theo theme</strong>
+    <span style="font-size: 13px; font-weight: 700">Không có theme thì dùng màu theo môn học</span>
+  </div>
+  <div style="padding: 20px 24px 28px; display: flex; flex-direction: column; gap: 18px; flex: 1">
+    <div>
+      <h1 style="margin: 0; font-size: 26px; font-weight: 900">Đếm con vật</h1>
+      <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px">
+        <span style="background: #E7EEF8; border-radius: 20px; padding: 6px 12px; font-size: 14px; font-weight: 800; color: #1F3F7A">Toán · Lớp 2</span>
+        <span style="background: #E7EEF8; border-radius: 20px; padding: 6px 12px; font-size: 14px; font-weight: 800; color: #1F3F7A">10 câu</span>
+        <span style="background: #E7EEF8; border-radius: 20px; padding: 6px 12px; font-size: 14px; font-weight: 800; color: #1F3F7A">30 giây mỗi câu</span>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 16px; font-weight: 900">Cách chơi</span>
+      <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 15px; font-weight: 600; line-height: 1.4"><span style="flex: none; width: 26px; height: 26px; border-radius: 50%; background: #1F5BD8; color: #FFFFFF; font-weight: 900; display: flex; align-items: center; justify-content: center">1</span>Mỗi câu là một màn chơi. Cách chơi chi tiết hiện ở màn đầu tiên.</div>
+      <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 15px; font-weight: 600; line-height: 1.4"><span style="flex: none; width: 26px; height: 26px; border-radius: 50%; background: #1F5BD8; color: #FFFFFF; font-weight: 900; display: flex; align-items: center; justify-content: center">2</span>Trả lời đúng được điểm, đúng liên tiếp được thưởng thêm.</div>
+      <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 15px; font-weight: 600; line-height: 1.4"><span style="flex: none; width: 26px; height: 26px; border-radius: 50%; background: #1F5BD8; color: #FFFFFF; font-weight: 900; display: flex; align-items: center; justify-content: center">3</span>Chơi xong được xem lại đáp án.</div>
+    </div>
+    <div style="display: flex; flex-direction: column; background: #FFFFFF; border: 2px solid #D5DEEA; border-radius: 14px; padding: 6px 14px">
+      <label style="display: flex; align-items: center; justify-content: space-between; height: 44px; font-size: 15px; font-weight: 800">Âm thanh<input type="checkbox" checked style="width: 22px; height: 22px; accent-color: #1F5BD8"></label>
+      <label style="display: flex; align-items: center; justify-content: space-between; height: 44px; font-size: 15px; font-weight: 800; border-top: 1px solid #E3E9F2">Tự đọc đề bài<input type="checkbox" style="width: 22px; height: 22px; accent-color: #1F5BD8"></label>
+    </div>
+    <button style="margin-top: auto; height: 60px; border-radius: 16px; border: none; background: #FF9F1C; color: #3B2200; font-size: 21px; font-weight: 900; box-shadow: 0 5px 0 #A85F00; cursor: pointer">Bắt đầu</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

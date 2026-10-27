@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng A – Đăng ký</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+h1,h2,h3{font-family:'Baloo 2','Nunito',sans-serif}
+button,a,input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #FBF6EC; padding: 24px; display: flex; gap: 24px">
+  <section style="position: relative; overflow: hidden; width: 680px; flex: none; background: #0A6847; border-radius: 32px; padding: 44px 48px; color: #FFFFFF; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <div style="width: 46px; height: 46px; border-radius: 14px; background: #F6B93B; color: #3B2600; font-weight: 900; display: flex; align-items: center; justify-content: center; transform: rotate(-6deg); box-shadow: 0 4px 0 #C98A12">AI</div>
+      <span style="font-family: 'Baloo 2', sans-serif; font-size: 21px; font-weight: 800">AI Game Platform</span>
+    </div>
+    <h1 style="margin: 64px 0 0; font-size: 52px; font-weight: 800; line-height: 1.05">Ba bước để có trò chơi đầu tiên</h1>
+    <div style="margin-top: 28px; display: flex; flex-direction: column; gap: 16px; max-width: 520px">
+      <div style="display: flex; align-items: center; gap: 16px"><span style="flex: none; width: 52px; height: 52px; border-radius: 16px; background: #E3ECFD; border: 4px solid #2F6FED; color: #1F4FC4; font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-6deg)">1</span><span style="font-size: 18px; font-weight: 700">Mô tả bài học bằng một câu</span></div>
+      <div style="display: flex; align-items: center; gap: 16px"><span style="flex: none; width: 52px; height: 52px; border-radius: 16px; background: #FDEBD3; border: 4px solid #E07B12; color: #9A4A00; font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(6deg)">2</span><span style="font-size: 18px; font-weight: 700">Chọn kiểu chơi AI đề xuất</span></div>
+      <div style="display: flex; align-items: center; gap: 16px"><span style="flex: none; width: 52px; height: 52px; border-radius: 16px; background: #EEE6FC; border: 4px solid #7A4CD9; color: #5B2DB8; font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-4deg)">3</span><span style="font-size: 18px; font-weight: 700">Chiếu lên lớp hoặc gửi mã cho học sinh</span></div>
+    </div>
+    <p style="margin-top: auto; margin-bottom: 0; font-size: 14px; font-weight: 600; color: #CDEBDD">Học sinh không cần tài khoản, chỉ dùng mã chơi và biệt danh.</p>
+  </section>
+  <section style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center">
+    <div style="width: 480px; background: #FFFFFF; border-radius: 30px; padding: 30px 36px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 16px 40px rgba(80,55,10,0.1)">
+      <div style="display: flex; background: #FBF6EC; border-radius: 16px; padding: 5px">
+        <a href="A-Login.dc.html" style="flex: 1; height: 44px; border-radius: 12px; color: #1B2333; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; text-decoration: none">Đăng nhập</a>
+        <span style="flex: 1; height: 44px; border-radius: 12px; background: #0E7A57; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900">Đăng ký</span>
+      </div>
+      <h2 style="margin: 0; font-size: 32px; font-weight: 800; line-height: 1.1">Tạo tài khoản giáo viên</h2>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="rn" style="font-size: 14px; font-weight: 900">Họ và tên</label>
+        <input id="rn" placeholder="Nguyễn Thị Lan" style="height: 48px; box-sizing: border-box; border: 2px solid #E7DCC5; border-radius: 14px; padding: 0 14px; font-size: 16px; font-weight: 700">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="re" style="font-size: 14px; font-weight: 900">Email</label>
+        <input id="re" placeholder="giaovien@example.com" style="height: 48px; box-sizing: border-box; border: 2px solid #E7DCC5; border-radius: 14px; padding: 0 14px; font-size: 16px; font-weight: 700">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="rp" style="font-size: 14px; font-weight: 900">Mật khẩu</label>
+        <input id="rp" type="password" value="matkhau12" style="height: 48px; box-sizing: border-box; border: 2px solid #E7DCC5; border-radius: 14px; padding: 0 14px; font-size: 16px; font-weight: 700">
+        <div style="display: flex; align-items: center; gap: 6px">
+          <span style="flex: 1; height: 6px; border-radius: 3px; background: #0E7A57"></span>
+          <span style="flex: 1; height: 6px; border-radius: 3px; background: #0E7A57"></span>
+          <span style="flex: 1; height: 6px; border-radius: 3px; background: #F1E8D6"></span>
+          <span style="font-size: 12px; font-weight: 800; color: #0A5A3C; margin-left: 4px">Khá ổn · ít nhất 8 ký tự</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="rc" style="font-size: 14px; font-weight: 900">Nhập lại mật khẩu</label>
+        <input id="rc" type="password" placeholder="Nhập lại mật khẩu" style="height: 48px; box-sizing: border-box; border: 2px solid #E7DCC5; border-radius: 14px; padding: 0 14px; font-size: 16px; font-weight: 700">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 14px; font-weight: 900">Cô dạy cấp nào? <span style="font-weight: 600; color: #4A5568">(không bắt buộc, để gợi ý bài phù hợp)</span></span>
+        <div style="display: flex; gap: 8px">
+          <button style="height: 40px; padding: 0 14px; border-radius: 20px; border: 2px solid #0E7A57; background: #E3F3EC; color: #0A5A3C; font-size: 14px; font-weight: 900; cursor: pointer">Mầm non</button>
+          <button style="height: 40px; padding: 0 14px; border-radius: 20px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Tiểu học</button>
+        </div>
+      </div>
+      <button style="height: 54px; border-radius: 16px; border: none; background: #0E7A57; color: #FFFFFF; font-size: 17px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 0 #095C41">Tạo tài khoản</button>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

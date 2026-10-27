@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bé ở nhà – Giới thiệu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1024px; height: 640px; box-sizing: border-box; background: #FFF4DC; position: relative; overflow: hidden">
+  <span style="position: absolute; top: 16px; left: 20px; font-size: 13px; font-weight: 700; color: #6B5A30">Nền: lấy theo theme của game</span>
+  <button aria-label="Tắt hoặc bật âm thanh" style="position: absolute; top: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; border: 3px solid #1F5BD8; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F5BD8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+  </button>
+  <div style="position: absolute; left: 70px; top: 90px; width: 500px; display: flex; flex-direction: column; gap: 22px">
+    <div style="background: #FFFFFF; border: 4px solid #1B2333; border-radius: 28px; padding: 22px 26px; box-shadow: 0 6px 0 #1B2333">
+      <p style="margin: 0; font-size: 30px; line-height: 1.25; font-weight: 800">Chào bé! Mình cùng chơi "Đếm con vật" nhé!</p>
+      <p style="margin: 10px 0 0; font-size: 15px; font-weight: 700; color: #1F3F7A">Giọng đọc tự phát sau khi bé chạm Bắt đầu</p>
+    </div>
+    <div style="width: 230px; height: 230px; box-sizing: border-box; border-radius: 50%; border: 4px dashed #6B7FA8; background: rgba(255,255,255,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #3A4A6B; margin-left: 30px">
+      <strong style="font-size: 18px">Nhân vật theo theme</strong>
+      <span style="font-size: 14px; font-weight: 700">trạng thái: chào, đang nói</span>
+    </div>
+  </div>
+  <div style="position: absolute; right: 120px; top: 180px; display: flex; flex-direction: column; align-items: center; gap: 14px">
+    <button aria-label="Bắt đầu chơi" style="width: 210px; height: 210px; border-radius: 50%; border: 6px solid #8A4B00; background: #FF9F1C; box-shadow: 0 10px 0 #8A4B00; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="96" height="96" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="#3B2200" stroke="#3B2200" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </button>
+    <span style="font-size: 30px; font-weight: 900">Bắt đầu</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1024,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { Group, Image as KonvaImage, Rect, Text } from 'react-konva'
 import useImage from 'use-image'
 import type { PairSide } from '../../types/game-dsl.types'
+import type { Palette } from '../common/palette'
+import { useGamePalette } from '../common/useGamePalette'
 import { CARD_FONT_SIZE, CARD_IMAGE_SIZE, CARD_PADDING, cardTextWidth } from './matchingLayout'
 import { sideDisplay } from './matchingView'
 
@@ -28,13 +30,13 @@ interface MatchingCardProps {
   onImageFailed?: () => void
 }
 
-const FILL: Record<MatchingCardState, string> = {
-  idle: '#FFFFFF',
-  selected: '#DBEAFE',
-  linked: '#FFFFFF',
-  correct: '#A5D6A7',
-  wrong: '#FFE082',
-}
+const fillOf = (palette: Palette): Record<MatchingCardState, string> => ({
+  idle: palette.surface,
+  selected: palette.selectedFill,
+  linked: palette.surface,
+  correct: palette.correctFill,
+  wrong: palette.wrongFill,
+})
 
 /**
  * Một thẻ ở cột trái hoặc phải: chữ và/hoặc ảnh (ảnh bên trái, chữ bên phải). Cả thẻ là vùng chạm. Là
@@ -47,10 +49,11 @@ export default function MatchingCard({
   height,
   content,
   state,
-  accent = '#334155',
+  accent,
   onPress,
   onImageFailed,
 }: MatchingCardProps) {
+  const palette = useGamePalette()
   const [image, imageStatus] = useImage(content.imageUrl ?? '')
   const imageFailed = imageStatus === 'failed'
   // Ảnh lỗi thì chữ dự phòng thay chỗ ảnh (xem `sideDisplay`) và báo renderer tính lại bố cục.
@@ -70,8 +73,8 @@ export default function MatchingCard({
         width={width}
         height={height}
         cornerRadius={20}
-        fill={FILL[state]}
-        stroke={emphasised ? accent : '#334155'}
+        fill={fillOf(palette)[state]}
+        stroke={emphasised ? (accent ?? palette.outline) : palette.outline}
         strokeWidth={emphasised ? 8 : 3}
       />
       {hasImage && image && (

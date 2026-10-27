@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng A – Trò chơi của tôi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+h1,h2,h3{font-family:'Baloo 2','Nunito',sans-serif}
+button,a,input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #FBF6EC; display: flex">
+  <aside style="width: 248px; flex: none; padding: 22px 16px; display: flex; flex-direction: column; gap: 6px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 22px">
+      <div style="width: 42px; height: 42px; border-radius: 13px; background: #F6B93B; color: #3B2600; font-weight: 900; display: flex; align-items: center; justify-content: center; transform: rotate(-6deg); box-shadow: 0 4px 0 #C98A12">AI</div>
+      <span style="font-family: 'Baloo 2', sans-serif; font-size: 19px; font-weight: 800">AI Game Platform</span>
+    </div>
+    <a href="A-Home.dc.html" style="height: 46px; border-radius: 14px; color: #1B2333; display: flex; align-items: center; padding: 0 16px; font-size: 15px; font-weight: 700; text-decoration: none">Trang chủ</a>
+    <a href="A-Games.dc.html" style="height: 46px; border-radius: 14px; background: #0E7A57; color: #FFFFFF; display: flex; align-items: center; padding: 0 16px; font-size: 15px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 0 #095C41">Trò chơi của tôi</a>
+    <a href="A-Results.dc.html" style="height: 46px; border-radius: 14px; color: #1B2333; display: flex; align-items: center; padding: 0 16px; font-size: 15px; font-weight: 700; text-decoration: none">Kết quả</a>
+  </aside>
+  <main style="flex: 1; padding: 28px 40px 28px 16px; display: flex; flex-direction: column; gap: 18px; min-width: 0">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <h1 style="margin: 0; font-size: 36px; font-weight: 800">Kệ trò chơi của cô</h1>
+      <a href="A-Create.dc.html" style="height: 50px; padding: 0 22px; border-radius: 16px; background: #F6B93B; color: #3B2600; font-size: 16px; font-weight: 900; display: flex; align-items: center; text-decoration: none; box-shadow: 0 5px 0 #C98A12">+ Tạo trò chơi</a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <button style="height: 42px; padding: 0 16px; border-radius: 21px; border: none; background: #1B2333; color: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Tất cả 10</button>
+      <button style="height: 42px; padding: 0 16px; border-radius: 21px; border: 2px solid #2F6FED; background: #E3ECFD; color: #1F4FC4; font-size: 14px; font-weight: 800; cursor: pointer">Toán 4</button>
+      <button style="height: 42px; padding: 0 16px; border-radius: 21px; border: 2px solid #E07B12; background: #FDEBD3; color: #9A4A00; font-size: 14px; font-weight: 800; cursor: pointer">Tiếng Việt 4</button>
+      <button style="height: 42px; padding: 0 16px; border-radius: 21px; border: 2px solid #7A4CD9; background: #EEE6FC; color: #5B2DB8; font-size: 14px; font-weight: 800; cursor: pointer">Tiếng Anh 2</button>
+      <span style="width: 2px; height: 26px; background: #E7DCC5; margin: 0 4px"></span>
+      <button style="height: 42px; padding: 0 16px; border-radius: 21px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Bản nháp 7</button>
+      <label style="margin-left: auto; width: 280px; height: 42px; box-sizing: border-box; display: flex; align-items: center; background: #FFFFFF; border-radius: 21px; padding: 0 16px; font-size: 14px; font-weight: 600; color: #6B7280; box-shadow: 0 4px 14px rgba(80,55,10,0.06)">Tìm trò chơi…<input aria-label="Tìm trò chơi" style="width: 0; border: none; opacity: 0"></label>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px">
+      <sc-for list="{{games}}" as="g" hint-placeholder-count="8">
+        <div style="background: #FFFFFF; border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 26px rgba(80,55,10,0.08)">
+          <div style="{{g.cover}}">
+            <div style="{{g.blob}}"></div>
+            <span style="{{g.tile1}}">{{g.g1}}</span>
+            <span style="{{g.tile2}}">{{g.g2}}</span>
+            <span style="{{g.status}}">{{g.statusText}}</span>
+          </div>
+          <div style="padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px">
+            <span style="{{g.subj}}">{{g.subjText}}</span>
+            <span style="font-size: 16px; font-weight: 900; line-height: 1.3; height: 42px; overflow: hidden">{{g.title}}</span>
+            <span style="font-size: 12px; font-weight: 700; color: #4A5568">{{g.meta}}</span>
+            <div style="display: flex; gap: 6px; margin-top: 4px">
+              <button style="{{g.cta}}">{{g.ctaText}}</button>
+              <button aria-label="Thao tác khác" style="width: 40px; height: 40px; border-radius: 12px; border: 2px solid #EFE6D3; background: #FFFFFF; font-weight: 900; cursor: pointer">…</button>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const S = { toan: ['#E3ECFD','#2F6FED','#1F4FC4','Toán'], tv: ['#FDEBD3','#E07B12','#9A4A00','Tiếng Việt'], ta: ['#EEE6FC','#7A4CD9','#5B2DB8','Tiếng Anh'] };
+    const list = [
+      ['Đếm số đến 10','toan','Mầm non · Trắc nghiệm · 42 lượt',true,'5','8'],
+      ['Nhận biết chữ cái A Ă Â','tv','Mầm non · Nối cặp',false,'A','Ă'],
+      ['Phân loại con vật theo nơi sống','tv','Lớp 1 · Kéo thả',false,'B','C'],
+      ['Nghe và chọn hình con vật','ta','Mầm non · Nghe chọn hình · 18 lượt',true,'a','b'],
+      ['Sắp xếp số từ bé đến lớn','toan','Lớp 1 · Sắp xếp',false,'1','3'],
+      ['Lật thẻ tìm cặp con vật','ta','Mầm non · Lật thẻ',false,'?','c'],
+      ['Ghép chữ về gia đình','tv','Lớp 1 · Ghép chữ · 26 lượt',true,'B','Ố'],
+      ['Tìm vật khác loại','toan','Mầm non · Khác loại',false,'○','△']
+    ];
+    const games = list.map((g) => {
+      const c = S[g[1]];
+      const t = (r, l, top) => 'position: absolute; left: ' + l + 'px; top: ' + top + 'px; width: 58px; height: 58px; border-radius: 16px; background: #FFFFFF; border: 4px solid ' + c[1] + '; color: ' + c[2] + '; font-family: Baloo 2, sans-serif; font-size: 30px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(' + r + 'deg); box-shadow: 0 6px 0 ' + c[1] + '55';
+      return {
+        title: g[0], meta: g[2], g1: g[4], g2: g[5], subjText: c[3],
+        cover: 'position: relative; height: 140px; background: ' + c[0] + '; overflow: hidden',
+        blob: 'position: absolute; right: -30px; bottom: -40px; width: 150px; height: 150px; border-radius: 50%; background: ' + c[1] + '33',
+        tile1: t(-10, 28, 36), tile2: t(8, 100, 26),
+        status: 'position: absolute; top: 10px; right: 10px; border-radius: 10px; padding: 4px 9px; font-size: 11px; font-weight: 900; ' + (g[3] ? 'background: #0E7A57; color: #FFFFFF' : 'background: #FFFFFF; color: #6B4600'),
+        statusText: g[3] ? 'Đã đăng' : 'Bản nháp',
+        subj: 'align-self: flex-start; border-radius: 8px; padding: 2px 8px; font-size: 12px; font-weight: 900; background: ' + c[0] + '; color: ' + c[2],
+        ctaText: g[3] ? 'Trình chiếu' : 'Soạn tiếp',
+        cta: 'flex: 1; height: 40px; border-radius: 12px; font-size: 14px; font-weight: 900; cursor: pointer; ' + (g[3] ? 'border: none; background: #0E7A57; color: #FFFFFF' : 'border: 2px solid #0E7A57; background: #FFFFFF; color: #0A5A3C')
+      };
+    });
+    return { games };
+  }
+}
+</script>
+</body>
+</html>

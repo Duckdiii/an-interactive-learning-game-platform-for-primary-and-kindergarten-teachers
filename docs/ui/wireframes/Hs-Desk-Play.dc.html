@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh máy tính – Chơi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #F4F7FB; display: flex; flex-direction: column">
+  <div style="height: 68px; flex: none; background: #FFFFFF; border-bottom: 2px solid #D5DEEA; display: flex; align-items: center; gap: 16px; padding: 0 28px">
+    <span style="font-size: 20px; font-weight: 900">Đếm con vật</span>
+    <span style="font-size: 14px; font-weight: 800; color: #4A5568">Toán · Lớp 2</span>
+    <div style="flex: 1; max-width: 420px; margin-left: 24px; display: flex; align-items: center; gap: 10px">
+      <span style="font-size: 14px; font-weight: 800; color: #4A5568">Câu 3/10</span>
+      <div style="flex: 1; height: 10px; border-radius: 5px; background: #DCE4EF; overflow: hidden"><div style="width: 30%; height: 100%; background: #1F5BD8"></div></div>
+    </div>
+    <button aria-label="Tạm dừng" style="margin-left: auto; height: 44px; padding: 0 14px; border-radius: 12px; border: 2px solid #D5DEEA; background: #FFFFFF; font-size: 15px; font-weight: 800; cursor: pointer">Tạm dừng (Esc)</button>
+  </div>
+  <div style="flex: 1; display: flex; gap: 24px; padding: 24px 28px; min-height: 0">
+    <div style="flex: 1; box-sizing: border-box; border: 3px dashed #6B7FA8; border-radius: 22px; background: repeating-linear-gradient(45deg, #FFFFFF 0 16px, #EEF2F8 16px 32px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; color: #3A4A6B">
+      <strong style="font-size: 30px">Khu vực trò chơi</strong>
+      <span style="font-size: 16px; font-weight: 700">Rộng hơn nên renderer bố trí lại: ví dụ MATCHING hai cột cạnh nhau, MEMORY_CARD lưới 4×4</span>
+      <span style="font-size: 16px; font-weight: 700">Thao tác bằng chuột, có trạng thái hover; giữ tỉ lệ khung để không méo</span>
+    </div>
+    <div style="width: 300px; flex: none; display: flex; flex-direction: column; gap: 14px">
+      <div style="background: #FFFFFF; border: 2px solid #D5DEEA; border-radius: 18px; padding: 16px; display: flex; align-items: center; justify-content: space-between">
+        <div><div style="font-size: 13px; font-weight: 800; color: #4A5568">Thời gian</div><div style="font-size: 30px; font-weight: 900">0:21</div></div>
+        <div><div style="font-size: 13px; font-weight: 800; color: #4A5568">Điểm</div><div style="font-size: 30px; font-weight: 900">20</div></div>
+        <div><div style="font-size: 13px; font-weight: 800; color: #4A5568">Chuỗi</div><div style="font-size: 30px; font-weight: 900; color: #9A4A00">x2</div></div>
+      </div>
+      <div style="background: #FFFFFF; border: 2px solid #86C99A; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #15803D; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <div><div style="font-size: 18px; font-weight: 900; color: #14532D">Chính xác!</div><div style="font-size: 13px; font-weight: 700">+10 điểm</div></div>
+        </div>
+        <button style="height: 48px; border-radius: 12px; border: none; background: #1F5BD8; color: #FFFFFF; font-size: 16px; font-weight: 900; cursor: pointer">Câu tiếp theo (Enter)</button>
+      </div>
+      <div style="background: #FFFFFF; border: 2px solid #D5DEEA; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 14px; font-weight: 900">Phím tắt</span>
+        <span style="font-size: 13px; font-weight: 700; color: #2D3748">Enter: nộp hoặc câu tiếp · R: nghe lại đề · Esc: tạm dừng</span>
+        <span style="font-size: 13px; font-weight: 700; color: #2D3748">Phím riêng của từng loại game (ví dụ 1–4 với QUIZ) do renderer khai báo</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import { Group, Rect, Text } from 'react-konva'
+import { useGamePalette } from './useGamePalette'
 import { AUDIO_BUTTON_HEIGHT, AUDIO_BUTTON_WIDTH, STAGE_WIDTH } from './mediaLayout'
 
 interface QuestionAudioButtonProps {
@@ -12,14 +13,16 @@ interface QuestionAudioButtonProps {
  * không giới hạn số lần bấm, và vẫn bấm được sau khi đã trả lời.
  */
 export default function QuestionAudioButton({ y, onPress }: QuestionAudioButtonProps) {
+  const palette = useGamePalette()
+
   return (
     <Group x={(STAGE_WIDTH - AUDIO_BUTTON_WIDTH) / 2} y={y} onClick={onPress} onTap={onPress}>
       <Rect
         width={AUDIO_BUTTON_WIDTH}
         height={AUDIO_BUTTON_HEIGHT}
         cornerRadius={20}
-        fill="#E0F2FE"
-        stroke="#0284C7"
+        fill={palette.audioFill}
+        stroke={palette.audioStroke}
         strokeWidth={3}
       />
       <Text

@@ -5,6 +5,8 @@ export const ROUTES = {
   register: '/register',
   workspace: '/workspace',
   workspaceEditor: '/workspace/editor',
+  // Trang học sinh (không đăng nhập): mở bằng mã chia sẻ hoặc mã QR.
+  play: '/play/:shareCode',
 } as const
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]

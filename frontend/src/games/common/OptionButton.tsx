@@ -1,5 +1,6 @@
 import { Group, Rect, Text } from 'react-konva'
 import type { TextChoice } from '../../types/game-dsl.types'
+import { useGamePalette } from './useGamePalette'
 import { OPTION_BUTTON_HEIGHT, OPTION_BUTTON_WIDTH, optionPosition } from './optionGrid'
 
 interface OptionButtonProps {
@@ -28,10 +29,11 @@ export default function OptionButton({
   locked,
   onClick,
 }: OptionButtonProps) {
+  const palette = useGamePalette()
   const { x, y } = optionPosition(index, originY)
 
   // Sai: KHÔNG dùng đỏ gắt — chỉ tô vàng nhẹ để biết đã chọn. Đúng: luôn tô xanh để trẻ học được.
-  const fill = locked && isCorrect ? '#A5D6A7' : locked && isSelected ? '#FFE082' : '#FFFFFF'
+  const fill = locked && isCorrect ? palette.correctFill : locked && isSelected ? palette.wrongFill : palette.surface
 
   return (
     <Group x={x} y={y} onClick={onClick} onTap={onClick}>
@@ -40,7 +42,7 @@ export default function OptionButton({
         height={OPTION_BUTTON_HEIGHT}
         cornerRadius={20}
         fill={fill}
-        stroke="#334155"
+        stroke={palette.outline}
         strokeWidth={3}
       />
       <Text

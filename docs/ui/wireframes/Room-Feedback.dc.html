@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Máy học sinh – Sau mỗi câu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #15803D; color: #FFFFFF; padding: 90px 28px 40px; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center">
+  <div style="width: 130px; height: 130px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+    <svg width="76" height="76" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+  </div>
+  <h1 style="margin: 0; font-size: 40px; font-weight: 900">Chính xác!</h1>
+  <span style="font-size: 30px; font-weight: 900">+120 điểm</span>
+  <span style="background: rgba(255,255,255,0.2); border-radius: 20px; padding: 8px 16px; font-size: 17px; font-weight: 800">Chuỗi đúng 3 câu · thưởng +20</span>
+  <div style="margin-top: 24px; width: 100%; background: rgba(0,0,0,0.18); border-radius: 18px; padding: 16px; display: flex; justify-content: space-between; font-size: 18px; font-weight: 800">
+    <span>Tổng điểm</span><span>360</span>
+  </div>
+  <p style="margin: auto 0 0; font-size: 18px; font-weight: 800">Nhìn lên tivi nào!</p>
+  <p style="margin: 0; font-size: 14px; font-weight: 700; color: #DDF5E4">Khi sai: nền cam, "Chưa đúng, cố lên!", không trừ điểm</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Text } from 'react-konva'
 import type { QuizQuestion } from '../../types/game-dsl.types'
+import type { StudentQuizQuestion } from '../../types/game-student.types'
+import type { AnswerResult } from '../common/answerResult'
 import { STAGE_WIDTH } from '../common/mediaLayout'
 import { measureWrappedTextHeight } from '../common/measureText'
 import OptionButton from '../common/OptionButton'
@@ -19,11 +21,18 @@ import { QUESTION_FONT_SIZE, QUESTION_TEXT_WIDTH, computeQuizLayout } from './qu
  *   khoá mà không có feedback. Component KHÔNG tự so `question.correctOptionId` ở mode này.
  * - review: xem lại câu đã làm, khoá sẵn. `selectedOptionId` bỏ trống khi câu hết giờ/bỏ qua.
  */
-type QuizRendererProps = { question: QuizQuestion } & (
-  | { mode: 'preview'; onAnswered?: (optionId: string) => void }
-  | { mode: 'play'; onAnswered: (optionId: string) => boolean | Promise<boolean> }
-  | { mode: 'review'; selectedOptionId?: string }
-)
+/** `correctAnswer` của QUIZ trong response chấm. */
+export interface QuizCorrectAnswer {
+  selectedOptionId: string
+}
+
+type QuizVerdict = boolean | AnswerResult<QuizCorrectAnswer>
+
+type QuizRendererProps =
+  | { mode: 'preview'; question: QuizQuestion; onAnswered?: (optionId: string) => void }
+  // question là dạng học sinh (không có correctOptionId). Cha có thể trả kèm correctAnswer để hiện đáp án đúng cho trẻ học khi trả lời sai.
+  | { mode: 'play'; question: StudentQuizQuestion; onAnswered: (optionId: string) => QuizVerdict | Promise<QuizVerdict> }
+  | { mode: 'review'; question: QuizQuestion; selectedOptionId?: string }
 
 function initialLocalState(mode: QuizRendererProps['mode'], selectedOptionId: string | undefined) {
   return {
@@ -40,6 +49,8 @@ export default function QuizRenderer(props: QuizRendererProps) {
     () => initialLocalState(mode, selectedOptionId).chosenId,
   )
   const [locked, setLocked] = useState(() => initialLocalState(mode, selectedOptionId).locked)
+  // Đáp án đúng do Backend trả sau khi chấm (mode play); mode preview/review lấy từ question.
+  const [revealedCorrectId, setRevealedCorrectId] = useState<string | null>(null)
   const [revealCorrect, setRevealCorrect] = useState(
     () => initialLocalState(mode, selectedOptionId).revealCorrect,
   )
@@ -79,6 +90,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
     setChosenId(next.chosenId)
     setLocked(next.locked)
     setRevealCorrect(next.revealCorrect)
+    setRevealedCorrectId(null)
   }
 
   // Đếm số lần "thế hệ" (tăng mỗi lần đổi câu/mode) để huỷ kết quả `onAnswered` cũ nếu nó resolve
@@ -96,7 +108,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
     setLocked(true)
 
     if (props.mode === 'preview') {
-      const isCorrect = optionId === question.correctOptionId
+      const isCorrect = optionId === props.question.correctOptionId
       setRevealCorrect(true)
       showFeedback(isCorrect)
       // Kiểu `void` không chặn được cha truyền hàm async; bọc lại để Promise bị reject không thành
@@ -113,9 +125,11 @@ export default function QuizRenderer(props: QuizRendererProps) {
       const result = await props.onAnswered(optionId)
       if (generationRef.current !== myGeneration) return // đã đổi câu/mode, bỏ qua kết quả cũ
       // Kiểu đã bắt buộc boolean; vẫn kiểm tra lúc chạy phòng cha viết bằng JS hoặc ép kiểu sai.
-      if (typeof result === 'boolean') {
+      const verdict = typeof result === 'boolean' ? { isCorrect: result } : result
+      if (typeof verdict?.isCorrect === 'boolean') {
+        setRevealedCorrectId(verdict.correctAnswer?.selectedOptionId ?? null)
         setRevealCorrect(true)
-        showFeedback(result)
+        showFeedback(verdict.isCorrect)
       }
     } catch (error) {
       if (generationRef.current !== myGeneration) return
@@ -124,6 +138,9 @@ export default function QuizRenderer(props: QuizRendererProps) {
       setLocked(false)
     }
   }
+
+  // Ở mode play CHỈ tin đáp án đúng do máy chủ trả sau khi chấm, kể cả khi cha lỡ truyền cả correctOptionId vào question.
+  const correctId = props.mode === 'play' ? revealedCorrectId : props.question.correctOptionId
 
   return (
     <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
@@ -155,7 +172,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
             index={index}
             originY={layout.optionsOriginY}
             isSelected={chosenId === option.id}
-            isCorrect={revealCorrect && option.id === question.correctOptionId}
+            isCorrect={revealCorrect && option.id === correctId}
             locked={locked}
             onClick={() => handleSelect(option.id)}
           />
