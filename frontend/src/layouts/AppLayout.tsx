@@ -19,6 +19,7 @@ const navigationItems: ReadonlyArray<{
 }> = [
   { label: viText.nav.home, to: ROUTES.dashboard, end: true, icon: 'home' },
   { label: viText.nav.myGames, to: ROUTES.workspace, end: false, icon: 'library' },
+  { label: viText.nav.results, to: ROUTES.results, end: true, icon: 'chart' },
   { label: viText.nav.createGame, to: ROUTES.createGame, end: true, icon: 'sparkles' },
 ]
 
@@ -32,7 +33,11 @@ export default function AppLayout() {
     logout()
     queryClient.clear()
   }
-  const displayName = user?.fullName || user?.email || viText.layout.fallbackUser
+  // Người Việt gọi bằng tên (từ cuối): "Nguyễn Thị Lan" -> "Cô Lan". Chưa có họ tên thì dùng email, không thêm "Cô".
+  const firstName = user?.fullName?.trim().split(/\s+/).pop()
+  const displayName = firstName
+    ? `${viText.layout.teacherPrefix} ${firstName}`
+    : user?.email || viText.layout.fallbackUser
 
   // Sang trang mới (trong ứng dụng) thì đưa tiêu điểm về nội dung chính và cuộn lên đầu: người dùng bàn phím và trình
   // đọc màn hình không bị kẹt ở thanh điều hướng, người dùng điện thoại không đứng giữa trang cũ. Lúc vừa mở trang thì
@@ -70,7 +75,7 @@ export default function AppLayout() {
 
       {/* Cột sidebar là một ô của lưới nên luôn cao bằng cả trang (nền trắng liền mạch dù trang dài hơn màn hình);
           phần nội dung bên trong dính trên cùng và cao đúng một màn hình nên không cuộn theo trang. */}
-      <aside className="hidden border-r border-ink/10 bg-white lg:block">
+      <aside className="hidden border-r border-line bg-surface lg:block">
         <div className="sticky top-0 flex h-screen flex-col px-4 py-6">
           <Brand />
 
@@ -82,10 +87,10 @@ export default function AppLayout() {
                 end={item.end}
                 className={({ isActive }) =>
                   [
-                    'flex min-h-12 items-center gap-3 rounded-xl px-4 text-base font-semibold transition',
+                    'flex min-h-12 items-center gap-3 rounded-full px-4 text-base font-bold transition',
                     isActive
-                      ? 'bg-brand text-white shadow-sm'
-                      : 'text-ink-soft hover:bg-brand-soft hover:text-brand-strong',
+                      ? 'bg-brand-soft text-brand-strong'
+                      : 'text-ink-soft hover:bg-brand-soft/60 hover:text-brand-strong',
                   ].join(' ')
                 }
               >
@@ -95,11 +100,11 @@ export default function AppLayout() {
             ))}
           </nav>
 
-          <div className="mt-auto rounded-2xl bg-paper p-4">
+          <div className="mt-auto rounded-2xl bg-paper p-4 shadow-card">
             <div className="flex items-center gap-3">
               <Avatar name={displayName} />
               <div className="min-w-0">
-                <p className="truncate text-base font-bold">{displayName}</p>
+                <p className="truncate font-display text-base font-extrabold">{displayName}</p>
                 {user?.fullName ? (
                   <p className="truncate text-sm text-ink-soft">{user.email}</p>
                 ) : null}
@@ -146,7 +151,7 @@ export default function AppLayout() {
 
       <nav
         aria-label={viText.layout.navLabelCompact}
-        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-3 border-t border-ink/10 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-ink/10 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         {navigationItems.map((item) => (
           <NavLink
@@ -182,11 +187,11 @@ export default function AppLayout() {
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex items-center gap-3 px-1">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand text-lg font-extrabold text-white">
+      <span className="grid h-11 w-11 shrink-0 -rotate-6 place-items-center rounded-xl bg-sun font-display text-lg font-extrabold text-sun-ink shadow-base-sun">
         AI
       </span>
       <div className="min-w-0">
-        <p className="truncate font-bold">{viText.appName}</p>
+        <p className="truncate font-display text-lg font-extrabold">{viText.appName}</p>
         {compact ? null : (
           <p className="text-sm text-ink-soft">{viText.layout.sidebarSubtitle}</p>
         )}
@@ -199,7 +204,7 @@ function Avatar({ name }: { name: string }) {
   return (
     <span
       aria-hidden="true"
-      className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sun-soft text-lg font-extrabold text-ink ring-2 ring-sun"
+      className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sun-soft font-display text-lg font-extrabold text-ink ring-2 ring-sun"
     >
       {initialOf(name)}
     </span>

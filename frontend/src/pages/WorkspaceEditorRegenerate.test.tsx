@@ -8,6 +8,8 @@ import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import { saveDraft } from '../utils/draftStorage'
 import { toContent } from '../utils/gameContent'
 import WorkspaceEditor from './WorkspaceEditor'
+import { autosaved } from '../test/autosave'
+import { timingBox } from '../test/editorTiming'
 
 // A6.3: nút "Yêu cầu AI làm lại", hộp thoại, các nhánh lỗi 5a, 5b, thông báo thành công, Hoàn tác (UC-06).
 // mock-game-1 là QUIZ có 3 câu đã lưu; mock-game-2 là MATCHING.
@@ -26,7 +28,6 @@ const dialog = () => screen.getByRole('dialog', { name: 'Yêu cầu AI làm lạ
 const feedbackBox = () => within(dialog()).getByRole('textbox', { name: /Gợi ý điều chỉnh/ })
 const listButtons = () => within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')
 const notice = () => document.getElementById('regenerate-notice')!
-const saveButton = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
 
 async function openEditor(gameId = QUIZ_ID) {
   renderWithProviders(<WorkspaceEditor />, `/workspace/editor?gameId=${gameId}`)
@@ -80,7 +81,7 @@ describe('mở hộp thoại', () => {
     await user.keyboard('{Escape}')
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(trigger()).toHaveFocus()
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
 
     await openDialog(user)
     await user.click(within(dialog()).getByRole('button', { name: 'Hủy' }))
@@ -118,14 +119,14 @@ describe('thành công và hoàn tác', () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument(), SLOW)
     expect(within(notice()).getByText(SUCCESS)).toBeInTheDocument()
-    expect(within(notice()).getByText('Câu mới chưa được lưu cho tới khi bạn bấm "Lưu bản nháp".')).toBeInTheDocument()
+    expect(within(notice()).getByText('Câu mới sẽ được tự lưu sau ít giây.')).toBeInTheDocument()
     expect(notice()).toHaveFocus()
 
     const after = listButtons().map((button) => button.textContent)
 
     expect(after[0]).not.toBe(before[0])
     expect(after.slice(1)).toEqual(before.slice(1))
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
     // Máy chủ KHÔNG đổi: câu mới chỉ nằm trong bản đang soạn.
     expect(getMockGame(QUIZ_ID).questions[0]).toEqual(serverBefore.questions[0])
     // Ảnh và âm thanh là của câu mới (kèm giọng đã chọn), không phải của câu cũ.
@@ -147,10 +148,10 @@ describe('thành công và hoàn tác', () => {
     expect(within(notice()).getByText('Đã khôi phục câu cũ.')).toBeInTheDocument()
     expect(within(notice()).queryByRole('button', { name: 'Hoàn tác' })).not.toBeInTheDocument()
     expect(listButtons().map((button) => button.textContent)).toEqual(before)
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
   })
 
-  it('sửa tiếp CHÍNH câu đó thì hết Hoàn tác; đổi sang câu khác rồi quay lại vẫn còn (cho tới khi sửa hoặc lưu)', async () => {
+  it('sửa tiếp CHÍNH câu đó thì hết Hoàn tác; đổi sang câu khác rồi quay lại vẫn còn (cho tới khi sửa câu đó)', async () => {
     const user = userEvent.setup()
 
     await openEditor()
@@ -162,14 +163,14 @@ describe('thành công và hoàn tác', () => {
     expect(within(notice()).queryByRole('button', { name: 'Hoàn tác' })).not.toBeInTheDocument()
     await user.click(listButtons()[0])
     expect(within(notice()).getByRole('button', { name: 'Hoàn tác' })).toBeInTheDocument()
-    expect(within(notice()).getByText(/vừa được AI làm lại và chưa được lưu/)).toBeInTheDocument()
+    expect(within(notice()).getByText(/vừa được AI làm lại. Bạn có thể hoàn tác/)).toBeInTheDocument()
 
-    fireEvent.change(screen.getByRole('textbox', { name: /^Điểm/ }), { target: { value: '55' } })
-    fireEvent.blur(screen.getByRole('textbox', { name: /^Điểm/ }))
+    fireEvent.change(timingBox(/^Điểm/), { target: { value: '55' } })
+    fireEvent.blur(timingBox(/^Điểm/))
     await waitFor(() => expect(within(notice()).queryByRole('button', { name: 'Hoàn tác' })).not.toBeInTheDocument())
   })
 
-  it('bấm Lưu thì hết Hoàn tác và câu mới được lưu lên máy chủ', async () => {
+  it('tự lưu đưa câu mới lên máy chủ nhưng vẫn giữ nút Hoàn tác; bấm Hoàn tác thì câu cũ được tự lưu lại', async () => {
     const user = userEvent.setup()
 
     await openEditor()
@@ -178,14 +179,17 @@ describe('thành công và hoàn tác', () => {
     await user.click(within(dialog()).getByRole('button', { name: 'Xác nhận tạo lại' }))
     await within(notice()).findByText(SUCCESS, {}, SLOW)
 
-    await user.click(saveButton())
+    await autosaved()
 
-    await screen.findByText(/Đã lưu thay đổi|Bạn đã lưu/, {}, SLOW)
-    expect(within(notice()).queryByRole('button', { name: 'Hoàn tác' })).not.toBeInTheDocument()
     // Máy chủ nhận câu MỚI do AI làm lại (khác câu cũ), đúng thẻ q1.
     expect(getMockGame(QUIZ_ID).questions[0].id).toBe('q1')
     expect(getMockGame(QUIZ_ID).questions[0]).not.toEqual(serverBefore.questions[0])
     expect(listButtons()[0].textContent).toContain((getMockGame(QUIZ_ID).questions[0] as { questionText: string }).questionText)
+
+    // Tự lưu không lấy mất Hoàn tác: bấm thì câu cũ quay lại và được tự lưu lên máy chủ.
+    await user.click(within(notice()).getByRole('button', { name: 'Hoàn tác' }))
+    await autosaved()
+    expect(getMockGame(QUIZ_ID).questions[0]).toEqual(serverBefore.questions[0])
   })
 
   it('trong lúc AI làm việc: nút Lưu bị khóa và hiện "Đang áp dụng chỉnh sửa..."; xong thì mở lại', async () => {
@@ -199,10 +203,10 @@ describe('thành công và hoàn tác', () => {
 
     expect(await screen.findByText('Đang nhờ AI làm lại câu này', {}, SLOW)).toBeInTheDocument()
     expect(screen.getByText('Đang áp dụng chỉnh sửa...')).toBeInTheDocument()
-    expect(saveButton()).toBeDisabled()
+    expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeDisabled()
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument(), { timeout: 10000 })
-    expect(saveButton()).toBeEnabled()
+    expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeEnabled()
   })
 })
 
@@ -221,8 +225,7 @@ describe('lỗi', () => {
     expect(feedbackBox()).toHaveFocus()
     expect(feedbackBox()).toHaveValue('làm câu nsfw')
     expect(listButtons().map((button) => button.textContent)).toEqual(before)
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
-    expect(saveButton()).toBeDisabled()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
 
     await user.clear(feedbackBox())
     await user.type(feedbackBox(), 'đổi chủ đề khác')
@@ -240,7 +243,7 @@ describe('lỗi', () => {
 
     expect(await within(dialog()).findByRole('alert', {}, SLOW)).toHaveTextContent(BUSY)
     expect(getMockAiAttempts()).toBe(3)
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
     // Chờ thêm một lúc: nếu giao diện tự thử lại thì số lần gọi sẽ tăng.
     await new Promise((resolve) => setTimeout(resolve, 100))
     expect(getMockAiAttempts()).toBe(3)
@@ -288,7 +291,7 @@ describe('lỗi', () => {
     await user.click(within(dialog()).getByRole('button', { name: 'Xác nhận tạo lại' }))
 
     expect(await within(dialog()).findByRole('alert', {}, SLOW)).toHaveTextContent(BUSY)
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
   })
 })
 
@@ -315,7 +318,7 @@ describe('câu chưa lưu trên máy chủ (404)', () => {
 
     expect(trigger()).toHaveAttribute('aria-disabled', 'true')
     expect(trigger()).toHaveAccessibleDescription(/Hãy lưu trước/)
-    expect(screen.getByText(/Hãy bấm "Lưu bản nháp" rồi mới nhờ AI làm lại/)).toBeInTheDocument()
+    expect(screen.getByText(/Hãy đợi trò chơi tự lưu rồi mới nhờ AI làm lại/)).toBeInTheDocument()
     expect(trigger()).toHaveAttribute('title', 'Hãy lưu trước')
     trigger().focus()
     expect(trigger()).toHaveFocus()
@@ -325,7 +328,7 @@ describe('câu chưa lưu trên máy chủ (404)', () => {
 
     await user.click(listButtons()[0])
     expect(trigger()).not.toHaveAttribute('aria-disabled')
-    expect(screen.queryByText(/Hãy bấm "Lưu bản nháp" rồi mới nhờ AI làm lại/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Hãy đợi trò chơi tự lưu rồi mới nhờ AI làm lại/)).not.toBeInTheDocument()
   })
 
   it('lưu xong thì câu mới có trên máy chủ và nút mở khóa', async () => {
@@ -334,8 +337,7 @@ describe('câu chưa lưu trên máy chủ (404)', () => {
     await openWithUnsavedQuestion(user)
     expect(trigger()).toHaveAttribute('aria-disabled', 'true')
 
-    await user.click(saveButton())
-    await screen.findByText(/Bạn đã lưu bản nháp thành công|Đã lưu thay đổi/, {}, SLOW)
+    await autosaved()
 
     await waitFor(() => expect(trigger()).not.toHaveAttribute('aria-disabled'))
   })
@@ -359,8 +361,8 @@ describe('các nhánh khác', () => {
     const user = userEvent.setup()
 
     await openEditor()
-    fireEvent.change(screen.getByRole('textbox', { name: /^Điểm/ }), { target: { value: '47' } })
-    fireEvent.blur(screen.getByRole('textbox', { name: /^Điểm/ }))
+    fireEvent.change(timingBox(/^Điểm/), { target: { value: '47' } })
+    fireEvent.blur(timingBox(/^Điểm/))
     await waitFor(() => expect(listButtons()[0].textContent).toContain('47 điểm'), SLOW)
 
     await openDialog(user)
@@ -369,7 +371,7 @@ describe('các nhánh khác', () => {
     await user.click(within(notice()).getByRole('button', { name: 'Hoàn tác' }))
 
     expect(listButtons()[0].textContent).toContain('47 điểm')
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
   })
 
   it('đóng hộp thoại đang có lỗi rồi mở lại thì sạch lỗi và không còn gợi ý cũ', async () => {
@@ -449,8 +451,8 @@ describe('các nhánh khác', () => {
     await user.click(within(notice()).getByRole('button', { name: 'Hoàn tác' }))
     expect(within(notice()).getByText('Đã khôi phục câu cũ.')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByRole('textbox', { name: /^Điểm/ }), { target: { value: '63' } })
-    fireEvent.blur(screen.getByRole('textbox', { name: /^Điểm/ }))
+    fireEvent.change(timingBox(/^Điểm/), { target: { value: '63' } })
+    fireEvent.blur(timingBox(/^Điểm/))
 
     await waitFor(() => expect(within(notice()).queryByText('Đã khôi phục câu cũ.')).not.toBeInTheDocument())
   })

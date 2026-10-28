@@ -27,7 +27,7 @@ export default function FormField({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="text-base font-semibold text-ink">
+        <label htmlFor={id} className="text-base font-bold text-ink">
           {label}
           {required ? (
             <span aria-hidden="true" className="text-rose-700">

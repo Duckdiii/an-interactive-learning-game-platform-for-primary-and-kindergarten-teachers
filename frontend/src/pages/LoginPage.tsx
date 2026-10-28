@@ -8,6 +8,7 @@ import ErrorNotice from '../components/ui/ErrorNotice'
 import FormField from '../components/ui/FormField'
 import PasswordInput from '../components/ui/PasswordInput'
 import { inputClass } from '../components/ui/formStyles'
+import { AUTH_FEATURES } from '../config/authFeatures'
 import { viText } from '../constants/viText'
 import { useAuth } from '../hooks/useAuth'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -61,13 +62,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       <div className="mb-6">
-        <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
-          {viText.auth.loginKicker}
-        </p>
-        <h1 className="mt-2 text-3xl font-extrabold">Đăng nhập</h1>
-        <p className="mt-2 text-base leading-7 text-ink-soft">
+        <h1 className="font-display text-3xl font-extrabold leading-tight">
+          {viText.auth.loginTitle}
+        </h1>
+        <p className="mt-1 text-base font-semibold text-ink-soft">
           {viText.auth.loginDescription}
         </p>
       </div>
@@ -102,7 +102,21 @@ export default function LoginPage() {
           />
         </FormField>
 
-        <FormField id="login-password" label="Mật khẩu">
+        <FormField
+          id="login-password"
+          label="Mật khẩu"
+          aside={
+            AUTH_FEATURES.forgotPassword ? (
+              // Chưa có route/màn "quên mật khẩu" (API planned); đổi sang Link khi có.
+              <a
+                href="/forgot-password"
+                className="inline-flex min-h-11 items-center text-sm font-extrabold text-brand-strong underline"
+              >
+                {viText.auth.forgotPassword}
+              </a>
+            ) : undefined
+          }
+        >
           <PasswordInput
             id="login-password"
             name="password"
@@ -116,18 +130,31 @@ export default function LoginPage() {
           />
         </FormField>
 
-        <Button type="submit" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+        {AUTH_FEATURES.rememberMe ? (
+          // Chưa gửi lên API: LoginRequest.rememberMe chưa được Backend cài.
+          <label className="flex min-h-11 items-center gap-3 text-sm font-bold">
+            <input
+              type="checkbox"
+              name="rememberMe"
+              defaultChecked
+              className="h-5 w-5 accent-brand"
+            />
+            {viText.auth.rememberMe}
+          </label>
+        ) : null}
+
+        <Button type="submit" size="lg" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? viText.auth.loginSubmitting : viText.auth.loginSubmit}
         </Button>
       </form>
 
-      <p className="mt-6 text-base text-ink-soft">
-        Chưa có tài khoản?{' '}
+      <p className="mt-6 text-center text-sm font-bold text-ink-soft">
+        {viText.auth.noAccount}{' '}
         <Link
           to={ROUTES.register}
-          className="inline-flex min-h-11 items-center px-1 font-bold text-brand-strong underline"
+          className="inline-flex min-h-11 items-center px-1 font-black text-brand-strong underline"
         >
-          Đăng ký
+          {viText.auth.createAccount}
         </Link>
       </p>
     </div>

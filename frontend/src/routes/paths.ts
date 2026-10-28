@@ -1,6 +1,7 @@
 export const ROUTES = {
   dashboard: '/dashboard',
   createGame: '/games/new',
+  results: '/results',
   login: '/login',
   register: '/register',
   workspace: '/workspace',

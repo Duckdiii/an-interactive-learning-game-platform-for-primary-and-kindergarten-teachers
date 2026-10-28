@@ -1,5 +1,7 @@
 import type { GameDsl, QuestionDsl } from '../../types/game-dsl.types'
 import { deepEqual, trimContent } from '../../utils/gameContent'
+import { applyGameDefault } from '../../utils/gameDefaults'
+import type { DefaultField } from '../../utils/gameDefaults'
 
 // Trạng thái của một phiên soạn thảo: `baseline` là bản đã lưu gần nhất (hoặc bản vừa mở từ máy chủ), `draft` là bản đang
 // sửa. "Chưa lưu" được SUY RA từ việc hai bản khác nhau, nên sửa rồi gõ lại như cũ thì hết "chưa lưu". Hàm thuần để test.
@@ -29,6 +31,8 @@ export type EditorAction =
   | { type: 'applyRegenerated'; index: number; questionId: string; question: QuestionDsl }
   // Trả câu cũ về, chỉ khi thẻ vẫn đang đúng là câu AI vừa đưa vào.
   | { type: 'undoRegenerated'; index: number; questionId: string }
+  // Đổi thời gian/điểm mặc định của game: mọi câu đang theo mặc định cũ đổi theo (xem utils/gameDefaults).
+  | { type: 'setGameDefault'; field: DefaultField; value: number }
   // Thay cả bản nháp bằng bản sao lưu trong trình duyệt (giáo viên chọn "Khôi phục").
   | { type: 'restore'; content: GameDsl }
   // Lưu thành công: `snapshot` là đúng nội dung đã gửi. Nếu giáo viên gõ thêm trong lúc chờ thì `draft` vẫn giữ phần mới đó.
@@ -56,6 +60,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, draft: { ...state.draft, metadata: { ...state.draft.metadata, title: action.title } } }
     case 'setTopic':
       return { ...state, draft: { ...state.draft, metadata: { ...state.draft.metadata, topic: action.topic } } }
+    case 'setGameDefault': {
+      const questions = applyGameDefault(state.draft.questions as QuestionDsl[], action.field, action.value)
+      // Câu nào bị đổi theo thì hết hoàn tác, như khi sửa tay câu đó.
+      const undo = questions.reduce((left, question, position) => (question === state.draft.questions[position] ? left : without(left, question.id)), state.undo)
+
+      return { ...state, draft: { ...state.draft, questions } as GameDsl, undo }
+    }
     case 'updateQuestion': {
       const current = state.draft.questions[action.index]
 
@@ -99,18 +110,9 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     }
     case 'restore':
       return { ...state, draft: action.content, undo: {} }
-    case 'saved': {
-      // Chỉ những câu AI vừa làm lại mà BẢN VỪA LƯU đã chứa mới hết hoàn tác. Câu AI áp trong lúc đang lưu (bản lưu không có) vẫn còn hoàn tác.
-      const remaining = Object.fromEntries(
-        Object.entries(state.undo).filter(([id, entry]) => {
-          const saved = action.snapshot.questions.find((question) => question.id === id)
-
-          return !(saved && deepEqual(saved, trimContent(entry.applied)))
-        }),
-      )
-
-      return { ...state, baseline: action.snapshot, undo: remaining }
-    }
+    case 'saved':
+      // Tự lưu chạy vài giây sau mỗi lần sửa, nên lưu xong vẫn giữ "Hoàn tác" của câu AI làm lại: hoàn tác chỉ đưa câu cũ về bản nháp rồi lại được tự lưu.
+      return { ...state, baseline: action.snapshot }
     case 'normalize': {
       // Chuẩn bị lưu: cắt khoảng trắng bản nháp. Hoàn tác giữ nguyên (lưu lỗi thì câu AI vẫn chưa lưu), chỉ cập nhật "câu đang hiện" theo bản đã cắt để hoàn tác vẫn nhận ra thẻ chưa bị sửa.
       const draft = trimContent(state.draft)

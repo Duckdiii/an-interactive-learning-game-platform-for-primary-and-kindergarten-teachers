@@ -36,7 +36,7 @@ describe('đăng xuất trên máy dùng chung', () => {
 
     await user.click(within(screen.getByRole('complementary')).getByRole('button', { name: 'Đăng xuất' }))
 
-    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Đăng nhập' })).toBeInTheDocument(), { timeout: 10_000 })
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Chào cô quay lại!' })).toBeInTheDocument(), { timeout: 10_000 })
     expect(queryClient.getQueryCache().getAll()).toHaveLength(0)
     expect(loadDraft('t1', 'g1')).toBeNull()
     expect(loadDraft('t-khac', 'g2')).toBeNull()
@@ -56,7 +56,7 @@ describe('đăng xuất khi đang soạn dở', () => {
     await user.type(await screen.findByRole('textbox', { name: /Tên trò chơi/ }, { timeout: 10_000 }), 'đang gõ dở')
     await user.click(within(screen.getByRole('complementary')).getByRole('button', { name: 'Đăng xuất' }))
 
-    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Đăng nhập' })).toBeInTheDocument(), { timeout: 10_000 })
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Chào cô quay lại!' })).toBeInTheDocument(), { timeout: 10_000 })
     await new Promise((resolve) => setTimeout(resolve, 800))
     expect(Object.keys(localStorage).filter((key) => key.startsWith('ai-game:editor-draft'))).toEqual([])
   })
@@ -68,6 +68,6 @@ describe('phiên không rõ là ai', () => {
     storeSession({} as never, 'token', 'refresh')
     renderWithProviders(<App />, '/dashboard')
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Chào cô quay lại!' })).toBeInTheDocument()
   })
 })

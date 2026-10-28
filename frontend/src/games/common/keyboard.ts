@@ -3,6 +3,8 @@
  */
 export function isPlainShortcut(event: KeyboardEvent): boolean {
   if (event.ctrlKey || event.altKey || event.metaKey) return false
+  // Trình soạn thảo nhúng renderer (xem trước) trong trang giáo viên: phím số là của trang đó, không phải để nộp đáp án ngầm.
+  if (document.querySelector('[data-game-hotkeys-off]')) return false
 
   const target = event.target instanceof HTMLElement ? event.target : null
 

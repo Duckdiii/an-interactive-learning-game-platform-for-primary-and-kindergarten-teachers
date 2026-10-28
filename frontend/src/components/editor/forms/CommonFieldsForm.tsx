@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { viText } from '../../../constants/viText'
+import { useGameDefaults } from './GameDefaultsContext'
 import { validationText } from '../../../constants/validationText'
 import type { GameType } from '../../../types/game-dsl.types'
 import { REQUIRED_COMMON_FIELDS } from '../../../utils/gameValidation'
@@ -26,6 +28,13 @@ export default function CommonFieldsForm({ question, issues, onUpdate, gameType,
   const required = REQUIRED_COMMON_FIELDS[gameType]
   const labels = validationText.labels
   const tools = mediaToolsAvailable()
+  const text = viText.editor.form
+  const defaults = useGameDefaults()
+  // Câu theo đúng mặc định của game thì thu gọn thành một dòng; "Đặt riêng" mở hai ô để ghi đè cho riêng câu này.
+  const followsDefault = question.timeLimitSeconds === defaults.timeLimitSeconds && question.points === defaults.points
+  const [own, setOwn] = useState(false)
+  // Ô có lỗi thì luôn mở để lỗi hiện ngay dưới ô.
+  const timingError = Boolean(fieldMessage(issues, 'timeLimitSeconds') || fieldMessage(issues, 'points'))
 
   return (
     <div className="space-y-4">
@@ -61,6 +70,26 @@ export default function CommonFieldsForm({ question, issues, onUpdate, gameType,
         onUpdate={onUpdate}
         tools={tools ? (api) => <ImageSuggestions idPrefix={idPrefix} visualPrompt={question.visualPrompt} tools={api} /> : undefined}
       />
+      {followsDefault && !own && !timingError ? (
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-paper px-4 py-2 text-base text-ink-soft">
+          <span>
+            <span className="font-bold text-ink">
+              {text.timingSummary(question.timeLimitSeconds, question.points)}
+            </span>{' '}
+            {text.followsDefault}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setOwn(true)
+              requestAnimationFrame(() => document.getElementById(`${idPrefix}-time-limit`)?.focus())
+            }}
+            className="min-h-11 px-1 font-bold text-brand-strong underline">
+            {text.setOwnTiming}
+          </button>
+        </p>
+      ) : (
+      <div className="space-y-2">
       <div className="grid gap-4 sm:grid-cols-2">
         <TimeLimitField
           id={`${idPrefix}-time-limit`}
@@ -78,6 +107,22 @@ export default function CommonFieldsForm({ question, issues, onUpdate, gameType,
           onCommit={(points) => onUpdate((current) => setPoints(current, points))}
         />
       </div>
+      {followsDefault || defaults.timeLimitSeconds === undefined || defaults.points === undefined ? null : (
+        <button
+          type="button"
+          onClick={() => {
+            const { timeLimitSeconds, points } = defaults as Required<typeof defaults>
+
+            onUpdate((current) => setPoints(setTimeLimit(current, timeLimitSeconds), points))
+            setOwn(false)
+          }}
+          className="min-h-11 px-1 text-base font-bold text-brand-strong underline"
+        >
+          {text.backToDefault(defaults.timeLimitSeconds, defaults.points)}
+        </button>
+      )}
+      </div>
+      )}
     </div>
   )
 }

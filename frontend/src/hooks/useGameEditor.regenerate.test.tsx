@@ -184,7 +184,7 @@ describe('useGameEditor: hoàn tác', () => {
     expect(quizText(result.current.draft.questions[0])).toBe('Con hãy đếm các con vật trong hình')
   })
 
-  it('lưu THÀNH CÔNG thì hết hoàn tác (câu đã lên máy chủ)', async () => {
+  it('lưu THÀNH CÔNG vẫn giữ hoàn tác (tự lưu chạy sau vài giây); hoàn tác xong thì câu cũ lại thành chưa lưu', async () => {
     const { result, replacement } = setup()
 
     act(() => {
@@ -196,9 +196,15 @@ describe('useGameEditor: hoàn tác', () => {
       result.current.save()
     })
 
-    await waitFor(() => expect(result.current.savedNotice).toBe(true))
-    expect(result.current.regeneratedIds).toEqual([])
+    await waitFor(() => expect(result.current.autosave).toBe('saved'))
+    expect(result.current.regeneratedIds).toEqual(['q1'])
     expect(quizText(getMockGame(GAME_ID).questions[0])).toBe('Con hãy đếm các con vật trong hình')
+
+    act(() => {
+      result.current.undoRegenerated(0, 'q1')
+    })
+    expect(result.current.regeneratedIds).toEqual([])
+    expect(result.current.dirty).toBe(true)
   })
 
   it('lưu LỖI (mất mạng) thì KHÔNG mất hoàn tác: câu AI vẫn chưa lưu và vẫn trả lại được câu cũ', async () => {

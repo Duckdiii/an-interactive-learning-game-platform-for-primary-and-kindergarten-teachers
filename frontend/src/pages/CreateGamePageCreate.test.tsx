@@ -54,18 +54,17 @@ function renderFlow() {
   )
 }
 
-const cards = () => screen.getAllByRole('checkbox')
-const createButton = () => screen.getByRole('button', { name: /^Tạo \d trò chơi$/ })
+const cards = () => screen.getAllByRole('button', { name: /^Dùng kiểu này:/ })
+// Nút "Dùng kiểu này" của thẻ đầu (phù hợp nhất).
+const createButton = () => cards()[0]
 const probe = () => screen.getByTestId('location').textContent ?? ''
 
-// Điền ý tưởng, sang bước đề xuất và chọn đủ `count` loại (loại đầu được chọn sẵn).
-async function toSuggestions(user: ReturnType<typeof userEvent.setup>, count: number) {
+// Điền ý tưởng rồi sang bước đề xuất (chờ có thẻ "Dùng kiểu này").
+async function toSuggestions(user: ReturnType<typeof userEvent.setup>) {
   fireEvent.change(screen.getByLabelText('Ý tưởng bài học'), { target: { value: IDEA } })
-  await user.click(screen.getByRole('button', { name: 'Tạo trò chơi' }))
-  await screen.findByRole('heading', { name: 'AI đề xuất các loại trò chơi cho bạn' })
-  await screen.findAllByRole('checkbox')
-
-  for (let index = 1; index < count; index += 1) await user.click(cards()[index])
+  await user.click(screen.getByRole('button', { name: 'Để AI soạn giúp' }))
+  await screen.findByRole('heading', { name: 'AI đề xuất kiểu chơi cho bài này' })
+  await screen.findAllByRole('button', { name: /^Dùng kiểu này:/ })
 }
 
 beforeEach(() => {
@@ -90,9 +89,10 @@ describe('tạo một game', () => {
     const user = userEvent.setup()
 
     renderFlow()
-    await user.selectOptions(screen.getByLabelText(/Khối lớp/), 'GRADE_2')
-    await user.selectOptions(screen.getByLabelText(/Môn học/), 'MATH')
-    await toSuggestions(user, 1)
+    await user.click(screen.getByRole('button', { name: 'Lớp 2–5' }))
+    await user.click(screen.getByRole('button', { name: 'Lớp 2' }))
+    await user.click(screen.getByRole('button', { name: 'Toán' }))
+    await toSuggestions(user)
     await user.click(createButton())
 
     await waitFor(() => expect(probe()).toMatch(/^\/workspace\/editor\?gameId=mock-game-11\|/), SLOW)
@@ -106,90 +106,76 @@ describe('tạo một game', () => {
     expect(created.metadata).toMatchObject({ gradeLevel: 'GRADE_2', subject: 'MATH' })
   })
 
-  it('nút Tạo và các lựa chọn khóa trong lúc đang tạo, nút ghi "Đang tạo trò chơi..."; bấm đúp chỉ tạo một lần', async () => {
+  it('trong lúc đang tạo chỉ còn màn tiến trình ước tính (không bấm lại Tạo hay đổi lựa chọn được); bấm đúp chỉ tạo một lần', async () => {
     vi.stubEnv('VITE_MOCK_LATENCY_MS', '400')
 
     const user = userEvent.setup()
 
     renderFlow()
-    await toSuggestions(user, 2)
+    await toSuggestions(user)
     await user.dblClick(createButton())
 
-    const busy = await screen.findByRole('button', { name: 'Đang tạo trò chơi...' })
+    const panel = await screen.findByRole('group', { name: /AI đang soạn trò chơi/ })
 
-    expect(busy).toBeDisabled()
-    expect(cards()[0]).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Quay lại sửa mô tả' })).toBeDisabled()
-    await waitFor(() => expect(probe()).toContain('/workspace'), { timeout: 8000 })
-    expect(getMockGenerateCalls()).toBe(2)
-    expect(listMockGames(NO_FILTERS)).toHaveLength(12)
+    expect(within(panel).getByRole('progressbar', { name: 'Tiến độ ước tính' })).toBeInTheDocument()
+    expect(within(panel).getByText(/tạm thời/)).toBeInTheDocument()
+    expect(within(panel).queryByText(/Đang soạn \d trò chơi/)).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Sửa mô tả' })).toBeNull()
+    await waitFor(() => expect(probe()).toContain('/workspace/editor'), { timeout: 8000 })
+    expect(getMockGenerateCalls()).toBe(1)
+    expect(listMockGames(NO_FILTERS)).toHaveLength(11)
   })
-})
 
-describe('tạo nhiều game', () => {
-  it('chọn 3 loại: về "Trò chơi của tôi" kèm thông báo, 3 thẻ có dấu "Mới"; trạng thái điều hướng được xóa nên tải lại không hiện lại thông báo', async () => {
+  it('chọn thẻ thứ hai thì tạo đúng kiểu của thẻ đó', async () => {
     const user = userEvent.setup()
 
     renderFlow()
-    await toSuggestions(user, 3)
-    await user.click(createButton())
+    await toSuggestions(user)
+    await user.click(cards()[1])
 
-    const message = await screen.findByText(/^Đã tạo 3 trò chơi nháp. Các trò chơi mới có dấu "Mới"./, {}, SLOW)
-
-    // Nhắc đây là bản mẫu do AI mô phỏng (trang tạo đã chuyển đi nên khối kết quả có nhãn không còn hiện).
-    expect(message).toHaveTextContent("do AI mô phỏng tạo: nội dung câu hỏi là bản mẫu")
-    expect(probe().startsWith('/workspace|')).toBe(true)
-    // Thẻ game mới (3 game vừa tạo) có chip "Mới"; 10 game mẫu thì không.
-    expect(await screen.findAllByText('Mới', { selector: 'span' })).toHaveLength(3)
-    // Trạng thái điều hướng đã bị thay bằng null.
-    await waitFor(() => expect(probe()).toBe('/workspace|null'))
+    await waitFor(() => expect(probe()).toMatch(/^\/workspace\/editor\?gameId=mock-game-11\|/), SLOW)
+    expect(getMockGame('mock-game-11').gameType).toBe(SUGGESTED[1])
   })
 })
 
 describe('lỗi một phần và thử lại', () => {
-  it('một loại lỗi: các loại khác vẫn tạo xong (có dấu "Mới"), loại lỗi hiện câu riêng và nút "Thử lại phần còn thiếu"; ở lại trang, tiêu điểm vào khối kết quả; KHÔNG tự thử lại', async () => {
+  it('lỗi tạm thời: hiện câu riêng và nút "Thử lại phần còn thiếu"; ở lại trang, tiêu điểm vào khối kết quả; KHÔNG tự thử lại', async () => {
     const user = userEvent.setup()
 
-    setMockGenerateFailure(SUGGESTED[1], 'timeout')
-
-    const { queryClient } = renderFlow()
-    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
-
-    await toSuggestions(user, 3)
+    setMockGenerateFailure(SUGGESTED[0], 'timeout')
+    renderFlow()
+    await toSuggestions(user)
     await user.click(createButton())
 
     const results = (await screen.findByRole('heading', { name: 'Có trò chơi chưa tạo được' }, SLOW)).closest('div[tabindex="-1"]') as HTMLElement
 
-    expect(within(results).getAllByText('Đã tạo xong, lưu thành bản nháp')).toHaveLength(2)
     expect(within(results).getByText('Trợ lý AI trả lời quá lâu. Hãy thử lại sau ít phút.')).toBeInTheDocument()
     expect(within(results).getByRole('button', { name: 'Thử lại phần còn thiếu' })).toBeInTheDocument()
     await waitFor(() => expect(results).toHaveFocus())
-    // Vẫn ở trang tạo game (không chuyển trang khi còn loại chưa tạo được).
+    // Vẫn ở trang tạo game, thẻ đề xuất còn đó để chọn kiểu khác.
     expect(screen.queryByTestId('location')).not.toBeInTheDocument()
-    expect(listMockGames(NO_FILTERS)).toHaveLength(12)
-    expect(['mock-game-12', 'mock-game-11'].every(isNewGame)).toBe(true)
-    // Danh sách game được làm mới ngay (game đã tạo có thật trên máy chủ dù còn loại lỗi).
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['games', 't1'] })
+    expect(cards().length).toBeGreaterThan(0)
+    expect(listMockGames(NO_FILTERS)).toHaveLength(10)
 
     await new Promise((resolve) => setTimeout(resolve, 100))
-    expect(getMockGenerateCalls()).toBe(3)
+    expect(getMockGenerateCalls()).toBe(1)
   })
 
-  it('"Thử lại phần còn thiếu" chỉ tạo loại còn thiếu (không tạo trùng); xong thì về danh sách với đủ 3 game', async () => {
+  it('"Thử lại phần còn thiếu" tạo lại đúng kiểu đã chọn; xong thì vào trình soạn thảo', async () => {
     const user = userEvent.setup()
 
-    setMockGenerateFailure(SUGGESTED[1], 'timeout')
+    setMockGenerateFailure(SUGGESTED[0], 'timeout')
     renderFlow()
-    await toSuggestions(user, 3)
+    await toSuggestions(user)
     await user.click(createButton())
     await screen.findByRole('button', { name: 'Thử lại phần còn thiếu' }, SLOW)
 
-    setMockGenerateFailure(SUGGESTED[1], null)
+    setMockGenerateFailure(SUGGESTED[0], null)
     await user.click(screen.getByRole('button', { name: 'Thử lại phần còn thiếu' }))
 
-    expect(await screen.findByText(/^Đã tạo 3 trò chơi nháp\. Các trò chơi mới có dấu "Mới"\./, {}, SLOW)).toBeInTheDocument()
-    expect(getMockGenerateCalls()).toBe(4)
-    expect(listMockGames(NO_FILTERS)).toHaveLength(13)
+    await waitFor(() => expect(probe()).toMatch(/^\/workspace\/editor\?gameId=mock-game-11\|/), SLOW)
+    expect(getMockGenerateCalls()).toBe(2)
+    expect(getMockGame('mock-game-11').gameType).toBe(SUGGESTED[0])
   })
 
   it('429: dùng câu chung của bảng mã lỗi, không tự thử lại (đúng một lần gọi), có nút thử lại', async () => {
@@ -197,7 +183,7 @@ describe('lỗi một phần và thử lại', () => {
 
     setMockGenerateFailure(SUGGESTED[0], 'rateLimited')
     renderFlow()
-    await toSuggestions(user, 1)
+    await toSuggestions(user)
     await user.click(createButton())
 
     expect(await screen.findByText('Bạn thao tác quá nhanh. Hãy chờ một lúc rồi thử lại.', {}, SLOW)).toBeInTheDocument()
@@ -212,73 +198,67 @@ describe('lỗi một phần và thử lại', () => {
 
     setMockGenerateFailure(SUGGESTED[0], 'unsafe')
     renderFlow()
-    await toSuggestions(user, 2)
+    await toSuggestions(user)
     await user.click(createButton())
 
     expect(await screen.findByText('Nội dung chưa phù hợp với học sinh nhỏ tuổi. Hãy đổi chủ đề hoặc cách diễn đạt rồi thử lại.', {}, SLOW)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Thử lại phần còn thiếu' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Quay lại sửa mô tả' })).toBeEnabled()
-    expect(cards().filter((card) => (card as HTMLInputElement).checked)).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Sửa mô tả' })).toBeEnabled()
   })
 
-  it('bỏ chọn loại đang lỗi: loại đã tạo xong vẫn được nhớ; bấm Tạo lại chỉ còn loại đã xong nên KHÔNG gọi AI lần nào (không tạo trùng) và vào thẳng game đã tạo', async () => {
-    const user = userEvent.setup()
-
-    setMockGenerateFailure(SUGGESTED[1], 'timeout')
-    renderFlow()
-    await toSuggestions(user, 2)
-    await user.click(createButton())
-    await screen.findByRole('button', { name: 'Thử lại phần còn thiếu' }, SLOW)
-    expect(getMockGenerateCalls()).toBe(2)
-
-    // Bỏ chọn loại lỗi: loại đã tạo xong còn đó, không còn câu lỗi.
-    await user.click(cards()[1])
-    expect(screen.queryByRole('button', { name: 'Thử lại phần còn thiếu' })).not.toBeInTheDocument()
-    expect(screen.getByText('Đã tạo xong, lưu thành bản nháp')).toBeInTheDocument()
-
-    await user.click(createButton())
-
-    await waitFor(() => expect(probe()).toMatch(/^\/workspace\/editor\?gameId=mock-game-\d+\|/), SLOW)
-    expect(getMockGenerateCalls()).toBe(2)
-    expect(listMockGames(NO_FILTERS)).toHaveLength(11)
-  })
-
-  it('đổi ý tưởng (quay lại sửa mô tả rồi đề xuất lại) thì quên kết quả cũ: lần tạo mới gửi lại mọi loại', async () => {
-    const user = userEvent.setup()
-
-    renderFlow()
-    await toSuggestions(user, 1)
-    setMockGenerateFailure(SUGGESTED[0], 'timeout')
-    await user.click(createButton())
-    await screen.findByRole('button', { name: 'Thử lại phần còn thiếu' }, SLOW)
-
-    await user.click(screen.getByRole('button', { name: 'Quay lại sửa mô tả' }))
-    setMockGenerateFailure(SUGGESTED[0], null)
-    await user.click(screen.getByRole('button', { name: 'Tạo trò chơi' }))
-    await screen.findAllByRole('checkbox')
-
-    // Đề xuất lại: kết quả lỗi của lần trước đã bị quên, không còn nút thử lại cũ.
-    expect(screen.queryByRole('button', { name: 'Thử lại phần còn thiếu' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Có trò chơi chưa tạo được' })).not.toBeInTheDocument()
-  })
-
-  it('lỗi không an toàn và lỗi tạm thời cùng lúc: "Thử lại" chỉ gửi loại tạm thời, không gửi lại loại không an toàn (đỡ tốn hạn mức)', async () => {
+  it('bấm lại đúng kiểu vừa bị "không an toàn": không gọi AI lại (vô ích) nhưng tiêu điểm tới khối lỗi để cô biết vì sao', async () => {
     const user = userEvent.setup()
 
     setMockGenerateFailure(SUGGESTED[0], 'unsafe')
-    setMockGenerateFailure(SUGGESTED[1], 'timeout')
     renderFlow()
-    await toSuggestions(user, 2)
+    await toSuggestions(user)
+    await user.click(createButton())
+
+    const results = (await screen.findByRole('heading', { name: 'Có trò chơi chưa tạo được' }, SLOW)).closest('div[tabindex="-1"]') as HTMLElement
+
+    createButton().focus()
+    await user.click(createButton())
+
+    await waitFor(() => expect(results).toHaveFocus())
+    expect(getMockGenerateCalls()).toBe(1)
+  })
+
+  it('đổi ý tưởng (sửa mô tả rồi đề xuất lại) thì quên kết quả cũ: kiểu từng bị "không an toàn" được gửi lại AI', async () => {
+    const user = userEvent.setup()
+
+    renderFlow()
+    await toSuggestions(user)
+    setMockGenerateFailure(SUGGESTED[0], 'unsafe')
+    await user.click(createButton())
+    await screen.findByText(/Nội dung chưa phù hợp/, {}, SLOW)
+
+    await user.click(screen.getByRole('button', { name: 'Sửa mô tả' }))
+    setMockGenerateFailure(SUGGESTED[0], null)
+    await user.click(screen.getByRole('button', { name: 'Để AI soạn giúp' }))
+    await screen.findAllByRole('button', { name: /^Dùng kiểu này:/ })
+
+    // Đề xuất lại: kết quả lỗi của lần trước đã bị quên.
+    expect(screen.queryByRole('heading', { name: 'Có trò chơi chưa tạo được' })).not.toBeInTheDocument()
+    await user.click(createButton())
+
+    await waitFor(() => expect(probe()).toMatch(/^\/workspace\/editor\?gameId=mock-game-11\|/), SLOW)
+    expect(getMockGenerateCalls()).toBe(2)
+  })
+
+  it('lỗi ở thẻ đầu rồi chọn thẻ thứ hai: tạo thẻ thứ hai, không gửi lại kiểu đã lỗi', async () => {
+    const user = userEvent.setup()
+
+    setMockGenerateFailure(SUGGESTED[0], 'timeout')
+    renderFlow()
+    await toSuggestions(user)
     await user.click(createButton())
     await screen.findByRole('button', { name: 'Thử lại phần còn thiếu' }, SLOW)
-    expect(getMockGenerateCalls()).toBe(2)
 
-    setMockGenerateFailure(SUGGESTED[1], null)
-    await user.click(screen.getByRole('button', { name: 'Thử lại phần còn thiếu' }))
-    await waitFor(() => expect(getMockGenerateCalls()).toBe(3), SLOW)
-    // Loại tạm thời đã xong; loại không an toàn vẫn lỗi nên ở lại trang.
-    await screen.findByText('Nội dung chưa phù hợp với học sinh nhỏ tuổi. Hãy đổi chủ đề hoặc cách diễn đạt rồi thử lại.')
-    expect(screen.queryByRole('button', { name: 'Thử lại phần còn thiếu' })).not.toBeInTheDocument()
+    await user.click(cards()[1])
+
+    await waitFor(() => expect(probe()).toMatch(/^\/workspace\/editor\?gameId=mock-game-11\|/), SLOW)
+    expect(getMockGenerateCalls()).toBe(2)
+    expect(getMockGame('mock-game-11').gameType).toBe(SUGGESTED[1])
   })
 
   it('bắt đầu tạo: tiêu điểm chuyển tới khối tiến trình (nút Tạo vừa bị khóa), có tên truy cập là tiêu đề', async () => {
@@ -287,10 +267,10 @@ describe('lỗi một phần và thử lại', () => {
     const user = userEvent.setup()
 
     renderFlow()
-    await toSuggestions(user, 1)
+    await toSuggestions(user)
     await user.click(createButton())
 
-    const group = await screen.findByRole('group', { name: 'Đang tạo trò chơi' })
+    const group = await screen.findByRole('group', { name: /AI đang soạn trò chơi/ })
 
     await waitFor(() => expect(group).toHaveFocus())
     expect(within(group).getByRole('button', { name: 'Hủy tạo' })).toBeInTheDocument()
@@ -304,17 +284,18 @@ describe('hủy giữa chừng', () => {
     const user = userEvent.setup()
 
     renderFlow()
-    await toSuggestions(user, 3)
+    await toSuggestions(user)
     await user.click(createButton())
     await user.click(await screen.findByRole('button', { name: 'Hủy tạo' }))
 
-    expect(await screen.findByRole('heading', { name: 'Đã hủy tạo trò chơi' })).toBeInTheDocument()
+    const canceledTitle = await screen.findByRole('heading', { name: 'Đã hủy tạo trò chơi' })
+
+    await waitFor(() => expect(canceledTitle.closest('[tabindex="-1"]')).toHaveFocus())
     expect(screen.getByRole('button', { name: 'Tạo tiếp phần còn lại' })).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     // Hủy không phải lỗi: mỗi loại chỉ ghi "Chưa tạo", không có câu lỗi nào.
-    expect(screen.getAllByText('Chưa tạo')).toHaveLength(3)
+    expect(screen.getAllByText('Chưa tạo')).toHaveLength(1)
     expect(listMockGames(NO_FILTERS)).toHaveLength(10)
-    expect(cards().filter((card) => (card as HTMLInputElement).checked)).toHaveLength(3)
     expect(screen.queryByTestId('location')).not.toBeInTheDocument()
     await waitFor(() => expect(createButton()).toBeEnabled())
   })
@@ -325,7 +306,7 @@ describe('hủy giữa chừng', () => {
     const user = userEvent.setup()
     const view = renderFlow()
 
-    await toSuggestions(user, 2)
+    await toSuggestions(user)
     await user.click(createButton())
     await screen.findByRole('button', { name: 'Hủy tạo' })
 
@@ -339,12 +320,18 @@ describe('hủy giữa chừng', () => {
 
 describe('nhãn mô phỏng', () => {
   it('khi đang tạo và khi có lỗi một phần, khối kết quả có nhãn "Dữ liệu mô phỏng" và nhắc nội dung chỉ là bản mẫu', async () => {
+    vi.stubEnv('VITE_MOCK_LATENCY_MS', '100')
+
     const user = userEvent.setup()
 
     setMockGenerateFailure(SUGGESTED[0], 'timeout')
     renderFlow()
-    await toSuggestions(user, 1)
+    await toSuggestions(user)
     await user.click(createButton())
+
+    const panel = await screen.findByRole('group', { name: /AI đang soạn trò chơi/ })
+
+    expect(within(panel).getByText('Dữ liệu mô phỏng')).toBeInTheDocument()
 
     const results = (await screen.findByRole('heading', { name: 'Có trò chơi chưa tạo được' }, SLOW)).closest('div[tabindex="-1"]') as HTMLElement
 

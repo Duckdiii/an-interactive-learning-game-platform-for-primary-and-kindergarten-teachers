@@ -21,6 +21,25 @@ describe('nút dùng chung', () => {
     expect(buttonClass('secondary')).not.toContain('bg-brand ')
   })
 
+  it('mỗi variant có nền/đế đúng, ghost không có đế', () => {
+    expect(buttonClass('primary')).toContain('shadow-base-brand')
+    expect(buttonClass('accent')).toContain('bg-sun')
+    expect(buttonClass('accent')).toContain('shadow-base-sun')
+    expect(buttonClass('secondary')).toContain('bg-surface')
+    expect(buttonClass('ghost')).not.toContain('shadow-base')
+    expect(buttonClass('ghost')).not.toContain('bg-brand ')
+  })
+
+  it("size='lg' có min-h-14, mặc định min-h-12", () => {
+    expect(buttonClass('primary', false, 'lg')).toContain('min-h-14')
+    expect(buttonClass('primary')).toContain('min-h-12')
+  })
+
+  it('disabled bỏ đế và không dịch khi nhấn', () => {
+    expect(buttonClass('primary')).toContain('disabled:shadow-none')
+    expect(buttonClass('primary')).toContain('disabled:active:translate-y-0')
+  })
+
   it('fullWidth thêm w-full, mặc định thì không', () => {
     expect(buttonClass('primary', true)).toContain('w-full')
     expect(buttonClass('primary')).not.toContain('w-full')

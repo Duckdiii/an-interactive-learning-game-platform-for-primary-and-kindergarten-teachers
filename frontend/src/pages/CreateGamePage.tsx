@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import CreateGamesProgress from '../components/create/CreateGamesProgress'
+import CreateProgressPanel from '../components/create/CreateProgressPanel'
 import GameTypeSuggestionStep from '../components/create/GameTypeSuggestionStep'
-import LessonContextChips from '../components/create/LessonContextChips'
+import IdeaSuggestions from '../components/create/IdeaSuggestions'
+import LessonContextPicker from '../components/create/LessonContextPicker'
 import FileDropZone from '../components/ui/FileDropZone'
 import FormField from '../components/ui/FormField'
 import Icon from '../components/ui/Icon'
 import { describedBy, inputClass, textareaClass } from '../components/ui/formStyles'
-import { GAME_TEMPLATES } from '../constants/gameTemplates'
+import { ideaGroupOf } from '../constants/createIdeas'
+import type { Idea, IdeaGroup } from '../constants/createIdeas'
 import {
   GRADE_LEVEL_VALUES,
   SUBJECT_VALUES,
-  gameTypeLabel,
   gradeLevelLabel,
   subjectLabel,
 } from '../constants/labels'
@@ -24,18 +26,14 @@ import { useCreateGames } from '../hooks/useCreateGames'
 import { useGameTypeSuggestions } from '../hooks/useGameTypeSuggestions'
 import { useLessonContext } from '../hooks/useLessonContext'
 import { usePageTitle } from '../hooks/usePageTitle'
-import type { GameTypeSuggestion } from '../types/game-suggestion.types'
 import { parseApiError } from '../utils/apiError'
 import {
   IDEA_MAX_LENGTH,
-  IDEA_MIN_LENGTH,
-  MAX_GAMES_PER_REQUEST,
   buildGenerateRequest,
   checkGenerate,
-  hasValidIdea,
 } from '../utils/generateRequest'
 import { ideaPlaceholderFor } from '../utils/ideaPlaceholder'
-import { checkLessonFile } from '../utils/lessonFile'
+import { LESSON_FILE_MAX_BYTES, checkLessonFile } from '../utils/lessonFile'
 
 type Mode = 'idea' | 'random'
 type Step = 'describe' | 'suggest'
@@ -67,6 +65,17 @@ export default function CreateGamePage() {
   const navigate = useNavigate()
   const creation = useCreateGames()
   const progressRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLElement>(null)
+  const wasCreating = useRef(false)
+  // Mô tả và khối của lần tạo đang chạy, để màn tiến trình hiện (không đọc ref lúc vẽ).
+  const [creatingInput, setCreatingInput] = useState({ idea: '', gradeLevel: '' })
+
+  // Vừa tạo xong mà còn ở trang (lỗi một phần hoặc đã hủy): khối kết quả mới được vẽ lại sau màn tiến trình,
+  // nên chờ nó có trong DOM rồi mới đưa tiêu điểm tới để người dùng bàn phím và trình đọc màn hình biết ngay.
+  useEffect(() => {
+    if (wasCreating.current && !creation.creating) progressRef.current?.focus()
+    wasCreating.current = creation.creating
+  }, [creation.creating])
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
   const suggestionsMutation = useGameTypeSuggestions()
   const lastInput = useRef({ idea: '', gradeLevel: '', subject: '' })
@@ -79,13 +88,30 @@ export default function CreateGamePage() {
   // Đổi ý tưởng hoặc lựa chọn thì kết quả tạo trước đó không còn đúng nữa (game đã tạo vẫn còn trong danh sách, chỉ không dùng lại cho lần tạo mới).
   const touch = () => creation.reset()
 
-  const templates = GAME_TEMPLATES.filter(
-    (template) =>
-      (lesson.gradeLevel || lesson.subject) &&
-      (!lesson.gradeLevel || template.level === lesson.gradeLevel) &&
-      (!lesson.subject || template.subject === lesson.subject),
-  )
-  const hasContext = Boolean(lesson.gradeLevel || lesson.subject)
+  // Chọn nhóm "Lớp 2–5" mà chưa chọn lớp cụ thể: giữ nhóm mở nhưng khối vẫn là "chưa xác định".
+  const [upperOpen, setUpperOpen] = useState(false)
+  const group: IdeaGroup | '' = ideaGroupOf(lesson.gradeLevel) || (upperOpen ? 'UPPER' : '')
+  const ideaRef = useRef<HTMLTextAreaElement>(null)
+
+  const chooseGroup = (next: IdeaGroup) => {
+    const unselect = group === next
+    setUpperOpen(next === 'UPPER' && !unselect)
+    if (next === 'UPPER') {
+      if (unselect || ideaGroupOf(lesson.gradeLevel) !== 'UPPER') lesson.setGradeLevel('')
+    } else {
+      lesson.setGradeLevel(unselect ? '' : next)
+    }
+    touch()
+  }
+
+  // Điền ý tưởng soạn sẵn rồi đưa tiêu điểm về ô để cô sửa tiếp; ô đã có chữ thì nối thêm, không xóa chữ cô đã gõ.
+  const pickIdea = (picked: Idea) => {
+    const line = `${picked.title}: ${picked.description}`
+    setIdea((current) => (current.trim() ? `${current.trimEnd()}\n${line}` : line).slice(0, IDEA_MAX_LENGTH))
+    setErrors((current) => ({ ...current, idea: undefined }))
+    touch()
+    ideaRef.current?.focus()
+  }
 
   const randomBlocked = idea.trim() !== '' || file !== null
 
@@ -111,10 +137,7 @@ export default function CreateGamePage() {
   }
 
   const requestSuggestions = () => {
-    suggestionsMutation.mutate(lastInput.current, {
-      // Loại đứng đầu (phù hợp nhất) được chọn sẵn để giáo viên chỉ cần bấm Tạo nếu đồng ý.
-      onSuccess: (data: GameTypeSuggestion[]) => setSelectedTypes(data[0] ? [data[0].type] : []),
-    })
+    suggestionsMutation.mutate(lastInput.current)
   }
 
   const submit = (nextMode: Mode) => {
@@ -152,17 +175,9 @@ export default function CreateGamePage() {
     setTimeout(() => document.getElementById('create-idea')?.focus(), 0)
   }
 
-  // Đổi lựa chọn KHÔNG xóa kết quả đã có: loại đã tạo xong vẫn được nhớ (chọn lại hay bấm Tạo cũng không tạo trùng); loại bị bỏ chọn thì biến khỏi khối kết quả.
-  const toggleType = (type: string) => {
-    setSelectedTypes((current) => {
-      if (current.includes(type)) return current.filter((item) => item !== type)
-
-      return current.length >= MAX_GAMES_PER_REQUEST ? current : [...current, type]
-    })
-  }
-
-  // Mỗi loại đã chọn là một yêu cầu sinh game (chạy song song). Dựng từ ĐÚNG dữ liệu đã dùng để đề xuất (lastInput), không từ ô nhập hiện tại.
-  const createSelected = async () => {
+  // Mỗi loại là một yêu cầu sinh game (F5 chỉ gửi một loại). Dựng từ ĐÚNG dữ liệu đã dùng để đề xuất (lastInput), không từ ô nhập hiện tại.
+  // Loại đã tạo xong được useCreateGames nhớ nên bấm lại cũng không tạo trùng.
+  const createSelected = async (types: ReadonlyArray<string>) => {
     const form = {
       subject: lastInput.current.subject,
       gradeLevel: lastInput.current.gradeLevel,
@@ -171,10 +186,11 @@ export default function CreateGamePage() {
       voiceGender: voice.voiceGender,
       hasFile: file !== null,
     }
-    const running = creation.create(selectedTypes.map((type) => buildGenerateRequest(form, mode, type)))
+    setCreatingInput({ idea: form.idea, gradeLevel: form.gradeLevel })
+    const running = creation.create(types.map((type) => buildGenerateRequest(form, mode, type)))
 
-    // Nút Tạo vừa bị khóa (mất tiêu điểm): đưa tiêu điểm tới khối tiến trình để người dùng bàn phím tới ngay nút "Hủy tạo".
-    setTimeout(() => progressRef.current?.focus(), 0)
+    // Nút Tạo vừa biến mất (mất tiêu điểm): đưa tiêu điểm tới màn tiến trình để người dùng bàn phím tới ngay nút "Hủy tạo".
+    setTimeout(() => panelRef.current?.focus(), 0)
 
     const outcome = await running
 
@@ -186,8 +202,8 @@ export default function CreateGamePage() {
       return
     }
 
-    // Còn loại chưa tạo được hoặc đã hủy: đưa tiêu điểm tới khối kết quả để người dùng bàn phím và trình đọc màn hình biết ngay.
-    if (outcome.status !== 'busy') setTimeout(() => progressRef.current?.focus(), 0)
+    // Bấm lại kiểu đã lỗi không thể thử lại (không an toàn...): không có lượt chạy mới nên đưa tiêu điểm tới khối lỗi, nút không "im lặng".
+    if (outcome.status === 'partial') setTimeout(() => progressRef.current?.focus(), 0)
   }
 
   const onSubmit = (event: FormEvent) => {
@@ -196,6 +212,12 @@ export default function CreateGamePage() {
   }
 
   const suggestions = suggestionsMutation.data ?? []
+  const suggestContext =
+    mode === 'random'
+      ? text.suggestStepRandom
+      : [lesson.subject && subjectLabel(lesson.subject), lesson.gradeLevel && gradeLevelLabel(lesson.gradeLevel), idea.trim()]
+          .filter(Boolean)
+          .join(' · ')
   const suggestionStatus =
     suggestionsMutation.status === 'error'
       ? 'error'
@@ -203,40 +225,69 @@ export default function CreateGamePage() {
         ? 'success'
         : 'pending'
 
+  if (creation.creating) {
+    return (
+      <CreateProgressPanel
+        ref={panelRef}
+        idea={creatingInput.idea}
+        gradeLevel={creatingInput.gradeLevel}
+        types={selectedTypes}
+        mock={isMock('ai')}
+        onCancel={creation.cancel}
+      />
+    )
+  }
+
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
-          {text.kicker}
-        </p>
-        <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{text.title}</h1>
-        <p className="mt-3 max-w-2xl text-base leading-7 text-ink-soft">
-          {text.description}
-        </p>
+      <header className="space-y-4">
+        {step === 'describe' ? (
+          <Link
+            to={ROUTES.dashboard}
+            aria-label={text.backHome}
+            className="grid h-11 w-11 place-items-center rounded-full bg-surface text-2xl font-bold text-ink shadow-sm transition hover:bg-brand-soft"
+          >
+            <span aria-hidden="true">‹</span>
+          </Link>
+        ) : null}
         <ol
           aria-label={text.stepsLabel}
-          className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-base font-semibold"
+          className="flex flex-wrap items-center gap-x-3 gap-y-2 text-base font-semibold"
         >
           <StepMarker number={1} label={text.stepDescribe} current={step === 'describe'} done={step === 'suggest'} />
           <li aria-hidden="true" className="h-0.5 w-6 bg-ink/20" />
-          <StepMarker number={2} label={text.stepPick} current={step === 'suggest'} done={false} />
+          <StepMarker
+            number={2}
+            label={text.stepPick}
+            current={step === 'suggest' && !creation.creating}
+            done={step === 'suggest' && creation.creating}
+          />
+          <li aria-hidden="true" className="h-0.5 w-6 bg-ink/20" />
+          <StepMarker number={3} label={text.stepCompose} current={step === 'suggest' && creation.creating} done={false} />
         </ol>
+        <h1 ref={stepHeadingRef} tabIndex={-1} className="font-display text-3xl font-extrabold outline-none sm:text-4xl">
+          {step === 'describe' ? text.heading : text.suggestStepTitle}
+        </h1>
       </header>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_20rem] xl:items-start">
+      <div className={`grid items-start gap-6 ${step === 'describe' ? 'lg:grid-cols-[2fr_1fr]' : ''}`}>
         <div className="space-y-6">
           {step === 'describe' ? (
             <form
               onSubmit={onSubmit}
               noValidate
-              className="space-y-6 rounded-3xl border-2 border-ink/10 bg-white p-5 sm:p-7"
+              className="space-y-6 rounded-3xl bg-surface p-5 shadow-sm sm:p-7"
             >
-              <LessonContextChips
+              <LessonContextPicker
                 gradeLevel={lesson.gradeLevel}
                 subject={lesson.subject}
+                group={group}
                 gradeIsGuess={lesson.gradeIsGuess}
                 subjectIsGuess={lesson.subjectIsGuess}
+                onGroupChange={chooseGroup}
                 onGradeLevelChange={(value) => {
+                  // Bỏ chọn lớp cụ thể thì giữ hàng lớp mở để cô chọn lại.
+                  setUpperOpen(group === 'UPPER')
                   lesson.setGradeLevel(value)
                   touch()
                 }}
@@ -259,6 +310,7 @@ export default function CreateGamePage() {
               >
                 <textarea
                   id="create-idea"
+                  ref={ideaRef}
                   value={idea}
                   maxLength={IDEA_MAX_LENGTH}
                   placeholder={ideaPlaceholderFor(lesson.gradeLevel, lesson.subject)}
@@ -273,54 +325,10 @@ export default function CreateGamePage() {
                 />
               </FormField>
 
-              <div>
-                <p className="text-base font-semibold text-ink">{text.suggestionsTitle}</p>
-                {templates.length > 0 ? (
-                  <ul className="mt-2 flex flex-wrap gap-2">
-                    {templates.map((template) => {
-                      const active = idea === template.topic
-
-                      return (
-                        <li key={template.id}>
-                          <button
-                            type="button"
-                            aria-pressed={active}
-                            onClick={() => {
-                              setIdea(template.topic)
-                              // Chọn mẫu là chọn luôn khối lớp và môn của mẫu, để danh sách gợi ý không "trôi" theo từ khóa AI đoán.
-                              lesson.setGradeLevel(template.level)
-                              lesson.setSubject(template.subject)
-                              setErrors((current) => ({ ...current, idea: undefined }))
-                              touch()
-                            }}
-                            className={[
-                              'inline-flex min-h-11 items-center gap-2 rounded-full border-2 px-4 text-base font-semibold transition',
-                              active
-                                ? 'border-brand bg-brand text-white'
-                                : 'border-ink/20 bg-white text-ink hover:border-brand hover:bg-brand-soft',
-                            ].join(' ')}
-                          >
-                            {active ? <Icon name="check" className="h-4 w-4" /> : null}
-                            {template.title}
-                          </button>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                ) : (
-                  <p className="mt-1 text-sm text-ink-soft">
-                    {hasContext ? text.suggestionsNone : text.suggestionsHint}
-                  </p>
-                )}
-                <p role="status" className="sr-only">
-                  {templates.length > 0 ? `${templates.length} ${text.suggestionsCount}` : ''}
-                </p>
-              </div>
-
               <FormField
                 id="create-file"
                 label={text.fileLabel}
-                hint={text.fileHint}
+                hint={text.fileHint.replace('{n}', String(LESSON_FILE_MAX_BYTES / (1024 * 1024)))}
                 error={fileError}
               >
                 <FileDropZone
@@ -374,13 +382,13 @@ export default function CreateGamePage() {
               </details>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Button type="submit" className="gap-2">
+                <Button type="submit" size="lg" className="gap-2">
                   <Icon name="sparkles" />
                   {text.submit}
                 </Button>
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="ghost"
                   className="gap-2"
                   disabled={randomBlocked}
                   aria-describedby="create-random-hint"
@@ -396,20 +404,21 @@ export default function CreateGamePage() {
             </form>
           ) : (
             <GameTypeSuggestionStep
-              ref={stepHeadingRef}
+              // Mỗi lần đề xuất mới thì quay về 3 thẻ đầu.
+              key={suggestionsMutation.submittedAt}
               status={suggestionStatus}
               suggestions={suggestions}
-              selected={selectedTypes}
               subject={lesson.subject}
-              randomTopic={mode === 'random'}
+              context={suggestContext}
               errorMessage={
                 suggestionsMutation.error
                   ? parseApiError(suggestionsMutation.error, text.suggestErrorFallback).message
                   : undefined
               }
-              creating={creation.creating}
-              onToggle={toggleType}
-              onCreate={() => void createSelected()}
+              onUse={(type) => {
+                setSelectedTypes([type])
+                void createSelected([type])
+              }}
               onBack={backToDescribe}
               onRetry={retrySuggestions}
             />
@@ -431,53 +440,15 @@ export default function CreateGamePage() {
               created={creation.created}
               failures={creation.failures}
               mock={isMock('ai')}
-              onRetry={() => void createSelected()}
+              onRetry={() => void createSelected(selectedTypes)}
               onCancel={creation.cancel}
             />
           ) : null}
         </div>
 
-        <aside
-          aria-labelledby="summary-title"
-          className="hidden rounded-3xl border-2 border-ink/10 bg-white p-5 xl:sticky xl:top-8 xl:block"
-        >
-          <h2 id="summary-title" className="text-lg font-extrabold">
-            {text.summaryTitle}
-          </h2>
-          <dl className="mt-4 space-y-3 text-base">
-            <SummaryRow
-              label={text.gradeLabel}
-              value={lesson.gradeLevel ? gradeLevelLabel(lesson.gradeLevel) : ''}
-              empty={text.noValueOption}
-              note={lesson.gradeIsGuess ? text.aiGuessTag : undefined}
-            />
-            <SummaryRow
-              label={text.subjectLabel}
-              value={lesson.subject ? subjectLabel(lesson.subject) : ''}
-              empty={text.noValueOption}
-              note={lesson.subjectIsGuess ? text.aiGuessTag : undefined}
-            />
-            <SummaryRow
-              label={text.ideaLabel}
-              value={step === 'suggest' && mode === 'random' ? text.randomTopicSummary : idea.trim()}
-              clamp
-              hint={
-                idea.trim() && !hasValidIdea(idea)
-                  ? text.ideaNeedMore.replace('{n}', String(IDEA_MIN_LENGTH - idea.trim().length))
-                  : undefined
-              }
-            />
-            <SummaryRow label={text.fileSummaryLabel} value={file?.name ?? ''} />
-            <SummaryRow
-              label={text.gameTypeLabel}
-              value={
-                step === 'suggest'
-                  ? selectedTypes.map(gameTypeLabel).join(', ')
-                  : text.gameTypeAuto
-              }
-            />
-          </dl>
-        </aside>
+        {step === 'describe' ? (
+          <IdeaSuggestions subject={lesson.subject} group={group} onPick={pickIdea} />
+        ) : null}
       </div>
     </div>
   )
@@ -510,32 +481,5 @@ function StepMarker({
         {done ? <span className="sr-only"> ({viText.generator.stepDone})</span> : null}
       </span>
     </li>
-  )
-}
-
-function SummaryRow({
-  label,
-  value,
-  clamp,
-  hint,
-  note,
-  empty = viText.generator.summaryEmpty,
-}: {
-  label: string
-  value: string
-  clamp?: boolean
-  hint?: string
-  note?: string
-  empty?: string
-}) {
-  return (
-    <div>
-      <dt className="text-sm font-semibold text-ink-soft">{label}</dt>
-      <dd className={`mt-0.5 font-semibold ${clamp ? 'line-clamp-3' : ''}`}>
-        {value || <span className="font-normal text-ink-soft">{empty}</span>}
-      </dd>
-      {note ? <dd className="text-sm font-medium text-brand-strong">{note}</dd> : null}
-      {hint ? <dd className="text-sm font-medium text-rose-800">{hint}</dd> : null}
-    </div>
   )
 }

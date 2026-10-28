@@ -7,7 +7,11 @@ import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import type { WordScrambleQuestion } from '../types/game-dsl.types'
 import WorkspaceEditor from './WorkspaceEditor'
+import { autosaved } from '../test/autosave'
 
+
+// Lỗi hiện ngay dưới ô nằm trong khung "Sửa câu"; khối "Sẵn sàng xuất bản?" ở cột phải cũng nhắc lại cùng câu.
+const editPane = () => document.getElementById('editor-pane-preview') as HTMLElement
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx) để mở màn chơi thử được trong test.
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
@@ -30,7 +34,7 @@ const lettersGroup = () => screen.getByRole('group', { name: 'Các chữ đã x�
 const shown = () => within(lettersGroup()).queryAllByRole('listitem').map((item) => item.textContent ?? '')
 const reshuffleButton = () => screen.getByRole('button', { name: 'Xáo lại' })
 const listItems = () => within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')
-const saveButton = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
+import { timingBox } from '../test/editorTiming'
 const key = (letters: ReadonlyArray<string>) => letters.map((letter) => letter.toUpperCase()).join('')
 const sortedKey = (letters: ReadonlyArray<string>) => [...letters].map((letter) => letter.toUpperCase()).sort().join('')
 const sortedWord = (word: string) => sortedKey(splitLetters(word))
@@ -74,7 +78,7 @@ describe('form sửa câu WORD_SCRAMBLE', () => {
     expect(wordBox()).toHaveValue('mẹ')
     expect(shown()).toEqual(['ẹ', 'm'])
     expect(screen.getByRole('textbox', { name: /^Lời đọc/ })).toHaveValue('Ghép chữ thành từ chỉ người sinh ra con')
-    expect(screen.getByRole('textbox', { name: /Thời gian trả lời/ })).toHaveValue('30')
+    expect(timingBox(/Thời gian trả lời/)).toHaveValue('30')
     expect(wordBox()).toHaveAccessibleDescription(/Từ từ 2 đến 10 chữ/)
   })
 
@@ -110,7 +114,7 @@ describe('form sửa câu WORD_SCRAMBLE', () => {
     expect(shown()).not.toEqual(['h', 'a', 'n'])
     expect(key(shown())).not.toBe('ANH')
     expect(sortedKey(shown())).toBe('AHN')
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
     expect(listItems()[2]).toHaveTextContent(expected.join(' '))
   })
 
@@ -200,8 +204,8 @@ describe('form sửa câu WORD_SCRAMBLE', () => {
     await openLoaded()
     type(wordBox(), 'con mèo')
 
-    expect(await screen.findByText(/không được có khoảng trắng/)).toBeInTheDocument()
-    expect(screen.getAllByText(/không được có khoảng trắng/)).toHaveLength(1)
+    expect(await within(editPane()).findByText(/không được có khoảng trắng/)).toBeInTheDocument()
+    expect(within(editPane()).getAllByText(/không được có khoảng trắng/)).toHaveLength(1)
     expect(screen.queryByText(/phải đúng là các chữ của từ đáp án/)).not.toBeInTheDocument()
     expect(shown().some((letter) => /\s/.test(letter))).toBe(false)
     expect(listItems()[0]).toHaveTextContent('Cần sửa')
@@ -210,10 +214,10 @@ describe('form sửa câu WORD_SCRAMBLE', () => {
   it('từ quá 10 chữ hoặc chỉ 1 chữ bị báo đúng ô', async () => {
     await openLoaded()
     type(wordBox(), 'abcdefghijk')
-    expect(await screen.findByText(/tối đa 10 ký tự/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/tối đa 10 ký tự/)).toBeInTheDocument()
 
     type(wordBox(), 'a')
-    expect(await screen.findByText(/ít nhất 2 ký tự/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/ít nhất 2 ký tự/)).toBeInTheDocument()
   })
 
   it('từ ngữ chưa phù hợp (UC-05 2a): giữ nguyên nội dung cũ, hiện đúng câu của SRS', async () => {
@@ -235,8 +239,7 @@ describe('form sửa câu WORD_SCRAMBLE', () => {
 
     const onScreen = shown()
 
-    fireEvent.click(saveButton())
-    await screen.findByText('Đã lưu thay đổi của trò chơi.', {}, { timeout: 8000 })
+    await autosaved()
 
     const stored = getMockGame(SCRAMBLE_ID).questions[2] as WordScrambleQuestion
 

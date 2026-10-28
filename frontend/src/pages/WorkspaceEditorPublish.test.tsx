@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import SharePanel from '../components/editor/SharePanel'
+import PublishDialog from '../components/editor/PublishDialog'
 import { getMockGame, resetMockGames, setMockGameLocked } from '../services/mock/mockGames'
 import { getMockPublishCalls, resetMockPublish, setMockPublishFailure } from '../services/mock/mockPublish'
 import { setMockScenario } from '../services/mock/mockRuntime'
@@ -54,7 +54,7 @@ describe('xuất bản từ trình soạn thảo', () => {
     await openLoaded(DRAFT_ID)
     await user.click(publishButton())
 
-    const dialog = await screen.findByRole('dialog', { name: 'Trò chơi đã xuất bản' })
+    const dialog = await screen.findByRole('dialog', { name: 'Xuất bản và chia sẻ' })
     const code = within(dialog).getByRole('textbox', { name: 'Mã chia sẻ' }) as HTMLInputElement
     const link = within(dialog).getByRole('textbox', { name: 'Liên kết chia sẻ' }) as HTMLInputElement
 
@@ -94,7 +94,7 @@ describe('xuất bản từ trình soạn thảo', () => {
     const dialog = await screen.findByRole('dialog')
 
     expect(within(dialog).getByRole('note')).toHaveTextContent('chưa được lưu')
-    expect(dialog).toHaveAccessibleDescription(/Học sinh dùng mã/)
+    expect(dialog).toHaveAccessibleDescription(/Cô muốn cho các bé chơi theo cách nào/)
   })
 
   it('đóng hộp bằng Esc', async () => {
@@ -142,7 +142,7 @@ describe('xuất bản từ trình soạn thảo', () => {
 
     expect(alert).toHaveTextContent('Hệ thống chưa hoàn tất lưu trò chơi. Bạn hãy thử lại một lần nữa.')
     expect(alert).toHaveTextContent('Nội dung bạn đang soạn vẫn được giữ nguyên.')
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Chưa lưu được')).toBeInTheDocument()
     expect(titleBox()).toHaveValue(`${getMockGame(DRAFT_ID).metadata.title} (mới)`)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
@@ -165,7 +165,7 @@ describe('xuất bản từ trình soạn thảo', () => {
 
     expect(alert).toHaveTextContent('Trò chơi đã lưu nhưng chưa thể tạo mã chia sẻ. Vui lòng thử xuất bản lại.')
     expect(within(alert).getByRole('button', { name: 'Thử lại' })).toBeInTheDocument()
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Chưa lưu được')).toBeInTheDocument()
   })
 
   it('409: có phòng chơi chưa kết thúc thì nói rõ lý do, giữ nội dung và không có nút Thử lại', async () => {
@@ -192,7 +192,6 @@ describe('xuất bản từ trình soạn thảo', () => {
     await user.click(publishButton())
 
     await waitFor(() => expect(screen.getByRole('button', { name: 'Đang xuất bản...' })).toBeDisabled())
-    expect(screen.getByRole('button', { name: 'Lưu bản nháp' })).toBeDisabled()
     expect(screen.getByRole('button', { name: /Chơi thử/ })).toBeDisabled()
 
     await screen.findByRole('dialog')
@@ -239,11 +238,11 @@ describe('sao chép mã và liên kết', () => {
   })
 })
 
-describe('SharePanel: liên kết an toàn', () => {
+describe('PublishDialog: liên kết an toàn', () => {
   it('shareUrl không phải http/https (javascript:, data:) bị bỏ, chỉ dùng địa chỉ ghép từ mã', () => {
     for (const shareUrl of ['javascript:alert(1)', 'data:text/html,<script>1</script>', 'ftp://x.test/a']) {
       const { unmount } = renderWithProviders(
-        <SharePanel gameTitle="Trò chơi mẫu" result={{ gameId: 'g', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl }} hasUnsavedAfter={false} onClose={() => undefined} />,
+        <PublishDialog gameTitle="Trò chơi mẫu" gradeLevel="GRADE_1" result={{ gameId: 'g', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl }} hasUnsavedAfter={false} onClose={() => undefined} />,
       )
       const link = screen.getByRole('textbox', { name: 'Liên kết chia sẻ' }) as HTMLInputElement
 
@@ -256,7 +255,7 @@ describe('SharePanel: liên kết an toàn', () => {
 
   it('đã sửa thêm trong lúc xuất bản thì có ghi chú phần sửa thêm chưa lưu', () => {
     renderWithProviders(
-      <SharePanel gameTitle="Trò chơi mẫu" result={{ gameId: 'g', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl: 'https://x.test/play/ABC123' }} hasUnsavedAfter onClose={() => undefined} />,
+      <PublishDialog gameTitle="Trò chơi mẫu" gradeLevel="GRADE_1" result={{ gameId: 'g', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl: 'https://x.test/play/ABC123' }} hasUnsavedAfter onClose={() => undefined} />,
     )
 
     expect(screen.getByRole('note')).toHaveTextContent('chưa được lưu')

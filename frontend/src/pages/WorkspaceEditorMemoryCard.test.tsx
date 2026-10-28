@@ -6,6 +6,7 @@ import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import type { MemoryCardQuestion } from '../types/game-dsl.types'
 import WorkspaceEditor from './WorkspaceEditor'
+import { autosaved } from '../test/autosave'
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx) để mở màn chơi thử được trong test.
 vi.mock('react-konva', () => ({
@@ -31,7 +32,10 @@ const cardBox = (pair: number, kind: 'Chữ trên thẻ' | 'Mô tả hình trên
 const addButton = () => screen.getByRole('button', { name: 'Thêm cặp' })
 const removeButton = (pair: number) => screen.getByRole('button', { name: `Xóa cặp ${pair}` })
 const listItems = () => within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')
-const saveButton = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
+import { timingBox } from '../test/editorTiming'
+
+// Lỗi hiện ngay dưới ô nằm trong khung "Sửa câu"; khối "Sẵn sàng xuất bản?" ở cột phải cũng nhắc lại cùng câu.
+const editPane = () => document.getElementById('editor-pane-preview') as HTMLElement
 const type = (box: HTMLElement, value: string) => {
   fireEvent.change(box, { target: { value } })
   fireEvent.blur(box)
@@ -80,8 +84,8 @@ describe('form sửa câu MEMORY_CARD', () => {
     expect(cardBox(2, 'Chữ trên thẻ')).toHaveValue('bird')
     expect(cardBox(0, 'Mô tả hình trên thẻ')).toHaveValue('')
     expect(screen.getByRole('textbox', { name: /^Lời đọc/ })).toHaveValue('Tìm hai thẻ giống nhau')
-    expect(screen.getByRole('textbox', { name: /Thời gian trả lời/ })).toHaveValue('30')
-    expect(screen.getByRole('textbox', { name: /^Điểm/ })).toHaveValue('10')
+    expect(timingBox(/Thời gian trả lời/)).toHaveValue('30')
+    expect(timingBox(/^Điểm/)).toHaveValue('10')
   })
 
   it('chọn câu khác thì form đổi theo (câu 2 có 4 cặp, câu 3 có 2 cặp)', async () => {
@@ -100,7 +104,7 @@ describe('form sửa câu MEMORY_CARD', () => {
     type(cardBox(0, 'Chữ trên thẻ'), 'kitten')
 
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('kitten'))
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
   })
 
   // Hai test nhẹ thay cho một test dài: dữ liệu được nạp sẵn sát giới hạn nên mỗi test chỉ cần MỘT lần bấm (trước đây 11 lần bấm liên tiếp trên form 8 cặp quá hạn khi máy bận).
@@ -163,9 +167,9 @@ describe('form sửa câu MEMORY_CARD', () => {
     await openLoaded()
     type(cardBox(1, 'Chữ trên thẻ'), 'cat')
 
-    expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/bị trùng nhau/)).toBeInTheDocument()
 
-    fireEvent.click(saveButton())
+    fireEvent.click(screen.getByRole('button', { name: 'Xem lỗi' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(getMockGame(MEMORY_ID).questions[0]).toMatchObject({ pairs: [{ content: { text: 'cat' } }, { content: { text: 'dog' } }, { content: { text: 'bird' } }] })
@@ -174,7 +178,7 @@ describe('form sửa câu MEMORY_CARD', () => {
   it('so trùng mặt thẻ: bỏ khoảng trắng đầu cuối và khoảng trắng thừa, không phân biệt hoa thường, GIỮ dấu tiếng Việt', async () => {
     await openLoaded()
     type(cardBox(1, 'Chữ trên thẻ'), '  CAT ')
-    expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/bị trùng nhau/)).toBeInTheDocument()
 
     // Khác dấu thì là hai từ khác nhau: "cát" không trùng "cat".
     type(cardBox(1, 'Chữ trên thẻ'), 'cát')
@@ -185,7 +189,7 @@ describe('form sửa câu MEMORY_CARD', () => {
     await openLoaded()
     type(cardBox(0, 'Chữ trên thẻ'), 'a'.repeat(101))
 
-    expect(await screen.findByText(/tối đa 100 ký tự/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/tối đa 100 ký tự/)).toBeInTheDocument()
   })
 
   it('từ ngữ chưa phù hợp (UC-05 2a): giữ nguyên nội dung cũ trong danh sách, hiện đúng câu của SRS', async () => {
@@ -205,7 +209,7 @@ describe('form sửa câu MEMORY_CARD', () => {
     saveMockGame(MEMORY_ID, game)
 
     await openLoaded()
-    const time = screen.getByRole('textbox', { name: /Thời gian trả lời/ })
+    const time = timingBox(/Thời gian trả lời/)
 
     expect(time).toHaveValue('135')
     // Chờ danh sách câu dựng xong rồi mới khẳng định không có lỗi (tránh đúng một cách rỗng).
@@ -229,8 +233,7 @@ describe('form sửa câu MEMORY_CARD', () => {
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('kitten'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    fireEvent.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(getMockGame(MEMORY_ID).questions[0]).toMatchObject({ timeLimitSeconds: 135, pairs: [{ content: { text: 'kitten' } }, { content: { text: 'dog' } }, { content: { text: 'bird' } }] })
@@ -243,8 +246,7 @@ describe('form sửa câu MEMORY_CARD', () => {
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('4 cặp'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    fireEvent.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(getMockGame(MEMORY_ID).questions[0]).toMatchObject({
       pairs: [

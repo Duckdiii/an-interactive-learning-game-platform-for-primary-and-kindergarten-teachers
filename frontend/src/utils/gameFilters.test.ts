@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { GameSummary } from '../types/game-summary.types'
 import {
   EMPTY_LIST_FILTERS,
+  countBySubject,
   filterGames,
   hasActiveFilter,
   normalizeSearchText,
@@ -68,5 +69,13 @@ describe('hasActiveFilter', () => {
     expect(hasActiveFilter(EMPTY_LIST_FILTERS)).toBe(false)
     expect(hasActiveFilter({ ...EMPTY_LIST_FILTERS, q: 'a' })).toBe(true)
     expect(hasActiveFilter({ ...EMPTY_LIST_FILTERS, grade: 'GRADE_3' })).toBe(true)
+  })
+})
+
+describe("countBySubject", () => {
+  it("đếm theo môn trên toàn danh sách, môn không có game thì không có khóa", () => {
+    expect(countBySubject(GAMES)).toEqual({ MATH: 1, VIETNAMESE: 1, ENGLISH: 1 })
+    expect(countBySubject([...GAMES, game({ gameId: "4" })])).toMatchObject({ MATH: 2 })
+    expect(countBySubject([])).toEqual({})
   })
 })

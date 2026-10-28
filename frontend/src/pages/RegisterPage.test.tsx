@@ -36,8 +36,8 @@ async function submitRegister() {
   fillField('Họ và tên', 'Nguyễn Văn An')
   fillField('Email', 'giaovien@example.com')
   fillField('Mật khẩu', 'mat-khau-dai-du')
-  fillField('Xác nhận mật khẩu', 'mat-khau-dai-du')
-  await user.click(screen.getByRole('button', { name: 'Đăng ký' }))
+  fillField('Nhập lại mật khẩu', 'mat-khau-dai-du')
+  await user.click(screen.getByRole('button', { name: 'Tạo tài khoản' }))
 }
 
 describe('Đăng ký: thông báo lỗi', () => {

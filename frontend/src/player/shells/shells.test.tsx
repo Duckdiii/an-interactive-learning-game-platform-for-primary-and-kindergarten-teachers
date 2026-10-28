@@ -27,6 +27,21 @@ describe('registry', () => {
   })
 })
 
+describe('embedded', () => {
+  it.each(['be', 'hocSinh'] as const)('khung %s: nhúng thì cao bằng khung chứa, mặc định cao bằng màn hình', (band) => {
+    const embedded = renderShell(band, { embedded: true })
+    const root = embedded.container.firstElementChild
+
+    expect(root).toHaveClass('h-full', 'min-h-0')
+    expect(root).not.toHaveClass('min-h-screen')
+    // Nhúng trong trang giáo viên thì không thêm h1 thứ hai.
+    expect(screen.queryByRole('heading', { level: 1 })).toBeNull()
+    embedded.unmount()
+    expect(renderShell(band).container.firstElementChild).toHaveClass('min-h-screen')
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+  })
+})
+
 describe('BeShell', () => {
   it('hiện tiến độ bằng sao, không đồng hồ, không điểm dù được đưa vào', () => {
     const { container } = renderShell('be')

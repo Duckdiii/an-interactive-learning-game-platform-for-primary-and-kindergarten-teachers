@@ -63,30 +63,53 @@ describe('Trò chơi của tôi', () => {
 
     expect(await screen.findByText('4 trò chơi')).toBeInTheDocument()
     expect(titles()).toHaveLength(4)
-    expect(screen.getByRole('radio', { name: /Tất cả/ })).toHaveAccessibleName('Tất cả 4')
-    expect(screen.getByRole('radio', { name: /Bản nháp/ })).toHaveAccessibleName('Bản nháp 2')
-    expect(screen.getByRole('radio', { name: /Đã đăng/ })).toHaveAccessibleName('Đã đăng 2')
+    const filters = within(screen.getByRole('group', { name: 'Lọc trò chơi theo môn và trạng thái' }))
+    expect(filters.getByRole('button', { name: 'Tất cả 4' })).toHaveAttribute('aria-pressed', 'true')
+    expect(filters.getByRole('button', { name: 'Toán 2' })).toHaveAttribute('aria-pressed', 'false')
+    expect(filters.getByRole('button', { name: 'Tiếng Việt 1' })).toBeInTheDocument()
+    expect(filters.getByRole('button', { name: 'Tiếng Anh 1' })).toBeInTheDocument()
+    expect(filters.getByRole('button', { name: 'Bản nháp 2' })).toHaveAttribute('aria-pressed', 'false')
     expect(mockedGetGames).toHaveBeenCalledTimes(1)
   })
 
-  it('đổi tab trạng thái lọc ngay ở máy (không gọi lại API) và ghi lên địa chỉ', async () => {
+  it('bấm chip môn lọc ngay ở máy (không gọi lại API), ghi lên địa chỉ; bấm lần nữa thì bỏ lọc', async () => {
     const user = userEvent.setup()
     renderPage()
     await screen.findByText('4 trò chơi')
 
-    await user.click(screen.getByRole('radio', { name: /Đã đăng/ }))
+    await user.click(screen.getByRole('button', { name: 'Toán 2' }))
 
     expect(await screen.findByText('Hiển thị 2 trên 4 trò chơi')).toBeInTheDocument()
-    expect(titles()).toEqual(['Nhận biết chữ cái A Ă Â', 'Phép cộng trong phạm vi 20'])
-    expect(screen.getByTestId('url')).toHaveTextContent('/workspace?status=PUBLISHED')
+    expect(titles()).toEqual(['Đếm số đến 10', 'Phép cộng trong phạm vi 20'])
+    expect(screen.getByRole('button', { name: 'Toán 2' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByTestId('url')).toHaveTextContent('/workspace?subject=MATH')
     expect(mockedGetGames).toHaveBeenCalledTimes(1)
+
+    await user.click(screen.getByRole('button', { name: 'Toán 2' }))
+    expect(await screen.findByText('4 trò chơi')).toBeInTheDocument()
   })
 
-  it('mở trang với ?status=DRAFT thì tab Bản nháp đã chọn sẵn (từ nút thống kê ở Trang chủ)', async () => {
+  it('chip "Bản nháp" bật/tắt lọc bản nháp', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByText('4 trò chơi')
+
+    await user.click(screen.getByRole('button', { name: 'Bản nháp 2' }))
+
+    expect(await screen.findByText('Hiển thị 2 trên 4 trò chơi')).toBeInTheDocument()
+    expect(titles()).toEqual(['Đếm số đến 10', 'Từ vựng về con vật'])
+    expect(screen.getByRole('button', { name: 'Bản nháp 2' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByTestId('url')).toHaveTextContent('/workspace?status=DRAFT')
+
+    await user.click(screen.getByRole('button', { name: 'Bản nháp 2' }))
+    expect(await screen.findByText('4 trò chơi')).toBeInTheDocument()
+  })
+
+  it('mở trang với ?status=DRAFT thì chip Bản nháp đã bật sẵn (từ nút thống kê ở Trang chủ)', async () => {
     renderPage('/workspace?status=DRAFT')
 
     expect(await screen.findByText('Hiển thị 2 trên 4 trò chơi')).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: /Bản nháp/ })).toBeChecked()
+    expect(screen.getByRole('button', { name: 'Bản nháp 2' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('tìm theo tên không cần gõ dấu và giữ từ khóa trên địa chỉ', async () => {
@@ -94,7 +117,7 @@ describe('Trò chơi của tôi', () => {
     renderPage()
     await screen.findByText('4 trò chơi')
 
-    await user.type(screen.getByRole('searchbox', { name: 'Tìm theo tên trò chơi' }), 'dem so')
+    await user.type(screen.getByRole('searchbox', { name: 'Tìm trò chơi' }), 'dem so')
 
     expect(await screen.findByText('Hiển thị 1 trên 4 trò chơi')).toBeInTheDocument()
     expect(titles()).toEqual(['Đếm số đến 10'])
@@ -106,7 +129,7 @@ describe('Trò chơi của tôi', () => {
     renderPage()
     await screen.findByText('4 trò chơi')
 
-    await user.selectOptions(screen.getByLabelText('Môn học'), 'MATH')
+    await user.click(screen.getByRole('button', { name: 'Toán 2' }))
     expect(await screen.findByText('Hiển thị 2 trên 4 trò chơi')).toBeInTheDocument()
 
     await user.selectOptions(screen.getByLabelText('Khối lớp'), 'GRADE_2')
@@ -127,15 +150,39 @@ describe('Trò chơi của tôi', () => {
     expect(screen.getByTestId('url')).toHaveTextContent(/^\/workspace$/)
   })
 
-  it('sao chép mã chơi của game đã đăng', async () => {
+  it('sao chép liên kết của game đã đăng qua menu "…"', async () => {
     const user = userEvent.setup()
     const writeText = mockClipboard()
     renderPage('/workspace?status=PUBLISHED')
     await screen.findByText('Hiển thị 2 trên 4 trò chơi')
 
-    await user.click(screen.getByRole('button', { name: 'Sao chép mã K7P2QM' }))
+    await user.click(screen.getByRole('button', { name: 'Thêm thao tác cho Phép cộng trong phạm vi 20' }))
+    await user.click(screen.getByRole('button', { name: 'Sao chép liên kết' }))
 
-    expect(writeText).toHaveBeenCalledWith('K7P2QM')
+    expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/\/play\/K7P2QM$/))
+  })
+
+  it('đường dẫn ?status=PUBLISHED: chip "Đã đăng" bật, "Tất cả" không bật; bấm "Tất cả" thì bỏ cả lọc trạng thái', async () => {
+    const user = userEvent.setup()
+    renderPage('/workspace?status=PUBLISHED')
+    await screen.findByText('Hiển thị 2 trên 4 trò chơi')
+    const filters = within(screen.getByRole('group', { name: /lọc/i }))
+
+    expect(filters.getByRole('button', { name: 'Đã đăng 2' })).toHaveAttribute('aria-pressed', 'true')
+    expect(filters.getByRole('button', { name: 'Tất cả 4' })).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(filters.getByRole('button', { name: 'Tất cả 4' }))
+
+    expect(await screen.findByText('4 trò chơi')).toBeInTheDocument()
+    expect(screen.getByTestId('url')).toHaveTextContent(/^\/workspace$/)
+  })
+
+  it('game đã đăng có nút Trình chiếu, bản nháp có nút Soạn tiếp', async () => {
+    renderPage()
+    await screen.findByText('4 trò chơi')
+
+    expect(screen.getAllByRole('link', { name: /Trình chiếu/ })).toHaveLength(2)
+    expect(screen.getAllByRole('link', { name: 'Soạn tiếp' })).toHaveLength(2)
   })
 
   it('chưa có game nào: trạng thái trống có nút tạo trò chơi đầu tiên', async () => {
@@ -160,10 +207,10 @@ describe('Trò chơi của tôi', () => {
     expect(await screen.findByText('4 trò chơi')).toBeInTheDocument()
   })
 
-  it('nút Tạo game mới ở đầu trang dẫn tới trang tạo game', async () => {
+  it('nút "+ Tạo trò chơi" ở đầu trang dẫn tới trang tạo game', async () => {
     renderPage()
     await screen.findByText('4 trò chơi')
 
-    expect(screen.getByRole('link', { name: 'Tạo game mới' })).toHaveAttribute('href', '/games/new')
+    expect(screen.getByRole('link', { name: '+ Tạo trò chơi' })).toHaveAttribute('href', '/games/new')
   })
 })

@@ -78,7 +78,7 @@ describe('trình soạn thảo: Chơi thử', () => {
     await user.click(screen.getByRole('button', { name: 'Thoát' }))
 
     expect(titleBox()).toHaveValue(`${before} (thử)`)
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
     await waitFor(() => expect(playButton()).toHaveFocus())
     // Chơi thử không lưu gì: kho vẫn giữ tên cũ và không có yêu cầu mạng nào.
     expect(getMockGame(QUIZ_ID).metadata.title).toBe(before)

@@ -6,7 +6,12 @@ import { setMockScenario } from '../services/mock/mockRuntime'
 import * as safety from '../services/safetyService'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import WorkspaceEditor from './WorkspaceEditor'
+import { autosaved } from '../test/autosave'
+import { timingBox } from '../test/editorTiming'
 
+
+// Lỗi hiện ngay dưới ô nằm trong khung "Sửa câu"; khối "Sẵn sàng xuất bản?" ở cột phải cũng nhắc lại cùng câu.
+const editPane = () => document.getElementById('editor-pane-preview') as HTMLElement
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx) để chơi thử được trong test.
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
@@ -34,8 +39,8 @@ const UNSAFE = 'Nội dung chỉnh sửa của giáo viên chưa đạt chuẩn 
 const questionBox = () => screen.getByRole('textbox', { name: /Nội dung câu hỏi/ })
 const optionBox = (letter: string) => screen.getByRole('textbox', { name: new RegExp(`Đáp án ${letter}`) })
 const radio = (letter: string) => screen.getByRole('radio', { name: new RegExp(`Đáp án ${letter}`) })
-const timeBox = () => screen.getByRole('textbox', { name: /Thời gian trả lời/ })
-const pointsBox = () => screen.getByRole('textbox', { name: /^Điểm/ })
+const timeBox = () => timingBox(/Thời gian trả lời/)
+const pointsBox = () => timingBox(/^Điểm/)
 const addButton = () => screen.getByRole('button', { name: 'Thêm đáp án' })
 const removeButtons = () => screen.getAllByRole('button', { name: /^Xóa đáp án/ })
 const listItems = () => within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')
@@ -97,7 +102,7 @@ describe('form sửa câu QUIZ (UC-05)', () => {
 
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('Trong hình có bao nhiêu quả táo?'))
     expect(screen.getAllByText('Trong hình có bao nhiêu quả táo?').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
   })
 
   it('không thể có 5 đáp án: đủ 4 thì nút Thêm bị khóa kèm lời giải thích', async () => {
@@ -146,6 +151,80 @@ describe('form sửa câu QUIZ (UC-05)', () => {
     expect(screen.queryByText(/Chưa có đáp án đúng/)).not.toBeInTheDocument()
   })
 
+  it('thời gian/điểm ở cấp game: câu theo mặc định thu gọn; đổi mặc định thì câu đặt riêng giữ nguyên; "Về mặc định" bỏ đặt riêng', async () => {
+    const user = userEvent.setup()
+
+    await openLoaded(QUIZ_ID)
+    const commit = (box: HTMLElement, value: string) => {
+      fireEvent.change(box, { target: { value } })
+      fireEvent.blur(box)
+    }
+    const times = () => listItems().map((item) => item.textContent?.match(/(\d+) giây/)?.[1])
+
+    expect(within(editPane()).getByText('30 giây · 10 điểm')).toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: /Thời gian trả lời/ })).toBeNull()
+
+    commit(screen.getByRole('textbox', { name: 'Mặc định: thời gian mỗi câu (giây)' }), '45')
+    await waitFor(() => expect(times()).toEqual(['45', '45', '45']))
+
+    // Câu 1 đặt riêng 60 giây.
+    commit(timingBox(/Thời gian trả lời/), '60')
+    await waitFor(() => expect(times()).toEqual(['60', '45', '45']))
+    expect(screen.getByRole('button', { name: 'Về mặc định (45 giây · 10 điểm)' })).toBeInTheDocument()
+
+    commit(screen.getByRole('textbox', { name: 'Mặc định: thời gian mỗi câu (giây)' }), '20')
+    await waitFor(() => expect(times()).toEqual(['60', '20', '20']))
+
+    await user.click(screen.getByRole('button', { name: 'Về mặc định (20 giây · 10 điểm)' }))
+    await waitFor(() => expect(times()).toEqual(['20', '20', '20']))
+    expect(within(editPane()).getByText('20 giây · 10 điểm')).toBeInTheDocument()
+  })
+
+  it('ô mặc định chỉ áp khi rời ô: gõ từng phím "60" không hút câu đặt riêng; ngoài khoảng thì báo lỗi dưới ô và không đổi câu nào', async () => {
+    const user = userEvent.setup()
+
+    await openLoaded(QUIZ_ID)
+    const times = () => listItems().map((item) => item.textContent?.match(/(\d+) giây/)?.[1])
+    const defaultTime = () => screen.getByRole('textbox', { name: 'Mặc định: thời gian mỗi câu (giây)' })
+
+    // Câu 1 đặt riêng 60 giây.
+    fireEvent.change(timingBox(/Thời gian trả lời/), { target: { value: '60' } })
+    fireEvent.blur(timingBox(/Thời gian trả lời/))
+    await waitFor(() => expect(times()).toEqual(['60', '30', '30']))
+
+    await user.clear(defaultTime())
+    await user.type(defaultTime(), '60')
+    expect(times()).toEqual(['60', '30', '30'])
+    await user.tab()
+    await waitFor(() => expect(times()).toEqual(['60', '60', '60']))
+
+    await user.clear(defaultTime())
+    await user.type(defaultTime(), '999{Enter}')
+    expect(await screen.findByText('Chỉ nhận từ 10 đến 120.')).toBeInTheDocument()
+    expect(defaultTime()).toHaveAttribute('aria-invalid', 'true')
+    expect(times()).toEqual(['60', '60', '60'])
+  })
+
+  it('khối "Sẵn sàng xuất bản?" nêu đúng câu còn lỗi; bấm dòng đó thì chuyển tới câu ấy', async () => {
+    const user = userEvent.setup()
+
+    await openLoaded(QUIZ_ID)
+    const readiness = () => within(screen.getByRole('region', { name: 'Sẵn sàng xuất bản?' }))
+
+    expect(readiness().getByText('Cả 3 câu đã sẵn sàng')).toBeInTheDocument()
+
+    await user.click(listItems()[1])
+    fireEvent.change(questionBox(), { target: { value: 'a'.repeat(201) } })
+    fireEvent.blur(questionBox())
+    await user.click(listItems()[0])
+
+    const problem = await readiness().findByRole('button', { name: 'Câu 2: Nội dung câu hỏi tối đa 200 ký tự.' })
+
+    expect(readiness().getByText('Câu 1, 3 đã sẵn sàng')).toBeInTheDocument()
+    await user.click(problem)
+    expect(listItems()[1]).toHaveAttribute('aria-current', 'true')
+  })
+
   it('nội dung câu quá 200 ký tự: lỗi hiện ngay dưới ô, bộ đếm đổi kiểu, và bấm Lưu bị chặn', async () => {
     const user = userEvent.setup()
 
@@ -153,10 +232,10 @@ describe('form sửa câu QUIZ (UC-05)', () => {
     fireEvent.change(questionBox(), { target: { value: 'a'.repeat(201) } })
     fireEvent.blur(questionBox())
 
-    expect(await screen.findByText(/Nội dung câu hỏi tối đa 200 ký tự/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/Nội dung câu hỏi tối đa 200 ký tự/)).toBeInTheDocument()
     expect(screen.getByText('201/200 ký tự')).toHaveClass('font-bold')
 
-    await user.click(screen.getByRole('button', { name: 'Lưu bản nháp' }))
+    await user.click(screen.getByRole('button', { name: 'Xem lỗi' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(getMockGame(QUIZ_ID).questions[0]).toMatchObject({ questionText: 'Có mấy quả táo trong hình?' })
@@ -213,7 +292,7 @@ describe('form sửa câu QUIZ (UC-05)', () => {
     expect(listItems()[0]).toHaveTextContent('Có mấy quả táo trong hình?')
     expect(questionBox()).toHaveValue('Cảnh máu me trong hình?')
     // Bộ đếm "đang áp dụng" giảm ở lượt vẽ kế tiếp sau khi lỗi hiện ra nên chờ một nhịp.
-    await waitFor(() => expect(screen.getByText('Đã lưu')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Đã tự lưu')).toBeInTheDocument())
   })
 
   it('có nhãn "Dữ liệu mô phỏng" ở chỗ kiểm tra từ ngữ (bộ lọc là giả lập)', async () => {
@@ -235,8 +314,7 @@ describe('form sửa câu QUIZ (UC-05)', () => {
     await user.type(timeBox(), '40')
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('Đếm số táo nhé?'))
 
-    await user.click(screen.getByRole('button', { name: 'Lưu bản nháp' }))
-    await screen.findByText('Đã lưu thay đổi của trò chơi.')
+    await autosaved()
 
     expect(getMockGame(QUIZ_ID).questions[0]).toMatchObject({ questionText: 'Đếm số táo nhé?', correctOptionId: 'c', timeLimitSeconds: 40 })
   })
@@ -289,8 +367,7 @@ describe('chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đang chạy
     expect(radio('C')).toBeChecked()
     expect(optionBox('A')).toHaveValue('Hai quả')
 
-    await user.click(screen.getByRole('button', { name: 'Lưu bản nháp' }))
-    await screen.findByText('Đã lưu thay đổi của trò chơi.')
+    await autosaved()
 
     expect(getMockGame(QUIZ_ID).questions[0]).toMatchObject({
       correctOptionId: 'c',
@@ -317,12 +394,12 @@ describe('chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đang chạy
     fireEvent.change(questionBox(), { target: { value: 'Đếm táo nhé?' } })
 
     expect(screen.getByText('Đang áp dụng chỉnh sửa...')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Lưu bản nháp' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Chơi thử' })).toBeDisabled()
 
     await waitUntilApplied()
 
-    expect(screen.getByRole('button', { name: 'Lưu bản nháp' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeEnabled()
     expect(screen.getByRole('button', { name: 'Chơi thử' })).toBeEnabled()
   })
 
@@ -358,7 +435,6 @@ describe('chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đang chạy
 
 describe('khóa Lưu/Chơi thử khi "Đang áp dụng chỉnh sửa..." luôn mở lại (câu hỏi của user)', () => {
   const APPLYING = 'Đang áp dụng chỉnh sửa...'
-  const saveBtn = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
   const playBtn = () => screen.getByRole('button', { name: 'Chơi thử' })
 
   // Làm cho bản nháp "chưa lưu" bằng một sửa đổi khác (nút Lưu chỉ bật khi có thay đổi), rồi gõ chữ chờ kiểm tra.
@@ -369,13 +445,13 @@ describe('khóa Lưu/Chơi thử khi "Đang áp dụng chỉnh sửa..." luôn m
     await user.type(timeBox(), '45')
     fireEvent.change(questionBox(), { target: { value: text } })
     expect(screen.getByText(APPLYING)).toBeInTheDocument()
-    expect(saveBtn()).toBeDisabled()
+    expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeDisabled()
     expect(playBtn()).toBeDisabled()
   }
 
   const expectReleased = () => {
     expect(screen.queryByText(APPLYING)).not.toBeInTheDocument()
-    expect(saveBtn()).toBeEnabled()
+    expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeEnabled()
     expect(playBtn()).toBeEnabled()
   }
 
@@ -414,7 +490,7 @@ describe('khóa Lưu/Chơi thử khi "Đang áp dụng chỉnh sửa..." luôn m
       fireEvent.change(timeBox(), { target: { value: '45' } })
       fireEvent.change(questionBox(), { target: { value: 'Đếm táo nhé?' } })
       expect(screen.getByText(APPLYING)).toBeInTheDocument()
-      expect(saveBtn()).toBeDisabled()
+      expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeDisabled()
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(9000 + 1000)

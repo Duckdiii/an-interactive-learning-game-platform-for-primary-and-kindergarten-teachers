@@ -10,6 +10,7 @@ import { ROUTES } from './routes/paths'
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const CreateGamePage = lazy(() => import('./pages/CreateGamePage'))
 const MyGamesPage = lazy(() => import('./pages/MyGamesPage'))
+const ResultsPage = lazy(() => import('./pages/ResultsPage'))
 const WorkspaceEditor = lazy(() => import('./pages/WorkspaceEditor'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
@@ -17,6 +18,7 @@ const PlayPage = lazy(() => import('./player/pages/PlayPage'))
 const JoinPage = lazy(() => import('./player/pages/JoinPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
+const UiKit = lazy(() => import('./pages/dev/UiKit'))
 
 function PageFallback() {
   return (
@@ -35,6 +37,10 @@ function App() {
           test Canvas Engine bằng fixture, xoá khi nối renderer vào WorkspaceEditor/GamePlayer thật. */}
         {import.meta.env.DEV && (
           <Route path="/dev/canvas-sandbox" element={<CanvasSandbox />} />
+        )}
+        {import.meta.env.DEV && <Route path="/dev/ui-kit" element={<UiKit />} />}
+        {import.meta.env.DEV && (
+          <Route path="/dev/type-specimen" element={<Navigate to="/dev/ui-kit" replace />} />
         )}
 
         <Route element={<AuthLayout />}>
@@ -57,6 +63,7 @@ function App() {
           <Route path={ROUTES.createGame} element={<CreateGamePage />} />
           <Route path={ROUTES.workspace} element={<MyGamesPage />} />
           <Route path={ROUTES.workspaceEditor} element={<WorkspaceEditor />} />
+          <Route path={ROUTES.results} element={<ResultsPage />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

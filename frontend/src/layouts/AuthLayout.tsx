@@ -1,5 +1,5 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
-import Icon from '../components/ui/Icon'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import Card from '../components/ui/Card'
 import LetterTiles from '../components/ui/LetterTiles'
 import { MIXED_TILES } from '../components/ui/tileSets'
 import { viText } from '../constants/viText'
@@ -10,63 +10,88 @@ const authNavigation = [
   { label: viText.auth.tabRegister, to: ROUTES.register },
 ]
 
-export default function AuthLayout() {
-  return (
-    <main className="min-h-screen bg-paper text-ink lg:grid lg:grid-cols-[1.05fr_1fr]">
-      {/* Điện thoại: chỉ một thanh thương hiệu gọn để form đăng nhập nằm ngay màn hình đầu tiên. */}
-      <section className="relative overflow-hidden bg-brand-strong px-6 py-4 text-white sm:px-10 lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-14 lg:py-12">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-24 -top-24 hidden h-96 w-96 rounded-full bg-white/5 lg:block"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-32 -left-20 hidden h-96 w-96 rounded-full bg-white/5 lg:block"
-        />
+// Ô số bước theo màu ba môn (viết đủ lớp để Tailwind quét được), nghiêng nhẹ như LetterTiles.
+const STEP_TILES = [
+  'border-math-mark bg-math-soft text-math-ink -rotate-3',
+  'border-viet-mark bg-viet-soft text-viet-ink rotate-2',
+  'border-eng-mark bg-eng-soft text-eng-ink -rotate-2',
+] as const
 
+// Cột thương hiệu đổi nội dung theo route: đăng nhập là thông điệp + khối chữ, đăng ký là "ba bước".
+function HeroContent({ isRegister }: { isRegister: boolean }) {
+  if (isRegister) {
+    // Như wireframe A-Register: số bước trên ô màu ba môn (khối chữ đồ chơi), ghi chú cho học sinh nằm sát đáy cột.
+    return (
+      <div className="relative hidden lg:flex lg:flex-1 lg:flex-col lg:pt-12">
+        <p className="max-w-xl font-display text-5xl font-extrabold leading-tight">
+          {viText.auth.stepsTitle}
+        </p>
+        <ol className="mt-8 space-y-5">
+          {viText.auth.steps.map((step, index) => (
+            <li key={step} className="flex items-center gap-4 text-xl font-semibold">
+              <span
+                aria-hidden="true"
+                className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl border-2 border-b-4 font-display text-2xl font-extrabold ${STEP_TILES[index % STEP_TILES.length]}`}
+              >
+                {index + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+        <p className="mt-auto max-w-lg pt-10 text-base leading-7 text-white/90">
+          {viText.auth.studentNote}
+        </p>
+      </div>
+    )
+  }
+
+  // Như wireframe A-Login: thông điệp ngay dưới logo, khối chữ to nằm sát đáy cột.
+  return (
+    <div className="relative hidden lg:flex lg:flex-1 lg:flex-col lg:pt-12">
+      <p className="max-w-xl font-display text-5xl font-extrabold leading-tight">
+        {viText.auth.heroTitle}
+      </p>
+      <p className="mt-5 max-w-lg text-lg font-semibold leading-8 text-white/90">
+        {viText.auth.heroDescription}
+      </p>
+      <LetterTiles tiles={MIXED_TILES} size="xl" className="mt-auto pt-10" />
+    </div>
+  )
+}
+
+export default function AuthLayout() {
+  const isRegister = useLocation().pathname === ROUTES.register
+
+  return (
+    <main className="min-h-screen bg-paper text-ink lg:grid lg:grid-cols-[1.05fr_1fr] lg:gap-6 lg:p-6">
+      {/* Dưới lg: chỉ một dải thương hiệu gọn để form nằm ngay màn hình đầu tiên. */}
+      <section className="relative overflow-hidden bg-brand-strong px-6 py-4 text-white sm:px-10 lg:flex lg:flex-col lg:justify-between lg:rounded-[32px] lg:px-12 lg:py-11">
         <Link
           to={ROUTES.login}
           className="relative inline-flex min-h-11 items-center gap-3"
         >
-          <span className="grid h-11 w-11 place-items-center rounded-xl bg-sun text-lg font-extrabold text-ink">
+          <span className="grid h-11 w-11 -rotate-6 place-items-center rounded-2xl bg-sun font-display text-lg font-extrabold text-sun-ink shadow-base-sun">
             AI
           </span>
-          <span className="text-lg font-bold">{viText.appName}</span>
+          <span className="font-display text-xl font-extrabold">{viText.appName}</span>
         </Link>
 
-        <div className="relative hidden lg:block">
-          <p className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-sun-soft">
-            {viText.auth.heroKicker}
-          </p>
-          <p className="max-w-xl text-5xl font-extrabold leading-tight">
-            {viText.auth.heroTitle}
-          </p>
-          <p className="mt-5 max-w-lg text-lg leading-8 text-white/90">
-            {viText.auth.heroDescription}
-          </p>
-          <ul className="mt-8 space-y-3">
-            {viText.auth.heroPoints.map((point) => (
-              <li key={point} className="flex items-start gap-3 text-base">
-                <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-sun text-ink">
-                  <Icon name="check" className="h-4 w-4" />
-                </span>
-                {point}
-              </li>
-            ))}
-          </ul>
-          <LetterTiles tiles={MIXED_TILES} size="lg" className="mt-12" />
-        </div>
-
-        <p className="relative hidden text-sm text-white/85 lg:block">
-          {viText.auth.footer}
-        </p>
+        <HeroContent isRegister={isRegister} />
+        <span aria-hidden="true" className="hidden lg:block" />
       </section>
 
-      <section className="flex justify-center px-6 py-8 sm:px-10 lg:items-center lg:py-12">
-        <div className="w-full max-w-md">
+      <section className="relative flex min-w-0 flex-col items-center px-6 py-8 sm:px-10 lg:justify-center lg:pt-20 lg:pb-12">
+        <Link
+          to={ROUTES.join}
+          className="mb-4 inline-flex min-h-11 items-center self-end rounded-full bg-surface px-4 text-sm font-extrabold text-ink shadow-card lg:absolute lg:right-4 lg:top-4 lg:mb-0"
+        >
+          {viText.auth.studentLink} <span aria-hidden="true">›</span>
+        </Link>
+        <Card padding="lg" className="w-full min-w-0 max-w-md">
           <nav
-            aria-label="Đăng nhập hoặc đăng ký"
-            className="mb-8 grid grid-cols-2 rounded-xl border-2 border-ink/10 bg-white p-1"
+            aria-label={viText.auth.tabsLabel}
+            className="mb-6 grid grid-cols-2 rounded-2xl bg-paper p-1"
           >
             {authNavigation.map((item) => (
               <NavLink
@@ -75,10 +100,10 @@ export default function AuthLayout() {
                 end
                 className={({ isActive }) =>
                   [
-                    'flex min-h-12 items-center justify-center rounded-lg text-base font-semibold transition',
+                    'flex min-h-12 items-center justify-center rounded-xl text-base transition',
                     isActive
-                      ? 'bg-brand text-white shadow-sm'
-                      : 'text-ink-soft hover:bg-brand-soft hover:text-brand-strong',
+                      ? 'bg-brand font-black text-white'
+                      : 'font-extrabold text-ink hover:bg-brand-soft hover:text-brand-strong',
                   ].join(' ')
                 }
               >
@@ -87,7 +112,7 @@ export default function AuthLayout() {
             ))}
           </nav>
           <Outlet />
-        </div>
+        </Card>
       </section>
     </main>
   )

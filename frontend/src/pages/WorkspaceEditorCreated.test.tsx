@@ -61,8 +61,7 @@ describe('mở game vừa tạo bằng AI mô phỏng', () => {
   it.each(GAME_TYPES)('%s: mở được, không có lỗi dữ liệu nào ("Đã lưu", Lưu bị khóa, không thẻ "Cần sửa")', async (type) => {
     await openCreated(type)
 
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Lưu bản nháp' })).toBeDisabled()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
     expect(screen.queryByText('Cần sửa')).not.toBeInTheDocument()
   })
 })

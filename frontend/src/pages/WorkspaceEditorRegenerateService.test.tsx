@@ -100,7 +100,7 @@ describe('câu AI trả về không hợp lệ', () => {
 
     expect(await within(dialog()).findByRole('alert', {}, SLOW)).toHaveTextContent(INVALID)
     expect(listButtons().map((button) => button.textContent)).toEqual(before)
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
     expect(within(dialog()).getByRole('button', { name: 'Thử lại' })).toBeInTheDocument()
     expect(within(notice()).queryByRole('button', { name: 'Hoàn tác' })).not.toBeInTheDocument()
   })
@@ -117,7 +117,7 @@ describe('câu AI trả về không hợp lệ', () => {
     await user.click(within(dialog()).getByRole('button', { name: 'Thử lại' }))
     await waitFor(() => expect(mockedRegenerate).toHaveBeenCalledTimes(2))
     expect(await within(dialog()).findByRole('alert', {}, SLOW)).toHaveTextContent(INVALID)
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
   })
 })
 
@@ -143,7 +143,7 @@ describe('hủy yêu cầu đang chạy', () => {
     pending.resolve({ question: goodQuestion(), gameType: 'QUIZ' })
     await new Promise((resolve) => setTimeout(resolve, 50))
 
-    expect(screen.getByText('Đã lưu')).toBeInTheDocument()
+    expect(screen.getByText('Đã tự lưu')).toBeInTheDocument()
     expect(within(dialog()).queryByRole('alert')).not.toBeInTheDocument()
   })
 

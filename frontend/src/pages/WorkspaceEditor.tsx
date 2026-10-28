@@ -7,6 +7,8 @@ import DraftRestoreNotice from '../components/editor/DraftRestoreNotice'
 import EditorLayout from '../components/editor/EditorLayout'
 import type { EditorPane } from '../components/editor/EditorLayout'
 import GameInfoForm from '../components/editor/GameInfoForm'
+import PublishReadiness from '../components/editor/PublishReadiness'
+import LivePreview from '../components/editor/preview/LivePreview'
 import PlayTestBoundary from '../components/editor/PlayTestBoundary'
 import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
 import { PendingEditsContext } from '../components/editor/forms/PendingEditsContext'
@@ -14,22 +16,16 @@ import { buttonClass } from '../components/buttonStyles'
 import RegenerateQuestionControls from '../components/editor/forms/RegenerateQuestionControls'
 import QuestionEditor from '../components/editor/forms/QuestionEditor'
 import { VoiceContext } from '../components/editor/forms/VoiceContext'
+import { GameDefaultsContext } from '../components/editor/forms/GameDefaultsContext'
+import { gameDefault } from '../utils/gameDefaults'
 import type { VoiceGender } from '../services/mediaService'
 import QuestionList from '../components/editor/QuestionList'
-import SaveBar from '../components/editor/SaveBar'
-import SharePanel from '../components/editor/SharePanel'
+import EditorTopBar from '../components/editor/EditorTopBar'
+import PublishDialog from '../components/editor/PublishDialog'
 import ErrorNotice from '../components/ui/ErrorNotice'
-import GameTypeCover from '../components/ui/GameTypeCover'
 import LetterTiles from '../components/ui/LetterTiles'
 import MockBadge from '../components/ui/MockBadge'
 import { MIXED_TILES } from '../components/ui/tileSets'
-import { subjectTheme } from '../components/ui/subjectTheme'
-import {
-  gameStatusLabel,
-  gameTypeLabel,
-  gradeLevelLabel,
-  subjectLabel,
-} from '../constants/labels'
 import { viText } from '../constants/viText'
 import { isMock } from '../config/mockMode'
 import { isMockGenerated } from '../services/mock/mockGames'
@@ -43,7 +39,6 @@ import type { GameResponse } from '../types/game-response.types'
 import { parseApiError } from '../utils/apiError'
 import { groupByQuestion } from '../utils/gameValidation'
 import { summarizeQuestions } from '../utils/questionSummary'
-import { formatRelativeTime } from '../utils/relativeTime'
 
 const text = viText.editor
 
@@ -92,7 +87,9 @@ function EditorSkeleton() {
 }
 
 function EditorWorkspace({ game }: { game: GameResponse }) {
-  const editor = useGameEditor(game)
+  // Số ô chữ còn chữ vừa gõ chưa vào bản đang soạn (xem `PendingEditsContext`). Khai báo trước hook để hoãn tự lưu trong lúc đó.
+  const [pendingEdits, setPendingEdits] = useState(0)
+  const editor = useGameEditor(game, { paused: pendingEdits > 0 })
   const { draft } = editor
 
   // Đã mở game vừa tạo thì hết dấu "Mới" trên thẻ game.
@@ -102,8 +99,6 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const [playing, setPlaying] = useState(false)
   // Vừa nhờ AI làm lại (hoặc vừa hoàn tác) câu nào: để hiện thông báo kèm nút Hoàn tác. Nằm ở đây vì thẻ sửa câu được dựng lại sau khi áp câu mới.
   const [regenNotice, setRegenNotice] = useState<{ kind: 'applied' | 'undone'; questionId: string } | null>(null)
-  // Số ô chữ còn chữ vừa gõ chưa vào bản đang soạn (xem `PendingEditsContext`).
-  const [pendingEdits, setPendingEdits] = useState(0)
   const beginEdit = useCallback(() => {
     setPendingEdits((count) => count + 1)
 
@@ -120,6 +115,10 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const [playAttempted, setPlayAttempted] = useState(false)
   const summaries = useMemo(() => summarizeQuestions(draft), [draft])
   // Câu nào còn lỗi (tính trực tiếp, không đợi bấm Lưu) thì danh sách đánh dấu "Cần sửa".
+  const gameDefaults = useMemo(
+    () => ({ timeLimitSeconds: gameDefault(draft.questions, 'timeLimitSeconds'), points: gameDefault(draft.questions, 'points') }),
+    [draft.questions],
+  )
   const issuesByQuestion = useMemo(() => groupByQuestion(editor.liveIssues), [editor.liveIssues])
   const items = draft.questions.map((question, position) => ({
     summary: summaries[position],
@@ -131,7 +130,6 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
 
   if (selected !== index) setSelected(index)
   const current = items[index]
-  const theme = subjectTheme(game.metadata.subject)
   const isPublished = game.status === 'PUBLISHED'
   const title = draft.metadata.title.trim() || text.untitled
   const saveText = text.save
@@ -147,11 +145,14 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   // Đưa tiêu điểm tới ô cần chú ý (sau khi khôi phục hoặc khi lưu bị chặn) để người dùng bàn phím và trình đọc màn hình không mất vị trí.
   const focusField = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.focus())
 
+  // "Xem lỗi" / "Thử lại" trên thanh trên cùng: `save()` kiểm tra lại, còn lỗi thì không gửi và hiện lỗi dưới từng ô; lỗi ở câu thì chuyển tới câu đầu tiên có lỗi.
   const handleSave = () => {
     setRegenNotice((notice) => (notice?.kind === 'undone' ? null : notice))
-    const first = editor.save().find((issue) => issue.questionIndex === null)
+    const found = editor.save()
+    const first = found.find((issue) => issue.questionIndex === null)
 
     if (first) focusField(first.field === 'metadata.topic' ? 'game-topic' : 'game-title')
+    else if (found.length > 0 && found[0].questionIndex !== null) choose(found[0].questionIndex)
   }
 
   const publishText = text.publish
@@ -210,36 +211,6 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     })
   }
 
-  const previewCard = (
-    <div className="space-y-4 rounded-2xl border-2 border-ink/10 bg-white p-4 sm:p-6">
-      <h2 className="text-lg font-extrabold">{text.previewHeading}</h2>
-      {current ? (
-        <div>
-          {/* Chỉ báo khi ĐỔI CÂU, không đọc lại nội dung mỗi lần gõ. */}
-          <p role="status" className="sr-only">
-            {text.questionLabel} {index + 1}
-          </p>
-          <p aria-hidden="true" className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
-            {text.questionLabel} {index + 1}
-          </p>
-          <p className="mt-1 [overflow-wrap:anywhere] text-xl font-bold leading-8">{current.summary}</p>
-          <p className="mt-2 text-base text-ink-soft">
-            {current.timeLimitSeconds} {text.seconds} · {current.points} {text.points}
-          </p>
-        </div>
-      ) : (
-        <p className="text-base text-ink-soft">{text.emptyQuestions}</p>
-      )}
-      <div className="max-w-sm overflow-hidden rounded-xl">
-        <GameTypeCover gameType={game.gameType} subject={game.metadata.subject} />
-      </div>
-      <p className="flex items-start gap-2 rounded-xl bg-sun-soft px-4 py-3 text-base">
-        <span className="shrink-0 font-bold">{text.comingTag}.</span>
-        <span>{text.previewNote}</span>
-      </p>
-    </div>
-  )
-
   const currentQuestionId = current ? draft.questions[index]?.id : undefined
   const undoable = currentQuestionId !== undefined && editor.regeneratedIds.includes(currentQuestionId)
   const noticeForCurrent = regenNotice !== null && regenNotice.questionId === currentQuestionId ? regenNotice.kind : null
@@ -267,7 +238,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
               ) : noticeForCurrent === 'applied' ? (
                 <>
                   <p className="font-bold">{regenText.success}</p>
-                  <p>{regenText.appliedNote}</p>
+                  {editor.autosave === 'saved' ? null : <p>{regenText.appliedNote}</p>}
                 </>
               ) : (
                 <p>{regenText.undoable}</p>
@@ -295,6 +266,10 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           </div>
         ) : null}
       </div>
+      {/* Chỉ báo khi ĐỔI CÂU, không đọc lại nội dung mỗi lần gõ. Nằm ở khung sửa vì trên điện thoại chọn câu là chuyển sang khung này. */}
+      <p role="status" className="sr-only">
+        {current ? `${text.questionLabel} ${index + 1}` : ''}
+      </p>
       {current ? (
         <QuestionEditor
           key={`${index}-${editor.revision}`}
@@ -322,41 +297,56 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           }
         />
       ) : null}
-      {previewCard}
+    </div>
+  )
+
+  const see = (
+    <div className="space-y-6">
+      <LivePreview
+        gameType={draft.gameType}
+        question={draft.questions[index]}
+        title={title}
+        index={index}
+        total={items.length}
+        gradeLevel={draft.metadata.gradeLevel}
+        subject={draft.metadata.subject}
+        hasIssues={issuesByQuestion.has(index)}
+      />
+      <PublishReadiness
+        issues={editor.readinessIssues}
+        questionCount={items.length}
+        onSelectQuestion={choose}
+        onSelectGameInfo={() => focusField('game-title')}
+      />
     </div>
   )
 
   return (
     <PendingEditsContext.Provider value={pendingApi}>
     <VoiceContext.Provider value={voiceApi}>
+    <GameDefaultsContext.Provider value={gameDefaults}>
     <div className="space-y-6">
-      <header>
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">{text.kicker}</p>
-          {isMock('editor') ? <MockBadge /> : null}
-        </div>
-        <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{title}</h1>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className={`rounded-full px-3 py-1 text-sm font-bold ${theme.chip}`}>
-            {subjectLabel(game.metadata.subject)} · {gradeLevelLabel(game.metadata.gradeLevel)}
-          </span>
-          <span className="rounded-full bg-paper px-3 py-1 text-sm font-bold text-ink">
-            {gameTypeLabel(game.gameType)}
-          </span>
-          <span
-            className={[
-              'rounded-full px-3 py-1 text-sm font-bold',
-              isPublished ? 'bg-brand-soft text-brand-strong' : 'bg-sun-soft text-ink ring-1 ring-sun',
-            ].join(' ')}
-          >
-            {gameStatusLabel(game.status)}
-          </span>
-          <span className="text-sm text-ink-soft">
-            {items.length} {text.questionCount} · {text.updatedPrefix}{' '}
-            {formatRelativeTime(game.updatedAt).toLowerCase()}
-          </span>
-        </div>
-      </header>
+      <EditorTopBar
+        title={title}
+        subject={game.metadata.subject}
+        gradeLevel={game.metadata.gradeLevel}
+        gameType={game.gameType}
+        questionCount={items.length}
+        gameStatus={game.status}
+        isPublished={isPublished}
+        mock={isMock('editor')}
+        autosave={editor.autosave}
+        issueCount={editor.liveIssues.length}
+        applying={applying}
+        publishing={editor.publishing}
+        saving={editor.saving}
+        playing={playing}
+        canRetry={!conflict}
+        onViewIssues={handleSave}
+        onRetry={handleSave}
+        onPublish={handlePublish}
+        onPlayTest={startPlay}
+      />
 
       {/* Game do AI mô phỏng tạo: nội dung là bản mẫu của loại game, không khớp mô tả của giáo viên. Nhắc ngay ở trình soạn thảo, không chỉ ở trang tạo. */}
       {isMockGenerated(game.gameId) ? (
@@ -394,18 +384,6 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
               }}
             />
           ) : null}
-
-          <SaveBar
-            dirty={editor.dirty}
-            saving={editor.saving}
-            saved={editor.savedNotice}
-            isPublished={isPublished}
-            publishing={editor.publishing}
-            applying={applying}
-            onSave={handleSave}
-            onPublish={handlePublish}
-            onPlayTest={startPlay}
-          />
 
           {playIssues.length > 0 ? (
             <ErrorNotice
@@ -480,13 +458,6 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
             <ErrorNotice
               title={saveText.saveErrorTitle}
               message={conflict ? saveText.conflict : `${editor.saveError.message} ${saveText.keptNote}`}
-              action={
-                conflict ? null : (
-                  <Button type="button" onClick={editor.save} disabled={editor.saving}>
-                    {saveText.retry}
-                  </Button>
-                )
-              }
             />
           ) : null}
 
@@ -496,6 +467,8 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
             disabled={Boolean(editor.pendingRestore)}
             onTitleChange={editor.setTitle}
             onTopicChange={editor.setTopic}
+            defaults={gameDefaults}
+            onDefaultChange={editor.setGameDefault}
           />
 
           <EditorLayout
@@ -504,11 +477,13 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
             questionCount={items.length}
             list={<QuestionList items={items} selectedIndex={index} onSelect={choose} />}
             preview={preview}
+            see={see}
           />
         </>
       )}
-      {editor.publishResult ? <SharePanel result={editor.publishResult} gameTitle={draft.metadata.title} hasUnsavedAfter={editor.dirty} onClose={closeSharePanel} /> : null}
+      {editor.publishResult ? <PublishDialog result={editor.publishResult} gameTitle={draft.metadata.title} gradeLevel={draft.metadata.gradeLevel} hasUnsavedAfter={editor.dirty} onClose={closeSharePanel} /> : null}
     </div>
+    </GameDefaultsContext.Provider>
     </VoiceContext.Provider>
     </PendingEditsContext.Provider>
   )

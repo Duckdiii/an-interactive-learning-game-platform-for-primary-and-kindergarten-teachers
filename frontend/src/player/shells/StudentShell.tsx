@@ -4,15 +4,16 @@ import ShellFooter from './ShellFooter'
 import type { ShellProps } from './types'
 
 /** Khung Học sinh (lớp 2 đến 5): tên game và "Câu x/y", đồng hồ và điểm ở thanh trên, thanh phản hồi dính đáy. */
-export default function StudentShell({ title, progress, score, remainingSeconds, mascot, feedback, showHotkeyHint, onPause, children }: ShellProps) {
+export default function StudentShell({ title, progress, score, remainingSeconds, mascot, feedback, showHotkeyHint, onPause, embedded, children }: ShellProps) {
   const { band } = useUiProfile()
   const showTimer = typeof remainingSeconds === 'number'
 
   return (
-    <div data-band={band} className="flex min-h-screen flex-col bg-play-page text-play-ink">
+    <div data-band={band} className={`flex flex-col bg-play-page text-play-ink ${embedded ? 'h-full min-h-0 overflow-y-auto' : 'min-h-screen'}`}>
       <header className="flex items-center justify-between gap-4 pb-3 play-safe-x play-safe-t">
         <div>
-          <h1 className="text-xl font-bold">{title}</h1>
+          {/* Nhúng trong trình soạn thảo thì không thêm h1 thứ hai vào trang giáo viên. */}
+          {embedded ? <p className="text-xl font-bold">{title}</p> : <h1 className="text-xl font-bold">{title}</h1>}
           <p className="text-play-ink-soft">{viText.player.progressLabel(progress.current, progress.total)}</p>
         </div>
         <div className="flex items-center gap-4 font-bold">

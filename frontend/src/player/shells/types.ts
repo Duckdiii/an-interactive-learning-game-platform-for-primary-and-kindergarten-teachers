@@ -20,6 +20,8 @@ export interface ShellProps {
   showHotkeyHint?: boolean
   /** Có thì khung có nút "Tạm dừng" (chỉ khung Học sinh vẽ nút; phím Esc do trang chơi lo). */
   onPause?: () => void
+  /** Nhúng trong khung cố định (xem trước ở trình soạn thảo): cao bằng khung chứa và tự cuộn, thay vì cao bằng màn hình. */
+  embedded?: boolean
   /** Vùng trò chơi: renderer chiếm toàn bộ phần còn lại của màn hình. */
   children?: ReactNode
 }

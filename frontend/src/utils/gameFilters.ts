@@ -42,3 +42,12 @@ export function filterGames(
 
 export const hasActiveFilter = (filters: GameListFilters) =>
   Object.values(filters).some((value) => value !== '')
+
+// Số game theo từng môn trên toàn danh sách (không phụ thuộc bộ lọc) để chip môn hiện số đếm.
+export function countBySubject(games: ReadonlyArray<GameSummary>) {
+  const counts: Record<string, number> = {}
+
+  for (const game of games) counts[game.subject] = (counts[game.subject] ?? 0) + 1
+
+  return counts
+}

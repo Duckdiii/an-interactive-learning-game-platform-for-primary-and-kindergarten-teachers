@@ -74,6 +74,8 @@ Response `200`:
 
 `expiresAt: null` là mở không giới hạn. `enabled: false` là tắt mã (học sinh nhận `GAME_DISABLED`). Đồng thời `POST /games/{id}/publish` và `GET /games/{id}` nên trả cùng các trường này. Lưu ở thông tin xuất bản, **không** nằm trong JSON game.
 
+**Frontend đang dùng (P3):** hộp "Xuất bản và chia sẻ" (F7, `frontend/src/components/editor/PublishDialog.tsx` và `PublishSettingsRow.tsx`) đọc và lưu 4 trường này qua `PublishSettingsApi { get, update }` (`frontend/src/services/publishSettings/`, hook `usePublishSettings`). Hiện chạy bằng adapter mô phỏng (nhóm `editor`, lưu theo `gameId` trong bộ nhớ, có nhãn "Dữ liệu mô phỏng" ở dev). Bản thật trả lỗi "chưa hỗ trợ": hàng cài đặt vẫn hiện nhưng khóa kèm "Sắp có". `get` dự kiến lấy từ `GET /games/{id}` (khi đã trả các trường trên). `expiresAt` do giao diện gửi là cuối ngày giờ Việt Nam, dạng `YYYY-MM-DDT16:59:59Z`.
+
 Lưu ý mâu thuẫn: spec hiện cố định phiên `SELF` hết hạn sau 24 giờ (`PlayResult.expiresAt`); cần chốt `expiresAt` của phiên `SELF` lấy từ đâu (xem câu hỏi Q8 trong PLAN).
 
 ### 2.3 Dạng câu hỏi dành cho học sinh: ví dụ máy đọc cho cả 10 loại
@@ -247,6 +249,12 @@ Wireframe cần thêm so với spec:
 
 "Tạo game ôn tập từ lỗi này": mở rộng `GenerateGameRequest` bằng trường tùy chọn `reviewFrom: { "gameId": "uuid", "questionIds": ["q4"] }` để Backend tự đưa các câu và lỗi hay gặp vào lời nhắc cho AI. Frontend không tự dựng lời nhắc từ dữ liệu kết quả (tránh đưa dữ liệu học sinh vào `idea`).
 
+Đề xuất bổ sung cho `review-needed`: sắp theo `correctRate` tăng dần (câu yếu nhất trước); `commonWrong` là `null` khi chưa có đáp án sai nào lặp lại từ 2 lần (Frontend khi đó bỏ vế "hay nhầm thành").
+
+> **Frontend đang dùng (P3, 2026-10-28):** trang chủ F1 gọi `GET /insights/review-needed?limit=3` qua `HomeApi.listReviewNeeded` (`frontend/src/services/home/`), hiện chạy bằng adapter mô phỏng (nhóm `results`, có nhãn "dữ liệu mẫu" ở dev); bản thật trả lỗi "chưa hỗ trợ" và khối hiện trạng thái trống. Trong lúc chưa có `reviewFrom`, nút "Tạo game ôn tập" chỉ điền sẵn `idea = "Ôn tập: {gameTitle}"` (tên game của giáo viên), không đưa câu trả lời của học sinh vào.
+
+> **Frontend đang dùng (P3, F8 trang "Kết quả"):** trang `/results` (`frontend/src/pages/ResultsPage.tsx`; không có `?gameId=` thì liệt kê game đã đăng để chọn) gọi `GET /games/{gameId}/insights` qua `HomeApi.getGameInsights(gameId, sessionType?)` (cùng `frontend/src/services/home/`, hook `useGameInsights`). Chip lọc "Tất cả lượt / Phòng thi đấu / Chơi ở nhà" gửi `sessionType` bỏ trống / `TEAM` / `SELF` và giữ trên địa chỉ `?type=`. Hiện chạy bằng adapter mô phỏng nhóm `results` (`mockInsights.ts`: số liệu xác định dựng từ câu hỏi của game mô phỏng, có câu `needsReview` và `commonWrong`; có nhãn "dữ liệu mẫu" ở dev); bản thật trả lỗi "chưa hỗ trợ" và trang hiện "Chưa có số liệu", không báo lỗi. Frontend chỉ dùng `label` của `commonWrong` (đã dựng ở Backend), chưa dùng `answer`. Thẻ "Cần ôn lại" lấy câu `needsReview` có `correctRate` thấp nhất; nút "Tạo game ôn tập" làm đúng như Trang chủ: chỉ điền sẵn `idea = "Ôn tập: {gameTitle}"` cùng `grade`, `subject` của game, không đưa lỗi hay câu trả lời của học sinh vào (chờ `reviewFrom`).
+
 ### 2.9 Tiến trình AI soạn (F4) và đề xuất kiểu chơi (F5)
 
 **Tiến trình:** spec đã có SSE (`progress` với `step` thuộc `ANALYZING, VALIDATING, FETCHING_IMAGES, GENERATING_AUDIO, SAVING`). Wireframe F4 có 5 bước hiển thị: Đọc mô tả / Đối chiếu chương trình / Soạn câu hỏi (đang soạn câu 3/5) / Kiểm tra an toàn / Gắn hình và giọng. Đề xuất:
@@ -254,6 +262,7 @@ Wireframe cần thêm so với spec:
 - Ánh xạ: Đọc mô tả = `ANALYZING`; Soạn câu hỏi = `GENERATING`; Kiểm tra an toàn = `VALIDATING`; Gắn hình và giọng = `FETCHING_IMAGES` + `GENERATING_AUDIO`; `SAVING` gộp vào bước cuối.
 - **"Đối chiếu chương trình" (bước 2) không có chức năng nào ở Backend hay tài liệu.** Frontend sẽ **không hiển thị bước này** cho đến khi có (xem Q10 trong PLAN), thay vì bịa ra.
 - Nếu SSE chưa làm: Frontend chạy theo thời gian ước tính và ghi rõ "tạm thời" (đúng SPEC 5.4).
+- **Frontend đang dùng (P3):** chưa có SSE nên màn F4 (`frontend/src/components/create/CreateProgressPanel.tsx`) hiện 4 bước (bỏ "Đối chiếu chương trình") và thanh tiến độ tính bằng `estimateProgress` (`frontend/src/utils/estimatedProgress.ts`, tối đa 95% cho tới khi có kết quả), kèm dòng "tạm thời". Khi có SSE, chỉ cần thay `estimateProgress` bằng `step`/`percent` từ sự kiện `progress` theo ánh xạ ở trên.
 
 **Đề xuất kiểu chơi (F5):** `openapi.yaml` **không có** endpoint đề xuất kiểu chơi (Frontend đang dùng bản mô phỏng `gameTypeSuggestionService`). Chờ chốt Q2 của SPEC (đề xuất rồi mới soạn, hay soạn sẵn cả 3). Cho cả hai phương án, hình dạng tối thiểu:
 
@@ -274,7 +283,7 @@ Phương án "soạn sẵn cả 3": mỗi phần tử thêm `gameId` của bản
 
 | Endpoint | Mục đích | Request / Response |
 |---|---|---|
-| `GET /sessions?status=WAITING,ACTIVE,PAUSED` | F1 "Đang diễn ra": hiện chỉ có `GET /games/{id}/sessions` theo từng game | Response mảng `SessionListItem` thêm `gameId`, `gameTitle`, `currentQuestionIndex` (số, hoặc `null`) |
+| `GET /sessions?status=WAITING,ACTIVE,PAUSED` | F1 "Đang diễn ra": hiện chỉ có `GET /games/{id}/sessions` theo từng game. **Frontend đang dùng (P3):** `HomeApi.listLiveSessions` (`frontend/src/services/home/`), chạy bằng mô phỏng nhóm `sessions` có nhãn "dữ liệu mẫu" | Response mảng `SessionListItem` thêm `gameId`, `gameTitle`, `currentQuestionIndex` (số, **tính từ 0**, hoặc `null` khi chưa bắt đầu), `questionCount` (tổng số câu của game, bắt buộc). Mỗi phần tử là đủ `SessionListItem` hiện có cộng 4 trường này; không trả phiên `SELF` (giao về nhà); sắp theo thời gian tạo mới nhất trước |
 | `DELETE /sessions/{sessionId}/participants/{participantId}` | Giáo viên xóa biệt danh không phù hợp (D1) | `204`; participant bị gỡ khỏi bảng và nhận sự kiện bị loại (WebSocket); biệt danh có thể dùng lại |
 
 ### 2.11 Phòng thi đấu thời gian thực (P5, phụ thuộc spike WebSocket)
@@ -312,6 +321,9 @@ Frontend không thể tự làm kiểm thử 30 máy; cần Backend cung cấp m
 3. **Không tin dữ liệu từ máy học sinh:** máy chủ tự ghi mốc lúc gửi câu hỏi và chặn `timeSpentMs` trong [0, giới hạn]; không nhận điểm từ client. `my-interactions` trả 409 trước khi hoàn thành phải được kiểm ở máy chủ. `retry` (2.5b) trả `correctAnswer` ngay lần sai đầu nên chỉ bật cho `SELF`, giới hạn số lần thử mỗi câu.
 4. **Xáo phía máy chủ** bằng HMAC với khóa bí mật (spec đã ghi), không dùng hạt giống đoán được như bản mô phỏng (`sessionId:questionId`).
 5. **Biệt danh** (khi có ô nhập): lọc từ cấm, 1 đến 20 ký tự, trả về như văn bản thuần.
+
+6. **Số liệu của giáo viên (`GET /games/{gameId}/insights`, `GET /insights/review-needed`, 2.8):** lọc theo `teacherId` lấy từ token; game không thuộc giáo viên thì trả **404 như game không tồn tại** (không trả 403, để không dò được mã game); `review-needed` chỉ gộp game của chính giáo viên đó. Trang F8 của Frontend chỉ gọi khi game có trong danh sách của cô, nhưng đó chỉ là lớp giao diện, không thay được kiểm quyền ở máy chủ.
+7. **`commonWrong.label`** là chuỗi dựng từ câu trả lời của học sinh (với loại nhập chữ như WORD_SCRAMBLE là chữ trẻ tự gõ): chỉ trả khi đáp án sai lặp lại từ 2 lần trở lên (áp cho cả `insights`, không riêng `review-needed`), giới hạn độ dài, đã lọc từ cấm, không chứa biệt danh, trả về như văn bản thuần. Khi `reviewFrom` đưa các chuỗi này vào lời nhắc AI: đặt trong khối dữ liệu tách riêng, ghi rõ là dữ liệu không tin cậy, vẫn qua đủ 3 lớp kiểm duyệt; `reviewFrom.gameId` kiểm chủ sở hữu như mục 6 và `questionIds` phải thuộc game đó.
 
 Phía Frontend khi cài `RealPlayerApi`: dùng một axios instance **riêng cho học sinh** (không có interceptor đính token và làm mới token của giáo viên, chỉ gắn `X-Participant-Id`), vì `axiosInstance` hiện tại sẽ đính token giáo viên nếu máy dùng chung còn đăng nhập và đẩy học sinh sang trang đăng nhập khi gặp 401.
 

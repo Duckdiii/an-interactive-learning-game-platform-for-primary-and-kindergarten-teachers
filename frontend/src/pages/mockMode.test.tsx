@@ -104,7 +104,7 @@ describe('trang giáo viên ở chế độ mô phỏng (nhóm games)', () => {
     await user.click(screen.getByRole('button', { name: 'Đăng nhập' }))
 
     expect(mockedLogin).toHaveBeenCalledWith({ email: 'lan@truong.edu.vn', password: 'matkhau123' })
-    expect(await screen.findByRole('heading', { level: 1, name: /Xin chào/ }, { timeout: 5000 })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: /Chào cô Lan/ }, { timeout: 5000 })).toBeInTheDocument()
     expect(screen.getByRole('note')).toHaveTextContent('Đang dùng dữ liệu mô phỏng')
   })
 })

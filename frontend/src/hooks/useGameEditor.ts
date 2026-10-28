@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { createEditorState, editorReducer, isDirty } from '../components/editor/editorReducer'
+import { createEditorState, editorReducer } from '../components/editor/editorReducer'
 import { viText } from '../constants/viText'
 import { getGame, updateGame } from '../services/gameService'
 import { publishGame } from '../services/publishService'
@@ -13,6 +13,7 @@ import { getStoredAccessToken } from '../utils/authStorage'
 import { clearDraft, loadDraft, saveDraft } from '../utils/draftStorage'
 import type { StoredDraft } from '../utils/draftStorage'
 import { deepEqual, stripTransientMedia, toContent, trimContent } from '../utils/gameContent'
+import type { DefaultField } from '../utils/gameDefaults'
 import { summarizeIssues, validateGame } from '../utils/gameValidation'
 import type { ValidationIssue } from '../utils/gameValidation'
 import { gameQueryKey } from './useGame'
@@ -20,6 +21,15 @@ import { gamesQueryKey } from './useGames'
 import { useTeacherIdentity } from './useTeacherIdentity'
 
 const BACKUP_DELAY_MS = 500
+// Sau lần sửa cuối đợi chừng này rồi mới tự lưu (mỗi lần lưu tốn một lượt kiểm duyệt AI ở Backend).
+export const AUTOSAVE_DELAY_MS = 2000
+
+export type AutosaveStatus = 'saved' | 'pending' | 'saving' | 'blocked' | 'error' | 'waitingRestore'
+
+interface GameEditorOptions {
+  // Còn chữ gõ chưa vào bản nháp: hoãn tự lưu để không lưu bản cũ.
+  paused?: boolean
+}
 
 // Đã đăng xuất (ở tab này hoặc tab khác) thì tuyệt đối không ghi sao lưu: dọn dẹp khi rời trang vẫn chạy sau khi đăng xuất đã xóa
 // sạch, và nếu ghi lại thì nội dung của giáo viên vừa đăng xuất nằm lại trên máy dùng chung.
@@ -44,14 +54,13 @@ export type ApplyRegeneratedResult = { ok: true } | { ok: false; reason: 'stale'
 
 // Toàn bộ logic của một phiên soạn thảo (trạng thái bản nháp, kiểm tra trước khi lưu, lưu, sao lưu và khôi phục) để trang chỉ
 // còn lo bố cục. Lưu thất bại KHÔNG bao giờ động tới bản đang soạn.
-export function useGameEditor(game: GameResponse) {
+export function useGameEditor(game: GameResponse, { paused = false }: GameEditorOptions = {}) {
   // `owner` là MÃ giáo viên dùng cho sao lưu (chưa có mã thì không sao lưu); `queryOwner` chỉ để đặt khóa bộ nhớ đệm.
   const { teacherId: owner, cacheOwner } = useTeacherIdentity()
   const queryOwner = cacheOwner ?? ''
   const queryClient = useQueryClient()
   const [state, dispatch] = useReducer(editorReducer, game, (loaded) => createEditorState(toContent(loaded)))
   const [attempted, setAttempted] = useState(false)
-  const [lastSaveOk, setLastSaveOk] = useState(false)
   // Tính một lần lúc mở: bản sao lưu từ lần soạn trước chưa kịp lưu.
   const [pendingRestore, setPendingRestore] = useState(() => readRestorable(owner, game.gameId, state.baseline))
   // Mốc `updatedAt` của máy chủ lúc bắt đầu soạn (đổi khi CHÍNH phiên này lưu thành công, không đổi theo lần tải lại nền):
@@ -59,15 +68,24 @@ export function useGameEditor(game: GameResponse) {
   const [baseUpdatedAt, setBaseUpdatedAt] = useState(game.updatedAt)
   // Tăng mỗi lần khôi phục bản sao lưu: các ô nhập giữ chữ đang gõ dở thì dựng lại theo số này để hiện đúng nội dung vừa khôi phục.
   const [revision, setRevision] = useState(0)
-  const dirty = isDirty(state)
+  // "Chưa lưu" so với bản ĐÃ CẮT khoảng trắng (đúng bản được gửi đi). Tự lưu không cắt bản đang gõ (sẽ nuốt dấu cách vừa gõ), nên nếu so bản thô thì
+  // dấu cách cuối khiến bản nháp mãi khác bản đã lưu và tự lưu lặp vô hạn.
+  const trimmedDraft = useMemo(() => trimContent(state.draft), [state.draft])
+  const dirty = useMemo(() => !deepEqual(trimmedDraft, state.baseline), [trimmedDraft, state.baseline])
+
+  // Lưu hoặc xuất bản bị từ chối 409 (game đang có phòng chơi chưa kết thúc): chặn tự lưu tới khi lưu được (xem autosaveReady).
+  const [conflictHold, setConflictHold] = useState(false)
 
   const mutation = useMutation({
     mutationFn: (snapshot: GameDsl) => updateGame(game.gameId, snapshot),
+    onError: (error) => {
+      if (parseApiError(error, '').code === 'CONFLICT') setConflictHold(true)
+    },
     onSuccess: (response, snapshot) => {
+      setConflictHold(false)
       dispatch({ type: 'saved', snapshot })
       setBaseUpdatedAt(response.updatedAt)
       clearDraft(owner, game.gameId)
-      setLastSaveOk(true)
       setAttempted(false)
       queryClient.setQueryData(gameQueryKey(queryOwner, game.gameId), response)
       // Danh sách "Trò chơi của tôi" có ngày cập nhật và tên: làm mới để khớp bản vừa lưu.
@@ -81,12 +99,15 @@ export function useGameEditor(game: GameResponse) {
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null)
   const publishMutation = useMutation({
     mutationFn: (snapshot: GameDsl) => publishGame(game.gameId, snapshot),
+    onError: (error) => {
+      if (describePublishError(error).kind === 'conflict') setConflictHold(true)
+    },
     onSuccess: async (result, snapshot) => {
+      setConflictHold(false)
       const key = gameQueryKey(queryOwner, game.gameId)
 
       dispatch({ type: 'saved', snapshot })
       clearDraft(owner, game.gameId)
-      setLastSaveOk(false)
       setPublishAttempted(false)
       setPublishResult(result)
       // Chưa biết mốc thật của máy chủ: tạm dùng giờ máy để bản sao lưu sau đó không bị coi là cũ hơn bản vừa xuất bản; lấy lại được thì thay bằng mốc thật.
@@ -158,6 +179,43 @@ export function useGameEditor(game: GameResponse) {
   // Lỗi của từng câu tính TRỰC TIẾP trên bản đang soạn (không đợi bấm Lưu) để form hiện lỗi ngay dưới ô đang sửa.
   const liveIssues = useMemo(() => validateGame(state.draft, 'save', { baseline: state.baseline }), [state.draft, state.baseline])
 
+  // Kiểm tra theo luật XUẤT BẢN, luôn tính (không đợi bấm Xuất bản) cho khối "Sẵn sàng xuất bản?".
+  const readinessIssues = useMemo(() => validateGame(state.draft, 'publish', { baseline: state.baseline }), [state.draft, state.baseline])
+
+  // Không tự lưu khi lỗi lưu/xuất bản trước chưa được sửa (`edit()` đã reset khi sửa): không tự thử lại để khỏi tốn thêm lượt kiểm duyệt.
+  // Riêng xung đột 409 (game đang có phòng chơi) thì sửa tiếp cũng vẫn bị từ chối: giữ chặn tới khi tải lại hoặc lưu thủ công được.
+  const autosaveReady =
+    dirty &&
+    !paused &&
+    !pendingRestore &&
+    !conflictHold &&
+    !mutation.isPending &&
+    !publishMutation.isPending &&
+    !mutation.isError &&
+    !publishMutation.isError &&
+    liveIssues.length === 0
+  const { mutate: mutateSave } = mutation
+
+  useEffect(() => {
+    if (!autosaveReady) return
+
+    const timer = setTimeout(() => mutateSave(trimmedDraft), AUTOSAVE_DELAY_MS)
+
+    return () => clearTimeout(timer)
+  }, [autosaveReady, trimmedDraft, mutateSave])
+
+  const autosave: AutosaveStatus = mutation.isPending
+    ? 'saving'
+    : mutation.isError || (dirty && (conflictHold || publishMutation.isError))
+      ? 'error'
+      : !dirty
+        ? 'saved'
+        : liveIssues.length > 0
+          ? 'blocked'
+          : pendingRestore
+            ? 'waitingRestore'
+            : 'pending'
+
   const savedQuestionIds = useMemo(() => new Set(state.baseline.questions.map((question) => question.id)), [state.baseline])
 
   // Sau lần bấm Xuất bản đầu tiên, lỗi dữ liệu tính lại theo từng lần sửa (kiểm tra theo chế độ XUẤT BẢN, chặt hơn Lưu).
@@ -167,7 +225,6 @@ export function useGameEditor(game: GameResponse) {
   )
 
   const edit = (action: Parameters<typeof dispatch>[0]) => {
-    setLastSaveOk(false)
     // Sửa tiếp thì lỗi lưu lần trước không còn đúng nữa (đang lưu dở thì để nguyên, tránh mở khóa nút Lưu giữa chừng).
     if (!mutation.isPending) mutation.reset()
     if (!publishMutation.isPending) publishMutation.reset()
@@ -179,7 +236,6 @@ export function useGameEditor(game: GameResponse) {
     // Đang xuất bản (đã gồm lưu) thì không gửi thêm bản lưu chồng lên.
     if (publishMutation.isPending) return []
 
-    setLastSaveOk(false)
     setAttempted(true)
     mutation.reset()
     publishMutation.reset()
@@ -225,15 +281,17 @@ export function useGameEditor(game: GameResponse) {
     draft: state.draft,
     dirty,
     saving: mutation.isPending,
-    savedNotice: lastSaveOk && !dirty,
+    autosave,
     issues,
     liveIssues,
+    readinessIssues,
     revision,
     issueSummary: summarizeIssues(issues, 'save'),
     saveError,
     pendingRestore,
     setTitle: (title: string) => edit({ type: 'setTitle', title }),
     setTopic: (topic: string) => edit({ type: 'setTopic', topic }),
+    setGameDefault: (field: DefaultField, value: number) => edit({ type: 'setGameDefault', field, value }),
     updateQuestion: (index: number, questionId: string, update: (question: QuestionDsl) => QuestionDsl) =>
       edit({ type: 'updateQuestion', index, questionId, update }),
     /** Mã các thẻ câu vừa được AI làm lại và còn hoàn tác được. */

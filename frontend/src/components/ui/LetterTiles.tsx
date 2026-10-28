@@ -6,6 +6,7 @@ import type { Tile } from './tileSets'
 const SIZES = {
   md: 'h-14 w-14 rounded-2xl text-3xl',
   lg: 'h-20 w-20 rounded-3xl text-5xl',
+  xl: 'h-28 w-28 rounded-[28px] text-6xl',
 } as const
 
 const TILTS = ['-rotate-6', 'rotate-3', '-rotate-3', 'rotate-6']

@@ -6,6 +6,7 @@ import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import type { AudioVisualMatchGame } from '../types/game-dsl.types'
 import WorkspaceEditor from './WorkspaceEditor'
+import { autosaved } from '../test/autosave'
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx) để mở màn chơi thử được trong test.
 vi.mock('react-konva', () => ({
@@ -35,7 +36,10 @@ const distractorBox = (index: number) => screen.getByRole('textbox', { name: new
 const addButton = () => screen.getByRole('button', { name: 'Thêm hình sai' })
 const removeButton = (number: number) => screen.getByRole('button', { name: `Xóa hình sai ${number}` })
 const listItems = () => within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')
-const saveButton = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
+import { timingBox } from '../test/editorTiming'
+
+// Lỗi hiện ngay dưới ô nằm trong khung "Sửa câu"; khối "Sẵn sàng xuất bản?" ở cột phải cũng nhắc lại cùng câu.
+const editPane = () => document.getElementById('editor-pane-preview') as HTMLElement
 const type = (box: HTMLElement, value: string) => {
   fireEvent.change(box, { target: { value } })
   fireEvent.blur(box)
@@ -55,10 +59,8 @@ async function openLoaded() {
 
 // Nút Lưu chỉ mở khi mọi chữ vừa gõ đã qua bước kiểm tra từ ngữ và vào game: chờ điều kiện đó (không chờ một khoảng cố định) rồi lưu để đọc kết quả thật từ kho.
 async function saveWhenApplied() {
-  await waitFor(() => expect(saveButton()).toBeEnabled(), { timeout: 8000 })
   await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument(), { timeout: 8000 })
-  fireEvent.click(saveButton())
-  await screen.findByText('Đã lưu thay đổi của trò chơi.', {}, { timeout: 8000 })
+  await autosaved()
 }
 
 // Nạp sẵn màn chơi thử (kéo theo renderer Canvas) một lần: lần nạp đầu tiên rất chậm khi nhiều file test chạy song song.
@@ -95,7 +97,7 @@ describe('form sửa câu AUDIO_VISUAL_MATCH', () => {
     // Lời đọc là bắt buộc ở loại này (dấu *), mô tả hình chung thì không.
     expect(document.querySelector(`label[for="${audioBox().id}"]`)?.textContent).toContain('*')
     expect(document.querySelector(`label[for="${promptBox().id}"]`)?.textContent).not.toContain('*')
-    expect(screen.getByRole('textbox', { name: /Thời gian trả lời/ })).toBeInTheDocument()
+    expect(timingBox(/Thời gian trả lời/)).toBeInTheDocument()
   })
 
   it('nhóm hình sai có gợi ý số lượng gắn kèm, và thêm lỗi của danh sách khi hình sai bị trùng', async () => {
@@ -139,7 +141,7 @@ describe('form sửa câu AUDIO_VISUAL_MATCH', () => {
   it('sửa mô tả hình đúng: danh sách câu cập nhật, hiện "Chưa lưu", và lưu vào kho (bỏ khoảng trắng thừa)', async () => {
     await openLoaded()
     type(correctBox(), '  a sleepy cat  ')
-    await waitFor(() => expect(screen.getByText('Chưa lưu')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument())
 
     await saveWhenApplied()
 
@@ -167,7 +169,7 @@ describe('form sửa câu AUDIO_VISUAL_MATCH', () => {
     await openLoaded()
     type(distractorBox(1), 'a'.repeat(101))
 
-    expect(await screen.findByText(/tối đa 100 ký tự/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/tối đa 100 ký tự/)).toBeInTheDocument()
     expect(distractorBox(1)).toHaveAttribute('aria-invalid', 'true')
   })
 
@@ -175,9 +177,9 @@ describe('form sửa câu AUDIO_VISUAL_MATCH', () => {
     await openLoaded()
     type(distractorBox(0), '  A CUTE  cat ')
 
-    expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/bị trùng nhau/)).toBeInTheDocument()
 
-    fireEvent.click(saveButton())
+    fireEvent.click(screen.getByRole('button', { name: 'Xem lỗi' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(stored().distractors.map((choice) => choice.visualPrompt)).toEqual(['a brown dog', 'a small bird'])
@@ -187,7 +189,7 @@ describe('form sửa câu AUDIO_VISUAL_MATCH', () => {
     await openLoaded()
     type(distractorBox(1), 'A brown dog')
 
-    expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/bị trùng nhau/)).toBeInTheDocument()
   })
 
   it('lời lẽ chưa phù hợp (UC-05 2a): giữ nguyên nội dung cũ trong danh sách, hiện đúng câu của SRS', async () => {
@@ -221,7 +223,6 @@ describe('AUDIO_VISUAL_MATCH: ảnh của lựa chọn', () => {
     expect(distractorBox(0)).toHaveAccessibleDescription(IMAGE_NOTE)
     expect(distractorBox(1)).not.toHaveAccessibleDescription(IMAGE_NOTE)
     expect(within(rows[1]).queryByText(IMAGE_NOTE)).not.toBeInTheDocument()
-    expect(saveButton()).toBeDisabled() // chưa sửa gì nên chưa có gì để lưu; lời nhắc không phải lỗi
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
@@ -378,7 +379,7 @@ describe('AUDIO_VISUAL_MATCH: thời gian, lưu và chơi thử', () => {
 
     await openLoaded()
     type(correctBox(), 'a sleepy cat')
-    await waitFor(() => expect(screen.getByText('Chưa lưu')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument())
 
     await saveWhenApplied()
 

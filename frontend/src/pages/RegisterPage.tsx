@@ -7,10 +7,12 @@ import ErrorNotice from '../components/ui/ErrorNotice'
 import FormField from '../components/ui/FormField'
 import PasswordInput from '../components/ui/PasswordInput'
 import { describedBy, inputClass } from '../components/ui/formStyles'
+import { AUTH_FEATURES } from '../config/authFeatures'
 import { viText } from '../constants/viText'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { ROUTES } from '../routes/paths'
 import { parseApiError } from '../utils/apiError'
+import { passwordStrength } from '../utils/passwordStrength'
 
 interface RegisterForm {
   fullName: string
@@ -67,6 +69,30 @@ function focusFirstError(errors: FieldErrors) {
   const first = FIELD_ORDER.find((field) => errors[field])
 
   if (first) document.getElementById(fieldId(first))?.focus()
+}
+
+// Thanh 3 vạch + nhãn đọc to khi đổi; theo đúng luật Backend (xem passwordStrength) nhưng chỉ gợi ý, không chặn nộp. Không dùng đỏ: mức thấp là vàng.
+function StrengthMeter({ password }: { password: string }) {
+  const { level, label } = passwordStrength(password)
+
+  return (
+    <div className="mt-2">
+      <div aria-hidden="true" className="flex gap-1.5">
+        {[1, 2, 3].map((bar) => (
+          <span
+            key={bar}
+            className={`h-2 flex-1 rounded-full ${
+              bar > level ? 'bg-line' : level === 3 ? 'bg-brand' : 'bg-sun'
+            }`}
+          />
+        ))}
+      </div>
+      <p aria-live="polite" className="mt-1 text-sm font-semibold text-ink-soft">
+        <span className="sr-only">{viText.auth.strengthLabel}: </span>
+        {label}
+      </p>
+    </div>
+  )
 }
 
 export default function RegisterPage() {
@@ -153,14 +179,13 @@ export default function RegisterPage() {
   )
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       <div className="mb-6">
-        <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-strong">
-          {viText.auth.registerKicker}
-        </p>
-        <h1 className="mt-2 text-3xl font-extrabold">Tạo tài khoản</h1>
-        <p className="mt-2 text-base leading-7 text-ink-soft">
-          Đăng ký tài khoản giáo viên để bắt đầu xây dựng trò chơi học tập.
+        <h1 className="font-display text-3xl font-extrabold leading-tight">
+          {viText.auth.registerTitle}
+        </h1>
+        <p className="mt-1 text-base font-semibold text-ink-soft">
+          {viText.auth.registerDescription}
         </p>
       </div>
 
@@ -190,11 +215,13 @@ export default function RegisterPage() {
               error: Boolean(errors.password),
             })}
           />
+          {/* Ô còn trống thì chưa chấm: không chê khi giáo viên chưa gõ gì. */}
+          {form.password ? <StrengthMeter password={form.password} /> : null}
         </FormField>
 
         <FormField
           id={fieldId('confirmPassword')}
-          label="Xác nhận mật khẩu"
+          label={viText.auth.confirmPassword}
           error={errors.confirmPassword}
         >
           <PasswordInput
@@ -212,16 +239,34 @@ export default function RegisterPage() {
           />
         </FormField>
 
-        <Button type="submit" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? 'Đang đăng ký...' : 'Đăng ký'}
+        {AUTH_FEATURES.teachingLevel ? (
+          // Chưa gửi lên API: RegisterRequest chưa có trường cấp dạy.
+          <fieldset>
+            <legend className="text-base font-bold">{viText.auth.teachingLevelLabel}</legend>
+            <div className="mt-2 flex flex-wrap gap-3">
+              {viText.auth.teachingLevels.map((level) => (
+                <label
+                  key={level}
+                  className="inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-line px-4 text-base font-bold has-[:checked]:border-brand has-[:checked]:bg-brand-soft"
+                >
+                  <input type="radio" name="teachingLevel" value={level} className="accent-brand" />
+                  {level}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ) : null}
+
+        <Button type="submit" size="lg" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? viText.auth.registerSubmitting : viText.auth.registerSubmit}
         </Button>
       </form>
 
-      <p className="mt-6 text-base text-ink-soft">
-        Đã có tài khoản?{' '}
+      <p className="mt-6 text-center text-sm font-bold text-ink-soft">
+        {viText.auth.hasAccount}{' '}
         <Link
           to={ROUTES.login}
-          className="inline-flex min-h-11 items-center px-1 font-bold text-brand-strong underline"
+          className="inline-flex min-h-11 items-center px-1 font-black text-brand-strong underline"
         >
           Đăng nhập
         </Link>

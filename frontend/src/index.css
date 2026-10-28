@@ -1,27 +1,85 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
-/* Bảng màu giao diện giáo viên (src/games/ có quy ước màu riêng, không dùng chung các biến này).
-   Chữ đạt tương phản >= 4.5:1 (đã tính): brand/trắng 5.3, brand-strong/trắng 7.3, ink/paper 15.1, ink-soft/paper 7.0. */
+/* Font tự host (SIL OFL 1.1, bản variable của Fontsource 5.3.0). Tách latin và vietnamese theo unicode-range: trang không có chữ có dấu
+   thì không tải tệp vietnamese. font-display: swap để chữ hiện ngay bằng font dự phòng trong lúc tải. */
+@font-face {
+  font-family: "Baloo 2 Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 800;
+  src: url("./assets/fonts/baloo-2-vietnamese-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: "Baloo 2 Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 800;
+  src: url("./assets/fonts/baloo-2-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Nunito Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 1000;
+  src: url("./assets/fonts/nunito-vietnamese-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: "Nunito Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 1000;
+  src: url("./assets/fonts/nunito-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Token "Lớp học ấm áp" (docs/ui/SPEC.md mục 4) cho giao diện giáo viên; src/games/ và src/player/ có bảng màu riêng (palette.ts, --play-*).
+   Tương phản đã tính (WCAG): ink/paper 14.6, ink-soft/paper 7.0, trắng/brand 5.3, trắng/brand-strong 6.8, brand/paper 4.95,
+   sun-ink/sun 8.2, brand/brand-soft 4.6; chữ môn trên nền môn: Toán 6.0, Tiếng Việt 5.4, Tiếng Anh 6.9; warn-ink/warn-soft 7.7.
+   Chip môn đã chọn dùng nền -ink chữ trắng (Toán 7.1, Tiếng Việt 6.3, Tiếng Anh 8.4), không dùng -mark (trắng trên viet-mark chỉ ~3:1). */
 @theme {
-  --color-paper: #f6f7f2;
-  --color-ink: #17212b;
-  --color-ink-soft: #475569;
-  --color-brand: #0b7a5b;
-  --color-brand-strong: #086349;
-  --color-brand-soft: #e3f4ec;
-  --color-sun: #f6b73c;
+  --font-display: "Baloo 2 Variable", "Nunito Variable", ui-rounded, system-ui, sans-serif;
+  --font-sans: "Nunito Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-paper: #fbf6ec;
+  --color-surface: #ffffff;
+  --color-line: #e7dcc5;
+  --color-ink: #1b2333;
+  --color-ink-soft: #4a5568;
+  --color-brand: #0e7a57;
+  --color-brand-strong: #0a6847;
+  /* "Đế" của nút chính: box-shadow 0 5px 0 màu này. */
+  --color-brand-base: #095c41;
+  --color-brand-soft: #e3f3ec;
+  --color-sun: #f6b93b;
+  --color-sun-ink: #3b2600;
+  --color-sun-base: #c98a12;
   --color-sun-soft: #fff4d6;
-  /* Mỗi môn một màu nền nhạt (soft), màu hình (mark) và màu chữ đậm (ink, >= 5.5:1 trên nền soft). */
-  --color-math-soft: #e0eaff;
-  --color-math-mark: #2563eb;
-  --color-math-ink: #1d4ed8;
-  --color-viet-soft: #fdebd0;
-  --color-viet-mark: #d97706;
-  --color-viet-ink: #92400e;
-  --color-eng-soft: #ece4ff;
-  --color-eng-mark: #7c3aed;
-  --color-eng-ink: #6d28d9;
+  --color-warn-soft: #fff4e5;
+  --color-warn-ink: #7a3e00;
+  /* Mỗi môn: nền nhạt (soft), viền/hình (mark), chữ đậm (ink, >= 5.3:1 trên nền soft). */
+  --color-math-soft: #e3ecfd;
+  --color-math-mark: #2f6fed;
+  --color-math-ink: #1f4fc4;
+  --color-viet-soft: #fdebd3;
+  --color-viet-mark: #e07b12;
+  --color-viet-ink: #9a4a00;
+  --color-eng-soft: #eee6fc;
+  --color-eng-mark: #7a4cd9;
+  --color-eng-ink: #5b2db8;
+
+  --radius-card: 1.5rem;
+  --radius-card-lg: 1.875rem;
+  --shadow-card: 0 10px 26px rgb(80 55 10 / 0.08);
+  --shadow-card-hover: 0 14px 30px rgb(80 55 10 / 0.12);
+  --shadow-base-brand: 0 5px 0 var(--color-brand-base);
+  --shadow-base-sun: 0 5px 0 var(--color-sun-base);
 }
 
 /* Màu phía học sinh: giá trị đến lúc chạy từ bảng màu duy nhất (games/common/palette.ts) qua biến --play-*, do usePlayerRootStyle đặt. Không có màu cứng ở đây. */
@@ -51,9 +109,7 @@
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
-    font-family:
-      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-      "Segoe UI", sans-serif;
+    font-family: var(--font-sans);
     color: var(--color-ink);
     font-size: 1rem;
     line-height: 1.5;
@@ -119,4 +175,26 @@
 
 @utility play-safe-b {
   padding-bottom: max(var(--play-pad-y, 0.75rem), env(safe-area-inset-bottom));
+}
+
+/* In phiếu QR (hộp Xuất bản và chia sẻ): khi in chỉ hiện vùng [data-print-sheet]. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  [data-print-sheet],
+  [data-print-sheet] * {
+    visibility: visible;
+  }
+
+  /* !important: vùng in mang thuộc tính hidden, mà preflight của Tailwind ẩn [hidden] bằng display:none !important. */
+  [data-print-sheet] {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    padding: 2rem;
+    background: #ffffff;
+    color: #000000;
+  }
 }

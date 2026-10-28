@@ -46,7 +46,7 @@ describe('trang soạn thảo: mở game', () => {
 
     expect(within(list).getAllByRole('button')).toHaveLength(3)
     expect(screen.getAllByText('Dữ liệu mô phỏng').length).toBeGreaterThan(0)
-    expect(screen.getByText('3 câu hỏi', { exact: false })).toBeInTheDocument()
+    expect(screen.getByText('Trắc nghiệm · 3 câu')).toBeInTheDocument()
   })
 
   it('chọn câu thì làm nổi bật (aria-current) và vùng xem đổi theo câu đó', async () => {

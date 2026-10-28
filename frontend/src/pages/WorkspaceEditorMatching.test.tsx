@@ -7,6 +7,11 @@ import { summarizeQuestion } from '../utils/questionSummary'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import WorkspaceEditor from './WorkspaceEditor'
+import { autosaved } from '../test/autosave'
+import { timingBox } from '../test/editorTiming'
+
+// Lỗi hiện ngay dưới ô nằm trong khung "Sửa câu"; khối "Sẵn sàng xuất bản?" ở cột phải cũng nhắc lại cùng câu.
+const editPane = () => document.getElementById('editor-pane-preview') as HTMLElement
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx) để chơi thử được trong test.
 vi.mock('react-konva', () => ({
@@ -41,7 +46,6 @@ const sideBox = (pair: number, side: 'trái' | 'phải', kind: 'Chữ' | 'Mô t�
 const addButton = () => screen.getByRole('button', { name: 'Thêm cặp' })
 const removeButton = (pair: number) => screen.getByRole('button', { name: `Xóa cặp ${pair}` })
 const listItems = () => within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')
-const saveButton = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
 
 async function openLoaded(gameId: string) {
   renderWithProviders(<WorkspaceEditor />, `/workspace/editor?gameId=${gameId}`)
@@ -77,8 +81,8 @@ describe('form sửa câu MATCHING', () => {
     expect(sideBox(2, 'phải', 'Chữ')).toHaveValue('ấm')
     expect(sideBox(0, 'trái', 'Mô tả hình ảnh')).toHaveValue('')
     expect(screen.getByRole('textbox', { name: /^Lời đọc/ })).toHaveValue('Nối chữ cái với hình')
-    expect(screen.getByRole('textbox', { name: /Thời gian trả lời/ })).toHaveValue('30')
-    expect(screen.getByRole('textbox', { name: /^Điểm/ })).toHaveValue('10')
+    expect(timingBox(/Thời gian trả lời/)).toHaveValue('30')
+    expect(timingBox(/^Điểm/)).toHaveValue('10')
   })
 
   it('sửa chữ một bên: danh sách câu cập nhật, hiện "Chưa lưu", chơi thử thấy chữ mới', async () => {
@@ -89,7 +93,7 @@ describe('form sửa câu MATCHING', () => {
     fireEvent.blur(sideBox(0, 'trái', 'Chữ'))
 
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('3 cặp: Ao, ă, â'))
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Chơi thử' }))
     expect(await screen.findByText('Câu 1 trên 3', {}, { timeout: 10_000 })).toBeInTheDocument()
@@ -148,9 +152,9 @@ describe('form sửa câu MATCHING', () => {
     fireEvent.change(sideBox(1, 'trái', 'Chữ'), { target: { value: 'a' } })
     fireEvent.blur(sideBox(1, 'trái', 'Chữ'))
 
-    expect(await screen.findByText(/Các mục bên trái bị trùng nhau/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/Các mục bên trái bị trùng nhau/)).toBeInTheDocument()
 
-    await user.click(saveButton())
+    await user.click(screen.getByRole('button', { name: 'Xem lỗi' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(getMockGame(MATCHING_ID).questions[0]).toMatchObject({ pairs: [{ left: { text: 'a' } }, { left: { text: 'ă' } }, { left: { text: 'â' } }] })
@@ -161,7 +165,7 @@ describe('form sửa câu MATCHING', () => {
     fireEvent.change(sideBox(0, 'phải', 'Chữ'), { target: { value: 'a'.repeat(101) } })
     fireEvent.blur(sideBox(0, 'phải', 'Chữ'))
 
-    expect(await screen.findByText(/tối đa 100 ký tự/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/tối đa 100 ký tự/)).toBeInTheDocument()
   })
 
   it('từ ngữ chưa phù hợp (UC-05 2a): giữ nguyên nội dung cũ, hiện đúng câu của SRS', async () => {
@@ -186,8 +190,7 @@ describe('form sửa câu MATCHING', () => {
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('4 cặp'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    await user.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(getMockGame(MATCHING_ID).questions[0]).toMatchObject({
       pairs: [
@@ -299,8 +302,7 @@ describe('MATCHING: chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đ
     expect(pairItems()).toHaveLength(3)
     expect(sideBox(0, 'trái', 'Chữ')).toHaveValue('Anh')
 
-    await user.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(getMockGame(MATCHING_ID).questions[2]).toMatchObject({
       pairs: [{ pairId: 'p1', left: { text: 'Anh' } }, { pairId: 'p2' }, { pairId: 'p3' }],
@@ -355,8 +357,8 @@ describe('các loại game còn lại: chỉ sửa trường chung, nội dung c
     expect(screen.getByRole('heading', { name: 'Nội dung câu (chỉ đọc)' })).toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: /^Lời đọc/ })).toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: /^Mô tả hình ảnh/ })).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: /Thời gian trả lời/ })).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: /^Điểm/ })).toBeInTheDocument()
+    expect(timingBox(/Thời gian trả lời/)).toBeInTheDocument()
+    expect(timingBox(/^Điểm/)).toBeInTheDocument()
     expect(screen.queryByRole('textbox', { name: /Nội dung câu hỏi/ })).not.toBeInTheDocument()
     // Nội dung chữ chỉ đọc: một đoạn văn, không phải ô nhập.
     const readOnly = screen.getByRole('heading', { name: 'Nội dung câu (chỉ đọc)' }).parentElement as HTMLElement
@@ -372,28 +374,24 @@ describe('các loại game còn lại: chỉ sửa trường chung, nội dung c
     const user = userEvent.setup()
 
     await openLoaded('mock-game-5')
-    const time = screen.getByRole('textbox', { name: /Thời gian trả lời/ })
+    const time = timingBox(/Thời gian trả lời/)
 
     await user.clear(time)
     await user.type(time, '55')
-    await user.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(listItems()[0]).toHaveTextContent('55 giây')
     expect(getMockGame('mock-game-5').questions[0].timeLimitSeconds).toBe(55)
   })
 
   it('lời đọc là TÙY CHỌN ở loại thường: xóa hết thì bỏ hẳn trường và vẫn lưu được', async () => {
-    const user = userEvent.setup()
-
     await openLoaded('mock-game-5')
     const audio = screen.getByRole('textbox', { name: /^Lời đọc/ })
 
     fireEvent.change(audio, { target: { value: '' } })
     fireEvent.blur(audio)
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
-    await user.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect('audioText' in getMockGame('mock-game-5').questions[0]).toBe(false)
   })

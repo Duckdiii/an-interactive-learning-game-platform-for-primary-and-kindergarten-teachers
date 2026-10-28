@@ -16,6 +16,15 @@ describe('subjectTheme', () => {
     expect(new Set([math.chip, viet.chip, eng.chip]).size).toBe(3)
   })
 
+  it('mỗi môn có viền và nền chọn riêng, mặc định dùng màu thương hiệu', () => {
+    expect(subjectTheme('MATH').chipBorder).toBe('border-math-mark')
+    expect(subjectTheme('MATH').chipSelected).toBe('bg-math-ink text-white')
+    expect(subjectTheme('VIETNAMESE').chipBorder).toBe('border-viet-mark')
+    expect(subjectTheme('ENGLISH').chipSelected).toBe('bg-eng-ink text-white')
+    expect(subjectTheme('SCIENCE').chipBorder).toBe('border-brand')
+    expect(subjectTheme('SCIENCE').chipSelected).toBe('bg-brand-strong text-white')
+  })
+
   it('môn chưa biết dùng giao diện mặc định, không vỡ', () => {
     const theme = subjectTheme('SCIENCE')
 

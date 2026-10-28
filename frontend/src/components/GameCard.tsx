@@ -1,132 +1,208 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  gameStatusLabel,
-  gameTypeLabel,
-  gradeLevelLabel,
-  subjectLabel,
-} from '../constants/labels'
+import { resolveShareUrl } from '../config/studentApp'
+import { gameStatusLabel, gameTypeLabel, gradeLevelLabel } from '../constants/labels'
 import { viText } from '../constants/viText'
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard'
+import { resultsLink } from '../utils/insights'
 import { useNewGameIds } from '../utils/newGames'
 import { ROUTES } from '../routes/paths'
 import type { GameSummary } from '../types/game-summary.types'
-import { formatRelativeTime } from '../utils/relativeTime'
 import { buttonClass } from './buttonStyles'
-import Icon from './ui/Icon'
-import GameTypeCover from './ui/GameTypeCover'
+import Card from './ui/Card'
+import SubjectChip from './ui/SubjectChip'
 import { subjectTheme } from './ui/subjectTheme'
 
 interface GameCardProps {
   game: GameSummary
-  // Mốc "bây giờ" do trang truyền xuống để mọi thẻ cùng một mốc và test không phụ thuộc đồng hồ.
-  now: number
 }
 
-// Điện thoại: thẻ nằm ngang gọn (ô môn học nhỏ bên trái) để xem được nhiều game trong một màn hình.
-// Máy tính bảng trở lên: thẻ dọc có hình bìa lớn.
-export default function GameCard({ game, now }: GameCardProps) {
-  const theme = subjectTheme(game.subject)
+const TILE_CLASS = 'grid h-16 w-16 place-items-center rounded-2xl border-2 bg-surface font-display text-4xl font-bold'
+
+export default function GameCard({ game }: GameCardProps) {
   const isPublished = game.status === 'PUBLISHED'
   // Game vừa tạo bằng AI trong phiên này: chỉ nằm trong bộ nhớ của tab, hết khi giáo viên mở game.
   const isNew = useNewGameIds().has(game.gameId)
+  const theme = subjectTheme(game.subject)
+  const editUrl = `${ROUTES.workspaceEditor}?gameId=${encodeURIComponent(game.gameId)}`
+  // Cùng một địa chỉ cho "Trình chiếu" và "Sao chép liên kết": shareUrl của Backend nếu an toàn, nếu không thì ghép từ địa chỉ trang học sinh.
+  const shareLink = game.shareCode ? resolveShareUrl(game.shareCode, game.shareUrl) : null
+
   const { copiedValue, copy } = useCopyToClipboard()
   const [copyFailed, setCopyFailed] = useState(false)
-  const justCopied = Boolean(game.shareCode) && copiedValue === game.shareCode
+  const justCopied = Boolean(shareLink) && copiedValue === shareLink
+
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const moreRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setMenuOpen(false)
+      moreRef.current?.focus()
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
+
+  const menuItemClass =
+    'flex min-h-12 w-full items-center px-4 text-left text-base font-semibold text-ink hover:bg-brand-soft'
 
   return (
-    <article className="flex overflow-hidden rounded-2xl border-2 border-ink/10 bg-white transition hover:border-brand/40 hover:shadow-md sm:flex-col">
-      <div className="w-24 shrink-0 sm:w-auto">
+    <Card as="article" padding="none" className="flex flex-col">
+      <div className={`relative h-36 overflow-hidden rounded-t-card ${theme.cover}`}>
         {game.thumbnailUrl ? (
-          <div className="aspect-[16/9] h-full bg-paper sm:h-auto">
-            <img src={game.thumbnailUrl} alt="" className="h-full w-full object-cover" />
-          </div>
+          <img src={game.thumbnailUrl} alt="" className="h-full w-full object-cover" />
         ) : (
           <>
-            <div className="h-full sm:hidden">
-              <GameTypeCover gameType={game.gameType} subject={game.subject} compact />
+            <div aria-hidden="true" className="flex h-full items-center justify-center gap-3">
+              <span className={`-rotate-6 ${TILE_CLASS} ${theme.chipBorder} ${theme.ink}`}>
+                {theme.tiles[0]}
+              </span>
+              <span className={`rotate-3 ${TILE_CLASS} ${theme.chipBorder} ${theme.ink}`}>
+                {theme.tiles[1]}
+              </span>
             </div>
-            <div className="hidden sm:block">
-              <GameTypeCover gameType={game.gameType} subject={game.subject} />
-            </div>
+            <span
+              aria-hidden="true"
+              className={`absolute -bottom-6 -right-6 h-24 w-24 rounded-full bg-current opacity-20 ${theme.mark}`}
+            />
           </>
         )}
+        <span
+          className={[
+            'absolute right-3 top-3 rounded-full px-3 py-1 text-sm font-bold',
+            isPublished ? 'bg-brand text-white' : 'bg-surface text-warn-ink',
+          ].join(' ')}
+        >
+          {gameStatusLabel(game.status)}
+        </span>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 sm:p-5">
+      <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className={`rounded-full px-3 py-1 text-sm font-bold ${theme.chip}`}>
-            {subjectLabel(game.subject)} · {gradeLevelLabel(game.gradeLevel)}
-          </span>
-          <span
-            className={[
-              'rounded-full px-3 py-1 text-sm font-bold',
-              isPublished
-                ? 'bg-brand-soft text-brand-strong'
-                : 'bg-sun-soft text-ink ring-1 ring-sun',
-            ].join(' ')}
-          >
-            {gameStatusLabel(game.status)}
-          </span>
-          {isNew ? <span className="rounded-full bg-brand px-3 py-1 text-sm font-bold text-white">{viText.gameCard.newBadge}</span> : null}
+          <SubjectChip subject={game.subject} />
+          {isNew ? (
+            <span className="rounded-full bg-brand px-3 py-1 text-sm font-bold text-white">
+              {viText.gameCard.newBadge}
+            </span>
+          ) : null}
         </div>
 
         <div className="min-w-0">
-          <h3 className="line-clamp-2 text-lg font-bold leading-snug text-ink sm:text-xl">
+          <h3 className="line-clamp-2 font-display text-lg font-bold leading-snug text-ink">
             {game.title}
           </h3>
           <p className="mt-1 text-sm text-ink-soft">
-            {gameTypeLabel(game.gameType)}
+            {gradeLevelLabel(game.gradeLevel)} · {gameTypeLabel(game.gameType)}
           </p>
-        </div>
-
-        <p className="flex items-center gap-2 text-sm text-ink-soft">
-          <Icon name="clock" className="h-4 w-4 shrink-0" />
-          {viText.gameCard.updated} {formatRelativeTime(game.updatedAt, now)}
-        </p>
-
-        {isPublished && game.shareCode ? (
-          <div>
-            <div className="flex items-center justify-between gap-2 rounded-xl bg-paper py-1 pl-3 pr-1">
-              <div>
-                <p className="text-xs font-semibold text-ink-soft">{viText.gameCard.shareCode}</p>
-                <p className="font-mono text-lg font-extrabold leading-tight tracking-widest text-ink">
-                  {game.shareCode}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={async () => {
-                  const ok = await copy(game.shareCode as string)
-                  setCopyFailed(!ok)
-                }}
-                aria-label={`${viText.gameCard.copyCode} ${game.shareCode}`}
-                className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-brand-strong transition hover:bg-brand-soft"
-              >
-                <Icon name={justCopied ? 'check' : 'copy'} className="h-4 w-4" />
-                {justCopied ? viText.gameCard.copied : viText.gameCard.copyShort}
-              </button>
-            </div>
-            {/* Trình duyệt chặn clipboard (trang không an toàn...): nói rõ để cô tự chép mã, không im lặng. */}
-            <p role="status" className={copyFailed ? 'mt-1 text-sm text-ink' : 'text-sm'}>
-              {copyFailed ? viText.gameCard.copyFailed : ''}
+          {/* Mã chơi để cô đọc to cho học sinh gõ ở trang /join (chọn được để sao chép tay). */}
+          {isPublished && game.shareCode ? (
+            <p className="mt-1 text-sm text-ink-soft">
+              {viText.gameCard.codeLabel}{' '}
+              <span className="select-all font-mono text-base font-bold tracking-widest text-ink">{game.shareCode}</span>
             </p>
-          </div>
-        ) : (
-          <p className="text-sm text-ink-soft">{viText.gameCard.notPublished}</p>
-        )}
-
-        <div className="mt-auto pt-1">
-          <Link
-            to={`${ROUTES.workspaceEditor}?gameId=${encodeURIComponent(game.gameId)}`}
-            className={`${buttonClass('secondary')} min-h-11 w-full gap-2 sm:w-auto`}
-            aria-label={`${viText.gameCard.edit}: ${game.title}`}
-          >
-            <Icon name="pencil" className="h-4 w-4" />
-            {viText.gameCard.edit}
-          </Link>
+          ) : null}
         </div>
+
+        <div className="mt-auto flex items-center gap-2 pt-1">
+          {!isPublished ? (
+            <Link to={editUrl} className={`${buttonClass('secondary')} flex-1`}>
+              {viText.gameCard.continueEdit}
+            </Link>
+          ) : shareLink ? (
+            // tạm: mở trang chơi; đổi sang /present khi có P4
+            <a
+              href={shareLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${buttonClass('primary')} flex-1`}
+            >
+              {viText.gameCard.present}{' '}
+              <span className="sr-only">({viText.gameCard.presentHint})</span>
+            </a>
+          ) : (
+            <Link to={editUrl} className={`${buttonClass('secondary')} flex-1`}>
+              {viText.gameCard.edit}
+            </Link>
+          )}
+
+          <div
+            ref={menuRef}
+            className="relative"
+            // Tab ra khỏi nút và danh sách thao tác thì đóng (không để danh sách mở treo).
+            onBlur={(event) => {
+              if (!menuRef.current?.contains(event.relatedTarget as Node | null)) setMenuOpen(false)
+            }}
+          >
+            <button
+              ref={moreRef}
+              type="button"
+              aria-expanded={menuOpen}
+              aria-controls={`more-${game.gameId}`}
+              aria-label={viText.gameCard.moreActions.replace('{title}', game.title)}
+              onClick={() => setMenuOpen((open) => !open)}
+              className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border-2 border-line bg-surface text-xl font-bold text-ink hover:bg-brand-soft"
+            >
+              <span aria-hidden="true">…</span>
+            </button>
+            {menuOpen ? (
+              // Danh sách mở/đóng (disclosure), không dùng role=menu vì không có điều hướng bằng phím mũi tên.
+              <div
+                id={`more-${game.gameId}`}
+                className="absolute bottom-full right-0 z-10 mb-2 w-52 overflow-hidden rounded-2xl border border-line bg-surface shadow-card-hover"
+              >
+                <Link
+                  to={editUrl}
+                  onClick={() => setMenuOpen(false)}
+                  className={menuItemClass}
+                >
+                  {viText.gameCard.edit}
+                </Link>
+                {isPublished ? (
+                  <Link
+                    to={resultsLink(game.gameId)}
+                    onClick={() => setMenuOpen(false)}
+                    className={menuItemClass}
+                  >
+                    {viText.gameCard.viewResults}
+                  </Link>
+                ) : null}
+                {shareLink ? (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setMenuOpen(false)
+                      moreRef.current?.focus()
+                      setCopyFailed(!(await copy(shareLink)))
+                    }}
+                    className={menuItemClass}
+                  >
+                    {viText.gameCard.copyLink}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Trình duyệt chặn clipboard (trang không an toàn...): nói rõ để cô tự chép liên kết, không im lặng. */}
+        <p role="status" className={copyFailed || justCopied ? 'text-sm text-ink' : 'sr-only'}>
+          {copyFailed ? viText.gameCard.copyFailed : justCopied ? viText.gameCard.copied : ''}
+        </p>
       </div>
-    </article>
+    </Card>
   )
 }

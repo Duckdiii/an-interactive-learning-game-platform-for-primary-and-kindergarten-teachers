@@ -1,5 +1,9 @@
 import { viText } from '../../constants/viText'
 import type { GameMetadata } from '../../types/game-dsl.types'
+import type { DefaultField } from '../../utils/gameDefaults'
+import { QUESTION_LIMITS } from '../../utils/questionSpecs'
+import NumberField from './forms/NumberField'
+import type { GameDefaults } from './forms/GameDefaultsContext'
 import type { ValidationIssue } from '../../utils/gameValidation'
 import FormField from '../ui/FormField'
 import { describedBy, inputClass } from '../ui/formStyles'
@@ -11,6 +15,9 @@ interface GameInfoFormProps {
   disabled?: boolean
   onTitleChange: (title: string) => void
   onTopicChange: (topic: string) => void
+  // Thời gian/điểm mặc định của game (suy ra từ các câu); vắng khi chưa có câu nào.
+  defaults?: GameDefaults
+  onDefaultChange?: (field: DefaultField, value: number) => void
 }
 
 // Lời nhắn của lỗi theo trường (bỏ tiền tố "Trò chơi: " vì đã nằm ngay dưới ô).
@@ -23,7 +30,7 @@ const errorOf = (issues: ReadonlyArray<ValidationIssue>, field: string) => {
 }
 
 // Tên và chủ đề của trò chơi, hai trường sửa được ở bước này. Lỗi hiện ngay dưới ô sau lần bấm Lưu đầu tiên.
-export default function GameInfoForm({ metadata, issues, disabled = false, onTitleChange, onTopicChange }: GameInfoFormProps) {
+export default function GameInfoForm({ metadata, issues, disabled = false, onTitleChange, onTopicChange, defaults = {}, onDefaultChange }: GameInfoFormProps) {
   const text = viText.editor
   const titleError = errorOf(issues, 'metadata.title')
   const topicError = errorOf(issues, 'metadata.topic')
@@ -59,6 +66,31 @@ export default function GameInfoForm({ metadata, issues, disabled = false, onTit
           />
         </FormField>
       </div>
+      {onDefaultChange && defaults.timeLimitSeconds !== undefined && defaults.points !== undefined ? (
+        <div className="space-y-2">
+          <div className="grid gap-4 md:grid-cols-2">
+            <NumberField
+              id="game-default-time"
+              label={text.form.defaultTimeLabel}
+              value={defaults.timeLimitSeconds}
+              limits={QUESTION_LIMITS.timeLimitSeconds}
+              disabled={disabled}
+              commitOnBlur
+              onCommit={(value) => onDefaultChange('timeLimitSeconds', value)}
+            />
+            <NumberField
+              id="game-default-points"
+              label={text.form.defaultPointsLabel}
+              value={defaults.points}
+              limits={QUESTION_LIMITS.points}
+              disabled={disabled}
+              commitOnBlur
+              onCommit={(value) => onDefaultChange('points', value)}
+            />
+          </div>
+          <p className="text-sm text-ink-soft">{text.form.defaultsHint}</p>
+        </div>
+      ) : null}
     </section>
   )
 }

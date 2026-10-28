@@ -10,6 +10,9 @@ interface DialogProps {
   describedById?: string
   // Bấm Esc. Hộp thoại KHÔNG đóng khi bấm ra ngoài vùng tối (gõ dở gợi ý dài mà lỡ tay là mất), nên đóng luôn qua nút hoặc Esc.
   onEscape: () => void
+  // Hộp rộng cho nội dung nhiều cột; tiêu đề chỉ dành cho trình đọc màn hình khi nội dung đã có đề mục hiển thị riêng.
+  wide?: boolean
+  hideTitle?: boolean
   children: ReactNode
 }
 
@@ -21,7 +24,7 @@ const focusableIn = (root: HTMLElement) => Array.from(root.querySelectorAll<HTML
  * Hộp thoại chặn (modal) dùng được bằng bàn phím và trình đọc màn hình: \`role="dialog"\` + \`aria-modal\`, tiêu điểm vào trong khi mở, Tab quay vòng trong hộp,
  * Esc để đóng, đóng xong trả tiêu điểm về phần tử đã mở nó, khóa cuộn trang nền. Vẽ ra \`document.body\` để không bị bố cục cha cắt hoặc che.
  */
-export default function Dialog({ title, initialFocusId, describedById, onEscape, children }: DialogProps) {
+export default function Dialog({ title, initialFocusId, describedById, onEscape, wide = false, hideTitle = false, children }: DialogProps) {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   // Chỉ dùng lúc mở: đổi `initialFocusId` sau đó không kéo tiêu điểm đi nữa.
@@ -107,9 +110,9 @@ export default function Dialog({ title, initialFocusId, describedById, onEscape,
         aria-labelledby={titleId}
         aria-describedby={describedById}
         tabIndex={-1}
-        className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-6"
+        className={`max-h-[92dvh] w-full ${wide ? 'max-w-5xl' : 'max-w-lg'} overflow-y-auto rounded-t-3xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-6`}
       >
-        <h2 id={titleId} className="text-xl font-extrabold">
+        <h2 id={titleId} className={hideTitle ? 'sr-only' : 'text-xl font-extrabold'}>
           {title}
         </h2>
         {children}

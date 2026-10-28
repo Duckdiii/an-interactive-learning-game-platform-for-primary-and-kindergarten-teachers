@@ -13,10 +13,16 @@ export function describedBy(
 }
 
 const baseInput =
-  'w-full rounded-xl border-2 bg-white px-4 text-base text-ink transition placeholder:text-ink-soft/70 focus:border-brand disabled:opacity-60'
+  'w-full rounded-2xl border-2 bg-surface px-4 text-base text-ink transition placeholder:text-ink-soft/70 focus:ring-4 disabled:opacity-60'
+
+// Đỏ chỉ cho lỗi form giáo viên.
+const stateClass = (invalid: boolean) =>
+  invalid
+    ? 'border-rose-600 focus:border-rose-600 focus:ring-rose-600/15'
+    : 'border-line focus:border-brand focus:ring-brand/15'
 
 export const inputClass = (invalid = false) =>
-  `h-12 ${baseInput} ${invalid ? 'border-rose-500 focus:border-rose-600' : 'border-ink/20'}`
+  `h-12 ${baseInput} ${stateClass(invalid)}`
 
 export const textareaClass = (invalid = false) =>
-  `min-h-32 py-3 leading-7 ${baseInput} ${invalid ? 'border-rose-500 focus:border-rose-600' : 'border-ink/20'}`
+  `min-h-32 py-3 leading-7 ${baseInput} ${stateClass(invalid)}`

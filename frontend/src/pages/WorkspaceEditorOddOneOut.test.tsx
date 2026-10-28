@@ -5,6 +5,7 @@ import { getMockGame, resetMockGames, saveMockGame } from '../services/mock/mock
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import WorkspaceEditor from './WorkspaceEditor'
+import { autosaved } from '../test/autosave'
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx) để mở màn chơi thử được trong test.
 vi.mock('react-konva', () => ({
@@ -31,7 +32,10 @@ const oddRadio = (index: number) => within(itemRows()[index]).getByRole('radio')
 const addButton = () => screen.getByRole('button', { name: 'Thêm mục' })
 const removeButton = (letter: string) => screen.getByRole('button', { name: `Xóa mục ${letter}` })
 const listItems = () => within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')
-const saveButton = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
+import { timingBox } from '../test/editorTiming'
+
+// Lỗi hiện ngay dưới ô nằm trong khung "Sửa câu"; khối "Sẵn sàng xuất bản?" ở cột phải cũng nhắc lại cùng câu.
+const editPane = () => document.getElementById('editor-pane-preview') as HTMLElement
 const type = (box: HTMLElement, value: string) => {
   fireEvent.change(box, { target: { value } })
   fireEvent.blur(box)
@@ -77,7 +81,7 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     expect(oddRadio(2)).toBeChecked()
     expect(oddRadio(0)).not.toBeChecked()
     expect(screen.getByRole('textbox', { name: /^Lời đọc/ })).toHaveValue('Con hãy chọn hình khác loại')
-    expect(screen.getByRole('textbox', { name: /Thời gian trả lời/ })).toHaveValue('30')
+    expect(timingBox(/Thời gian trả lời/)).toHaveValue('30')
   })
 
   it('đúng MỘT mục khác loại: chọn mục khác thì mục cũ bỏ chọn', async () => {
@@ -86,7 +90,7 @@ describe('form sửa câu ODD_ONE_OUT', () => {
 
     expect(oddRadio(0)).toBeChecked()
     expect(oddRadio(2)).not.toBeChecked()
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
   })
 
   it('sửa chữ một mục: danh sách câu cập nhật, mục khác loại vẫn đúng mục đó', async () => {
@@ -133,7 +137,7 @@ describe('form sửa câu ODD_ONE_OUT', () => {
 
     expect(itemRows()).toHaveLength(3)
     for (let index = 0; index < 3; index += 1) expect(oddRadio(index)).not.toBeChecked()
-    expect(screen.getByText(/hãy chọn mục khác loại/i)).toBeInTheDocument()
+    expect(within(editPane()).getByText(/hãy chọn mục khác loại/i)).toBeInTheDocument()
     expect(screen.queryByText(/đáp án đúng/i)).not.toBeInTheDocument()
     expect(listItems()[1]).toHaveTextContent('Cần sửa')
 
@@ -202,9 +206,9 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     await openLoaded()
     type(itemBox(1), '  hình tròn NHỎ ')
 
-    expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/bị trùng nhau/)).toBeInTheDocument()
 
-    fireEvent.click(saveButton())
+    fireEvent.click(screen.getByRole('button', { name: 'Xem lỗi' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(getMockGame(ODD_ID).questions[0]).toMatchObject({ items: [{ text: 'Hình tròn nhỏ' }, { text: 'Hình tròn to' }, { text: 'Hình vuông' }] })
@@ -214,7 +218,7 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     await openLoaded()
     type(itemBox(0), 'a'.repeat(101))
 
-    expect(await screen.findByText(/tối đa 100 ký tự/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/tối đa 100 ký tự/)).toBeInTheDocument()
   })
 
   it('từ ngữ chưa phù hợp (UC-05 2a): giữ nguyên nội dung cũ trong danh sách, hiện đúng câu của SRS', async () => {
@@ -237,8 +241,7 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('Hình tròn bé'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    fireEvent.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(getMockGame(ODD_ID).questions[0]).toMatchObject({ timeLimitSeconds: 135 })
   })
@@ -251,8 +254,7 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('Hình tam giác'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    fireEvent.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(getMockGame(ODD_ID).questions[0]).toMatchObject({
       items: [

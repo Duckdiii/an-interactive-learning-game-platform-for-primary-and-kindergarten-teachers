@@ -2,13 +2,15 @@ import type { KeyboardEvent, ReactNode } from 'react'
 import { viText } from '../../constants/viText'
 import { useIsDesktop } from '../../hooks/useIsDesktop'
 
-export type EditorPane = 'list' | 'preview'
+export type EditorPane = 'list' | 'preview' | 'see'
 
 interface EditorLayoutProps {
   pane: EditorPane
   onPaneChange: (pane: EditorPane) => void
   list: ReactNode
   preview: ReactNode
+  // Cột phải "Bé sẽ thấy": xem trước và khối sẵn sàng xuất bản.
+  see: ReactNode
   // Số câu hỏi, hiện trên tab điện thoại để biết trước danh sách có gì.
   questionCount: number
 }
@@ -16,11 +18,12 @@ interface EditorLayoutProps {
 const PANES: ReadonlyArray<{ id: EditorPane; label: string }> = [
   { id: 'list', label: viText.editor.questionsTab },
   { id: 'preview', label: viText.editor.previewTab },
+  { id: 'see', label: viText.editor.seeTab },
 ]
 
-// Khung hai phần của trình soạn thảo. Máy tính (lg trở lên): danh sách câu hỏi bên trái, vùng xem bên phải, cùng hiện và là hai vùng
-// thường (không có tab). Điện thoại: hai tab theo mẫu WAI-ARIA (mũi tên Trái/Phải, Home, End), mỗi lúc một phần.
-export default function EditorLayout({ pane, onPaneChange, list, preview, questionCount }: EditorLayoutProps) {
+// Khung ba phần của trình soạn thảo: danh sách câu | sửa câu | "Bé sẽ thấy". Máy tính (lg trở lên) hiện cả ba là vùng thường (không có tab):
+// từ xl ba cột cạnh nhau, ở lg cột thứ ba xuống dưới. Điện thoại: ba tab theo mẫu WAI-ARIA (mũi tên Trái/Phải, Home, End), mỗi lúc một phần.
+export default function EditorLayout({ pane, onPaneChange, list, preview, see, questionCount }: EditorLayoutProps) {
   const text = viText.editor
   const isDesktop = useIsDesktop()
 
@@ -48,7 +51,7 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, questi
 
   return (
     <div>
-      <div role="tablist" aria-label={text.panesLabel} onKeyDown={handleKeyDown} className="mb-4 grid grid-cols-2 gap-2 lg:hidden">
+      <div role="tablist" aria-label={text.panesLabel} onKeyDown={handleKeyDown} className="mb-4 grid grid-cols-3 gap-2 lg:hidden">
         {PANES.map((item) => {
           const selected = pane === item.id
 
@@ -76,7 +79,7 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, questi
         })}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[17rem_minmax(0,1fr)_22rem]">
         <section
           id="editor-pane-list"
           tabIndex={-1}
@@ -92,6 +95,14 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, questi
           className={pane === 'preview' ? 'block min-w-0 focus:outline-none' : 'hidden min-w-0 focus:outline-none lg:block'}
         >
           {preview}
+        </section>
+        <section
+          id="editor-pane-see"
+          tabIndex={-1}
+          {...panelProps('see', text.seeTab)}
+          className={pane === 'see' ? 'block min-w-0 focus:outline-none lg:col-span-2 xl:col-span-1' : 'hidden min-w-0 focus:outline-none lg:col-span-2 lg:block xl:col-span-1'}
+        >
+          {see}
         </section>
       </div>
     </div>

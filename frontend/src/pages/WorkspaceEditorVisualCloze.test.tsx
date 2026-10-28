@@ -5,6 +5,7 @@ import { getMockGame, resetMockGames, saveMockGame } from '../services/mock/mock
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import WorkspaceEditor from './WorkspaceEditor'
+import { autosaved } from '../test/autosave'
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx) để mở màn chơi thử được trong test.
 vi.mock('react-konva', () => ({
@@ -34,7 +35,10 @@ const insertButton = () => screen.getByRole('button', { name: 'Chèn chỗ trố
 const addButton = () => screen.getByRole('button', { name: 'Thêm từ sai' })
 const removeButton = (number: number) => screen.getByRole('button', { name: `Xóa từ sai ${number}` })
 const listItems = () => within(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).getAllByRole('button')
-const saveButton = () => screen.getByRole('button', { name: 'Lưu bản nháp' })
+import { timingBox } from '../test/editorTiming'
+
+// Lỗi hiện ngay dưới ô nằm trong khung "Sửa câu"; khối "Sẵn sàng xuất bản?" ở cột phải cũng nhắc lại cùng câu.
+const editPane = () => document.getElementById('editor-pane-preview') as HTMLElement
 const type = (box: HTMLElement, value: string) => {
   fireEvent.change(box, { target: { value } })
   fireEvent.blur(box)
@@ -47,10 +51,8 @@ async function openLoaded() {
 
 // Nút Lưu chỉ mở khi mọi chữ vừa gõ đã qua bước kiểm tra từ ngữ và vào game: chờ điều kiện đó (không chờ một khoảng cố định) rồi lưu để đọc kết quả thật từ kho.
 async function saveWhenApplied() {
-  await waitFor(() => expect(saveButton()).toBeEnabled(), { timeout: 8000 })
   await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument(), { timeout: 8000 })
-  fireEvent.click(saveButton())
-  await screen.findByText('Bạn đã lưu bản nháp thành công.', {}, { timeout: 8000 })
+  await autosaved()
 }
 
 // Nạp sẵn màn chơi thử (kéo theo renderer Canvas) một lần: lần nạp đầu tiên rất chậm khi nhiều file test chạy song song.
@@ -89,7 +91,7 @@ describe('form sửa câu VISUAL_CLOZE', () => {
     expect(document.querySelector(`label[for="${promptBox().id}"]`)?.textContent).toContain('*')
     expect(document.querySelector(`label[for="${screen.getByRole('textbox', { name: /^Lời đọc/ }).id}"]`)?.textContent).not.toContain('*')
     expect(screen.getByRole('textbox', { name: /^Lời đọc/ })).toHaveValue('Chọn từ điền vào chỗ trống')
-    expect(screen.getByRole('textbox', { name: /Thời gian trả lời/ })).toHaveValue('30')
+    expect(timingBox(/Thời gian trả lời/)).toHaveValue('30')
   })
 
   it('chọn câu khác thì form đổi theo (câu 3 có 3 từ sai)', async () => {
@@ -106,14 +108,14 @@ describe('form sửa câu VISUAL_CLOZE', () => {
     type(sentenceBox(), 'Con mèo đang ___ trên giường.')
 
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('Con mèo đang ___ trên giường.'))
-    expect(screen.getByText('Chưa lưu')).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
   })
 
   it('xóa chỗ trống khỏi câu: báo "đúng một chỗ trống" ngay dưới ô câu và danh sách đánh dấu "Cần sửa"; thêm lại thì hết lỗi', async () => {
     await openLoaded()
     type(sentenceBox(), 'Con mèo đang ngủ trên ghế.')
 
-    expect(await screen.findByText(/đúng một chỗ trống "___"/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/đúng một chỗ trống "___"/)).toBeInTheDocument()
     expect(listItems()[0]).toHaveTextContent('Cần sửa')
 
     type(sentenceBox(), 'Con mèo đang ___ trên ghế.')
@@ -124,14 +126,14 @@ describe('form sửa câu VISUAL_CLOZE', () => {
   it('hai chỗ trống hoặc chỗ trống 4 gạch dưới cũng bị báo', async () => {
     await openLoaded()
     type(sentenceBox(), 'Con ___ đang ___ trên ghế.')
-    expect(await screen.findByText(/đúng một chỗ trống "___"/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/đúng một chỗ trống "___"/)).toBeInTheDocument()
 
     // Về câu hợp lệ cho lỗi biến mất hẳn, rồi mới thử chỗ trống 4 gạch dưới: lỗi mới phải xuất hiện lại (không phải lỗi cũ còn sót).
     type(sentenceBox(), 'Con mèo đang ___ trên ghế.')
     await waitFor(() => expect(screen.queryByText(/đúng một chỗ trống "___"/)).not.toBeInTheDocument())
 
     type(sentenceBox(), 'Con mèo đang ____ trên ghế.')
-    expect(await screen.findByText(/đúng một chỗ trống "___"/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/đúng một chỗ trống "___"/)).toBeInTheDocument()
   })
 })
 
@@ -147,7 +149,7 @@ describe('VISUAL_CLOZE: nút "Chèn chỗ trống"', () => {
     await openLoaded()
     type(sentenceBox(), 'Con mèo đang trên ghế.')
     await waitFor(() => expect(insertButton()).toBeEnabled())
-    expect(screen.getByText(/đúng một chỗ trống "___"/)).toBeInTheDocument()
+    expect(within(editPane()).getByText(/đúng một chỗ trống "___"/)).toBeInTheDocument()
 
     // Con trỏ nằm sau "đang " (vị trí 13).
     sentenceBox().focus()
@@ -222,9 +224,9 @@ describe('VISUAL_CLOZE: từ sai', () => {
     await openLoaded()
     type(distractorBox(0), ' NGỦ ')
 
-    expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/bị trùng nhau/)).toBeInTheDocument()
 
-    fireEvent.click(saveButton())
+    fireEvent.click(screen.getByRole('button', { name: 'Xem lỗi' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Chưa lưu được')
     expect(getMockGame(CLOZE_ID).questions[0]).toMatchObject({ correctAnswer: 'ngủ', distractors: ['chạy', 'bay'] })
@@ -234,14 +236,14 @@ describe('VISUAL_CLOZE: từ sai', () => {
     await openLoaded()
     type(distractorBox(1), 'Chạy')
 
-    expect(await screen.findByText(/bị trùng nhau/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/bị trùng nhau/)).toBeInTheDocument()
   })
 
   it('từ đúng quá 50 ký tự bị báo ngay dưới đúng ô', async () => {
     await openLoaded()
     type(correctBox(), 'a'.repeat(51))
 
-    expect(await screen.findByText(/tối đa 50 ký tự/)).toBeInTheDocument()
+    expect(await within(editPane()).findByText(/tối đa 50 ký tự/)).toBeInTheDocument()
   })
 
   it('xóa từ sai đứng trước: chữ gõ dở đi theo ĐÚNG từ (khóa theo từ, không theo vị trí); lưu xong kho có đúng chữ đó', async () => {
@@ -288,11 +290,10 @@ describe('VISUAL_CLOZE: kiểm tra từ ngữ, lưu và chơi thử', () => {
 
     await openLoaded()
     type(correctBox(), 'ngủ ngon')
-    await waitFor(() => expect(screen.getByText('Chưa lưu')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument())
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    fireEvent.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(getMockGame(CLOZE_ID).questions[0]).toMatchObject({ timeLimitSeconds: 135, correctAnswer: 'ngủ ngon' })
   })
@@ -306,8 +307,7 @@ describe('VISUAL_CLOZE: kiểm tra từ ngữ, lưu và chơi thử', () => {
     await waitFor(() => expect(listItems()[0]).toHaveTextContent('trên giường'))
     await waitFor(() => expect(screen.queryByText('Đang áp dụng chỉnh sửa...')).not.toBeInTheDocument())
 
-    fireEvent.click(saveButton())
-    await screen.findByText('Bạn đã lưu bản nháp thành công.')
+    await autosaved()
 
     expect(getMockGame(CLOZE_ID).questions[0]).toMatchObject({
       sentenceTemplate: 'Con mèo đang ___ trên giường.',
