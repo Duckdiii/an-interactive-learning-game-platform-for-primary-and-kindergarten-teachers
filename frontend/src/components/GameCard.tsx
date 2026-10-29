@@ -6,7 +6,7 @@ import { viText } from '../constants/viText'
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard'
 import { resultsLink } from '../utils/insights'
 import { useNewGameIds } from '../utils/newGames'
-import { ROUTES } from '../routes/paths'
+import { ROUTES, presentPath } from '../routes/paths'
 import type { GameSummary } from '../types/game-summary.types'
 import { buttonClass } from './buttonStyles'
 import Card from './ui/Card'
@@ -122,20 +122,11 @@ export default function GameCard({ game }: GameCardProps) {
             <Link to={editUrl} className={`${buttonClass('secondary')} flex-1`}>
               {viText.gameCard.continueEdit}
             </Link>
-          ) : shareLink ? (
-            // tạm: mở trang chơi; đổi sang /present khi có P4
-            <a
-              href={shareLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${buttonClass('primary')} flex-1`}
-            >
+          ) : (
+            // Mở trong thẻ mới để giáo viên kéo sang màn hình tivi; trang trình chiếu chạy từ bản game đầy đủ, không cần mã chia sẻ.
+            <Link to={presentPath(game.gameId)} target="_blank" rel="noopener noreferrer" className={`${buttonClass('primary')} flex-1`}>
               {viText.gameCard.present}{' '}
               <span className="sr-only">({viText.gameCard.presentHint})</span>
-            </a>
-          ) : (
-            <Link to={editUrl} className={`${buttonClass('secondary')} flex-1`}>
-              {viText.gameCard.edit}
             </Link>
           )}
 

@@ -81,15 +81,14 @@ describe('GameCard', () => {
     expect(screen.queryByRole('link', { name: /Trình chiếu/ })).toBeNull()
   })
 
-  it('đã đăng có mã: "Trình chiếu" mở trang chơi trong thẻ mới', () => {
+  it('đã đăng: "Trình chiếu" mở trang trình chiếu của game trong thẻ mới', () => {
     renderCard({ status: 'PUBLISHED', shareCode: 'A3F9K2' })
 
     const link = screen.getByRole('link', { name: /Trình chiếu/ })
-    // Cùng địa chỉ với "Sao chép liên kết" (resolveShareUrl).
-    expect(link.getAttribute('href')).toMatch(/\/play\/A3F9K2$/)
+    expect(link).toHaveAttribute('href', '/present/g%2F1')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(link).toHaveAccessibleName('Trình chiếu (mở trang chơi trong thẻ mới)')
+    expect(link).toHaveAccessibleName('Trình chiếu (mở trong thẻ mới)')
   })
 
   it('đã đăng có mã: hiện mã chơi để cô đọc cho học sinh; bản nháp thì không', () => {
@@ -102,11 +101,11 @@ describe('GameCard', () => {
     expect(screen.queryByText('A3F9K2')).toBeNull()
   })
 
-  it('đã đăng nhưng thiếu mã: nút chính là "Sửa" (không bịa mã)', () => {
+  it('đã đăng nhưng thiếu mã: vẫn trình chiếu được (chạy từ bản game đầy đủ, không cần mã) và không hiện mã bịa', () => {
     renderCard({ status: 'PUBLISHED', shareCode: null })
 
-    expect(screen.getByRole('link', { name: 'Sửa' })).toHaveAttribute('href', '/workspace/editor?gameId=g%2F1')
-    expect(screen.queryByRole('link', { name: /Trình chiếu/ })).toBeNull()
+    expect(screen.getByRole('link', { name: /Trình chiếu/ })).toHaveAttribute('href', '/present/g%2F1')
+    expect(screen.queryByText(/Mã chơi/)).toBeNull()
   })
 
   it('menu "…": mở có aria-expanded, Esc đóng và trả focus về nút', async () => {

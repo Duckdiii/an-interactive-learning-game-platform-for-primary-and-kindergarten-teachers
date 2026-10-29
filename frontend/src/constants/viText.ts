@@ -1,6 +1,8 @@
 // Chuỗi hiển thị cho giáo viên (tiếng Việt). Gom một chỗ để dễ rà soát từ ngữ và không rải chữ trong component.
 // Quy ước viết: động từ rõ ràng ("Tạo trò chơi", không "Gửi"), cùng một việc luôn cùng một tên, lỗi nói rõ việc cần làm.
 
+import type { GameType } from '../types/game-dsl.types'
+
 export const viText = {
   // Mã QR dùng chung (chia sẻ trò chơi, và phòng chơi ở nhóm C).
   qr: {
@@ -190,7 +192,7 @@ export const viText = {
   gameCard: {
     viewResults: 'Xem kết quả',
     present: 'Trình chiếu',
-    presentHint: 'mở trang chơi trong thẻ mới',
+    presentHint: 'mở trong thẻ mới',
     continueEdit: 'Soạn tiếp',
     edit: 'Sửa',
     moreActions: 'Thêm thao tác cho {title}',
@@ -505,9 +507,8 @@ export const viText = {
           title: 'Trình chiếu trên lớp',
           body: 'Chiếu lên tivi, cô điều khiển từng câu. Hợp với Mầm non.',
           action: 'Bắt đầu trình chiếu',
-          opensNew: '(mở trang chơi trong thẻ mới)',
-          temporary: 'Tạm thời: chế độ trình chiếu riêng đang được làm, hiện nút này mở trang chơi bình thường trong thẻ mới.',
-          noLink: 'Chưa có liên kết hợp lệ để trình chiếu.',
+          opensNew: '(mở trong thẻ mới)',
+          note: 'Mở trong thẻ mới: kéo thẻ đó sang màn hình tivi rồi bấm Toàn màn hình.',
         },
         room: {
           title: 'Mở phòng thi đấu',
@@ -683,6 +684,73 @@ export const viText = {
   },
 
   // Phía học sinh: câu ngắn, giọng nhẹ nhàng, nhờ người lớn giúp khi lỗi kỹ thuật.
+  // Trình chiếu trên tivi lớp (P4).
+  present: {
+    title: 'Trình chiếu',
+    toolbarLabel: 'Điều khiển của giáo viên',
+    teacher: 'Giáo viên',
+    end: 'Kết thúc',
+    notFound: 'Không mở được trò chơi này',
+    backToShelf: 'Về kệ trò chơi',
+    loadFailed: 'Chưa tải được trò chơi. Kiểm tra mạng rồi thử lại.',
+    retry: 'Thử lại',
+    start: 'Bắt đầu',
+    fullscreen: 'Toàn màn hình',
+    exitFullscreen: 'Thoát toàn màn hình',
+    soundCheck: 'Kiểm tra âm thanh',
+    lobbyHint: 'Phím Space để bắt đầu · thanh tự ẩn sau 3 giây',
+    lobby: {
+      questionCount: '{n} câu',
+      ready: 'Cả lớp sẵn sàng chưa nào?',
+    },
+    play: {
+      progress: (current: number, total: number) => `Câu ${current}/${total}`,
+      replay: 'Đọc lại',
+      prev: 'Câu trước',
+      next: 'Câu sau',
+      seeResult: 'Xem kết quả',
+      retry: 'Cho thử lại',
+      retryReason: 'Trả lời xong mới cho thử lại được',
+      answeredBefore: 'Câu này lớp mình trả lời rồi. Cô bấm "Cho thử lại" để chơi lại nhé.',
+      hint: 'Gợi ý',
+      pause: 'Tạm dừng',
+      keysHint: '← → chuyển câu · R đọc lại · tự ẩn sau 3 giây',
+      ask: 'Bạn nào biết nào?',
+      hintReread: 'Mình nghe lại đề nhé!',
+      unsupported: 'Kiểu này chưa trình chiếu được',
+      unsupportedSkip: 'Cô bấm "Câu sau" để sang câu khác nhé.',
+      // Gợi ý chung theo loại game: nhắc cách làm, không lộ đáp án.
+      hintByType: {
+        QUIZ: 'Mình đọc kỹ câu hỏi nhé!',
+        AUDIO_VISUAL_MATCH: 'Mình nghe thật kỹ rồi nhìn các hình nhé!',
+        ODD_ONE_OUT: 'Hình nào không giống các hình còn lại nhỉ?',
+        SPOT_THE_TARGET: 'Mình nhìn kỹ cả bức tranh nhé!',
+        WORD_SCRAMBLE: 'Mình đọc từng chữ cái nhé!',
+        MATCHING: 'Mình tìm hai bên giống nhau nhé!',
+        MEMORY_CARD: 'Mình nhớ xem thẻ đó ở đâu nhé!',
+        DRAG_DROP: 'Mình xem mỗi thứ hợp với chỗ nào nhé!',
+        ORDERING: 'Mình nghĩ xem cái nào đứng trước nhé!',
+        VISUAL_CLOZE: 'Mình xem chỗ trống cần gì nhé!',
+      } satisfies Record<GameType, string>,
+      result: {
+        title: 'Cả lớp giỏi quá!',
+        // Chưa đúng câu nào (hoặc kết thúc sớm): không khen sai sự thật, động viên nhẹ.
+        titleNoneCorrect: 'Cả lớp chơi chăm quá! Mình cùng ôn lại nhé!',
+        summary: (correct: number, total: number) => `Lớp mình trả lời đúng ${correct}/${total} câu`,
+        retried: (n: number) => `Có ${n} câu cả lớp thử lại rồi đúng`,
+        stars: (correct: number, total: number) => `${correct} trên ${total} câu đúng`,
+        replay: 'Chơi lại',
+        review: 'Xem lại từng câu',
+        reviewTitle: 'Xem lại từng câu',
+        backToResult: 'Về kết quả',
+        endSession: 'Kết thúc buổi chơi',
+        noScoreNote: 'Không hiển thị điểm từng bé',
+        // Kết quả của cả lớp, không chấm từng bé; câu chưa đúng nói nhẹ nhàng.
+        outcome: { firstTry: 'Đúng ngay', afterRetry: 'Thử lại rồi đúng', notYet: 'Mình ôn thêm nhé' },
+        correctAnswer: 'Đáp án đúng',
+      },
+    },
+  },
   player: {
     retry: 'Thử lại',
     pageTitle: 'Chơi',

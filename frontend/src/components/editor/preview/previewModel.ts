@@ -25,6 +25,9 @@ export const previewSeed = (question: QuestionDsl) => `preview-${question.id}`
 export const toPreviewStudentQuestion = (gameType: GameType, question: QuestionDsl) =>
   MOCK_HANDLERS[gameType].toStudent(question, previewSeed(question))
 
+/** Đáp án đúng theo hình dạng máy chủ trả, dùng cho màn xem lại khi chạy cục bộ. */
+export const previewCorrectAnswer = (gameType: GameType, question: QuestionDsl) => MOCK_HANDLERS[gameType].correct(question, previewSeed(question))
+
 export function gradePreviewAnswer(gameType: GameType, question: QuestionDsl, answer: AnswerPayload): AnswerResult {
   const handler = MOCK_HANDLERS[gameType]
   const seed = previewSeed(question)
@@ -35,6 +38,6 @@ export function gradePreviewAnswer(gameType: GameType, question: QuestionDsl, an
     isCorrect,
     pointsEarned: isCorrect ? question.points : 0,
     totalScore: isCorrect ? question.points : 0,
-    correctAnswer: handler.correct(question, seed),
+    correctAnswer: previewCorrectAnswer(gameType, question),
   }
 }

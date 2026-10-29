@@ -36,15 +36,15 @@ describe('PublishDialog: 3 cách chơi', () => {
     expect(screen.getByRole('textbox', { name: 'Mã chia sẻ' })).toHaveFocus()
   })
 
-  it('"Bắt đầu trình chiếu" mở đúng liên kết chơi trong thẻ mới, ghi rõ là tạm thời', () => {
+  it('"Bắt đầu trình chiếu" mở trang trình chiếu của game trong thẻ mới, kèm hướng dẫn đưa lên tivi', () => {
     open()
 
     const link = within(card('Trình chiếu trên lớp')).getByRole('link', { name: /Bắt đầu trình chiếu/ })
 
-    expect(link).toHaveAttribute('href', 'https://x.test/play/ABC123')
+    expect(link).toHaveAttribute('href', '/present/g1')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(link).toHaveAccessibleDescription(/Tạm thời/)
+    expect(link).toHaveAccessibleDescription(/Toàn màn hình/)
   })
 
   it('"Mở phòng" bị khóa, đọc được lý do và bấm không làm gì', async () => {

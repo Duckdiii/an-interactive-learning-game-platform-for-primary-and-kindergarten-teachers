@@ -1,7 +1,9 @@
 import { QRCodeSVG } from 'qrcode.react'
 import type { ReactNode } from 'react'
 import { isMock } from '../../config/mockMode'
+import { Link } from 'react-router-dom'
 import { resolveShareUrl } from '../../config/studentApp'
+import { presentPath } from '../../routes/paths'
 import { viText } from '../../constants/viText'
 import { usePublishSettings } from '../../hooks/usePublishSettings'
 import { resolveAgeBand } from '../../player/profile/resolveUiProfile'
@@ -106,14 +108,12 @@ export default function PublishDialog({ result, gameTitle, gradeLevel, hasUnsave
 
         <div className="grid gap-4 lg:grid-cols-3">
           <OptionCard id="present" recommended={recommended === 'present'}>
-            {url ? (
-              <a href={url} target="_blank" rel="noopener noreferrer" aria-describedby="present-note" className={`${buttonClass('primary')} mt-auto`}>
-                {present.action}
-                <span className="sr-only"> {present.opensNew}</span>
-              </a>
-            ) : null}
+            <Link to={presentPath(result.gameId)} target="_blank" rel="noopener noreferrer" aria-describedby="present-note" className={`${buttonClass('primary')} mt-auto`}>
+              {present.action}
+              <span className="sr-only"> {present.opensNew}</span>
+            </Link>
             <p id="present-note" className="text-sm text-ink-soft">
-              {url ? present.temporary : present.noLink}
+              {present.note}
             </p>
           </OptionCard>
 
