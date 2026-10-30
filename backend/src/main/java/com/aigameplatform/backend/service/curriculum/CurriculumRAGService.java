@@ -65,6 +65,7 @@ public final class CurriculumRAGService {
         var filter = metadataKey("subject").isEqualTo(subject.name())
                 .and(metadataKey("gradeLevel").isEqualTo(gradeLevel.name()))
                 .and(metadataKey("contentType").isEqualTo("curriculum_outcome"))
+                .and(metadataKey("control").isEqualTo("false"))
                 .and(metadataKey("datasetVersion").isEqualTo(source.datasetVersion()))
                 .and(metadataKey("curriculumVersion").isEqualTo(source.curriculumVersion()))
                 .and(metadataKey("sourceSha256").isEqualTo(source.sourceSha256()))
@@ -75,7 +76,8 @@ public final class CurriculumRAGService {
             var metadata = content.textSegment().metadata();
             Subject actualSubject = Subject.valueOf(metadata.getString("subject"));
             GradeLevel actualGrade = GradeLevel.valueOf(metadata.getString("gradeLevel"));
-            if (actualSubject != subject || actualGrade != gradeLevel)
+            if (actualSubject != subject || actualGrade != gradeLevel
+                    || !"false".equals(metadata.getString("control")))
                 throw new IllegalStateException("Embedding store returned a chunk outside the mandatory scope");
             return new RetrievedChunk(metadata.getString("chunkId"), actualSubject, actualGrade,
                     metadata.getString("topic"), metadata.getString("outcomeText"),

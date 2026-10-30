@@ -1,0 +1,99 @@
+{
+  "sampleId" : "sample-8",
+  "topic" : "Cộng nhẩm trong phạm vi 10",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Cộng nhẩm trong phạm vi 10",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Cộng nhẩm trong phạm vi 10"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Kết quả của phép tính 3 + 2 là bao nhiêu?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "4"
+      }, {
+        "id" : "b",
+        "text" : "5"
+      }, {
+        "id" : "c",
+        "text" : "6"
+      }, {
+        "id" : "d",
+        "text" : "7"
+      } ],
+      "correctOptionId" : "b"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Tính nhẩm: 4 + 4 = ?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "8"
+      }, {
+        "id" : "b",
+        "text" : "7"
+      }, {
+        "id" : "c",
+        "text" : "10"
+      }, {
+        "id" : "d",
+        "text" : "9"
+      } ],
+      "correctOptionId" : "a"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Số nào là kết quả của 5 + 3?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "7"
+      }, {
+        "id" : "b",
+        "text" : "9"
+      }, {
+        "id" : "c",
+        "text" : "10"
+      }, {
+        "id" : "d",
+        "text" : "8"
+      } ],
+      "correctOptionId" : "d"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Cộng nhẩm: 2 + 7 bằng mấy?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "10"
+      }, {
+        "id" : "b",
+        "text" : "6"
+      }, {
+        "id" : "c",
+        "text" : "8"
+      }, {
+        "id" : "d",
+        "text" : "9"
+      } ],
+      "correctOptionId" : "d"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-007] Các phép tính với số tự nhiên / Tính nhẩm\nThực hiện được việc cộng, trừ nhẩm trong phạm vi 10.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 4200
+}

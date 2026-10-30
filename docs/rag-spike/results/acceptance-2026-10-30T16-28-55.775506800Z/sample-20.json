@@ -1,0 +1,107 @@
+{
+  "sampleId" : "sample-20",
+  "topic" : "Đọc giờ đúng",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Đọc giờ đúng",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Đọc giờ đúng"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Đồng hồ có kim phút chỉ số 12 và kim giờ chỉ số 3. Đố em biết đó là mấy giờ?",
+      "visualPrompt" : "Đồng hồ chỉ 3 giờ",
+      "questionText" : "Đồng hồ có kim phút chỉ số 12 và kim giờ chỉ số 3. Đố em biết đó là mấy giờ?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "12 giờ"
+      }, {
+        "id" : "b",
+        "text" : "2 giờ"
+      }, {
+        "id" : "c",
+        "text" : "1 giờ"
+      }, {
+        "id" : "d",
+        "text" : "3 giờ"
+      } ],
+      "correctOptionId" : "d"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Nhìn lên đồng hồ thấy kim dài chỉ số 12, kim ngắn chỉ số 8. Hỏi đồng hồ chỉ mấy giờ?",
+      "visualPrompt" : "Đồng hồ chỉ 8 giờ",
+      "questionText" : "Nhìn lên đồng hồ thấy kim dài chỉ số 12, kim ngắn chỉ số 8. Hỏi đồng hồ chỉ mấy giờ?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "6 giờ"
+      }, {
+        "id" : "b",
+        "text" : "10 giờ"
+      }, {
+        "id" : "c",
+        "text" : "12 giờ"
+      }, {
+        "id" : "d",
+        "text" : "8 giờ"
+      } ],
+      "correctOptionId" : "d"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Khi kim phút chỉ số 12 và kim giờ chỉ số 6, ta đọc là mấy giờ?",
+      "visualPrompt" : "Đồng hồ chỉ 6 giờ",
+      "questionText" : "Khi kim phút chỉ số 12 và kim giờ chỉ số 6, ta đọc là mấy giờ?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "6 giờ"
+      }, {
+        "id" : "b",
+        "text" : "7 giờ"
+      }, {
+        "id" : "c",
+        "text" : "12 giờ"
+      }, {
+        "id" : "d",
+        "text" : "5 giờ"
+      } ],
+      "correctOptionId" : "a"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Đồng hồ treo tường chỉ đúng 10 giờ khi kim ngắn chỉ vào số nào?",
+      "visualPrompt" : "Đồng hồ chỉ 10 giờ",
+      "questionText" : "Đồng hồ treo tường chỉ đúng 10 giờ khi kim ngắn chỉ vào số nào?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Số 10"
+      }, {
+        "id" : "b",
+        "text" : "Số 12"
+      }, {
+        "id" : "c",
+        "text" : "Số 11"
+      }, {
+        "id" : "d",
+        "text" : "Số 9"
+      } ],
+      "correctOptionId" : "a"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-018] Đo lường / Giờ đúng trên đồng hồ\nNhận biết được giờ đúng trên đồng hồ.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 189; trang in 23; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 6478
+}

@@ -7,6 +7,9 @@ param(
     [ValidateSet('KINDERGARTEN', 'GRADE_1', 'GRADE_2', 'GRADE_3', 'GRADE_4', 'GRADE_5')]
     [string]$GradeLevel = 'GRADE_1',
     [string]$Topic,
+    [ValidateSet('legacy','tune','holdout')][string]$EvaluationSet = 'legacy',
+    [string]$QueriesPath,
+    [string]$TunePath,
     [switch]$SkipBuild
 )
 $ErrorActionPreference = 'Stop'
@@ -14,7 +17,7 @@ $ragRoot = Split-Path -Parent $PSScriptRoot
 $ragBackend = Join-Path $ragRoot 'backend'
 if (-not $EnvFile) { $EnvFile = Join-Path $ragBackend '.env' }
 $ragAllowedKeys = @('GEMINI_API_KEY','DB_URL','DB_USERNAME','DB_PASSWORD',
-    'GEMINI_EMBEDDING_MODEL','RAG_MIN_SCORE','CURRICULUM_PDF')
+    'GEMINI_EMBEDDING_MODEL','RAG_MIN_SCORE','CURRICULUM_PDF','CURRICULUM_CONSTRAINTS_APPROVED_SHA256')
 if (Test-Path -LiteralPath $EnvFile) {
     foreach ($ragLine in [System.IO.File]::ReadAllLines((Resolve-Path -LiteralPath $EnvFile).Path)) {
         if ($ragLine -match '^\s*([A-Z][A-Z0-9_]*)\s*=(.*)$' -and $ragAllowedKeys -contains $Matches[1]) {
@@ -38,6 +41,17 @@ if ($PdfPath -and $Mode -in @('Extract','Ingest')) { $ragArguments += $PdfPath }
 if ($Mode -eq 'Query') {
     if (-not $Topic) { throw 'Query mode needs -Topic.' }
     $ragArguments += @($Subject, $GradeLevel, $Topic)
+}
+if ($Mode -eq 'Evaluate') {
+    $ragArguments += $EvaluationSet
+    if ($EvaluationSet -ne 'legacy') {
+        if (-not $QueriesPath) { throw 'Tune/holdout needs -QueriesPath and its review manifest.' }
+        $ragArguments += (Resolve-Path -LiteralPath $QueriesPath).Path
+        if ($EvaluationSet -eq 'holdout') {
+            if (-not $TunePath) { throw 'Holdout needs -TunePath to verify group separation.' }
+            $ragArguments += (Resolve-Path -LiteralPath $TunePath).Path
+        }
+    }
 }
 Push-Location $ragBackend
 try {

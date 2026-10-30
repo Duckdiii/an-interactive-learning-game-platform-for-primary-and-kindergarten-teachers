@@ -1,0 +1,20 @@
+{
+    "evaluationType":  "AI_AUTHORED_EXPLORATORY_NOT_INDEPENDENT_HOLDOUT",
+    "labelsReview":  "PENDING_HUMAN_REVIEW",
+    "releaseAccepted":  false,
+    "querySha256":  "9413dd8c0ee1243eec47c5bf4f9f98ecb4b9f956f4b5d68ef0ccc3b216ccaa72",
+    "queryCount":  90,
+    "datasetVersion":  "math-grade1-spike-v1",
+    "curriculumVersion":  "32/2018/TT-BGDDT",
+    "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "constraintsSha256":  "b44066d375f2f591800ded3c0fceaf89ef8c1a4992f9bac5e6e28396a19f189a",
+    "pipeline":  "A_EXISTING_VECTOR_TYPED_VERIFIER",
+    "newRagVariantsEnabled":  false,
+    "topK":  3,
+    "scoreThresholdDefault":  0.855,
+    "model":  "gemini-embedding-001",
+    "generationSampleTarget":  20,
+    "moderationMode":  "BLOCKLIST_ONLY",
+    "reasonForPartialModeration":  "Configured OpenAI Moderation preflight returned HTTP401",
+    "tuningDuringRun":  false
+}

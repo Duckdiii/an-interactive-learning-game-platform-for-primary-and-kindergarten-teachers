@@ -67,6 +67,7 @@ app:
       game-generation:
         enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
   curriculum-rag:
+    constraints-approved-sha256: ${CURRICULUM_CONSTRAINTS_APPROVED_SHA256:}
     enabled: ${CURRICULUM_RAG_ENABLED:false}
     embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
     min-score: ${CURRICULUM_RAG_MIN_SCORE:0.855}

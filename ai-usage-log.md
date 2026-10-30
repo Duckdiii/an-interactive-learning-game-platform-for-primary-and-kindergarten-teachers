@@ -74,3 +74,13 @@ Chỉ điền khi gặp trường hợp thật. Sao chép khung dưới đây ch
 - **Lỗi của AI:**
 - **Nguyên nhân & Khắc phục:**
 - **Minh chứng Commit SHA:**
+## Bản ghi nghiệm thu chờ commit — 2026-10-30
+
+Trạng thái: chưa commit; đây là bản ghi bằng chứng trước khi hoàn thiện dòng nhật ký có Commit SHA theo quy ước phía trên.
+
+- Yêu cầu: chạy nghiệm thu đầy đủ pipeline RAG hiện có; cập nhật brainstorm/plan thử nghiệm biến thể, chưa triển khai hybrid/HyDE/judge.
+- Công cụ: Codex (GPT-6), một agent review độc lập các artifact; AI soạn90 ca thăm dò và test harness opt-in `CurriculumAcceptanceLiveTest`.
+- Bằng chứng: full backend regression496 test tổng,0 failure/error,5 skipped; coverage70% đạt, gồm context DB và pgvector. Live acceptance22 test:20 đạt,2 error;20 lần sinh có18 game và2 lỗi. Retrieval/verification thăm dò29/30 supported,0/60 false acceptance,0 leakage. Các ca này chưa có nhãn được người duyệt độc lập phê chuẩn, không coi là holdout độc lập.
+- Review artifact: đọc18 game/72 câu với hỗ trợ AI; phát hiện bài toán cho kẹo nhưng đáp án cộng sai ngữ nghĩa, câu hình học nhiều đáp án thỏa, lỗi tiếng Việt và thiếu media hiển thị. Không thay thế giáo viên review hoặc sửa file mẫu để làm bằng chứng pass.
+- OpenAI Moderation: preflight401; sinh mẫu dùng BLOCKLIST_ONLY theo chế độ local, không công bố moderation đầy đủ đã đạt. Không ghi key vào log/báo cáo và không sửa `.env` để che lỗi.
+- Kết luận: NOT_ACCEPTED; không đổi ngưỡng/model/thuật toán trong lúc đo. Chi tiết tại [báo cáo nghiệm thu](docs/rag-spike/acceptance-2026-10-30.md); chưa commit/push.

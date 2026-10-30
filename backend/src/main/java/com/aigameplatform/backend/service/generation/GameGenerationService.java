@@ -10,6 +10,8 @@ import com.aigameplatform.backend.exception.UnsafeContentException;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.service.curriculum.CurriculumContextProvider;
+import com.aigameplatform.backend.service.curriculum.CurriculumCatalog;
+import com.aigameplatform.backend.service.curriculum.CurriculumMetrics;
 import com.aigameplatform.backend.service.factory.GameDslFactoryRegistry;
 import com.aigameplatform.backend.service.factory.GameDslRequest;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
@@ -45,6 +47,8 @@ public class GameGenerationService {
     private final GameValidationService validationService;
     private final JsonMapper jsonMapper;
     private final ObjectProvider<CurriculumContextProvider> curriculumProvider;
+    private final ObjectProvider<CurriculumCatalog> curriculumCatalog;
+    private final ObjectProvider<CurriculumMetrics> metricsProvider;
     private final boolean curriculumRagEnabled;
     private final int maxRetries;
 
@@ -57,6 +61,8 @@ public class GameGenerationService {
             GameValidationService validationService,
             JsonMapper jsonMapper,
             ObjectProvider<CurriculumContextProvider> curriculumProvider,
+            ObjectProvider<CurriculumCatalog> curriculumCatalog,
+            ObjectProvider<CurriculumMetrics> metricsProvider,
             @Value("${app.curriculum-rag.enabled:false}") boolean curriculumRagEnabled,
             @Value("${app.generation.max-retries:2}") int maxRetries) {
         if (maxRetries < 0) {
@@ -69,6 +75,8 @@ public class GameGenerationService {
         this.validationService = validationService;
         this.jsonMapper = jsonMapper;
         this.curriculumProvider = curriculumProvider;
+        this.curriculumCatalog = curriculumCatalog;
+        this.metricsProvider = metricsProvider;
         this.curriculumRagEnabled = curriculumRagEnabled;
         this.maxRetries = maxRetries;
     }
@@ -79,6 +87,11 @@ public class GameGenerationService {
      * @throws AiGenerationTimeoutException nếu AI hoặc kiểm duyệt không dùng được, hoặc hết số lần thử
      */
     public GameDsl generate(GameType type, GameDslRequest request) {
+        return metricsProvider.getIfAvailable(CurriculumMetrics::noop).measure(CurriculumMetrics.Stage.TOTAL,
+                request.subject(), request.gradeLevel(), () -> generateGame(type, request), g -> CurriculumMetrics.Outcome.SUCCESS);
+    }
+
+    private GameDsl generateGame(GameType type, GameDslRequest request) {
         String curriculumContext = curriculumRagEnabled ? retrieveCurriculumContext(type, request) : null;
         GameContentGenerator generator = generatorProvider.getIfAvailable();
         if (generator == null) {
@@ -120,10 +133,9 @@ public class GameGenerationService {
     }
 
     private String retrieveCurriculumContext(GameType type, GameDslRequest request) {
-        if (type != GameType.QUIZ || request.subject() != Subject.MATH || request.gradeLevel() != GradeLevel.GRADE_1) {
-            throw new CurriculumEvidenceNotFoundException(
-                    "Curriculum RAG pilot currently supports QUIZ / Mathematics Grade 1 only");
-        }
+        var catalog = curriculumCatalog.getIfAvailable();
+        if (catalog == null) throw new CurriculumServiceUnavailableException("Curriculum catalog not configured", null);
+        catalog.requireSupported(type, request.subject(), request.gradeLevel());
         CurriculumContextProvider provider = curriculumProvider.getIfAvailable();
         if (provider == null) {
             throw new CurriculumServiceUnavailableException("Curriculum retrieval is enabled but not configured", null);
@@ -139,7 +151,7 @@ public class GameGenerationService {
         } catch (CurriculumEvidenceNotFoundException exception) {
             throw exception;
         } catch (RuntimeException exception) {
-            log.error("Curriculum retrieval failed: {}", exception.getMessage());
+            log.error("Curriculum retrieval failed ({})", exception.getClass().getSimpleName());
             throw new CurriculumServiceUnavailableException(
                     "Không truy xuất được căn cứ chương trình; vui lòng thử lại sau", exception);
         }
@@ -147,9 +159,10 @@ public class GameGenerationService {
 
     private String callAi(GameContentGenerator generator, GenerationAttempt attempt) {
         try {
-            return generator.generate(attempt);
+            return metricsProvider.getIfAvailable(CurriculumMetrics::noop).measure(CurriculumMetrics.Stage.GENERATION,
+                    attempt.subject(), attempt.gradeLevel(), () -> generator.generate(attempt), g -> CurriculumMetrics.Outcome.SUCCESS);
         } catch (AiServiceUnavailableException e) {
-            log.error("Không gọi được dịch vụ AI: {}", e.getMessage());
+            log.error("Không gọi được dịch vụ AI ({})", e.getClass().getSimpleName());
             throw new AiGenerationTimeoutException("Dịch vụ AI không phản hồi, vui lòng thử lại sau", e);
         }
     }

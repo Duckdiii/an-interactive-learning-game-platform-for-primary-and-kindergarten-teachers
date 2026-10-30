@@ -22,3 +22,17 @@ CheckConfig reports only booleans; Gemini key, DB URL/user/password were not con
 - Live Supabase migration/ingestion/evaluation completed: V5 applied, 28 chunks ingested idempotently, retrieval reached Hit@3 10/10, negative rejection 3/3, and 5/5 control probes passed. Threshold 0.855 was tuned on the same query set and remains exploratory; an independent holdout is still needed.
 - The pilot is wired for QUIZ / Mathematics Grade 1 through `GameGenerationService`, Spring RAG configuration and a LangChain4j Gemini adapter. The standard backend suite has 469 passes and two opt-in live tests skipped; JaCoCo passes. Both live smoke tests were also run separately and passed: in-corpus generation returned a four-question quiz; the Python-loop query was refused before generation.
 - Duy has not reviewed the selected context contract. Generated quiz content has not yet been manually scored against retrieved outcomes, and no live with/without-RAG comparison has been run. Other game types and subjects remain outside this pilot.
+
+## Kiểm chứng triển khai P0/P1 ngày 2026-10-30
+
+Cập nhật sau khi người dùng yêu cầu nghiệm thu rộng: [báo cáo ngày2026-10-30](acceptance-2026-10-30.md). Regression hiện đạt với JDBC thật, nhưng live acceptance **NOT_ACCEPTED** vì2 lỗi vận hành và các lỗi nội dung trong game mẫu. Các số phía dưới là bằng chứng ở thời điểm triển khai, không thay thế kết luận nghiệm thu mới.
+
+- Bộ backend độc lập JDBC: 492 tests, 0 failure/error, 3 skipped (489 đạt); JaCoCo gate LINE >=70% đạt. Log local: `backend/target/rag-business-local-tests.log`.
+- Full suite đã được chạy. `AigameBackendApplicationTests.contextLoads` còn cần URL JDBC hợp lệ; lỗi assertion metric xuất hiện ở lần đầu đã được sửa và kiểm thử lại đạt. Không thay cấu hình/ngưỡng test để che lỗi môi trường.
+- Test thật `PgVectorScoreIntegrationTest` đạt 1/1, dùng bảng TEMP trên một session. Xác nhận scope filter và score mapping `(cosine+1)/2`; [bằng chứng](results/pgvector-score-2026-10-30.json).
+- Chạy lại `scripts/rag-spike.ps1 -Mode Extract -SkipBuild` trên PDF thật: SHA khớp, 28/28 chunk xác minh trên 6 trang (23 YCCĐ, 5 đối chứng).
+- Reviewer độc lập đã kiểm tra và tái kiểm tra các sửa đổi: không còn Critical/Important. Kiểm thử hồi quy gồm thiếu phạm vi/điều kiện nhớ/đơn vị, đọc giờ chưa chỉ rõ giờ đúng và registry metric lỗi.
+- Chưa có nhãn ràng buộc được người duyệt nghiệp vụ chấp thuận, chưa có tune/holdout độc lập được duyệt, chưa chạy đánh giá chất lượng Gemini mới hoặc review 20 game. Không kết luận chất lượng phát hành từ các test trên.
+- Runtime yêu cầu SHA phê duyệt đúng file constraints; xem [biên bản chờ duyệt](constraints-review.md). Khi chưa có SHA đó, RAG trả 503 trước embedding. Không sửa `.env` để tự bật cổng này.
+
+Chi tiết task, sai khác có chủ đích và cổng phát hành: [execution ledger](implementation-progress.md).

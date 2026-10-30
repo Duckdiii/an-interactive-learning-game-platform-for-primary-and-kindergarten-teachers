@@ -1,0 +1,103 @@
+{
+  "sampleId" : "sample-4",
+  "topic" : "Đọc các số trong phạm vi 20",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Đọc các số trong phạm vi 20",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Đọc các số trong phạm vi 20"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Số 15 đọc là gì?",
+      "questionText" : "Số 15 đọc là gì?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Mười bảy"
+      }, {
+        "id" : "b",
+        "text" : "Mười sáu"
+      }, {
+        "id" : "c",
+        "text" : "Mười lăm"
+      }, {
+        "id" : "d",
+        "text" : "Mười bốn"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Số mười hai được viết như thế nào?",
+      "questionText" : "Số mười hai được viết như thế nào?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "10"
+      }, {
+        "id" : "b",
+        "text" : "12"
+      }, {
+        "id" : "c",
+        "text" : "13"
+      }, {
+        "id" : "d",
+        "text" : "11"
+      } ],
+      "correctOptionId" : "b"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Số 18 đọc là gì?",
+      "questionText" : "Số 18 đọc là gì?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Mười tám"
+      }, {
+        "id" : "b",
+        "text" : "Mười bảy"
+      }, {
+        "id" : "c",
+        "text" : "Mười lăm"
+      }, {
+        "id" : "d",
+        "text" : "Mười chín"
+      } ],
+      "correctOptionId" : "a"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Số mấy viết là 14?",
+      "questionText" : "Số mười mấy viết là 14?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Mười ba"
+      }, {
+        "id" : "b",
+        "text" : "Mười lăm"
+      }, {
+        "id" : "c",
+        "text" : "Mười sáu"
+      }, {
+        "id" : "d",
+        "text" : "Mười bốn"
+      } ],
+      "correctOptionId" : "d"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-001] Số tự nhiên / Đếm, đọc, viết các số trong phạm vi 100\nĐếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong phạm vi 100.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 187; trang in 21; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 4287
+}

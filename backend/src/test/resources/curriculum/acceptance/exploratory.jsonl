@@ -1,0 +1,90 @@
+{"queryId":"p001","groupId":"primary-math-g1-001","cohort":"SUPPORTED","topic":"Đếm số con vật từ 1 đến 5","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-001"]}
+{"queryId":"p002","groupId":"primary-math-g1-001","cohort":"SUPPORTED","topic":"Đếm số con vật từ 1 đến 10","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-001"]}
+{"queryId":"p003","groupId":"primary-math-g1-001","cohort":"SUPPORTED","topic":"Đếm trong phạm vi 20","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-001"]}
+{"queryId":"p004","groupId":"primary-math-g1-001","cohort":"SUPPORTED","topic":"Đọc các số trong phạm vi 20","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-001"]}
+{"queryId":"p005","groupId":"primary-math-g1-001","cohort":"SUPPORTED","topic":"Viết các số trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-001"]}
+{"queryId":"p006","groupId":"primary-math-g1-005","cohort":"SUPPORTED","topic":"Cộng không nhớ trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-005"]}
+{"queryId":"p007","groupId":"primary-math-g1-005","cohort":"SUPPORTED","topic":"Trừ không nhớ trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-005"]}
+{"queryId":"p008","groupId":"primary-math-g1-007","cohort":"SUPPORTED","topic":"Cộng nhẩm trong phạm vi 10","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-007"]}
+{"queryId":"p009","groupId":"primary-math-g1-007","cohort":"SUPPORTED","topic":"Trừ nhẩm trong phạm vi 10","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-007"]}
+{"queryId":"p010","groupId":"primary-math-g1-008","cohort":"SUPPORTED","topic":"Cộng nhẩm các số tròn chục","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-008"]}
+{"queryId":"p011","groupId":"primary-math-g1-008","cohort":"SUPPORTED","topic":"Trừ nhẩm các số tròn chục","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-008"]}
+{"queryId":"p012","groupId":"primary-math-g1-003","cohort":"SUPPORTED","topic":"So sánh các số trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-003"]}
+{"queryId":"p013","groupId":"primary-math-g1-012","cohort":"SUPPORTED","topic":"Nhận biết hình vuông","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-012"]}
+{"queryId":"p014","groupId":"primary-math-g1-012","cohort":"SUPPORTED","topic":"Nhận biết hình tròn","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-012"]}
+{"queryId":"p015","groupId":"primary-math-g1-012","cohort":"SUPPORTED","topic":"Nhận biết hình tam giác","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-012"]}
+{"queryId":"p016","groupId":"primary-math-g1-012","cohort":"SUPPORTED","topic":"Nhận biết hình chữ nhật","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-012"]}
+{"queryId":"p017","groupId":"primary-math-g1-013","cohort":"SUPPORTED","topic":"Nhận biết khối lập phương","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-013"]}
+{"queryId":"p018","groupId":"primary-math-g1-013","cohort":"SUPPORTED","topic":"Nhận biết khối hộp chữ nhật","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-013"]}
+{"queryId":"p019","groupId":"primary-math-g1-020","cohort":"SUPPORTED","topic":"Đo độ dài bằng cm","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-020"]}
+{"queryId":"p020","groupId":"primary-math-g1-018","cohort":"SUPPORTED","topic":"Đọc giờ đúng","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-018","math-g1-021"]}
+{"queryId":"p021","groupId":"primary-math-g1-001","cohort":"SUPPORTED","topic":"Đếm từ 0 đến 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-001"]}
+{"queryId":"p022","groupId":"primary-math-g1-001","cohort":"SUPPORTED","topic":"Đọc số từ 0 đến 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-001"]}
+{"queryId":"p023","groupId":"primary-math-g1-001","cohort":"SUPPORTED","topic":"Viết số từ 1 đến 20","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-001"]}
+{"queryId":"p024","groupId":"primary-math-g1-005","cohort":"SUPPORTED","topic":"Cộng không nhớ trong phạm vi 20","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-005"]}
+{"queryId":"p025","groupId":"primary-math-g1-005","cohort":"SUPPORTED","topic":"Trừ không nhớ trong phạm vi 20","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-005"]}
+{"queryId":"p026","groupId":"primary-math-g1-007","cohort":"SUPPORTED","topic":"Cộng nhẩm trong phạm vi 5","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-007"]}
+{"queryId":"p027","groupId":"primary-math-g1-007","cohort":"SUPPORTED","topic":"Trừ nhẩm trong phạm vi 5","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-007"]}
+{"queryId":"p028","groupId":"primary-math-g1-012","cohort":"SUPPORTED","topic":"Nhận biết hình vuông và hình tròn","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-012"]}
+{"queryId":"p029","groupId":"primary-math-g1-013","cohort":"SUPPORTED","topic":"Nhận biết khối lập phương và khối hộp chữ nhật","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-013"]}
+{"queryId":"p030","groupId":"primary-math-g1-003","cohort":"SUPPORTED","topic":"So sánh các số trong phạm vi 20","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":true,"expectedChunkIds":["math-g1-003"]}
+{"queryId":"boundary-1","groupId":"boundary","cohort":"BOUNDARY","topic":"Đếm con vật","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-2","groupId":"boundary","cohort":"BOUNDARY","topic":"Cộng","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-3","groupId":"boundary","cohort":"BOUNDARY","topic":"Trừ","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-4","groupId":"boundary","cohort":"BOUNDARY","topic":"Đọc số","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-5","groupId":"boundary","cohort":"BOUNDARY","topic":"Viết số","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-6","groupId":"boundary","cohort":"BOUNDARY","topic":"So sánh các số","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-7","groupId":"boundary","cohort":"BOUNDARY","topic":"Cộng trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-8","groupId":"boundary","cohort":"BOUNDARY","topic":"Trừ trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-9","groupId":"boundary","cohort":"BOUNDARY","topic":"Đo độ dài","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-10","groupId":"boundary","cohort":"BOUNDARY","topic":"Đọc giờ","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-11","groupId":"boundary","cohort":"BOUNDARY","topic":"Xem đồng hồ","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-12","groupId":"boundary","cohort":"BOUNDARY","topic":"Đồng hồ","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-13","groupId":"boundary","cohort":"BOUNDARY","topic":"Đem số con vật từ 1 đến 5","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-14","groupId":"boundary","cohort":"BOUNDARY","topic":"Không đếm số trong phạm vi 10","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-15","groupId":"boundary","cohort":"BOUNDARY","topic":"Đếm từ 10 đến 1","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-16","groupId":"boundary","cohort":"BOUNDARY","topic":"Cộng có nhớ trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-17","groupId":"boundary","cohort":"BOUNDARY","topic":"Trừ có nhớ trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-18","groupId":"boundary","cohort":"BOUNDARY","topic":"Cộng nhẩm trong phạm vi 20","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-19","groupId":"boundary","cohort":"BOUNDARY","topic":"Trừ nhẩm trong phạm vi 20","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-20","groupId":"boundary","cohort":"BOUNDARY","topic":"Đếm trong phạm vi 100 và cộng trong phạm vi 1000","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-21","groupId":"boundary","cohort":"BOUNDARY","topic":"Cộng không nhớ trong phạm vi 100 và chia đều","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-22","groupId":"boundary","cohort":"BOUNDARY","topic":"Đo độ dài bằng mét","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-23","groupId":"boundary","cohort":"BOUNDARY","topic":"Đo độ dài bằng milimét","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-24","groupId":"boundary","cohort":"BOUNDARY","topic":"Đọc giờ rưỡi","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-25","groupId":"boundary","cohort":"BOUNDARY","topic":"Đọc giờ đúng và phút","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-26","groupId":"boundary","cohort":"BOUNDARY","topic":"Nhận biết hình vuông và diện tích","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-27","groupId":"boundary","cohort":"BOUNDARY","topic":"Đếm từ 1 đến 5 và nhân","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-28","groupId":"boundary","cohort":"BOUNDARY","topic":"Cộng trong phạm vi 10 hoặc 1000","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-29","groupId":"boundary","cohort":"BOUNDARY","topic":"Cộng không nhớ và có nhớ trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"boundary-30","groupId":"boundary","cohort":"BOUNDARY","topic":"Đếm từ 1 đến 5 không tính số 3","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-1","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Đếm trong phạm vi 1000","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-2","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Đọc số trong phạm vi 1000","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-3","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Viết số trong phạm vi 1000","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-4","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Cộng không nhớ trong phạm vi 1000","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-5","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Trừ không nhớ trong phạm vi 1000","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-6","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Cộng có nhớ trong phạm vi 1000","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-7","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Nhân trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-8","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Chia trong phạm vi 100","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-9","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Bảng cửu chương 7","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-10","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Cộng phân số khác mẫu","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-11","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Trừ phân số cùng mẫu","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-12","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Cộng số thập phân","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-13","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Trừ số âm","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-14","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Đếm số âm từ -5 đến 5","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-15","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Cộng 1.5 và 2.5","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-16","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Tính diện tích hình vuông","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-17","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Tính chu vi hình tròn","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-18","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Nhận biết hình thang","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-19","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Nhận biết hình bình hành","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-20","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Nhận biết hình cầu","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-21","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Nhận biết hình trụ","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-22","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Nhận biết hình nón","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-23","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Đo khối lượng bằng kilôgam","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-24","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Đo dung tích bằng lít","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-25","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Đổi mét sang centimet","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-26","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Đọc giờ kém 15 phút","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-27","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Lập trình vòng lặp Python","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-28","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Giải phương trình bậc hai","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-29","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Tính tỉ số phần trăm","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}
+{"queryId":"unsupported-30","groupId":"unsupported","cohort":"UNSUPPORTED","topic":"Đọc biểu đồ cột","subject":"MATH","gradeLevel":"GRADE_1","expectedSupported":false,"expectedChunkIds":[]}

@@ -41,9 +41,26 @@ class CurriculumPdfExtractorTest {
                 List.of(new CurriculumChunk.SourceFragment(1, 1, "RIGHT", "Outcome alpha.")));
         assertThat(new CurriculumPdfExtractor().verifyAndExtract(pdf,
                 new CurriculumDataset(source, List.of(chunk)), directory.resolve("output")).verifiedChunks()).isEqualTo(1);
+        var reportPath = directory.resolve("output/source-verification.json");
+        var report = new tools.jackson.databind.json.JsonMapper().readTree(Files.readString(reportPath));
+        assertThat(report.path("datasetVersion").asString()).isEqualTo("fixture-v1");
+        assertThat(report.path("verifiedOutcomes").asInt()).isEqualTo(1);
+        assertThat(report.path("verifiedControls").asInt()).isZero();
+        assertThat(report.path("chunks").get(0).path("chunkId").asString()).isEqualTo("alpha");
+        assertThat(report.path("chunks").get(0).path("sourceFragments").get(0).path("pdfPage").asInt()).isEqualTo(1);
         var badSource = new CurriculumSource("source.pdf", "0".repeat(64), "version", "fixture-v1", 1);
         assertThatThrownBy(() -> new CurriculumPdfExtractor().verifyAndExtract(pdf,
                 new CurriculumDataset(badSource, List.of(chunk)), directory.resolve("bad-output")))
                 .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new CurriculumPdfExtractor().verifyAndExtract(pdf,
+                new CurriculumDataset(badSource, List.of(chunk)), directory.resolve("output")))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(reportPath).doesNotExist();
+        var incorrect = new CurriculumChunk("wrong", Subject.MATH, GradeLevel.GRADE_1, "topic", "Wrong outcome.", false,
+                List.of(new CurriculumChunk.SourceFragment(1, 1, "RIGHT", "Wrong outcome.")));
+        assertThatThrownBy(() -> new CurriculumPdfExtractor().verifyAndExtract(pdf,
+                new CurriculumDataset(source, List.of(incorrect)), directory.resolve("output")))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("wrong");
+        assertThat(reportPath).doesNotExist();
     }
 }

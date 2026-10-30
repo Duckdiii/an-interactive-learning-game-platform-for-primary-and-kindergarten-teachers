@@ -1,4 +1,7 @@
 {
+  "constraintsVersion": "math-g1-constraints-v1",
+  "constraintsResource": "constraints.jsonl",
+  "constraintsSha256": "b44066d375f2f591800ded3c0fceaf89ef8c1a4992f9bac5e6e28396a19f189a",
   "datasetVersion": "math-grade1-spike-v1",
   "curriculumVersion": "32/2018/TT-BGDDT",
   "applicabilityReviewedOn": "2026-10-10",

@@ -5,6 +5,7 @@ import com.aigameplatform.backend.entity.enums.Subject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public final class CurriculumEvaluation {
     private CurriculumEvaluation() { }
@@ -16,6 +17,23 @@ public final class CurriculumEvaluation {
     public record Summary(int positiveQueries, int hits, double hitAt3, int leakedChunks,
                           int negativeQueries, int negativeRejections, boolean retrievalGatePassed,
                           boolean negativeGatePassed, boolean passed) { }
+
+    public record ControlProbe(String controlChunkId, long ownScopeControlLeakage, long primaryScopeLeakage,
+                               List<String> ownScopeChunkIds, List<String> primaryScopeChunkIds, boolean passed) { }
+
+    /** Storage completeness is checked against every deterministic ID before these probes run. */
+    public static ControlProbe scoreControl(CurriculumChunk control, Set<String> controlIds,
+                                             CurriculumRAGService.RetrievalResult own,
+                                             CurriculumRAGService.RetrievalResult primary) {
+        long ownLeakage = own.chunks().stream().filter(c -> controlIds.contains(c.chunkId())
+                || c.subject() != control.subject() || c.gradeLevel() != control.gradeLevel()).count();
+        long primaryLeakage = primary.chunks().stream().filter(c -> controlIds.contains(c.chunkId())
+                || c.subject() != Subject.MATH || c.gradeLevel() != GradeLevel.GRADE_1).count();
+        return new ControlProbe(control.chunkId(), ownLeakage, primaryLeakage,
+                own.chunks().stream().map(CurriculumRAGService.RetrievedChunk::chunkId).toList(),
+                primary.chunks().stream().map(CurriculumRAGService.RetrievedChunk::chunkId).toList(),
+                ownLeakage == 0 && primaryLeakage == 0);
+    }
 
     public static List<EvaluationQuery> loadQueries() throws IOException {
         var queries = CurriculumDataset.readLines("queries.jsonl", EvaluationQuery.class);

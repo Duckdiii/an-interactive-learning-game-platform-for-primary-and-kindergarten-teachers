@@ -43,6 +43,15 @@ import tools.jackson.databind.json.JsonMapper;
 /** Bộ điều phối sinh game với cổng AI và kiểm duyệt giả: không gọi dịch vụ ngoài, không cần DB. */
 class GameGenerationServiceTest {
 
+    @Test
+    @org.junit.jupiter.api.extension.ExtendWith(org.springframework.boot.test.system.OutputCaptureExtension.class)
+    void providerErrorLogsMustNotContainTeacherOrProviderPayload(org.springframework.boot.test.system.CapturedOutput output) {
+        var generator = new ScriptedGenerator(new AiServiceUnavailableException("CANARY_TEACHER_SECRET"));
+        assertThatThrownBy(() -> service(generator, 0).generate(GameType.QUIZ, REQUEST))
+                .isInstanceOf(AiGenerationTimeoutException.class);
+        assertThat(output.getAll()).doesNotContain("CANARY_TEACHER_SECRET");
+    }
+
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
     private static final GameDslRequest REQUEST = new GameDslRequest("Đếm con vật", Subject.MATH, GradeLevel.GRADE_1);
 
@@ -93,6 +102,10 @@ class GameGenerationServiceTest {
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
             ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled) {
         DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
+        try {
+            beans.registerSingleton("catalog", new com.aigameplatform.backend.service.curriculum.CurriculumCatalog(
+                    List.of(com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadDefault()), java.util.Set.of(GameType.QUIZ)));
+        } catch (IOException e) { throw new java.io.UncheckedIOException(e); }
         if (generator != null) {
             beans.registerSingleton("generator", generator);
         }
@@ -108,7 +121,9 @@ class GameGenerationServiceTest {
                 new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)),
                 new AiOutputValidator(MAPPER),
                 GameTestFixtures.factoryRegistry(random),
-                validation, MAPPER, beans.getBeanProvider(CurriculumContextProvider.class), ragEnabled, maxRetries);
+                validation, MAPPER, beans.getBeanProvider(CurriculumContextProvider.class),
+                beans.getBeanProvider(com.aigameplatform.backend.service.curriculum.CurriculumCatalog.class),
+                beans.getBeanProvider(com.aigameplatform.backend.service.curriculum.CurriculumMetrics.class), ragEnabled, maxRetries);
     }
 
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries) {
@@ -215,14 +230,15 @@ class GameGenerationServiceTest {
     @Test
     void ragPilotRejectsSubjectsAndGradesOutsideItsReviewedDataset() {
         ScriptedGenerator generator = new ScriptedGenerator();
-        CurriculumContextProvider curriculum = (topic, subject, grade) ->
-                CurriculumContextProvider.Evidence.found("some context");
+        CurriculumContextProvider curriculum = (topic, subject, grade) -> {
+            throw new AssertionError("Unsupported scope must not retrieve");
+        };
         GameDslRequest outOfScope = new GameDslRequest("alphabet", Subject.ENGLISH, GradeLevel.GRADE_1);
 
         assertThatThrownBy(() -> service(generator, 2, moderation(false, false), curriculum, true)
                 .generate(GameType.QUIZ, outOfScope))
-                .isInstanceOf(CurriculumEvidenceNotFoundException.class)
-                .hasMessageContaining("QUIZ / Mathematics Grade 1");
+                .isInstanceOf(com.aigameplatform.backend.exception.GenerationScopeUnsupportedException.class)
+                .hasMessageContaining("QUIZ");
         assertThat(generator.attempts).isEmpty();
     }
 
@@ -245,8 +261,8 @@ class GameGenerationServiceTest {
 
         assertThatThrownBy(() -> service(generator, 2, moderation(false, false), curriculum, true)
                 .generate(GameType.WORD_SCRAMBLE, REQUEST))
-                .isInstanceOf(CurriculumEvidenceNotFoundException.class)
-                .hasMessageContaining("QUIZ / Mathematics Grade 1");
+                .isInstanceOf(com.aigameplatform.backend.exception.GenerationScopeUnsupportedException.class)
+                .hasMessageContaining("QUIZ");
         assertThat(generator.attempts).isEmpty();
     }
 

@@ -1,0 +1,107 @@
+{
+  "sampleId" : "sample-13",
+  "topic" : "Nhận biết hình vuông",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Nhận biết hình vuông",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Nhận biết hình vuông"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Em hãy tìm hình nào là hình vuông trong các hình dưới đây?",
+      "visualPrompt" : "Bốn hình phẳng khác nhau",
+      "questionText" : "Em hãy tìm hình nào là hình vuông trong các hình dưới đây?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hình chữ nhật"
+      }, {
+        "id" : "b",
+        "text" : "Hình tam giác"
+      }, {
+        "id" : "c",
+        "text" : "Hình vuông"
+      }, {
+        "id" : "d",
+        "text" : "Hình tròn"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Vật nào sau đây có dạng hình vuông?",
+      "visualPrompt" : "Các đồ vật có hình dạng khác nhau",
+      "questionText" : "Vật nào sau đây có dạng hình vuông?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Viên bi"
+      }, {
+        "id" : "b",
+        "text" : "Khăn tay"
+      }, {
+        "id" : "c",
+        "text" : "Cái bút"
+      }, {
+        "id" : "d",
+        "text" : "Quả bóng"
+      } ],
+      "correctOptionId" : "b"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Trong các hình sau, đâu là hình vuông?",
+      "visualPrompt" : "Đặc điểm các hình",
+      "questionText" : "Trong các hình sau, đâu là hình vuông?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hình có chiều dài lớn hơn chiều rộng"
+      }, {
+        "id" : "b",
+        "text" : "Hình có bốn cạnh bằng nhau và bốn góc vuông"
+      }, {
+        "id" : "c",
+        "text" : "Hình có ba cạnh"
+      }, {
+        "id" : "d",
+        "text" : "Hình có đường cong khép kín"
+      } ],
+      "correctOptionId" : "b"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Em hãy nhận biết tên gọi của hình có bốn cạnh bằng nhau dưới đây:",
+      "visualPrompt" : "Một hình vuông đơn lẻ",
+      "questionText" : "Em hãy nhận biết tên gọi của hình có bốn cạnh bằng nhau dưới đây:",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hình tròn"
+      }, {
+        "id" : "b",
+        "text" : "Hình vuông"
+      }, {
+        "id" : "c",
+        "text" : "Hình tam giác"
+      }, {
+        "id" : "d",
+        "text" : "Hình chữ nhật"
+      } ],
+      "correctOptionId" : "b"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-012] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được hình vuông, hình tròn, hình tam giác, hình chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 3832
+}

@@ -45,8 +45,8 @@ class CurriculumSpikeTest {
     void filtersSubjectAndGradeBeforeRankingEvenWhenControlsAreCloser() {
         var store = new InMemoryEmbeddingStore<TextSegment>();
         put(store, chunk("right", Subject.MATH, GradeLevel.GRADE_1, false), new float[]{0.8f, 0.6f});
-        put(store, chunk("wrong-grade", Subject.MATH, GradeLevel.GRADE_2, true), new float[]{1, 0});
-        put(store, chunk("wrong-subject", Subject.VIETNAMESE, GradeLevel.GRADE_1, true), new float[]{1, 0});
+        put(store, chunk("wrong-grade", Subject.MATH, GradeLevel.GRADE_2, false), new float[]{1, 0});
+        put(store, chunk("wrong-subject", Subject.VIETNAMESE, GradeLevel.GRADE_1, false), new float[]{1, 0});
         var service = new CurriculumRAGService(store, model(new float[]{1, 0}), SOURCE, MODEL, 3, 0.7);
 
         var result = service.retrieve("addition", Subject.MATH, GradeLevel.GRADE_1);
@@ -99,6 +99,52 @@ class CurriculumSpikeTest {
     }
 
     @Test
+    void controlsAreExcludedEvenInTheirOwnScopeAndMissingLabelsFailClosed() {
+        var store = new InMemoryEmbeddingStore<TextSegment>();
+        put(store, chunk("control", Subject.MATH, GradeLevel.GRADE_2, true), new float[]{1, 0});
+        var unlabeled = chunk("unlabeled", Subject.MATH, GradeLevel.GRADE_2, false).toSegment(SOURCE, MODEL);
+        unlabeled.metadata().remove("control");
+        store.add(Embedding.from(new float[]{1, 0}), unlabeled);
+        var service = new CurriculumRAGService(store, model(new float[]{1, 0}), SOURCE, MODEL, 1, 0.7);
+
+        assertThat(service.retrieve("addition", Subject.MATH, GradeLevel.GRADE_2).chunks()).isEmpty();
+        put(store, chunk("real", Subject.MATH, GradeLevel.GRADE_2, false), new float[]{0.8f, 0.6f});
+        assertThat(service.retrieve("addition", Subject.MATH, GradeLevel.GRADE_2).chunks())
+                .extracting(CurriculumRAGService.RetrievedChunk::chunkId).containsExactly("real");
+    }
+
+    @Test
+    void ingestionCheckpointsValidatedBatchesAndResumesAfterProviderFailure() {
+        var store = new InMemoryEmbeddingStore<TextSegment>();
+        var chunks = java.util.stream.IntStream.range(0, 65)
+                .mapToObj(i -> chunk("chunk-" + i, Subject.MATH, GradeLevel.GRADE_1, false)).toList();
+        var dataset = new CurriculumDataset(SOURCE, chunks);
+        var calls = new java.util.concurrent.atomic.AtomicInteger();
+        EmbeddingModel provider = new EmbeddingModel() {
+            @Override
+            public Response<List<Embedding>> embedAll(List<TextSegment> segments) {
+                if (segments.size() > 32) throw new IllegalStateException("Provider batch limit exceeded");
+                if (calls.incrementAndGet() == 2) throw new IllegalStateException("Temporary provider failure");
+                return Response.from(segments.stream().map(s -> Embedding.from(new float[]{3, 4})).toList());
+            }
+        };
+        assertThatThrownBy(() -> new CurriculumIngestor(store, provider, MODEL, 2).ingest(dataset, Set.of()))
+                .isInstanceOf(IllegalStateException.class).hasMessage("Temporary provider failure");
+        assertThat(store.size()).isEqualTo(32);
+        var existing = chunks.subList(0, 32).stream().map(c -> c.embeddingId(SOURCE, MODEL, 2))
+                .collect(java.util.stream.Collectors.toSet());
+
+        var result = new CurriculumIngestor(store, provider, MODEL, 2).ingest(dataset, existing);
+        assertThat(result.written()).isEqualTo(33);
+        assertThat(result.skipped()).isEqualTo(32);
+        assertThat(store.size()).isEqualTo(65);
+        var matches = store.search(dev.langchain4j.store.embedding.EmbeddingSearchRequest.builder()
+                .queryEmbedding(Embedding.from(new float[]{1, 0})).maxResults(65).build()).matches();
+        assertThat(matches).hasSize(65).allSatisfy(match ->
+                assertThat(match.embedding().vector()).containsExactly(0.6f, 0.8f));
+    }
+
+    @Test
     void dimensionMismatchStopsBeforeAnyWrite() {
         var store = new InMemoryEmbeddingStore<TextSegment>();
         var dataset = new CurriculumDataset(SOURCE, List.of(chunk("one", Subject.MATH, GradeLevel.GRADE_1, false)));
@@ -139,6 +185,23 @@ class CurriculumSpikeTest {
                 List.of(new CurriculumChunk.SourceFragment(2, 2, "RIGHT", "Outcome one")));
         assertThat(correctedPage.embeddingId(SOURCE, MODEL, 768))
                 .isNotEqualTo(original.embeddingId(SOURCE, MODEL, 768));
+    }
+
+    @Test
+    void controlGateRequiresStoredControlsToBeExcludedInBothScopes() {
+        var control = chunk("control", Subject.MATH, GradeLevel.GRADE_2, true);
+        var empty = new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.INSUFFICIENT_EVIDENCE, List.of());
+        var ownLeak = new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.FOUND,
+                List.of(hit("control", Subject.MATH, GradeLevel.GRADE_2)));
+        // A different control labeled with the primary scope must also count as leakage.
+        var primaryLeak = new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.FOUND,
+                List.of(hit("another-control", Subject.MATH, GradeLevel.GRADE_1)));
+        var ids = Set.of("control", "another-control");
+        var passed = CurriculumEvaluation.scoreControl(control, ids, empty, empty);
+        assertThat(passed.passed()).isTrue();
+        assertThat(CurriculumEvaluation.scoreControl(control, ids, ownLeak, empty).passed()).isFalse();
+        assertThat(CurriculumEvaluation.scoreControl(control, ids, empty, primaryLeak).passed()).isFalse();
+        assertThat(CurriculumEvaluation.scoreControl(control, ids, empty, primaryLeak).primaryScopeLeakage()).isEqualTo(1);
     }
 
     @Test

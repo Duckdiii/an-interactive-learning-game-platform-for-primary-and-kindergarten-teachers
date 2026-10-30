@@ -33,6 +33,10 @@
 		<jacoco.version>0.8.12</jacoco.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
 		<!-- RAG spike: keep the integration aligned with the existing LangChain4j release. -->
 		<dependency>
 			<groupId>dev.langchain4j</groupId>

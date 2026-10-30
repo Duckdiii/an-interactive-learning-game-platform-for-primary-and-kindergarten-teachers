@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public final class CurriculumIngestor {
+    private static final int BATCH_SIZE = 32;
     private final EmbeddingStore<TextSegment> store;
     private final EmbeddingModel model;
     private final String modelName;
@@ -27,17 +28,19 @@ public final class CurriculumIngestor {
         var allIds = dataset.chunks().stream().map(c -> c.embeddingId(dataset.source(), modelName, dimension)).toList();
         var pending = dataset.chunks().stream()
                 .filter(c -> !existingIds.contains(c.embeddingId(dataset.source(), modelName, dimension))).toList();
-        if (!pending.isEmpty()) {
-            var segments = pending.stream().map(c -> c.toSegment(dataset.source(), modelName)).toList();
+        for (int offset = 0; offset < pending.size(); offset += BATCH_SIZE) {
+            var batch = pending.subList(offset, Math.min(offset + BATCH_SIZE, pending.size()));
+            var segments = batch.stream().map(c -> c.toSegment(dataset.source(), modelName)).toList();
             var embeddings = model.embedAll(segments).content();
-            if (embeddings.size() != pending.size() || embeddings.stream().anyMatch(e -> e.dimension() != dimension
+            if (embeddings.size() != batch.size() || embeddings.stream().anyMatch(e -> e.dimension() != dimension
                     || java.util.stream.IntStream.range(0, e.vector().length).anyMatch(i -> !Float.isFinite(e.vector()[i]))
                     || java.util.stream.IntStream.range(0, e.vector().length).allMatch(i -> e.vector()[i] == 0))) {
                 throw new IllegalStateException("Embedding count, values or dimensions differ from the store configuration");
             }
             // gemini-embedding-001's reduced vectors need normalization; cosine ranking is unchanged.
             embeddings.forEach(e -> e.normalize());
-            var ids = pending.stream().map(c -> c.embeddingId(dataset.source(), modelName, dimension)).toList();
+            var ids = batch.stream().map(c -> c.embeddingId(dataset.source(), modelName, dimension)).toList();
+            // Persist each validated batch so a rerun can skip committed IDs after a later failure.
             store.addAll(ids, embeddings, segments);
         }
         return new IngestionResult(pending.size(), dataset.chunks().size() - pending.size(), allIds);

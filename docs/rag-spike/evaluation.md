@@ -35,9 +35,11 @@ Ngưỡng 0.855 được chọn sau khi xem bộ 10 positive và 3 negative, nê
 
 ## Tiêu chí pass/fail
 
+Chính sách đối chứng từ 2026-10-30 áp dụng cho báo cáo `reportVersion=2`. Các số đo live phía trên giữ nguyên làm bằng chứng lịch sử, chưa chứng minh pipeline mới đạt khi chạy live.
+
 - Có đủ 10 positive query; `Hit@3 = số query có ít nhất một chunk kỳ vọng trong top 3 / 10`, phải ≥ 0,8.
 - Không trả chunk sai môn/lớp ở bất kỳ query/probe Toán lớp 1 nào.
-- Các đối chứng thực sự đã nạp: 3 chunk Toán lớp 2 và 2 chunk Tiếng Việt lớp 1. Truy vấn trong scope của chúng phải tìm được chúng; truy vấn Toán lớp 1 không được nhận các chunk này.
+- Các đối chứng thực sự đã nạp: 3 chunk Toán lớp 2 và 2 chunk Tiếng Việt lớp 1. Xác nhận lưu trữ bằng tập ID đầy đủ trong database trước khi chạy probe. Truy vấn cả scope của đối chứng và Toán lớp 1 đều không được nhận bất kỳ ID đối chứng nào; kết quả sai môn/lớp cũng làm probe trượt. Bộ kiểm thử in-memory riêng xác nhận bộ lọc môn/lớp với vector đối chứng gần hơn.
 - Negative gate riêng: 3/3 negative query phải nhận `INSUFFICIENT_EVIDENCE`. Báo cáo giữ riêng retrieval gate và negative gate để thấy rõ RAG tìm đúng ở các query hợp lệ nhưng có thể vẫn chấp nhận query ngoài chương trình.
 - Một kết quả semantic gần nghĩa không được xem là căn cứ đủ.
 - Đọc bằng mắt các đoạn trả về và trang nguồn trước khi đưa kết luận vào báo cáo. Score tương đồng không phải xác suất yêu cầu đó đúng chương trình.

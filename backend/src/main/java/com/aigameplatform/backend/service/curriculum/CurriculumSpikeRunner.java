@@ -81,6 +81,33 @@ public final class CurriculumSpikeRunner {
             var queryModel = embedding(config, GoogleAiEmbeddingModel.TaskType.RETRIEVAL_QUERY);
             var service = new CurriculumRAGService(store, queryModel, dataset.source(), config.embeddingModel(),
                     RagSpikeConfig.TOP_K, config.minScore());
+            if ("--evaluate".equals(mode) && args.length > 1 && !"legacy".equals(args[1])) {
+                if (args.length < 3 || !java.util.Set.of("tune", "holdout").contains(args[1]))
+                    throw new IllegalArgumentException("--evaluate tune|holdout QUERIES_PATH [TUNE_PATH]");
+                var constraints = CurriculumConstraints.load(dataset);
+                constraints.requireApproved(environment.getOrDefault("CURRICULUM_CONSTRAINTS_APPROVED_SHA256", ""));
+                var queries = CurriculumBenchmark.loadReviewed(Path.of(args[2]), dataset, constraints);
+                CurriculumBenchmark.requireCohorts(queries, args[1]);
+                if ("holdout".equals(args[1])) {
+                    if (args.length < 4) throw new IllegalArgumentException("Holdout needs a reviewed tune set for overlap checks");
+                    var tune = CurriculumBenchmark.loadReviewed(Path.of(args[3]), dataset, constraints);
+                    CurriculumBenchmark.requireCohorts(tune, "tune");
+                    CurriculumBenchmark.requireDisjoint(tune, queries);
+                }
+                var measurements = CurriculumBenchmark.evaluate(service, dataset, constraints, queries);
+                var metrics = CurriculumBenchmark.summarize(measurements);
+                var report = new LinkedHashMap<String, Object>(Map.of("reportVersion", 3, "evaluationSet", args[1], "dataset", dataset.source(),
+                        "constraintsSha256", constraints.sha256(), "embeddingModel", config.embeddingModel(),
+                        "minScore", config.minScore(), "measuredAtUtc", Instant.now().toString(),
+                        "manualGameReview", "PENDING", "summary", metrics, "queries", measurements));
+                report.put("cohorts", CurriculumBenchmark.summarizeCohorts(measurements));
+                Path reportPath = Path.of("..", "docs", "rag-spike", "results", "benchmark-" + args[1] + "-"
+                        + Instant.now().toString().replace(':', '-') + ".json");
+                Files.createDirectories(reportPath.getParent());
+                Files.writeString(reportPath, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(report), StandardCharsets.UTF_8);
+                System.out.println(mapper.writeValueAsString(metrics));
+                return metrics.qualityGatePassed() ? 0 : 4;
+            }
             if ("--query".equals(mode)) {
                 if (args.length < 4) throw new IllegalArgumentException("--query SUBJECT GRADE_LEVEL TOPIC");
                 Subject subject = Subject.valueOf(args[1]);
@@ -92,20 +119,20 @@ public final class CurriculumSpikeRunner {
             var queries = CurriculumEvaluation.loadQueries();
             var rows = CurriculumEvaluation.evaluate(service, queries);
             var summary = CurriculumEvaluation.summarize(rows);
-            var probes = new ArrayList<Map<String, Object>>();
+            var probes = new ArrayList<CurriculumEvaluation.ControlProbe>();
+            var controlIds = dataset.chunks().stream().filter(CurriculumChunk::control)
+                    .map(CurriculumChunk::chunkId).collect(java.util.stream.Collectors.toSet());
             for (var control : dataset.chunks().stream().filter(CurriculumChunk::control).toList()) {
                 var own = service.retrieve(control.text(), control.subject(), control.gradeLevel());
                 var primary = service.retrieve(control.text(), Subject.MATH, GradeLevel.GRADE_1);
-                probes.add(Map.of("controlChunkId", control.chunkId(), "ownScopeRetrieved",
-                        own.chunks().stream().anyMatch(c -> c.chunkId().equals(control.chunkId())),
-                        "primaryScopeLeakage", primary.chunks().stream()
-                                .filter(c -> c.subject() != Subject.MATH || c.gradeLevel() != GradeLevel.GRADE_1).count(),
-                        "primaryScopeChunkIds", primary.chunks().stream().map(CurriculumRAGService.RetrievedChunk::chunkId).toList()));
+                probes.add(CurriculumEvaluation.scoreControl(control, controlIds, own, primary));
             }
-            boolean controlsPass = probes.stream().allMatch(p -> Boolean.TRUE.equals(p.get("ownScopeRetrieved"))
-                    && ((Number) p.get("primaryScopeLeakage")).longValue() == 0);
+            boolean controlsPass = !probes.isEmpty() && probes.stream().allMatch(CurriculumEvaluation.ControlProbe::passed);
             var report = new LinkedHashMap<String, Object>();
             report.put("measurementStatus", "LIVE_COMPLETED");
+            report.put("reportVersion", 2);
+            report.put("evaluationScope", "LEGACY_RETRIEVAL_ONLY_NOT_VERIFIED_GENERATION");
+            report.put("controlPolicy", "STORED_BUT_EXCLUDED_FROM_ALL_RETRIEVAL_SCOPES");
             report.put("measuredAtUtc", Instant.now().toString());
             report.put("dataset", dataset.source());
             report.put("embeddingModel", config.embeddingModel());
@@ -115,6 +142,7 @@ public final class CurriculumSpikeRunner {
             report.put("manualReview", "PENDING: inspect returned text and source pages before citing quality conclusions");
             report.put("summary", summary);
             report.put("controlProbes", probes);
+            report.put("controlsStored", true);
             report.put("controlsPassed", controlsPass);
             report.put("passed", summary.passed() && controlsPass);
             report.put("queries", rows);

@@ -1,0 +1,107 @@
+{
+  "sampleId" : "sample-15",
+  "topic" : "Nhận biết hình tam giác",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Nhận biết hình tam giác",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Nhận biết hình tam giác"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Em hãy tìm hình tam giác trong các hình dưới đây.",
+      "visualPrompt" : "Bốn hình phẳng khác nhau",
+      "questionText" : "Em hãy tìm hình tam giác trong các hình dưới đây.",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hình chữ nhật"
+      }, {
+        "id" : "b",
+        "text" : "Hình tròn"
+      }, {
+        "id" : "c",
+        "text" : "Hình tam giác"
+      }, {
+        "id" : "d",
+        "text" : "Hình vuông"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Biển báo giao thông nào có dạng hình tam giác?",
+      "visualPrompt" : "Các loại biển báo giao thông",
+      "questionText" : "Biển báo giao thông nào có dạng hình tam giác?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Biển báo hình tam giác"
+      }, {
+        "id" : "b",
+        "text" : "Biển báo hình vuông"
+      }, {
+        "id" : "c",
+        "text" : "Biển báo hình chữ nhật"
+      }, {
+        "id" : "d",
+        "text" : "Biển báo hình tròn"
+      } ],
+      "correctOptionId" : "a"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Hình nào có ba cạnh và ba góc?",
+      "visualPrompt" : "Các hình học cơ bản",
+      "questionText" : "Hình nào có ba cạnh và ba góc?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hình tròn"
+      }, {
+        "id" : "b",
+        "text" : "Hình chữ nhật"
+      }, {
+        "id" : "c",
+        "text" : "Hình vuông"
+      }, {
+        "id" : "d",
+        "text" : "Hình tam giác"
+      } ],
+      "correctOptionId" : "d"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Em hãy chọn hình là hình tam giác.",
+      "visualPrompt" : "Mô tả các hình",
+      "questionText" : "Em hãy chọn hình là hình tam giác.",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hình có 4 cạnh bằng nhau"
+      }, {
+        "id" : "b",
+        "text" : "Hình có 3 cạnh"
+      }, {
+        "id" : "c",
+        "text" : "Hình không có góc"
+      }, {
+        "id" : "d",
+        "text" : "Hình có 4 cạnh"
+      } ],
+      "correctOptionId" : "b"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-012] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được hình vuông, hình tròn, hình tam giác, hình chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 3204
+}

@@ -1,0 +1,103 @@
+{
+  "sampleId" : "sample-5",
+  "topic" : "Viết các số trong phạm vi 100",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Viết các số trong phạm vi 100",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Viết các số trong phạm vi 100"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "So gom bon chuc va nam don vi viet la gi?",
+      "questionText" : "Số gồm 4 chục và 5 đơn vị viết là gì?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "40"
+      }, {
+        "id" : "b",
+        "text" : "50"
+      }, {
+        "id" : "c",
+        "text" : "45"
+      }, {
+        "id" : "d",
+        "text" : "54"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Viet so bay muoi mot",
+      "questionText" : "Viết số bảy mươi mươi mốt hay còn gọi là bảy mươi mốt?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "91"
+      }, {
+        "id" : "b",
+        "text" : "71"
+      }, {
+        "id" : "c",
+        "text" : "81"
+      }, {
+        "id" : "d",
+        "text" : "61"
+      } ],
+      "correctOptionId" : "b"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "So lien sau cua so 39 la so may?",
+      "questionText" : "Số liền sau của số 39 là số mấy?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "40"
+      }, {
+        "id" : "b",
+        "text" : "49"
+      }, {
+        "id" : "c",
+        "text" : "38"
+      }, {
+        "id" : "d",
+        "text" : "30"
+      } ],
+      "correctOptionId" : "a"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "audioText" : "Doc so 82 ta viet bang chu la gi?",
+      "questionText" : "Đọc số 82 ta viết bằng chữ là gì?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Tám mươi mốt"
+      }, {
+        "id" : "b",
+        "text" : "Hai mươi tám"
+      }, {
+        "id" : "c",
+        "text" : "Tám mươi hai"
+      }, {
+        "id" : "d",
+        "text" : "Tám mươi"
+      } ],
+      "correctOptionId" : "c"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-001] Số tự nhiên / Đếm, đọc, viết các số trong phạm vi 100\nĐếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong phạm vi 100.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 187; trang in 21; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 3377
+}

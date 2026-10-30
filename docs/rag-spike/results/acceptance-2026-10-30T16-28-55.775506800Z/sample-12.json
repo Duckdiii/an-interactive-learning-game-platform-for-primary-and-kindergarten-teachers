@@ -1,0 +1,99 @@
+{
+  "sampleId" : "sample-12",
+  "topic" : "So sánh các số trong phạm vi 100",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "So sánh các số trong phạm vi 100",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "So sánh các số trong phạm vi 100"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Số nào lớn hơn trong hai số 34 và 43?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Cả hai số bằng nhau"
+      }, {
+        "id" : "b",
+        "text" : "34"
+      }, {
+        "id" : "c",
+        "text" : "Không so sánh được"
+      }, {
+        "id" : "d",
+        "text" : "43"
+      } ],
+      "correctOptionId" : "d"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Số nào bé hơn trong hai số 78 và 69?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "69"
+      }, {
+        "id" : "b",
+        "text" : "Bằng nhau"
+      }, {
+        "id" : "c",
+        "text" : "Không biết"
+      }, {
+        "id" : "d",
+        "text" : "78"
+      } ],
+      "correctOptionId" : "a"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Sắp xếp các số sau theo thứ tự từ bé đến lớn: 52, 25, 45, 54.",
+      "options" : [ {
+        "id" : "a",
+        "text" : "45, 25, 54, 52"
+      }, {
+        "id" : "b",
+        "text" : "25, 52, 45, 54"
+      }, {
+        "id" : "c",
+        "text" : "25, 45, 52, 54"
+      }, {
+        "id" : "d",
+        "text" : "54, 52, 45, 25"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Sắp xếp các số sau theo thứ tự từ lớn đến bé: 81, 91, 19, 89.",
+      "options" : [ {
+        "id" : "a",
+        "text" : "91, 81, 89, 19"
+      }, {
+        "id" : "b",
+        "text" : "19, 81, 89, 91"
+      }, {
+        "id" : "c",
+        "text" : "91, 89, 81, 19"
+      }, {
+        "id" : "d",
+        "text" : "89, 91, 81, 19"
+      } ],
+      "correctOptionId" : "c"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-003] Số tự nhiên / So sánh các số trong phạm vi 100\nNhận biết được cách so sánh, xếp thứ tự các số trong phạm vi 100 (ở các nhóm có không quá 4 số).\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 5915
+}

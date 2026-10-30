@@ -1,0 +1,53 @@
+{
+    "measuredAtUtc":  "2026-10-30T16:37:33.3614115Z",
+    "verdict":  "NOT_ACCEPTED",
+    "regression":  {
+                       "coverageGate":  "PASSED_70_PERCENT",
+                       "includesLivePgvector":  true,
+                       "errors":  0,
+                       "tests":  496,
+                       "failures":  0,
+                       "skipped":  5,
+                       "includesDatabaseContext":  true
+                   },
+    "liveAcceptance":  {
+                           "failed":  2,
+                           "sample1":  "CURRICULUM_EVIDENCE_NOT_FOUND",
+                           "failures":  0,
+                           "sample3":  "GEMINI_HTTP503_UNAVAILABLE_HIGH_DEMAND",
+                           "generationAttempts":  20,
+                           "errors":  2,
+                           "tests":  22,
+                           "generated":  18,
+                           "skipped":  0,
+                           "moderationMode":  "BLOCKLIST_ONLY"
+                       },
+    "exploratory":  {
+                        "labelsHumanReviewed":  false,
+                        "supported":  30,
+                        "falseAcceptances":  0,
+                        "leakedChunks":  0,
+                        "unsupported":  60,
+                        "acceptedSupported":  29,
+                        "queries":  90,
+                        "independentHoldout":  false
+                    },
+    "contentReview":  {
+                          "questions":  72,
+                          "games":  18,
+                          "importantIssues":  [
+                                                  "sample6_q2_story_answer_mismatch",
+                                                  "sample16_q4_multiple_valid_options",
+                                                  "sample2_missing_counting_visuals"
+                                              ],
+                          "humanAcceptance":  "PENDING",
+                          "mode":  "AI_ASSISTED_NOT_TEACHER_SIGNOFF"
+                      },
+    "moderationPreflight":  {
+                                "provider":  "OpenAI",
+                                "httpStatus":  401,
+                                "passed":  false
+                            },
+    "newRagVariantsEnabled":  false,
+    "releaseAccepted":  false
+}

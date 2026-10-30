@@ -54,7 +54,7 @@ public record CurriculumDataset(CurriculumSource source, List<CurriculumChunk> c
         }
     }
 
-    private static InputStream resource(String name) throws IOException {
+    static InputStream resource(String name) throws IOException {
         var stream = CurriculumDataset.class.getResourceAsStream(RESOURCE_ROOT + name);
         if (stream == null) throw new IOException("Missing reviewed curriculum resource: " + name);
         return stream;

@@ -1,0 +1,99 @@
+{
+  "sampleId" : "sample-16",
+  "topic" : "Nhận biết hình chữ nhật",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Nhận biết hình chữ nhật",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Nhận biết hình chữ nhật"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Hinh nao duoi day la hinh chu nhat?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hinh tron"
+      }, {
+        "id" : "b",
+        "text" : "Hinh tam giac"
+      }, {
+        "id" : "c",
+        "text" : "Hinh chu nhat"
+      }, {
+        "id" : "d",
+        "text" : "Hinh vuong"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Vat nao co dang hinh chu nhat?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Cai ec-ke hinh tam giac"
+      }, {
+        "id" : "b",
+        "text" : "Qua bong"
+      }, {
+        "id" : "c",
+        "text" : "Quyen vo hoc tap"
+      }, {
+        "id" : "d",
+        "text" : "Bien bao giao thong hinh tron"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Trong cac hinh sau, hinh nao co hai canh dai va hai canh ngan?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hinh chu nhat"
+      }, {
+        "id" : "b",
+        "text" : "Hinh vuong deu"
+      }, {
+        "id" : "c",
+        "text" : "Hinh tron"
+      }, {
+        "id" : "d",
+        "text" : "Hinh tam giac"
+      } ],
+      "correctOptionId" : "a"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Em hay chi ra ten cua hinh co bon canh va bon goc vuong, trong do hai canh doi dien dai bang nhau.",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hinh chu nhat"
+      }, {
+        "id" : "b",
+        "text" : "Hinh tron"
+      }, {
+        "id" : "c",
+        "text" : "Hinh tam giac"
+      }, {
+        "id" : "d",
+        "text" : "Hinh vuong"
+      } ],
+      "correctOptionId" : "a"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-012] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được hình vuông, hình tròn, hình tam giác, hình chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 5183
+}
