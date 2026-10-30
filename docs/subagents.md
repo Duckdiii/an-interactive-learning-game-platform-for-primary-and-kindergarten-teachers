@@ -33,28 +33,34 @@ Dự án có **18 subagent**. Phiên chính (agent đang trò chuyện với ng�
 | 17 | `doc-syncer` | Tài liệu | sonnet | Có, chỉ file tài liệu (worktree riêng) | Sau khi code xong, trước khi mở PR |
 | 18 | `security-auditor` | Bảo mật | sonnet | Không | Khi đổi code liên quan bảo mật, trước khi triển khai |
 
-`canvas-ux-checker` và `mutation-checker` tốn nhiều usage nên không tự chạy. Ba agent thực thi chỉ được giao việc khi phiên chính đã có kế hoạch.
+`canvas-ux-checker` và `mutation-checker` tốn nhiều usage nên không tự chạy. Mặc định phiên chính tự viết code; ba agent thực thi chỉ được giao khi có spec đầy đủ hoặc các phần thật sự độc lập (xem `CLAUDE.md`, mục Subagent).
 
 ## 2. Bảng định tuyến
 
+**Luôn chạy:**
+
+| Khi nào | Chạy |
+|---|---|
+| Có sửa code (`backend/**`, `frontend/src/**`) | `reviewer` + `test-verifier` |
+| Mọi commit | `pre-commit-checker` (sau cùng) |
+
+**Chạy thêm khi đụng phần liên quan:**
+
 | Thay đổi đụng tới | Chạy |
 |---|---|
+| `backend/**/*.java` | `backend-architect-reviewer` |
 | `dto/dsl`, `schema/game-dsl`, `schema/game-ai-output`, `game-dsl.types.ts`, `docs/openapi/openapi.yaml`, controller/DTO REST | `contract-guardian` |
 | `backend/src/main/resources/db/migration/`, `entity/`, `application*.yml` | `migration-checker` |
-| `backend/**/*.java` | `backend-architect-reviewer` + `test-verifier` |
-| `frontend/src/**` | `reviewer` + `test-verifier` |
-| `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | thêm `canvas-ux-checker` và `mutation-checker` nếu người dùng yêu cầu |
-| Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
-| Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch và bản giao việc |
-| `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
-| Code đã xong, tài liệu có thể lỗi thời (`x-status`, mô tả, bảng agent) | `doc-syncer`, sau đó `contract-guardian` |
 | `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` |
-| Cần cài đặt backend theo kế hoạch đã chốt | `backend-implementer`, sau đó như hàng `backend/**/*.java` |
-| Cần cài đặt frontend theo kế hoạch đã chốt | `frontend-implementer`, sau đó như hàng `frontend/src/**` |
-| Mutant sống sót hoặc module thiếu test | `test-writer`, sau đó `mutation-checker` nếu người dùng yêu cầu |
+| `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
 | `ai-usage-log.md` | `log-auditor` |
+| `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |
+| Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
+| Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch |
+| Code đã xong, tài liệu có thể lỗi thời (`x-status`, mô tả, bảng agent) | `doc-syncer`, sau đó `contract-guardian` |
+| Đã đủ điều kiện giao cài đặt (xem `CLAUDE.md`, mục Subagent) | `backend-implementer` / `frontend-implementer` |
+| Mutant sống sót hoặc module thiếu test | `test-writer`, sau đó `mutation-checker` nếu người dùng yêu cầu |
 | PR đã có review của bot/người | `pr-triage` |
-| Mọi commit | `pre-commit-checker` (sau cùng) |
 
 Quy trình: chạy song song các agent đúng với phần đã đổi, đợi tất cả xong rồi mới sửa theo kết quả, sau đó chạy lại `test-verifier`. Ngay trước khi đưa commit message, chạy `pre-commit-checker`. Thay đổi chỉ trong `*.md` hay docs thì không cần `test-verifier`.
 
@@ -315,6 +321,6 @@ Vì subagent không thấy hội thoại, phiên chính phải viết bản giao
 ## 8. Lưu ý khi dùng
 
 - Nhóm kiểm tra chỉ **báo cáo**; phiên chính mới là bên quyết định sửa gì và sửa thế nào.
-- Nhóm khảo sát nên chạy trước khi lập kế hoạch (có thể chạy song song). Nhóm thực thi chỉ được giao khi đã có kế hoạch. `doc-syncer` nên chạy sau khi code xong và trước `contract-guardian`; `security-auditor` chạy khi đổi code liên quan bảo mật và trước khi triển khai. Không giao hai agent thực thi sửa cùng file (chạy tuần tự nếu bắt buộc), và luôn xem diff trong worktree cùng chạy agent kiểm tra theo bảng định tuyến trước khi đưa vào cây chính.
-- Không giao cho subagent việc ghi `ai-usage-log.md`, quyết định thiết kế hay các việc nhỏ (vì chúng không thấy hội thoại, và giao việc tốn hơn tự làm).
+- Nhóm khảo sát nên chạy trước khi lập kế hoạch (có thể chạy song song). Nhóm thực thi chỉ được giao khi có spec đầy đủ hoặc các phần thật sự độc lập. `doc-syncer` nên chạy sau khi code xong và trước `contract-guardian`; `security-auditor` chạy khi đổi code liên quan bảo mật và trước khi triển khai. Không giao hai agent thực thi sửa cùng file (chạy tuần tự nếu bắt buộc), và luôn xem diff trong worktree cùng chạy agent kiểm tra theo bảng định tuyến trước khi đưa vào cây chính.
+- Không giao cho subagent việc ghi `ai-usage-log.md` hay quyết định thiết kế (vì chúng không thấy hội thoại).
 - Chỉ chạy agent đúng với phần đã đổi; không chạy cả 18 agent cho mỗi thay đổi.
