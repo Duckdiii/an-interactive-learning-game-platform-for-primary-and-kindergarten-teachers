@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Phòng thi đấu – Bảng xếp hạng</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#FFFFFF}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; box-sizing: border-box; background: #13306B; position: relative; padding: 44px 200px 112px; display: flex; flex-direction: column; gap: 18px">
+  <div style="display: flex; align-items: baseline; justify-content: space-between">
+    <h1 style="margin: 0; font-size: 42px; font-weight: 900">Top 5 sau câu 3</h1>
+    <span style="font-size: 22px; font-weight: 800; color: #C9D8F5">Cả lớp đúng 75% câu này</span>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 12px">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+      <div style="display: flex; align-items: center; gap: 16px; background: #1F3F84; border-radius: 18px; padding: 12px 20px">
+        <span style="width: 40px; font-size: 30px; font-weight: 900">{{r.rank}}</span>
+        <div style="{{r.dot}}"></div>
+        <span style="flex: 1; font-size: 28px; font-weight: 900">{{r.name}}</span>
+        <span style="font-size: 20px; font-weight: 800; color: #5EEAD4">{{r.delta}}</span>
+        <span style="width: 110px; text-align: right; font-size: 30px; font-weight: 900">{{r.pts}}</span>
+      </div>
+    </sc-for>
+  </div>
+  <div style="position: absolute; left: 24px; right: 24px; bottom: 20px; height: 72px; box-sizing: border-box; border-radius: 20px; background: rgba(8,18,40,0.9); display: flex; align-items: center; gap: 10px; padding: 0 14px">
+    <span style="background: #34476B; border-radius: 10px; padding: 6px 10px; font-size: 13px; font-weight: 800">Giáo viên</span>
+    <button style="height: 48px; padding: 0 22px; border-radius: 12px; border: none; background: #FF9F1C; color: #3B2200; font-size: 18px; font-weight: 900; cursor: pointer">Câu tiếp</button>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Xem đáp án câu 3</button>
+    <span style="margin-left: auto; font-size: 14px; font-weight: 700; color: #C9D3E6">Chỉ hiện 5 bạn dẫn đầu, các bạn khác xem thứ hạng trên máy mình</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const data = [['Sao Băng',360,'+120'],['Ong Vàng 27',340,'+120'],['Cá Heo Xanh',310,'+100'],['Hổ Con',280,'+120'],['Thỏ Ngọc',260,'+90']];
+    const colors = ['#7CC8FF','#FFD43B','#8BD98B','#FFB347','#FF9EBB'];
+    const rows = data.map((d, i) => ({ rank: i + 1, name: d[0], pts: d[1], delta: d[2], dot: 'flex: none; width: 36px; height: 36px; border-radius: 50%; background: ' + colors[i] }));
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>

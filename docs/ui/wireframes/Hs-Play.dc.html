@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh – Chơi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F7FB; padding: 20px 16px 16px; display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 10px">
+    <button aria-label="Tạm dừng" style="width: 44px; height: 44px; border-radius: 12px; border: 2px solid #D5DEEA; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#1B2333" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+    </button>
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 5px">
+      <span style="font-size: 13px; font-weight: 800; color: #4A5568">Câu 3/10</span>
+      <div style="height: 10px; border-radius: 5px; background: #DCE4EF; overflow: hidden"><div style="width: 30%; height: 100%; background: #1F5BD8"></div></div>
+    </div>
+    <div style="width: 44px; height: 44px; border-radius: 50%; background: conic-gradient(#1F5BD8 0 70%, #DCE4EF 70% 100%); display: flex; align-items: center; justify-content: center" aria-label="Còn 21 giây">
+      <div style="width: 34px; height: 34px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900">21</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px; background: #FFFFFF; border: 2px solid #D5DEEA; border-radius: 12px; padding: 0 10px; height: 44px; font-size: 16px; font-weight: 900">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="#F59E0B" stroke="#B45309" stroke-width="1.5" stroke-linejoin="round"/></svg>20
+    </div>
+  </div>
+  <div style="flex: 1; box-sizing: border-box; border: 3px dashed #6B7FA8; border-radius: 20px; background: repeating-linear-gradient(45deg, #FFFFFF 0 14px, #EEF2F8 14px 28px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; color: #3A4A6B; padding: 16px">
+    <strong style="font-size: 22px">Khu vực trò chơi</strong>
+    <span style="font-size: 14px; font-weight: 700">Renderer theo loại game vẽ câu hỏi, lựa chọn và nút nộp</span>
+    <span style="font-size: 14px; font-weight: 700">Đồng hồ lấy từ timeLimitSeconds, điểm từ points</span>
+  </div>
+  <div style="background: #FFFFFF; border-radius: 20px 20px 16px 16px; border: 2px solid #86C99A; box-shadow: 0 -6px 18px rgba(27,35,51,0.08); padding: 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: #15803D; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <div>
+        <p style="margin: 0; font-size: 20px; font-weight: 900; color: #14532D">Chính xác!</p>
+        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #2D3748">+10 điểm · chuỗi đúng 2 câu</p>
+      </div>
+    </div>
+    <button style="height: 52px; border-radius: 14px; border: none; background: #1F5BD8; color: #FFFFFF; font-size: 18px; font-weight: 900; cursor: pointer">Câu tiếp theo</button>
+    <span style="font-size: 12px; font-weight: 700; color: #4A5568">Thanh phản hồi của khung: hiện sau khi máy chủ chấm xong (isCorrect, correctAnswer)</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -50,8 +50,6 @@ Quiz, Matching, Drag & Drop, Memory Card, Ordering, Odd One Out, Word Scramble, 
 
 Prompt ACTIVE v1.0.0 và `schemaVersion` 1.0.0 đóng băng để phục vụ đo đạc. Đổi prompt phải tạo phiên bản mới có SHA-256 và ghi vết. Nâng schema phải tương thích ngược. Xem [[Kiểm thử và vận hành]].
 
-## Tiến độ theo tài liệu định hướng
-
-Tài liệu này ghi 2/10 loại có trình chơi, chưa có giao diện học sinh, Workspace Editor mới là khung. **Số liệu này có vẻ cũ** so với nhánh `everyone/UI`, chưa đối chiếu với code nên không dùng để báo cáo tiến độ.
+Tiến độ đã đối chiếu code ở [[Trạng thái thực tế]]. Contract xem [[Game JSON DSL]] và [[Bản đồ API]].
 
 Xem thêm: [[Điểm lệch và việc cần chốt]]

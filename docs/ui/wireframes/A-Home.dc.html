@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng A – Trang chủ giáo viên</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+h1,h2,h3{font-family:'Baloo 2','Nunito',sans-serif}
+button,a,input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #FBF6EC; display: flex">
+  <aside style="width: 248px; flex: none; padding: 22px 16px; display: flex; flex-direction: column; gap: 6px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 22px">
+      <div style="width: 42px; height: 42px; border-radius: 13px; background: #F6B93B; color: #3B2600; font-weight: 900; display: flex; align-items: center; justify-content: center; transform: rotate(-6deg); box-shadow: 0 4px 0 #C98A12">AI</div>
+      <span style="font-family: 'Baloo 2', sans-serif; font-size: 19px; font-weight: 800">AI Game Platform</span>
+    </div>
+    <a href="A-Home.dc.html" style="height: 46px; border-radius: 14px; background: #0E7A57; color: #FFFFFF; display: flex; align-items: center; padding: 0 16px; font-size: 15px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 0 #095C41">Trang chủ</a>
+    <a href="A-Games.dc.html" style="height: 46px; border-radius: 14px; color: #1B2333; display: flex; align-items: center; padding: 0 16px; font-size: 15px; font-weight: 700; text-decoration: none">Trò chơi của tôi</a>
+    <a href="A-Results.dc.html" style="height: 46px; border-radius: 14px; color: #1B2333; display: flex; align-items: center; padding: 0 16px; font-size: 15px; font-weight: 700; text-decoration: none">Kết quả</a>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 16px; background: #FFFFFF; box-shadow: 0 6px 20px rgba(80,55,10,0.08)">
+      <div style="width: 38px; height: 38px; border-radius: 50%; background: #FFF1D0; border: 2px solid #F6B93B; display: flex; align-items: center; justify-content: center; font-weight: 900">L</div>
+      <div><div style="font-size: 14px; font-weight: 800">Cô Lan</div><div style="font-size: 12px; font-weight: 600; color: #4A5568">Lớp Lá 2</div></div>
+    </div>
+  </aside>
+  <main style="flex: 1; padding: 28px 40px 28px 16px; display: flex; flex-direction: column; gap: 22px; min-width: 0">
+    <section style="position: relative; overflow: hidden; background: #0A6847; border-radius: 28px; padding: 30px 34px; color: #FFFFFF; box-shadow: 0 14px 30px rgba(10,104,71,0.25)">
+      <div style="position: absolute; right: 40px; top: 26px; display: flex; gap: 12px" aria-hidden="true">
+        <div style="width: 74px; height: 74px; border-radius: 18px; background: #E3ECFD; border: 3px solid #2F6FED; color: #1F4FC4; font-family: 'Baloo 2', sans-serif; font-size: 40px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg)">1</div>
+        <div style="width: 74px; height: 74px; border-radius: 18px; background: #FDEBD3; border: 3px solid #E07B12; color: #9A4A00; font-family: 'Baloo 2', sans-serif; font-size: 40px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(6deg) translateY(-10px)">A</div>
+        <div style="width: 74px; height: 74px; border-radius: 18px; background: #EEE6FC; border: 3px solid #7A4CD9; color: #5B2DB8; font-family: 'Baloo 2', sans-serif; font-size: 40px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-4deg) translateY(6px)">B</div>
+      </div>
+      <h1 style="margin: 0; font-size: 38px; font-weight: 800; line-height: 1.1">Chào cô Lan, hôm nay lớp mình học gì?</h1>
+      <p style="margin: 6px 0 18px; font-size: 16px; font-weight: 600; color: #CDEBDD">Mô tả bài học, AI soạn thành trò chơi trong chưa đầy một phút.</p>
+      <div style="display: flex; gap: 10px; max-width: 820px">
+        <label style="flex: 1; height: 58px; box-sizing: border-box; display: flex; align-items: center; background: #FFFFFF; border-radius: 16px; padding: 0 18px; font-size: 16px; font-weight: 600; color: #6B7280">Ví dụ: Bé đếm số con vật từ 1 đến 5<input aria-label="Mô tả bài học" style="width: 0; border: none; opacity: 0"></label>
+        <a href="A-Create-Progress.dc.html" style="height: 58px; padding: 0 26px; border-radius: 16px; background: #F6B93B; color: #3B2600; font-size: 17px; font-weight: 900; display: flex; align-items: center; text-decoration: none; box-shadow: 0 5px 0 #C98A12">Tạo trò chơi</a>
+      </div>
+      <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap">
+        <span style="background: rgba(255,255,255,0.14); border-radius: 20px; padding: 7px 14px; font-size: 13px; font-weight: 800">Toán · Lá · Đếm đến 5</span>
+        <span style="background: rgba(255,255,255,0.14); border-radius: 20px; padding: 7px 14px; font-size: 13px; font-weight: 800">Tiếng Việt · Lớp 1 · Âm a ă â</span>
+        <span style="background: rgba(255,255,255,0.14); border-radius: 20px; padding: 7px 14px; font-size: 13px; font-weight: 800">Tiếng Anh · Màu sắc</span>
+      </div>
+    </section>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+      <section style="background: #FFFFFF; border-radius: 22px; padding: 20px 22px; box-shadow: 0 8px 24px rgba(80,55,10,0.07); display: flex; flex-direction: column; gap: 12px">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 800">Đang diễn ra</h2>
+        <div style="display: flex; align-items: center; gap: 14px; background: #FFF6F2; border-radius: 16px; padding: 12px 14px">
+          <div style="width: 52px; height: 52px; border-radius: 14px; background: #E3ECFD; flex: none; display: flex; align-items: center; justify-content: center; font-family: 'Baloo 2', sans-serif; font-size: 26px; font-weight: 800; color: #1F4FC4">10</div>
+          <div style="flex: 1"><div style="font-size: 16px; font-weight: 900">Đếm số đến 10</div><div style="font-size: 13px; font-weight: 800; color: #B42318">Phòng đang chạy · 24 bạn · câu 3/10</div></div>
+          <button style="height: 42px; padding: 0 16px; border-radius: 12px; border: none; background: #0E7A57; color: #FFFFFF; font-size: 14px; font-weight: 900; cursor: pointer">Vào phòng</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; border-radius: 16px; padding: 12px 14px; border: 2px dashed #E7DCC5">
+          <div style="flex: 1; font-size: 14px; font-weight: 700; color: #4A5568">Chưa có buổi trình chiếu nào hôm nay</div>
+          <button style="height: 40px; padding: 0 14px; border-radius: 12px; border: 2px solid #0E7A57; background: #FFFFFF; color: #0A5A3C; font-size: 14px; font-weight: 800; cursor: pointer">Trình chiếu một game</button>
+        </div>
+      </section>
+      <section style="background: #FFFFFF; border-radius: 22px; padding: 20px 22px; box-shadow: 0 8px 24px rgba(80,55,10,0.07); display: flex; flex-direction: column; gap: 12px">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 800">Lớp mình cần ôn lại</h2>
+        <div style="display: flex; align-items: center; gap: 14px; background: #FFF4E5; border-radius: 16px; padding: 12px 14px">
+          <div style="flex: 1"><div style="font-size: 15px; font-weight: 900">"CHỊ" trong game Ghép chữ về gia đình</div><div style="font-size: 13px; font-weight: 700; color: #7A3E00">Chỉ 41% đúng · hay ghép nhầm thành "CHI"</div></div>
+          <button style="height: 42px; padding: 0 14px; border-radius: 12px; border: none; background: #F6B93B; color: #3B2600; font-size: 14px; font-weight: 900; cursor: pointer">Tạo game ôn tập</button>
+        </div>
+        <div style="font-size: 13px; font-weight: 700; color: #4A5568">AI dùng kết quả chơi để gợi ý nội dung ôn lại.</div>
+      </section>
+    </div>
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Soạn dở</h2><a href="A-Games.dc.html" style="font-size: 14px; font-weight: 800; color: #0A5A3C">Xem tất cả</a></div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+        <sc-for list="{{drafts}}" as="d" hint-placeholder-count="3">
+          <div style="background: #FFFFFF; border-radius: 20px; padding: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 24px rgba(80,55,10,0.07)">
+            <div style="{{d.cover}}"><span style="{{d.tile}}">{{d.glyph}}</span></div>
+            <div style="flex: 1; min-width: 0"><div style="font-size: 15px; font-weight: 900">{{d.title}}</div><div style="font-size: 13px; font-weight: 700; color: #4A5568">{{d.meta}}</div></div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const S = { toan: ['#E3ECFD','#2F6FED','#1F4FC4'], tv: ['#FDEBD3','#E07B12','#9A4A00'], ta: ['#EEE6FC','#7A4CD9','#5B2DB8'] };
+    const drafts = [
+      ['Nhận biết chữ cái A Ă Â','Tiếng Việt · Mầm non · Nối cặp','tv','Ă'],
+      ['Phân loại con vật','Tiếng Việt · Lớp 1 · Kéo thả','tv','B'],
+      ['Sắp xếp số bé đến lớn','Toán · Lớp 1 · Sắp xếp','toan','3']
+    ].map((d) => {
+      const c = S[d[2]];
+      return {
+        title: d[0], meta: d[1], glyph: d[3],
+        cover: 'width: 64px; height: 64px; flex: none; border-radius: 16px; background: ' + c[0] + '; display: flex; align-items: center; justify-content: center',
+        tile: 'width: 40px; height: 40px; border-radius: 11px; background: #FFFFFF; border: 3px solid ' + c[1] + '; color: ' + c[2] + '; font-family: Baloo 2, sans-serif; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-6deg)'
+      };
+    });
+    return { drafts };
+  }
+}
+</script>
+</body>
+</html>

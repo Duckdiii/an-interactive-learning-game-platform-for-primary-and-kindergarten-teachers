@@ -44,6 +44,7 @@ Hệ thống có 10 cơ chế chơi, còn giáo viên mô tả theo nhu cầu d�
 
 - Thêm luồng vào UC-02 trong SRS.
 - Xác định chỗ lưu "ghi nhận nhóm C, D": chưa có trong SRS.
+- Luồng 4c đề xuất 2–3 trong 10 loại, chưa nói khi không loại nào phù hợp. Đây là chỗ nên nối nhóm C, D vào.
 - Tài liệu định hướng còn ghi FLD-15 cần thống nhất, nhưng SRS đã có 10 loại, xem [[Điểm lệch và việc cần chốt]].
 
 Xem thêm: [[Trải nghiệm cho trẻ]], [[Kiến trúc và công nghệ]]

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Tivi lớp – Chờ bắt đầu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; box-sizing: border-box; background: #FFF4DC; position: relative; overflow: hidden">
+  <div style="position: absolute; top: 60px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 18px">
+    <div style="display: flex; gap: 10px">
+      <span style="background: #FFFFFF; border: 2px solid #E8C98A; border-radius: 20px; padding: 6px 16px; font-size: 18px; font-weight: 800; color: #5C3D00">Toán</span>
+      <span style="background: #FFFFFF; border: 2px solid #E8C98A; border-radius: 20px; padding: 6px 16px; font-size: 18px; font-weight: 800; color: #5C3D00">Mầm non</span>
+      <span style="background: #FFFFFF; border: 2px solid #E8C98A; border-radius: 20px; padding: 6px 16px; font-size: 18px; font-weight: 800; color: #5C3D00">5 câu</span>
+    </div>
+    <h1 style="margin: 0; font-size: 72px; font-weight: 900; color: #1B2333">Đếm con vật</h1>
+    <div style="width: 260px; height: 260px; box-sizing: border-box; border-radius: 50%; border: 4px dashed #6B7FA8; background: rgba(255,255,255,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; color: #3A4A6B">
+      <strong style="font-size: 20px">Nhân vật theo theme</strong>
+      <span style="font-size: 15px; font-weight: 700">trạng thái: chào</span>
+    </div>
+    <p style="margin: 0; font-size: 26px; font-weight: 800; color: #3A2A00">Cả lớp sẵn sàng chưa nào?</p>
+  </div>
+  <div style="position: absolute; left: 24px; right: 24px; bottom: 20px; height: 72px; box-sizing: border-box; border-radius: 20px; background: rgba(19,30,52,0.94); display: flex; align-items: center; gap: 10px; padding: 0 14px; color: #FFFFFF">
+    <span style="background: #34476B; border-radius: 10px; padding: 6px 10px; font-size: 13px; font-weight: 800">Giáo viên</span>
+    <button style="height: 48px; padding: 0 22px; border-radius: 12px; border: none; background: #FF9F1C; color: #3B2200; font-size: 18px; font-weight: 900; display: flex; align-items: center; gap: 8px; cursor: pointer">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l12-7z" fill="#3B2200"/></svg>Bắt đầu
+    </button>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Toàn màn hình</button>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Kiểm tra âm thanh</button>
+    <span style="margin-left: auto; font-size: 14px; font-weight: 700; color: #C9D3E6">Phím Space để bắt đầu · thanh tự ẩn sau 3 giây</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

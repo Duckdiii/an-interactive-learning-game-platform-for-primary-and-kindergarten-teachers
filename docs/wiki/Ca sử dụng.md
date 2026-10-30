@@ -8,7 +8,7 @@ Trang này tóm tắt điều cần nhớ của từng ca. Thông báo đúng t�
 | UC | Tác nhân | Luồng chính | Rẽ nhánh và ngoại lệ đáng nhớ |
 |---|---|---|---|
 | UC-01 Đăng ký | Giáo viên | Nhập họ tên, email, mật khẩu, trường (tùy chọn), đồng ý chính sách | Email trùng; thiếu thông tin; chưa đồng ý |
-| UC-02 Gửi mô tả | Giáo viên | Chọn khối, môn, mô tả → phân tích, đối chiếu → sinh, media → rà soát → lưu nháp → chơi thử | Chỉ giáo án; tạo ngẫu nhiên; sai định dạng; quá 10MB; không hợp tuổi; không an toàn; AI lỗi |
+| UC-02 Gửi mô tả | Giáo viên | Chọn khối, môn, mô tả → phân tích, đối chiếu → sinh, media → rà soát → lưu nháp → chơi thử | Chỉ giáo án; tạo ngẫu nhiên; đề xuất 2–3 thể loại (4c); sai định dạng; quá 10MB; không hợp tuổi; không an toàn; AI lỗi |
 | UC-03 Chơi thử | Giáo viên | Mở môi trường thử, chơi hết, xem tổng kết mô phỏng | Thoát giữa chừng không lưu; thiếu tài nguyên bắt buộc thì đóng phiên |
 | UC-04 Chỉnh sửa | Giáo viên | Danh sách câu bên trái, chơi thử bên phải, lưu nháp | Sửa tay; AI làm lại một thẻ; xuất bản ngay; câu không có đáp án đúng thì không lưu |
 | UC-05 Sửa thủ công | Giáo viên | Sửa chữ, đáp án đúng; xem lại ngay | Tải ảnh hoặc MP3; nội dung không an toàn thì giữ bản cũ; tệp sai hoặc quá cỡ bị từ chối |

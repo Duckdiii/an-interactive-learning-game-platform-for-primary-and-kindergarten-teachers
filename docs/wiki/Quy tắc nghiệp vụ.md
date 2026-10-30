@@ -20,10 +20,10 @@ Tra nhanh các con số. Khi viết code hay test, đối chiếu lại nguồn 
 | Khối lớp | Mầm non (3–5 tuổi), Lớp 1 đến Lớp 5 |
 | Mô tả | 10–2.000 ký tự |
 | Giáo án | `.pdf`, `.docx`, tối đa 10MB |
-| Thể loại | 10 loại; không chọn thì hệ thống tự xác định |
-| Nội dung câu | Tối đa 500 ký tự |
+| Thể loại | Tùy chọn, 10 loại; không chọn thì hệ thống đề xuất 2–3 loại kèm lý do |
+| Nội dung câu | SRS 500 ký tự, DSL 200; giao diện dùng 200 |
 | Đáp án | 2–4 đáp án, đúng 1 đáp án đúng |
-| Thời gian câu | 10–120 giây, mặc định 30 |
+| Thời gian câu | SRS 10–120 giây, mặc định 30; DSL 5–600 giây |
 | Ảnh | JPG, PNG, WebP, tối đa 5MB |
 | Âm thanh tải lên | MP3, dưới 10MB |
 | Giọng đọc | Nam hoặc Nữ, lưu cùng game |
@@ -63,7 +63,7 @@ Trạng thái `WAITING`, `ACTIVE`, `PAUSED`, `CLOSED`. Các loại phiên: SELF 
 |---|---|
 | Mất mạng | Lưu nháp vào LocalStorage, báo, tự đồng bộ lại |
 | LLM quá 5 giây | Thanh chờ, chuyển nhà cung cấp dự phòng, quá hạn thì trả bộ khung mẫu |
-| JSON sai cấu trúc | Phát hiện dưới 100 ms, gọi lại kèm thông báo lỗi, tối đa 3 lần tính cả lần đầu |
+| JSON sai | Validator theo quy tắc phát hiện dưới 100 ms và quyết định đúng sai; LLM sinh lại phần lỗi, tối đa 3 lần tính cả lần đầu |
 | Quá hạn mức 429 | Xếp hàng, đếm ngược rõ ràng |
 | Lỗi máy chủ | Thông báo thân thiện, nút Thử lại, giữ dữ liệu đã nhập, ghi log |
 

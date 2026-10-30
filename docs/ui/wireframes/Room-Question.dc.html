@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Phòng thi đấu – Đang trả lời</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#FFFFFF}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; box-sizing: border-box; background: #13306B; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 48px; gap: 26px">
+  <div style="display: flex; align-items: center; gap: 16px">
+    <span style="background: #1F3F84; border-radius: 20px; padding: 8px 20px; font-size: 26px; font-weight: 900">Câu 3/10</span>
+    <span style="font-size: 22px; font-weight: 800; color: #C9D8F5">Đếm con vật</span>
+  </div>
+  <p style="margin: 0; font-size: 34px; font-weight: 900">Câu hỏi đang hiện trên máy của từng bạn</p>
+  <div style="width: 260px; height: 260px; border-radius: 50%; background: conic-gradient(#FF9F1C 0 60%, #2A4C93 60% 100%); display: flex; align-items: center; justify-content: center" aria-label="Còn 18 giây">
+    <div style="width: 210px; height: 210px; border-radius: 50%; background: #13306B; display: flex; flex-direction: column; align-items: center; justify-content: center">
+      <span style="font-size: 96px; font-weight: 900; line-height: 1">18</span>
+      <span style="font-size: 20px; font-weight: 800; color: #C9D8F5">giây</span>
+    </div>
+  </div>
+  <div style="width: 640px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; justify-content: space-between; font-size: 24px; font-weight: 900"><span>Đã trả lời</span><span>21/32</span></div>
+    <div style="height: 22px; border-radius: 11px; background: #2A4C93; overflow: hidden"><div style="width: 66%; height: 100%; background: #5EEAD4"></div></div>
+  </div>
+  <div style="position: absolute; left: 24px; right: 24px; bottom: 20px; height: 72px; box-sizing: border-box; border-radius: 20px; background: rgba(8,18,40,0.9); display: flex; align-items: center; gap: 10px; padding: 0 14px">
+    <span style="background: #34476B; border-radius: 10px; padding: 6px 10px; font-size: 13px; font-weight: 800">Giáo viên</span>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Kết thúc câu sớm</button>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Tạm dừng</button>
+    <span style="margin-left: auto; font-size: 14px; font-weight: 700; color: #C9D3E6">Hết giờ hoặc đủ người trả lời thì tự chuyển sang bảng xếp hạng</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

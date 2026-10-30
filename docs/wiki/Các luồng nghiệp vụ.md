@@ -5,8 +5,8 @@ Cập nhật: 2026-10-31
 
 ## Luồng 5 bước
 
-1. **Tiếp nhận:** chọn khối lớp, môn, thể loại (nếu muốn); nhập mô tả hoặc tải giáo án; trích văn bản.
-2. **Phân tích ý định và tra chuẩn:** bóc chủ đề, mục tiêu, số câu, độ khó; tra Yêu cầu cần đạt.
+1. **Tiếp nhận:** chọn khối lớp, môn; thể loại là tùy chọn; nhập mô tả hoặc tải giáo án; trích văn bản.
+2. **Phân tích ý định và tra chuẩn:** bóc chủ đề, mục tiêu, số câu, độ khó; tra Yêu cầu cần đạt. Chưa chọn thể loại thì đề xuất 2–3 loại kèm lý do để giáo viên xác nhận.
 3. **Sinh cấu trúc và kiểm duyệt:** LLM trả JSON theo schema, kiểm tra và kiểm duyệt.
 4. **Bổ sung media:** hình ảnh an toàn, giọng đọc.
 5. **Soạn thảo, xuất bản, chơi:** chơi thử, chỉnh sửa, xuất bản, học sinh vào chơi.

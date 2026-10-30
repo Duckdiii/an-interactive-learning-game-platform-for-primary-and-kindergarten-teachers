@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bé điện thoại – Chơi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 844px; height: 390px; box-sizing: border-box; background: #FFF4DC; padding: 12px 48px 12px 48px; display: flex; gap: 12px; position: relative">
+  <div style="width: 72px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: space-between">
+    <button aria-label="Cài đặt cho người lớn: nhấn giữ 3 giây" style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid #B89A5C; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B5A30" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+    </button>
+    <div style="display: flex; flex-direction: column; gap: 4px" aria-label="Đã xong 2 trên 5 câu">
+      <sc-for list="{{stars}}" as="s" hint-placeholder-count="5">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="{{s.fill}}" stroke="{{s.stroke}}" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </sc-for>
+    </div>
+    <div style="width: 68px; height: 68px; box-sizing: border-box; border-radius: 50%; border: 3px dashed #6B7FA8; background: rgba(255,255,255,0.75); display: flex; align-items: center; justify-content: center; text-align: center; font-size: 10px; font-weight: 800; color: #3A4A6B">Nhân vật</div>
+  </div>
+  <div style="flex: 1; box-sizing: border-box; border: 3px dashed #6B7FA8; border-radius: 20px; background: repeating-linear-gradient(45deg, #FFFBF1 0 14px, #FBF0D9 14px 28px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; color: #3A4A6B; padding: 12px">
+    <strong style="font-size: 22px">Khu vực trò chơi</strong>
+    <span style="font-size: 14px; font-weight: 700">Màn nhỏ: renderer giảm số phần tử mỗi hàng, giữ vùng chạm lớn</span>
+  </div>
+  <div style="width: 72px; flex: none; display: flex; flex-direction: column; align-items: center">
+    <button aria-label="Nghe lại đề bài" style="width: 64px; height: 64px; border-radius: 20px; border: 3px solid #1F5BD8; background: #FFFFFF; box-shadow: 0 4px 0 #1F5BD8; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1F5BD8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    </button>
+  </div>
+  <span style="position: absolute; left: 8px; top: 160px; width: 34px; font-size: 10px; font-weight: 800; color: #6B5A30; text-align: center">vùng an toàn tai thỏ</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":844,"height":390}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const stars = [0,1,2,3,4].map((i) => i < 2 ? { fill: '#FFC93C', stroke: '#B07800' } : { fill: '#FFFFFF', stroke: '#C9B48A' });
+    return { stars };
+  }
+}
+</script>
+</body>
+</html>

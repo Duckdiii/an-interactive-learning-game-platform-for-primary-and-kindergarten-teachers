@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bé ở nhà – Lỗi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1024px; height: 640px; box-sizing: border-box; background: #F4F7FB; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px">
+  <div style="width: 150px; height: 150px; border-radius: 40px; background: #FFFFFF; border: 4px solid #1B2333; display: flex; align-items: center; justify-content: center">
+    <svg width="86" height="86" viewBox="0 0 24 24" fill="none" stroke="#1B2333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 9-3.4"/><path d="M5 12a10 10 0 0 1 5-2.6"/><path d="M8.5 15.5a5 5 0 0 1 3.5-1.4"/><circle cx="12" cy="19" r="1" fill="#1B2333"/><path d="M15 6l6 6M21 6l-6 6"/></svg>
+  </div>
+  <h1 style="margin: 0; font-size: 40px; font-weight: 900">Ôi, chưa mở được trò chơi</h1>
+  <p style="margin: 0; font-size: 22px; font-weight: 700; color: #2D3748">Nhờ bố mẹ kiểm tra mạng và đường dẫn nhé.</p>
+  <button style="height: 88px; padding: 0 44px; border-radius: 44px; border: 5px solid #8A4B00; background: #FF9F1C; box-shadow: 0 7px 0 #8A4B00; display: flex; align-items: center; gap: 14px; font-size: 30px; font-weight: 900; color: #3B2200; cursor: pointer">
+    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#3B2200" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    Thử lại
+  </button>
+  <p style="margin: 0; font-size: 14px; font-weight: 700; color: #4A5568">Dành cho người lớn: mã lỗi NET-01 · không dùng nhân vật vì theme chưa tải được</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1024,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

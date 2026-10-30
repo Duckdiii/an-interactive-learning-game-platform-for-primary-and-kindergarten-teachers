@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh – Lỗi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button,a{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F7FB; padding: 56px 24px 28px; display: flex; flex-direction: column; gap: 20px">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center">
+    <div style="width: 96px; height: 96px; border-radius: 28px; background: #FFF4E5; border: 3px solid #F59E0B; display: flex; align-items: center; justify-content: center">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/><path d="M9 9l4 4M13 9l-4 4"/></svg>
+    </div>
+    <h1 style="margin: 0; font-size: 26px; font-weight: 900">Không tìm thấy trò chơi</h1>
+    <p style="margin: 0; font-size: 16px; font-weight: 600; line-height: 1.45; color: #2D3748">Mã <strong style="font-weight: 900; letter-spacing: 2px">482 931</strong> không đúng hoặc trò chơi đã đóng.</p>
+  </div>
+  <div style="background: #FFFFFF; border: 2px solid #D5DEEA; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+    <span style="font-size: 15px; font-weight: 900">Bạn thử kiểm tra:</span>
+    <div style="display: flex; gap: 10px; font-size: 15px; font-weight: 600; line-height: 1.4"><span style="flex: none; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: #1F5BD8"></span>Gõ lại mã, kiểm tra từng chữ số.</div>
+    <div style="display: flex; gap: 10px; font-size: 15px; font-weight: 600; line-height: 1.4"><span style="flex: none; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: #1F5BD8"></span>Hỏi thầy cô xem trò chơi đã mở chưa.</div>
+    <div style="display: flex; gap: 10px; font-size: 15px; font-weight: 600; line-height: 1.4"><span style="flex: none; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: #1F5BD8"></span>Kiểm tra kết nối mạng.</div>
+  </div>
+  <div style="background: #E7EEF8; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F3F7A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5 12a10 10 0 0 1 14 0"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="#1F3F7A"/></svg>
+    <p style="margin: 0; font-size: 14px; font-weight: 700; color: #1F3F7A">Nếu mất mạng giữa lúc chơi, tiến độ được giữ lại và tự nối lại khi có mạng.</p>
+  </div>
+  <div style="margin-top: auto; display: flex; flex-direction: column; gap: 12px">
+    <a href="Hs-Join.dc.html" style="height: 60px; border-radius: 16px; background: #1F5BD8; color: #FFFFFF; font-size: 20px; font-weight: 900; box-shadow: 0 5px 0 #133C94; display: flex; align-items: center; justify-content: center; text-decoration: none">Nhập lại mã</a>
+    <button style="height: 56px; border-radius: 16px; border: 2px solid #1F5BD8; background: #FFFFFF; color: #1F5BD8; font-size: 18px; font-weight: 900; cursor: pointer">Quét mã QR</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

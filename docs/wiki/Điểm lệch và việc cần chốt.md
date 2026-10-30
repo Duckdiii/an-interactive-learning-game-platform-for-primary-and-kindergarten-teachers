@@ -1,26 +1,38 @@
 # Điểm lệch và việc cần chốt
 
-Nguồn: đối chiếu `docs/SRS.docx` (cả 5 sơ đồ đã xem), `docs/Dinh_huong_de_tai.docx`, `CLAUDE.md`.
+Nguồn: đối chiếu `docs/SRS.docx` bản từ `everyone/UI` (commit `5d39f54`, 5 sơ đồ đã xem), `docs/Dinh_huong_de_tai.docx`, `docs/decisions.md`, `docs/ui/PLAN.md`, `docs/game-json-dsl-v1.0.0.md`, `CLAUDE.md`.
 Cập nhật: 2026-10-31
 
 Đây là nhận định của người viết sau khi đối chiếu, không phải nội dung của tài liệu nguồn. Mỗi mục cần nhóm quyết định. Wiki chỉ ghi lại, không tự chọn.
+
+## Quan trọng nhất
+
+| # | Vấn đề | Vì sao quan trọng |
+|---|---|---|
+| 30 | NFR-01 đòi LLM p95 dưới 3 giây, timeout 5 giây; đo thật 5–12 giây cho một lần gọi 4 câu ([[Kết quả đo sinh game]]) | Với timeout 5 giây, phần lớn lần gọi sẽ bị coi là quá hạn. Cần đổi mục tiêu hoặc nói rõ đo đoạn nào |
+| 31 | Câu hỏi: SRS 500 ký tự, DSL 200; thời gian: SRS 10–120 giây, DSL 5–600 giây | Nên sửa SRS theo DSL đã đóng băng |
+| 32 | Đề xuất loại game: SRS 2–3 loại, chọn một; `decisions.md` 3–5 loại, chọn nhiều, tối đa 3 | Giao diện và SRS đang khác nhau |
+| 33 | Khối lớp, môn: SRS và `openapi.yaml` bắt buộc; `decisions.md` tùy chọn | Được ghi là chặn khi nối backend thật |
+| 34 | LLM lỗi hết lượt: SRS trả bộ khung mẫu; DSL trả 504, không nạp game mẫu | Hai cách xử lý đối nghịch |
+| 35 | Bé không đếm giờ (SPEC); FLD-07, backend có TIMEOUT, thời gian bắt buộc | Mâu thuẫn M2 trong `docs/ui/PLAN.md` |
+| 36 | Nhập mã: ShareCode 6 ký tự và PIN 6 số dùng chung một ô | Mâu thuẫn M4 trong `docs/ui/PLAN.md` |
 
 ## Giữa tài liệu định hướng và SRS
 
 | # | Định hướng | SRS | Cần chốt |
 |---|---|---|---|
 | 1 | FLD-15 chỉ có 4 loại, cần thống nhất | FLD-15 đã có đủ 10 loại | Định hướng đã cũ ở điểm này |
-| 2 | Validation bằng luật "thay cho vòng LLM tự sửa" | Mục 3.1.1 và TS-02: gọi lại LLM kèm lỗi, tối đa 3 lần | Có giữ vòng tự sửa không |
+| 2 | Validation bằng luật "thay cho vòng LLM tự sửa" | Bản mới: validator quyết định đúng sai, LLM chỉ sinh lại phần lỗi | **Đã khớp** với SRS mới |
 | 3 | Curriculum-RAG bằng embedding và pgvector | Tra theo khối và môn; pgvector là hướng phát triển | Mức nào là cam kết |
 | 4 | Có phụ huynh | Không có tác nhân phụ huynh | Có đưa vào đặc tả không |
 | 5 | Lưu media trên S3 | Bảng công nghệ không có S3 (sơ đồ kiến trúc thì có) | Bổ sung SRS |
-| 6 | Hướng thiết kế là đề xuất vài loại game kèm lý do | Giáo viên chọn, không chọn thì tự xác định | Bổ sung bước đề xuất |
+| 6 | Hướng thiết kế là đề xuất vài loại game kèm lý do | Bản mới có luồng 4c đề xuất 2–3 loại | **Đã khớp**; còn lệch với `decisions.md`, xem mục 32 |
 
 ## Trong nội bộ SRS
 
 | # | Điểm lệch | Cần chốt |
 |---|---|---|
-| 7 | LLM pipeline p95 dưới 3 giây, trong khi KPI-01 cho 60 giây và luồng còn tìm ảnh, sinh giọng | 3 giây đo đoạn nào |
+| 7 | LLM pipeline p95 dưới 3 giây, trong khi KPI-01 cho 60 giây và luồng còn tìm ảnh, sinh giọng (xem mục 30) | 3 giây đo đoạn nào |
 | 8 | Refresh Token 24 giờ, UC-15 ghi nhớ 30 ngày | Ghi rõ hai chế độ |
 | 9 | Dịch vụ ngoài giả định uptime 99,0%, hệ thống cam kết 99,5%, chạy gói miễn phí | Mục tiêu có thực tế không |
 | 10 | Gói miễn phí nhưng cần 500 học sinh mỗi lớp, RTO 15 phút, WAL | Chọn con số đo được |
@@ -56,8 +68,10 @@ Cập nhật: 2026-10-31
 
 ## Khoảng trống trong đặc tả
 
-- **Trình chiếu và mở phòng không có UC cho giáo viên:** phạm vi có nêu, FR-09 và UC-09 lại đặt tác nhân là học sinh. Luồng giáo viên tạo phòng, điều khiển, chia đội, xem tiến trình chưa được đặc tả. Màn trình chiếu tivi P4 cũng chưa có FR hay UC tương ứng.
-- **Báo cáo kết quả cho giáo viên:** sơ đồ luồng có bước này, nhưng không có FR hay UC.
+- **Trình chiếu và mở phòng không có UC cho giáo viên:** phạm vi có nêu, FR-09 và UC-09 lại đặt tác nhân là học sinh. Luồng giáo viên tạo phòng, điều khiển, chia đội, xem tiến trình chưa có trong SRS. Thiết kế có ở `docs/ui/SPEC.md`, nhưng SRS chưa có FR hay UC tương ứng.
+- **Báo cáo kết quả cho giáo viên:** sơ đồ luồng có bước này, giao diện F8 cũng có, nhưng SRS không có FR hay UC.
+- **Giọng đọc chưa có chỗ lưu:** FLD-12 nói lưu cùng game, DSL 1.0.0 không có trường này.
+- **Bước "Đối chiếu chương trình" trên giao diện chưa có chức năng thật:** mâu thuẫn M12 trong `docs/ui/PLAN.md`.
 - **Kho học liệu:** xem, tìm, xóa game chưa có UC.
 - **Quản lý từ cấm:** có FLD-25 và mục 3.5.2, chưa có luồng trong UC-12 đến UC-14.
 - **Quản lý kho Yêu cầu cần đạt:** ai nhập và cập nhật chưa được nêu.
@@ -67,7 +81,8 @@ Cập nhật: 2026-10-31
 
 ## Giới hạn của trang này
 
-- Đã xem 5 trong 18 sơ đồ; 13 sơ đồ tuần tự còn lại chưa đối chiếu.
-- Chưa đối chiếu với code. Sơ đồ có thể đã cũ hơn chữ.
+- Đã xem 5 sơ đồ; các sơ đồ tuần tự còn lại chưa đối chiếu.
+- Chỉ đối chiếu code ở mức tiến độ, xem [[Trạng thái thực tế]]. Sơ đồ có thể đã cũ hơn chữ.
+- `docs/ui/PLAN.md` còn 19 mâu thuẫn và 18 câu hỏi, mới ghi lại vài mục ở đây.
 
 Xem thêm: [[Tổng quan đề tài]], [[Kiến trúc và công nghệ]]

@@ -37,10 +37,10 @@ Năm KPI chi tiết ở [[Yêu cầu phi chức năng]]. Ngoài ra có yêu cầ
 
 | Rủi ro | Cách giảm |
 |---|---|
-| Chưa đủ trình chơi cho 10 loại game | Ưu tiên nhóm P0, nói rõ phần còn lại là mở rộng |
+| Mới 2/10 loại có trình chơi | Ưu tiên nhóm P0, nói rõ phần còn lại là mở rộng |
 | Chất lượng nội dung AI | Validation nhiều lớp, tính lại đáp án Toán bằng code, bộ mô tả mẫu kiểm hồi quy |
 | Mô tả ngoài danh mục | Phân loại A–D, phản hồi rõ |
 | Chi phí mô hình, người dùng đồng thời | Dự toán chi phí, nêu con số mục tiêu rồi kiểm tra tải |
 | Mở rộng quá phạm vi | Chốt mức cam kết, có điểm dừng an toàn |
 
-Xem thêm: [[Các luồng nghiệp vụ]], [[Điểm lệch và việc cần chốt]]
+Xem thêm: [[Trạng thái thực tế]], [[Các luồng nghiệp vụ]], [[Điểm lệch và việc cần chốt]]

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng A – Tạo game: AI đang soạn</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+h1,h2,h3{font-family:'Baloo 2','Nunito',sans-serif}
+button,a{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #FBF6EC; display: flex; align-items: center; justify-content: center; gap: 70px">
+  <div style="position: relative; width: 360px; height: 360px" aria-hidden="true">
+    <div style="position: absolute; left: 20px; top: 40px; width: 140px; height: 140px; border-radius: 34px; background: #E3ECFD; border: 5px solid #2F6FED; color: #1F4FC4; font-family: 'Baloo 2', sans-serif; font-size: 80px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-12deg)">1</div>
+    <div style="position: absolute; left: 190px; top: 10px; width: 140px; height: 140px; border-radius: 34px; background: #FDEBD3; border: 5px solid #E07B12; color: #9A4A00; font-family: 'Baloo 2', sans-serif; font-size: 80px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(10deg)">A</div>
+    <div style="position: absolute; left: 110px; top: 190px; width: 140px; height: 140px; border-radius: 34px; background: #EEE6FC; border: 5px solid #7A4CD9; color: #5B2DB8; font-family: 'Baloo 2', sans-serif; font-size: 80px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-4deg)">B</div>
+    <span style="position: absolute; left: 0; bottom: -10px; font-size: 13px; font-weight: 700; color: #6B5A30">Các khối nảy lần lượt theo bước đang chạy</span>
+  </div>
+  <section style="width: 560px; background: #FFFFFF; border-radius: 28px; padding: 32px 34px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 14px 34px rgba(80,55,10,0.1)">
+    <h1 style="margin: 0; font-size: 34px; font-weight: 800; line-height: 1.1">AI đang soạn trò chơi cho lớp Lá</h1>
+    <p style="margin: 0; font-size: 15px; font-weight: 700; color: #4A5568">"Đếm số con vật trong tranh từ 1 đến 5…"</p>
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px">
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="5">
+        <div style="{{s.row}}">
+          <span style="{{s.dot}}">{{s.mark}}</span>
+          <span style="flex: 1"><span style="display: block; font-size: 16px; font-weight: 900">{{s.t}}</span><span style="display: block; font-size: 13px; font-weight: 700; color: #4A5568">{{s.d}}</span></span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="height: 12px; border-radius: 6px; background: #F1E8D6; overflow: hidden"><div style="width: 58%; height: 100%; background: #0E7A57"></div></div>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 13px; font-weight: 700; color: #4A5568">Thường mất vài giây</span>
+      <button style="height: 40px; padding: 0 14px; border-radius: 12px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Hủy</button>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const data = [
+      ['Đọc mô tả của cô', 'Chủ đề: đếm 1–5 · Đối tượng: Mầm non', 'done'],
+      ['Đối chiếu chương trình', 'Tìm thấy yêu cầu cần đạt phù hợp', 'done'],
+      ['Soạn câu hỏi', 'Đang soạn câu 3/5', 'doing'],
+      ['Kiểm tra an toàn và độ đúng', 'Kiểm tra đáp án, từ ngữ hợp lứa tuổi', 'todo'],
+      ['Gắn hình và giọng đọc', 'Hình con vật, giọng đọc tiếng Việt', 'todo']
+    ];
+    const steps = data.map((d) => {
+      const done = d[2] === 'done', doing = d[2] === 'doing';
+      return {
+        t: d[0], d: d[1], mark: done ? '✓' : (doing ? '…' : ''),
+        row: 'display: flex; align-items: center; gap: 14px; border-radius: 16px; padding: 10px 12px; ' + (doing ? 'background: #FFF4D6;' : ''),
+        dot: 'flex: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; ' + (done ? 'background: #0E7A57; color: #FFFFFF' : doing ? 'background: #F6B93B; color: #3B2600' : 'background: #F1E8D6; color: #6B5A30')
+      };
+    });
+    return { steps };
+  }
+}
+</script>
+</body>
+</html>

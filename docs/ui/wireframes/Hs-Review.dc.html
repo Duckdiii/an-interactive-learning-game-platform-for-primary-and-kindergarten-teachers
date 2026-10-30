@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh – Xem lại đáp án</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button,a{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F7FB; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 10px">
+    <a href="Hs-Result.dc.html" aria-label="Quay lại kết quả" style="width: 44px; height: 44px; box-sizing: border-box; border-radius: 12px; border: 2px solid #D5DEEA; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1B2333" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <h1 style="margin: 0; font-size: 22px; font-weight: 900">Xem lại đáp án</h1>
+  </div>
+  <div style="display: flex; gap: 8px">
+    <button style="height: 40px; padding: 0 16px; border-radius: 20px; border: none; background: #1F5BD8; color: #FFFFFF; font-size: 14px; font-weight: 900; cursor: pointer">Tất cả (10)</button>
+    <button style="height: 40px; padding: 0 16px; border-radius: 20px; border: 2px solid #D5DEEA; background: #FFFFFF; color: #1B2333; font-size: 14px; font-weight: 800; cursor: pointer">Câu sai (2)</button>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 10px">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+      <div style="{{r.card}}">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <div style="{{r.badge}}">
+            <sc-if value="{{r.ok}}" hint-placeholder-val="{{ true }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+            </sc-if>
+            <sc-if value="{{r.bad}}" hint-placeholder-val="{{ false }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
+            </sc-if>
+          </div>
+          <span style="font-size: 13px; font-weight: 800; color: #4A5568">Câu {{r.no}} · {{r.status}}</span>
+        </div>
+        <p style="margin: 8px 0 0; font-size: 17px; font-weight: 900">{{r.q}}</p>
+        <p style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #2D3748">{{r.ans}}</p>
+      </div>
+    </sc-for>
+  </div>
+  <p style="margin: 0; font-size: 12px; font-weight: 700; color: #4A5568">Chỉ hiện đáp án đúng. DSL v1.0.0 chưa có trường giải thích.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const data = [
+      { no: 1, ok: true, q: 'Có mấy con mèo?', ans: 'Bạn chọn: 3' },
+      { no: 2, ok: false, q: 'Con nào khác loại?', ans: 'Bạn chọn: thỏ · Đáp án đúng: xe hơi' },
+      { no: 3, ok: true, q: 'Nối từ với nghĩa', ans: 'Nối đúng cả 3 cặp' },
+      { no: 4, ok: false, q: 'Con ___ kêu meo meo.', ans: 'Bạn chọn: chó · Đáp án đúng: mèo' }
+    ];
+    const rows = data.map((d) => ({
+      ...d,
+      bad: !d.ok,
+      status: d.ok ? 'Đúng' : 'Sai',
+      card: 'background: #FFFFFF; border-radius: 16px; padding: 14px; border: 2px solid ' + (d.ok ? '#D5DEEA' : '#F59E0B'),
+      badge: 'width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: ' + (d.ok ? '#15803D' : '#C2410C')
+    }));
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>

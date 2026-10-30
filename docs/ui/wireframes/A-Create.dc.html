@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng A – Tạo game: mô tả</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+h1,h2,h3{font-family:'Baloo 2','Nunito',sans-serif}
+button,a,textarea{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #FBF6EC; padding: 28px 40px; display: flex; flex-direction: column; gap: 22px">
+  <div style="display: flex; align-items: center; gap: 14px">
+    <a href="A-Home.dc.html" aria-label="Quay lại trang chủ" style="width: 44px; height: 44px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #1B2333; text-decoration: none; font-weight: 900; box-shadow: 0 4px 14px rgba(80,55,10,0.08)">‹</a>
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 800">
+      <span style="width: 30px; height: 30px; border-radius: 50%; background: #0E7A57; color: #FFFFFF; display: flex; align-items: center; justify-content: center">1</span>Mô tả bài học
+      <span style="width: 40px; height: 3px; background: #E7DCC5; border-radius: 2px"></span>
+      <span style="width: 30px; height: 30px; border-radius: 50%; background: #E7DCC5; color: #6B5A30; display: flex; align-items: center; justify-content: center">2</span><span style="color: #6B5A30">AI soạn</span>
+      <span style="width: 40px; height: 3px; background: #E7DCC5; border-radius: 2px"></span>
+      <span style="width: 30px; height: 30px; border-radius: 50%; background: #E7DCC5; color: #6B5A30; display: flex; align-items: center; justify-content: center">3</span><span style="color: #6B5A30">Chọn kiểu chơi</span>
+    </div>
+  </div>
+  <div style="display: flex; gap: 24px; flex: 1; min-height: 0">
+    <section style="flex: 1; background: #FFFFFF; border-radius: 28px; padding: 30px 32px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 12px 30px rgba(80,55,10,0.08)">
+      <h1 style="margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1">Hôm nay cô muốn dạy gì?</h1>
+      <div style="display: flex; gap: 10px">
+        <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #2F6FED; background: #E3ECFD; color: #1F4FC4; font-size: 14px; font-weight: 900; cursor: pointer">Toán</button>
+        <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Tiếng Việt</button>
+        <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Tiếng Anh</button>
+        <span style="width: 2px; background: #EFE6D3; margin: 0 6px"></span>
+        <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #0E7A57; background: #E3F3EC; color: #0A5A3C; font-size: 14px; font-weight: 900; cursor: pointer">Mầm non</button>
+        <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Lớp 1</button>
+        <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Lớp 2–5</button>
+      </div>
+      <label for="idea" style="font-size: 15px; font-weight: 900">Mô tả bài học</label>
+      <textarea id="idea" style="height: 150px; box-sizing: border-box; border-radius: 18px; border: 3px solid #0E7A57; padding: 16px 18px; font-size: 18px; font-weight: 700; line-height: 1.5; color: #1B2333; resize: none">Cho các bé lớp Lá đếm số con vật trong tranh từ 1 đến 5, có hình con vật quen thuộc như gà, vịt, mèo.</textarea>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <button style="height: 46px; padding: 0 16px; border-radius: 14px; border: 2px dashed #C9B48A; background: #FFFBF2; color: #5C3D00; font-size: 14px; font-weight: 800; cursor: pointer">Đính kèm giáo án (.docx, .pdf)</button>
+        <span style="font-size: 13px; font-weight: 700; color: #4A5568">Tùy chọn · tối đa 10 MB</span>
+        <a href="A-Create-Progress.dc.html" style="margin-left: auto; height: 58px; padding: 0 30px; border-radius: 18px; background: #F6B93B; color: #3B2600; font-size: 18px; font-weight: 900; display: flex; align-items: center; text-decoration: none; box-shadow: 0 6px 0 #C98A12">Để AI soạn giúp</a>
+      </div>
+    </section>
+    <section style="width: 420px; flex: none; display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 22px; font-weight: 800">Gợi ý cho Toán · Mầm non</h2>
+      <sc-for list="{{ideas}}" as="i" hint-placeholder-count="4">
+        <button style="text-align: left; background: #FFFFFF; border: none; border-radius: 18px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; box-shadow: 0 6px 18px rgba(80,55,10,0.07); cursor: pointer">
+          <span style="flex: none; width: 44px; height: 44px; border-radius: 12px; background: #E3ECFD; border: 3px solid #2F6FED; color: #1F4FC4; font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-6deg)">{{i.g}}</span>
+          <span><span style="display: block; font-size: 15px; font-weight: 900">{{i.t}}</span><span style="display: block; font-size: 13px; font-weight: 700; color: #4A5568">{{i.d}}</span></span>
+        </button>
+      </sc-for>
+      <div style="background: #FFF4D6; border-radius: 18px; padding: 14px 16px; font-size: 14px; font-weight: 700; line-height: 1.5; color: #5C3D00">Mẹo: nêu <strong>đối tượng</strong>, <strong>nội dung</strong> và <strong>hình ảnh bé quen</strong>. AI sẽ tự chọn kiểu chơi phù hợp.</div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ideas = [
+      { g: '5', t: 'Đếm đồ vật từ 1 đến 5', d: 'Nhận biết số lượng qua tranh' },
+      { g: '+', t: 'Nhiều hơn, ít hơn', d: 'So sánh hai nhóm đồ vật' },
+      { g: '○', t: 'Nhận biết hình tròn, vuông, tam giác', d: 'Tìm hình trong đồ vật quen thuộc' },
+      { g: '3', t: 'Xếp theo thứ tự 1, 2, 3', d: 'Sắp xếp số từ bé đến lớn' }
+    ];
+    return { ideas };
+  }
+}
+</script>
+</body>
+</html>

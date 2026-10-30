@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng A – Tạo game: chọn kiểu chơi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+h1,h2,h3{font-family:'Baloo 2','Nunito',sans-serif}
+button,a{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #FBF6EC; padding: 32px 40px; display: flex; flex-direction: column; gap: 22px">
+  <div>
+    <h1 style="margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1">AI đề xuất 3 kiểu chơi cho bài này</h1>
+    <p style="margin: 6px 0 0; font-size: 16px; font-weight: 700; color: #4A5568">Toán · Mầm non · Đếm số con vật từ 1 đến 5 · nội dung 5 câu đã soạn sẵn cho từng kiểu</p>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; flex: 1; min-height: 0">
+    <sc-for list="{{cards}}" as="c" hint-placeholder-count="3">
+      <div style="{{c.card}}">
+        <div style="{{c.preview}}">
+          <span style="{{c.badge}}">{{c.badgeText}}</span>
+          <div style="display: flex; gap: 10px">
+            <sc-for list="{{c.tiles}}" as="t" hint-placeholder-count="3">
+              <span style="{{t.s}}">{{t.g}}</span>
+            </sc-for>
+          </div>
+          <span style="position: absolute; bottom: 10px; right: 14px; font-size: 12px; font-weight: 800; color: #3A4A6B">Ảnh động xem trước</span>
+        </div>
+        <div style="padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1">
+          <h2 style="margin: 0; font-size: 24px; font-weight: 800">{{c.name}}</h2>
+          <p style="margin: 0; font-size: 15px; font-weight: 700; line-height: 1.5; color: #2D3748">{{c.why}}</p>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap">
+            <sc-for list="{{c.chips}}" as="h" hint-placeholder-count="2">
+              <span style="background: #F6F0E2; border-radius: 10px; padding: 4px 10px; font-size: 12px; font-weight: 800; color: #5C3D00">{{h.t}}</span>
+            </sc-for>
+          </div>
+          <div style="margin-top: auto; display: flex; gap: 10px">
+            <a href="A-Editor.dc.html" style="{{c.cta}}">Dùng kiểu này</a>
+            <button style="height: 48px; padding: 0 14px; border-radius: 14px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Chơi thử</button>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: #4A5568">
+    <span>Chưa ưng?</span>
+    <button style="height: 40px; padding: 0 14px; border-radius: 12px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Đề xuất kiểu khác</button>
+    <button style="height: 40px; padding: 0 14px; border-radius: 12px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Sửa mô tả</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tile = (bg, bd, fg, g, r) => ({ g, s: 'width: 70px; height: 70px; border-radius: 18px; background: #FFFFFF; border: 4px solid ' + bd + '; color: ' + fg + '; font-family: Baloo 2, sans-serif; font-size: 34px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(' + r + 'deg)' });
+    const raw = [
+      { name: 'Trắc nghiệm hình ảnh', best: true, why: 'Bé nhìn tranh, đếm rồi chạm vào số đúng. Đơn giản nhất cho trẻ chưa đọc chữ, chơi tốt khi cô trình chiếu.', chips: ['Chạm 1 lần', 'Hợp trình chiếu', 'Có giọng đọc'], bg: '#E3ECFD', bd: '#2F6FED', fg: '#1F4FC4', tiles: ['3','4','5'] },
+      { name: 'Nối số với nhóm con vật', best: false, why: 'Bé kéo nối mỗi số với nhóm con vật có đúng số lượng. Luyện thêm thao tác kéo, hợp khi bé chơi trên máy tính bảng.', chips: ['Kéo nối', 'Máy tính bảng'], bg: '#FDEBD3', bd: '#E07B12', fg: '#9A4A00', tiles: ['1','2','3'] },
+      { name: 'Lật thẻ tìm cặp', best: false, why: 'Lật thẻ tìm cặp số và tranh có cùng số lượng. Vui và cần ghi nhớ, hợp để ôn lại sau bài học.', chips: ['Ôn tập', 'Ghi nhớ'], bg: '#EEE6FC', bd: '#7A4CD9', fg: '#5B2DB8', tiles: ['?','2','?'] }
+    ];
+    const cards = raw.map((c) => ({
+      name: c.name, why: c.why,
+      chips: c.chips.map((t) => ({ t })),
+      tiles: c.tiles.map((g, i) => tile(c.bg, c.bd, c.fg, g, [-8, 4, -3][i])),
+      badgeText: c.best ? 'Phù hợp nhất' : 'Lựa chọn khác',
+      badge: 'position: absolute; top: 14px; left: 14px; border-radius: 10px; padding: 5px 10px; font-size: 12px; font-weight: 900; ' + (c.best ? 'background: #F6B93B; color: #3B2600' : 'background: #FFFFFF; color: #3A4A6B'),
+      preview: 'position: relative; height: 210px; background: ' + c.bg + '; display: flex; align-items: center; justify-content: center',
+      card: 'background: #FFFFFF; border-radius: 26px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 12px 30px rgba(80,55,10,0.09); ' + (c.best ? 'outline: 4px solid #0E7A57' : ''),
+      cta: 'flex: 1; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; text-decoration: none; ' + (c.best ? 'background: #0E7A57; color: #FFFFFF; box-shadow: 0 5px 0 #095C41' : 'background: #FFFFFF; color: #0A5A3C; border: 2px solid #0E7A57')
+    }));
+    return { cards };
+  }
+}
+</script>
+</body>
+</html>
