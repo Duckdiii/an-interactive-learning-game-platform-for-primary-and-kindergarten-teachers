@@ -249,7 +249,7 @@ Ba agent này **viết code hoặc test** thay phiên chính. Chúng đều ch�
 
 ### Bản giao việc (bắt buộc)
 
-Vì subagent không thấy hội thoại, phiên chính phải viết bản giao việc tự chứa gồm: mục tiêu, phạm vi (file/class), ràng buộc (kiến trúc đã chốt, contract, không thêm dependency), tiêu chí xong và lệnh kiểm chứng. Thiếu thông tin đến mức không làm đúng được thì agent dừng và trả về câu hỏi thay vì đoán.
+Vì subagent không thấy hội thoại, phiên chính phải viết bản giao việc tự chứa gồm: mục tiêu, phạm vi (file/class), quyết định đã chốt của người dùng (agent không tự đổi), ràng buộc (kiến trúc đã chốt, contract, không thêm dependency), tiêu chí xong kiểm được, lệnh kiểm chứng và chỗ phải dừng lại hỏi. Chỉ dẫn đường tới tài liệu trong repo thay vì chép lại; phải ghi rõ những gì không có trong repo. Thiếu thông tin đến mức không làm đúng được thì agent dừng và trả về câu hỏi thay vì đoán; báo cáo của `backend-implementer` và `frontend-implementer` phải liệt kê các chỗ tự quyết định.
 
 ### 6.1. `backend-implementer`
 

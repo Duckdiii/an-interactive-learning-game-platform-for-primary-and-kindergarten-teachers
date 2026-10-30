@@ -155,7 +155,7 @@ Agent thực thi (có quyền ghi, luôn chạy trong worktree riêng, không co
 - `frontend-implementer`: cài đặt code frontend/renderer theo bản giao việc, tự `tsc`/lint/test/build.
 - `test-writer`: chỉ thêm/sửa file test (ví dụ lấp mutant sống sót), không sửa code nguồn.
 
-Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/class, ràng buộc (kiến trúc, contract, không thêm dependency), tiêu chí xong, lệnh kiểm chứng. Không giao quyết định thiết kế. Không giao hai agent thực thi sửa cùng file; nếu bắt buộc thì chạy tuần tự. Phiên chính phải xem diff trong worktree của agent, chạy agent kiểm tra theo bảng định tuyến rồi mới đưa thay đổi vào cây chính.
+Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/class, quyết định đã chốt của người dùng cho việc này (agent không tự đổi), ràng buộc (kiến trúc, contract, không thêm dependency), tiêu chí xong kiểm được, lệnh kiểm chứng, và chỗ phải dừng lại hỏi. Chỉ dẫn đường tới tài liệu trong repo thay vì chép lại; phải ghi rõ những gì không có trong repo. Không giao quyết định thiết kế. Không giao hai agent thực thi sửa cùng file; nếu bắt buộc thì chạy tuần tự. Phiên chính phải xem diff trong worktree của agent, chạy agent kiểm tra theo bảng định tuyến rồi mới đưa thay đổi vào cây chính.
 
 ### Bảng định tuyến
 
