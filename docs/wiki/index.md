@@ -4,10 +4,10 @@
 
 ## Yêu cầu của hệ thống
 
-- [[yeu-cau-chuc-nang]]: 15 yêu cầu chức năng, nhóm theo tác nhân, ánh xạ FR sang UC.
-- [[yeu-cau-phi-chuc-nang]]: 5 nhóm NFR và các chỉ số định lượng.
+- [[Yêu cầu chức năng]]: 15 yêu cầu chức năng, nhóm theo tác nhân, ánh xạ FR sang UC.
+- [[Yêu cầu phi chức năng]]: 5 nhóm NFR và các chỉ số định lượng.
 
 ## Quyết định về quy trình AI
 
-- [[quyet-dinh-subagent]]: vì sao phiên chính viết code, subagent đọc, chạy và kiểm tra.
-- [[quyet-dinh-memory]]: memory cho subagent, Obsidian và wiki được chọn thế nào.
+- [[Quyết định về subagent]]: vì sao phiên chính viết code, subagent đọc, chạy và kiểm tra.
+- [[Quyết định về memory]]: memory cho subagent, Obsidian và wiki được chọn thế nào.

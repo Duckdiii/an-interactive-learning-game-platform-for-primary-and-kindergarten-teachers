@@ -21,9 +21,9 @@ Wiki kiến thức của đề tài, theo mẫu [LLM Wiki của Karpathy](https:
 
 ## Cách viết trang
 
-- Mỗi trang một chủ đề, ngắn, tên file tiếng Việt không dấu, dùng gạch nối.
+- Mỗi trang một chủ đề, ngắn, tên file là tiêu đề tiếng Việt có dấu.
 - Đầu trang ghi `Nguồn:` và `Cập nhật:` (ngày).
-- Liên kết trang khác bằng `[[tên-trang]]`.
+- Liên kết trang khác bằng `[[tên trang]]`.
 - Tách rõ điều nguồn nói với nhận định của người viết. Số liệu ngoài phải ghi ai đo và ngày đọc.
 - Khi nguồn đổi, sửa trang tương ứng; khi hai nguồn mâu thuẫn, ghi rõ, không tự chọn.
 

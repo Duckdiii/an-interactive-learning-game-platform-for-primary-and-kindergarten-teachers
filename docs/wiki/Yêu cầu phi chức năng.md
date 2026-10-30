@@ -18,4 +18,4 @@ Năm nhóm NFR để bảo đảm các KPI đã chốt: tạo game dưới 60 gi
 - NFR-02 về thông tin học sinh là lý do wiki và memory không được chứa dữ liệu học sinh, xem [[README]].
 - NFR-04 có màn hình 4K và máy chiếu, liên quan màn trình chiếu tivi.
 
-Xem thêm: [[yeu-cau-chuc-nang]]
+Xem thêm: [[Yêu cầu chức năng]]

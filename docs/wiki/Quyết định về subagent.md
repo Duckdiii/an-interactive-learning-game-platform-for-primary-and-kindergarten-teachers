@@ -29,4 +29,4 @@ Dữ liệu của repo: đếm thô từ `ai-usage-log.md` cho thấy `reviewer`
 - [How and when to use subagents](https://claude.com/blog/how-and-when-to-use-subagents-in-claude-code)
 - [Multi-Agents: What's Actually Working](https://cognition.com/blog/multi-agents-working)
 
-Xem thêm: [[quyet-dinh-memory]]
+Xem thêm: [[Quyết định về memory]]

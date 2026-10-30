@@ -35,4 +35,4 @@ Hệ thống có 15 yêu cầu chức năng, mỗi FR ánh xạ một UC cùng s
 | FR-13 | Quản lý giáo viên và nhật ký | UC-13 |
 | FR-14 | Cấu hình AI | UC-14 |
 
-Xem thêm: [[yeu-cau-phi-chuc-nang]]
+Xem thêm: [[Yêu cầu phi chức năng]]

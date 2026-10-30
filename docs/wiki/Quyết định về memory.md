@@ -31,4 +31,4 @@ Cập nhật: 2026-10-31
 - [Memory for Autonomous LLM Agents](https://arxiv.org/abs/2603.07670)
 - [obsidian-mind](https://github.com/breferrari/obsidian-mind): một phiên không có chỉ dẫn đã không gọi vault lần nào (số do dự án tự báo).
 
-Xem thêm: [[quyet-dinh-subagent]]
+Xem thêm: [[Quyết định về subagent]]
