@@ -19,6 +19,13 @@ Mẫu một mục:
 
 (trống)
 
+### 2026-10-30 — Regex trong test mất dấu `\` vì ghi qua heredoc, test thành vô tác dụng
+- Lỗi: ở P4.4 sửa test bằng `node - <<'EOF'`, regex `/\d+\s*điểm/i` thành `/d+s*điểm/i` nên không bao giờ khớp "10 điểm"; test vẫn xanh nên không ai thấy. Nằm ở `PresentPlay.test.tsx` trên nhánh `everyone/UI`.
+- Phát hiện nhờ: chạy thử prompt mới của `reviewer` (mục kiểm test), các lần review trước bỏ sót.
+- Nguyên nhân gốc: lặp lại lỗi heredoc đã ghi ngày 2026-10-13; test xanh nên tin là đúng, không đọc lại dòng vừa ghi.
+- Cách chặn: chuỗi có `\` luôn sửa bằng Edit/Write, không dùng heredoc hay `node -e`; sau khi ghi test mới, thử làm code sai xem test có hỏng không.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-10-11 — Agent kiểm tra diff bỏ sót thay đổi chưa commit

@@ -99,9 +99,9 @@ Quy trình: chạy song song các agent đúng với phần đã đổi, đợi 
 - **Làm như thế nào:**
   1. Đọc `CLAUDE.md` trước (đó là chuẩn review).
   2. Lấy diff: `git diff main...HEAD`, cộng `git diff` và `git diff --cached` nếu có thay đổi chưa commit; chỉ phê bình phần nằm trong diff.
-  3. Kiểm tra theo thứ tự ưu tiên: (1) lỗi đúng sai với kịch bản cụ thể; (2) kiến trúc đã chốt; (3) quy ước frontend (chỉ Context + useState/useReducer, gọi API qua `axiosInstance`, session qua `useAuth()`, không thêm dependency ngoài danh sách duyệt); (4) Canvas Engine (prop `mode`, `onAnswered`, nộp một lần, dùng lại `games/common/`); (5) UX cho trẻ (touch target 64px, không đỏ gắt/rung mạnh khi sai, nút nghe lại); (6) an toàn (secret, `.env`, CORS/`permitAll`); (7) test có thật sự thất bại khi code sai.
+  3. Kiểm tra theo thứ tự ưu tiên: (1) lỗi đúng sai với kịch bản cụ thể; (2) kiến trúc đã chốt; (3) quy ước frontend (chỉ Context + useState/useReducer, gọi API qua `axiosInstance`, session qua `useAuth()`, không thêm dependency ngoài danh sách duyệt); (4) Canvas Engine (prop `mode`, `onAnswered`, nộp một lần, dùng lại `games/common/`); (5) UX cho trẻ (touch target 64px, không đỏ gắt/rung mạnh khi sai, nút nghe lại); (6) an toàn (secret, `.env`, CORS/`permitAll`); (7) test (bắt buộc khi diff có test): tên test hứa gì, thân test có làm và assert đúng điều đó không, bỏ đoạn code chính thì test có hỏng không.
   4. Không phê bình định dạng hay đặt tên nhỏ nhặt, không khen, không đề xuất tính năng mới.
-- **Đầu ra:** danh sách `[CAO|TRUNG BÌNH|THẤP] file:dòng — vấn đề — kịch bản gây lỗi — cách sửa gợi ý`, xếp từ nặng đến nhẹ; dòng cuối `Kết luận: có thể mở PR` hoặc `Nên sửa trước khi mở PR`.
+- **Đầu ra:** danh sách `[CAO|TRUNG BÌNH|THẤP] file:dòng — vấn đề — kịch bản gây lỗi — cách sửa gợi ý`, xếp từ nặng đến nhẹ (CAO: sai chức năng chính, mất/lộ dữ liệu, bảo mật, vi phạm kiến trúc hoặc contract; TRUNG BÌNH: sai ở trường hợp biên có thể gặp thật, hoặc test không bảo vệ hành vi quan trọng; THẤP: không gây sai chức năng); cuối cùng các dòng `Tổng: CAO x · TRUNG BÌNH y · THẤP z`, `Chưa kiểm: ...` và `Kết luận: có thể mở PR` hoặc `Nên sửa trước khi mở PR`.
 - **Giới hạn:** Bash chỉ dùng cho `git diff/log/show/status`.
 
 ### 3.4. `backend-architect-reviewer`
