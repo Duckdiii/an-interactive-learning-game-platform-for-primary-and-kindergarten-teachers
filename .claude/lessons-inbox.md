@@ -26,6 +26,13 @@ Mẫu một mục:
 - Cách chặn: chuỗi có `\` luôn sửa bằng Edit/Write, không dùng heredoc hay `node -e`; sau khi ghi test mới, thử làm code sai xem test có hỏng không.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-10-31 — Code an ninh viết bằng danh sách cấm, hook có đường im lặng cho qua
+- Lỗi: hook `agent-guard` bản đầu dùng danh sách cấm nên `git diff "--output=CLAUDE.md"` lọt, và chỉ chạy khi `argv[1]` khớp đúng đường dẫn nên có thể thoát 0 mà không kiểm tra; test vẫn xanh 13/13.
+- Phát hiện nhờ: `reviewer` được giao thử vượt qua hook.
+- Nguyên nhân gốc: chỉ nghĩ tới dạng lệnh viết thẳng, quên shell xử lý chuỗi trước khi git nhận; test do chính người viết nghĩ ra nên cùng điểm mù.
+- Cách chặn: phần chặn quyền dùng danh sách cho phép; mặc định là chặn; mọi code an ninh phải có người khác thử vượt qua.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-10-11 — Agent kiểm tra diff bỏ sót thay đổi chưa commit

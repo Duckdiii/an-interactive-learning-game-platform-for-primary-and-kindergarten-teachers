@@ -186,6 +186,10 @@ Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/c
 
 Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.md` hay docs không cần `test-verifier`.
 
+## Wiki kiến thức (`docs/wiki/`)
+
+Cần biết yêu cầu hoặc lý do của một quyết định thì đọc `docs/wiki/index.md` trước. Phiên chính ghi wiki khi người dùng yêu cầu, theo `docs/wiki/README.md`; subagent chỉ đọc. Wiki không thay nguồn gốc: contract vẫn ở `docs/game-json-dsl-v1.0.0.md` và `docs/openapi/openapi.yaml`.
+
 ## Học từ lỗi của agent
 
 Quy tắc đã duyệt (mỗi quy tắc rút từ một lỗi thật, chi tiết ở `.claude/lessons-inbox.md`):
