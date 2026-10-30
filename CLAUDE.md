@@ -188,7 +188,17 @@ Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.m
 
 ## Wiki kiến thức (`docs/wiki/`)
 
-Cần biết yêu cầu hoặc lý do của một quyết định thì đọc `docs/wiki/index.md` trước. Phiên chính ghi wiki khi người dùng yêu cầu, theo `docs/wiki/README.md`; subagent chỉ đọc. Wiki không thay nguồn gốc: contract vẫn ở `docs/game-json-dsl-v1.0.0.md` và `docs/openapi/openapi.yaml`.
+Wiki chỉ để định hướng: tóm tắt, nối các tài liệu lại với nhau, có thể chậm hơn nguồn. **Trước khi viết code hay test phải đọc nguồn gốc theo bảng dưới; wiki khác nguồn thì tin nguồn.** Phiên chính ghi wiki khi người dùng yêu cầu, theo `docs/wiki/README.md`; subagent chỉ đọc.
+
+| Cần biết | Đọc |
+|---|---|
+| Tổng quan, trạng thái, lý do quyết định, điểm lệch | `docs/wiki/index.md` |
+| Luồng đầy đủ của một ca sử dụng | `docs/srs/UC-xx.md` |
+| Yêu cầu chức năng, phi chức năng | `docs/srs/FR-summary.md`, `docs/srs/NFR.md` |
+| Trường FLD, KPI, các mục SRS khác | `docs/SRS.docx` (chưa có bản trích) |
+| Field DSL | `docs/game-json-dsl-v1.0.0.md` |
+| Endpoint, mã lỗi | `docs/openapi/openapi.yaml` |
+| Thiết kế màn hình | `docs/ui/SPEC.md`, `docs/ui/wireframes/` |
 
 ## Học từ lỗi của agent
 

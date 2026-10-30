@@ -11,14 +11,14 @@ Trang này trả lời "đã làm tới đâu". Đã kiểm sự tồn tại c�
 
 ## So với bảng tiến độ của tài liệu định hướng
 
-| Tài liệu định hướng ghi | Thực tế | Ghi chú |
-|---|---|---|
-| 2/10 loại có trình chơi | **Đúng** | Chỉ QUIZ, MATCHING trong `player/renderers/index.ts` |
-| Giao diện học sinh chưa bắt đầu | **Đã cũ** | Có `/play/:shareCode`, `/join`, các màn chơi, nhưng dùng dữ liệu mô phỏng |
-| Teacher Portal 50%, Editor mới là khung | **Đã cũ** | Có đủ F1–F10 theo commit P3 |
-| Chưa có endpoint gọi sinh game | **Đúng** | Có service sinh game, chưa có controller |
-| Kho YCCĐ chưa bắt đầu | Chưa kiểm | |
-| Live Arena chưa bắt đầu | **Đúng** | Không có route hay thư mục phòng |
+| Tài liệu định hướng ghi                 | Thực tế   | Ghi chú                                                                   |
+| --------------------------------------- | --------- | ------------------------------------------------------------------------- |
+| 2/10 loại có trình chơi                 | **Đúng**  | Chỉ QUIZ, MATCHING trong `player/renderers/index.ts`                      |
+| Giao diện học sinh chưa bắt đầu         | **Đã cũ** | Có `/play/:shareCode`, `/join`, các màn chơi, nhưng dùng dữ liệu mô phỏng |
+| Teacher Portal 50%, Editor mới là khung | **Đã cũ** | Có đủ F1–F10 theo commit P3                                               |
+| Chưa có endpoint gọi sinh game          | **Đúng**  | Có service sinh game, chưa có controller                                  |
+| Kho YCCĐ chưa bắt đầu                   | Chưa kiểm |                                                                           |
+| Live Arena chưa bắt đầu                 | **Đúng**  | Không có route hay thư mục phòng                                          |
 
 ## Frontend
 

@@ -5,7 +5,7 @@ Wiki kiến thức của đề tài, theo mẫu [LLM Wiki của Karpathy](https:
 ## Ba lớp
 
 - **Nguồn:** file gốc trong repo (`docs/srs/`, `docs/game-json-dsl-v1.0.0.md`, `docs/openapi/openapi.yaml`, `docs/subagents.md`...) và tài liệu ngoài. Wiki không sửa nguồn.
-- **Wiki:** các trang trong thư mục này. Phiên chính viết, người dùng duyệt qua `git diff`.
+- **Wiki:** các trang trong thư mục này. Phiên chính viết, người dùng duyệt qua `git diff`. Wiki là bản tóm tắt, có thể chậm hơn nguồn: viết code hay test thì đọc nguồn gốc, khác nhau thì tin nguồn. Bảng tra nguồn ở mục Wiki của `CLAUDE.md`.
 - **Quy tắc:** file này.
 
 ## Ai làm gì
