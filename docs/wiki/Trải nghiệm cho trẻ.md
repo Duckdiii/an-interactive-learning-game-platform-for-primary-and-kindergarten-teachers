@@ -1,6 +1,6 @@
 # Trải nghiệm cho trẻ
 
-Nguồn: `docs/Dinh_huong_de_tai.docx` mục 6; `docs/SRS.docx` mục 3.2.1, 3.2.2.
+Nguồn: `docs/Dinh_huong_de_tai.md` mục 6; `docs/SRS-full.md` mục 3.2.1, 3.2.2.
 Cập nhật: 2026-10-31
 
 Yêu cầu của thầy Thanh: độ mượt, sức hấp dẫn, đồ họa phải hơn web tool, nên phần này cần mục tiêu và cách đo cụ thể. Trẻ Mầm non chưa đọc được, nên hình ảnh và giọng đọc là kênh chính.
@@ -32,7 +32,8 @@ Yêu cầu của thầy Thanh: độ mượt, sức hấp dẫn, đồ họa ph�
 - Vùng chạm lớn, Mầm non lớn hơn Tiểu học.
 - Font đủ tiếng Việt có dấu, kiểm tra thật trên các trình duyệt.
 - Ba ngữ cảnh: máy chiếu, máy tính bảng, điện thoại phụ huynh.
-- Không chỉ dùng màu để báo đúng sai: kèm biểu tượng và âm thanh.
+- Độ tương phản đủ rõ; không chỉ dùng màu để báo đúng sai, kèm biểu tượng và âm thanh.
+- Thiết bị lớp học: bảng tương tác, tivi, máy chiếu qua HDMI hoặc không dây.
 
 ## Âm thanh
 
@@ -46,5 +47,7 @@ Yêu cầu của thầy Thanh: độ mượt, sức hấp dẫn, đồ họa ph�
 - Lighthouse và kiểm tra font trên nhiều thiết bị.
 
 Thử nghiệm với trẻ cần được giáo viên và phụ huynh đồng ý; tài liệu nguồn chưa nêu quy trình này, đây là lưu ý của người viết.
+
+Bản đầy đủ: [[Dinh_huong_de_tai]].
 
 Xem thêm: [[Mô tả ngoài danh mục game]], [[Kiến trúc và công nghệ]]

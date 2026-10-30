@@ -36,6 +36,17 @@ Tổng 49: 2 `implemented`, 2 `extended-pending`, 45 `planned`. Realtime dùng S
 
 **Không cần backend:** huy hiệu, chuỗi đúng, lời khích lệ, trình chiếu lớp (chạy cục bộ từ `GET /games/{id}`).
 
+## Chi tiết cần đọc ở nguồn
+
+- Xung đột thử lại và `attemptsCount` với "gửi lại trả kết quả cũ" (mục 2.5).
+- Bảng thân trả lời và `correctAnswer` cho 10 loại (2.4).
+- Trường bị bỏ khỏi bản học sinh, rủi ro lộ đáp án qua thứ tự hoặc id (2.3).
+- Bảng sự kiện WebSocket đề xuất (2.11).
+- `reviewFrom`, `teachingLevel`, mã lỗi 404 phân biệt, nhãn `commonWrong` phải lọc.
+- Học sinh dùng axios instance riêng, chỉ gắn `X-Participant-Id`.
+
+Bản đầy đủ: [[API-CONTRACT]].
+
 ## Câu hỏi đang chặn
 
 - `gradeLevel`, `subject` có bắt buộc khi sinh game không.

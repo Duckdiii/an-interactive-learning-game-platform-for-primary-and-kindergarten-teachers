@@ -1,6 +1,6 @@
 # Kế hoạch và việc còn lại
 
-Nguồn: `docs/ui/PLAN.md`, `docs/ui/SPEC.md` (2026-10-27), `docs/plan.md`, `docs/analysis.md`, `docs/progress-2026-10-16.md`, `docs/Dinh_huong_de_tai.docx` mục 7.
+Nguồn: `docs/ui/PLAN.md`, `docs/ui/SPEC.md` (2026-10-27), `docs/plan.md`, `docs/analysis.md`, `docs/progress-2026-10-16.md`, `docs/Dinh_huong_de_tai.md` mục 7.
 Cập nhật: 2026-10-31
 
 Có hai kế hoạch nối tiếp: `docs/plan.md` (nhóm F, A, B, C, D, tháng 10 đầu) và `docs/ui/PLAN.md` (P0–P5, mới hơn). Khi khác nhau, ưu tiên kế hoạch mới. Không tài liệu nào có phân công theo người hay hạn nộp.
@@ -16,12 +16,17 @@ Có hai kế hoạch nối tiếp: `docs/plan.md` (nhóm F, A, B, C, D, tháng 1
 | P4 | Trình chiếu lớp | Xong theo commit |
 | P5 | Thi đấu phòng | Chưa, phụ thuộc spike WebSocket |
 
+## Phụ thuộc giữa các bước
+
+P1 rồi P2 (P2b song song với P3), rồi P4. P3.7 cần P1.10. P5 làm cuối. P3.0 (token, font) nên làm sớm.
+
 ## Việc chưa xong từ kế hoạch cũ
 
 Đối chiếu tài liệu, chưa đối chiếu code, nên một số mục có thể đã xong trong P3:
 
 - A7: khôi phục khi AI làm lại cả game.
-- Form sửa tay: ORDERING, DRAG_DROP, SPOT_THE_TARGET. Các nguồn lệch nhau về WORD_SCRAMBLE, AUDIO_VISUAL_MATCH.
+- B4 (lối tự luyện và mở phòng), C1–C4 (trang phòng, trạng thái, xếp hạng, kết nối), D1–D3 (trang kết quả, câu sai nhiều, lối vào kết quả).
+- Form sửa tay: ORDERING, DRAG_DROP, SPOT_THE_TARGET. WORD_SCRAMBLE, AUDIO_VISUAL_MATCH: `docs/plan.md` mới hơn ghi đã xong, `docs/progress-2026-10-16.md` ghi còn thiếu.
 
 ## Việc từ tài liệu định hướng
 
@@ -31,9 +36,9 @@ Có hai kế hoạch nối tiếp: `docs/plan.md` (nhóm F, A, B, C, D, tháng 1
 ## Nợ và rủi ro đã ghi
 
 - Mock còn nằm trong bundle build thật.
-- 19 mâu thuẫn M1–M19 và 18 câu hỏi trong `docs/ui/PLAN.md` cần nhóm trả lời.
+- 19 mâu thuẫn và 18 câu hỏi cần nhóm trả lời, xem [[Mâu thuẫn giao diện và câu hỏi mở]].
 - `WorkspaceEditor` 563 dòng và 8 renderer là nút thắt.
-- Thư viện chưa cài cần duyệt: font Baloo 2, Nunito; `@stomp/stompjs`, `sockjs-client` (P5); `jsqr` (không bắt buộc). Âm thanh hiện là tiếng bíp tạm.
+- Thư viện cần duyệt: font Baloo 2, Nunito; `jsqr` (không bắt buộc). `@stomp/stompjs`, `sockjs-client` đã duyệt sẵn, chỉ chưa cài (P5). Âm thanh hiện là tiếng bíp tạm.
 - Test chập chờn dưới tải cao; CI dùng `--maxWorkers=2`.
 - Chưa thử trên thiết bị thật.
 

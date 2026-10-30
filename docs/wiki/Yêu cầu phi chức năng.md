@@ -1,6 +1,6 @@
 # Yêu cầu phi chức năng
 
-Nguồn: `docs/SRS.docx` mục 1.2.3, 2.4, 2.5, 3.3, bản trích ở `docs/srs/NFR.md`.
+Nguồn: `docs/srs/KPI.md`, `docs/srs/NFR.md`; mục 2.4, 2.5 ở `docs/SRS-full.md`.
 Cập nhật: 2026-10-31
 
 ## Năm KPI nghiệp vụ
@@ -33,8 +33,10 @@ Muốn báo cáo được KPI-01 đến KPI-04, hệ thống phải **ghi các s
 
 ## Liên hệ với việc đang làm
 
-- NFR-02 là lý do wiki và memory không chứa dữ liệu học sinh, xem [[README]].
+- NFR-02 là lý do wiki và memory không chứa dữ liệu học sinh, xem [[wiki/README|quy tắc wiki]].
 - NFR-04 có 4K và máy chiếu, liên quan màn trình chiếu tivi.
 - Một số chỉ số khó đạt cùng lúc, xem [[Điểm lệch và việc cần chốt]].
+
+Bản đầy đủ: [[KPI]], [[NFR]].
 
 Xem thêm: [[Yêu cầu chức năng]], [[Kiểm thử và vận hành]]

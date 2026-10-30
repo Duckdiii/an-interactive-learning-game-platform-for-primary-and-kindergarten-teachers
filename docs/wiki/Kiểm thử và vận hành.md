@@ -1,6 +1,6 @@
 # Kiểm thử và vận hành
 
-Nguồn: `docs/SRS.docx` mục 3.4, 3.5.
+Nguồn: `docs/SRS-full.md` mục 3.4, 3.5.
 Cập nhật: 2026-10-31
 
 ## Bốn tầng kiểm thử
@@ -46,5 +46,7 @@ Cập nhật: 2026-10-31
 Full backup 02:00 hằng ngày, mã hóa AES-256; WAL liên tục. RTO dưới 15 phút, RPO dưới 1 giờ.
 
 Các mục tiêu vận hành này cần đối chiếu với gói miễn phí đã nêu trong ràng buộc, xem [[Điểm lệch và việc cần chốt]].
+
+Bản đầy đủ: [[SRS-full]] mục 3.4, 3.5.
 
 Xem thêm: [[Yêu cầu phi chức năng]], [[Quy tắc nghiệp vụ]]

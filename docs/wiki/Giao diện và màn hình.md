@@ -22,20 +22,28 @@ Giả định chưa chốt: bé trên điện thoại bắt buộc xoay ngang. G
 
 Lưu ý: mã nhóm trong SPEC khác tiền tố tên file. File `A-*` là màn giáo viên (F1–F10), còn nhóm A trong SPEC là tivi.
 
-| Nhóm SPEC | Đối tượng | Wireframe |
-|---|---|---|
-| A1–A3 | Tivi lớp Mầm non | Tv-Lobby, Tv-Play, Tv-Result |
-| B1–B5 | Bé ở nhà, tablet ngang | Main, Be-Intro, Be-Play, Be-Result, Be-Error |
-| C1–C7 | Học sinh trên điện thoại | Hs-Join, Hs-Nickname, Hs-Intro, Hs-Play, Hs-Result, Hs-Review, Hs-Error |
-| D1–D4 | Phòng thi đấu trên tivi | Room-Lobby, Room-Question, Room-Board, Room-Podium |
-| D5–D7 | Phòng thi đấu trên máy học sinh | Room-Wait, Room-Feedback, Room-Final |
-| E1–E2 | Học sinh trên máy tính | Hs-Desk-Join, Hs-Desk-Play |
-| E3–E5 | Bé trên điện thoại | Be-Phone-Rotate, Be-Phone-Play, Be-Phone-Result |
-| F1–F10 | Giáo viên | A-Home, A-Games, A-Create, A-Create-Progress, A-Create-Pick, A-Editor, A-Publish, A-Results, A-Login, A-Register |
+| Nhóm SPEC | Đối tượng                       | Wireframe                                                                                                        |
+| --------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| A1–A3     | Tivi lớp Mầm non                | Tv-Lobby, Tv-Play, Tv-Result                                                                                     |
+| B1–B5     | Bé ở nhà, tablet ngang          | Main, Be-Intro, Be-Play, Be-Result, Be-Error                                                                     |
+| C1–C7     | Học sinh trên điện thoại        | Hs-Join, Hs-Nickname, Hs-Intro, Hs-Play, Hs-Result, Hs-Review, Hs-Error                                          |
+| D1–D4     | Phòng thi đấu trên tivi         | Room-Lobby, Room-Question, Room-Board, Room-Podium                                                               |
+| D5–D7     | Phòng thi đấu trên máy học sinh | Room-Wait, Room-Feedback, Room-Final                                                                             |
+| E1–E2     | Học sinh trên máy tính          | Hs-Desk-Join, Hs-Desk-Play                                                                                       |
+| E3–E5     | Bé trên điện thoại              | Be-Phone-Rotate, Be-Phone-Play, Be-Phone-Result                                                                  |
+| F1–F10    | Giáo viên                       | A-Home, A-Games, A-Create, A-Create-Progress, A-Create-Pick, A-Editor, A-Publish, A-Results, A-Login, A-Register |
 
 ## Trạng thái lỗi bắt buộc
 
 Mã sai; game chưa xuất bản, hết hạn, bị tắt; phòng đóng, đã bắt đầu, đủ người; mất mạng (giữ tiến độ, tự nối lại); âm thanh bị chặn; máy dọc khi game cần ngang.
+
+## Token và hợp đồng
+
+- Giáo viên: nền `#FBF6EC`, xanh lá `#0E7A57`, vàng `#F6B93B`, font Baloo 2 và Nunito.
+- Học sinh tạm dùng xanh dương `#1F5BD8`, cam `#FF9F1C`. Mọi màu lấy từ token.
+- Renderer nhận câu hỏi đã bỏ đáp án, hồ sơ tuổi và `onSubmit`; khung lo đồng hồ, điểm, phản hồi, chuyển câu, âm thanh. Mã hiện có còn lệch, xem M3 ở [[Mâu thuẫn giao diện và câu hỏi mở]].
+
+Bản đầy đủ: [[SPEC]].
 
 ## Rủi ro đã ghi trong kế hoạch
 

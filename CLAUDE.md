@@ -188,14 +188,16 @@ Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.m
 
 ## Wiki kiến thức (`docs/wiki/`)
 
-Wiki chỉ để định hướng: tóm tắt, nối các tài liệu lại với nhau, có thể chậm hơn nguồn. **Trước khi viết code hay test phải đọc nguồn gốc theo bảng dưới; wiki khác nguồn thì tin nguồn.** Phiên chính ghi wiki khi người dùng yêu cầu, theo `docs/wiki/README.md`; subagent chỉ đọc.
+`docs/wiki/index.md` là cửa vào của kho tài liệu (vault Obsidian là `docs/`). Wiki chỉ để định hướng: tóm tắt, nối các tài liệu lại với nhau, có thể chậm hơn nguồn. **Trước khi viết code hay test phải đọc nguồn gốc theo bảng dưới; wiki khác nguồn thì tin nguồn.** Phiên chính ghi wiki khi người dùng yêu cầu, theo `docs/wiki/README.md`; subagent chỉ đọc.
 
 | Cần biết | Đọc |
 |---|---|
 | Tổng quan, trạng thái, lý do quyết định, điểm lệch | `docs/wiki/index.md` |
 | Luồng đầy đủ của một ca sử dụng | `docs/srs/UC-xx.md` |
 | Yêu cầu chức năng, phi chức năng | `docs/srs/FR-summary.md`, `docs/srs/NFR.md` |
-| Trường FLD, KPI, các mục SRS khác | `docs/SRS.docx` (chưa có bản trích) |
+| Trường FLD, KPI | `docs/srs/FLD.md`, `docs/srs/KPI.md` |
+| Các mục SRS khác | `docs/SRS-full.md`; sơ đồ chỉ có ở `docs/SRS.docx` |
+| Định hướng đề tài | `docs/Dinh_huong_de_tai.md` |
 | Field DSL | `docs/game-json-dsl-v1.0.0.md` |
 | Endpoint, mã lỗi | `docs/openapi/openapi.yaml` |
 | Thiết kế màn hình | `docs/ui/SPEC.md`, `docs/ui/wireframes/` |

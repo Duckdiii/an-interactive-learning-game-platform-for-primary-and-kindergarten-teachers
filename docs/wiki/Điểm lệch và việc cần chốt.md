@@ -1,6 +1,6 @@
 # Điểm lệch và việc cần chốt
 
-Nguồn: đối chiếu `docs/SRS.docx` bản từ `everyone/UI` (commit `5d39f54`, 5 sơ đồ đã xem), `docs/Dinh_huong_de_tai.docx`, `docs/decisions.md`, `docs/ui/PLAN.md`, `docs/game-json-dsl-v1.0.0.md`, `CLAUDE.md`.
+Nguồn: đối chiếu `docs/SRS-full.md` bản từ `everyone/UI` (commit `5d39f54`, 5 sơ đồ đã xem), `docs/Dinh_huong_de_tai.md`, `docs/decisions.md`, `docs/ui/PLAN.md`, `docs/game-json-dsl-v1.0.0.md`, `CLAUDE.md`.
 Cập nhật: 2026-10-31
 
 Đây là nhận định của người viết sau khi đối chiếu, không phải nội dung của tài liệu nguồn. Mỗi mục cần nhóm quyết định. Wiki chỉ ghi lại, không tự chọn.
@@ -17,12 +17,20 @@ Cập nhật: 2026-10-31
 | 35 | Bé không đếm giờ (SPEC); FLD-07, backend có TIMEOUT, thời gian bắt buộc | Mâu thuẫn M2 trong `docs/ui/PLAN.md` |
 | 36 | Nhập mã: ShareCode 6 ký tự và PIN 6 số dùng chung một ô | Mâu thuẫn M4 trong `docs/ui/PLAN.md` |
 
+## Phát hiện thêm khi đối chiếu lại
+
+| # | Vấn đề | Cần chốt |
+|---|---|---|
+| 37 | FLD-30 ghi xuất bản lên "kho học liệu dùng chung"; UC-02, UC-04 ghi kho cá nhân; phạm vi loại trừ trao đổi học liệu | Có kho dùng chung không |
+| 38 | Khóa đăng nhập: NFR-02 "sau 5 lần", UC-15 "vượt quá 5 lần", TS-07 "N lần" | Thống nhất một con số |
+| 39 | Admin được giao quản lý từ điển từ cấm (Bảng 2.1) nhưng không có luồng UC | Thêm vào UC |
+
 ## Giữa tài liệu định hướng và SRS
 
 | # | Định hướng | SRS | Cần chốt |
 |---|---|---|---|
 | 1 | FLD-15 chỉ có 4 loại, cần thống nhất | FLD-15 đã có đủ 10 loại | Định hướng đã cũ ở điểm này |
-| 2 | Validation bằng luật "thay cho vòng LLM tự sửa" | Bản mới: validator quyết định đúng sai, LLM chỉ sinh lại phần lỗi | **Đã khớp** với SRS mới |
+| 2 | Validation bằng luật "thay cho vòng LLM tự sửa" | Bản mới: validator quyết định đúng sai, nhưng vẫn có vòng LLM sinh lại phần lỗi (tối đa 2 lần gọi lại) | Khớp ở chỗ ai phán; còn lệch ở chỗ có vòng sinh lại |
 | 3 | Curriculum-RAG bằng embedding và pgvector | Tra theo khối và môn; pgvector là hướng phát triển | Mức nào là cam kết |
 | 4 | Có phụ huynh | Không có tác nhân phụ huynh | Có đưa vào đặc tả không |
 | 5 | Lưu media trên S3 | Bảng công nghệ không có S3 (sơ đồ kiến trúc thì có) | Bổ sung SRS |
@@ -33,7 +41,7 @@ Cập nhật: 2026-10-31
 | # | Điểm lệch | Cần chốt |
 |---|---|---|
 | 7 | LLM pipeline p95 dưới 3 giây, trong khi KPI-01 cho 60 giây và luồng còn tìm ảnh, sinh giọng (xem mục 30) | 3 giây đo đoạn nào |
-| 8 | Refresh Token 24 giờ, UC-15 ghi nhớ 30 ngày | Ghi rõ hai chế độ |
+| 8 | UC-15 đã nói rõ 30 ngày thay vì 24 giờ; chỉ NFR-02 và bảng công nghệ chưa nhắc | Bổ sung vào NFR-02 |
 | 9 | Dịch vụ ngoài giả định uptime 99,0%, hệ thống cam kết 99,5%, chạy gói miễn phí | Mục tiêu có thực tế không |
 | 10 | Gói miễn phí nhưng cần 500 học sinh mỗi lớp, RTO 15 phút, WAL | Chọn con số đo được |
 | 11 | Bảng 2.2 ghi Tika cho FR-03, trích giáo án thuộc FR-02 | Sửa số |
@@ -47,7 +55,7 @@ Cập nhật: 2026-10-31
 
 | # | Chữ | Sơ đồ | Cần chốt |
 |---|---|---|---|
-| 17 | Thứ tự: kiểm duyệt rồi mới media (mục 2.1.2) | Tuần tự UC-02: gắn ảnh, giọng rồi mới kiểm tra | Thứ tự nào; ảnh và giọng cũng cần kiểm duyệt |
+| 17 | Mục 2.1.2: kiểm duyệt rồi mới media. UC-02 bước 5, 6 và luồng 6a: media rồi mới rà soát, nên phần chữ cũng tự lệch | Tuần tự UC-02 theo cách sau | Thứ tự nào; ảnh và giọng cũng cần kiểm duyệt |
 | 18 | Google Text-to-Speech | Sơ đồ luồng ghi Edge TTS | Sửa sơ đồ |
 | 19 | OpenAI Moderation | Sơ đồ kiến trúc ghi Gemini kiểm duyệt; sơ đồ tuần tự ghi OpenAI | Sửa sơ đồ |
 | 20 | Admin không nêu Ant Design | Sơ đồ kiến trúc có Ant Design | Chọn một |
@@ -72,7 +80,7 @@ Cập nhật: 2026-10-31
 - **Báo cáo kết quả cho giáo viên:** sơ đồ luồng có bước này, giao diện F8 cũng có, nhưng SRS không có FR hay UC.
 - **Giọng đọc chưa có chỗ lưu:** FLD-12 nói lưu cùng game, DSL 1.0.0 không có trường này.
 - **Bước "Đối chiếu chương trình" trên giao diện chưa có chức năng thật:** mâu thuẫn M12 trong `docs/ui/PLAN.md`.
-- **Kho học liệu:** xem, tìm, xóa game chưa có UC.
+- **Kho học liệu:** xem, tìm, xóa game chưa có UC; phạm vi dùng chung chưa rõ, xem mục 37.
 - **Quản lý từ cấm:** có FLD-25 và mục 3.5.2, chưa có luồng trong UC-12 đến UC-14.
 - **Quản lý kho Yêu cầu cần đạt:** ai nhập và cập nhật chưa được nêu.
 - **Lớp học:** sơ đồ lớp có `Classroom`, không có chức năng nào quản lý.
@@ -83,6 +91,6 @@ Cập nhật: 2026-10-31
 
 - Đã xem 5 sơ đồ; các sơ đồ tuần tự còn lại chưa đối chiếu.
 - Chỉ đối chiếu code ở mức tiến độ, xem [[Trạng thái thực tế]]. Sơ đồ có thể đã cũ hơn chữ.
-- `docs/ui/PLAN.md` còn 19 mâu thuẫn và 18 câu hỏi, mới ghi lại vài mục ở đây.
+- Toàn bộ mâu thuẫn trong `docs/ui/PLAN.md` ở [[Mâu thuẫn giao diện và câu hỏi mở]].
 
 Xem thêm: [[Tổng quan đề tài]], [[Kiến trúc và công nghệ]]

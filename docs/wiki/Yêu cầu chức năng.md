@@ -1,6 +1,6 @@
 # Yêu cầu chức năng
 
-Nguồn: `docs/SRS.docx` mục 3.1.2, 3.1.3, bản trích ở `docs/srs/FR-summary.md`. Tiêu chí chấp nhận đúng từng chữ xem nguồn.
+Nguồn: `docs/SRS-full.md` mục 3.1.2, 3.1.3, bản trích ở `docs/srs/FR-summary.md`. Tiêu chí chấp nhận đúng từng chữ xem nguồn.
 Cập nhật: 2026-10-31
 
 Hệ thống có 15 yêu cầu chức năng, mỗi FR ứng với một UC cùng số, chia theo 3 phân hệ. Hỗ trợ cho chúng là 30 trường giao diện FLD, các con số ở [[Quy tắc nghiệp vụ]].
@@ -38,5 +38,7 @@ Hệ thống có 15 yêu cầu chức năng, mỗi FR ứng với một UC cùng
 ## Điều chưa được FR nào phủ
 
 Mở phòng và điều khiển phòng từ phía giáo viên, trình chiếu, báo cáo kết quả, kho học liệu. Xem [[Điểm lệch và việc cần chốt]].
+
+Bản đầy đủ: [[FR-summary]], [[FLD]].
 
 Xem thêm: [[Ca sử dụng]], [[Các luồng nghiệp vụ]], [[Yêu cầu phi chức năng]]

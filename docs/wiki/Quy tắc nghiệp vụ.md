@@ -1,15 +1,15 @@
 # Quy tắc nghiệp vụ
 
-Nguồn: `docs/SRS.docx` mục 3.1.1, 3.1.3, 3.1.4 (FLD-01 đến FLD-30), 3.3, 4.2.
+Nguồn: `docs/srs/FLD.md`, `docs/srs/FR-summary.md`, `docs/srs/NFR.md`, các file UC; mục 3.1.1 ở `docs/SRS-full.md`.
 Cập nhật: 2026-10-31
 
-Tra nhanh các con số. Khi viết code hay test, đối chiếu lại nguồn và contract, xem [[README]].
+Tra nhanh các con số. Khi viết code hay test, đối chiếu lại nguồn và contract, xem [[wiki/README|quy tắc wiki]].
 
 ## Tài khoản
 
 - Mật khẩu 8–72 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt.
 - Access Token 15 phút, Refresh Token 24 giờ; "Ghi nhớ đăng nhập" 30 ngày.
-- Sai quá 5 lần liên tiếp thì khóa tạm 15 phút.
+- Sai quá 5 lần liên tiếp thì khóa tạm 15 phút (các mục trong SRS ghi chưa thống nhất).
 - Liên kết đặt lại mật khẩu dùng một lần, hết hạn sau 30 phút; thông báo giống nhau dù email có tồn tại hay không; đặt lại xong thì đăng xuất các phiên cũ.
 - Vai trò: `ROLE_TEACHER`, `ROLE_ADMIN`. Tài khoản quản trị do hệ thống cấp sẵn.
 
@@ -43,9 +43,13 @@ Giọng đọc tự sinh cho Mầm non và Lớp 1 theo UC-02.
 - Sai, bỏ qua, hết giờ: 0 điểm.
 - Điểm đội là trung bình điểm thành viên.
 
+## Mã Yêu cầu cần đạt
+
+Mã YCCĐ chỉ dùng nội bộ để làm giàu câu lệnh, không hiển thị trong cấu trúc trò chơi.
+
 ## Phòng chơi
 
-Trạng thái `WAITING`, `ACTIVE`, `PAUSED`, `CLOSED`. Các loại phiên: SELF (tự luyện), SOLO và TEAM (theo phòng). Sĩ số tối đa do giáo viên đặt.
+Trạng thái `WAITING`, `ACTIVE`, `PAUSED`, `CLOSED`. Các loại phiên: SELF (tự luyện), SOLO và TEAM (theo phòng). Sĩ số tối đa do giáo viên đặt. Chia đội ngẫu nhiên là mặc định, cân bằng số người khi bắt đầu. Máy học sinh hiện trạng thái kết nối Connected, Reconnecting, Disconnected và tự nối lại.
 
 ## Cấu hình AI
 
@@ -56,6 +60,10 @@ Trạng thái `WAITING`, `ACTIVE`, `PAUSED`, `CLOSED`. Các loại phiên: SELF 
 | Max Tokens | 500–4.000 |
 | System Prompt | Mặc định ACTIVE v1.0.0, có SHA-256 |
 | Từ cấm | Cập nhật nóng trong bộ nhớ |
+
+Phiên bản đóng băng không sửa trực tiếp: thay đổi tạo bản mới kế thừa. Khôi phục đặt bản đã chọn làm bản đang dùng. Cấu hình mới áp dụng cho các lượt sinh kế tiếp.
+
+Audit Log lưu IP, thời điểm, Actor ID, thao tác API, kết quả kiểm duyệt. Giọng đọc lưu cùng game để dùng khi tạo lại từng câu.
 
 ## Xử lý sự cố toàn cục
 
@@ -68,5 +76,7 @@ Trạng thái `WAITING`, `ACTIVE`, `PAUSED`, `CLOSED`. Các loại phiên: SELF 
 | Lỗi máy chủ | Thông báo thân thiện, nút Thử lại, giữ dữ liệu đã nhập, ghi log |
 
 Giới hạn gọi API: 10 yêu cầu mỗi phút mỗi người dùng. Quá 5 lần vi phạm từ khóa mỗi phút từ một tài khoản thì khóa tạo game 15 phút.
+
+Bản đầy đủ của 30 trường: [[FLD]].
 
 Xem thêm: [[Ca sử dụng]], [[Yêu cầu phi chức năng]]

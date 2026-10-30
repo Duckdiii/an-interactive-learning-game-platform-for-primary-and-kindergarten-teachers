@@ -1,6 +1,6 @@
 # Các luồng nghiệp vụ
 
-Nguồn: `docs/SRS.docx` mục 2.1.2, 2.6, 4.2 (sơ đồ luồng và tuần tự UC-02); `docs/Dinh_huong_de_tai.docx` mục 5.1.
+Nguồn: `docs/SRS-full.md` mục 2.1.2, 2.6, 4.2 (sơ đồ luồng và tuần tự UC-02); `docs/Dinh_huong_de_tai.md` mục 5.1.
 Cập nhật: 2026-10-31
 
 ## Luồng 5 bước
@@ -17,7 +17,7 @@ Thứ tự bước 3 và 4 không thống nhất giữa các nguồn, xem [[Đi�
 
 | Bước | UC | Kết quả | Khi lỗi |
 |---|---|---|---|
-| Đăng ký, đăng nhập | UC-01, UC-15 | Có phiên làm việc theo vai trò | Sai 5 lần khóa 15 phút; tài khoản bị khóa thì từ chối |
+| Đăng ký, đăng nhập | UC-01, UC-15 | Có phiên làm việc theo vai trò | Sai quá 5 lần khóa 15 phút; tài khoản bị khóa thì từ chối |
 | Tạo game | UC-02 | Bản nháp và màn chơi thử | Sai tệp, quá 10MB, không hợp tuổi, không an toàn, AI lỗi |
 | Chơi thử | UC-03 | Kết quả không được lưu | Thiếu dữ liệu thì không vào được; thiếu ảnh phụ thì bỏ qua |
 | Chỉnh sửa | UC-04, UC-05, UC-06 | Bản nháp mới nhất | Câu không có đáp án đúng thì không lưu |
@@ -42,7 +42,7 @@ Tương tác kéo thả, lật thẻ ở UC-10; giọng đọc và nghe lại �
 
 ## Hành trình quản trị
 
-- **UC-12:** dashboard chi phí và trạng thái, lọc theo thời gian và dịch vụ. Không đủ dữ liệu thì ghi "Chưa có dữ liệu chi phí", không tự đưa số giả.
+- **UC-12:** dashboard chi phí và trạng thái, lọc theo thời gian và dịch vụ. Không có billing chính thức thì ước tính từ dữ liệu sử dụng và bảng giá; không đủ dữ liệu mới ghi "Chưa có dữ liệu chi phí". Dịch vụ lỗi thì đánh dấu "Không thể kết nối", các phần khác vẫn hiện.
 - **UC-13:** tìm, thêm, sửa, khóa, mở khóa giáo viên, có nhật ký.
 - **UC-14:** sửa câu lệnh hệ thống và tham số, đóng băng và khôi phục phiên bản.
 

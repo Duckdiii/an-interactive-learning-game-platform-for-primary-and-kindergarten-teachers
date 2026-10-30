@@ -19,7 +19,9 @@ Cả hai lần chưa đủ 10 lần; nguyên nhân QUOTA chưa xác định.
 
 - Mọi lần thành công đều đúng cấu trúc: 4 câu, 4 lựa chọn khác nhau, đáp án hợp lệ.
 - Đáp án đúng về số học ở toàn bộ 28 câu của mỗi lần đo.
-- Lệch prompt về nội dung: lần 1 có 16/28 câu dùng chữ số thay vì viết chữ, 5 cảnh con vật ngủ; lần 2 có 9 câu dùng chữ số, 4 cảnh ngủ.
+- Lệch prompt về nội dung: lần 1 có 16/28 câu dùng chữ số thay vì viết chữ, 5 cảnh con vật ngủ, 5 câu đặt chung một chỗ; lần 2 có 9 câu dùng chữ số, 4 cảnh ngủ, 4 câu đặt chung một chỗ.
+
+Cấu hình: prompt `quiz-count-animals-v4`, chỉ `KINDERGARTEN`, `maxRetries(0)`, không đặt temperature. Không được kết luận lỗi QUOTA là hết hạn mức ngày.
 
 Rà soát tay không phải tỉ lệ giáo viên chấp nhận, nên chưa kết luận được KPI-02.
 
@@ -31,6 +33,6 @@ Nhận định của người viết:
 - KPI-01 dưới 60 giây vẫn khả thi về độ trễ gọi mô hình, nhưng chưa tính tra chuẩn, ảnh, giọng đọc, kiểm duyệt.
 - Lỗi QUOTA ở lần thứ 8 là tín hiệu cần tính khi demo cho cả lớp.
 
-Lịch sử 2026-09-27 dùng đường gọi cũ, không phải bằng chứng cho v4; xem nguồn.
+Lịch sử 2026-09-27 dùng đường gọi cũ, không phải bằng chứng cho v4: 9/10 thành công, 1 lỗi HTTP 503, độ trễ 5.098–8.020 ms.
 
 Xem thêm: [[Yêu cầu phi chức năng]], [[Kiểm thử và vận hành]]

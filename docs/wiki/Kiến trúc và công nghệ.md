@@ -1,6 +1,6 @@
 # Kiến trúc và công nghệ
 
-Nguồn: `docs/SRS.docx` mục 2.3, 2.7, 4.3, 3.2; `docs/Dinh_huong_de_tai.docx` mục 5.2, 8. Kiến trúc đã chốt để code theo nằm ở `CLAUDE.md`.
+Nguồn: `docs/SRS-full.md` mục 2.3, 2.7, 4.3, 3.2; `docs/Dinh_huong_de_tai.md` mục 5.2, 8. Kiến trúc đã chốt để code theo nằm ở `CLAUDE.md`.
 Cập nhật: 2026-10-31
 
 ## Tổng quan
@@ -32,6 +32,10 @@ Giáo viên mô tả → Intent Parser → tra Yêu cầu cần đạt → Conte
 | Triển khai | Vercel, Render hoặc Railway |
 
 Tra Yêu cầu cần đạt: SRS dùng tra theo khối và môn; pgvector là hướng phát triển.
+
+**Đã loại:** OpenAI GPT để sinh nội dung, PixiJS, @dnd-kit. STOMP dùng broker trong bộ nhớ, đủ cho quy mô đồ án. Cơ sở dữ liệu chỉ giữ khóa đối tượng của S3.
+
+**Môi trường:** máy khách là Chrome, Edge, Firefox có Canvas 2D, WebGL, Web Audio; màn hình tối thiểu 320x568. Máy chủ chạy container Docker, HTTPS TLS 1.3, WSS.
 
 ## Mô hình miền
 

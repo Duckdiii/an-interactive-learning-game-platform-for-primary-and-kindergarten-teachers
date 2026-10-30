@@ -40,6 +40,27 @@ Các quyết định này ra đời trước đợt P1–P4, và thuộc giai đ
 
 - Sau xuất bản có 2 lối: tự luyện và mở phòng. Chia đội làm ngẫu nhiên trước. Cổng realtime có bản mock, chờ tài liệu WebSocket.
 
+## Chi tiết dễ bỏ sót
+
+- Sửa game đã xuất bản: `PUT` giữ `PUBLISHED`, nội dung đổi ngay cho người đang xem. Khi xuất bản khóa Lưu, Chơi thử, AI, Hoàn tác. Giao diện giả định xuất bản có thể trả 409, contract chưa liệt kê.
+- Hết phiên (401) không xóa bản sao lưu; bản của người khác bị xóa khi có người đăng nhập.
+- ORDERING: Backend chỉ lưu `correctPosition`, engine học sinh phải tự xáo.
+- AUDIO_VISUAL_MATCH: đổi mô tả hình không xóa `imageUrl`.
+- SPOT_THE_TARGET: kiểu TS `hitRegion` thiếu `null`, chỉ ghi nhận. Backend phải chặn xuất bản khi thiếu `hitRegion`, hiện chưa có `SpotTheTargetRule`.
+- Đang tải tệp thì khóa Lưu, Chơi thử; `blob:` chỉ sống trong tab; nhóm `media` phải mô phỏng cùng `editor`.
+- Timeout AI làm lại một câu = 3 × 5 giây + 5 giây đệm.
+- `shareUrl` của Backend được ưu tiên, `VITE_STUDENT_APP_BASE_URL` chỉ dự phòng.
+- Đường dẫn `/rooms/:sessionId`, `/results/:sessionId`; game vừa tạo có dấu "Mới".
+- Nút Quay lại không chặn được vì dùng `BrowserRouter`.
+
+## Yêu cầu gửi Backend chưa giải quyết
+
+- Khóa lạc quan khi lưu (`updatedAt` hoặc `version`).
+- Lọc từ cấm khớp nguyên từ và giữ dấu (tránh "Bảo Lực" trùng "bạo lực").
+- Khóa idempotency khi tạo game, xử lý nháp mồ côi.
+- Mã lỗi riêng cho không tạo được mã chia sẻ; bốn câu hỏi về `regenerateGame`.
+- `GameDefaults` đặt 135 giây cho MEMORY_CARD mầm non, vượt 120 giây của SRS; giao diện đã xử lý riêng.
+
 ## Đang chờ nhóm quyết định
 
 - Nơi lưu giọng đọc: thêm trường DSL 1.1.0 hay metadata backend.

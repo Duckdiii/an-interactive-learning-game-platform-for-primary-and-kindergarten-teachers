@@ -7,7 +7,8 @@ Cập nhật: 2026-10-31
 
 - Memory của subagent dùng trường `memory: project` của Claude Code, file Markdown trong repo, commit lên git.
 - Không dùng Mem0, Zep, Letta: quy mô quá nhỏ và mất khả năng xem qua git.
-- Bật thử cho `reviewer` trước, kèm hook `.claude/hooks/agent-guard.mjs`; đo sau 5 lần review rồi mới mở rộng.
+- Kế hoạch: bật thử cho `reviewer`, kèm hook `.claude/hooks/agent-guard.mjs`; đo sau 5 lần review rồi mới mở rộng.
+- **Trạng thái:** mới xong hook. `memory` chưa bật, hook chưa gắn vào agent nào; các giai đoạn sau tạm dừng khi chuyển sang làm kho tài liệu.
 - Kiến thức dự án để ở wiki này, mở bằng Obsidian. Vault ngoài repo không dùng vì cả nhóm không chia sẻ được.
 
 ## Phân biệt

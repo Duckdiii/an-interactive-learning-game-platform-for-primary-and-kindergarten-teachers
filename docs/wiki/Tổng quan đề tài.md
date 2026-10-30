@@ -1,6 +1,6 @@
 # Tổng quan đề tài
 
-Nguồn: `docs/Dinh_huong_de_tai.docx` mục 0, 1, 9; `docs/SRS.docx` chương 1, 2.
+Nguồn: `docs/Dinh_huong_de_tai.md` mục 0, 1, 9; `docs/SRS-full.md` chương 1, 2.
 Cập nhật: 2026-10-31
 
 ## Đề tài là gì
@@ -42,5 +42,7 @@ Năm KPI chi tiết ở [[Yêu cầu phi chức năng]]. Ngoài ra có yêu cầ
 | Mô tả ngoài danh mục | Phân loại A–D, phản hồi rõ |
 | Chi phí mô hình, người dùng đồng thời | Dự toán chi phí, nêu con số mục tiêu rồi kiểm tra tải |
 | Mở rộng quá phạm vi | Chốt mức cam kết, có điểm dừng an toàn |
+
+Bản đầy đủ: [[Dinh_huong_de_tai]].
 
 Xem thêm: [[Trạng thái thực tế]], [[Các luồng nghiệp vụ]], [[Điểm lệch và việc cần chốt]]

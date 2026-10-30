@@ -1,6 +1,6 @@
 # Mô tả ngoài danh mục game
 
-Nguồn: `docs/Dinh_huong_de_tai.docx` mục 7.
+Nguồn: `docs/Dinh_huong_de_tai.md` mục 7.
 Cập nhật: 2026-10-31
 
 Đây là vấn đề đang được giải quyết tiếp theo, và là nơi thầy Thanh nhấn mạnh: AI phải tạo được trò chơi hợp bối cảnh giáo viên mô tả, kể cả ngoài kịch bản dựng sẵn.
@@ -26,6 +26,14 @@ Hệ thống có 10 cơ chế chơi, còn giáo viên mô tả theo nhu cầu d�
 4. Kiểm tra: mọi nhóm đều qua validation và kiểm duyệt.
 5. Ghi nhận: lưu mô tả nhóm C, D để chọn tựa game mới.
 
+## Giáo viên được chọn gì
+
+| Kết luận | Lựa chọn |
+|---|---|
+| A, B | Chơi thử, chỉnh sửa, xuất bản |
+| C | Dùng bản gần nhất, chỉnh lại mô tả, hoặc gửi yêu cầu bổ sung trò chơi |
+| D | Chọn 1 trong 2–3 phương án thay thế, hoặc gửi yêu cầu để nhóm xem xét |
+
 ## Nguyên tắc
 
 - Không bịa cơ chế.
@@ -46,5 +54,7 @@ Hệ thống có 10 cơ chế chơi, còn giáo viên mô tả theo nhu cầu d�
 - Xác định chỗ lưu "ghi nhận nhóm C, D": chưa có trong SRS.
 - Luồng 4c đề xuất 2–3 trong 10 loại, chưa nói khi không loại nào phù hợp. Đây là chỗ nên nối nhóm C, D vào.
 - Tài liệu định hướng còn ghi FLD-15 cần thống nhất, nhưng SRS đã có 10 loại, xem [[Điểm lệch và việc cần chốt]].
+
+Bản đầy đủ: [[Dinh_huong_de_tai]].
 
 Xem thêm: [[Trải nghiệm cho trẻ]], [[Kiến trúc và công nghệ]]

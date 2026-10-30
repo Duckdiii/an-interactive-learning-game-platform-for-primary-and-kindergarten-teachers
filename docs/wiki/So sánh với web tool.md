@@ -1,6 +1,6 @@
 # So sánh với web tool
 
-Nguồn: `docs/Dinh_huong_de_tai.docx` mục 2, 3, 4.
+Nguồn: `docs/Dinh_huong_de_tai.md` mục 2, 3, 4.
 Cập nhật: 2026-10-31
 
 Phần này cần cho chương đặt vấn đề và phần bảo vệ. Các đánh giá công cụ là nhận định của nhóm, chưa phải số đo.
@@ -37,5 +37,7 @@ Nhiều giáo viên đã tự "vibe code" công cụ riêng, nên **"tạo đư�
 | Mô tả ngoài mẫu | Không làm được | Phân loại A–D | [[Mô tả ngoài danh mục game]] |
 
 Giá trị theo số: dưới 60 giây so với baseline 15–20 phút; nội dung dùng được ngay từ 75%; ảo giác dưới 5% trên mẫu 50 câu. Tất cả đều là **mục tiêu, chưa phải kết quả đo**.
+
+Bản đầy đủ: [[Dinh_huong_de_tai]].
 
 Xem thêm: [[Tổng quan đề tài]]
