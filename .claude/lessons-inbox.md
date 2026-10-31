@@ -17,6 +17,20 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-01 — Chỉ chạy test thư mục đang sửa nên sót luật kiểm toàn repo
+- Lỗi: ba bước P5 chỉ chạy `src/player/room`, nên không thấy `tokens.test.tsx` cấm mã màu hex trong `src/player`; màu viết cứng trong 5 file tới bước thứ tư mới lộ.
+- Phát hiện nhờ: `test-verifier` chạy toàn bộ test.
+- Nguyên nhân gốc: chạy test hẹp để nhanh và không đọc quy ước màu trước khi viết màn mới; `test-verifier` bước 2, 3 bị bỏ qua.
+- Cách chặn: kết thúc mỗi bước có sửa code thì chạy `test-verifier` toàn bộ như bảng định tuyến; viết màn mới trong `src/player` thì dùng token `play-*`.
+- Trạng thái: CHỜ DUYỆT.
+
+### 2026-10-31 — `cd` trong Bash làm memory của subagent lệch chỗ
+- Lỗi: chạy `cd frontend/...` trong Bash, thư mục làm việc giữ nguyên qua các lệnh sau; subagent `reviewer` chạy từ `frontend/` nên Claude Code tạo thư mục nhớ ở `frontend/.claude/agent-memory/`, hook chặn ghi và file nhớ rỗng, trong khi `reviewer` báo đã cập nhật bộ nhớ.
+- Phát hiện nhờ: đối chiếu đường dẫn trong báo cáo với file thật.
+- Nguyên nhân gốc: không chú ý thư mục làm việc trước khi gọi subagent; tin báo cáo của agent mà chưa kiểm file.
+- Cách chặn: không `cd`, dùng đường dẫn tuyệt đối hoặc `npm --prefix`; sau mỗi lần `reviewer` chạy, kiểm file nhớ thật ở gốc repo. Có thể dặn trong `reviewer.md`: bị hook chặn ghi nhớ thì phải báo.
+- Trạng thái: CHỜ DUYỆT.
+
 ### 2026-10-13 — Tạo nhánh git trái ý người dùng
 - Lỗi: tự tạo nhánh con `duy/ui-teacher-phase1` để làm UI, dù người dùng chỉ dùng nhánh `everyone/UI`.
 - Phát hiện nhờ: người dùng ngắt và yêu cầu xóa.

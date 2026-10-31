@@ -93,6 +93,23 @@
   --color-play-primary-strong: var(--play-primary-strong);
   --color-play-primary-ink: var(--play-primary-ink);
   --color-play-accent: var(--play-accent);
+  --color-play-night: var(--play-night);
+  --color-play-night-panel: var(--play-night-panel);
+  --color-play-night-track: var(--play-night-track);
+  --color-play-night-soft: var(--play-night-soft);
+  --color-play-night-progress: var(--play-night-progress);
+  --color-play-dot-yellow: var(--play-dot-yellow);
+  --color-play-dot-pink: var(--play-dot-pink);
+  --color-play-dot-blue: var(--play-dot-blue);
+  --color-play-dot-green: var(--play-dot-green);
+  --color-play-dot-orange: var(--play-dot-orange);
+  --color-play-dot-purple: var(--play-dot-purple);
+  --color-play-feedback-correct: var(--play-feedback-correct);
+  --color-play-feedback-try: var(--play-feedback-try);
+  --color-play-rank-fill: var(--play-rank-fill);
+  --color-play-rank-ink: var(--play-rank-ink);
+  --color-play-streak-fill: var(--play-streak-fill);
+  --color-play-streak-ink: var(--play-streak-ink);
 }
 
 @layer base {

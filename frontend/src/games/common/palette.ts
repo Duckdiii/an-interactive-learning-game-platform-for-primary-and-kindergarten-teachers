@@ -25,6 +25,25 @@ export interface Palette {
   linkColors: readonly string[]
   correctLine: string
   wrongLine: string
+  /** Nền xanh đêm của phòng thi đấu và các màu trên nền đó. */
+  night: string
+  nightPanel: string
+  nightTrack: string
+  nightSoft: string
+  nightProgress: string
+  dotYellow: string
+  dotPink: string
+  dotBlue: string
+  dotGreen: string
+  dotOrange: string
+  dotPurple: string
+  /** Màn sau mỗi câu trên máy học sinh; trả lời sai là cam dịu, không đỏ. */
+  feedbackCorrect: string
+  feedbackTry: string
+  rankFill: string
+  rankInk: string
+  streakFill: string
+  streakInk: string
 }
 
 // Màu tạm theo wireframe phía học sinh (xanh dương và cam); các màu của Konva giữ nguyên giá trị đang dùng.
@@ -49,6 +68,23 @@ export const DEFAULT_PALETTE: Palette = {
   linkColors: ['#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#92400E', '#64748B'],
   correctLine: '#43A047',
   wrongLine: '#F59E0B',
+  night: '#13306B',
+  nightPanel: '#1F3F84',
+  nightTrack: '#2A4C93',
+  nightSoft: '#C9D8F5',
+  nightProgress: '#5EEAD4',
+  dotYellow: '#FFD43B',
+  dotPink: '#FF9EBB',
+  dotBlue: '#7CC8FF',
+  dotGreen: '#8BD98B',
+  dotOrange: '#FFB347',
+  dotPurple: '#B79CFF',
+  feedbackCorrect: '#15803D',
+  feedbackTry: '#B45309',
+  rankFill: '#FFF4E5',
+  rankInk: '#5C3300',
+  streakFill: '#EAF7EE',
+  streakInk: '#14532D',
 }
 
 /** `fooBar` -> `foo-bar`, cho tên biến CSS. */
