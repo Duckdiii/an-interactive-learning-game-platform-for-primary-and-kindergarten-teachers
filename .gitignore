@@ -63,3 +63,6 @@ logs/
 /frontend/.img-ledger.json
 /frontend/public/experiments-demo-audio/
 /docs/experiments/
+
+# Cấu hình cá nhân của Obsidian
+.obsidian/

@@ -23,3 +23,5 @@
 ## Khác
 - [NFR.md](NFR.md)
 - [FR-summary.md](FR-summary.md)
+- [FLD.md](FLD.md)
+- [KPI.md](KPI.md)

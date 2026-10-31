@@ -12,7 +12,7 @@ Bạn không thấy hội thoại của phiên chính. Mọi thứ cần biết 
 
 ## Trước khi viết code
 
-1. Bản giao việc phải nêu: mục tiêu, phạm vi (component/file), ràng buộc, cách kiểm chứng. Thiếu một trong các ý đó đến mức không thể làm đúng thì DỪNG và trả về danh sách câu hỏi, đừng đoán.
+1. Bản giao việc phải nêu: mục tiêu, phạm vi (component/file), quyết định đã chốt, ràng buộc, cách kiểm chứng. Quyết định đã chốt không được tự đổi, kể cả khi thấy có cách hay hơn (nêu đề xuất trong báo cáo). Gặp điều bản giao việc chưa nói mà ảnh hưởng đến hành vi người dùng thấy thì hỏi, không tự chọn. Thiếu một trong các ý đó đến mức không thể làm đúng thì DỪNG và trả về danh sách câu hỏi, đừng đoán.
 2. Đọc `CLAUDE.md` ở root, đặc biệt các mục "Frontend", "Quy ước UX cho Canvas Engine", "Contract đã freeze" và "OOP, SOLID, GRASP".
 3. Đọc code lân cận và bắt chước phong cách có sẵn. Với renderer mới, lấy `MatchingRenderer`/`QuizRenderer` và `frontend/src/games/common/` làm mẫu.
 4. Nếu việc đụng DSL hoặc REST (field/endpoint), đọc `docs/game-json-dsl-v1.0.0.md` hoặc `docs/openapi/openapi.yaml` và dùng đúng tên đã có; kiểu DSL nằm ở `frontend/src/types/game-dsl.types.ts`.
@@ -50,7 +50,7 @@ Bạn không thấy hội thoại của phiên chính. Mọi thứ cần biết 
 1. **Đường dẫn worktree** và nhánh (từ `git rev-parse --show-toplevel` và `git branch --show-current`).
 2. **Danh sách file đã thêm/sửa** (`git status --short`), mỗi file một dòng với mô tả ngắn.
 3. **Kết quả kiểm chứng:** bảng `lệnh | PASS/FAIL/BỎ QUA | ghi chú`, kèm số test chạy/pass/fail.
-4. **Lệch so với bản giao việc:** những gì làm khác hoặc chưa làm, và lý do.
+4. **Lệch so với bản giao việc:** những gì làm khác hoặc chưa làm, và lý do. Kèm **các chỗ bạn tự quyết định** vì bản giao việc không nói tới (mỗi chỗ một dòng); không có thì ghi `không`.
 5. **Điểm cần phiên chính quyết định hoặc kiểm tra thêm:** ví dụ cần chạy `contract-guardian`, `canvas-ux-checker`, cần thêm dependency, phát hiện lỗi ngoài phạm vi.
 
 Không ghi `ai-usage-log.md`, không sửa `CLAUDE.md`, không sửa file ngoài phạm vi được giao. Thấy lỗi ở chỗ khác thì ghi vào báo cáo, đừng tự sửa.

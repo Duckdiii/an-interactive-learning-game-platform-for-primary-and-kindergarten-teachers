@@ -291,7 +291,7 @@ Phương án "soạn sẵn cả 3": mỗi phần tử thêm `gameId` của bản
 `openapi.yaml` ghi rõ: **tài liệu WebSocket Message Format chưa viết**. Wireframe D1–D7 yêu cầu **đồng bộ theo câu do giáo viên điều khiển** ("Câu tiếp", "Kết thúc câu sớm", "Xem đáp án", đồng hồ chung, "đã trả lời 21/32"), trong khi contract hiện tại để từng học sinh làm theo nhịp riêng (`getSessionQuestions` trả cả bộ câu, chỉ có `start/pause/resume/close`). Xin Backend chốt:
 
 1. Phòng đồng bộ theo câu (giáo viên điều khiển) hay theo nhịp riêng (tivi chỉ hiện tổng hợp)? Frontend giả định **đồng bộ theo câu**.
-2. Danh sách sự kiện (đề xuất của `RoomClient` cho P5, **chờ duyệt**, sau đó cần Backend xác nhận). `MockRoomClient` chạy theo đúng bảng này. `index` tính từ 0 như mục 2.10. Thời gian là ISO 8601 UTC.
+2. Danh sách sự kiện (của `RoomClient` cho P5, đã duyệt phía Frontend, còn cần Backend xác nhận). `createMockRoom` chạy theo đúng bảng này. `index` tính từ 0 như mục 2.10. Thời gian là ISO 8601 UTC.
 
 **Máy chủ phát.** Kênh chung là `/topic/session/{id}/teacher` và `/topic/session/{id}/students`, để dữ liệu của giáo viên không tới máy học sinh. Kênh riêng `/user/queue/session/{id}` là phần thêm so với mô tả trong `openapi.yaml`.
 

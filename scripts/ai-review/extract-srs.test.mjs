@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve, dirname } from "node:path";
-import { splitSrs, sectionOf } from "./extract-srs.mjs";
+import { splitSrs, sectionOf, wholeDocument, WHOLE_DOCUMENTS } from "./extract-srs.mjs";
 import { docxToBlocks } from "./docx-to-markdown.mjs";
 
 const h = (level, text) => ({ type: "heading", level, text });
@@ -41,6 +41,8 @@ test("SRS.docx thật: đủ 15 UC, có NFR, UC-01 có luồng ngoại lệ", { 
   assert.equal(ucs[14], "UC-15.md");
   assert.ok(files.has("NFR.md"));
   assert.match(files.get("UC-01.md"), /Exception Flows/);
+  assert.match(files.get("FLD.md"), /FLD-30/);
+  assert.match(files.get("KPI.md"), /KPI-05/);
 });
 
 function docx() {
@@ -56,6 +58,22 @@ test("docs/srs/ khớp với kết quả trích từ docs/SRS.docx (nhắc chạ
   for (const [name, content] of expected) {
     assert.equal(norm(readFileSync(resolve(dir, name), "utf8")), norm(content), `${name} lệch; chạy: node scripts/ai-review/extract-srs.mjs`);
   }
+});
+
+test("bản đầy đủ khớp file Word và không có trang bìa", { skip: !existsSync(docx()) }, () => {
+  const docs = dirname(docx());
+  const norm = (t) => t.replace(/\r\n/g, "\n");
+  for (const [from, to] of WHOLE_DOCUMENTS) {
+    const text = readFileSync(resolve(docs, to), "utf8");
+    assert.equal(norm(text), norm(wholeDocument(docxToBlocks(readFileSync(resolve(docs, from))))), `${to} lệch; chạy: node scripts/ai-review/extract-srs.mjs`);
+    assert.match(text, /^# /, `${to} phải bắt đầu từ heading, không có trang bìa`);
+  }
+  assert.match(readFileSync(resolve(docs, "SRS-full.md"), "utf8"), /^# CHƯƠNG 1\./);
+});
+
+test("wholeDocument bỏ phần trước heading đầu tiên", () => {
+  assert.equal(wholeDocument([p("bìa"), h(1, "Mở đầu"), p("thân")]).includes("bìa"), false);
+  assert.equal(wholeDocument([p("bìa"), p("tên, mã số")]), "");
 });
 
 // ---- escCell: ký tự | trong ô bảng ----

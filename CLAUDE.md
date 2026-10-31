@@ -11,6 +11,7 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 
 - **Không tự ý thêm thư viện/dependency mới** nếu chưa hỏi lại user trước, kể cả khi có vẻ "cần thiết" cho task.
 - **Không bao giờ hardcode secret** (connection string, password, API key) vào source code. Luôn đọc qua biến môi trường (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `VITE_API_BASE_URL`...). Nếu thêm biến env mới, cập nhật cả `.env.example` tương ứng.
+- Việc UI giáo viên làm trực tiếp trên nhánh `everyone/UI`; không tự tạo nhánh mới khi chưa được cho phép.
 - Comment ngắn gọn, chỉ giải thích phần không tự rõ nghĩa (ví dụ: lý do dùng Session Pooler thay vì Transaction Pooler).
 - Trước khi `git add -A` hoặc commit, kiểm tra `git status`/diff để không lỡ commit `.env`, file build (`target/`, `node_modules/`, `dist/`) hay secret.
 
@@ -120,7 +121,15 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 
 ## Subagent (`.claude/agents/`)
 
-Phiên chính là **AI Orchestrator**: lập kế hoạch, chọn công cụ, viết bản giao việc, quyết định thiết kế, xem diff của agent và đưa vào cây chính, ghi `ai-usage-log.md`, báo cáo. Khảo sát giao cho `codebase-explorer` / `impact-analyzer`; cài đặt giao cho agent thực thi (xem dưới); kiểm tra giao cho subagent chỉ đọc theo bảng định tuyến (không có `Edit`/`Write`, nên chạy song song được). Phiên chính chỉ tự sửa khi việc nhỏ (khoảng dưới 20 dòng, một file, không có quyết định thiết kế mới) hoặc cần ngữ cảnh hội thoại. Subagent không thấy hội thoại, nên **không giao** việc ghi `ai-usage-log.md` hay quyết định thiết kế.
+Nguyên tắc: **phiên chính viết code, subagent đọc, chạy và kiểm tra.** Phiên chính lập kế hoạch, quyết định thiết kế, viết code, ghi `ai-usage-log.md`, duyệt kết quả cuối. Khảo sát và kiểm tra giao cho subagent chỉ đọc (không có `Edit`/`Write`, nên chạy song song được).
+
+Chỉ giao cài đặt cho agent thực thi khi có một trong hai điều kiện:
+- Có spec đầy đủ (ví dụ `openapi.yaml`): đưa cho người mới là làm được, không cần hỏi lại.
+- Các phần thật sự độc lập: không cần kết quả của nhau, không sửa chung file, không phải tự quyết định chung một thứ.
+
+Người viết không tự xác nhận code của mình: code do phiên chính viết vẫn phải qua `reviewer`. `reviewer` chỉ nhận diff và tiêu chí, không nhận lời giải thích vì sao code viết như vậy, để giữ góc nhìn sạch.
+
+Subagent chỉ biết `CLAUDE.md`, file agent, git status và bản giao việc: không thấy hội thoại, không thấy auto memory. Vì vậy **không giao** việc ghi `ai-usage-log.md` hay quyết định thiết kế; quy tắc nào subagent cần biết thì phải ghi ở một trong các nơi đó.
 
 Tự chạy (chỉ đọc, rẻ):
 - `test-verifier`: chạy `tsc`/lint/test/build (frontend), `./mvnw test` (backend) và báo kết quả gọn.
@@ -145,35 +154,57 @@ Agent tài liệu và bảo mật:
 - `doc-syncer`: có quyền ghi nhưng chỉ file tài liệu, chạy trong worktree riêng, không commit; tự sửa `x-status` và mô tả đã lỗi thời, KHÔNG tự đổi contract đã freeze (chỗ code khác spec thì báo để phiên chính hỏi user).
 - `security-auditor`: chỉ đọc, rà soát bảo mật sâu (xác thực, phân quyền theo chủ sở hữu, CORS, WebSocket, dữ liệu trẻ em, kiểm duyệt AI, lạm dụng chi phí AI); không gọi mạng; chạy khi đổi code liên quan bảo mật và trước khi triển khai, bổ sung chứ không thay `pre-commit-checker`.
 
-Agent thực thi (có quyền ghi, luôn chạy trong worktree riêng, không commit; chỉ giao khi phiên chính đã có kế hoạch và viết được bản giao việc tự chứa):
+Agent thực thi (có quyền ghi, luôn chạy trong worktree riêng, không commit; chỉ giao khi đủ điều kiện ở đầu mục này):
 - `backend-implementer`: cài đặt code backend theo bản giao việc, tự build và chạy test lớp của mình.
 - `frontend-implementer`: cài đặt code frontend/renderer theo bản giao việc, tự `tsc`/lint/test/build.
 - `test-writer`: chỉ thêm/sửa file test (ví dụ lấp mutant sống sót), không sửa code nguồn.
 
-Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/class, ràng buộc (kiến trúc, contract, không thêm dependency), tiêu chí xong, lệnh kiểm chứng. Không giao việc nhỏ (tự làm rẻ hơn) hay quyết định thiết kế. Không giao hai agent thực thi sửa cùng file; nếu bắt buộc thì chạy tuần tự. Phiên chính phải xem diff trong worktree của agent, chạy agent kiểm tra theo bảng định tuyến rồi mới đưa thay đổi vào cây chính.
+Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/class, quyết định đã chốt của người dùng cho việc này (agent không tự đổi), ràng buộc (kiến trúc, contract, không thêm dependency), tiêu chí xong kiểm được, lệnh kiểm chứng, và chỗ phải dừng lại hỏi. Chỉ dẫn đường tới tài liệu trong repo thay vì chép lại; phải ghi rõ những gì không có trong repo. Không giao quyết định thiết kế. Không giao hai agent thực thi sửa cùng file; nếu bắt buộc thì chạy tuần tự. Phiên chính phải xem diff trong worktree của agent, chạy agent kiểm tra theo bảng định tuyến rồi mới đưa thay đổi vào cây chính.
 
-### Bảng định tuyến (thay đổi đụng tới → agent chạy)
+### Bảng định tuyến
+
+**Luôn chạy:**
+
+| Khi nào | Chạy |
+|---|---|
+| Có sửa code (`backend/**`, `frontend/src/**`) | `reviewer` + `test-verifier` |
+| Mọi commit | `pre-commit-checker` (sau cùng) |
+
+**Chạy thêm khi đụng phần liên quan:**
 
 | Thay đổi đụng tới | Chạy |
 |---|---|
+| `backend/**/*.java` | `backend-architect-reviewer` |
 | `dto/dsl`, `schema/game-dsl`, `schema/game-ai-output`, `game-dsl.types.ts`, `docs/openapi/openapi.yaml`, controller/DTO REST | `contract-guardian` |
 | `backend/src/main/resources/db/migration/`, `entity/`, `application*.yml` | `migration-checker` |
-| `backend/**/*.java` | `backend-architect-reviewer` + `test-verifier` |
-| `frontend/src/**` | `reviewer` + `test-verifier` |
-| `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | thêm `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |
-| Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
-| Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch và bản giao việc |
-| `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
-| Code đã xong, tài liệu có thể lỗi thời (`x-status`, mô tả, bảng agent) | `doc-syncer`, sau đó `contract-guardian` |
 | `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` |
-| Cần cài đặt backend theo kế hoạch đã chốt | `backend-implementer`, sau đó như hàng `backend/**/*.java` |
-| Cần cài đặt frontend theo kế hoạch đã chốt | `frontend-implementer`, sau đó như hàng `frontend/src/**` |
-| Mutant sống sót hoặc module thiếu test | `test-writer`, sau đó `mutation-checker` nếu người dùng yêu cầu |
+| `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
 | `ai-usage-log.md` | `log-auditor` |
+| `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |
+| Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
+| Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch |
+| Code đã xong, tài liệu có thể lỗi thời (`x-status`, mô tả, bảng agent) | `doc-syncer`, sau đó `contract-guardian` |
+| Đã đủ điều kiện giao cài đặt (xem đầu mục Subagent) | `backend-implementer` / `frontend-implementer` |
+| Mutant sống sót hoặc module thiếu test | `test-writer`, sau đó `mutation-checker` nếu người dùng yêu cầu |
 | PR đã có review của bot/người | `pr-triage` |
-| Mọi commit | `pre-commit-checker` (sau cùng) |
 
 Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.md` hay docs không cần `test-verifier`.
+
+## Wiki kiến thức (`docs/wiki/`)
+
+`docs/wiki/index.md` là cửa vào của kho tài liệu (vault Obsidian là `docs/`). Wiki chỉ để định hướng: tóm tắt, nối các tài liệu lại với nhau, có thể chậm hơn nguồn. **Trước khi viết code hay test phải đọc nguồn gốc theo bảng dưới; wiki khác nguồn thì tin nguồn.** Phiên chính ghi wiki khi người dùng yêu cầu, theo `docs/wiki/README.md`; subagent chỉ đọc.
+
+| Cần biết | Đọc |
+|---|---|
+| Tổng quan, trạng thái, lý do quyết định, điểm lệch | `docs/wiki/index.md` |
+| Luồng đầy đủ của một ca sử dụng | `docs/srs/UC-xx.md` |
+| Yêu cầu chức năng, phi chức năng | `docs/srs/FR-summary.md`, `docs/srs/NFR.md` |
+| Trường FLD, KPI | `docs/srs/FLD.md`, `docs/srs/KPI.md` |
+| Các mục SRS khác | `docs/SRS-full.md`; sơ đồ chỉ có ở `docs/SRS.docx` |
+| Định hướng đề tài | `docs/Dinh_huong_de_tai.md` |
+| Field DSL | `docs/game-json-dsl-v1.0.0.md` |
+| Endpoint, mã lỗi | `docs/openapi/openapi.yaml` |
+| Thiết kế màn hình | `docs/ui/SPEC.md`, `docs/ui/wireframes/` |
 
 ## Học từ lỗi của agent
 

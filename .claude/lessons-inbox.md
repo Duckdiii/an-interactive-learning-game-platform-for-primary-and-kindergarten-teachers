@@ -113,6 +113,20 @@ Mẫu một mục:
 - Bổ sung (P2.2): agent thực thi vẫn bị cô lập trong worktree riêng của nó nên lệnh `cmd`/`powershell` tạo junction `node_modules` ở worktree phiên chính tạo bị chặn; phiên chính phải tự tạo junction trước khi giao (`New-Item -ItemType Junction`), và tự gỡ bằng `cmd /c rmdir` sau khi chép kết quả.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-10-30 — Regex trong test mất dấu `\` vì ghi qua heredoc, test thành vô tác dụng
+- Lỗi: ở P4.4 sửa test bằng `node - <<'EOF'`, regex `/\d+\s*điểm/i` thành `/d+s*điểm/i` nên không bao giờ khớp "10 điểm"; test vẫn xanh nên không ai thấy. Nằm ở `PresentPlay.test.tsx` trên nhánh `everyone/UI`.
+- Phát hiện nhờ: chạy thử prompt mới của `reviewer` (mục kiểm test), các lần review trước bỏ sót.
+- Nguyên nhân gốc: lặp lại lỗi heredoc đã ghi ngày 2026-10-13; test xanh nên tin là đúng, không đọc lại dòng vừa ghi.
+- Cách chặn: chuỗi có `\` luôn sửa bằng Edit/Write, không dùng heredoc hay `node -e`; sau khi ghi test mới, thử làm code sai xem test có hỏng không.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-10-31 — Code an ninh viết bằng danh sách cấm, hook có đường im lặng cho qua
+- Lỗi: hook `agent-guard` bản đầu dùng danh sách cấm nên `git diff "--output=CLAUDE.md"` lọt, và chỉ chạy khi `argv[1]` khớp đúng đường dẫn nên có thể thoát 0 mà không kiểm tra; test vẫn xanh 13/13.
+- Phát hiện nhờ: `reviewer` được giao thử vượt qua hook.
+- Nguyên nhân gốc: chỉ nghĩ tới dạng lệnh viết thẳng, quên shell xử lý chuỗi trước khi git nhận; test do chính người viết nghĩ ra nên cùng điểm mù.
+- Cách chặn: phần chặn quyền dùng danh sách cho phép; mặc định là chặn; mọi code an ninh phải có người khác thử vượt qua.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-10-11 — Agent kiểm tra diff bỏ sót thay đổi chưa commit

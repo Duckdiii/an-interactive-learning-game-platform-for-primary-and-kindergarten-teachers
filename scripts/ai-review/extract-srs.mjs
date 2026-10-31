@@ -5,6 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { docxToBlocks, blocksToMarkdown } from "./docx-to-markdown.mjs";
 
+export const WHOLE_DOCUMENTS = [["SRS.docx", "SRS-full.md"], ["Dinh_huong_de_tai.docx", "Dinh_huong_de_tai.md"]];
 const UC_HEADING = /^4\.2\.\d+\.\s.*\b(UC-\d{2})\b/;
 
 /** Cắt các khối thuộc một heading (đến heading cùng cấp hoặc cao hơn kế tiếp). */
@@ -42,12 +43,22 @@ export function splitSrs(blocks) {
   const extras = [
     ["NFR.md", (h) => h.level === 2 && /^3\.3\./.test(h.text)],
     ["FR-summary.md", (h) => h.level === 3 && /^3\.1\.3\./.test(h.text)],
+    ["FLD.md", (h) => h.level === 3 && /^3\.1\.4\./.test(h.text)],
+    ["KPI.md", (h) => h.level === 3 && /^1\.2\.3\./.test(h.text)],
   ];
   for (const [name, pred] of extras) {
     const sec = sectionOf(blocks, pred);
     if (sec) files.set(name, blocksToMarkdown(rebase(sec)));
   }
   return files;
+}
+
+/** Toàn bộ tài liệu thành Markdown, bỏ phần trước heading đầu tiên (trang bìa có họ tên, mã số sinh viên). */
+export function wholeDocument(blocks) {
+  const start = blocks.findIndex((b) => b.type === "heading");
+
+  // Không có heading thì không biết đâu là hết trang bìa: thà rỗng còn hơn lộ.
+  return start < 0 ? "" : blocksToMarkdown(blocks.slice(start));
 }
 
 function indexMarkdown(files) {
@@ -62,7 +73,7 @@ function indexMarkdown(files) {
     ...ucs.map((n) => `- [${n.replace(".md", "")}](${n})`),
     "",
     "## Khác",
-    ...["NFR.md", "FR-summary.md"].filter((n) => files.has(n)).map((n) => `- [${n}](${n})`),
+    ...["NFR.md", "FR-summary.md", "FLD.md", "KPI.md"].filter((n) => files.has(n)).map((n) => `- [${n}](${n})`),
     "",
   ].join("\n");
 }
@@ -72,8 +83,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const input = resolve(process.argv[2] ?? join(root, "docs", "SRS.docx"));
   const outDir = resolve(process.argv[3] ?? join(root, "docs", "srs"));
   const files = splitSrs(docxToBlocks(readFileSync(input)));
+  // Chỉ sinh bản đầy đủ khi chạy mặc định; có tham số là đang trích thử ra chỗ khác. Đọc trước khi ghi để thiếu file Word thì không ghi dở dang.
+  const whole = process.argv[2] === undefined ? WHOLE_DOCUMENTS.map(([from, to]) => [to, wholeDocument(docxToBlocks(readFileSync(join(root, "docs", from))))]) : [];
   mkdirSync(outDir, { recursive: true });
   for (const [name, content] of files) writeFileSync(join(outDir, name), content);
   writeFileSync(join(outDir, "README.md"), indexMarkdown(files));
   console.log(`Đã ghi ${files.size + 1} file vào ${outDir}`);
+  for (const [to, content] of whole) writeFileSync(join(root, "docs", to), content);
 }

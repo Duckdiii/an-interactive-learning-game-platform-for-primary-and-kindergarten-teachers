@@ -33,28 +33,34 @@ Dự án có **18 subagent**. Phiên chính (agent đang trò chuyện với ng�
 | 17 | `doc-syncer` | Tài liệu | sonnet | Có, chỉ file tài liệu (worktree riêng) | Sau khi code xong, trước khi mở PR |
 | 18 | `security-auditor` | Bảo mật | sonnet | Không | Khi đổi code liên quan bảo mật, trước khi triển khai |
 
-`canvas-ux-checker` và `mutation-checker` tốn nhiều usage nên không tự chạy. Ba agent thực thi chỉ được giao việc khi phiên chính đã có kế hoạch.
+`canvas-ux-checker` và `mutation-checker` tốn nhiều usage nên không tự chạy. Mặc định phiên chính tự viết code; ba agent thực thi chỉ được giao khi có spec đầy đủ hoặc các phần thật sự độc lập (xem `CLAUDE.md`, mục Subagent).
 
 ## 2. Bảng định tuyến
 
+**Luôn chạy:**
+
+| Khi nào | Chạy |
+|---|---|
+| Có sửa code (`backend/**`, `frontend/src/**`) | `reviewer` + `test-verifier` |
+| Mọi commit | `pre-commit-checker` (sau cùng) |
+
+**Chạy thêm khi đụng phần liên quan:**
+
 | Thay đổi đụng tới | Chạy |
 |---|---|
+| `backend/**/*.java` | `backend-architect-reviewer` |
 | `dto/dsl`, `schema/game-dsl`, `schema/game-ai-output`, `game-dsl.types.ts`, `docs/openapi/openapi.yaml`, controller/DTO REST | `contract-guardian` |
 | `backend/src/main/resources/db/migration/`, `entity/`, `application*.yml` | `migration-checker` |
-| `backend/**/*.java` | `backend-architect-reviewer` + `test-verifier` |
-| `frontend/src/**` | `reviewer` + `test-verifier` |
-| `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | thêm `canvas-ux-checker` và `mutation-checker` nếu người dùng yêu cầu |
-| Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
-| Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch và bản giao việc |
-| `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
-| Code đã xong, tài liệu có thể lỗi thời (`x-status`, mô tả, bảng agent) | `doc-syncer`, sau đó `contract-guardian` |
 | `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` |
-| Cần cài đặt backend theo kế hoạch đã chốt | `backend-implementer`, sau đó như hàng `backend/**/*.java` |
-| Cần cài đặt frontend theo kế hoạch đã chốt | `frontend-implementer`, sau đó như hàng `frontend/src/**` |
-| Mutant sống sót hoặc module thiếu test | `test-writer`, sau đó `mutation-checker` nếu người dùng yêu cầu |
+| `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
 | `ai-usage-log.md` | `log-auditor` |
+| `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |
+| Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
+| Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch |
+| Code đã xong, tài liệu có thể lỗi thời (`x-status`, mô tả, bảng agent) | `doc-syncer`, sau đó `contract-guardian` |
+| Đã đủ điều kiện giao cài đặt (xem `CLAUDE.md`, mục Subagent) | `backend-implementer` / `frontend-implementer` |
+| Mutant sống sót hoặc module thiếu test | `test-writer`, sau đó `mutation-checker` nếu người dùng yêu cầu |
 | PR đã có review của bot/người | `pr-triage` |
-| Mọi commit | `pre-commit-checker` (sau cùng) |
 
 Quy trình: chạy song song các agent đúng với phần đã đổi, đợi tất cả xong rồi mới sửa theo kết quả, sau đó chạy lại `test-verifier`. Ngay trước khi đưa commit message, chạy `pre-commit-checker`. Thay đổi chỉ trong `*.md` hay docs thì không cần `test-verifier`.
 
@@ -93,9 +99,9 @@ Quy trình: chạy song song các agent đúng với phần đã đổi, đợi 
 - **Làm như thế nào:**
   1. Đọc `CLAUDE.md` trước (đó là chuẩn review).
   2. Lấy diff: `git diff main...HEAD`, cộng `git diff` và `git diff --cached` nếu có thay đổi chưa commit; chỉ phê bình phần nằm trong diff.
-  3. Kiểm tra theo thứ tự ưu tiên: (1) lỗi đúng sai với kịch bản cụ thể; (2) kiến trúc đã chốt; (3) quy ước frontend (chỉ Context + useState/useReducer, gọi API qua `axiosInstance`, session qua `useAuth()`, không thêm dependency ngoài danh sách duyệt); (4) Canvas Engine (prop `mode`, `onAnswered`, nộp một lần, dùng lại `games/common/`); (5) UX cho trẻ (touch target 64px, không đỏ gắt/rung mạnh khi sai, nút nghe lại); (6) an toàn (secret, `.env`, CORS/`permitAll`); (7) test có thật sự thất bại khi code sai.
+  3. Kiểm tra theo thứ tự ưu tiên: (1) lỗi đúng sai với kịch bản cụ thể; (2) kiến trúc đã chốt; (3) quy ước frontend (chỉ Context + useState/useReducer, gọi API qua `axiosInstance`, session qua `useAuth()`, không thêm dependency ngoài danh sách duyệt); (4) Canvas Engine (prop `mode`, `onAnswered`, nộp một lần, dùng lại `games/common/`); (5) UX cho trẻ (touch target 64px, không đỏ gắt/rung mạnh khi sai, nút nghe lại); (6) an toàn (secret, `.env`, CORS/`permitAll`); (7) test (bắt buộc khi diff có test): tên test hứa gì, thân test có làm và assert đúng điều đó không, bỏ đoạn code chính thì test có hỏng không.
   4. Không phê bình định dạng hay đặt tên nhỏ nhặt, không khen, không đề xuất tính năng mới.
-- **Đầu ra:** danh sách `[CAO|TRUNG BÌNH|THẤP] file:dòng — vấn đề — kịch bản gây lỗi — cách sửa gợi ý`, xếp từ nặng đến nhẹ; dòng cuối `Kết luận: có thể mở PR` hoặc `Nên sửa trước khi mở PR`.
+- **Đầu ra:** danh sách `[CAO|TRUNG BÌNH|THẤP] file:dòng — vấn đề — kịch bản gây lỗi — cách sửa gợi ý`, xếp từ nặng đến nhẹ (CAO: sai chức năng chính, mất/lộ dữ liệu, bảo mật, vi phạm kiến trúc hoặc contract; TRUNG BÌNH: sai ở trường hợp biên có thể gặp thật, hoặc test không bảo vệ hành vi quan trọng; THẤP: không gây sai chức năng); cuối cùng các dòng `Tổng: CAO x · TRUNG BÌNH y · THẤP z`, `Chưa kiểm: ...` và `Kết luận: có thể mở PR` hoặc `Nên sửa trước khi mở PR`.
 - **Giới hạn:** Bash chỉ dùng cho `git diff/log/show/status`.
 
 ### 3.4. `backend-architect-reviewer`
@@ -243,7 +249,7 @@ Ba agent này **viết code hoặc test** thay phiên chính. Chúng đều ch�
 
 ### Bản giao việc (bắt buộc)
 
-Vì subagent không thấy hội thoại, phiên chính phải viết bản giao việc tự chứa gồm: mục tiêu, phạm vi (file/class), ràng buộc (kiến trúc đã chốt, contract, không thêm dependency), tiêu chí xong và lệnh kiểm chứng. Thiếu thông tin đến mức không làm đúng được thì agent dừng và trả về câu hỏi thay vì đoán.
+Vì subagent không thấy hội thoại, phiên chính phải viết bản giao việc tự chứa gồm: mục tiêu, phạm vi (file/class), quyết định đã chốt của người dùng (agent không tự đổi), ràng buộc (kiến trúc đã chốt, contract, không thêm dependency), tiêu chí xong kiểm được, lệnh kiểm chứng và chỗ phải dừng lại hỏi. Chỉ dẫn đường tới tài liệu trong repo thay vì chép lại; phải ghi rõ những gì không có trong repo. Thiếu thông tin đến mức không làm đúng được thì agent dừng và trả về câu hỏi thay vì đoán; báo cáo của `backend-implementer` và `frontend-implementer` phải liệt kê các chỗ tự quyết định.
 
 ### 6.1. `backend-implementer`
 
@@ -315,6 +321,6 @@ Vì subagent không thấy hội thoại, phiên chính phải viết bản giao
 ## 8. Lưu ý khi dùng
 
 - Nhóm kiểm tra chỉ **báo cáo**; phiên chính mới là bên quyết định sửa gì và sửa thế nào.
-- Nhóm khảo sát nên chạy trước khi lập kế hoạch (có thể chạy song song). Nhóm thực thi chỉ được giao khi đã có kế hoạch. `doc-syncer` nên chạy sau khi code xong và trước `contract-guardian`; `security-auditor` chạy khi đổi code liên quan bảo mật và trước khi triển khai. Không giao hai agent thực thi sửa cùng file (chạy tuần tự nếu bắt buộc), và luôn xem diff trong worktree cùng chạy agent kiểm tra theo bảng định tuyến trước khi đưa vào cây chính.
-- Không giao cho subagent việc ghi `ai-usage-log.md`, quyết định thiết kế hay các việc nhỏ (vì chúng không thấy hội thoại, và giao việc tốn hơn tự làm).
+- Nhóm khảo sát nên chạy trước khi lập kế hoạch (có thể chạy song song). Nhóm thực thi chỉ được giao khi có spec đầy đủ hoặc các phần thật sự độc lập. `doc-syncer` nên chạy sau khi code xong và trước `contract-guardian`; `security-auditor` chạy khi đổi code liên quan bảo mật và trước khi triển khai. Không giao hai agent thực thi sửa cùng file (chạy tuần tự nếu bắt buộc), và luôn xem diff trong worktree cùng chạy agent kiểm tra theo bảng định tuyến trước khi đưa vào cây chính.
+- Không giao cho subagent việc ghi `ai-usage-log.md` hay quyết định thiết kế (vì chúng không thấy hội thoại).
 - Chỉ chạy agent đúng với phần đã đổi; không chạy cả 18 agent cho mỗi thay đổi.
