@@ -87,12 +87,18 @@ public class GameGenerationService {
      * @throws AiGenerationTimeoutException nếu AI hoặc kiểm duyệt không dùng được, hoặc hết số lần thử
      */
     public GameDsl generate(GameType type, GameDslRequest request) {
+        return generateResult(type, request).game();
+    }
+
+    public GenerationResult generateResult(GameType type, GameDslRequest request) {
         return metricsProvider.getIfAvailable(CurriculumMetrics::noop).measure(CurriculumMetrics.Stage.TOTAL,
                 request.subject(), request.gradeLevel(), () -> generateGame(type, request), g -> CurriculumMetrics.Outcome.SUCCESS);
     }
 
-    private GameDsl generateGame(GameType type, GameDslRequest request) {
-        String curriculumContext = curriculumRagEnabled ? retrieveCurriculumContext(type, request) : null;
+    private GenerationResult generateGame(GameType type, GameDslRequest request) {
+        var curriculum = curriculumRagEnabled ? retrieveCurriculumContext(type, request) : CurriculumContextProvider.Evidence.insufficient();
+        String curriculumContext = curriculumRagEnabled
+                ? withPreschoolPedagogy(curriculum.context(), request.gradeLevel()) : null;
         GameContentGenerator generator = generatorProvider.getIfAvailable();
         if (generator == null) {
             throw new AiGenerationTimeoutException("Chưa cấu hình dịch vụ AI để sinh game");
@@ -110,7 +116,8 @@ public class GameGenerationService {
             if (aiReport.valid()) {
                 ValidationReport report = validate(type, aiReport.output(), request);
                 if (report.valid()) {
-                    return report.game();
+                    return new GenerationResult(report.game(), curriculum.evidence(),
+                            com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable());
                 }
                 if (report.unsafe()) {
                     log.warn("Nội dung AI sinh ra bị từ chối vì không an toàn (lần thử {})", attemptNumber);
@@ -132,7 +139,7 @@ public class GameGenerationService {
         throw new AiGenerationTimeoutException("AI chưa sinh được game hợp lệ sau " + (maxRetries + 1) + " lần thử");
     }
 
-    private String retrieveCurriculumContext(GameType type, GameDslRequest request) {
+    private CurriculumContextProvider.Evidence retrieveCurriculumContext(GameType type, GameDslRequest request) {
         var catalog = curriculumCatalog.getIfAvailable();
         if (catalog == null) throw new CurriculumServiceUnavailableException("Curriculum catalog not configured", null);
         catalog.requireSupported(type, request.subject(), request.gradeLevel());
@@ -142,19 +149,28 @@ public class GameGenerationService {
         }
         try {
             CurriculumContextProvider.Evidence evidence = provider.retrieve(
-                    request.topic(), request.subject(), request.gradeLevel());
+                    request.topic(), request.subject(), request.gradeLevel(), request.kindergartenAgeBand());
             if (evidence == null || !evidence.sufficient()) {
                 throw new CurriculumEvidenceNotFoundException(
                         "Không tìm thấy yêu cầu cần đạt đủ liên quan trong chương trình Toán lớp 1 cho chủ đề này");
             }
-            return evidence.context();
+            return evidence;
         } catch (CurriculumEvidenceNotFoundException exception) {
+            throw exception;
+        } catch (com.aigameplatform.backend.exception.KindergartenAgeBandRequiredException exception) {
             throw exception;
         } catch (RuntimeException exception) {
             log.error("Curriculum retrieval failed ({})", exception.getClass().getSimpleName());
             throw new CurriculumServiceUnavailableException(
                     "Không truy xuất được căn cứ chương trình; vui lòng thử lại sau", exception);
         }
+    }
+
+    private static String withPreschoolPedagogy(String context, GradeLevel grade) {
+        if (grade != GradeLevel.KINDERGARTEN || context == null || context.isBlank()) return context;
+        return "RÀNG BUỘC SƯ PHẠM MẦM NON: Dùng câu ngắn, ít chữ; ưu tiên hình ảnh và hướng dẫn bằng âm thanh khi kiểu game hỗ trợ. "
+                + "Không yêu cầu trẻ đọc nhiều. Điều chỉnh độ khó theo độ tuổi ghi trong từng kết quả mong đợi; không suy rộng sang độ tuổi khác.\n\n"
+                + "CĂN CỨ CHƯƠNG TRÌNH:\n" + context;
     }
 
     private String callAi(GameContentGenerator generator, GenerationAttempt attempt) {

@@ -1,0 +1,724 @@
+{
+  "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "verifiedChunks" : 44,
+  "sourceFragmentCount" : 45,
+  "extractedPages" : 5,
+  "datasetVersion" : "vietnamese-grade4-draft-v1",
+  "curriculumVersion" : "32/2018/TT-BGDDT",
+  "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "verifiedOutcomes" : 42,
+  "verifiedControls" : 2,
+  "manualTranscribedOutcomes" : 0,
+  "manualTranscribedControls" : 0,
+  "manualTranscriptionChunkIds" : [ ],
+  "chunks" : [ {
+    "chunkId" : "vi-g4-001",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Kĩ thuật đọc",
+    "text" : "Đọc đúng và diễn cảm các văn bản truyện, kịch, thơ, văn bản miêu tả: nhấn giọng đúng từ ngữ; thể hiện cảm xúc qua giọng đọc. Tốc độ đọc khoảng 80 – 90 tiếng trong 1 phút.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 87,
+      "printedPage" : 31,
+      "region" : "LEFT",
+      "text" : "Đọc đúng và diễn cảm các văn bản truyện, kịch, thơ, văn bản miêu tả: nhấn giọng đúng từ ngữ; thể hiện cảm xúc qua giọng đọc. Tốc độ đọc khoảng 80 – 90 tiếng trong 1 phút."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-002",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Kĩ thuật đọc",
+    "text" : "Đọc thầm với tốc độ nhanh hơn lớp 3.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 87,
+      "printedPage" : 31,
+      "region" : "LEFT",
+      "text" : "Đọc thầm với tốc độ nhanh hơn lớp 3."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-003",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Kĩ thuật đọc",
+    "text" : "Sử dụng được từ điển học sinh để tìm từ và nghĩa của các từ ngữ mới.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 87,
+      "printedPage" : 31,
+      "region" : "LEFT",
+      "text" : "Sử dụng được từ điển học sinh để tìm từ và nghĩa của các từ ngữ mới."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-004",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Kĩ thuật đọc",
+    "text" : "Ghi chép được vắn tắt những ý tưởng, chi tiết quan trọng vào phiếu đọc sách hoặc sổ tay.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 87,
+      "printedPage" : 31,
+      "region" : "LEFT",
+      "text" : "Ghi chép được vắn tắt những ý tưởng, chi tiết quan trọng vào phiếu đọc sách hoặc sổ tay."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-005",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Đọc hiểu nội dung",
+    "text" : "Nhận biết được một số chi tiết và nội dung chính của văn bản; dựa vào gợi ý hiểu được điều tác giả muốn nói qua văn bản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 87,
+      "printedPage" : 31,
+      "region" : "LEFT",
+      "text" : "Nhận biết được một số chi tiết và nội dung chính của văn bản; dựa vào gợi ý hiểu"
+    }, {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "được điều tác giả muốn nói qua văn bản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-006",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Đọc hiểu nội dung",
+    "text" : "Tóm tắt được văn bản truyện đơn giản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Tóm tắt được văn bản truyện đơn giản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-007",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Đọc hiểu nội dung",
+    "text" : "Nhận biết được chủ đề văn bản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Nhận biết được chủ đề văn bản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-008",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Đọc hiểu hình thức",
+    "text" : "Nhận biết được đặc điểm của nhân vật thể hiện qua hình dáng, điệu bộ, hành động, lời thoại.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Nhận biết được đặc điểm của nhân vật thể hiện qua hình dáng, điệu bộ, hành động, lời thoại."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-009",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Đọc hiểu hình thức",
+    "text" : "Nhận biết được trình tự sắp xếp các sự việc trong câu chuyện theo quan hệ nhân quả.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Nhận biết được trình tự sắp xếp các sự việc trong câu chuyện theo quan hệ nhân quả."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-010",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Đọc hiểu hình thức",
+    "text" : "Nhận biết được quan hệ giữa các nhân vật trong câu chuyện thể hiện qua cách xưng hô.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Nhận biết được quan hệ giữa các nhân vật trong câu chuyện thể hiện qua cách xưng hô."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-011",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Đọc hiểu hình thức",
+    "text" : "Nhận biết được hình ảnh trong thơ, lời thoại trong văn bản kịch",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Nhận biết được hình ảnh trong thơ, lời thoại trong văn bản kịch"
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-012",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Đọc hiểu hình thức",
+    "text" : "Hiểu tác dụng của biện pháp tu từ nhân hoá.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Hiểu tác dụng của biện pháp tu từ nhân hoá."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-013",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Liên hệ, so sánh, kết nối",
+    "text" : "Nêu được tình cảm, suy nghĩ của bản thân sau khi đọc văn bản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Nêu được tình cảm, suy nghĩ của bản thân sau khi đọc văn bản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-014",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Liên hệ, so sánh, kết nối",
+    "text" : "Nêu được câu chuyện, bài hoặc đoạn thơ mà mình yêu thích nhất và giải thích vì sao.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Nêu được câu chuyện, bài hoặc đoạn thơ mà mình yêu thích nhất và giải thích vì sao."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-015",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản văn học / Liên hệ, so sánh, kết nối",
+    "text" : "Nêu được cách ứng xử của bản thân nếu gặp những tình huống tương tự như tình huống của nhân vật trong tác phẩm.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Nêu được cách ứng xử của bản thân nếu gặp những tình huống tương tự như tình huống của nhân vật trong tác phẩm."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-016",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc mở rộng / Văn bản văn học",
+    "text" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Trong 1 năm học, đọc tối thiểu 35 văn bản văn học (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có thể loại và độ dài tương đương với các văn bản đã học."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-017",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc mở rộng / Văn bản văn học",
+    "text" : "Thuộc lòng ít nhất 10 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 80 chữ.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 88,
+      "printedPage" : 32,
+      "region" : "LEFT",
+      "text" : "Thuộc lòng ít nhất 10 đoạn thơ, bài thơ hoặc đoạn văn đã học; mỗi đoạn thơ, bài thơ, đoạn văn có độ dài khoảng 80 chữ."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-018",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản thông tin / Đọc hiểu nội dung",
+    "text" : "Nhận biết được những thông tin chính trong văn bản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 89,
+      "printedPage" : 33,
+      "region" : "LEFT",
+      "text" : "Nhận biết được những thông tin chính trong văn bản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-019",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản thông tin / Đọc hiểu nội dung",
+    "text" : "Biết tóm tắt văn bản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 89,
+      "printedPage" : 33,
+      "region" : "LEFT",
+      "text" : "Biết tóm tắt văn bản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-020",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản thông tin / Đọc hiểu hình thức",
+    "text" : "Nhận biết được đặc điểm của một số loại văn bản thông dụng, đơn giản và mối quan hệ giữa đặc điểm văn bản với mục đích của nó: văn bản chỉ dẫn các bước thực hiện một công việc hoặc cách làm, cách sử dụng một sản phẩm; thư thăm hỏi, thư cảm ơn hoặc xin lỗi; đơn (xin nghỉ học, xin nhập học); giấy mời, báo cáo công việc.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 89,
+      "printedPage" : 33,
+      "region" : "LEFT",
+      "text" : "Nhận biết được đặc điểm của một số loại văn bản thông dụng, đơn giản và mối quan hệ giữa đặc điểm văn bản với mục đích của nó: văn bản chỉ dẫn các bước thực hiện một công việc hoặc cách làm, cách sử dụng một sản phẩm; thư thăm hỏi, thư cảm ơn hoặc xin lỗi; đơn (xin nghỉ học, xin nhập học); giấy mời, báo cáo công việc."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-021",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản thông tin / Đọc hiểu hình thức",
+    "text" : "Nhận biết được bố cục của một văn bản thông tin thông thường: phần đầu, phần giữa (chính) và phần cuối.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 89,
+      "printedPage" : 33,
+      "region" : "LEFT",
+      "text" : "Nhận biết được bố cục của một văn bản thông tin thông thường: phần đầu, phần giữa (chính) và phần cuối."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-022",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản thông tin / Liên hệ, so sánh, kết nối",
+    "text" : "Nêu được một vấn đề có ý nghĩa đối với bản thân hay cộng đồng được gợi ra từ văn bản đã đọc.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 89,
+      "printedPage" : 33,
+      "region" : "LEFT",
+      "text" : "Nêu được một vấn đề có ý nghĩa đối với bản thân hay cộng đồng được gợi ra từ văn bản đã đọc."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-023",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc hiểu / Văn bản thông tin / Liên hệ, so sánh, kết nối",
+    "text" : "Nhận biết được thông tin qua hình ảnh, số liệu trong văn bản (văn bản in hoặc văn bản điện tử).",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 89,
+      "printedPage" : 33,
+      "region" : "LEFT",
+      "text" : "Nhận biết được thông tin qua hình ảnh, số liệu trong văn bản (văn bản in hoặc văn bản điện tử)."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-024",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Đọc / Đọc mở rộng / Văn bản thông tin",
+    "text" : "Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có kiểu văn bản và độ dài tương đương với các văn bản đã học.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 89,
+      "printedPage" : 33,
+      "region" : "LEFT",
+      "text" : "Trong 1 năm học, đọc tối thiểu 18 văn bản thông tin (bao gồm văn bản được hướng dẫn đọc trên mạng Internet) có kiểu văn bản và độ dài tương đương với các văn bản đã học."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-025",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết / Kĩ thuật viết",
+    "text" : "Viết đúng các tên riêng của tổ chức, cơ quan.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết đúng các tên riêng của tổ chức, cơ quan."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-026",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Quy trình viết",
+    "text" : "Biết viết theo các bước: xác định nội dung viết (viết về cái gì); quan sát và tìm tư liệu để viết; hình thành ý chính cho đoạn, bài viết; viết đoạn, bài; chỉnh sửa (bố cục, dùng từ, đặt câu, chính tả).",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Biết viết theo các bước: xác định nội dung viết (viết về cái gì); quan sát và tìm tư liệu để viết; hình thành ý chính cho đoạn, bài viết; viết đoạn, bài; chỉnh sửa (bố cục, dùng từ, đặt câu, chính tả)."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-027",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Quy trình viết",
+    "text" : "Viết đoạn văn, bài văn thể hiện chủ đề, ý tưởng chính; phù hợp với yêu cầu về kiểu, loại văn bản; có mở đầu, triển khai, kết thúc; các câu, đoạn có mối liên kết với nhau.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết đoạn văn, bài văn thể hiện chủ đề, ý tưởng chính; phù hợp với yêu cầu về kiểu, loại văn bản; có mở đầu, triển khai, kết thúc; các câu, đoạn có mối liên kết với nhau."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-028",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Thực hành viết",
+    "text" : "Viết được bài văn thuật lại một sự việc đã chứng kiến (nhìn, xem) hoặc tham gia và chia sẻ suy nghĩ, tình cảm của mình về sự việc đó.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết được bài văn thuật lại một sự việc đã chứng kiến (nhìn, xem) hoặc tham gia và chia sẻ suy nghĩ, tình cảm của mình về sự việc đó."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-029",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Thực hành viết",
+    "text" : "Viết được bài văn kể lại câu chuyện đã đọc, đã nghe hoặc viết đoạn văn tưởng tượng dựa vào câu chuyện đã đọc, đã nghe.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết được bài văn kể lại câu chuyện đã đọc, đã nghe hoặc viết đoạn văn tưởng tượng dựa vào câu chuyện đã đọc, đã nghe."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-030",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Thực hành viết",
+    "text" : "Viết được bài văn miêu tả con vật, cây cối; sử dụng nhân hoá và những từ ngữ gợi lên đặc điểm nổi bật của đối tượng được tả.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết được bài văn miêu tả con vật, cây cối; sử dụng nhân hoá và những từ ngữ gợi lên đặc điểm nổi bật của đối tượng được tả."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-031",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Thực hành viết",
+    "text" : "Viết được đoạn văn nêu tình cảm, cảm xúc của bản thân về một nhân vật trong văn học hoặc một người gần gũi, thân thiết.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết được đoạn văn nêu tình cảm, cảm xúc của bản thân về một nhân vật trong văn học hoặc một người gần gũi, thân thiết."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-032",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Thực hành viết",
+    "text" : "Viết được đoạn văn ngắn nêu lí do vì sao mình thích câu chuyện đã đọc hoặc đã nghe.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết được đoạn văn ngắn nêu lí do vì sao mình thích câu chuyện đã đọc hoặc đã nghe."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-033",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Thực hành viết",
+    "text" : "Viết được văn bản ngắn hướng dẫn các bước thực hiện một công việc hoặc làm, sử dụng một sản phẩm gồm 2 – 3 bước.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết được văn bản ngắn hướng dẫn các bước thực hiện một công việc hoặc làm, sử dụng một sản phẩm gồm 2 – 3 bước."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-034",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Viết đoạn văn, văn bản / Thực hành viết",
+    "text" : "Viết được báo cáo thảo luận nhóm, đơn theo mẫu, thư cho người thân, bạn bè.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 90,
+      "printedPage" : 34,
+      "region" : "LEFT",
+      "text" : "Viết được báo cáo thảo luận nhóm, đơn theo mẫu, thư cho người thân, bạn bè."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-035",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Nói và nghe / Nói",
+    "text" : "Nói rõ ràng, tập trung vào mục đích và đề tài; có thái độ tự tin; biết kết hợp cử chỉ, điệu bộ để tăng hiệu quả giao tiếp.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 91,
+      "printedPage" : 35,
+      "region" : "LEFT",
+      "text" : "Nói rõ ràng, tập trung vào mục đích và đề tài; có thái độ tự tin; biết kết hợp cử chỉ, điệu bộ để tăng hiệu quả giao tiếp."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-036",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Nói và nghe / Nói",
+    "text" : "Nói được về một đề tài có sử dụng các phương tiện hỗ trợ (ví dụ: tranh ảnh, sơ đồ,...).",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 91,
+      "printedPage" : 35,
+      "region" : "LEFT",
+      "text" : "Nói được về một đề tài có sử dụng các phương tiện hỗ trợ (ví dụ: tranh ảnh, sơ đồ,...)."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-037",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Nói và nghe / Nói",
+    "text" : "Kể lại được một sự việc đã tham gia và chia sẻ cảm xúc, suy nghĩ về sự việc đó.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 91,
+      "printedPage" : 35,
+      "region" : "LEFT",
+      "text" : "Kể lại được một sự việc đã tham gia và chia sẻ cảm xúc, suy nghĩ về sự việc đó."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-038",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Nói và nghe / Nói",
+    "text" : "Trình bày được lí lẽ để củng cố cho một ý kiến hoặc nhận định về một vấn đề gần gũi với đời sống.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 91,
+      "printedPage" : 35,
+      "region" : "LEFT",
+      "text" : "Trình bày được lí lẽ để củng cố cho một ý kiến hoặc nhận định về một vấn đề gần gũi với đời sống."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-039",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Nói và nghe / Nghe",
+    "text" : "Nghe và hiểu chủ đề, những chi tiết quan trọng trong câu chuyện.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 91,
+      "printedPage" : 35,
+      "region" : "LEFT",
+      "text" : "Nghe và hiểu chủ đề, những chi tiết quan trọng trong câu chuyện."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-040",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Nói và nghe / Nghe",
+    "text" : "Ghi lại được những nội dung quan trọng khi nghe ý kiến phát biểu của người khác.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 91,
+      "printedPage" : 35,
+      "region" : "LEFT",
+      "text" : "Ghi lại được những nội dung quan trọng khi nghe ý kiến phát biểu của người khác."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-041",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Nói và nghe / Nói nghe tương tác",
+    "text" : "Thực hiện đúng những quy định trong thảo luận: nguyên tắc luân phiên lượt lời, tập trung vào vấn đề thảo luận.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 91,
+      "printedPage" : 35,
+      "region" : "LEFT",
+      "text" : "Thực hiện đúng những quy định trong thảo luận: nguyên tắc luân phiên lượt lời, tập trung vào vấn đề thảo luận."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-042",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Việt / Nói và nghe / Nói nghe tương tác",
+    "text" : "Biết đóng góp ý kiến trong việc thảo luận về một vấn đề đáng quan tâm hoặc một nhiệm vụ mà nhóm, lớp phải thực hiện.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 91,
+      "printedPage" : 35,
+      "region" : "LEFT",
+      "text" : "Biết đóng góp ý kiến trong việc thảo luận về một vấn đề đáng quan tâm hoặc một nhiệm vụ mà nhóm, lớp phải thực hiện."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-ctrl-001",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_3",
+    "topic" : "Tiếng Việt / Nói và nghe / Nói nghe tương tác",
+    "text" : "Chú ý lắng nghe, tập trung vào vấn đề trao đổi, không nói lạc đề.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 87,
+      "printedPage" : 31,
+      "region" : "LEFT",
+      "text" : "Chú ý lắng nghe, tập trung vào vấn đề trao đổi, không nói lạc đề."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "vi-g4-ctrl-002",
+    "subject" : "VIETNAMESE",
+    "gradeLevel" : "GRADE_3",
+    "topic" : "Tiếng Việt / Nói và nghe / Nói nghe tương tác",
+    "text" : "Biết nói chuyện qua điện thoại với cách mở đầu và kết thúc phù hợp; lắng nghe để hiểu đúng thông tin; nói rõ ràng và tỏ thái độ thích hợp; tập trung vào mục đích cuộc nói chuyện.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 87,
+      "printedPage" : 31,
+      "region" : "LEFT",
+      "text" : "Biết nói chuyện qua điện thoại với cách mở đầu và kết thúc phù hợp; lắng nghe để hiểu đúng thông tin; nói rõ ràng và tỏ thái độ thích hợp; tập trung vào mục đích cuộc nói chuyện."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  } ]
+}

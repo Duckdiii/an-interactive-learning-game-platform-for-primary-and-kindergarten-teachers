@@ -64,6 +64,18 @@ class SchemaGameValidatorTest {
         assertThat(quiz.questions().get(0).options()).hasSize(3);
     }
 
+    @ParameterizedTest
+    @EnumSource(GameType.class)
+    void frozenVersionRejectsTeacherCurriculumReviewInsideGameMetadata(GameType type) throws IOException {
+        ObjectNode json = example(type);
+        ((ObjectNode) json.get("metadata")).set("curriculumReview",
+                MAPPER.createObjectNode().put("status", "REVIEWED"));
+        var context = new GameValidationContext(json);
+
+        assertThat(validator.validate(context)).isNotEmpty();
+        assertThat(context.getGame()).isNull();
+    }
+
     @Test
     void rejectsRootThatIsNotAnObject() {
         GameValidationContext context = new GameValidationContext(MAPPER.createArrayNode());

@@ -1,0 +1,19 @@
+{
+  "datasetVersion": "math-grade2-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Toán / Nội dung cụ thể / Lớp 2 / Yêu cầu cần đạt",
+  "pdfPages": [190, 191, 192, 193, 194],
+  "printedPages": [24, 25, 26, 27, 28],
+  "region": "RIGHT",
+  "primaryOutcomeCount": 43,
+  "controlOutcomeCount": 0,
+  "corpusStatus": "SOURCE_VERIFIED_CONTENT_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/math-grade2-source-verification.json",
+  "reviewNote": "PDF hash, page count and all 43 fragments passed PDFBox verification. Amendment applicability, curriculum-expert review, control examples and evaluation-set review remain pending. Extraction-only; not published or eligible for production ingest."
+}

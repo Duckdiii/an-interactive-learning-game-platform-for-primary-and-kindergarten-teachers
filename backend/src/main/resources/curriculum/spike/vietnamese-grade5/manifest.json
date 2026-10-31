@@ -1,0 +1,29 @@
+{
+  "datasetVersion": "vietnamese-grade5-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Tiếng Việt / Nội dung cụ thể / Lớp 5 / Yêu cầu cần đạt",
+  "pdfPages": [91, 92, 93, 94, 95, 96],
+  "printedPages": [35, 36, 37, 38, 39, 40],
+  "pageMap": [
+    {"pdfPage": 91, "printedPage": 35},
+    {"pdfPage": 92, "printedPage": 36},
+    {"pdfPage": 93, "printedPage": 37},
+    {"pdfPage": 94, "printedPage": 38},
+    {"pdfPage": 95, "printedPage": 39},
+    {"pdfPage": 96, "printedPage": 40}
+  ],
+  "region": "LEFT",
+  "primaryOutcomeCount": 40,
+  "controlOutcomeCount": 2,
+  "sourceFragmentCount": 45,
+  "corpusStatus": "SOURCE_VERIFIED_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "manualTranscriptions": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/vietnamese-grade5-source-verification.json",
+  "reviewNote": "40 Grade 5 outcomes and two Grade 4 controls declared from the LEFT YCCĐ column across 45 source fragments. Extraction-only; not published or eligible for production ingest."
+}

@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-11-01",
+  "environment": {
+    "database": "dedicated local PostgreSQL + pgvector",
+    "address": "127.0.0.1:55432",
+    "migrations": "V1-V6 already applied before this run",
+    "remoteWrites": false
+  },
+  "corpus": {
+    "datasetsPreviouslyIngested": 16,
+    "rowsPreviouslyVerified": 653,
+    "primaryOutcomes": 485,
+    "primaryControls": 34,
+    "kindergartenOutcomes": 134,
+    "note": "Inherited from local verification record; no corpus or database write was repeated for the age filter change."
+  },
+  "ageBandRegression": {
+    "result": "PASS",
+    "requestWithoutAge": "Validation error asks for 3-4, 4-5, or 5-6 years before retrieval",
+    "candidateOrderingFixture": "A closer AGE_4_5 vector is present; AGE_3_4 request returns only AGE_3_4 outcomes",
+    "localGeminiQuery": {
+      "result": "FOUND",
+      "requestedAgeBand": "AGE_3_4",
+      "returnedChunkIds": ["kg-cog-science-classify-34"],
+      "returnedAgeBands": ["AGE_3_4"],
+      "score": 0.8537685573,
+      "pdfPage": 62,
+      "printedPage": 74,
+      "sourceSha256": "146c1f23b3515d46f2e2e97afcfc0a1d871ef28b6700c7db4fbacfeb56e8572f"
+    },
+    "preschoolPublication": "DISABLED_PENDING_SPECIALIST_REVIEW"
+  },
+  "liveGeneration": {
+    "result": "PASS",
+    "tests": 2,
+    "inScope": "One QUIZ / MATH / GRADE_1 game generated and validated",
+    "insufficientEvidence": "One out-of-scope topic rejected before generation",
+    "generatedQuestionCount": 4,
+    "manualContentCheck": {
+      "questionsChecked": 4,
+      "arithmeticAnswersCorrect": 4,
+      "allSumsWithinRequestedLimit10": true,
+      "matchedEvidenceChunkIds": ["math-g1-007"],
+      "sourcePdfPage": 188,
+      "sourcePrintedPage": 22
+    },
+    "dslVersion": "1.0.0",
+    "externalModeration": "NOT_RUN; smoke used blocklist-only validation",
+    "otherIntegratedGameTypesAndScopes": "NOT_AVAILABLE"
+  },
+  "evaluation": {
+    "naturalLanguageIndependentBenchmark": "NOT_RUN",
+    "reason": "No independent teacher-authored and professionally labeled frozen dev/holdout set is available across the 15 primary scopes and preschool age bands.",
+    "falseAcceptRate": "NOT_ESTABLISHED",
+    "falseRejectRate": "NOT_ESTABLISHED",
+    "existingMathGrade1ExploratorySet": "AI-authored, labels pending human review; not a holdout and not used as acceptance evidence"
+  },
+  "automatedTests": {
+    "focusedRelevantTests": 101,
+    "focusedFailures": 0,
+    "focusedErrors": 0,
+    "fullBackendTests": 549,
+    "fullFailures": 0,
+    "fullErrors": 0,
+    "fullSkipped": 8
+  },
+  "deployment": {
+    "runtimeScopes": "MATH / GRADE_1 only; no new curriculum scope enabled",
+    "preschoolExpertApproval": "PENDING",
+    "remoteSupabaseMigrationOrIngest": "NOT_RUN; remote target not confirmed as an approved write target"
+  }
+}

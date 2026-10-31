@@ -1,0 +1,31 @@
+{
+  "datasetVersion": "math-grade5-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Toán / Nội dung cụ thể / Lớp 5 / Yêu cầu cần đạt",
+  "pdfPages": [206, 207, 208, 209, 210, 211],
+  "printedPages": [40, 41, 42, 43, 44, 45],
+  "pageMap": [
+    {"pdfPage": 206, "printedPage": 40},
+    {"pdfPage": 207, "printedPage": 41},
+    {"pdfPage": 208, "printedPage": 42},
+    {"pdfPage": 209, "printedPage": 43},
+    {"pdfPage": 210, "printedPage": 44},
+    {"pdfPage": 211, "printedPage": 45}
+  ],
+  "region": "RIGHT",
+  "primaryOutcomeCount": 53,
+  "controlOutcomeCount": 0,
+  "sourceFragmentCount": 56,
+  "corpusStatus": "SOURCE_VERIFIED_WITH_MANUAL_TRANSCRIPTIONS_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "manualTranscriptions": [
+    {"chunkId": "math-g5-053", "pdfPage": 211, "printedPage": 45, "region": "RIGHT"}
+  ],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/math-grade5-source-verification.json",
+  "reviewNote": "52 outcomes and 55 fragments matched PDFBox; one stacked-fraction outcome on PDF page 211 uses the separately declared text-transcriptions.jsonl fallback, counted separately as manual. All six printed-page footers passed on 2026-10-31. Independent review is pending. Extraction-only; not published or eligible for production ingest."
+}

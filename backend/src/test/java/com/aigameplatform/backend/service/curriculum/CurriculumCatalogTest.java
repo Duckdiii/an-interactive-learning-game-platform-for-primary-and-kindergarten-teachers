@@ -20,4 +20,21 @@ class CurriculumCatalogTest {
         assertThatThrownBy(() -> catalog.requireSupported(GameType.WORD_SCRAMBLE, Subject.MATH, GradeLevel.GRADE_1))
                 .isInstanceOf(GenerationScopeUnsupportedException.class);
     }
+
+    @Test
+    void kindergartenCatalogTreatsSubjectAsHintAndPublishesOneAgeBandAgnosticScope() {
+        var source = new CurriculumSource("preschool.pdf", "a".repeat(64), "01/VBHN-BGDĐT",
+                "kindergarten-outcomes-v1", 84);
+        var outcome = "Khám phá các sự vật gần gũi.";
+        var chunk = new CurriculumChunk("kg-cognitive-34", Subject.MATH, GradeLevel.KINDERGARTEN,
+                "Nhận thức / Khám phá khoa học", outcome, false,
+                List.of(new CurriculumChunk.SourceFragment(62, 74, "AGE_3_4", outcome)),
+                "COGNITIVE", List.of("SCIENCE_EXPLORATION"), "AGE_3_4");
+        var dataset = new CurriculumDataset(source, List.of(chunk));
+        var catalog = new CurriculumCatalog(List.of(dataset), Set.of(GameType.QUIZ));
+
+        assertThat(catalog.requireSupported(GameType.QUIZ, Subject.MATH, GradeLevel.KINDERGARTEN)).isSameAs(dataset);
+        assertThat(catalog.requireSupported(GameType.QUIZ, Subject.VIETNAMESE, GradeLevel.KINDERGARTEN)).isSameAs(dataset);
+        assertThat(catalog.requireSupported(GameType.QUIZ, Subject.ENGLISH, GradeLevel.KINDERGARTEN)).isSameAs(dataset);
+    }
 }

@@ -1,0 +1,30 @@
+{
+  "datasetVersion": "math-grade3-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Toán / Nội dung cụ thể / Lớp 3 / Yêu cầu cần đạt",
+  "pdfPages": [195, 196, 197, 198, 199],
+  "printedPages": [29, 30, 31, 32, 33],
+  "pageMap": [
+    {"pdfPage": 195, "printedPage": 29},
+    {"pdfPage": 196, "printedPage": 30},
+    {"pdfPage": 197, "printedPage": 31},
+    {"pdfPage": 198, "printedPage": 32},
+    {"pdfPage": 199, "printedPage": 33}
+  ],
+  "region": "RIGHT",
+  "primaryOutcomeCount": 51,
+  "controlOutcomeCount": 0,
+  "sourceFragmentCount": 51,
+  "corpusStatus": "SOURCE_VERIFIED_WITH_MANUAL_TRANSCRIPTIONS",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "manualTranscriptions": [
+    {"chunkId": "math-g3-022", "pdfPage": 197, "printedPage": 31, "region": "RIGHT"},
+    {"chunkId": "math-g3-023", "pdfPage": 197, "printedPage": 31, "region": "RIGHT"}
+  ],
+  "reviewNote": "PDFBox matched 49 outcomes and all five printed-page footers. The two stacked-fraction outcomes on page 197 use the separately declared text-transcriptions.jsonl fallback and are counted as manual transcriptions, not PDFBox matches. Their wording was visually compared with the source page on 2026-10-31. Amendment applicability and evaluation remain pending. Extraction-only; not published or eligible for production ingest."
+}

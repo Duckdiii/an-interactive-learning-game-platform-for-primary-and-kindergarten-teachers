@@ -29,6 +29,7 @@ import com.aigameplatform.backend.dto.dsl.ai.WordScrambleAiOutput;
 import com.aigameplatform.backend.dto.dsl.ai.WordScrambleAiQuestion;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.KindergartenAgeBand;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.service.validation.GameValidationService;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
@@ -140,6 +141,10 @@ class GameDslFactoryTest {
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new GameDslRequest("x", Subject.MATH, null))
                 .isInstanceOf(IllegalArgumentException.class);
+        assertThat(new GameDslRequest("x", Subject.MATH, GradeLevel.KINDERGARTEN).kindergartenAgeBand())
+                .isNull();
+        assertThatThrownBy(() -> new GameDslRequest("x", Subject.MATH, GradeLevel.GRADE_1,
+                KindergartenAgeBand.AGE_3_4)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

@@ -1,0 +1,29 @@
+{
+  "datasetVersion": "english-grade5-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Tiếng Anh / Nội dung cụ thể / Lớp 5 / Kỹ năng ngôn ngữ",
+  "pdfPages": [1278, 1279, 1280, 1281],
+  "printedPages": [29, 30, 31, 32],
+  "pageMap": [
+    {"pdfPage": 1278, "printedPage": 29},
+    {"pdfPage": 1279, "printedPage": 30},
+    {"pdfPage": 1280, "printedPage": 31},
+    {"pdfPage": 1281, "printedPage": 32}
+  ],
+  "regions": ["SKILLS_G4", "SKILLS_G5"],
+  "primaryOutcomeCount": 15,
+  "controlOutcomeCount": 2,
+  "sourceFragmentCount": 18,
+  "corpusStatus": "SOURCE_VERIFIED_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "manualTranscriptions": [
+    {"chunkId": "en-g5-012", "pdfPage": 1280, "printedPage": 31, "region": "SKILLS_G5"}
+  ],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/english-grade5-source-verification.json",
+  "reviewNote": "15 Grade 5 outcomes and two Grade 4 controls are tied to source fragments from the skills column. PDFBox reads the first glyph of en-g5-012 as 'Ð'; the visually checked Vietnamese spelling is recorded in text-transcriptions.jsonl. Grade-specific vertical bands exclude adjacent Grade 4 and Grade 6 table content. Extraction-only; not published or eligible for production ingest."
+}

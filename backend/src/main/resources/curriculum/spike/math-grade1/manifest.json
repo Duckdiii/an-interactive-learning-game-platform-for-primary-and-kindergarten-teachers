@@ -14,6 +14,17 @@
   "mathCoverPdfPage": 167,
   "mathGrade1PdfPages": [187, 188, 189, 190],
   "mathGrade1PrintedPages": [21, 22, 23, 24],
+  "pdfPages": [76, 187, 188, 189, 190, 191],
+  "printedPages": [20, 21, 22, 23, 24, 25],
+  "pageMap": [
+    {"pdfPage": 76, "printedPage": 20},
+    {"pdfPage": 187, "printedPage": 21},
+    {"pdfPage": 188, "printedPage": 22},
+    {"pdfPage": 189, "printedPage": 23},
+    {"pdfPage": 190, "printedPage": 24},
+    {"pdfPage": 191, "printedPage": 25}
+  ],
+  "regions": ["LEFT", "RIGHT"],
   "excludedFromOutcomeCorpus": "Trang 190 phần Hoạt động thực hành và trải nghiệm là hướng dẫn hoạt động; phần LỚP 2 ở cùng trang chỉ được lấy làm dữ liệu đối chứng có nhãn riêng.",
   "reviewedAmendments": [
     {"id":"20/2021/TT-BGDDT","sourceDocument":"20-bgddt.pdf","sourceSha256":"242913c886242173dd05d16ce63b306dce584cf1c238cd1c2b914e261af18c08","pdfPages":[1],"changesMathGrade1Outcomes":false,"scope":"Bổ sung khoản 4 Điều 3 về lộ trình môn Tin học THCS."},

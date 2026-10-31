@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:aigame_context_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+    hikari:
+      connection-init-sql: ""
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+app:
+  jwt:
+    secret: test-only-signing-key-not-valid-for-any-deployment

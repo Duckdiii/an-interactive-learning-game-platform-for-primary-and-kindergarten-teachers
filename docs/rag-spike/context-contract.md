@@ -28,3 +28,11 @@ Overload nhận context trống sẽ cho kết quả prompt cũ để giữ tư�
 - `GameDslRequest`/`GenerationAttempt` đã có môn và lớp. `GameGenerationService` có vòng retry và cổng `GameContentGenerator`.
 - `QuizSpikeContentService` là một đường spike riêng, giới hạn `KINDERGARTEN`; pilot RAG hiện nối luồng sinh `QUIZ / MATH / GRADE_1` qua orchestration chính. Các game type khác chưa thuộc pilot.
 - Pilot đã wiring qua `GameGenerationService`, `CurriculumContextProvider` và `GeminiGameContentGenerator`; fake model test bắt system prompt/schema. Hai live smoke đã chạy: quiz cho chủ đề trong corpus được tạo, còn chủ đề ngoài corpus bị từ chối. Duy chưa review contract.
+
+## Frozen DSL and preschool evidence contract
+
+DSL 1.0.0 remains frozen: curriculum review/evidence is separate from the student game JSON and is persisted through the V6 review table. The teacher-only review endpoint returns age-band labels and cited outcomes outside the DSL. A future game edit must mark its review `STALE` in the same save transaction.
+
+For `KINDERGARTEN`, there are no grade-specific subjects for curriculum retrieval: the submitted DSL subject is only a compatibility hint. The catalog publishes the one Kindergarten scope, retrieval filters by allowed `domain` and dataset provenance, and searches all three age bands without age filtering. The context labels each cited age band and requests preschool-appropriate short, image-first/audio-supported content. This does not imply that every game type has native audio/image capabilities.
+
+The checked-in Kindergarten data is a nine-outcome pilot subset. The feature flag remains off until coverage and specialist review are complete. TT50/2020 has an official source but is not yet curated into the corpus; do not generate English preschool under an `UNVERIFIED` label until its source is chunked, cited, and validated.

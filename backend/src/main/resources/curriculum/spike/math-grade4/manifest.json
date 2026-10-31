@@ -1,0 +1,29 @@
+{
+  "datasetVersion": "math-grade4-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Toán / Nội dung cụ thể / Lớp 4 / Yêu cầu cần đạt",
+  "pdfPages": [200, 201, 202, 203, 204, 205],
+  "printedPages": [34, 35, 36, 37, 38, 39],
+  "pageMap": [
+    {"pdfPage": 200, "printedPage": 34},
+    {"pdfPage": 201, "printedPage": 35},
+    {"pdfPage": 202, "printedPage": 36},
+    {"pdfPage": 203, "printedPage": 37},
+    {"pdfPage": 204, "printedPage": 38},
+    {"pdfPage": 205, "printedPage": 39}
+  ],
+  "region": "RIGHT",
+  "primaryOutcomeCount": 53,
+  "controlOutcomeCount": 0,
+  "sourceFragmentCount": 57,
+  "corpusStatus": "SOURCE_VERIFIED_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "manualTranscriptions": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/math-grade4-source-verification.json",
+  "reviewNote": "All 53 outcomes and 57 source fragments passed PDFBox region checks; all six printed-page footers passed on 2026-10-31. Independent review is pending. Extraction-only; not published or eligible for production ingest."
+}

@@ -2,7 +2,7 @@
 
 **Kết luận nghiệm thu mới nhất (2026-10-30): chưa đạt phát hành.** Regression backend và pgvector đạt, nhưng bộ20 lần sinh mới có2 lỗi và game được tạo có lỗi nội dung. Xem [báo cáo nghiệm thu](acceptance-2026-10-30.md). Kết quả exploratory cũ bên dưới không chứng minh phiên bản hiện tại đã nghiệm thu đầy đủ. Các đề xuất hybrid/HyDE/judge nằm trong [plan thử nghiệm](rag-variants-experiment.md), chưa bật vào pipeline.
 
-Trạng thái: spike live Toán lớp 1 **đạt bộ tiêu chí exploratory**: Hit@3 10/10, zero leakage, 3/3 negative bị từ chối và 5/5 control probes đúng scope. Ngưỡng 0.855 được chọn sau lần chạy đầu trên cùng bộ query; cần đánh giá holdout trước khi coi kết quả tổng quát. Pilot QUIZ / Toán lớp 1 đã nối retrieval vào `GameGenerationService` và system prompt Gemini qua feature flag. Fake Gemini test xác nhận context/citation và schema; live smoke sinh quiz từ chủ đề trong corpus và từ chối chủ đề ngoài corpus đều pass. Xem [kiểm tra nguồn](source-audit.md), [contract context](context-contract.md), [kế hoạch tích hợp orchestration](integration-plan.md) và [bảng đánh giá](evaluation.md).
+Trạng thái lịch sử (2026-10-30): bộ 10 câu Toán lớp 1 đạt tiêu chí exploratory (Hit@3 10/10), nhưng không phải holdout độc lập và không chứng minh chất lượng release; xem báo cáo nghiệm thu 2026-10-30. Các báo cáo mới tách tỷ lệ từ chối/chấp nhận sai, đúng căn cứ, gợi ý cứu được, MRR và khoảng tin cậy. p50/p95 trong benchmark là thời gian retrieval + verification, chưa gồm sinh game.
 
 ## Điền cấu hình trên máy
 
@@ -80,9 +80,9 @@ Mã thoát: 0 thành công; 1 lỗi vận hành; 2 cấu hình còn thiếu; 3 q
 
 ## Kết quả và giới hạn
 
-Extraction lưu tại `backend/target/curriculum-spike/extracted/`. Báo cáo live mới được tạo ở `docs/rag-spike/results/live-*.json` sau khi chạy đủ query và đối chứng. Mỗi báo cáo ghi model, dimension, ngưỡng, nguồn, thời điểm, đoạn trả về, score, latency và kết quả gate; yêu cầu đọc thủ công trước khi dẫn kết luận chất lượng.
+Extraction lưu riêng tại `backend/target/curriculum-spike/extracted/<dataset>/` để chạy bộ này không ghi đè bằng chứng của bộ khác. Báo cáo live mới được tạo ở `docs/rag-spike/results/live-*.json` sau khi chạy đủ query và đối chứng. Mỗi báo cáo ghi model, dimension, ngưỡng, nguồn, thời điểm, đoạn trả về, score, latency và kết quả gate; yêu cầu đọc thủ công trước khi dẫn kết luận chất lượng.
 
-`source-verification.json` chỉ được xuất bản khi toàn bộ chunk khớp PDF. Báo cáo ghi SHA nguồn, phiên bản dataset/chương trình, số YCCĐ/đối chứng và nội dung từng chunk kèm trang PDF, trang in, vùng chữ. Báo cáo thành công cũ bị xóa ngay đầu lần xác minh mới; nếu sai SHA hoặc một fragment không khớp thì không còn báo cáo thành công để dùng nhầm. File được ghi tạm rồi đổi tên sau khi hoàn tất.
+`source-verification.json` trong `backend/target/curriculum-spike/extracted/<dataset>/` chỉ được xuất bản khi toàn bộ chunk của dataset đó khớp PDF. Báo cáo ghi SHA nguồn, phiên bản dataset/chương trình, số YCCĐ/đối chứng và nội dung từng chunk kèm trang PDF, trang in, vùng chữ. Báo cáo thành công cũ bị xóa ngay đầu lần xác minh mới; nếu sai SHA hoặc một fragment không khớp thì không còn báo cáo thành công để dùng nhầm. File được ghi tạm rồi đổi tên sau khi hoàn tất.
 
 Báo cáo Evaluate mới có `reportVersion=2` và `controlPolicy=STORED_BUT_EXCLUDED_FROM_ALL_RETRIEVAL_SCOPES`. Runner kiểm tra đủ ID trong database trước khi đánh giá (`controlsStored=true`). Mỗi control probe phải có `ownScopeControlLeakage=0` và `primaryScopeLeakage=0`; không còn yêu cầu tìm được đối chứng qua retrieval. Probe rỗng không được coi là đạt.
 
@@ -114,3 +114,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rag-spike.ps1 -Mode 
 ```
 
 Test thang score/filter pgvector được bật riêng bằng `RUN_LIVE_RAG_VECTOR_TEST=true` và cấu hình DB trong process khi chạy Maven `-Dtest=PgVectorScoreIntegrationTest`. Test dùng bảng TEMP trên một session, không ghi vào corpus thật. Test live này đã đạt ngày 2026-10-30: score = (cosine + 1) / 2, nên ngưỡng score 0.855 tương đương cosine 0.71; xem [bằng chứng score](results/pgvector-score-2026-10-30.json). Bộ nhãn độc lập, số đo live và duyệt ít nhất 20 game vẫn là cổng phát hành cần hoàn tất.
+
+## Remediation decision (2026-10-31)
+
+- Keep DSL v1.0.0 unchanged. `metadata.curriculumReview` is rejected by all ten game schemas. Curriculum evidence and review status live in V6 `game_curriculum_reviews`, with a teacher-owned `GET /api/games/{id}/curriculum-review` contract. This checkout has no game create/update HTTP route; callers must use `GameCurriculumReviewService.saveWithGame` in the same transaction and `saveEditedGame` to mark reviews stale. The generation reviewer is currently `UNAVAILABLE` because this checkout has no reviewer service.
+- Preschool does not have primary-school subjects. Retrieval uses `gradeLevel=KINDERGARTEN`, allowed `domain`/`subDomain`, and all age bands; the DSL `subject` is only a compatibility hint. The current 18 source-verified outcomes cover a few science, math, social-exploration, and language outcomes across the three age bands. They are a pilot subset, not a complete or expert-approved corpus. `CURRICULUM_KINDERGARTEN_ENABLED` defaults to false.
+- The dataset is based on consolidated `01/VBHN-BGDĐT (2021)` (TT17/2009 as amended by TT28/2016 and TT51/2020). It does not represent the experimental GDMN program for 2026-2027 approved under Decision 388/QĐ-BGDĐT for participating schools; the pilot stays disabled pending source curation, applicability policy, and specialist review. See the [Hanoi Department of Education pilot notice](https://hanoi.edu.vn/giao-duc-thu-do-doi-moi-hoi-nhap-phat-trien/so-gddt-tap-huan-huong-dan-thuc-hien-chuong-trinh-giao-duc-mam-non-thi-diem-nam/ctmb/1142/17087).
+- The official source for preschool English familiarization, TT50/2020, is identified at the [Government legal document portal](https://vanban.chinhphu.vn/default.aspx?docid=203049&pageid=27160), but it has not yet been curated into source-verified chunks. English preschool must not silently borrow Vietnamese-language outcomes.
+- Official source: consolidated 01/VBHN-BGDĐT (2021), including TT17/2009 as amended by TT28/2016 and TT51/2020, SHA-256 `146c1f23b3515d46f2e2e97afcfc0a1d871ef28b6700c7db4fbacfeb56e8572f`, 84 PDF pages. English preschool program source TT50/2020 was found, but source-specific provenance/OCR curation is not complete; English remains unsupported rather than falsely marked UNVERIFIED.
+- Evaluation tooling distinguishes decision quality from retrieval ranking. Existing exposed query sets are development/exploratory data, not an independent holdout. Exact filtered vector scan remains the current choice for the small corpus. Runtime query text/vector caching is disabled.
+- Offline Extract/Ingest/Evaluate code now lives in test scope and is invoked by `scripts/rag-spike.ps1` with `-Dataset primary-math-g1|kindergarten`.
+
+The current code changes have focused unit/regression coverage, but no complete preschool corpus, curriculum specialist approval, online preschool evaluation, or end-to-end generation/save endpoint is claimed.

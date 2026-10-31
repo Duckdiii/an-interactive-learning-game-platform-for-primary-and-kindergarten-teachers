@@ -15,7 +15,8 @@ public final class CurriculumCatalog {
         var scopes = new HashMap<Scope, CurriculumDataset>();
         for (var dataset : datasets) {
             dataset.chunks().stream().filter(c -> !c.control()).forEach(c -> {
-                var previous = scopes.putIfAbsent(new Scope(c.subject(), c.gradeLevel()), dataset);
+                var key = new Scope(c.gradeLevel() == GradeLevel.KINDERGARTEN ? null : c.subject(), c.gradeLevel());
+                var previous = scopes.putIfAbsent(key, dataset);
                 if (previous != null && previous != dataset)
                     throw new IllegalArgumentException("Only one active dataset per scope is allowed");
             });
@@ -24,10 +25,10 @@ public final class CurriculumCatalog {
     }
 
     public CurriculumDataset requireSupported(GameType type, Subject subject, GradeLevel grade) {
-        var dataset = datasets.get(new Scope(subject, grade));
+        var dataset = datasets.get(new Scope(grade == GradeLevel.KINDERGARTEN ? null : subject, grade));
         if (!gameTypes.contains(type) || dataset == null)
             throw new GenerationScopeUnsupportedException(
-                    "Chưa hỗ trợ kiểu game, môn hoặc lớp đã chọn. Hiện hỗ trợ QUIZ / Toán / Lớp 1.");
+                    "Chưa có chương trình đã công bố cho kiểu game, môn hoặc lớp đã chọn. Hiện hỗ trợ kiểu game QUIZ.");
         return dataset;
     }
 }

@@ -12,7 +12,13 @@ import java.util.stream.Collectors;
 
 /** One reviewed learning outcome, never a whole circular or an arbitrary character window. */
 public record CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeLevel, String topic,
-                              String text, boolean control, List<SourceFragment> sourceFragments) {
+                              String text, boolean control, List<SourceFragment> sourceFragments,
+                              String domain, List<String> subDomain, String ageBand) {
+    public CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeLevel, String topic,
+                           String text, boolean control, List<SourceFragment> sourceFragments) {
+        this(chunkId, subject, gradeLevel, topic, text, control, sourceFragments, null, List.of(), null);
+    }
+
     public CurriculumChunk {
         if (chunkId == null || !chunkId.matches("[a-z0-9-]+") || subject == null || gradeLevel == null
                 || topic == null || topic.isBlank() || text == null || text.isBlank() || text.contains("\uFFFD")
@@ -20,6 +26,15 @@ public record CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeL
             throw new IllegalArgumentException("A chunk needs scope, text and source fragments");
         }
         sourceFragments = List.copyOf(sourceFragments);
+        subDomain = subDomain == null ? List.of() : List.copyOf(subDomain);
+        if (gradeLevel == GradeLevel.KINDERGARTEN) {
+            if (!("COGNITIVE".equals(domain) || "LANGUAGE".equals(domain)) || subDomain.isEmpty()
+                    || !("AGE_3_4".equals(ageBand) || "AGE_4_5".equals(ageBand) || "AGE_5_6".equals(ageBand))) {
+                throw new IllegalArgumentException("Preschool outcomes require an allowed domain, subDomain and ageBand");
+            }
+        } else if (domain != null || !subDomain.isEmpty() || ageBand != null) {
+            throw new IllegalArgumentException("Age-band metadata is only valid for kindergarten outcomes");
+        }
         String fragments = sourceFragments.stream().map(SourceFragment::text).collect(Collectors.joining(" "));
         if (!normalize(text).equals(normalize(fragments))) {
             throw new IllegalArgumentException("Chunk text differs from its source fragments: " + chunkId);
@@ -28,7 +43,7 @@ public record CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeL
 
     public record SourceFragment(int pdfPage, int printedPage, String region, String text) {
         public SourceFragment {
-            if (pdfPage < 1 || printedPage < 1 || !("RIGHT".equals(region) || "LEFT".equals(region))
+            if (pdfPage < 1 || printedPage < 1 || region == null || region.isBlank()
                     || text == null || text.isBlank()) {
                 throw new IllegalArgumentException("Invalid source fragment");
             }
@@ -39,6 +54,7 @@ public record CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeL
         String identity = String.join("|", source.sourceSha256(), source.sourceDocument(), source.curriculumVersion(),
                 source.datasetVersion(), chunkId, subject.name(), gradeLevel.name(), Boolean.toString(control),
                 model, Integer.toString(dimension), topic, text, sourceFragments.toString());
+        if (domain != null) identity += "|" + domain + "|" + String.join(",", subDomain) + "|" + ageBand;
         return UUID.nameUUIDFromBytes(identity.getBytes(StandardCharsets.UTF_8)).toString();
     }
 
@@ -60,8 +76,15 @@ public record CurriculumChunk(String chunkId, Subject subject, GradeLevel gradeL
         metadata.put("curriculumVersion", source.curriculumVersion());
         metadata.put("datasetVersion", source.datasetVersion());
         metadata.put("embeddingModel", model);
+        if (domain != null) {
+            metadata.put("domain", domain);
+            metadata.put("subDomain", String.join("|", subDomain));
+            metadata.put("ageBand", ageBand);
+        }
         return TextSegment.from("Môn: " + subject + "\nLớp: " + gradeLevel + "\nChủ đề: " + topic
-                + "\nYêu cầu cần đạt: " + text, metadata);
+                + (domain == null ? "\nYêu cầu cần đạt: " + text
+                : "\nLĩnh vực: " + domain + "\nNội dung: " + String.join(" / ", subDomain)
+                        + "\nĐộ tuổi: " + ageBand + "\nKết quả mong đợi: " + text), metadata);
     }
 
     static String normalize(String text) {

@@ -63,7 +63,7 @@ app:
   ai:
     gemini:
       api-key: ${GEMINI_API_KEY:}
-      model: ${GEMINI_MODEL:}
+      model: ${GEMINI_MODEL:gemini-2.5-flash}
       game-generation:
         enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
   curriculum-rag:
@@ -71,3 +71,7 @@ app:
     enabled: ${CURRICULUM_RAG_ENABLED:false}
     embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
     min-score: ${CURRICULUM_RAG_MIN_SCORE:0.855}
+    kindergarten:
+      enabled: ${CURRICULUM_KINDERGARTEN_ENABLED:false}
+      top-k: ${CURRICULUM_KINDERGARTEN_TOP_K:8}
+      min-score: ${CURRICULUM_KINDERGARTEN_MIN_SCORE:0.84}

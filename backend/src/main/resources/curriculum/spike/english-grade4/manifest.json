@@ -1,0 +1,26 @@
+{
+  "datasetVersion": "english-grade4-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDDT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Tiếng Anh / Nội dung cụ thể / Lớp 4 / Kỹ năng ngôn ngữ",
+  "pdfPages": [1277, 1278, 1279],
+  "printedPages": [28, 29, 30],
+  "pageMap": [
+    {"pdfPage": 1277, "printedPage": 28},
+    {"pdfPage": 1278, "printedPage": 29},
+    {"pdfPage": 1279, "printedPage": 30}
+  ],
+  "regions": ["SKILLS_G3", "SKILLS_G4"],
+  "primaryOutcomeCount": 14,
+  "controlOutcomeCount": 3,
+  "sourceFragmentCount": 19,
+  "corpusStatus": "SOURCE_VERIFIED_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "manualTranscriptions": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/english-grade4-source-verification.json",
+  "reviewNote": "14 Grade 4 outcomes and three Grade 3 controls are tied to the skills column. Page-specific vertical bands isolate adjacent grade tables. Extraction-only; not published or eligible for production ingest."
+}

@@ -44,6 +44,29 @@ import tools.jackson.databind.json.JsonMapper;
 class GameGenerationServiceTest {
 
     @Test
+    void generationResultKeepsEvidenceOutsideFrozenDslWithoutRetrievingTwice() throws Exception {
+        var generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        var calls = new java.util.concurrent.atomic.AtomicInteger();
+        var source = new com.aigameplatform.backend.service.curriculum.CurriculumSource(
+                "source.pdf", "a".repeat(64), "32/2018/TT-BGDDT", "test-v1", 2);
+        var chunk = new com.aigameplatform.backend.service.curriculum.CurriculumRAGService.RetrievedChunk(
+                "math-g1-001", Subject.MATH, GradeLevel.GRADE_1, "Counting", "Count to 10", 0.9,
+                "source.pdf", List.of(1), List.of(1), "32/2018/TT-BGDDT");
+        var evidence = com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(source, "fixture", List.of(chunk));
+        CurriculumContextProvider provider = (topic, subject, grade) -> {
+            calls.incrementAndGet();
+            return CurriculumContextProvider.Evidence.found("[math-g1-001] Count to10; source.pdf", evidence);
+        };
+        var result = service(generator, 2, moderation(false, false), provider, true).generateResult(GameType.QUIZ, REQUEST);
+        assertThat(calls).hasValue(1);
+        assertThat(result.evidence().chunks()).containsExactly(chunk);
+        assertThat(result.review().status().name()).isEqualTo("UNAVAILABLE");
+        assertThat(result.review().warnings()).contains("REVIEWER_NOT_CONFIGURED");
+        assertThat(MAPPER.valueToTree(result.game()).path("metadata").has("curriculumReview")).isFalse();
+        assertThat(MAPPER.valueToTree(result).has("review")).isTrue();
+    }
+
+    @Test
     @org.junit.jupiter.api.extension.ExtendWith(org.springframework.boot.test.system.OutputCaptureExtension.class)
     void providerErrorLogsMustNotContainTeacherOrProviderPayload(org.springframework.boot.test.system.CapturedOutput output) {
         var generator = new ScriptedGenerator(new AiServiceUnavailableException("CANARY_TEACHER_SECRET"));
