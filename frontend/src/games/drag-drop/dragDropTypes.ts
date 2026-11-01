@@ -1,4 +1,4 @@
-import type { DragDropQuestion, DropZone } from '../../types/game-dsl.types'
+import type { DragDropQuestion } from '../../types/game-dsl.types'
 import type { StudentDragDropQuestion } from '../../types/game-student.types'
 
 export interface Point {
@@ -41,4 +41,5 @@ export type DragDropRendererProps =
       mode: 'review'
       question: DragDropQuestion
       placements?: { itemId: string; zoneId: string }[]
+      disabled?: boolean
     }

@@ -38,4 +38,5 @@ export type WordScrambleRendererProps =
       mode: 'review'
       question: WordScrambleQuestion
       completedWord?: string
+      disabled?: boolean
     }
