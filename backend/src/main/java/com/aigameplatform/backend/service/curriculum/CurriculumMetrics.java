@@ -23,6 +23,7 @@ public final class CurriculumMetrics {
             result = outcome.apply(value);
             return value;
         } catch (CurriculumEvidenceNotFoundException e) { result = Outcome.REJECTED; throw e; }
+        catch (CurriculumClarificationRequiredException e) { result = Outcome.REJECTED; throw e; }
         catch (GenerationScopeUnsupportedException e) { result = Outcome.UNSUPPORTED; throw e; }
         catch (UnsafeContentException e) { result = Outcome.UNSAFE; throw e; }
         finally {

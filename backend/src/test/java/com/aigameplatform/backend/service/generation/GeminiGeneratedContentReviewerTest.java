@@ -32,7 +32,8 @@ class GeminiGeneratedContentReviewerTest {
 
         assertThat(result.accepted()).isTrue();
         assertThat(result.review().status()).isEqualTo(
-                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED);
+                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING);
+        assertThat(result.review().warnings()).contains("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING");
         assertThat(result.review().reviewerModel()).isEqualTo("review-model");
         assertThat(request.get().parameters().responseFormat()).isNotNull();
     }

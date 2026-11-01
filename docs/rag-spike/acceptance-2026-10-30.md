@@ -100,3 +100,36 @@ After scope cleanup, `mvn verify` completed successfully: 584 tests, 0 failures,
 | Game-generation controller, request DTO, application service and their tests | Retract | Product/API flow outside the assigned RAG work; existing generation service contract is left intact |
 | Frontend game-create API, UI, preview and page test | Retract | UI and game workflow belong to other project work, not this RAG task |
 | Acceptance claims about create/save/UI and whole-product completion | Retract | Out of RAG acceptance scope; historical RAG evidence/results remain unchanged |
+
+## Cross-scope Curriculum RAG implementation recheck — 2026-11-01
+
+This addendum records the current code state after the 2026-10-30 findings. The 2026-10-30 measurement artifacts and outcomes are unchanged. A local test run is not a replacement for live pgvector evaluation or specialist approval.
+
+### Finding disposition
+
+| Finding | Current disposition | Evidence / remaining limit |
+|---|---|---|
+| 1. `curriculumReview` in frozen DSL v1.0.0 | Addressed in prior scope-cleanup work | Review remains outside DSL; this turn did not change DSL/schema. |
+| 2. Kindergarten blocked by primary-only catalog | Partially addressed technically; not publishable | Age/domain-filtered retrieval and semantic verifier path are implemented. Feature is disabled by default and requires exact source hash; specialist approval and live evaluation remain pending. |
+| 3. Evaluation queries too close to curriculum text | Open | Existing sets remain exploratory/AI-authored; no independent natural-language benchmark was run. |
+| 4. No current online results on current code | Open | No new live pgvector + Gemini semantic evaluation in this run. Prior results remain historical. |
+| 5. 616-line Math rules may reject other subjects | Addressed for non-pilot path, unmeasured | Math Grade 1 retains its deterministic rules. Other primary scopes and Kindergarten use a constrained semantic verifier that can select only exact retrieved IDs. Live false-accept/false-reject rates are unknown. |
+| 6. Persistent serialized query embedding cache | Runtime persistence remains disabled | Runtime configuration does not persist teacher topic/query vectors. No cache behavior change was needed here. |
+| 7. Added serial reviewer latency / NFR | Deferred as previously agreed | No current p50/p95 live measurement; no async redesign in this scope. |
+| 8. Evaluation runners in application source | Addressed in prior cleanup | Offline runner tooling remains in test scope and is invoked by the PowerShell script. |
+| 9. Database failure can affect startup | Partially isolated, not removed from application | RAG model/store are lazy and readiness is per source; the backend still depends on its configured application database. No local pgvector endpoint was available for this run. |
+| 10. Hard rejection lacks guidance | Addressed for retrieval evidence rejection | Existing context provider returns nearest-candidate guidance; clarification has a distinct 422 code. |
+| 11. Only teacher topic is queried | Open / unchanged | No lesson-plan summarization was introduced. |
+| 12. No ANN index | Intentional for the current small corpus | Exact filtered scan remains; no new scale data warrants ANN. |
+
+### Scope and evidence
+
+The runtime RAG catalog now discovers the 15 primary datasets and selects the dataset matching the request. `CurriculumAvailability` caches readiness per source instead of allowing a request for one dataset to evict another scope's readiness. Primary retrieval filters exact subject, grade, content type, source SHA, curriculum version, dataset version, embedding model, and `control=false`; Kindergarten additionally filters allowed domain and the requested age band before semantic verification. The Grade 1 Math verifier remains specialized; it is not applied to other subjects/grades.
+
+The packaged corpus has 15 primary scopes (485 non-control outcomes, 34 controls) and one Kindergarten dataset (134 outcomes: 38 age 3–4, 47 age 4–5, 49 age 5–6). A new in-memory regression traverses all 16 datasets and checks source/scope filtering, control exclusion, and Kindergarten age/domain filtering. It does not measure real embedding ranking or semantic decision quality.
+
+End-to-end game generation remains only implemented for QUIZ / MATH / GRADE_1. `GeminiGameContentGenerator` has an explicit pilot guard and `QuizGameStrategy` hardcodes Mathematics Grade 1 and throws for other grades. Those components are owned outside this RAG change; widening their prompt contract is a coordination dependency. Therefore 14 other primary scopes and Kindergarten are **not** claimed as supported end-to-end generation, despite their retrieval/verifier implementation. Kindergarten also remains disabled pending subject-matter review.
+
+Current run evidence: focused RAG/provider/generation suite passed 62 tests with no failures/errors. Full backend `mvn verify` then passed the current tree at 595 tests, 0 failures/errors, 8 skipped, JaCoCo passed. No new live evaluation was run because an authorized local pgvector endpoint was unavailable; remote Supabase was not written. Independent benchmark labels, human/specialist review, live false-accept/false-reject rates, and Kindergarten publication remain pending.
+
+Scope-by-scope outcome counts and pipeline details are in the [current implementation recheck](README.md#current-cross-scope-implementation-recheck-2026-11-01); the sanitized machine-readable status is in [local-acceptance-2026-11-01.json](results/local-acceptance-2026-11-01.json).

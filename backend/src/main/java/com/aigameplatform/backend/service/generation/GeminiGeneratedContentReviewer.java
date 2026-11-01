@@ -19,7 +19,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import tools.jackson.databind.json.JsonMapper;
 
-/** Experimental advisory reviewer. It is not a Spring bean and cannot authorize curriculum-grounded generation. */
+/** Automated grounding gate. An accepted model check remains PENDING for human curriculum/content review. */
 public class GeminiGeneratedContentReviewer implements GeneratedContentReviewer {
     private static final String SCHEMA = """
             {"type":"object","additionalProperties":false,"required":["questions"],"properties":{"questions":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["questionId","answerCorrect","supportedByCurriculum","supportingChunkIds","reason"],"properties":{"questionId":{"type":"string"},"answerCorrect":{"type":"boolean"},"supportedByCurriculum":{"type":"boolean"},"supportingChunkIds":{"type":"array","items":{"type":"string"}},"reason":{"type":"string"}}}}}}
@@ -64,7 +64,8 @@ public class GeminiGeneratedContentReviewer implements GeneratedContentReviewer 
                     "supportedByCurriculum", Boolean.TRUE.equals(q.supportedByCurriculum()),
                     "supportingChunkIds", q.supportingChunkIds() == null ? List.of() : q.supportingChunkIds())).toList();
             var evidenceReview = validation.isEmpty()
-                    ? new CurriculumEvidenceReview(CurriculumEvidenceReview.Status.REVIEWED, claims, List.of(), modelName)
+                    ? new CurriculumEvidenceReview(CurriculumEvidenceReview.Status.PENDING, claims,
+                            List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), modelName)
                     : CurriculumEvidenceReview.unavailable();
             return new GeneratedContentReviewer.Result(validation, evidenceReview);
         } catch (RuntimeException exception) {

@@ -17,6 +17,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
     private final int kindergartenTopK;
     private final double kindergartenMinScore;
     private final Supplier<KindergartenEvidenceVerifier> kindergartenEvidenceVerifier;
+    private final Supplier<SemanticCurriculumEvidenceVerifier> semanticEvidenceVerifier;
     private volatile CurriculumConstraints loaded;
     private final CurriculumTopicParser parser = new CurriculumTopicParser();
     private final CurriculumEvidenceVerifier verifier = new CurriculumEvidenceVerifier();
@@ -50,6 +51,15 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
             Supplier<CurriculumRAGService> retrieval, Supplier<CurriculumConstraints> constraints, String approvedSha,
             CurriculumMetrics metrics, String embeddingModel, int kindergartenTopK, double kindergartenMinScore,
             Supplier<KindergartenEvidenceVerifier> kindergartenEvidenceVerifier) {
+        this(catalog, availability, retrieval, constraints, approvedSha, metrics, embeddingModel,
+                kindergartenTopK, kindergartenMinScore, kindergartenEvidenceVerifier, () -> null);
+    }
+
+    public VerifiedCurriculumContextProvider(CurriculumCatalog catalog, CurriculumAvailability availability,
+            Supplier<CurriculumRAGService> retrieval, Supplier<CurriculumConstraints> constraints, String approvedSha,
+            CurriculumMetrics metrics, String embeddingModel, int kindergartenTopK, double kindergartenMinScore,
+            Supplier<KindergartenEvidenceVerifier> kindergartenEvidenceVerifier,
+            Supplier<SemanticCurriculumEvidenceVerifier> semanticEvidenceVerifier) {
         this.catalog = Objects.requireNonNull(catalog);
         this.availability = Objects.requireNonNull(availability);
         this.retrieval = Objects.requireNonNull(retrieval);
@@ -63,6 +73,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
         this.kindergartenTopK = kindergartenTopK;
         this.kindergartenMinScore = kindergartenMinScore;
         this.kindergartenEvidenceVerifier = Objects.requireNonNull(kindergartenEvidenceVerifier);
+        this.semanticEvidenceVerifier = Objects.requireNonNull(semanticEvidenceVerifier);
     }
 
     @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade) {
@@ -78,18 +89,25 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
         var dataset = catalog.requireSupported(GameType.QUIZ, subject, grade);
         try {
             if (grade == GradeLevel.KINDERGARTEN) {
-                KindergartenEvidenceVerifier semanticVerifier = kindergartenEvidenceVerifier.get();
-                if (semanticVerifier == null)
+                SemanticCurriculumEvidenceVerifier semanticVerifier = semanticEvidenceVerifier.get();
+                KindergartenEvidenceVerifier legacyVerifier = kindergartenEvidenceVerifier.get();
+                if (semanticVerifier == null && legacyVerifier == null)
                     throw new CurriculumServiceUnavailableException(
                             "Curriculum RAG mầm non đang khóa cho tới khi có bộ xác minh căn cứ theo lĩnh vực và duyệt chuyên môn.", null);
                 availability.requireReady(dataset);
+                int ageOutcomeCount = (int) dataset.chunks().stream().filter(c -> !c.control())
+                        .filter(c -> kindergartenAgeBand.metadataValue().equals(c.ageBand()))
+                        .filter(c -> "COGNITIVE".equals(c.domain()) || "LANGUAGE".equals(c.domain())).count();
                 var candidates = metrics.measure(CurriculumMetrics.Stage.RETRIEVAL, subject, grade,
                         () -> retrieval.get().retrieveKindergarten(topic, subject, dataset.source(), kindergartenAgeBand,
-                                kindergartenTopK, kindergartenMinScore), r -> r.chunks().isEmpty()
+                                Math.max(kindergartenTopK, ageOutcomeCount), 0), r -> r.chunks().isEmpty()
                                 ? CurriculumMetrics.Outcome.REJECTED : CurriculumMetrics.Outcome.SUCCESS);
                 if (candidates.chunks().isEmpty())
                     throw new CurriculumEvidenceNotFoundException(kindergartenGuidance(candidates.suggestions()));
-                var supportedIds = semanticVerifier.supportedChunkIds(topic, kindergartenAgeBand, candidates.chunks());
+                var supportedIds = semanticVerifier != null
+                        ? requireSemanticDecision(semanticVerifier.verify(topic, subject, grade, kindergartenAgeBand,
+                                candidates.chunks()), candidates.chunks())
+                        : legacyVerifier.supportedChunkIds(topic, kindergartenAgeBand, candidates.chunks());
                 if (supportedIds == null || supportedIds.isEmpty())
                     throw new CurriculumEvidenceNotFoundException(kindergartenGuidance(candidates.chunks()));
                 var candidateIds = candidates.chunks().stream().map(CurriculumRAGService.RetrievedChunk::chunkId)
@@ -107,6 +125,25 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                 return Evidence.found(context,
                         com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
                                 dataset.source(), embeddingModel, supportedChunks));
+            }
+            if (subject != Subject.MATH || grade != GradeLevel.GRADE_1) {
+                availability.requireReady(dataset);
+                SemanticCurriculumEvidenceVerifier semanticVerifier = semanticEvidenceVerifier.get();
+                if (semanticVerifier == null)
+                    throw new CurriculumServiceUnavailableException("Chưa cấu hình bộ xác minh ngữ nghĩa cho phạm vi chương trình này.", null);
+                int outcomeCount = (int) dataset.chunks().stream().filter(c -> !c.control()).count();
+                var candidates = metrics.measure(CurriculumMetrics.Stage.RETRIEVAL, subject, grade,
+                        () -> retrieval.get().retrieve(topic, subject, grade, dataset.source(), outcomeCount, -1),
+                        r -> r.chunks().isEmpty() ? CurriculumMetrics.Outcome.REJECTED : CurriculumMetrics.Outcome.SUCCESS);
+                var decision = metrics.measure(CurriculumMetrics.Stage.VERIFICATION, subject, grade,
+                        () -> semanticVerifier.verify(topic, subject, grade, null, candidates.chunks()),
+                        d -> d.status() == SemanticCurriculumEvidenceVerifier.Status.SUPPORTED
+                                ? CurriculumMetrics.Outcome.SUCCESS : CurriculumMetrics.Outcome.REJECTED);
+                var selected = selectSemanticEvidence(decision, candidates.chunks(), candidates.chunks());
+                return Evidence.found(new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.FOUND, selected)
+                                .curriculumContext(),
+                        com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
+                                dataset.source(), embeddingModel, selected));
             }
             var capabilities = loaded;
             if (capabilities == null) { capabilities = constraints.get(); loaded = capabilities; }
@@ -132,12 +169,45 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
             var selected = candidates.chunks().stream().filter(c -> decision.supportedChunkIds().contains(c.chunkId())).toList();
             return Evidence.found(new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.FOUND, selected).curriculumContext(),
                     com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(dataset.source(), embeddingModel, selected));
-        } catch (CurriculumEvidenceNotFoundException | CurriculumServiceUnavailableException exception) {
+        } catch (CurriculumEvidenceNotFoundException | CurriculumClarificationRequiredException
+                 | CurriculumServiceUnavailableException exception) {
             throw exception;
         } catch (RuntimeException exception) {
             throw new CurriculumServiceUnavailableException(
                     "Không truy xuất được căn cứ chương trình; vui lòng thử lại sau.", null);
         }
+    }
+
+    private static java.util.List<String> requireSemanticDecision(SemanticCurriculumEvidenceVerifier.Decision decision,
+            java.util.List<CurriculumRAGService.RetrievedChunk> suggestions) {
+        if (decision == null) throw new IllegalStateException("Semantic verifier returned no decision");
+        return switch (decision.status()) {
+            case SUPPORTED -> decision.supportedChunkIds();
+            case NEEDS_CLARIFICATION -> throw new CurriculumClarificationRequiredException(
+                    "Cần làm rõ yêu cầu trước khi đối chiếu chương trình (" + decision.reasonCode() + ").");
+            case INSUFFICIENT_EVIDENCE -> throw new CurriculumEvidenceNotFoundException(
+                    suggestionGuidance(suggestions));
+        };
+    }
+
+    private static java.util.List<CurriculumRAGService.RetrievedChunk> selectSemanticEvidence(
+            SemanticCurriculumEvidenceVerifier.Decision decision,
+            java.util.List<CurriculumRAGService.RetrievedChunk> candidates,
+            java.util.List<CurriculumRAGService.RetrievedChunk> suggestions) {
+        var ids = requireSemanticDecision(decision, suggestions);
+        if (ids.isEmpty()) throw new IllegalStateException("Supported semantic decision contains no chunk IDs");
+        var candidateIds = candidates.stream().map(CurriculumRAGService.RetrievedChunk::chunkId)
+                .collect(java.util.stream.Collectors.toSet());
+        if (!candidateIds.containsAll(ids)) throw new IllegalStateException("Verifier selected a chunk outside the selected dataset");
+        return candidates.stream().filter(c -> ids.contains(c.chunkId())).toList();
+    }
+
+    private static String suggestionGuidance(java.util.List<CurriculumRAGService.RetrievedChunk> suggestions) {
+        if (suggestions == null || suggestions.isEmpty()) return "Chưa tìm thấy YCCĐ phù hợp; hãy mô tả mục tiêu bài học cụ thể hơn.";
+        String closest = suggestions.stream().limit(3).map(c -> c.topic() + " — " + c.text()
+                + " (PDF " + c.pdfPages().stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(",")) + ")")
+                .collect(java.util.stream.Collectors.joining("; "));
+        return "Chưa tìm thấy căn cứ đủ phù hợp. Gợi ý gần nhất: " + closest + ".";
     }
 
     private static String kindergartenGuidance(java.util.List<CurriculumRAGService.RetrievedChunk> suggestions) {

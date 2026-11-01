@@ -24,4 +24,11 @@ public class GeminiChatConfiguration {
                 .supportedCapabilities(Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA))
                 .maxRetries(0).build();
     }
+
+    @Bean
+    GeneratedContentReviewer generatedContentReviewer(ChatModel gameGenerationChatModel,
+            tools.jackson.databind.json.JsonMapper mapper,
+            @Value("${app.ai.gemini.model:gemini-2.5-flash}") String modelName) {
+        return new GeminiGeneratedContentReviewer(gameGenerationChatModel, mapper, modelName);
+    }
 }

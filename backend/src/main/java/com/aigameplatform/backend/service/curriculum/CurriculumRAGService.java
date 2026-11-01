@@ -72,18 +72,27 @@ public final class CurriculumRAGService {
     }
 
     public RetrievalResult retrieve(String topic, Subject subject, GradeLevel gradeLevel) {
+        return retrieve(topic, subject, gradeLevel, source, topK, minScore);
+    }
+
+    /** Retrieval for a selected dataset; callers supply its source and scope-specific candidate policy. */
+    public RetrievalResult retrieve(String topic, Subject subject, GradeLevel gradeLevel,
+                                    CurriculumSource selectedSource, int maxResults, double scoreFloor) {
         if (topic == null || topic.isBlank() || subject == null || gradeLevel == null)
             throw new IllegalArgumentException("Topic, subject and gradeLevel are required");
+        if (selectedSource == null || maxResults < 1 || !Double.isFinite(scoreFloor)
+                || scoreFloor < -1 || scoreFloor > 1)
+            throw new IllegalArgumentException("Invalid selected dataset retrieval policy");
         var filter = metadataKey("subject").isEqualTo(subject.name())
                 .and(metadataKey("gradeLevel").isEqualTo(gradeLevel.name()))
                 .and(metadataKey("contentType").isEqualTo("curriculum_outcome"))
                 .and(metadataKey("control").isEqualTo("false"))
-                .and(metadataKey("datasetVersion").isEqualTo(source.datasetVersion()))
-                .and(metadataKey("curriculumVersion").isEqualTo(source.curriculumVersion()))
-                .and(metadataKey("sourceSha256").isEqualTo(source.sourceSha256()))
+                .and(metadataKey("datasetVersion").isEqualTo(selectedSource.datasetVersion()))
+                .and(metadataKey("curriculumVersion").isEqualTo(selectedSource.curriculumVersion()))
+                .and(metadataKey("sourceSha256").isEqualTo(selectedSource.sourceSha256()))
                 .and(metadataKey("embeddingModel").isEqualTo(modelName));
         var retriever = EmbeddingStoreContentRetriever.builder().embeddingStore(store).embeddingModel(queryModel)
-                .filter(filter).maxResults(topK).minScore(0.0).build();
+                .filter(filter).maxResults(maxResults).minScore(0.0).build();
         var ranked = retriever.retrieve(Query.from(topic)).stream().map(content -> {
             var metadata = content.textSegment().metadata();
             Subject actualSubject = Subject.valueOf(metadata.getString("subject"));
@@ -97,7 +106,7 @@ public final class CurriculumRAGService {
                     metadata.getString("sourceDocument"), pages(metadata.getString("sourcePdfPages")),
                     pages(metadata.getString("sourcePrintedPages")), metadata.getString("curriculumVersion"));
         }).toList();
-        var chunks = ranked.stream().filter(c -> c.score() >= minScore).toList();
+        var chunks = ranked.stream().filter(c -> c.score() >= scoreFloor).toList();
         var suggestions = ranked.stream().limit(3).toList();
         return new RetrievalResult(chunks.isEmpty() ? Status.INSUFFICIENT_EVIDENCE : Status.FOUND, chunks,
                 chunks.isEmpty() ? suggestions : List.of());

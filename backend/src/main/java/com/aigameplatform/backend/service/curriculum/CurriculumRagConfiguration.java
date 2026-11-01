@@ -3,6 +3,9 @@ package com.aigameplatform.backend.service.curriculum;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel;
+import dev.langchain4j.model.chat.Capability;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import java.io.IOException;
@@ -38,13 +41,12 @@ public class CurriculumRagConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "app.curriculum-rag.kindergarten.enabled", havingValue = "true")
-    CurriculumDataset kindergartenCurriculumDataset() throws IOException {
-        return CurriculumDataset.loadKindergarten();
-    }
-
-    @Bean
-    CurriculumCatalog curriculumCatalog(List<CurriculumDataset> datasets) {
+    CurriculumCatalog curriculumCatalog(
+            @Value("${app.curriculum-rag.kindergarten.enabled:false}") boolean kindergartenEnabled) throws IOException {
+        var datasets = CurriculumDataset.loadPackaged().stream()
+                .filter(dataset -> kindergartenEnabled || dataset.chunks().getFirst().gradeLevel()
+                        != com.aigameplatform.backend.entity.enums.GradeLevel.KINDERGARTEN)
+                .toList();
         return new CurriculumCatalog(datasets, java.util.Set.of(com.aigameplatform.backend.entity.enums.GameType.QUIZ));
     }
 
@@ -84,6 +86,26 @@ public class CurriculumRagConfiguration {
 
     @Bean
     @Lazy
+    ChatModel curriculumSemanticVerifierChatModel(
+            @Value("${app.ai.gemini.api-key:}") String apiKey,
+            @Value("${app.ai.gemini.model:gemini-2.5-flash}") String modelName) {
+        if (apiKey.isBlank()) throw new IllegalStateException("GEMINI_API_KEY is required for semantic curriculum verification");
+        return GoogleAiGeminiChatModel.builder().apiKey(apiKey).modelName(modelName)
+                .supportedCapabilities(java.util.Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA))
+                .maxRetries(0).build();
+    }
+
+    @Bean
+    @Lazy
+    SemanticCurriculumEvidenceVerifier semanticCurriculumEvidenceVerifier(
+            @Qualifier("curriculumSemanticVerifierChatModel") ChatModel model,
+            tools.jackson.databind.json.JsonMapper mapper,
+            @Value("${app.ai.gemini.model:gemini-2.5-flash}") String modelName) {
+        return new GeminiSemanticCurriculumEvidenceVerifier(model, mapper, modelName);
+    }
+
+    @Bean
+    @Lazy
     EmbeddingStore<TextSegment> curriculumEmbeddingStore(DataSource dataSource) {
         return PgVectorEmbeddingStore.datasourceBuilder().datasource(dataSource).table("curriculum_embeddings")
                 .dimension(CurriculumEmbeddingContract.DIMENSION).createTable(false).dropTableFirst(false).useIndex(false)
@@ -108,18 +130,24 @@ public class CurriculumRagConfiguration {
     CurriculumContextProvider curriculumContextProvider(CurriculumCatalog catalog,
             @Qualifier("mathGradeOneCurriculumDataset") CurriculumDataset dataset,
             ObjectProvider<CurriculumRAGService> retriever, DataSource database,
-            ObjectProvider<KindergartenEvidenceVerifier> kindergartenEvidenceVerifier,
+            ObjectProvider<SemanticCurriculumEvidenceVerifier> semanticEvidenceVerifier,
             @Value("${app.curriculum-rag.embedding-model:gemini-embedding-001}") String model,
             @Value("${app.curriculum-rag.constraints-approved-sha256:}") String approvedSha, CurriculumMetrics metrics,
             @Value("${app.curriculum-rag.kindergarten.top-k:8}") int kindergartenTopK,
-            @Value("${app.curriculum-rag.kindergarten.min-score:0.50}") double kindergartenMinScore) {
+            @Value("${app.curriculum-rag.kindergarten.min-score:0.50}") double kindergartenMinScore,
+            @Value("${app.curriculum-rag.kindergarten.expert-approved-source-sha256:}") String kindergartenApprovedSourceSha) {
         var availability = new CurriculumAvailability(java.time.Clock.systemUTC(), Duration.ofSeconds(30),
-                d -> new CurriculumDatasetReadiness(database).requireComplete(d, model));
+                d -> {
+                    if (d.chunks().getFirst().gradeLevel() == com.aigameplatform.backend.entity.enums.GradeLevel.KINDERGARTEN
+                            && !d.source().sourceSha256().equals(kindergartenApprovedSourceSha))
+                        throw new IllegalStateException("Preschool expert review must approve this exact source hash");
+                    new CurriculumDatasetReadiness(database).requireComplete(d, model);
+                });
         return new VerifiedCurriculumContextProvider(catalog, availability, retriever::getObject,
                 () -> {
                     try { return CurriculumConstraints.load(dataset); }
                     catch (IOException e) { throw new IllegalStateException("Constraints unavailable"); }
                 }, approvedSha, metrics, model, kindergartenTopK, kindergartenMinScore,
-                kindergartenEvidenceVerifier::getIfAvailable);
+                () -> null, semanticEvidenceVerifier::getIfAvailable);
     }
 }

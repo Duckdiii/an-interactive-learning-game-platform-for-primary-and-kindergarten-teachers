@@ -106,5 +106,43 @@
     "mvnVerify": { "tests": 584, "failures": 0, "errors": 0, "skipped": 8, "jacocoGate": "PASS" },
     "focusedRagTests": { "tests": 8, "failures": 0, "errors": 0, "skipped": 0 },
     "liveRetrieval": "NOT_RUN; local database and Gemini credentials unavailable"
+  },
+  "currentRagImplementationRecheck": {
+    "recordedAt": "2026-11-01",
+    "runtimeCatalog": "All 15 packaged primary scopes load when Curriculum RAG is enabled; Kindergarten is included only when its feature flag is enabled and exact source approval SHA matches.",
+    "primaryScopeCounts": {
+      "mathGrade1": 23,
+      "mathGrade2": 43,
+      "mathGrade3": 51,
+      "mathGrade4": 53,
+      "mathGrade5": 53,
+      "englishGrade1": 6,
+      "englishGrade2": 7,
+      "englishGrade3": 15,
+      "englishGrade4": 14,
+      "englishGrade5": 15,
+      "vietnameseGrade1": 36,
+      "vietnameseGrade2": 42,
+      "vietnameseGrade3": 45,
+      "vietnameseGrade4": 42,
+      "vietnameseGrade5": 40
+    },
+    "kindergarten": {
+      "ageBandCounts": { "AGE_3_4": 38, "AGE_4_5": 47, "AGE_5_6": 49 },
+      "publication": "DISABLED_PENDING_SPECIALIST_REVIEW",
+      "semanticVerifier": "Implemented but not live-evaluated; expert approval is not inferred from AI review"
+    },
+    "retrievalAndVerificationImplementation": "Dataset-specific source/version/hash/model metadata filters and control=false are applied; each scope has independent readiness cache. Non-MATH/GRADE_1 uses constrained Gemini semantic verification over exact retrieved candidates; Kindergarten retrieval filters the requested age band and allowed domain before semantic verification.",
+    "generationIntegration": "NOT_COMPLETE_FOR_ALL_SCOPES: the existing QuizGameStrategy prompt still hardcodes Mathematics Grade 1 and rejects other grades; GeminiGameContentGenerator also retains the pilot guard. Strategy owner coordination is required before the remaining scopes can generate through the current service. No strategy/schema owned by another member was changed.",
+    "crossDatasetRegression": { "result": "PASS", "test": "CurriculumRAGServiceTest.selectedSourceFiltersAndExcludesControlsForEveryPackagedDataset", "scopes": 16, "includesAgeAndDomainFilteringForKindergarten": true },
+    "focusedBackendTests": { "tests": 62, "failures": 0, "errors": 0, "skipped": 0 },
+    "fullBackendVerify": { "tests": 595, "failures": 0, "errors": 0, "skipped": 8, "jacocoGate": "PASS" },
+    "qualityEvaluation": {
+      "naturalLanguageIndependentBenchmark": "NOT_RUN",
+      "falseAcceptAndFalseRejectRates": "NOT_ESTABLISHED",
+      "teacherOrSpecialistLabelReview": "PENDING",
+      "livePgvectorAndGeminiSemanticVerification": "NOT_RUN; no authorized local pgvector endpoint available; remote Supabase was not written"
+    },
+    "scopeStatus": "Retrieval/filter/verifier code is implemented for the 15 primary scopes and technical age-filter path; end-to-end non-pilot generation, live quality, independent benchmark and Kindergarten expert approval remain incomplete."
   }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -53,6 +54,7 @@ public class GameGenerationService {
     private final ObjectProvider<CurriculumMetrics> metricsProvider;
     private final boolean curriculumRagEnabled;
     private final int maxRetries;
+    private volatile GeneratedContentReviewer generatedContentReviewer;
 
     // ObjectProvider để ứng dụng vẫn khởi động khi chưa có bản cài đặt cổng AI; thiếu thì báo lúc gọi.
     public GameGenerationService(
@@ -83,6 +85,11 @@ public class GameGenerationService {
         this.metricsProvider = metricsProvider;
         this.curriculumRagEnabled = curriculumRagEnabled;
         this.maxRetries = maxRetries;
+    }
+
+    @Autowired(required = false)
+    public void setGeneratedContentReviewer(GeneratedContentReviewer reviewer) {
+        this.generatedContentReviewer = reviewer;
     }
 
     /**
@@ -135,24 +142,43 @@ public class GameGenerationService {
                     return new GenerationResult(report.game(), curriculum.evidence(),
                             com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable());
                 } else {
-                    PilotQuizContentVerifier verifier = contentVerifierProvider.getIfAvailable();
-                    if (verifier == null) throw new GeneratedContentUnverifiedException("CONTENT_VERIFIER_UNAVAILABLE");
-                    PilotQuizContentVerifier.Result decision = verifier.verify(report.game(), request.topic(), curriculum.evidence());
-                    if (decision.status() == PilotQuizContentVerifier.Status.UNVERIFIED) {
-                        lastUnverifiedReason = decision.errors().isEmpty()
-                                ? "CONTENT_NOT_MACHINE_CHECKABLE" : decision.errors().get(0).message();
-                        errors = decision.errors();
-                    } else if (decision.status() == PilotQuizContentVerifier.Status.INVALID) {
-                        errors = decision.errors();
+                    if (type == GameType.QUIZ && request.subject() == Subject.MATH
+                            && request.gradeLevel() == GradeLevel.GRADE_1) {
+                        PilotQuizContentVerifier verifier = contentVerifierProvider.getIfAvailable();
+                        if (verifier == null) throw new GeneratedContentUnverifiedException("CONTENT_VERIFIER_UNAVAILABLE");
+                        PilotQuizContentVerifier.Result decision = verifier.verify(report.game(), request.topic(), curriculum.evidence());
+                        if (decision.status() == PilotQuizContentVerifier.Status.UNVERIFIED) {
+                            lastUnverifiedReason = decision.errors().isEmpty()
+                                    ? "CONTENT_NOT_MACHINE_CHECKABLE" : decision.errors().get(0).message();
+                            errors = decision.errors();
+                        } else if (decision.status() == PilotQuizContentVerifier.Status.INVALID) {
+                            errors = decision.errors();
+                        } else {
+                            var claims = decision.chunkIds().stream().map(chunkId -> java.util.Map.<String, Object>of(
+                                    "chunkId", chunkId,
+                                    "claim", "Question arithmetic and numeric scope passed deterministic pilot checks"))
+                                    .toList();
+                            var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
+                                    com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED,
+                                    claims, List.of(), "math-g1-quiz-deterministic-v1");
+                            return new GenerationResult(report.game(), curriculum.evidence(), review);
+                        }
                     } else {
-                        var claims = decision.chunkIds().stream().map(chunkId -> java.util.Map.<String, Object>of(
-                                "chunkId", chunkId,
-                                "claim", "Question arithmetic and numeric scope passed deterministic pilot checks"))
-                                .toList();
-                        var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED,
-                                claims, List.of(), "math-g1-quiz-deterministic-v1");
-                        return new GenerationResult(report.game(), curriculum.evidence(), review);
+                        GeneratedContentReviewer reviewer = generatedContentReviewer;
+                        if (reviewer == null)
+                            throw new GeneratedContentUnverifiedException("SEMANTIC_CONTENT_REVIEWER_UNAVAILABLE");
+                        GeneratedContentReviewer.Result decision;
+                        try { decision = reviewer.review(report.game(), request.topic(), curriculum.evidence()); }
+                        catch (RuntimeException unavailable) {
+                            throw new AiGenerationTimeoutException("Không kiểm tra được mức bám YCCĐ của nội dung game.", unavailable);
+                        }
+                        if (decision == null || !decision.accepted()) {
+                            lastUnverifiedReason = decision == null || decision.errors().isEmpty()
+                                    ? "SEMANTIC_CONTENT_NOT_VERIFIED" : decision.errors().get(0).message();
+                            errors = decision == null ? List.of(new ValidationError("$", lastUnverifiedReason)) : decision.errors();
+                        } else {
+                            return new GenerationResult(report.game(), curriculum.evidence(), decision.review());
+                        }
                     }
                 }
             }
@@ -178,10 +204,12 @@ public class GameGenerationService {
                     request.topic(), request.subject(), request.gradeLevel(), request.kindergartenAgeBand());
             if (evidence == null || !evidence.sufficient()) {
                 throw new CurriculumEvidenceNotFoundException(
-                        "Không tìm thấy yêu cầu cần đạt đủ liên quan trong chương trình Toán lớp 1 cho chủ đề này");
+                        "Không tìm thấy yêu cầu cần đạt đủ liên quan trong chương trình đã chọn cho chủ đề này");
             }
             return evidence;
         } catch (CurriculumEvidenceNotFoundException exception) {
+            throw exception;
+        } catch (com.aigameplatform.backend.exception.CurriculumClarificationRequiredException exception) {
             throw exception;
         } catch (com.aigameplatform.backend.exception.KindergartenAgeBandRequiredException exception) {
             throw exception;

@@ -126,3 +126,21 @@ Test thang score/filter pgvector được bật riêng bằng `RUN_LIVE_RAG_VECT
 - Offline Extract/Ingest/Evaluate code now lives in test scope and is invoked by `scripts/rag-spike.ps1` with `-Dataset primary-math-g1|kindergarten`.
 
 The current code changes have focused unit/regression coverage, but no complete preschool corpus, curriculum specialist approval, online preschool evaluation, or end-to-end generation/save endpoint is claimed.
+
+## Current cross-scope implementation recheck (2026-11-01)
+
+This section supersedes older statements above that described the runtime catalog or semantic reviewer as Math Grade 1 only / unavailable. It does not supersede historical evaluation results.
+
+- **Offline path:** packaged manifests are loaded as 15 primary subject/grade datasets plus one Kindergarten dataset. Source verification, chunk parsing, dataset hashes, provenance, and control labels remain dataset-specific. Existing `Extract`, `Ingest`, and `Evaluate` tools remain in test scope and are invoked through `scripts/rag-spike.ps1`; evaluation artifacts remain exploratory unless independently labeled and frozen.
+- **Online retrieval path:** the runtime catalog loads the 15 primary datasets and selects by requested subject/grade. Each request checks readiness against the selected source; vector filtering includes source hash, curriculum version, dataset version, embedding model, subject/grade, `contentType`, and `control=false`. Primary non-pilot scopes use a constrained Gemini semantic evidence decision over the retrieved candidates; the Math Grade 1 deterministic constraint verifier remains specialized to that pilot. Similarity alone does not grant evidence.
+- **Kindergarten:** a separate feature flag defaults off; when enabled, the exact source approval hash is also required. Retrieval filters the requested age band and allowed domains before semantic evidence selection. The corpus currently contains 134 outcomes (38 age 3–4, 47 age 4–5, 49 age 5–6). Specialist review and live evaluation are still pending; AI review is not specialist approval.
+- **Generation integration limit:** `GeminiGameContentGenerator` still restricts generation to QUIZ / MATH / GRADE_1, and the existing `QuizGameStrategy` prompt is hardcoded to Grade 1 and throws for other grades. Therefore the new per-scope RAG retrieval code does **not** yet mean end-to-end generation is supported for the other 14 primary scopes or Kindergarten. Strategy-owner coordination is required; this task did not rewrite that strategy or the published DSL.
+- **Current verification:** focused backend RAG/provider/generation regressions passed (62 tests, 0 failures/errors). The all-packaged-dataset in-memory regression covers metadata scope and control exclusion for 15 primary datasets and age/domain filtering for Kindergarten. This is technical filter evidence, not a live pgvector quality evaluation.
+- **Still not measured:** natural-language independent benchmark, false-accept/false-reject rates, semantic verifier live calls, retrieval quality across all scopes, and online Kindergarten quality. Local pgvector was unavailable for a new run; Supabase was not written.
+
+| Scope | Dataset outcomes | RAG selection/filter implementation | Current generation status | Evaluation / review |
+|---|---:|---|---|---|
+| Math Grades 1–5 | 23 / 43 / 51 / 53 / 53 | Source-scoped retrieval; Grade 1 deterministic verifier; Grades 2–5 semantic verifier | Grade 1 only; Grades 2–5 blocked by existing strategy/generator guard | Unit/filter tests; no new live quality run; labels not independently reviewed |
+| English Grades 1–5 | 6 / 7 / 15 / 14 / 15 | Source-scoped retrieval and semantic verifier | Blocked by existing strategy/generator guard | Unit/filter tests; no new live quality run; labels not independently reviewed |
+| Vietnamese Grades 1–5 | 36 / 42 / 45 / 42 / 40 | Source-scoped retrieval and semantic verifier | Blocked by existing strategy/generator guard | Unit/filter tests; no new live quality run; labels not independently reviewed |
+| Kindergarten ages 3–4 / 4–5 / 5–6 | 38 / 47 / 49 | Age/domain filter precedes semantic verification; feature flag and source-hash gate | Disabled pending specialist approval; generator prompt is also Grade 1-specific | Age/filter regression passed; no live new evaluation; specialist review pending |

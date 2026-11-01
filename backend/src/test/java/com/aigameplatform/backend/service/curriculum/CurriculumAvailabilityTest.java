@@ -7,6 +7,19 @@ import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.Test;
 
 class CurriculumAvailabilityTest {
+    @Test void readinessIsCachedPerDatasetInsteadOfEvictingThePreviousScope() throws Exception {
+        var calls = new AtomicInteger();
+        var availability = new CurriculumAvailability(Clock.systemUTC(), Duration.ofMinutes(1), dataset -> calls.incrementAndGet());
+        var gradeOne = CurriculumDataset.loadDefault();
+        var gradeTwo = CurriculumDataset.loadFromResourceRoot("/curriculum/spike/math-grade2/");
+
+        availability.requireReady(gradeOne);
+        availability.requireReady(gradeTwo);
+        availability.requireReady(gradeOne);
+
+        assertThat(calls).hasValue(2);
+    }
+
     @Test void failedChecksRecoverAfterTtlAndReadyChecksAreReused() throws Exception {
         var instant = new AtomicReference<>(Instant.parse("2026-10-30T00:00:00Z"));
         Clock clock = new Clock() {

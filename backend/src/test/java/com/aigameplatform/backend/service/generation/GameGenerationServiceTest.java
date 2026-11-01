@@ -44,6 +44,40 @@ import tools.jackson.databind.json.JsonMapper;
 class GameGenerationServiceTest {
 
     @Test
+    void nonPilotScopeUsesSemanticGroundingGateAndDoesNotClaimHumanReview() throws Exception {
+        var dataset = com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadFromResourceRoot(
+                "/curriculum/spike/english-grade1/");
+        var chunk = dataset.chunks().stream().filter(outcome -> !outcome.control()).findFirst().orElseThrow();
+        var retrieved = new com.aigameplatform.backend.service.curriculum.CurriculumRAGService.RetrievedChunk(
+                chunk.chunkId(), chunk.subject(), chunk.gradeLevel(), chunk.topic(), chunk.text(), .2,
+                dataset.source().sourceDocument(), List.of(1238), List.of(7), dataset.source().curriculumVersion());
+        var evidence = com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
+                dataset.source(), "fixture", List.of(retrieved));
+        CurriculumContextProvider provider = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("English outcome with source", evidence);
+        var service = service(new ScriptedGenerator(validOutput(GameType.QUIZ)), 0, moderation(false, false),
+                provider, true, List.of(dataset));
+        var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
+                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                List.of(), List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), "test-model");
+        var reviewCalls = new java.util.concurrent.atomic.AtomicInteger();
+        service.setGeneratedContentReviewer((game, topic, curriculumEvidence) -> {
+            reviewCalls.incrementAndGet();
+            assertThat(curriculumEvidence).isSameAs(evidence);
+            return new GeneratedContentReviewer.Result(List.of(), review);
+        });
+
+        var result = service.generateResult(GameType.QUIZ,
+                new GameDslRequest("Nối từ tiếng Anh với tranh", Subject.ENGLISH, GradeLevel.GRADE_1));
+
+        assertThat(result.game().metadata().subject()).isEqualTo(Subject.ENGLISH);
+        assertThat(result.evidence().datasetVersion()).isEqualTo(dataset.source().datasetVersion());
+        assertThat(result.review().status()).isEqualTo(
+                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING);
+        assertThat(reviewCalls).hasValue(1);
+    }
+
+    @Test
     void generationResultKeepsEvidenceOutsideFrozenDslWithoutRetrievingTwice() throws Exception {
         var generator = new ScriptedGenerator(validArithmeticOutput());
         var calls = new java.util.concurrent.atomic.AtomicInteger();
@@ -124,11 +158,18 @@ class GameGenerationServiceTest {
 
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
             ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled) {
-        DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
         try {
-            beans.registerSingleton("catalog", new com.aigameplatform.backend.service.curriculum.CurriculumCatalog(
-                    List.of(com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadDefault()), java.util.Set.of(GameType.QUIZ)));
+            return service(generator, maxRetries, moderation, curriculum, ragEnabled,
+                    List.of(com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadDefault()));
         } catch (IOException e) { throw new java.io.UncheckedIOException(e); }
+    }
+
+    private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
+            ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled,
+            List<com.aigameplatform.backend.service.curriculum.CurriculumDataset> catalogDatasets) {
+        DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
+        beans.registerSingleton("catalog", new com.aigameplatform.backend.service.curriculum.CurriculumCatalog(
+                catalogDatasets, java.util.Set.of(GameType.QUIZ)));
         if (generator != null) {
             beans.registerSingleton("generator", generator);
         }
