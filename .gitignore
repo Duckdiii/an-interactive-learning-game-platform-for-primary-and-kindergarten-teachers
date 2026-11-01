@@ -39,3 +39,8 @@ Thumbs.db
 # === Logs ===
 *.log
 logs/
+
+# Local PDF extraction/rendering scratch artifacts. Keep the source PDF available
+# because the English Grade 1/2 manifests use it for reproducible source checks.
+/tmp/*
+!/tmp/curriculum-source.pdf
