@@ -86,6 +86,11 @@ test("escCell escape ký tự | thành \\| để không tạo thêm cột", () =
   assert.equal(escCell("a|b").length, 4, "thêm đúng một ký tự backslash");
 });
 
+test("escCell escape cả backslash, ô có sẵn \\| không thành ranh giới cột", () => {
+  assert.equal(escCell("a\\|b"), "a\\\\\\|b");
+  assert.equal(escCell("C:\\temp"), "C:\\\\temp");
+});
+
 test("bảng sinh từ SRS thật có số cột đều nhau ở mọi dòng (không dòng nào bị lệch do ký tự |)", { skip: !existsSync(docx()) }, () => {
   const countCells = (row) => row.replace(/\\\|/g, "").split("|").length - 2;
   for (const b of docxToBlocks(readFileSync(docx()))) {

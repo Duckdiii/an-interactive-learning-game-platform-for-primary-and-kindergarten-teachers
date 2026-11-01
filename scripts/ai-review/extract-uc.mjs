@@ -5,6 +5,7 @@
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { stripHtmlComments } from "./sanitize.mjs";
 
 // Cho phép chữ đi kèm sau tên mục, ví dụ "Liên quan UC/FR (tùy chọn)" trong PR template.
 const SECTION_HEADING = /^#{1,6}[ \t]*Liên quan UC\/FR[^\n]*$/im;
@@ -12,7 +13,7 @@ const ANY_HEADING = /^#{1,6}[ \t]/m;
 
 /** Lấy nội dung mục "Liên quan UC/FR", bỏ bình luận HTML (ví dụ mẫu trong template không được tính). */
 export function declaredSection(body) {
-  const text = String(body ?? "").normalize("NFC").replace(/\r\n/g, "\n").replace(/<!--[\s\S]*?-->/g, "");
+  const text = stripHtmlComments(String(body ?? "").normalize("NFC").replace(/\r\n/g, "\n"));
   const m = SECTION_HEADING.exec(text);
   if (!m) return null;
   const rest = text.slice(m.index + m[0].length);
