@@ -53,7 +53,7 @@ Reviewer độc lập đã đọc18 game/72 câu hỏi và đối chiếu topic 
 | [19](results/acceptance-2026-10-30T16-28-55.775506800Z/sample-19.json) | Đáp án văn bản đúng | Tính độ dài từ hai đầu mút đúng; ảnh thước chưa nghiệm thu |
 | [20](results/acceptance-2026-10-30T16-28-55.775506800Z/sample-20.json) | Đáp án văn bản đúng | Đọc giờ đúng dựa mô tả đúng; hình đồng hồ chưa nghiệm thu |
 
-Renderer được kiểm tra ở `frontend/src/games/quiz/QuizRenderer.tsx`: nạp question.imageUrl, không hiển thị visualPrompt. Trong phạm vi backend hiện tại chưa có chuỗi tạo media/UI hoàn chỉnh; đây là giới hạn tích hợp, không được bỏ qua khi tuyên bố game đã chơi được. Frontend chưa có node_modules ở checkout nên chưa chạy lại frontend suite trong lượt này.
+Ghi chú renderer trong lượt nghiệm thu lịch sử chỉ là quan sát tích hợp sản phẩm, không phải tiêu chí nghiệm thu Curriculum RAG. Việc tạo/hiển thị media và chạy frontend suite nằm ngoài phạm vi task RAG; nội dung câu hỏi cần hình ảnh vẫn được xem là chưa thể xác minh nếu bản thân đầu ra không cung cấp bằng chứng hình ảnh tương ứng.
 
 ## Hành động tiếp theo theo ưu tiên
 
@@ -61,7 +61,7 @@ Renderer được kiểm tra ở `frontend/src/games/quiz/QuizRenderer.tsx`: n�
 2. Điều tra ca đếm1–5 bị retrieval bỏ sót trên baseline cố định; thử nghiệm variant theo ma trận A–E, chưa thay production trong đợt nghiệm thu này.
 3. Có key OpenAI Moderation hợp lệ rồi kiểm thử lại kiểm duyệt đầy đủ. Không lấy blocklist pass thay moderation pass.
 4. Chuẩn bị tập tune/holdout được người duyệt độc lập xác nhận, có cả ca dương/âm sát ranh giới; không chuyển90 ca AI-authored thành “holdout đã duyệt”.
-5. Có ít nhất20 game hợp lệ và giáo viên review theo rubric: đúng đáp án, duy nhất đáp án, phù hợp YCCĐ, giữ điều kiện, tiếng Việt phù hợp, media hiển thị đủ. Hiện chỉ18 game và có lỗi nên cổng này chưa đạt.
+5. Có ít nhất20 game hợp lệ và giáo viên review theo rubric nội dung: đúng đáp án, duy nhất đáp án, phù hợp YCCĐ, giữ điều kiện và tiếng Việt phù hợp. Hiện chỉ18 game và có lỗi nên cổng review nội dung chưa đạt; media/UI không thuộc cổng nghiệm thu RAG.
 
 Không commit/push hoặc tuyên bố phát hành từ báo cáo này. Các kết quả không đạt được giữ nguyên để có thể tái kiểm tra.
 
@@ -72,7 +72,7 @@ This addendum checks the preserved samples against the current generation gate; 
 | Sample / issue | Current finding | Classification |
 | --- | --- | --- |
 | sample-1: natural counting query was rejected before generation | Not rerun as a teacher-style retrieval case in this change; no claim of fixed false rejection | Not addressed |
-| sample-2: counting depends on animal images, but the sample has only `visualPrompt`; renderer consumes `imageUrl` | Current verifier cannot prove visual counting and returns unverified; media delivery still needs integration | Gated, not fixed |
+| sample-2: counting depends on animal images, but the sample has only `visualPrompt` | Current verifier cannot prove visual counting and returns unverified; renderer/media integration is outside this RAG report | Gated, not fixed |
 | sample-3: Gemini HTTP 503 | Provider availability was not altered | Not addressed |
 | samples-4/5: awkward Vietnamese and reading/writing skill drift | Language/visual semantics are outside the deterministic arithmetic pilot; unverified forms are not returned as grounded | Gated, not fixed |
 | sample-6: report described giving away 25 and asking what remained | The checked-in JSON instead says “cho em thêm 25” and asks for the total; 30+25=55 is correct. The old narrative is inaccurate. The current gate still leaves its word-problem form unverified | Historical description corrected; semantic parser still unsupported |
