@@ -15,7 +15,8 @@
                           ],
     "primaryOutcomeCount":  134,
     "controlOutcomeCount":  0,
-    "corpusStatus":  "SOURCE_VERIFIED_AGENT_REVIEWED_EXPERT_REVIEW_PENDING",
+    "corpusStatus":  "SOURCE_VERIFIED_OWNER_APPROVED",
+    "ownerApprovalBasis":  "Project owner policy: outcomes extracted from and verified against this exact official PDF source are approved as curriculum corpus data. This does not claim separate preschool-specialist pedagogical review.",
     "supportedSubDomains":  [
                                 "SCIENCE_EXPLORATION",
                                 "MATHEMATICAL_CONCEPTS",
@@ -74,7 +75,7 @@
                                      "pdfPage":  69
                                  }
                              ],
-    "reviewNote":  "The declared scope contains all 134 expected outcomes on PDF pages 61-70 (printed 73-82) for cognitive and language development, across age bands 3-4, 4-5 and 5-6. Independent source reviewers passed each completed batch. PDFBox verifies 131 outcomes directly; 3 are separately transcribed because PDFBox attaches superscript amendment footnote markers 71, 72 and 73 to adjacent words. Human preschool curriculum review, evaluation, database ingestion and runtime publication remain pending.",
+    "reviewNote":  "The declared scope contains all 134 expected outcomes on PDF pages 61-70 (printed 73-82) for cognitive and language development, across age bands 3-4, 4-5 and 5-6. Independent source reviewers passed each completed batch. PDFBox verifies 131 outcomes directly; 3 are separately transcribed because PDFBox attaches superscript amendment footnote markers 71, 72 and 73 to adjacent words. The owner approves this corpus under the recorded exact-PDF extraction policy; no separate preschool-specialist pedagogical review is claimed.",
     "sourceFragmentCount":  134,
     "pdfPages":  [
                      61,

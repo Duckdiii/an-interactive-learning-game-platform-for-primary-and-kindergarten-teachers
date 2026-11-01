@@ -1,6 +1,10 @@
 # Kindergarten source audit
 
-Status: source-verified draft; independent source transcription reviews passed; preschool curriculum expert review, evaluation, ingestion and runtime publication remain pending.
+Status: source-verified and owner-approved as curriculum corpus data under the exact-PDF extraction policy; independent source transcription reviews passed. No separate preschool-specialist pedagogical review is claimed.
+
+## Owner approval policy — 2026-11-02
+
+The project owner has determined that outcomes extracted from and verified against the exact official PDF identified by this manifest are approved for use as curriculum source data. This approval is tied to the manifest's SHA-256 and does not represent a separate pedagogical review by a preschool specialist. Runtime still checks dataset readiness against the exact manifest hash, dataset version and embedding model; it does not require a separate expert-approved hash.
 
 ## Source and scope
 

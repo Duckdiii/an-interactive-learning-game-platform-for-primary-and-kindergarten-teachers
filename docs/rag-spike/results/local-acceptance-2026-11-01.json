@@ -1330,6 +1330,20 @@
     "coverage": "Regression added for 14 non-pilot primary subject/grade scopes, Kindergarten age/domain preservation, missing-provenance rejection, and GameGenerationService evidence/context handoff.",
     "testStatus": "VERIFIED_AFTER_EDIT; focused suite 56 passed, full backend mvn verify 634 passed with 0 failures/errors and 8 skipped; JaCoCo passed.",
     "liveGeneration": "NOT_RUN; latest one-request Gemini probe returned rate limit.",
-    "remaining": ["live retrieval/generation", "independent benchmark review", "Kindergarten specialist approval", "request-level Kindergarten domain contract coordination"]
+    "remaining": ["live retrieval/generation", "independent benchmark review", "request-level Kindergarten domain contract coordination"]
+  },
+  "latestKindergartenApprovalPolicy": {
+    "date": "2026-11-02",
+    "decision": "OWNER_APPROVED_AS_CURRICULUM_CORPUS_DATA",
+    "basis": "Outcomes extracted from and verified against the exact official PDF source hash in the manifest.",
+    "specialistPedagogicalReview": "NOT_CLAIMED",
+    "runtimeCatalog": "Kindergarten dataset included whenever Curriculum RAG is enabled; exact manifest readiness, age/domain filtering and semantic evidence verification remain enforced.",
+    "verificationAfterPolicyChange": {
+      "focusedTests": {"tests": 11, "failures": 0, "errors": 0, "skipped": 0},
+      "fullBackend": {"command": "mvn verify", "tests": 634, "failures": 0, "errors": 0, "skipped": 8, "jacoco": "PASS"},
+      "geminiCalls": 0,
+      "databaseWrites": false,
+      "liveQuality": "NOT_RUN_QUOTA_BLOCKED"
+    }
   }
 }

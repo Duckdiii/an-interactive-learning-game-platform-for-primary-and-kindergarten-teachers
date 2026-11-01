@@ -41,13 +41,9 @@ public class CurriculumRagConfiguration {
     }
 
     @Bean
-    CurriculumCatalog curriculumCatalog(
-            @Value("${app.curriculum-rag.kindergarten.enabled:false}") boolean kindergartenEnabled) throws IOException {
-        var datasets = CurriculumDataset.loadPackaged().stream()
-                .filter(dataset -> kindergartenEnabled || dataset.chunks().getFirst().gradeLevel()
-                        != com.aigameplatform.backend.entity.enums.GradeLevel.KINDERGARTEN)
-                .toList();
-        return new CurriculumCatalog(datasets, java.util.Set.of(com.aigameplatform.backend.entity.enums.GameType.QUIZ));
+    CurriculumCatalog curriculumCatalog() throws IOException {
+        return new CurriculumCatalog(CurriculumDataset.loadPackaged(),
+                java.util.Set.of(com.aigameplatform.backend.entity.enums.GameType.QUIZ));
     }
 
     @Bean
@@ -134,13 +130,11 @@ public class CurriculumRagConfiguration {
             @Value("${app.curriculum-rag.embedding-model:gemini-embedding-001}") String model,
             @Value("${app.curriculum-rag.constraints-approved-sha256:}") String approvedSha, CurriculumMetrics metrics,
             @Value("${app.curriculum-rag.kindergarten.top-k:8}") int kindergartenTopK,
-            @Value("${app.curriculum-rag.kindergarten.min-score:0.50}") double kindergartenMinScore,
-            @Value("${app.curriculum-rag.kindergarten.expert-approved-source-sha256:}") String kindergartenApprovedSourceSha) {
+            @Value("${app.curriculum-rag.kindergarten.min-score:0.50}") double kindergartenMinScore) {
         var availability = new CurriculumAvailability(java.time.Clock.systemUTC(), Duration.ofSeconds(30),
                 d -> {
-                    if (d.chunks().getFirst().gradeLevel() == com.aigameplatform.backend.entity.enums.GradeLevel.KINDERGARTEN
-                            && !d.source().sourceSha256().equals(kindergartenApprovedSourceSha))
-                        throw new IllegalStateException("Preschool expert review must approve this exact source hash");
+                    // Owner policy: source-verified PDF extraction approves the corpus as sourced curriculum data.
+                    // Readiness still requires every stored vector to match this manifest's exact hash/version/model.
                     new CurriculumDatasetReadiness(database).requireComplete(d, model);
                 });
         return new VerifiedCurriculumContextProvider(catalog, availability, retriever::getObject,

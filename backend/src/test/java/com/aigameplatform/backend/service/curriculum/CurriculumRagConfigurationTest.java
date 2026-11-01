@@ -9,9 +9,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.env.MapPropertySource;
 
 class CurriculumRagConfigurationTest {
-    @Test void runtimeCatalogSelectsAllPackagedPrimaryDatasetsAndRequiresExplicitPreschoolEnablement() throws Exception {
+    @Test void runtimeCatalogIncludesPdfVerifiedPreschoolCorpusWithoutSeparateExpertHash() throws Exception {
         var configuration = new CurriculumRagConfiguration();
-        var catalog = configuration.curriculumCatalog(false);
+        var catalog = configuration.curriculumCatalog();
 
         for (var subject : java.util.List.of(com.aigameplatform.backend.entity.enums.Subject.MATH,
                 com.aigameplatform.backend.entity.enums.Subject.VIETNAMESE,
@@ -25,13 +25,7 @@ class CurriculumRagConfigurationTest {
                         .chunks().stream().filter(chunk -> !chunk.control()).count()).isPositive();
             }
         }
-        assertThatThrownBy(() -> catalog.requireSupported(com.aigameplatform.backend.entity.enums.GameType.QUIZ,
-                com.aigameplatform.backend.entity.enums.Subject.MATH,
-                com.aigameplatform.backend.entity.enums.GradeLevel.KINDERGARTEN))
-                .isInstanceOf(com.aigameplatform.backend.exception.GenerationScopeUnsupportedException.class);
-
-        var preschoolCatalog = configuration.curriculumCatalog(true);
-        assertThat(preschoolCatalog.requireSupported(com.aigameplatform.backend.entity.enums.GameType.QUIZ,
+        assertThat(catalog.requireSupported(com.aigameplatform.backend.entity.enums.GameType.QUIZ,
                 com.aigameplatform.backend.entity.enums.Subject.VIETNAMESE,
                 com.aigameplatform.backend.entity.enums.GradeLevel.KINDERGARTEN)
                 .chunks()).hasSize(134);
