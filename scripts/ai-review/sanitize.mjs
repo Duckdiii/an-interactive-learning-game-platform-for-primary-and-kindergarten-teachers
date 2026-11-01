@@ -40,7 +40,14 @@ function untilStable(text, step) {
 
 /** Bỏ bình luận HTML, kể cả bình luận lồng để tái tạo sau khi gỡ. */
 export function stripHtmlComments(text) {
-  return untilStable(text, (s) => s.replace(/<!--[\s\S]*?-->/g, ""));
+  let out = text;
+  let prev;
+  // Mỗi lượt có đổi thì chuỗi ngắn đi nên vòng lặp luôn dừng, không cần MAX_PASSES.
+  do {
+    prev = out;
+    out = out.replace(/<!--[\s\S]*?-->/g, "");
+  } while (out !== prev);
+  return out;
 }
 
 function stripMarkup(segment, repo) {
