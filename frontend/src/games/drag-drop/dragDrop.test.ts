@@ -4,6 +4,7 @@ import {
   CONFIRM_BUTTON_HEIGHT,
   isInsideZone,
   ITEM_SIZE,
+  TRAY_LABEL_HEIGHT,
 } from './dragDropLayout'
 import { canSubmit, createDragDropState, dragDropReducer } from './dragDropReducer'
 import type { DragDropDisplayItem } from './dragDropTypes'
@@ -132,6 +133,23 @@ describe('Drag & Drop Layout & Geometry', () => {
     expect(layout.confirmY).toBeGreaterThanOrEqual(
       layout.trayBounds.y + layout.trayBounds.height,
     )
+  })
+
+  it('keeps tray items below the tray label and inside the tray', () => {
+    for (const scale of [1, 0.75, 0.4875]) {
+      const layout = computeDragDropLayout({
+        items: sampleItems,
+        dropZones: sampleZones,
+        hasAudio: false,
+        hasIllustration: false,
+        scale,
+      })
+      const trayBottom = layout.trayBounds.y + layout.trayBounds.height
+      for (const pos of Object.values(layout.trayPositions)) {
+        expect(pos.y).toBeGreaterThanOrEqual(layout.trayBounds.y + TRAY_LABEL_HEIGHT)
+        expect(pos.y + layout.itemSize).toBeLessThanOrEqual(trayBottom)
+      }
+    }
   })
 })
 

@@ -12,6 +12,10 @@ export const SLOT_HEIGHT = 76
 export const CONFIRM_BUTTON_HEIGHT = 72
 export const GAP = 12
 export const PADDING = 20
+// Dải dành cho nhãn khay, thẻ chữ nằm dưới dải này để không đè lên nhãn.
+export const TRAY_LABEL_HEIGHT = 26
+// Chỗ cho dòng báo lỗi nộp bài dưới nút xác nhận.
+export const SUBMIT_ERROR_HEIGHT = 32
 
 export interface WordScrambleBoardLayout {
   width: number
@@ -100,7 +104,7 @@ export function computeWordScrambleLayout(params: {
   // Bố trí khay chữ cái (Letter Tiles Tray)
   const trayColumns = Math.max(1, Math.floor((availableWidth - 24) / (tileSize + GAP)))
   const trayRows = Math.max(1, Math.ceil(tiles.length / trayColumns))
-  const trayHeight = 32 + trayRows * (tileSize + GAP)
+  const trayHeight = TRAY_LABEL_HEIGHT + trayRows * (tileSize + GAP)
   const trayY = currentY
 
   const trayPositions: Record<string, Point> = {}
@@ -111,7 +115,7 @@ export function computeWordScrambleLayout(params: {
     const startX = (width - rowWidth) / 2
     trayPositions[tile.tileId] = {
       x: startX + (index % trayColumns) * (tileSize + GAP),
-      y: trayY + 16 + row * (tileSize + GAP),
+      y: trayY + TRAY_LABEL_HEIGHT + row * (tileSize + GAP),
     }
   })
 
@@ -119,7 +123,7 @@ export function computeWordScrambleLayout(params: {
 
   // Nút xác nhận «Xong rồi!»
   const confirmY = currentY
-  currentY += confirmHeight + PADDING
+  currentY += confirmHeight + SUBMIT_ERROR_HEIGHT + PADDING
 
   return {
     width,

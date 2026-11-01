@@ -12,7 +12,7 @@ vi.mock('react-konva', () => ({
   }: {
     children?: React.ReactNode
     onClick?: () => void
-  }) => <div onClick={onClick}>{children}</div>,
+  }) => <div data-testid="konva-group" onClick={onClick}>{children}</div>,
   Rect: () => null,
   Line: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
@@ -36,6 +36,12 @@ const sampleQuestion: WordScrambleQuestion = {
   scrambledLetters: ['Á', 'C'],
 }
 
+/** Chạm chữ rồi chạm ô đích. Câu mẫu không có audio và ảnh nên các Group đầu tiên chính là các ô. */
+function placeLetter(letter: string, slotIndex: number) {
+  fireEvent.click(screen.getByText(letter))
+  fireEvent.click(screen.getAllByTestId('konva-group')[slotIndex])
+}
+
 describe('WordScrambleRenderer Component', () => {
   it('renders prompt, letter tiles, and confirm button', () => {
     render(<WordScrambleRenderer mode="preview" question={sampleQuestion} />)
@@ -46,19 +52,33 @@ describe('WordScrambleRenderer Component', () => {
     expect(screen.getByText('Xong rồi!')).toBeInTheDocument()
   })
 
-  it('allows tapping tiles to auto-place into slots and submits in preview mode', () => {
+  it('places a selected tile into the tapped slot and submits in preview mode', () => {
     const onAnswered = vi.fn()
     render(<WordScrambleRenderer mode="preview" question={sampleQuestion} onAnswered={onAnswered} />)
 
-    // Tap 'C' -> auto-places into slot 0
-    fireEvent.click(screen.getByText('C'))
-    // Tap 'Á' -> auto-places into slot 1
-    fireEvent.click(screen.getByText('Á'))
+    // Cố ý đặt ô sau trước: chữ phải vào đúng ô được chạm, không vào ô trống đầu tiên
+    placeLetter('Á', 1)
+    placeLetter('C', 0)
 
     // Click confirm button
     fireEvent.click(screen.getByText('Xong rồi!'))
     expect(onAnswered).toHaveBeenCalledWith('CÁ')
     expect(screen.getByText(/Tuyệt vời/)).toBeInTheDocument()
+  })
+
+  it('resets placed letters when the teacher edits letters under the same question id', () => {
+    const onAnswered = vi.fn()
+    const { rerender } = render(
+      <WordScrambleRenderer mode="preview" question={sampleQuestion} onAnswered={onAnswered} />,
+    )
+    placeLetter('C', 0)
+    placeLetter('Á', 1)
+
+    const edited = { ...sampleQuestion, correctWord: 'CÁT', scrambledLetters: ['T', 'Á', 'C'] }
+    rerender(<WordScrambleRenderer mode="preview" question={edited} onAnswered={onAnswered} />)
+
+    fireEvent.click(screen.getByText('Xong rồi!'))
+    expect(onAnswered).not.toHaveBeenCalled()
   })
 
   it('renders in review mode without confirm button, locks interaction, and updates on completedWord change', () => {
@@ -94,10 +114,8 @@ describe('WordScrambleRenderer Component', () => {
 
     render(<WordScrambleRenderer mode="play" question={studentQuestion} onAnswered={onAnswered} />)
 
-    // Tap 'C' -> auto-places into slot 0
-    fireEvent.click(screen.getByText('C'))
-    // Tap 'Á' -> auto-places into slot 1
-    fireEvent.click(screen.getByText('Á'))
+    placeLetter('C', 0)
+    placeLetter('Á', 1)
 
     const confirmBtn = screen.getByText('Xong rồi!')
     fireEvent.click(confirmBtn)

@@ -303,6 +303,12 @@ describe('DragDropPlayable với MockPlayerApi', () => {
 })
 
 describe('WordScramblePlayable với MockPlayerApi', () => {
+  /** Chạm chữ rồi chạm ô đích; mỗi ô có đúng một Line gạch chân nên dùng Line để trỏ tới ô. */
+  const placeLetter = (letter: string, slotIndex: number) => {
+    tap(letter)
+    fireEvent.click(screen.getAllByTestId('line')[slotIndex])
+  }
+
   it('ghép đúng từ rồi bấm «Xong rồi!»: nộp word, máy chủ chấm đúng', async () => {
     const { api, sessionId, game } = await startSession('MOCK07')
     const WordScramble = getPlayableRenderer('WORD_SCRAMBLE')!
@@ -311,9 +317,9 @@ describe('WordScramblePlayable với MockPlayerApi', () => {
 
     render(<WordScramble question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
 
-    // Khay có 'ẹ' và 'm'. Từ đúng là 'mẹ'. Chạm 'm' vào ô 0, chạm 'ẹ' vào ô 1.
-    tap('m')
-    tap('ẹ')
+    // Khay có 'ẹ' và 'm'. Từ đúng là 'mẹ'.
+    placeLetter('ẹ', 1)
+    placeLetter('m', 0)
 
     tap('Xong rồi!')
 
@@ -330,8 +336,8 @@ describe('WordScramblePlayable với MockPlayerApi', () => {
     render(<WordScramble question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
 
     // Ghép ngược: 'ẹm'
-    tap('ẹ')
-    tap('m')
+    placeLetter('ẹ', 0)
+    placeLetter('m', 1)
 
     tap('Xong rồi!')
 

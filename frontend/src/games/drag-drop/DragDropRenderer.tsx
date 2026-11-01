@@ -86,14 +86,15 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
     () => createDragDropState(initialPlacements, mode === 'review'),
   )
 
-  // Reset state when question changes
-  const lastQuestionId = useRef(question.id)
+  // Reset khi đổi câu hoặc giáo viên sửa danh sách vật trong Editor (câu giữ nguyên id).
+  const questionKey = [question.id, ...items.map((item) => item.id)].join('|')
+  const lastQuestionKey = useRef(questionKey)
   useEffect(() => {
-    if (lastQuestionId.current !== question.id) {
-      lastQuestionId.current = question.id
+    if (lastQuestionKey.current !== questionKey) {
+      lastQuestionKey.current = questionKey
       dispatch({ type: 'RESET' })
     }
-  }, [question.id])
+  }, [questionKey])
 
   // Cập nhật placements ở chế độ review khi prop đổi
   useEffect(() => {
@@ -128,16 +129,22 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
     (itemId: string) => {
       if (state.locked || disabled) return
 
-      // Nếu item đang ở trong rổ -> bấm để trả về khay
-      if (state.placements[itemId]) {
-        dispatch({ type: 'UNPLACE_ITEM', itemId })
+      const zoneId = state.placements[itemId]
+      if (zoneId) {
+        // Đang chọn vật khác mà chạm trúng vật trong rổ: trẻ đang nhắm vào rổ đó, đặt vật đang chọn vào.
+        if (state.selectedItemId) {
+          playSound('/sounds/pair-matched.wav')
+          dispatch({ type: 'PLACE_ITEM', itemId: state.selectedItemId, zoneId })
+        } else {
+          dispatch({ type: 'UNPLACE_ITEM', itemId })
+        }
         return
       }
 
       // Nếu item ở khay -> chọn/bỏ chọn
       dispatch({ type: 'SELECT_ITEM', itemId })
     },
-    [state.locked, state.placements, disabled],
+    [state.locked, state.placements, state.selectedItemId, disabled],
   )
 
   const handleZoneTap = useCallback(
@@ -406,13 +413,16 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
                   />
                   <Text
                     text={viText.player.dragDrop.correctZoneLabel(targetCorrectZone.label)}
-                    fontSize={Math.round(10 * Math.min(1.4, layout.itemSize / 76))}
+                    fontSize={Math.round(12 * Math.min(1.4, layout.itemSize / 76))}
                     fontStyle="bold"
-                    fill={palette.wrongLine}
-                    width={layout.itemSize}
+                    fill={palette.ink}
+                    x={4}
+                    width={layout.itemSize - 8}
                     height={22}
                     align="center"
                     verticalAlign="middle"
+                    wrap="none"
+                    ellipsis
                     listening={false}
                   />
                 </Group>
@@ -439,7 +449,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
             fontSize={18}
             fill={palette.accent}
             x={20}
-            y={layout.confirmY + 76}
+            y={layout.confirmY + layout.confirmHeight + 8}
             width={layout.width - 40}
             align="center"
             listening={false}

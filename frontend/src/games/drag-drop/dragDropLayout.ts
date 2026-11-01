@@ -10,6 +10,10 @@ export const CONFIRM_BUTTON_HEIGHT = 72
 export const GAP = 16
 export const PADDING = 20
 export const LABEL_HEIGHT = 44
+// Dải dành cho nhãn khay, vật nằm dưới dải này để không đè lên nhãn.
+export const TRAY_LABEL_HEIGHT = 26
+// Chỗ cho dòng báo lỗi nộp bài dưới nút xác nhận.
+export const SUBMIT_ERROR_HEIGHT = 32
 
 export interface ZoneLayout extends DropZone {
   bounds: Bounds
@@ -133,7 +137,7 @@ export function computeDragDropLayout(params: {
   // Bố trí khay chứa (Tray)
   const trayColumns = Math.max(1, Math.floor((availableWidth - 20) / (itemSize + GAP)))
   const trayRows = Math.max(1, Math.ceil(items.length / trayColumns))
-  const trayHeight = trayRows * (itemSize + GAP) + 20
+  const trayHeight = TRAY_LABEL_HEIGHT + trayRows * (itemSize + GAP)
   const trayY = currentY
 
   const trayPositions: Record<string, Point> = {}
@@ -144,7 +148,7 @@ export function computeDragDropLayout(params: {
     const startX = (width - rowWidth) / 2
     trayPositions[item.id] = {
       x: startX + (index % trayColumns) * (itemSize + GAP),
-      y: trayY + 12 + row * (itemSize + GAP),
+      y: trayY + TRAY_LABEL_HEIGHT + row * (itemSize + GAP),
     }
   })
 
@@ -152,7 +156,7 @@ export function computeDragDropLayout(params: {
 
   // Nút xác nhận «Xong rồi!»
   const confirmY = currentY
-  currentY += confirmHeight + PADDING
+  currentY += confirmHeight + SUBMIT_ERROR_HEIGHT + PADDING
 
   return {
     width,

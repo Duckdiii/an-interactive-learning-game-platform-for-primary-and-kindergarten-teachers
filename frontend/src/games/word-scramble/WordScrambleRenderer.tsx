@@ -104,14 +104,15 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
     () => createWordScrambleState(wordLength, initialSlots, mode === 'review'),
   )
 
-  // Reset state when question changes
-  const lastQuestionId = useRef(question.id)
+  // Reset khi đổi câu hoặc giáo viên sửa chữ cái trong Editor (câu giữ nguyên id).
+  const questionKey = [question.id, ...question.scrambledLetters].join('|')
+  const lastQuestionKey = useRef(questionKey)
   useEffect(() => {
-    if (lastQuestionId.current !== question.id) {
-      lastQuestionId.current = question.id
+    if (lastQuestionKey.current !== questionKey) {
+      lastQuestionKey.current = questionKey
       dispatch({ type: 'RESET', wordLength })
     }
-  }, [question.id, wordLength])
+  }, [questionKey, wordLength])
 
   // Cập nhật slots ở chế độ review khi prop completedWord đổi
   useEffect(() => {
@@ -164,14 +165,14 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
       if (state.locked || disabled) return
       const currentTileId = state.slots[slotIndex]
 
-      if (currentTileId) {
-        // Bấm vào ô đã có chữ -> trả chữ về khay
-        playSound('/sounds/pair-matched.wav')
-        dispatch({ type: 'RETURN_TILE', tileId: currentTileId })
-      } else if (state.selectedTileId) {
-        // Bấm vào ô trống khi đang chọn chữ -> đặt chữ vào ô
+      if (state.selectedTileId) {
+        // Đang chọn chữ -> đặt vào ô; ô đã có chữ thì chữ cũ về khay.
         playSound('/sounds/pair-matched.wav')
         dispatch({ type: 'PLACE_TILE', tileId: state.selectedTileId, slotIndex })
+      } else if (currentTileId) {
+        // Không chọn chữ nào mà bấm ô đã có chữ -> trả chữ về khay
+        playSound('/sounds/pair-matched.wav')
+        dispatch({ type: 'RETURN_TILE', tileId: currentTileId })
       }
     },
     [state.locked, state.slots, state.selectedTileId, disabled],
@@ -236,7 +237,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
         {layout.slotBounds.map((bounds, index) => {
           const filledTileId = state.slots[index]
           const filledTile = filledTileId ? tileMap.get(filledTileId) : null
-          const isSlotHighlighted = Boolean(state.selectedTileId && !filledTileId)
+          const isSlotHighlighted = Boolean(state.selectedTileId)
 
           return (
             <Group
@@ -375,7 +376,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
             fontSize={18}
             fill={palette.accent}
             x={20}
-            y={layout.confirmY + 76}
+            y={layout.confirmY + layout.confirmHeight + 8}
             width={layout.width - 40}
             align="center"
             listening={false}

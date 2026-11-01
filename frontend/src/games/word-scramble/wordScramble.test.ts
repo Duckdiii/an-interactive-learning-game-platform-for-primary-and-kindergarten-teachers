@@ -4,6 +4,7 @@ import {
   CONFIRM_BUTTON_HEIGHT,
   SLOT_WIDTH,
   TILE_SIZE,
+  TRAY_LABEL_HEIGHT,
 } from './wordScrambleLayout'
 import {
   isWordMatch,
@@ -59,35 +60,34 @@ describe('Word Scramble Reducer with Duplicate Letters', () => {
     let state = createWordScrambleState(word.length)
     expect(canSubmit(state.slots)).toBe(false)
 
-    // Tap tile A (t2) -> auto-places into slot 0
-    state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId: 't2' })
-    expect(state.slots[0]).toBe('t2')
-
-    // Tap first P (t1) -> auto-places into slot 1
-    state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId: 't1' })
-    expect(state.slots[1]).toBe('t1')
-
-    // Tap second P (t3) -> auto-places into slot 2
-    state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId: 't3' })
-    expect(state.slots[2]).toBe('t3')
-
-    // Tap L (t4) -> auto-places into slot 3
-    state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId: 't4' })
-    expect(state.slots[3]).toBe('t4')
-
-    // Tap E (t0) -> auto-places into slot 4
-    state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId: 't0' })
-    expect(state.slots[4]).toBe('t0')
+    // Chạm chữ rồi chạm ô đích, lần lượt A, P, P, L, E
+    for (const [slotIndex, tileId] of ['t2', 't1', 't3', 't4', 't0'].entries()) {
+      state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId })
+      state = wordScrambleReducer(state, { type: 'PLACE_TILE', tileId, slotIndex })
+      expect(state.slots[slotIndex]).toBe(tileId)
+    }
 
     // All slots filled
     expect(canSubmit(state.slots)).toBe(true)
     expect(constructWord(state.slots, tiles)).toBe('APPLE')
 
     // Tap first P in slot 1 -> removes only first P, leaving second P in slot 2!
-    state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId: 't1' })
+    state = wordScrambleReducer(state, { type: 'RETURN_TILE', tileId: 't1' })
     expect(state.slots[1]).toBeNull()
     expect(state.slots[2]).toBe('t3')
     expect(canSubmit(state.slots)).toBe(false)
+  })
+
+  it('tapping a tray tile only selects it, the target slot decides where it goes', () => {
+    let state = createWordScrambleState(3)
+
+    state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId: 't0' })
+    expect(state.selectedTileId).toBe('t0')
+    expect(state.slots).toEqual([null, null, null])
+
+    // Chạm lại chữ đang chọn thì bỏ chọn
+    state = wordScrambleReducer(state, { type: 'SELECT_TILE', tileId: 't0' })
+    expect(state.selectedTileId).toBeNull()
   })
 
   it('allows manual placement and swapping of tiles', () => {
@@ -216,5 +216,17 @@ describe('Word Scramble Layout & Sizing', () => {
     expect(layout.slotBounds[1].x).toBeGreaterThan(layout.slotBounds[0].x)
     expect(layout.trayBounds.y).toBeGreaterThan(layout.slotBounds[0].y + layout.slotBounds[0].height)
     expect(layout.confirmY).toBeGreaterThan(layout.trayBounds.y + layout.trayBounds.height)
+  })
+
+  it('keeps tiles below the tray label and inside the tray', () => {
+    const tiles: LetterTile[] = Array.from({ length: 15 }, (_, i) => ({ tileId: `t${i}`, character: 'A' }))
+    for (const scale of [1, 0.75, 0.4875]) {
+      const layout = computeWordScrambleLayout({ tiles, wordLength: 15, hasAudio: false, hasIllustration: false, scale })
+      const trayBottom = layout.trayBounds.y + layout.trayBounds.height
+      for (const pos of Object.values(layout.trayPositions)) {
+        expect(pos.y).toBeGreaterThanOrEqual(layout.trayBounds.y + TRAY_LABEL_HEIGHT)
+        expect(pos.y + layout.tileSize).toBeLessThanOrEqual(trayBottom)
+      }
+    }
   })
 })

@@ -57,6 +57,44 @@ describe('DragDropRenderer Component', () => {
     expect(screen.getByText('Xong rồi!')).toBeInTheDocument()
   })
 
+  it('tapping an item inside a basket while another is selected places the selected one there', () => {
+    const onAnswered = vi.fn()
+    render(<DragDropRenderer mode="preview" question={sampleQuestion} onAnswered={onAnswered} />)
+
+    fireEvent.click(screen.getByText('Cá'))
+    fireEvent.click(screen.getByText('Dưới nước'))
+
+    // Đang chọn 'Thỏ', chạm trúng 'Cá' trong rổ: 'Cá' ở lại, 'Thỏ' vào cùng rổ
+    fireEvent.click(screen.getByText('Thỏ'))
+    fireEvent.click(screen.getByText('Cá'))
+
+    fireEvent.click(screen.getByText('Xong rồi!'))
+    expect(onAnswered).toHaveBeenCalledWith([
+      { itemId: 'fish', zoneId: 'water' },
+      { itemId: 'rabbit', zoneId: 'water' },
+    ])
+  })
+
+  it('resets placements when the teacher edits items under the same question id', () => {
+    const onAnswered = vi.fn()
+    const { rerender } = render(
+      <DragDropRenderer mode="preview" question={sampleQuestion} onAnswered={onAnswered} />,
+    )
+    fireEvent.click(screen.getByText('Cá'))
+    fireEvent.click(screen.getByText('Dưới nước'))
+    fireEvent.click(screen.getByText('Thỏ'))
+    fireEvent.click(screen.getByText('Trên cạn'))
+
+    const edited = {
+      ...sampleQuestion,
+      items: [...sampleQuestion.items, { id: 'crab', text: 'Cua', targetZoneId: 'water' }],
+    }
+    rerender(<DragDropRenderer mode="preview" question={edited} onAnswered={onAnswered} />)
+
+    fireEvent.click(screen.getByText('Xong rồi!'))
+    expect(onAnswered).not.toHaveBeenCalled()
+  })
+
   it('allows 2-tap placement and submits in preview mode', () => {
     const onAnswered = vi.fn()
     render(<DragDropRenderer mode="preview" question={sampleQuestion} onAnswered={onAnswered} />)

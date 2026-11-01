@@ -49,33 +49,7 @@ export function wordScrambleReducer(state: WordScrambleState, action: WordScramb
     case 'SELECT_TILE': {
       if (state.locked || state.submitting) return state
 
-      const existingSlotIndex = state.slots.indexOf(action.tileId)
-      // Nếu chữ đã nằm trong ô -> bấm vào để trả về khay
-      if (existingSlotIndex !== -1) {
-        const nextSlots = [...state.slots]
-        nextSlots[existingSlotIndex] = null
-        return {
-          ...state,
-          slots: nextSlots,
-          selectedTileId: null,
-          submitFailed: false,
-        }
-      }
-
-      // Chữ đang ở trong khay: tự động bay vào ô trống đầu tiên nếu có
-      const firstEmptySlot = state.slots.indexOf(null)
-      if (firstEmptySlot !== -1) {
-        const nextSlots = [...state.slots]
-        nextSlots[firstEmptySlot] = action.tileId
-        return {
-          ...state,
-          slots: nextSlots,
-          selectedTileId: null,
-          submitFailed: false,
-        }
-      }
-
-      // Nếu không còn ô trống: toggle chọn
+      // Chữ trong khay: chỉ chọn, chạm tiếp vào ô đích mới đặt (chạm lần nữa thì bỏ chọn).
       if (state.selectedTileId === action.tileId) {
         return { ...state, selectedTileId: null, submitFailed: false }
       }
