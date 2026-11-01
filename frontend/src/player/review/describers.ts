@@ -83,6 +83,37 @@ const VISUAL_CLOZE: ReviewDescriber<'VISUAL_CLOZE'> = {
   correct: (_q, correctAnswer) => (typeof correctAnswer?.answer === 'string' ? correctAnswer.answer : null),
 }
 
+const DRAG_DROP: ReviewDescriber<'DRAG_DROP'> = {
+  prompt: (q) => q.audioText ?? viText.player.dragDropPrompt,
+  chosen: (q, a) =>
+    a.placements
+      .map(
+        (p) =>
+          `${q.items.find((i) => i.id === p.itemId)?.text ?? p.itemId} → ${
+            q.dropZones.find((z) => z.id === p.zoneId)?.label ?? p.zoneId
+          }`,
+      )
+      .join('; '),
+  correct: (q, correctAnswer) => {
+    const list = correctAnswer?.placements
+    if (!Array.isArray(list)) return null
+    return list
+      .map(
+        (p: { itemId: string; zoneId: string }) =>
+          `${q.items.find((i) => i.id === p.itemId)?.text ?? p.itemId} → ${
+            q.dropZones.find((z) => z.id === p.zoneId)?.label ?? p.zoneId
+          }`,
+      )
+      .join('; ')
+  },
+}
+
+const WORD_SCRAMBLE: ReviewDescriber<'WORD_SCRAMBLE'> = {
+  prompt: (q) => q.audioText ?? viText.player.wordScramblePrompt,
+  chosen: (_q, a) => a.word,
+  correct: (_q, correctAnswer) => (typeof correctAnswer?.word === 'string' ? correctAnswer.word : null),
+}
+
 // Điểm xóa kiểu duy nhất, như `renderers/index.ts`: mỗi describer ràng buộc đúng loại game khi đăng ký.
 const define = <T extends GameType>(describer: ReviewDescriber<T>) => describer as unknown as AnyReviewDescriber
 
@@ -92,6 +123,8 @@ export const REVIEW_DESCRIBERS: Partial<Record<GameType, AnyReviewDescriber>> = 
   MATCHING: define(MATCHING),
   ODD_ONE_OUT: define(ODD_ONE_OUT),
   VISUAL_CLOZE: define(VISUAL_CLOZE),
+  DRAG_DROP: define(DRAG_DROP),
+  WORD_SCRAMBLE: define(WORD_SCRAMBLE),
 }
 
 export const isNoAnswer = (answer: AnswerPayload): answer is NoAnswer => 'outcome' in answer

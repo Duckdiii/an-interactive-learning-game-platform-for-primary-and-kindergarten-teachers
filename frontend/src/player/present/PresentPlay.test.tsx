@@ -36,7 +36,7 @@ const replay = vi.fn()
 vi.mock('../../games/common/useQuestionAudio', () => ({ useQuestionAudio: () => replay }))
 
 // Đáp án đúng của 3 câu mẫu: '3', '5', '9'. Chọn đáp án khác là sai.
-const [quiz, , dragDrop] = buildMockGameContents()
+const [quiz, , , unplayable] = buildMockGameContents()
 const asGame = (content: unknown) => ({ ...(content as object), gameId: 'g1', status: 'PUBLISHED', updatedAt: '' }) as GameResponse
 
 function renderPlay(game: GameResponse = asGame(quiz), onLeave = vi.fn()) {
@@ -225,7 +225,7 @@ describe('PresentPlay', () => {
   it('kiểu chưa có renderer: báo chưa trình chiếu được, vẫn sang câu sau, không tính vào tổng', async () => {
     const user = userEvent.setup()
 
-    renderPlay(asGame(dragDrop))
+    renderPlay(asGame(unplayable))
     expect(screen.getByText('Kiểu này chưa trình chiếu được')).toBeInTheDocument()
     expect(button('Gợi ý')).toBeDisabled()
     await user.keyboard('{ArrowRight}{ArrowRight}')

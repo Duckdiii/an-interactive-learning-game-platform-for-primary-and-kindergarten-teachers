@@ -2,11 +2,13 @@ import type { ComponentType } from 'react'
 import type { GameType } from '../../types/game-dsl.types'
 import type { AnswerPayload, AnswerResult, StudentQuestionByType } from '../../types/game-student.types'
 import type { UiProfile } from '../profile/types'
+import DragDropPlayable from './DragDropPlayable'
 import MatchingPlayable from './MatchingPlayable'
 import OddOneOutPlayable from './OddOneOutPlayable'
 import QuizPlayable from './QuizPlayable'
 import type { PlayableRenderer } from './types'
 import VisualClozePlayable from './VisualClozePlayable'
+import WordScramblePlayable from './WordScramblePlayable'
 
 export type { PlayableRenderer, PlayableRendererProps } from './types'
 
@@ -26,6 +28,8 @@ const RENDERERS: ReadonlyMap<GameType, AnyPlayableRenderer> = new Map([
   ['ODD_ONE_OUT', define<'ODD_ONE_OUT'>(OddOneOutPlayable)],
   ['MATCHING', define<'MATCHING'>(MatchingPlayable)],
   ['VISUAL_CLOZE', define<'VISUAL_CLOZE'>(VisualClozePlayable)],
+  ['DRAG_DROP', define<'DRAG_DROP'>(DragDropPlayable)],
+  ['WORD_SCRAMBLE', define<'WORD_SCRAMBLE'>(WordScramblePlayable)],
 ])
 
 export const getPlayableRenderer = (gameType: GameType) => RENDERERS.get(gameType)

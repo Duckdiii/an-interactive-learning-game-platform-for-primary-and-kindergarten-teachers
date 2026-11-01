@@ -340,8 +340,8 @@ describe('trang chơi, các tình huống khác', () => {
     submit.mockRestore()
   })
 
-  it('loại game chưa có renderer (DRAG_DROP): báo chưa chơi được, không có nút Bắt đầu', async () => {
-    openPlay('MOCK02')
+  it('loại game chưa có renderer (ORDERING): báo chưa chơi được, không có nút Bắt đầu', async () => {
+    openPlay('MOCK04')
 
     expect(await screen.findByText(/chưa chơi được/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Bắt đầu' })).not.toBeInTheDocument()
@@ -678,7 +678,7 @@ describe('phím tắt (P2.6)', () => {
     await screen.findByRole('img', { name: 'Câu 1/3' })
 
     press('Escape')
-    expect(screen.getByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
+    expect(await screen.findByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
     ;(document.activeElement as HTMLElement | null)?.blur()
     press('1', document.body)
 
@@ -697,8 +697,10 @@ describe('phím tắt (P2.6)', () => {
     vi.spyOn(Date, 'now').mockImplementation(() => realNow() + offset)
 
     press('Escape')
+    await screen.findByRole('dialog', { name: 'Tạm dừng' })
     offset = 20_000
     press('Escape')
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Tạm dừng' })).toBeNull())
     press('1')
 
     await screen.findByRole('button', { name: 'Câu tiếp theo' })
@@ -712,7 +714,7 @@ describe('phím tắt (P2.6)', () => {
     await screen.findByRole('timer')
 
     press('Escape')
-    expect(screen.getByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
+    expect(await screen.findByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
     const before = screen.getByRole('timer').textContent
 
     await act(async () => {
@@ -721,7 +723,7 @@ describe('phím tắt (P2.6)', () => {
     expect(screen.getByRole('timer')).toHaveTextContent(before!)
 
     press('Escape')
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3_000)

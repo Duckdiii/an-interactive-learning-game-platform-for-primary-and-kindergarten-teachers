@@ -862,6 +862,8 @@ export const viText = {
     seeResult: 'Xem kết quả',
     finishedTitle: 'Hoàn thành!',
     oddOneOutPrompt: 'Tìm thứ khác với các thứ còn lại',
+    dragDropPrompt: 'Kéo thả các vật thể vào đúng rổ phân loại',
+    wordScramblePrompt: 'Ghép các chữ cái thành từ đúng',
     correctCount: (correct: number, total: number) => `${correct}/${total} câu đúng`,
     replay: 'Chơi lại',
     review: {

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { MatchingStudentQuestion, StudentQuizQuestion } from '../../types/game-student.types'
+import type {
+  MatchingStudentQuestion,
+  StudentDragDropQuestion,
+  StudentQuizQuestion,
+  StudentWordScrambleQuestion,
+} from '../../types/game-student.types'
 import { REVIEW_DESCRIBERS } from './describers'
 
 const quiz: StudentQuizQuestion = {
@@ -94,5 +99,60 @@ describe('describer MATCHING', () => {
     const doubled = { matches: [expected.matches[0], expected.matches[0]] }
 
     expect(matchingDescriber.chosen(matching as never, doubled as never, expected)).toBe('Nối đúng 1/2 cặp')
+  })
+})
+
+describe('describer DRAG_DROP', () => {
+  const dragDrop: StudentDragDropQuestion = {
+    id: 'q1',
+    timeLimitSeconds: 30,
+    points: 10,
+    dropZones: [
+      { id: 'z1', label: 'Dưới nước' },
+      { id: 'z2', label: 'Trên cạn' },
+    ],
+    items: [
+      { id: 'i1', text: 'Cá' },
+      { id: 'i2', text: 'Mèo' },
+    ],
+  }
+  const ddExpected = { placements: [{ itemId: 'i1', zoneId: 'z1' }, { itemId: 'i2', zoneId: 'z2' }] }
+  const ddDescriber = REVIEW_DESCRIBERS.DRAG_DROP!
+
+  it('hiển thị danh sách phân loại của học sinh', () => {
+    expect(ddDescriber.chosen(dragDrop as never, ddExpected as never, ddExpected)).toBe('Cá → Dưới nước; Mèo → Trên cạn')
+  })
+
+  it('xếp sang rổ khác: hiển thị đúng phân loại đã chọn', () => {
+    const answer = { placements: [{ itemId: 'i1', zoneId: 'z1' }, { itemId: 'i2', zoneId: 'z1' }] }
+    expect(ddDescriber.chosen(dragDrop as never, answer as never, ddExpected)).toBe('Cá → Dưới nước; Mèo → Dưới nước')
+  })
+
+  it('đáp án đúng liệt kê "vật -> rổ"', () => {
+    expect(ddDescriber.correct(dragDrop as never, ddExpected)).toBe('Cá → Dưới nước; Mèo → Trên cạn')
+  })
+
+  it('đáp án đúng không hợp lệ thì trả null', () => {
+    expect(ddDescriber.correct(dragDrop as never, null)).toBeNull()
+    expect(ddDescriber.correct(dragDrop as never, { placements: 'invalid' })).toBeNull()
+  })
+})
+
+describe('describer WORD_SCRAMBLE', () => {
+  const wsQuestion: StudentWordScrambleQuestion = {
+    id: 'q1',
+    timeLimitSeconds: 30,
+    points: 10,
+    scrambledLetters: ['ẹ', 'm'],
+  }
+  const wsDescriber = REVIEW_DESCRIBERS.WORD_SCRAMBLE!
+
+  it('hiển thị từ học sinh đã ghép', () => {
+    expect(wsDescriber.chosen(wsQuestion as never, { word: 'mẹ' } as never, { word: 'mẹ' })).toBe('mẹ')
+  })
+
+  it('hiển thị từ đúng do máy chủ trả', () => {
+    expect(wsDescriber.correct(wsQuestion as never, { word: 'mẹ' })).toBe('mẹ')
+    expect(wsDescriber.correct(wsQuestion as never, null)).toBeNull()
   })
 })

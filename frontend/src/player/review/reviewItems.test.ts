@@ -50,8 +50,8 @@ describe('buildReviewItems', () => {
   })
 
   it('loại chưa có describer: "Câu i", không dòng chi tiết', () => {
-    const other = { ...game, gameType: 'DRAG_DROP' } as StudentGame
-    const [item] = buildReviewItems(other, [{ questionId: 'q1', answer: { placements: [] }, result: result(false) }])
+    const other = { ...game, gameType: 'MEMORY_CARD' } as StudentGame
+    const [item] = buildReviewItems(other, [{ questionId: 'q1', answer: { matchedPairIds: [], flips: 0 }, result: result(false) }])
 
     expect(item).toMatchObject({ prompt: 'Câu 1', chosen: null, correct: null })
     expect(describeAnswerLine(item)).toBeNull()

@@ -22,6 +22,10 @@ vi.mock('use-image', () => ({
   default: () => [undefined],
 }))
 
+vi.mock('canvas-confetti', () => ({
+  default: vi.fn(),
+}))
+
 vi.mock('../common/measureText', () => ({
   measureWrappedTextHeight: () => 40,
 }))

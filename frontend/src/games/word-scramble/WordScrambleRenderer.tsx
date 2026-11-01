@@ -324,7 +324,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
                 fill={palette.surface}
                 stroke={isSelected ? palette.accent : palette.primaryStrong}
                 strokeWidth={isSelected ? 4 : 2}
-                shadowColor="#000000"
+                shadowColor={palette.ink}
                 shadowBlur={isSelected ? 8 : 4}
                 shadowOpacity={isSelected ? 0.25 : 0.15}
                 shadowOffset={{ x: 0, y: 2 }}

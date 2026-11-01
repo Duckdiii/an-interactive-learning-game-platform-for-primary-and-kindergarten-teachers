@@ -8,6 +8,8 @@ import { getPlayableRenderer } from './index'
 
 type StudentQuizGame = Extract<StudentGame, { gameType: 'QUIZ' }>
 type StudentMatchingGame = Extract<StudentGame, { gameType: 'MATCHING' }>
+type StudentDragDropGame = Extract<StudentGame, { gameType: 'DRAG_DROP' }>
+type StudentWordScrambleGame = Extract<StudentGame, { gameType: 'WORD_SCRAMBLE' }>
 
 // Hai bài Matching đầu dùng khung Học sinh (có nút «Xong rồi!»); khung Bé tự nộp khi nối xong, xem cuối tệp.
 // Nối renderer cũ (Konva) với MockPlayerApi qua adapter, đúng đường chạy thật: câu hỏi dạng học sinh -> trẻ trả lời -> máy chủ (mô phỏng) chấm
@@ -58,7 +60,7 @@ describe('registry renderer', () => {
   it('chỉ các loại đã có renderer chơi được; loại khác khung hiện "chưa hỗ trợ"', () => {
     const playable = GAME_TYPES.filter((type) => getPlayableRenderer(type))
 
-    expect(playable).toEqual(['QUIZ', 'ODD_ONE_OUT', 'MATCHING', 'VISUAL_CLOZE'])
+    expect(playable).toEqual(['QUIZ', 'ODD_ONE_OUT', 'WORD_SCRAMBLE', 'MATCHING', 'DRAG_DROP', 'VISUAL_CLOZE'])
   })
 })
 
@@ -240,5 +242,100 @@ describe('MatchingPlayable, chạm là chấm (khung Bé)', () => {
     link('â', 'ấm') // gỡ cặp cuối
     link('â', 'ấm') // nối lại
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(2))
+  })
+})
+
+describe('DragDropPlayable với MockPlayerApi', () => {
+  it('xếp đúng các con vật vào vùng rồi bấm «Xong rồi!»: nộp placements, máy chủ chấm đúng', async () => {
+    const { api, sessionId, game } = await startSession('MOCK02')
+    const DragDrop = getPlayableRenderer('DRAG_DROP')!
+    const question = (game as StudentDragDropGame).questions[0]
+    const onSubmit = vi.fn((answer) => api.submitInteraction(sessionId, question.id, answer))
+
+    render(<DragDrop question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+
+    // Con cá -> Dưới nước
+    tap('Con cá')
+    tap('Dưới nước')
+
+    // Con mèo -> Trên cạn
+    tap('Con mèo')
+    tap('Trên cạn')
+
+    // Con cua -> Dưới nước
+    tap('Con cua')
+    tap('Dưới nước')
+
+    // Con gà -> Trên cạn
+    tap('Con gà')
+    tap('Trên cạn')
+
+    tap('Xong rồi!')
+
+    await waitFor(() => expect(showFeedbackMock).toHaveBeenCalledWith(true))
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+    expect(onSubmit.mock.calls[0][0].placements).toHaveLength(4)
+  })
+
+  it('xếp sai: máy chủ chấm sai và phản hồi sai', async () => {
+    const { api, sessionId, game } = await startSession('MOCK02')
+    const DragDrop = getPlayableRenderer('DRAG_DROP')!
+    const question = (game as StudentDragDropGame).questions[0]
+    const onSubmit = vi.fn((answer) => api.submitInteraction(sessionId, question.id, answer))
+
+    render(<DragDrop question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+
+    // Đặt tất cả vào Trên cạn (sai cho Con cá và Con cua)
+    tap('Con cá')
+    tap('Trên cạn')
+    tap('Con mèo')
+    tap('Trên cạn')
+    tap('Con cua')
+    tap('Trên cạn')
+    tap('Con gà')
+    tap('Trên cạn')
+
+    tap('Xong rồi!')
+
+    await waitFor(() => expect(showFeedbackMock).toHaveBeenCalledWith(false))
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('WordScramblePlayable với MockPlayerApi', () => {
+  it('ghép đúng từ rồi bấm «Xong rồi!»: nộp word, máy chủ chấm đúng', async () => {
+    const { api, sessionId, game } = await startSession('MOCK07')
+    const WordScramble = getPlayableRenderer('WORD_SCRAMBLE')!
+    const question = (game as StudentWordScrambleGame).questions[0]
+    const onSubmit = vi.fn((answer) => api.submitInteraction(sessionId, question.id, answer))
+
+    render(<WordScramble question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+
+    // Khay có 'ẹ' và 'm'. Từ đúng là 'mẹ'. Chạm 'm' vào ô 0, chạm 'ẹ' vào ô 1.
+    tap('m')
+    tap('ẹ')
+
+    tap('Xong rồi!')
+
+    await waitFor(() => expect(showFeedbackMock).toHaveBeenCalledWith(true))
+    expect(onSubmit).toHaveBeenCalledWith({ word: 'mẹ' })
+  })
+
+  it('ghép sai từ: máy chủ chấm sai và phản hồi sai', async () => {
+    const { api, sessionId, game } = await startSession('MOCK07')
+    const WordScramble = getPlayableRenderer('WORD_SCRAMBLE')!
+    const question = (game as StudentWordScrambleGame).questions[0]
+    const onSubmit = vi.fn((answer) => api.submitInteraction(sessionId, question.id, answer))
+
+    render(<WordScramble question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+
+    // Ghép ngược: 'ẹm'
+    tap('ẹ')
+    tap('m')
+
+    tap('Xong rồi!')
+
+    await waitFor(() => expect(showFeedbackMock).toHaveBeenCalledWith(false))
+    expect(onSubmit).toHaveBeenCalledWith({ word: 'ẹm' })
   })
 })

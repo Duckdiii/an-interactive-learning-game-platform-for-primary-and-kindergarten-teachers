@@ -59,7 +59,7 @@ describe('PublishDialog: 3 cách chơi', () => {
   })
 
   it('loại game chưa có renderer: khóa và nêu đúng lý do', () => {
-    open('GRADE_1', 'DRAG_DROP')
+    open('GRADE_1', 'ORDERING')
 
     const button = within(card('Mở phòng thi đấu')).getByRole('button', { name: /Mở phòng/ })
 

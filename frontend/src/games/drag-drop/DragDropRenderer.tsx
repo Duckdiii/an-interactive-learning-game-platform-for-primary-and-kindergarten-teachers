@@ -250,7 +250,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
                 text={zone.label}
                 fontSize={20}
                 fontStyle="bold"
-                fill="#FFFFFF"
+                fill={palette.surface}
                 width={zone.bounds.width}
                 height={40}
                 align="center"
@@ -332,7 +332,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
                       : palette.outline
                 }
                 strokeWidth={isSelected ? 4 : 2}
-                shadowColor="#000000"
+                shadowColor={palette.ink}
                 shadowBlur={isSelected ? 8 : 4}
                 shadowOpacity={isSelected ? 0.25 : 0.1}
                 shadowOffset={{ x: 0, y: 2 }}
