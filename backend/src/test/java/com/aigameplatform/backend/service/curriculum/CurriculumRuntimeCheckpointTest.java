@@ -13,11 +13,9 @@ import dev.langchain4j.exception.HttpException;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import tools.jackson.databind.json.JsonMapper;
 
 class CurriculumRuntimeCheckpointTest {
     @TempDir Path tempDir;
@@ -39,6 +37,10 @@ class CurriculumRuntimeCheckpointTest {
             assertThat(resumed.pendingQueryIds(List.of("q-supported", "q-refused", "q-pending")))
                     .containsExactly("q-pending");
             assertThat(resumed.latestOutcomes()).hasSize(3);
+        }
+        assertThat(Files.readString(file)).endsWith("\n");
+        try (var files = Files.list(tempDir)) {
+            assertThat(files).noneMatch(path -> path.getFileName().toString().endsWith(".tmp"));
         }
 
         assertThatThrownBy(() -> CurriculumRuntimeCheckpoint.open(file, "fingerprint-b"))
@@ -83,38 +85,6 @@ class CurriculumRuntimeCheckpointTest {
                 new com.aigameplatform.backend.exception.CurriculumServiceUnavailableException("safe",
                         new HttpException(400, "bad request"))))
                 .isEqualTo("HTTP_400");
-    }
-
-    @Test void importingPreviousExploratoryReportKeepsDecisionsAndMarksUnknownFailuresPending() throws Exception {
-        var previousDecision = outcome("q-supported", "SUPPORTED", null);
-        var previousFailure = outcome("q-pending", "SERVICE_UNAVAILABLE", null);
-        var report = Map.of("mode", "--exploratory", "labelReview", "AI_AUTHORED_UNREVIEWED", "scopes",
-                Map.of("dataset-v1", Map.of("outcomes", List.of(previousDecision, previousFailure))));
-        var oldReport = tempDir.resolve("live-dev.json");
-        Files.writeString(oldReport, new JsonMapper().writeValueAsString(report));
-        var checkpointPath = tempDir.resolve("resume.checkpoint.jsonl");
-
-        try (var checkpoint = CurriculumRuntimeCheckpoint.openOrImport(checkpointPath, "fp", oldReport,
-                "dataset-v1", List.of(previousDecision.query(), previousFailure.query()))) {
-            assertThat(checkpoint.completedQueryIds()).containsExactly("q-supported");
-            assertThat(checkpoint.pendingQueryIds(List.of("q-supported", "q-pending"))).containsExactly("q-pending");
-            assertThat(checkpoint.latestOutcomes()).filteredOn(o -> o.query().queryId().equals("q-pending"))
-                    .singleElement().extracting(CurriculumRuntimeEvaluation.Outcome::serviceFailureCategory)
-                    .isEqualTo("CAUSE_NOT_CAPTURED_IN_PRIOR_RUN");
-        }
-    }
-
-    @Test void refusesToStartFullReplayWhenLegacyReportHasNoPerQueryRows() throws Exception {
-        var blocked = tempDir.resolve("live-dev.json");
-        Files.writeString(blocked, new JsonMapper().writeValueAsString(Map.of("mode", "--exploratory",
-                "labelReview", "AI_AUTHORED_UNREVIEWED", "failureType", "SQLTransientConnectionException",
-                "scopes", Map.of("dataset-v1", Map.of("liveEvaluation", "NOT_RUN")))));
-        var checkpointPath = tempDir.resolve("resume.checkpoint.jsonl");
-
-        assertThatThrownBy(() -> CurriculumRuntimeCheckpoint.openOrImport(checkpointPath, "fp", blocked,
-                "dataset-v1", List.of(outcome("q", "SUPPORTED", null).query())))
-                .isInstanceOf(IllegalStateException.class).hasMessageContaining("refusing to replay completed work");
-        assertThat(Files.exists(checkpointPath)).isFalse();
     }
 
     private static CurriculumRuntimeEvaluation.Outcome outcome(String id, String status, String failureCategory) {

@@ -118,13 +118,34 @@ class CurriculumRuntimeEvaluationTest {
     }
 
     @Test void preflightValidatesAllDraftFilesWithoutCallingDatabaseOrAI() throws Exception {
-        var output = Path.of("target", "rag-eval-local", "runtime-preflight.json");
-        CurriculumRuntimeEvaluation.main(new String[]{"--preflight", "../docs/rag-spike/evaluation-drafts", "DEV", output.toString()});
+        var root = Path.of("target", "rag-eval-local", "runs-test");
+        String runId = "preflight-regression";
+        CurriculumRuntimeEvaluation.main(new String[]{"--preflight", "../docs/rag-spike/evaluation-drafts", "DEV", root.toString(), runId});
+        var output = root.resolve(runId).resolve("attempts");
+        try (var attempts = Files.list(output)) {
+            output = attempts.findFirst().orElseThrow().resolve("report.json");
+        }
         var json = new tools.jackson.databind.json.JsonMapper().readTree(Files.readString(output));
         assertThat(json.path("scopes").size()).isEqualTo(16);
         assertThat(json.path("releaseGate").asString()).isEqualTo("NOT_ESTABLISHED");
+        assertThat(json.path("runId").asString()).isEqualTo(runId);
     }
 
+    @Test void preflightCanSelectExactlyOneDatasetForSequentialEvaluation() throws Exception {
+        var root = tempDir.resolve("selected-dataset-run");
+        CurriculumRuntimeEvaluation.main(new String[]{"--preflight", "../docs/rag-spike/evaluation-drafts", "DEV",
+                root.toString(), "selected-dataset-run", "english-grade3-draft-v1"});
+        var attempts = root.resolve("selected-dataset-run").resolve("attempts");
+        Path report;
+        try (var dirs = Files.list(attempts)) {
+            report = dirs.findFirst().orElseThrow().resolve("report.json");
+        }
+        var json = new tools.jackson.databind.json.JsonMapper().readTree(Files.readString(report));
+        assertThat(json.path("scopeSelection").asString()).isEqualTo("english-grade3-draft-v1");
+        assertThat(json.path("totalManifestQueries").asInt()).isEqualTo(30);
+        assertThat(json.path("scopes").size()).isEqualTo(1);
+        assertThat(json.path("scopes").has("english-grade3-draft-v1")).isTrue();
+    }
     @Test void aiDraftCannotEnterTheReviewedBenchmarkLoader() throws Exception {
         var d = CurriculumDataset.loadFromResourceRoot("/curriculum/spike/english-grade1/");
         var p = Path.of("..", "docs", "rag-spike", "evaluation-drafts", d.source().datasetVersion(), "DEV.jsonl");

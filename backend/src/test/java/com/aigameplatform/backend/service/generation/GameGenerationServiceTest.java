@@ -54,9 +54,9 @@ class GameGenerationServiceTest {
         var evidence = com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
                 dataset.source(), "fixture", List.of(retrieved));
         CurriculumContextProvider provider = (topic, subject, grade) ->
-                CurriculumContextProvider.Evidence.found("English outcome with source", evidence);
-        var service = service(new ScriptedGenerator(validOutput(GameType.QUIZ)), 0, moderation(false, false),
-                provider, true, List.of(dataset));
+                CurriculumContextProvider.Evidence.found("English outcome with source; Provenance: sourceSha256=" + dataset.source().sourceSha256() + "; datasetVersion=" + dataset.source().datasetVersion() + "; embeddingModel=fixture", evidence);
+        var generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        var service = service(generator, 0, moderation(false, false), provider, true, List.of(dataset));
         var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
                 com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
                 List.of(java.util.Map.of("chunkId", chunk.chunkId())), List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), "test-model");
@@ -75,6 +75,10 @@ class GameGenerationServiceTest {
         assertThat(result.review().status()).isEqualTo(
                 com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING);
         assertThat(reviewCalls).hasValue(1);
+        assertThat(result.evidence().chunks()).containsExactly(retrieved);
+        assertThat(generator.attempts.getFirst().subject()).isEqualTo(Subject.ENGLISH);
+        assertThat(generator.attempts.getFirst().gradeLevel()).isEqualTo(GradeLevel.GRADE_1);
+        assertThat(generator.attempts.getFirst().curriculumContext()).contains("English outcome with source", "sourceSha256=");
     }
 
     @Test

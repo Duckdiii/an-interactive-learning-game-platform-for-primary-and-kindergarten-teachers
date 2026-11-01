@@ -14,7 +14,9 @@ param(
     [string]$QueriesPath,
     [string]$TunePath,
     [ValidateSet('DEV','HOLDOUT_CANDIDATE','HOLDOUT')][string]$RuntimeSplit = 'DEV',
-    [string]$ReportPath,
+    [Alias('ReportPath')][string]$RunRoot,
+    [string]$RunId,
+    [string]$DatasetVersion,
     [switch]$SkipBuild
 )
 $ErrorActionPreference = 'Stop'
@@ -24,7 +26,8 @@ if (-not $EnvFile) { $EnvFile = Join-Path $ragBackend '.env' }
 $ragAllowedKeys = @('GEMINI_API_KEY','DB_URL','DB_USERNAME','DB_PASSWORD',
     'GEMINI_EMBEDDING_MODEL','RAG_MIN_SCORE','CURRICULUM_PDF','CURRICULUM_CONSTRAINTS_APPROVED_SHA256',
     'CURRICULUM_KINDERGARTEN_ENABLED','CURRICULUM_KINDERGARTEN_TOP_K','CURRICULUM_KINDERGARTEN_MIN_SCORE',
-    'RAG_LOCAL_EVAL','GEMINI_MODEL','CURRICULUM_KINDERGARTEN_EXPERT_APPROVED_SOURCE_SHA256')
+    'RAG_LOCAL_EVAL','GEMINI_MODEL','CURRICULUM_KINDERGARTEN_EXPERT_APPROVED_SOURCE_SHA256',
+    'RAG_EVAL_CONFIRMED_EMBEDDING_REQUESTS','RAG_EVAL_CONFIRMED_REVIEWER_REQUESTS','RAG_EVAL_QUOTA_CHECKED_AT')
 if (Test-Path -LiteralPath $EnvFile) {
     foreach ($ragLine in [System.IO.File]::ReadAllLines((Resolve-Path -LiteralPath $EnvFile).Path)) {
         if ($ragLine -match '^\s*([A-Z][A-Z0-9_]*)\s*=(.*)$' -and $ragAllowedKeys -contains $Matches[1]) {
@@ -69,12 +72,12 @@ $ragMainClass = 'com.aigameplatform.backend.service.curriculum.CurriculumSpikeRu
 if ($Mode -in @('RuntimePreflight','RuntimeExploratory','RuntimeReviewed')) {
     $ragMainClass = 'com.aigameplatform.backend.service.curriculum.CurriculumRuntimeEvaluation'
     if (-not $QueriesPath) { $QueriesPath = Join-Path $ragRoot 'docs/rag-spike/evaluation-drafts' }
-    if (-not $ReportPath) {
-        if ($Mode -eq 'RuntimeExploratory' -and $RuntimeSplit -eq 'DEV') {
-            $ReportPath = Join-Path $ragBackend 'target/rag-eval-local/live-dev.json'
-        } else {
-            $ReportPath = Join-Path $ragBackend ('target/rag-eval-local/runtime-' + $RuntimeSplit + '.json')
-        }
+    if (-not $RunRoot) { $RunRoot = Join-Path $ragBackend 'target/rag-eval-local/runs' }
+    if ($Mode -eq 'RuntimeExploratory' -and -not $DatasetVersion) {
+        throw 'RuntimeExploratory requires -DatasetVersion to avoid running all 480 queries at once.'
+    }
+    if ($Mode -eq 'RuntimeExploratory' -and -not $RunId) {
+        throw 'RuntimeExploratory requires a stable -RunId so dataset checkpoints can be resumed independently.'
     }
     $ragRuntimeFlag = switch ($Mode) {
         'RuntimePreflight' { '--preflight' }
@@ -82,7 +85,9 @@ if ($Mode -in @('RuntimePreflight','RuntimeExploratory','RuntimeReviewed')) {
         'RuntimeReviewed' { '--reviewed' }
     }
     $ragArguments = @($ragRuntimeFlag, (Resolve-Path -LiteralPath $QueriesPath).Path,
-        $RuntimeSplit, [System.IO.Path]::GetFullPath($ReportPath))
+        $RuntimeSplit, [System.IO.Path]::GetFullPath($RunRoot))
+    if ($RunId -or $DatasetVersion) { $ragArguments += $RunId }
+    if ($DatasetVersion) { $ragArguments += $DatasetVersion }
 }
 Push-Location $ragBackend
 try {

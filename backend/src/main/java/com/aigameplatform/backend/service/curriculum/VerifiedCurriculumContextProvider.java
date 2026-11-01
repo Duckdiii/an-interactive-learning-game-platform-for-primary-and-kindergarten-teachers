@@ -130,7 +130,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                 if (supportedChunks.stream().anyMatch(c -> !kindergartenAgeBand.metadataValue().equals(c.ageBand())))
                     throw new IllegalStateException("Kindergarten verifier returned evidence for another age band");
                 var context = supportedChunks.stream().map(c -> "[" + c.chunkId() + "] " + c.topic()
-                        + "\nKết quả mong đợi: " + c.text() + "\nĐộ tuổi phù hợp: " + ageLabel(c.ageBand())
+                        + "\nKết quả mong đợi: " + c.text() + "\nĐộ tuổi phù hợp: " + ageLabel(c.ageBand()) + "\nDomain: " + c.domain() + "; subDomain: " + c.subDomain()
                         + "\nNguồn: " + c.sourceDocument() + "; PDF " + c.pdfPages()
                         + "; trang in " + c.printedPages() + "; " + c.curriculumVersion())
                         .collect(java.util.stream.Collectors.joining("\n\n"));

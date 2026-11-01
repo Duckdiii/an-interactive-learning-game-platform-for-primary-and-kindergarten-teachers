@@ -1255,5 +1255,81 @@
       "liveEvaluation": "BLOCKED_BEFORE_MODEL_CALL_BY_LOCAL_JDBC; no new decisions",
       "remoteWrites": false
     }
+  },
+  "artifactRecoveryFollowup": {
+    "checkedAt": "2026-11-02",
+    "recoverySearch": "Inspected available Temp backups, worktrees, result directories and Git object/path history. No per-query copy of the prior live-dev.json was found; inspected matching artifact is the blocked report under ignored target.",
+    "historicPerQueryDecisions": "NOT_RECOVERABLE_FROM_INSPECTED_ARTIFACTS; do not reconstruct from aggregate counts",
+    "historicAggregates": "Preserved unchanged; all 400 prior service failures remain CAUSE_NOT_CAPTURED_IN_PRIOR_RUN. Later HTTP 429 is evidence only for its own later smoke.",
+    "englishCases": "Four English G3/G5 cases remain unresolved AI-label/verifier disagreements; not confirmed false rejects or fixes.",
+    "postgres": {
+      "state": "Existing local cluster confirmed read-only; not restarted or rebuilt",
+      "target": "127.0.0.1:55432/rag_eval",
+      "dataDirectory": "backend/target/rag-eval-local/data",
+      "embeddingRows": 653,
+      "datasetVersions": 16,
+      "writesThisFollowup": false,
+      "supabaseAccessed": false,
+      "priorJdbcFailureInterpretation": "Local URL combined with remote .env role; role mismatch, not evidence that cluster was down"
+    },
+    "runIsolation": {
+      "outputLayout": "unique run ID / unique attempt ID / attempt report.json",
+      "reportWrite": "atomic temp + fsync + atomic move",
+      "checkpoint": "run-scoped atomic full snapshot after each query result; resume requires matching source/query/model/retrieval fingerprint",
+      "legacyReportImport": "disabled; only checkpoints inside the selected run resume",
+      "persistentEmbeddingCache": "synthetic AI-authored exploratory evaluation only; no persistent teacher-query cache"
+    },
+    "preflight": {
+      "runId": "run-20261101T185722896Z-b669d5c0",
+      "attemptId": "attempt-20261101T185722896Z-9a0ba750",
+      "queries": 480,
+      "maxEmbeddingRequests": 480,
+      "maxReviewerRequests": 480,
+      "maxTotalRequests": 960,
+      "providerCalls": 0,
+      "quotaStatus": "MANUAL_CONFIRMATION_REQUIRED_OR_STALE",
+      "result": "PREFLIGHT_ONLY; not a retrieval result"
+    },
+    "liveResume": "NOT_RUN; requires fresh manual provider quota confirmation and local-only connection settings",
+    "benchmarkApproval": "PENDING_INDEPENDENT_LABEL_REVIEW",
+    "kindergartenExpertApproval": "PENDING"
+  },
+  "postRunIsolationVerification": {
+    "date": "2026-11-02",
+    "focusedSuite": {"tests": 36, "failures": 0, "errors": 0, "skipped": 0},
+    "fullBackend": {"command": "mvn verify", "tests": 629, "failures": 0, "errors": 0, "skipped": 8, "jacoco": "PASS"},
+    "liveRetrieval": "NOT_RUN; manual provider quota confirmation was absent",
+    "preflightRunId": "run-20261101T185722896Z-b669d5c0",
+    "preflightAttemptId": "attempt-20261101T185722896Z-9a0ba750",
+    "diffCheck": "PASS",
+    "jsonParse": "PASS"
+  },
+  "latestRuntimeFollowup": {
+    "date": "2026-11-02",
+    "postgres": {"pid": 37736, "versionMajor": 18, "listener": "127.0.0.1:55432", "database": "rag_eval", "dataDirectory": "backend/target/rag-eval-local/data", "rows": 653, "datasetVersions": 16, "action": "confirmed existing process; no restart, initialization or writes"},
+    "artifactSearch": "No old per-query live-dev.json backup found in inspected backup/worktree/result/Git locations; 80 historical outcomes not reconstructed.",
+    "geminiProbe": {"requestsAttempted": 1, "input": "synthetic non-user text", "modelTask": "RETRIEVAL_QUERY embedding; 768 dimensions", "retries": 0, "requestLogging": false, "result": "RATE_LIMIT (RateLimitException)", "batchStarted": false},
+    "allScopePreflight": {"queries": 480, "maxRequests": 960, "providerCalls": 0, "status": "preflight only"},
+    "datasetPreflight": {"runId": "preflight-en-g3-postscope-20261102", "attemptId": "attempt-20261101T190640216Z-867746b4", "datasetVersion": "english-grade3-draft-v1", "queries": 30, "pending": 30, "providerCalls": 0},
+    "liveBatch": "NOT_RUN_AFTER_SINGLE_REQUEST_RATE_LIMIT",
+    "englishCases": "DEV-006/009/013 (en-g3-003) and DEV-014 (en-g5-001) remain unresolved; AI labels unreviewed, prior exact verifier rationale unavailable.",
+    "duyContract": "Prepared proposal in README; no message sent and no strategy/DSL changed."
+  },
+  "latestVerification": {
+    "date": "2026-11-02",
+    "focusedRagTests": {"tests": 37, "failures": 0, "errors": 0, "skipped": 0},
+    "backendVerify": {"tests": 630, "failures": 0, "errors": 0, "skipped": 8, "jacoco": "PASS"},
+    "datasetScopedEvaluatorRegression": "PASS; run preflight-en-g3-postscope-20261102 selected english-grade3-draft-v1 and validated 30 questions without API/DB calls",
+    "liveQuotaProbe": "One synthetic embedding request; RateLimitException; no retry and no batch followed",
+    "liveRetrieval": "NOT_RUN"
+  },
+  "latestGenerationAdapter": {
+    "date": "2026-11-02",
+    "implementation": "Preserve deterministic Math G1 pilot path; other QUIZ scopes use a subject/grade-aware prompt carrying teacher topic, retrieved evidence and source provenance. Non-pilot calls without versioned evidence are rejected before model invocation. Kindergarten evidence context includes selected age band, domain and subdomain.",
+    "strategyOrDslChanged": false,
+    "coverage": "Regression added for 14 non-pilot primary subject/grade scopes, Kindergarten age/domain preservation, missing-provenance rejection, and GameGenerationService evidence/context handoff.",
+    "testStatus": "VERIFIED_AFTER_EDIT; focused suite 56 passed, full backend mvn verify 634 passed with 0 failures/errors and 8 skipped; JaCoCo passed.",
+    "liveGeneration": "NOT_RUN; latest one-request Gemini probe returned rate limit.",
+    "remaining": ["live retrieval/generation", "independent benchmark review", "Kindergarten specialist approval", "request-level Kindergarten domain contract coordination"]
   }
 }

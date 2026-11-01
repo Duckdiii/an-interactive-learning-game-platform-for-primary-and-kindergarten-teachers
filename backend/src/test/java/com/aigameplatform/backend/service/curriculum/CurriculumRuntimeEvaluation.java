@@ -187,38 +187,81 @@ public final class CurriculumRuntimeEvaluation {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 4 || !(args[0].equals("--preflight") || args[0].equals("--exploratory") || args[0].equals("--reviewed"))
+        if ((args.length < 4 || args.length > 6)
+                || !(args[0].equals("--preflight") || args[0].equals("--exploratory") || args[0].equals("--reviewed"))
                 || !Set.of("DEV", "HOLDOUT_CANDIDATE", "HOLDOUT").contains(args[2]))
-            throw new IllegalArgumentException("--preflight|--exploratory|--reviewed QUERY_ROOT DEV|HOLDOUT_CANDIDATE|HOLDOUT OUTPUT.json");
+            throw new IllegalArgumentException("--preflight|--exploratory|--reviewed QUERY_ROOT DEV|HOLDOUT_CANDIDATE|HOLDOUT RUN_ROOT [RUN_ID] [DATASET_VERSION]");
         boolean reviewed = args[0].equals("--reviewed");
         if (reviewed && args[2].equals("HOLDOUT_CANDIDATE"))
             throw new IllegalArgumentException("Exposed candidates cannot establish independent holdout");
         var environment = System.getenv();
         var config = RagSpikeConfig.from(environment);
+        Instant startedAt = Instant.now();
+        var run = CurriculumEvaluationRunStore.begin(Path.of(args[3]), args.length >= 5 ? args[4] : null, startedAt);
+        System.out.println("RAG_EVAL_RUN_ID=" + run.runId());
+        System.out.println("RAG_EVAL_ATTEMPT_ID=" + run.attemptId());
         var report = new LinkedHashMap<String, Object>();
-        report.put("measuredAt", Instant.now().toString());
+        report.put("measuredAt", startedAt.toString());
         report.put("mode", args[0]);
+        report.put("runId", run.runId());
+        report.put("attemptId", run.attemptId());
+        report.put("runReport", "attempts/" + run.attemptId() + "/report.json");
         report.put("environment", config.safeStatus());
         report.put("releaseGate", "NOT_ESTABLISHED");
         report.put("labelReview", reviewed ? "REVIEW_MANIFEST_VALIDATED" : "AI_AUTHORED_UNREVIEWED");
         report.put("codeRevision", environment.getOrDefault("GIT_COMMIT", "UNKNOWN"));
-        var all = CurriculumDataset.loadPackaged();
+        String datasetFilter = args.length == 6 ? args[5] : null;
+        var all = selectDatasets(CurriculumDataset.loadPackaged(), datasetFilter);
+        report.put("scopeSelection", datasetFilter == null || datasetFilter.isBlank() ? "ALL_DATASETS" : datasetFilter);
         var queries = new LinkedHashMap<CurriculumDataset, List<CurriculumBenchmark.Query>>();
-        for (var d : all) {
-            var path = Path.of(args[1], d.source().datasetVersion(), args[2] + ".jsonl");
-            var set = loadQueries(path, d, args[2], reviewed);
-            if (reviewed && args[2].equals("HOLDOUT"))
-                CurriculumBenchmark.requireDisjoint(loadQueries(path.getParent().resolve("DEV.jsonl"), d, "DEV", true), set);
-            queries.put(d, set);
+        try {
+            for (var d : all) {
+                var path = Path.of(args[1], d.source().datasetVersion(), args[2] + ".jsonl");
+                var set = loadQueries(path, d, args[2], reviewed);
+                if (reviewed && args[2].equals("HOLDOUT"))
+                    CurriculumBenchmark.requireDisjoint(loadQueries(path.getParent().resolve("DEV.jsonl"), d, "DEV", true), set);
+                queries.put(d, set);
+            }
+        } catch (Exception inputFailure) {
+            report.put("execution", "BLOCKED_INPUT_PREFLIGHT");
+            report.put("failureType", inputFailure.getClass().getSimpleName());
+            report.put("scopes", Map.of());
+            run.writeReport(JSON.writerWithDefaultPrettyPrinter().writeValueAsString(report));
+            throw new IllegalStateException("Evaluation input preflight failed; see this attempt's report");
         }
         var results = new LinkedHashMap<String, Object>();
         boolean interruptedByQuota = false;
         long cacheFreshVectors = 0;
         long cacheReusedVectors = 0;
         long cacheLiveApiCalls = 0;
-        if (args[0].equals("--preflight")) {
+        long queryCount = queries.values().stream().mapToLong(List::size).sum();
+        long pendingQueryEstimate = queryCount;
+        if (!args[0].equals("--preflight")) {
+            try {
+                pendingQueryEstimate = pendingQueryEstimate(run, queries, args[0], args[2],
+                        config.embeddingModel(), environment.getOrDefault("GEMINI_MODEL", "gemini-2.5-flash"));
+            } catch (Exception checkpointProblem) {
+                report.put("execution", "BLOCKED_CHECKPOINT_OR_FINGERPRINT");
+                report.put("failureType", checkpointProblem.getClass().getSimpleName());
+                all.forEach(d -> results.put(d.source().datasetVersion(), Map.of("liveEvaluation", "NOT_RUN_CHECKPOINT_PREFLIGHT")));
+            }
+        }
+        var requestEstimate = CurriculumEvaluationQuotaPlan.estimate(pendingQueryEstimate);
+        report.put("totalManifestQueries", queryCount);
+        report.put("estimatedPendingQueries", pendingQueryEstimate);
+        var quotaCheck = CurriculumEvaluationQuotaPlan.check(environment, requestEstimate, startedAt);
+        report.put("requestBudget", quotaCheck.asMap(requestEstimate));
+        if (report.containsKey("failureType")) {
+            // Checkpoint drift is a hard stop; never reinterpret it as a fresh full evaluation.
+        } else if (args[0].equals("--preflight")) {
             queries.forEach((d, q) -> results.put(d.source().datasetVersion(), Map.of("queries", q.size(),
-                    "source", d.source(), "liveEvaluation", "NOT_RUN")));
+                    "source", d.source(), "liveEvaluation", "NOT_RUN_PREFLIGHT_ONLY")));
+            report.put("execution", "PREFLIGHT_ONLY_NO_PROVIDER_CALLS");
+        } else if (!quotaCheck.confirmed()) {
+            queries.forEach((d, q) -> results.put(d.source().datasetVersion(), Map.of("queries", q.size(),
+                    "liveEvaluation", "NOT_RUN_QUOTA_BUDGET_UNCONFIRMED")));
+            report.put("execution", "BLOCKED_QUOTA_PRECHECK");
+            report.put("failureType", "QuotaBudgetNotConfirmed");
         } else {
           try {
             if (!config.localEvaluation()) throw new IllegalArgumentException("Exploratory runtime evaluation is local-only; set RAG_LOCAL_EVAL=true");
@@ -248,14 +291,12 @@ public final class CurriculumRuntimeEvaluation {
                                     && q.labelerIds().isEmpty());
                     String fingerprint = checkpointFingerprint(dataset, entry.getValue(), args[0], args[2],
                             config.embeddingModel(), name);
-                    Path checkpointPath = outputSidecar(Path.of(args[3]), "." + datasetVersion + ".checkpoint.jsonl");
-                    Path legacyPath = args[0].equals("--exploratory") && args[2].equals("DEV")
-                            ? Path.of(args[3]).resolveSibling("live-dev.json") : null;
-                    try (var checkpoint = CurriculumRuntimeCheckpoint.openOrImport(checkpointPath, fingerprint,
-                            legacyPath, datasetVersion, entry.getValue());
+                    Path checkpointPath = run.runDirectory().resolve("checkpoints").resolve(datasetVersion + ".jsonl");
+                    Path cachePath = run.runDirectory().resolve("query-embedding-cache").resolve(datasetVersion + ".jsonl");
+                    try (var checkpoint = CurriculumRuntimeCheckpoint.open(checkpointPath, fingerprint);
                          var queryCache = syntheticCacheAllowed
                                  ? new BenchmarkQueryEmbeddingCache(model,
-                                         outputSidecar(Path.of(args[3]), "." + datasetVersion + ".query-embeddings.jsonl"),
+                                         cachePath,
                                          config.embeddingModel(), datasetVersion, fingerprint, 768)
                                  : null) {
                         EmbeddingModel queryModel = queryCache == null ? model : queryCache;
@@ -308,9 +349,11 @@ public final class CurriculumRuntimeEvaluation {
                     "liveEvaluation", "NOT_RUN", "reason", "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"));
           }
         }
-        String execution = report.containsKey("failureType") ? "BLOCKED_ENVIRONMENT_OR_SERVICE"
-                : interruptedByQuota ? "STOPPED_ON_CONFIRMED_QUOTA_PENDING_RESUME" : "COMPLETED_OR_PARTIAL";
-        report.put("execution", execution);
+        if (!report.containsKey("execution")) {
+            String execution = report.containsKey("failureType") ? "BLOCKED_ENVIRONMENT_OR_SERVICE"
+                    : interruptedByQuota ? "STOPPED_ON_CONFIRMED_QUOTA_PENDING_RESUME" : "COMPLETED_OR_PARTIAL";
+            report.put("execution", execution);
+        }
         if (interruptedByQuota) for (var dataset : all) {
             String version = dataset.source().datasetVersion();
             if (!results.containsKey(version)) results.put(version, Map.of("liveEvaluation", "NOT_RUN_STOPPED_ON_QUOTA",
@@ -320,20 +363,19 @@ public final class CurriculumRuntimeEvaluation {
                 "teacherRequests", "No persistent query embedding cache", "freshVectorsThisRun", cacheFreshVectors,
                 "reusedVectorsThisRun", cacheReusedVectors, "liveApiCallsThisRun", cacheLiveApiCalls));
         report.put("scopes", results);
-        Path output = Path.of(args[3]);
-        Path reportPath = report.containsKey("failureType") ? outputSidecar(output, ".blocked.json") : output;
-        if (reportPath.toAbsolutePath().getParent() != null) Files.createDirectories(reportPath.toAbsolutePath().getParent());
-        Files.writeString(reportPath, JSON.writerWithDefaultPrettyPrinter().writeValueAsString(report));
+        run.writeReport(JSON.writerWithDefaultPrettyPrinter().writeValueAsString(report));
         if (report.containsKey("failureType"))
-            throw new IllegalStateException("Local runtime evaluation blocked; see sanitized .blocked.json report");
+            throw new IllegalStateException("Evaluation blocked; see this attempt's report");
         if (interruptedByQuota)
-            throw new IllegalStateException("Evaluation stopped after confirmed provider quota exhaustion; resume from checkpoint");
+            throw new IllegalStateException("Evaluation stopped after confirmed provider quota exhaustion; resume this run ID");
     }
 
-    private static Path outputSidecar(Path output, String suffix) {
-        return output.resolveSibling(output.getFileName().toString() + suffix);
+    static List<CurriculumDataset> selectDatasets(List<CurriculumDataset> available, String datasetVersion) {
+        if (datasetVersion == null || datasetVersion.isBlank()) return List.copyOf(available);
+        var selected = available.stream().filter(d -> datasetVersion.equals(d.source().datasetVersion())).toList();
+        if (selected.isEmpty()) throw new IllegalArgumentException("Unknown curriculum dataset version: " + datasetVersion);
+        return selected;
     }
-
     private static String checkpointFingerprint(CurriculumDataset dataset,
             List<CurriculumBenchmark.Query> queries, String mode, String split, String embeddingModel,
             String reviewerModel) throws Exception {
@@ -347,5 +389,26 @@ public final class CurriculumRuntimeEvaluation {
         settings.put("queryManifest", queries);
         return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
                 .digest(JSON.writeValueAsBytes(settings)));
+    }
+
+    private static long pendingQueryEstimate(CurriculumEvaluationRunStore.Run run,
+            Map<CurriculumDataset, List<CurriculumBenchmark.Query>> queries, String mode, String split,
+            String embeddingModel, String reviewerModel) throws Exception {
+        long pending = 0;
+        for (var entry : queries.entrySet()) {
+            var dataset = entry.getKey();
+            Path checkpointPath = run.runDirectory().resolve("checkpoints")
+                    .resolve(dataset.source().datasetVersion() + ".jsonl");
+            if (!Files.isRegularFile(checkpointPath)) {
+                pending += entry.getValue().size();
+                continue;
+            }
+            String fingerprint = checkpointFingerprint(dataset, entry.getValue(), mode, split, embeddingModel, reviewerModel);
+            try (var checkpoint = CurriculumRuntimeCheckpoint.open(checkpointPath, fingerprint)) {
+                pending += checkpoint.pendingQueryIds(entry.getValue().stream()
+                        .map(CurriculumBenchmark.Query::queryId).toList()).size();
+            }
+        }
+        return pending;
     }
 }

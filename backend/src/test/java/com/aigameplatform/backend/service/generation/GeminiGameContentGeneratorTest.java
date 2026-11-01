@@ -48,6 +48,88 @@ class GeminiGameContentGeneratorTest {
     }
 
     @Test
+    void nonPilotScopeUsesGroundedScopeAwarePromptInsteadOfMathGradeOneStrategy() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        String context = "[en-g3-003] Listening outcome\nLĩnh vực: LANGUAGE; độ tuổi phù hợp: 8–9\n"
+                + "Nguồn: curriculum.pdf; PDF 1275; printed 26\nProvenance: sourceSha256=" + "a".repeat(64)
+                + "; datasetVersion=english-grade3-draft-v1; embeddingModel=gemini-embedding-001";
+        var attempt = new GenerationAttempt(GameType.QUIZ, "Nghe và trả lời câu hỏi quen thuộc",
+                Subject.ENGLISH, GradeLevel.GRADE_3, new QuizGameStrategy(MAPPER).getStructuredSchema(),
+                context, 1, null, List.of());
+
+        assertThat(generator.generate(attempt)).isEqualTo(OUTPUT);
+
+        String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
+        assertThat(systemPrompt).contains("Môn học: ENGLISH", "Khối lớp: GRADE_3", attempt.topic(), context,
+                "exact curriculum evidence", "exactly 4 questions")
+                .doesNotContain("Toán lớp 1", "6–7 tuổi", "2 + 3 = ?");
+    }
+
+    @Test
+    void groundedPromptCarriesEveryNonPilotPrimarySubjectAndGrade() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        String provenance = "\nNguồn: curriculum.pdf; PDF 10; printed 2\nProvenance: sourceSha256=" + "b".repeat(64)
+                + "; datasetVersion=scope-test-v1; embeddingModel=gemini-embedding-001";
+        var scopes = new java.util.ArrayList<java.util.Map.Entry<Subject, GradeLevel>>();
+        for (Subject subject : List.of(Subject.MATH, Subject.VIETNAMESE, Subject.ENGLISH)) {
+            for (GradeLevel grade : List.of(GradeLevel.GRADE_1, GradeLevel.GRADE_2, GradeLevel.GRADE_3,
+                    GradeLevel.GRADE_4, GradeLevel.GRADE_5)) {
+                if (subject != Subject.MATH || grade != GradeLevel.GRADE_1) {
+                    scopes.add(java.util.Map.entry(subject, grade));
+                }
+            }
+        }
+
+        for (var scope : scopes) {
+            String context = "[scope-outcome] Exact outcome" + provenance;
+            var attempt = new GenerationAttempt(GameType.QUIZ, "teacher's natural request", scope.getKey(),
+                    scope.getValue(), new QuizGameStrategy(MAPPER).getStructuredSchema(), context, 1, null, List.of());
+
+            assertThat(generator.generate(attempt)).isEqualTo(OUTPUT);
+            String prompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
+            assertThat(prompt).contains("Môn học: " + scope.getKey().name(),
+                    "Khối lớp: " + scope.getValue().name(), "teacher's natural request", context);
+            assertThat(prompt).doesNotContain("Toán lớp 1", "6–7 tuổi", "2 + 3 = ?");
+        }
+    }
+
+    @Test
+    void kindergartenPromptRetainsRetrievedAgeAndDomainEvidence() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        String context = "[kg-4-5-001] Kết quả mong đợi\nĐộ tuổi phù hợp: 4–5 tuổi\n"
+                + "Domain: COGNITIVE; subDomain: MATHEMATICAL_CONCEPTS\nNguồn: curriculum.pdf; PDF 10\n"
+                + "Provenance: sourceSha256=" + "c".repeat(64)
+                + "; datasetVersion=kindergarten-outcomes-v1; embeddingModel=gemini-embedding-001";
+        var attempt = new GenerationAttempt(GameType.QUIZ, "Phân loại đồ vật", Subject.MATH,
+                GradeLevel.KINDERGARTEN, new QuizGameStrategy(MAPPER).getStructuredSchema(), context, 1, null, List.of());
+
+        generator.generate(attempt);
+
+        String prompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
+        assertThat(prompt).contains("Khối lớp: KINDERGARTEN", "Độ tuổi phù hợp: 4–5 tuổi",
+                "Domain: COGNITIVE", "subDomain: MATHEMATICAL_CONCEPTS", "kindergarten-outcomes-v1")
+                .doesNotContain("Toán lớp 1", "2 + 3 = ?");
+    }
+
+    @Test
+    void nonPilotScopeWithoutProvenanceIsRejectedBeforeCallingGemini() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        var attempt = new GenerationAttempt(GameType.QUIZ, "Count to 20", Subject.MATH, GradeLevel.GRADE_2,
+                new QuizGameStrategy(MAPPER).getStructuredSchema(), "unverified text only", 1, null, List.of());
+
+        assertThatThrownBy(() -> generator.generate(attempt))
+                .isInstanceOf(GenerationScopeUnsupportedException.class);
+        assertThat(sent).hasValue(null);
+    }
+    @Test
     void retryKeepsCurriculumInSystemPromptAndSendsValidationFeedbackAsUserMessage() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),

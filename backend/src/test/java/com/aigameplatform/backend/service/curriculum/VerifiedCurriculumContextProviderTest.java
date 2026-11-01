@@ -115,6 +115,7 @@ class VerifiedCurriculumContextProviderTest {
         assertThat(result.evidence().chunks()).extracting(CurriculumRAGService.RetrievedChunk::ageBand)
                 .containsExactly("AGE_3_4");
         assertThat(result.context()).contains("3–4 tuổi").doesNotContain("4–5 tuổi");
+        assertThat(result.context()).contains("Domain: COGNITIVE", "subDomain: MATHEMATICAL_CONCEPTS", "Nguồn:");
     }
     @Test void providerWithoutAgeAwareImplementationFailsClosedForKindergarten() {
         var called = new AtomicBoolean();
