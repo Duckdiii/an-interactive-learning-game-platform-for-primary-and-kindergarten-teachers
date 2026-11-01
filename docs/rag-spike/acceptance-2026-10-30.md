@@ -83,3 +83,24 @@ This addendum checks the preserved samples against the current generation gate; 
 New regression tests cover a wrong arithmetic answer, two choices with the same numeric value, a requested-range violation, the adversarial “30 give away 25 but answer 55” form as unverified, and carry/borrow edge cases. They do not retroactively turn the historical samples into passing outputs.
 
 Live smoke against the isolated local database: the unsupported-scope rejection passed; one in-scope generation remained unverified after the configured retry and returned `GENERATED_CONTENT_UNVERIFIED` with `QUESTION_NOT_MACHINE_CHECKABLE`. The positive live-generation check therefore did not pass, and no current positive game is claimed. Remote Supabase was not used.
+
+## Current application integration recheck — 2026-11-01
+
+This recheck adds an authenticated teacher create-and-save boundary and a teacher-facing create/preview page. It does not change the previous live-smoke result and does not turn the current pilot into a full-system release.
+
+The earlier `PASS` object retained in the JSON came from a separate bounded smoke that generated a Math Grade 1 quiz while external moderation was disabled. The later pre-integration attempt is recorded separately below: its positive game remained `QUESTION_NOT_MACHINE_CHECKABLE` after retry, while its unsupported-scope negative case was rejected. The application integration added in this recheck has **no live run**; do not use the historical PASS as evidence that the new API or current pipeline passed live acceptance.
+
+| Area | Current result | Limit |
+| --- | --- | --- |
+| Dataset discovery | All 16 packaged manifests load; the discovery test counts 653 chunks and 34 controls | Discovery is not publication; only the existing Math Grade 1 runtime is wired for generation |
+| Create API | `POST /api/games/generate` resolves the authenticated teacher, requires RAG+catalog, rejects unsupported scopes before AI calls, maps through the existing strategy and saves game plus separate curriculum review through the existing transaction boundary | Endpoint has mock/controller and application-service tests; no live database request was run in this environment |
+| DSL contract | The response carries `game` and `curriculum` as siblings; `metadata.curriculumReview` remains absent | DSL remains 1.0.0 |
+| Teacher UI | The create page submits a natural-language topic and renders QUIZ preview, review status, outcome and source page | It intentionally exposes only QUIZ / MATH / GRADE_1, matching currently wired runtime; save/reopen/edit workflow is not complete |
+| Backend verify | 591 tests, 0 failures, 0 errors, 8 opt-in skips; JaCoCo gate passed | JaCoCo printed stale execution-data class mismatch warnings in `target`; the gate nevertheless passed |
+| Frontend | 11 tests passed; TypeScript/Vite build and oxlint passed | Vite reports a bundle-size warning above 500 kB |
+| New live acceptance | Not run | `GEMINI_API_KEY` and `OPENAI_API_KEY` were absent from the process environment; local pgvector endpoint `127.0.0.1:55432` was unreachable |
+| Other primary scopes | Not runtime-ready | No evidence verifier / active ingestion path was wired for the other 14 primary datasets |
+| Kindergarten | Still gated | Semantic verifier and specialist approval remain pending |
+| Benchmark and deployment | Not complete | Independent natural teacher-language benchmark is still missing; Supabase write target is not approved/confirmed |
+
+The machine-readable current run is [local-acceptance-2026-11-01.json](results/local-acceptance-2026-11-01.json). This is a partial application integration result, not acceptance of the complete Curriculum RAG system.

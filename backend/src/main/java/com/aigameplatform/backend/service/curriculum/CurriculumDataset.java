@@ -7,8 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import tools.jackson.databind.json.JsonMapper;
 
 public record CurriculumDataset(CurriculumSource source, List<CurriculumChunk> chunks,
@@ -73,15 +77,30 @@ public record CurriculumDataset(CurriculumSource source, List<CurriculumChunk> c
         return dataset;
     }
 
+    /** Loads every packaged dataset for discovery; publication remains a separate catalog decision. */
+    public static List<CurriculumDataset> loadPackaged() throws IOException {
+        var resolver = new PathMatchingResourcePatternResolver(CurriculumDataset.class.getClassLoader());
+        Resource[] manifests = resolver.getResources("classpath*:/curriculum/**/manifest.json");
+        var datasets = new ArrayList<CurriculumDataset>(manifests.length);
+        for (var manifest : manifests) datasets.add(loadFromManifest(manifest));
+        datasets.sort(java.util.Comparator.comparing(dataset -> dataset.source().datasetVersion()));
+        return List.copyOf(datasets);
+    }
+
     public static CurriculumDataset loadFromResourceRoot(String root) throws IOException {
+        return loadFromManifest(new ClassPathResource(root.substring(1) + "manifest.json"));
+    }
+
+    private static CurriculumDataset loadFromManifest(Resource manifestResource) throws IOException {
         var mapper = new JsonMapper();
-        try (var manifestStream = resource(root, "manifest.json")) {
+        try (var manifestStream = manifestResource.getInputStream()) {
             var manifest = mapper.readTree(manifestStream);
             var source = new CurriculumSource(manifest.get("sourceDocument").asString(),
                     manifest.get("sourceSha256").asString(), manifest.get("curriculumVersion").asString(),
                     manifest.get("datasetVersion").asString(), manifest.get("pdfPageCount").asInt());
-            var chunks = readLines(root, "chunks.jsonl", CurriculumChunk.class);
-            var manualTranscriptions = readOptionalLines(root, "text-transcriptions.jsonl", ManualTranscription.class);
+            var chunks = readLines(manifestResource.createRelative("chunks.jsonl"), CurriculumChunk.class);
+            var manualTranscriptions = readOptionalLines(manifestResource.createRelative("text-transcriptions.jsonl"),
+                    ManualTranscription.class);
             validateManifestProvenance(manifest, chunks);
             validateManualTranscriptionDeclarations(manifest, manualTranscriptions);
             long primary = chunks.stream().filter(c -> !c.control()).count();
@@ -164,17 +183,19 @@ public record CurriculumDataset(CurriculumSource source, List<CurriculumChunk> c
     }
 
     private static <T> List<T> readLines(String root, String name, Class<T> type) throws IOException {
+        return readLines(new ClassPathResource(root.substring(1) + name), type);
+    }
+
+    private static <T> List<T> readLines(Resource resource, Class<T> type) throws IOException {
         var mapper = new JsonMapper();
-        try (var reader = new BufferedReader(new InputStreamReader(resource(root, name), StandardCharsets.UTF_8))) {
+        try (var reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
             return reader.lines().filter(line -> !line.isBlank()).map(line -> mapper.readValue(line, type)).toList();
         }
     }
 
-    private static <T> List<T> readOptionalLines(String root, String name, Class<T> type) throws IOException {
-        try (var stream = CurriculumDataset.class.getResourceAsStream(root + name)) {
-            if (stream == null) return List.of();
-        }
-        return readLines(root, name, type);
+    private static <T> List<T> readOptionalLines(Resource resource, Class<T> type) throws IOException {
+        if (!resource.exists()) return List.of();
+        return readLines(resource, type);
     }
 
     static InputStream resource(String name) throws IOException {

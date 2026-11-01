@@ -9,6 +9,16 @@ import org.junit.jupiter.api.Test;
 
 class CurriculumCatalogTest {
     @Test
+    void packagedCorpusDiscoveryLoadsEveryDatasetWithoutTreatingItAsPublished() throws Exception {
+        List<CurriculumDataset> datasets = CurriculumDataset.loadPackaged();
+
+        assertThat(datasets).hasSize(16);
+        assertThat(datasets).extracting(d -> d.source().datasetVersion()).doesNotHaveDuplicates();
+        assertThat(datasets.stream().mapToLong(d -> d.chunks().size()).sum()).isEqualTo(653);
+        assertThat(datasets.stream().flatMap(d -> d.chunks().stream()).filter(CurriculumChunk::control)).hasSize(34);
+    }
+
+    @Test
     void controlsDoNotPublishAnExtraScope() throws Exception {
         var dataset = CurriculumDataset.loadDefault();
         var catalog = new CurriculumCatalog(List.of(dataset), Set.of(GameType.QUIZ));
