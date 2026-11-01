@@ -50,11 +50,24 @@ export function stripHtmlComments(text) {
   return out;
 }
 
+function stripHtmlTags(text) {
+  let out = text;
+  let prev;
+  let pass = 0;
+  // Còn sót thẻ khi quá MAX_PASSES thì `sanitizeProse` thoát dấu < ở bước cuối.
+  do {
+    prev = out;
+    out = out.replace(/<\/?[A-Za-z][^>]*>/g, "");
+    pass++;
+  } while (out !== prev && pass < MAX_PASSES);
+  return out;
+}
+
 function stripMarkup(segment, repo) {
-  return segment
+  const noLinks = segment
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "[ảnh đã loại]")
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/<\/?[A-Za-z][^>]*>/g, "")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+  return stripHtmlTags(noLinks)
     .replace(/\b(?:https?:\/\/|ftp:\/\/|mailto:|xmpp:|www\d{0,3}\.)[^\s)>\]]+/gi, (url) =>
       repo && url.startsWith(`https://github.com/${repo}/`) ? url : "[liên kết đã loại]",
     );
