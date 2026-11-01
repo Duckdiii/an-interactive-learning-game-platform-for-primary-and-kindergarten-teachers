@@ -37,7 +37,15 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: ./mvnw --batch-mode test
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        # PR của Dependabot không nhận Actions secret nên không kết nối được Supabase; chỉ bỏ test khởi động thật,
+        # không thêm secret DB cho Dependabot vì code của gói bên thứ ba chạy trong job này.
+        run: |
+          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
+            ./mvnw --batch-mode test '-Dtest=!AigameBackendApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
+          else
+            ./mvnw --batch-mode test
+          fi
 
       - name: Upload JaCoCo coverage report
         if: always()
