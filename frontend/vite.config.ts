@@ -10,5 +10,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // scripts/*.test.mjs chạy bằng `node --test`, không phải Vitest.
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
 })

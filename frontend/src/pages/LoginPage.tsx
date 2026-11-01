@@ -26,7 +26,7 @@ export default function LoginPage() {
   const [form, setForm] = useState(initialForm)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { login } = useAuth()
+  const { login, loginDemo } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const locationState = location.state as LoginLocationState | null
@@ -126,6 +126,22 @@ export default function LoginPage() {
           {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </Button>
       </form>
+
+      {import.meta.env.DEV ? (
+        <Button
+          type="button"
+          variant="secondary"
+          fullWidth
+          className="mt-3"
+          disabled={isSubmitting}
+          onClick={() => {
+            loginDemo()
+            navigate(ROUTES.dashboard, { replace: true })
+          }}
+        >
+          Đăng nhập demo
+        </Button>
+      ) : null}
 
       <p className="mt-6 text-sm text-slate-600">
         Chưa có tài khoản?{' '}
