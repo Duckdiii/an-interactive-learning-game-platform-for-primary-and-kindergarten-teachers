@@ -1,12 +1,17 @@
 import { AUDIO_BUTTON_HEIGHT, ILLUSTRATION_SIZE, STAGE_WIDTH } from '../common/mediaLayout'
+import { minCardHeightFor } from '../matching/matchingLayout'
 import type { Bounds, LetterTile, Point } from './wordScrambleTypes'
 
+export const DEFAULT_TILE_SIZE = 68
+export const DEFAULT_SLOT_WIDTH = 72
+export const DEFAULT_SLOT_HEIGHT = 76
+export const DEFAULT_CONFIRM_BUTTON_HEIGHT = 72
 export const TILE_SIZE = 68
 export const SLOT_WIDTH = 72
 export const SLOT_HEIGHT = 76
+export const CONFIRM_BUTTON_HEIGHT = 72
 export const GAP = 12
 export const PADDING = 20
-export const CONFIRM_BUTTON_HEIGHT = 72
 
 export interface WordScrambleBoardLayout {
   width: number
@@ -19,6 +24,11 @@ export interface WordScrambleBoardLayout {
   trayBounds: Bounds
   trayPositions: Record<string, Point>
   confirmY: number
+  confirmHeight: number
+  confirmWidth: number
+  tileSize: number
+  slotWidth: number
+  slotHeight: number
 }
 
 export function computeWordScrambleLayout(params: {
@@ -27,8 +37,26 @@ export function computeWordScrambleLayout(params: {
   hasAudio: boolean
   hasIllustration: boolean
   promptHeight?: number
+  minTouchPx?: number
+  scale?: number
 }): WordScrambleBoardLayout {
-  const { tiles, wordLength, hasAudio, hasIllustration, promptHeight = 36 } = params
+  const {
+    tiles,
+    wordLength,
+    hasAudio,
+    hasIllustration,
+    promptHeight = 36,
+    minTouchPx = 64,
+    scale = 1,
+  } = params
+
+  const minTargetSize = minCardHeightFor(minTouchPx, scale > 0 ? scale : 1)
+  const slotWidth = Math.max(DEFAULT_SLOT_WIDTH, minTargetSize)
+  const slotHeight = Math.max(DEFAULT_SLOT_HEIGHT, minTargetSize)
+  const tileSize = Math.max(DEFAULT_TILE_SIZE, minTargetSize)
+  const confirmHeight = Math.max(DEFAULT_CONFIRM_BUTTON_HEIGHT, minTargetSize)
+  const confirmWidth = Math.max(260, Math.round(260 * (confirmHeight / DEFAULT_CONFIRM_BUTTON_HEIGHT)))
+
   const width = STAGE_WIDTH
   let currentY = PADDING
 
@@ -47,36 +75,43 @@ export function computeWordScrambleLayout(params: {
     currentY += AUDIO_BUTTON_HEIGHT + 16
   }
 
-  // Bố trí các ô slot mục tiêu (Word Slots)
-  const totalSlotsWidth = wordLength * SLOT_WIDTH + (wordLength - 1) * GAP
-  const startSlotX = Math.max(PADDING, (width - totalSlotsWidth) / 2)
-  const slotY = currentY
+  // Bố trí các ô slot mục tiêu (Word Slots) có hỗ trợ xuống dòng khi từ dài
+  const availableWidth = width - PADDING * 2
+  const slotsPerRow = Math.max(1, Math.floor((availableWidth + GAP) / (slotWidth + GAP)))
+  const totalSlotRows = Math.max(1, Math.ceil(wordLength / slotsPerRow))
+  const startSlotY = currentY
 
-  const slotBounds: Bounds[] = Array.from({ length: wordLength }, (_, i) => ({
-    x: startSlotX + i * (SLOT_WIDTH + GAP),
-    y: slotY,
-    width: SLOT_WIDTH,
-    height: SLOT_HEIGHT,
-  }))
+  const slotBounds: Bounds[] = Array.from({ length: wordLength }, (_, i) => {
+    const row = Math.floor(i / slotsPerRow)
+    const col = i % slotsPerRow
+    const rowCount = Math.min(slotsPerRow, wordLength - row * slotsPerRow)
+    const rowWidth = rowCount * slotWidth + (rowCount - 1) * GAP
+    const startX = (width - rowWidth) / 2
+    return {
+      x: startX + col * (slotWidth + GAP),
+      y: startSlotY + row * (slotHeight + GAP),
+      width: slotWidth,
+      height: slotHeight,
+    }
+  })
 
-  currentY += SLOT_HEIGHT + 28
+  currentY += totalSlotRows * (slotHeight + GAP) + 20
 
   // Bố trí khay chữ cái (Letter Tiles Tray)
-  const availableWidth = width - PADDING * 2
-  const trayColumns = Math.max(1, Math.floor((availableWidth - 24) / (TILE_SIZE + GAP)))
+  const trayColumns = Math.max(1, Math.floor((availableWidth - 24) / (tileSize + GAP)))
   const trayRows = Math.max(1, Math.ceil(tiles.length / trayColumns))
-  const trayHeight = 32 + trayRows * (TILE_SIZE + GAP)
+  const trayHeight = 32 + trayRows * (tileSize + GAP)
   const trayY = currentY
 
   const trayPositions: Record<string, Point> = {}
   tiles.forEach((tile, index) => {
     const row = Math.floor(index / trayColumns)
     const rowCount = Math.min(trayColumns, tiles.length - row * trayColumns)
-    const rowWidth = rowCount * TILE_SIZE + (rowCount - 1) * GAP
+    const rowWidth = rowCount * tileSize + (rowCount - 1) * GAP
     const startX = (width - rowWidth) / 2
     trayPositions[tile.tileId] = {
-      x: startX + (index % trayColumns) * (TILE_SIZE + GAP),
-      y: trayY + 16 + row * (TILE_SIZE + GAP),
+      x: startX + (index % trayColumns) * (tileSize + GAP),
+      y: trayY + 16 + row * (tileSize + GAP),
     }
   })
 
@@ -84,7 +119,7 @@ export function computeWordScrambleLayout(params: {
 
   // Nút xác nhận «Xong rồi!»
   const confirmY = currentY
-  currentY += CONFIRM_BUTTON_HEIGHT + PADDING
+  currentY += confirmHeight + PADDING
 
   return {
     width,
@@ -102,5 +137,10 @@ export function computeWordScrambleLayout(params: {
     },
     trayPositions,
     confirmY,
+    confirmHeight,
+    confirmWidth,
+    tileSize,
+    slotWidth,
+    slotHeight,
   }
 }

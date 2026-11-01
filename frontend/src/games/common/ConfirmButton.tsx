@@ -31,14 +31,14 @@ export default function ConfirmButton({
       <Rect
         width={width}
         height={height}
-        cornerRadius={20}
+        cornerRadius={Math.round(20 * Math.min(1.4, height / 72))}
         fill={enabled ? palette.primary : palette.disabledFill}
         stroke={enabled ? palette.primaryStrong : palette.disabledStroke}
         strokeWidth={3}
       />
       <Text
         text={label}
-        fontSize={28}
+        fontSize={Math.round(28 * Math.min(1.4, height / 72))}
         fontStyle="bold"
         fill={enabled ? palette.primaryInk : palette.disabledInk}
         width={width}

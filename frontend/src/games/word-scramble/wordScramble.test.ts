@@ -127,6 +127,78 @@ describe('Word Scramble Layout & Sizing', () => {
     expect(CONFIRM_BUTTON_HEIGHT).toBeGreaterThanOrEqual(64)
   })
 
+  it('guarantees touch target sizes >= 64px AFTER scaling across various scales', () => {
+    const scales = [1.0, 0.85, 0.75, 0.4875, 0.35]
+    const tiles: LetterTile[] = [
+      { tileId: 't0', character: 'C' },
+      { tileId: 't1', character: 'Á' },
+    ]
+
+    for (const scale of scales) {
+      const layout = computeWordScrambleLayout({
+        tiles,
+        wordLength: 2,
+        hasAudio: false,
+        hasIllustration: false,
+        minTouchPx: 64,
+        scale,
+      })
+
+      // Kích thước ô chữ sau khi scale trên màn hình
+      expect(layout.slotWidth * scale).toBeGreaterThanOrEqual(64 - 1e-4)
+      expect(layout.slotHeight * scale).toBeGreaterThanOrEqual(64 - 1e-4)
+
+      // Kích thước thẻ chữ khay sau khi scale
+      expect(layout.tileSize * scale).toBeGreaterThanOrEqual(64 - 1e-4)
+
+      // Chiều cao nút xác nhận sau khi scale
+      expect(layout.confirmHeight * scale).toBeGreaterThanOrEqual(64 - 1e-4)
+    }
+  })
+
+  it('supports word lengths from 1 to 15 without overflowing stage width or bounds', () => {
+    const alphabet = 'A B C D E F G H I K L M N O P'.split(' ')
+
+    for (let length = 1; length <= 15; length++) {
+      const tiles: LetterTile[] = Array.from({ length }, (_, i) => ({
+        tileId: `t_${i}`,
+        character: alphabet[i],
+      }))
+
+      // Thử ở cả desktop (scale 1.0) lẫn mobile 390px (scale 0.4875)
+      for (const scale of [1.0, 0.4875]) {
+        const layout = computeWordScrambleLayout({
+          tiles,
+          wordLength: length,
+          hasAudio: true,
+          hasIllustration: true,
+          minTouchPx: 64,
+          scale,
+        })
+
+        // Mọi slot phải nằm trọn trong stageWidth (không tràn ngang)
+        expect(layout.slotBounds).toHaveLength(length)
+        for (const slot of layout.slotBounds) {
+          expect(slot.x).toBeGreaterThanOrEqual(0)
+          expect(slot.x + slot.width).toBeLessThanOrEqual(layout.width)
+          expect(slot.y + slot.height).toBeLessThanOrEqual(layout.height)
+        }
+
+        // Mọi thẻ trong khay phải nằm trong chiều rộng stage
+        for (const tile of tiles) {
+          const pos = layout.trayPositions[tile.tileId]
+          expect(pos.x).toBeGreaterThanOrEqual(0)
+          expect(pos.x + layout.tileSize).toBeLessThanOrEqual(layout.width)
+          expect(pos.y + layout.tileSize).toBeLessThanOrEqual(layout.height)
+        }
+
+        // Nút xác nhận nằm dưới khay và nằm trọn trong stage
+        expect(layout.confirmY).toBeGreaterThanOrEqual(layout.trayBounds.y + layout.trayBounds.height)
+        expect(layout.confirmY + layout.confirmHeight).toBeLessThanOrEqual(layout.height)
+      }
+    }
+  })
+
   it('computes slot bounds and tray bounds correctly', () => {
     const tiles: LetterTile[] = [
       { tileId: 't0', character: 'C' },

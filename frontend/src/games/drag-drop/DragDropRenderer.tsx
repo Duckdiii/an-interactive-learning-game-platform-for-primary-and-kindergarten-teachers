@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Group, Image as KonvaImage, Layer, Rect, Text } from 'react-konva'
 import useImage from 'use-image'
 import { viText } from '../../constants/viText'
@@ -16,7 +16,6 @@ import { useQuestionAudio } from '../common/useQuestionAudio'
 import {
   computeDragDropLayout,
   isInsideZone,
-  ITEM_SIZE,
 } from './dragDropLayout'
 import { canSubmit, createDragDropState, dragDropReducer } from './dragDropReducer'
 import type { DragDropAnswerResult, DragDropDisplayItem, DragDropRendererProps, Point } from './dragDropTypes'
@@ -54,6 +53,8 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
     }))
   }, [question.items])
 
+  const [scale, setScale] = useState(1)
+
   const layout = useMemo(
     () =>
       computeDragDropLayout({
@@ -62,8 +63,10 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
         hasAudio: Boolean(question.audioUrl),
         hasIllustration: Boolean(question.imageUrl),
         promptHeight,
+        minTouchPx: props.minTouchPx,
+        scale,
       }),
-    [items, question.dropZones, question.audioUrl, question.imageUrl, promptHeight],
+    [items, question.dropZones, question.audioUrl, question.imageUrl, promptHeight, props.minTouchPx, scale],
   )
 
   const initialPlacements = useMemo(() => {
@@ -105,7 +108,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
   const handleDragEnd = useCallback(
     (itemId: string, pos: Point) => {
       if (state.locked || disabled) return
-      const center: Point = { x: pos.x + ITEM_SIZE / 2, y: pos.y + ITEM_SIZE / 2 }
+      const center: Point = { x: pos.x + layout.itemSize / 2, y: pos.y + layout.itemSize / 2 }
       const targetZone = layout.zones.find((z) => isInsideZone(center, z.bounds))
 
       if (targetZone) {
@@ -118,7 +121,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
         }
       }
     },
-    [layout.zones, state.locked, state.placements, disabled],
+    [layout.zones, layout.itemSize, state.locked, state.placements, disabled],
   )
 
   const handleItemTap = useCallback(
@@ -218,7 +221,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
   }, [state.result, mode, props, items])
 
   return (
-    <ResponsiveStage width={layout.width} height={layout.height}>
+    <ResponsiveStage width={layout.width} height={layout.height} onScaleChange={setScale}>
       <Layer>
         {/* Nền toàn màn */}
         <Rect width={layout.width} height={layout.height} fill={palette.page} listening={false} />
@@ -353,9 +356,9 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
               }}
             >
               <Rect
-                width={ITEM_SIZE}
-                height={ITEM_SIZE}
-                cornerRadius={14}
+                width={layout.itemSize}
+                height={layout.itemSize}
+                cornerRadius={Math.round(14 * Math.min(1.4, layout.itemSize / 76))}
                 fill={isMisplaced ? palette.wrongFill : palette.surface}
                 stroke={
                   isSelected
@@ -372,15 +375,15 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
               />
 
               {item.imageUrl ? (
-                <ItemIllustration url={item.imageUrl} x={6} y={6} size={ITEM_SIZE - 12} />
+                <ItemIllustration url={item.imageUrl} x={6} y={6} size={layout.itemSize - 12} />
               ) : (
                 <Text
                   text={item.text ?? item.visualPrompt ?? ''}
-                  fontSize={16}
+                  fontSize={Math.round(16 * Math.min(1.4, layout.itemSize / 76))}
                   fontStyle="bold"
                   fill={palette.ink}
-                  width={ITEM_SIZE - 8}
-                  height={ITEM_SIZE}
+                  width={layout.itemSize - 8}
+                  height={layout.itemSize}
                   x={4}
                   align="center"
                   verticalAlign="middle"
@@ -391,11 +394,11 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
 
               {/* Nhãn đáp án đúng nếu đặt sai */}
               {isMisplaced && targetCorrectZone && (
-                <Group y={ITEM_SIZE - 20}>
+                <Group y={layout.itemSize - 22}>
                   <Rect
-                    width={ITEM_SIZE}
-                    height={20}
-                    cornerRadius={[0, 0, 14, 14]}
+                    width={layout.itemSize}
+                    height={22}
+                    cornerRadius={[0, 0, Math.round(14 * Math.min(1.4, layout.itemSize / 76)), Math.round(14 * Math.min(1.4, layout.itemSize / 76))]}
                     fill={palette.surface}
                     stroke={palette.wrongLine}
                     strokeWidth={1}
@@ -403,11 +406,11 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
                   />
                   <Text
                     text={viText.player.dragDrop.correctZoneLabel(targetCorrectZone.label)}
-                    fontSize={10}
+                    fontSize={Math.round(10 * Math.min(1.4, layout.itemSize / 76))}
                     fontStyle="bold"
                     fill={palette.wrongLine}
-                    width={ITEM_SIZE}
-                    height={20}
+                    width={layout.itemSize}
+                    height={22}
                     align="center"
                     verticalAlign="middle"
                     listening={false}
@@ -422,6 +425,8 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
         {!state.locked && mode !== 'review' && (
           <ConfirmButton
             y={layout.confirmY}
+            height={layout.confirmHeight}
+            width={layout.confirmWidth}
             enabled={canSubmit(state.placements, items.length) && !state.submitting && !disabled}
             onPress={handleSubmit}
           />

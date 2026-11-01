@@ -21,7 +21,7 @@ export interface WordScrambleAnswerResult {
   correctWord?: string
 }
 
-export type WordScrambleRendererProps =
+export type WordScrambleModeProps =
   | {
       mode: 'preview'
       question: WordScrambleQuestion
@@ -40,3 +40,5 @@ export type WordScrambleRendererProps =
       completedWord?: string
       disabled?: boolean
     }
+
+export type WordScrambleRendererProps = WordScrambleModeProps & { minTouchPx?: number }

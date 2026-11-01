@@ -24,7 +24,7 @@ export interface DragDropAnswerResult {
   correctPlacements?: { itemId: string; zoneId: string }[]
 }
 
-export type DragDropRendererProps =
+export type DragDropModeProps =
   | {
       mode: 'preview'
       question: DragDropQuestion
@@ -41,5 +41,8 @@ export type DragDropRendererProps =
       mode: 'review'
       question: DragDropQuestion
       placements?: { itemId: string; zoneId: string }[]
+      correctPlacements?: { itemId: string; zoneId: string }[]
       disabled?: boolean
     }
+
+export type DragDropRendererProps = DragDropModeProps & { minTouchPx?: number }

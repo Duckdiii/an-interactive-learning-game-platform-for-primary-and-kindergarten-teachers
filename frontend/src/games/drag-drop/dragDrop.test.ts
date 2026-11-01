@@ -42,6 +42,29 @@ describe('Drag & Drop Layout & Geometry', () => {
     expect(CONFIRM_BUTTON_HEIGHT).toBeGreaterThanOrEqual(64)
   })
 
+  it('guarantees touch target sizes >= 64px AFTER scaling across various scales', () => {
+    const scales = [1.0, 0.85, 0.75, 0.4875, 0.35]
+
+    for (const scale of scales) {
+      const layout = computeDragDropLayout({
+        items: sampleItems,
+        dropZones: sampleZones,
+        hasAudio: false,
+        hasIllustration: false,
+        minTouchPx: 64,
+        scale,
+      })
+
+      // Kích thước vật sau khi scale hiển thị trên màn hình
+      const renderedItemSize = layout.itemSize * scale
+      expect(renderedItemSize).toBeGreaterThanOrEqual(64 - 1e-4)
+
+      // Chiều cao nút xác nhận sau khi scale
+      const renderedConfirmHeight = layout.confirmHeight * scale
+      expect(renderedConfirmHeight).toBeGreaterThanOrEqual(64 - 1e-4)
+    }
+  })
+
   it('keeps all items strictly inside zone bounds in worst-case single-basket placement', () => {
     const itemCounts = [1, 2, 4, 6, 8]
     const zoneCounts = [1, 2, 3, 4]

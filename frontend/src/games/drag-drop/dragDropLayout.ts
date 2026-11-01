@@ -1,11 +1,14 @@
 import { AUDIO_BUTTON_HEIGHT, ILLUSTRATION_SIZE, STAGE_WIDTH } from '../common/mediaLayout'
+import { minCardHeightFor } from '../matching/matchingLayout'
 import type { DragDropDisplayItem, Bounds, Point } from './dragDropTypes'
 import type { DropZone } from '../../types/game-dsl.types'
 
+export const DEFAULT_ITEM_SIZE = 76
+export const DEFAULT_CONFIRM_BUTTON_HEIGHT = 72
 export const ITEM_SIZE = 76
+export const CONFIRM_BUTTON_HEIGHT = 72
 export const GAP = 16
 export const PADDING = 20
-export const CONFIRM_BUTTON_HEIGHT = 72
 export const LABEL_HEIGHT = 44
 
 export interface ZoneLayout extends DropZone {
@@ -25,6 +28,9 @@ export interface DragDropBoardLayout {
   trayBounds: Bounds
   trayPositions: Record<string, Point>
   confirmY: number
+  confirmHeight: number
+  confirmWidth: number
+  itemSize: number
 }
 
 export function isInsideZone(point: Point, bounds: Bounds): boolean {
@@ -42,8 +48,24 @@ export function computeDragDropLayout(params: {
   hasAudio: boolean
   hasIllustration: boolean
   promptHeight?: number
+  minTouchPx?: number
+  scale?: number
 }): DragDropBoardLayout {
-  const { items, dropZones, hasAudio, hasIllustration, promptHeight = 36 } = params
+  const {
+    items,
+    dropZones,
+    hasAudio,
+    hasIllustration,
+    promptHeight = 36,
+    minTouchPx = 64,
+    scale = 1,
+  } = params
+
+  const minTargetSize = minCardHeightFor(minTouchPx, scale > 0 ? scale : 1)
+  const itemSize = Math.max(DEFAULT_ITEM_SIZE, minTargetSize)
+  const confirmHeight = Math.max(DEFAULT_CONFIRM_BUTTON_HEIGHT, minTargetSize)
+  const confirmWidth = Math.max(260, Math.round(260 * (confirmHeight / DEFAULT_CONFIRM_BUTTON_HEIGHT)))
+
   const width = STAGE_WIDTH
   let currentY = PADDING
 
@@ -72,9 +94,9 @@ export function computeDragDropLayout(params: {
 
   // Chiều cao rổ tính theo trường hợp xấu nhất: mọi vật có thể được xếp vào cùng một rổ
   const maxItemsPerZone = Math.max(1, items.length)
-  const slotsPerRow = Math.max(1, Math.floor((zoneWidth - 16) / (ITEM_SIZE + 8)))
+  const slotsPerRow = Math.max(1, Math.floor((zoneWidth - 16) / (itemSize + 8)))
   const slotRowsPerZone = Math.max(1, Math.ceil(maxItemsPerZone / slotsPerRow))
-  const zoneHeight = LABEL_HEIGHT + 12 + slotRowsPerZone * (ITEM_SIZE + 8) + 12
+  const zoneHeight = LABEL_HEIGHT + 12 + slotRowsPerZone * (itemSize + 8) + 12
 
   const zones: ZoneLayout[] = dropZones.map((zone, index) => {
     const col = index % zoneColumns
@@ -95,13 +117,13 @@ export function computeDragDropLayout(params: {
   const zoneItemPositions: Record<string, Record<number, Point>> = {}
   for (const zone of zones) {
     zoneItemPositions[zone.id] = {}
-    const rowWidth = slotsPerRow * (ITEM_SIZE + 8) - 8
+    const rowWidth = slotsPerRow * (itemSize + 8) - 8
     const startX = zone.bounds.x + Math.max(8, (zone.bounds.width - rowWidth) / 2)
     for (let i = 0; i < items.length; i++) {
       const col = i % slotsPerRow
       const row = Math.floor(i / slotsPerRow)
-      const slotX = startX + col * (ITEM_SIZE + 8)
-      const slotY = zone.bounds.y + LABEL_HEIGHT + 10 + row * (ITEM_SIZE + 8)
+      const slotX = startX + col * (itemSize + 8)
+      const slotY = zone.bounds.y + LABEL_HEIGHT + 10 + row * (itemSize + 8)
       zoneItemPositions[zone.id][i] = { x: slotX, y: slotY }
     }
   }
@@ -109,20 +131,20 @@ export function computeDragDropLayout(params: {
   currentY += zoneRows * (zoneHeight + GAP) + 8
 
   // Bố trí khay chứa (Tray)
-  const trayColumns = Math.max(1, Math.floor((availableWidth - 20) / (ITEM_SIZE + GAP)))
+  const trayColumns = Math.max(1, Math.floor((availableWidth - 20) / (itemSize + GAP)))
   const trayRows = Math.max(1, Math.ceil(items.length / trayColumns))
-  const trayHeight = trayRows * (ITEM_SIZE + GAP) + 20
+  const trayHeight = trayRows * (itemSize + GAP) + 20
   const trayY = currentY
 
   const trayPositions: Record<string, Point> = {}
   items.forEach((item, index) => {
     const row = Math.floor(index / trayColumns)
     const rowCount = Math.min(trayColumns, items.length - row * trayColumns)
-    const rowWidth = rowCount * ITEM_SIZE + (rowCount - 1) * GAP
+    const rowWidth = rowCount * itemSize + (rowCount - 1) * GAP
     const startX = (width - rowWidth) / 2
     trayPositions[item.id] = {
-      x: startX + (index % trayColumns) * (ITEM_SIZE + GAP),
-      y: trayY + 12 + row * (ITEM_SIZE + GAP),
+      x: startX + (index % trayColumns) * (itemSize + GAP),
+      y: trayY + 12 + row * (itemSize + GAP),
     }
   })
 
@@ -130,7 +152,7 @@ export function computeDragDropLayout(params: {
 
   // Nút xác nhận «Xong rồi!»
   const confirmY = currentY
-  currentY += CONFIRM_BUTTON_HEIGHT + PADDING
+  currentY += confirmHeight + PADDING
 
   return {
     width,
@@ -149,5 +171,8 @@ export function computeDragDropLayout(params: {
     },
     trayPositions,
     confirmY,
+    confirmHeight,
+    confirmWidth,
+    itemSize,
   }
 }

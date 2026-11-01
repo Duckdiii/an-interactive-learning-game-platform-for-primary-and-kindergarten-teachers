@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Group, Layer, Line, Rect, Text } from 'react-konva'
 import { viText } from '../../constants/viText'
 import ConfirmButton from '../common/ConfirmButton'
@@ -14,7 +14,6 @@ import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
 import {
   computeWordScrambleLayout,
-  TILE_SIZE,
 } from './wordScrambleLayout'
 import { isWordMatch } from './wordScrambleLogic'
 import {
@@ -56,6 +55,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
   }, [question.scrambledLetters])
 
   const wordLength = question.scrambledLetters.length
+  const [scale, setScale] = useState(1)
 
   const layout = useMemo(
     () =>
@@ -65,8 +65,10 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
         hasAudio: Boolean(question.audioUrl),
         hasIllustration: Boolean(question.imageUrl),
         promptHeight,
+        minTouchPx: props.minTouchPx,
+        scale,
       }),
-    [tiles, wordLength, question.audioUrl, question.imageUrl, promptHeight],
+    [tiles, wordLength, question.audioUrl, question.imageUrl, promptHeight, props.minTouchPx, scale],
   )
 
   // Khởi tạo các slot ban đầu nếu ở chế độ review
@@ -124,7 +126,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
   const handleTileDragEnd = useCallback(
     (tileId: string, pos: Point) => {
       if (state.locked || disabled) return
-      const center: Point = { x: pos.x + TILE_SIZE / 2, y: pos.y + TILE_SIZE / 2 }
+      const center: Point = { x: pos.x + layout.tileSize / 2, y: pos.y + layout.tileSize / 2 }
 
       // Tìm xem rơi vào slot nào
       const targetSlotIndex = layout.slotBounds.findIndex(
@@ -145,7 +147,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
         }
       }
     },
-    [layout.slotBounds, state.locked, state.slots, disabled],
+    [layout.slotBounds, layout.tileSize, state.locked, state.slots, disabled],
   )
 
   const handleTileTap = useCallback(
@@ -204,7 +206,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
   const tileMap = useMemo(() => new Map(tiles.map((t) => [t.tileId, t])), [tiles])
 
   return (
-    <ResponsiveStage width={layout.width} height={layout.height}>
+    <ResponsiveStage width={layout.width} height={layout.height} onScaleChange={setScale}>
       <Layer>
         {/* Nền toàn màn */}
         <Rect width={layout.width} height={layout.height} fill={palette.page} listening={false} />
@@ -267,7 +269,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
               {filledTile && (
                 <Text
                   text={filledTile.character}
-                  fontSize={36}
+                  fontSize={Math.round(36 * Math.min(1.4, bounds.height / 76))}
                   fontStyle="bold"
                   fill={palette.ink}
                   width={bounds.width}
@@ -329,9 +331,9 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
               }}
             >
               <Rect
-                width={TILE_SIZE}
-                height={TILE_SIZE}
-                cornerRadius={12}
+                width={layout.tileSize}
+                height={layout.tileSize}
+                cornerRadius={Math.round(12 * Math.min(1.4, layout.tileSize / 68))}
                 fill={palette.surface}
                 stroke={isSelected ? palette.accent : palette.primaryStrong}
                 strokeWidth={isSelected ? 4 : 2}
@@ -342,11 +344,11 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
               />
               <Text
                 text={tile.character}
-                fontSize={34}
+                fontSize={Math.round(34 * Math.min(1.4, layout.tileSize / 68))}
                 fontStyle="bold"
                 fill={palette.ink}
-                width={TILE_SIZE}
-                height={TILE_SIZE}
+                width={layout.tileSize}
+                height={layout.tileSize}
                 align="center"
                 verticalAlign="middle"
                 listening={false}
@@ -359,6 +361,8 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
         {!state.locked && mode !== 'review' && (
           <ConfirmButton
             y={layout.confirmY}
+            height={layout.confirmHeight}
+            width={layout.confirmWidth}
             enabled={canSubmit(state.slots) && !state.submitting && !disabled}
             onPress={handleSubmit}
           />
