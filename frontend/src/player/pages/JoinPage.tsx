@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { viText } from '../../constants/viText'
-import { ROUTES } from '../../routes/paths'
+import { ROUTES, roomJoinPath } from '../../routes/paths'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { publishInfoQuery } from '../api/publishInfoQuery'
 import PlayButton from '../components/PlayButton'
-import { isJoinCodeFormat, normalizeJoinCode, publishErrorKind } from '../join/joinCode'
+import { isJoinCodeFormat, isRoomPin, normalizeJoinCode, publishErrorKind } from '../join/joinCode'
 import { PROFILES } from '../profile/profiles'
+import { getRoomApi } from '../room/getRoomApi'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 
 const text = viText.player
@@ -63,6 +64,12 @@ export default function JoinPage() {
     setBusy(true)
 
     try {
+      if (isRoomPin(code) && (await (await getRoomApi()).findByPin(code))) {
+        if (mounted.current) navigate(roomJoinPath(code))
+
+        return
+      }
+
       await queryClient.fetchQuery(publishInfoQuery(code))
       // Đã rời trang (bấm Back) trong lúc chờ thì không kéo người dùng sang /play.
       if (mounted.current) navigate(generatePath(ROUTES.play, { shareCode: code }))

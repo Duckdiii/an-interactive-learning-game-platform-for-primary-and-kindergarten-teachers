@@ -9,6 +9,9 @@ export const normalizeJoinCode = (raw: string) => raw.replace(/\s+/g, '').toUppe
 
 export const isJoinCodeFormat = (code: string) => JOIN_CODE_FORMAT.test(code)
 
+// PIN phòng là 6 chữ số; mã chia sẻ cũng có thể toàn số nên /join phải thử PIN trước rồi mới thử mã chia sẻ.
+export const isRoomPin = (code: string) => /^\d{6}$/.test(code)
+
 const KIND_BY_ERROR_CODE: Readonly<Record<string, PublishErrorKind>> = {
   GAME_NOT_PUBLISHED: 'notPublished',
   GAME_EXPIRED: 'expired',

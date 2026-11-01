@@ -53,7 +53,7 @@ Quy ước chung (giữ nguyên contract hiện có): vỏ `{ "success": true, "
 
 `uiOverride` thuộc `AUTO | BE | HOC_SINH`. `themeId` là chuỗi tùy ý, `null` thì Frontend tự chọn theme theo loại game và môn. Không thêm vào Game JSON DSL (SPEC mục 3).
 
-Lỗi phân biệt cho màn lỗi (SPEC mục 2): `404` với `error.code` thuộc `SHARE_CODE_NOT_FOUND | GAME_NOT_PUBLISHED | GAME_EXPIRED | GAME_DISABLED` (SELF); `SESSION_NOT_FOUND | SESSION_CLOSED | SESSION_STARTED | SESSION_FULL` (phòng). Hiện spec chỉ có 404/409 chung.
+Lỗi phân biệt cho màn lỗi (SPEC mục 2): `404` với `error.code` thuộc `SHARE_CODE_NOT_FOUND | GAME_NOT_PUBLISHED | GAME_EXPIRED | GAME_DISABLED` (SELF); `SESSION_NOT_FOUND | SESSION_CLOSED | SESSION_ALREADY_STARTED | SESSION_FULL` (phòng). Hiện spec chỉ có 404/409 chung.
 
 ### 2.2 Thông tin xuất bản (SPEC 5.3)
 
@@ -350,6 +350,8 @@ interface StudentRoomClient extends RoomClient<StudentRoomEvent> {
 ```
 
 **Lỗi khi vào phòng:** `join` đang chỉ có `409` chung. Giao diện cần phân biệt, đề xuất thêm `error.code`: `SESSION_CLOSED`, `SESSION_ALREADY_STARTED`, `SESSION_FULL`. Mất kết nối: tự nối lại, giữ `participantId`, nhận `sync`; tải lại trang cũng nối lại bằng `participantId` đã lưu.
+
+**Cần Backend chốt trước khi thay mô phỏng hai tab:** (1) xếp hòa: `openapi.yaml` theo `timeSpentMs`, mục này cho cùng hạng và sắp theo biệt danh; (2) `GET /sessions/{id}/questions` trả 409 khi `WAITING` nhưng `RoomStudentScreen` cần `game` ngay từ phòng chờ; (3) `interactions` trả `correctAnswer` ngay sau khi chấm, trong khi phòng chỉ báo đúng sai khi câu kết thúc; (4) kiểm biệt danh trùng, độ dài, từ cấm khi `join`.
 
 3. Tivi chỉ cần dữ liệu tổng hợp; **không gửi nội dung câu hỏi qua kênh tivi** (câu hỏi hiện trên máy từng học sinh, SPEC 1.9).
 4. Ngưỡng ổn định: 30 máy cùng phòng; kết nối lại giữ `participantId`.

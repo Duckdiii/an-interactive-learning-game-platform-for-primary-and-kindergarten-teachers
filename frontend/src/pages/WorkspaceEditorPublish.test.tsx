@@ -242,7 +242,7 @@ describe('PublishDialog: liên kết an toàn', () => {
   it('shareUrl không phải http/https (javascript:, data:) bị bỏ, chỉ dùng địa chỉ ghép từ mã', () => {
     for (const shareUrl of ['javascript:alert(1)', 'data:text/html,<script>1</script>', 'ftp://x.test/a']) {
       const { unmount } = renderWithProviders(
-        <PublishDialog gameTitle="Trò chơi mẫu" gradeLevel="GRADE_1" result={{ gameId: 'g', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl }} hasUnsavedAfter={false} onClose={() => undefined} />,
+        <PublishDialog gameTitle="Trò chơi mẫu" gameType="QUIZ" gradeLevel="GRADE_1" result={{ gameId: 'g', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl }} hasUnsavedAfter={false} onClose={() => undefined} />,
       )
       const link = screen.getByRole('textbox', { name: 'Liên kết chia sẻ' }) as HTMLInputElement
 
@@ -255,7 +255,7 @@ describe('PublishDialog: liên kết an toàn', () => {
 
   it('đã sửa thêm trong lúc xuất bản thì có ghi chú phần sửa thêm chưa lưu', () => {
     renderWithProviders(
-      <PublishDialog gameTitle="Trò chơi mẫu" gradeLevel="GRADE_1" result={{ gameId: 'g', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl: 'https://x.test/play/ABC123' }} hasUnsavedAfter onClose={() => undefined} />,
+      <PublishDialog gameTitle="Trò chơi mẫu" gameType="QUIZ" gradeLevel="GRADE_1" result={{ gameId: 'g', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl: 'https://x.test/play/ABC123' }} hasUnsavedAfter onClose={() => undefined} />,
     )
 
     expect(screen.getByRole('note')).toHaveTextContent('chưa được lưu')

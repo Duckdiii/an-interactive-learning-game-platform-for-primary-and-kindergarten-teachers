@@ -3,12 +3,13 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MockPublishSettingsApi, resetMockPublishSettings } from '../../services/publishSettings/mockPublishSettingsApi'
 import { loginAsTeacher, renderWithProviders } from '../../test/renderWithApp'
+import type { GameType } from '../../types/game-dsl.types'
 import PublishDialog from './PublishDialog'
 
 const RESULT = { gameId: 'g1', status: 'PUBLISHED', shareCode: 'ABC123', shareUrl: 'https://x.test/play/ABC123' } as const
 
-const open = (gradeLevel = 'GRADE_1') =>
-  renderWithProviders(<PublishDialog gameTitle="Đếm số đến 10" gradeLevel={gradeLevel} result={RESULT} hasUnsavedAfter={false} onClose={() => undefined} />)
+const open = (gradeLevel = 'GRADE_1', gameType: GameType = 'QUIZ') =>
+  renderWithProviders(<PublishDialog gameTitle="Đếm số đến 10" gameType={gameType} gradeLevel={gradeLevel} result={RESULT} hasUnsavedAfter={false} onClose={() => undefined} />)
 
 const card = (name: string) => screen.getByRole('region', { name })
 
@@ -47,7 +48,27 @@ describe('PublishDialog: 3 cách chơi', () => {
     expect(link).toHaveAccessibleDescription(/Toàn màn hình/)
   })
 
-  it('"Mở phòng" bị khóa, đọc được lý do và bấm không làm gì', async () => {
+  it('"Mở phòng" là liên kết sang tab mới khi phòng chạy được và loại game có renderer', () => {
+    open()
+
+    const link = within(card('Mở phòng thi đấu')).getByRole('link', { name: /Mở phòng/ })
+
+    expect(link).toHaveAttribute('href', '/rooms/host/g1')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAccessibleDescription(/tab khác/)
+  })
+
+  it('loại game chưa có renderer: khóa và nêu đúng lý do', () => {
+    open('GRADE_1', 'DRAG_DROP')
+
+    const button = within(card('Mở phòng thi đấu')).getByRole('button', { name: /Mở phòng/ })
+
+    expect(button).toHaveAttribute('aria-disabled', 'true')
+    expect(button).toHaveAccessibleDescription(/Kiểu trò chơi này/)
+  })
+
+  it('bản build thật: "Mở phòng" bị khóa, đọc được lý do và bấm không làm gì', async () => {
+    vi.stubEnv('PROD', true)
     open()
 
     const button = within(card('Mở phòng thi đấu')).getByRole('button', { name: /Mở phòng/ })

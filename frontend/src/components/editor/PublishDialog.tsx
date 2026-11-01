@@ -3,11 +3,14 @@ import type { ReactNode } from 'react'
 import { isMock } from '../../config/mockMode'
 import { Link } from 'react-router-dom'
 import { resolveShareUrl } from '../../config/studentApp'
-import { presentPath } from '../../routes/paths'
+import { presentPath, roomHostPath } from '../../routes/paths'
 import { viText } from '../../constants/viText'
 import { usePublishSettings } from '../../hooks/usePublishSettings'
 import { resolveAgeBand } from '../../player/profile/resolveUiProfile'
 import type { AgeBand } from '../../player/profile/types'
+import { getPlayableRenderer } from '../../player/renderers'
+import { isRoomAvailable } from '../../player/room/getRoomApi'
+import type { GameType } from '../../types/game-dsl.types'
 import type { PublishResult } from '../../types/publish.types'
 import { safeHttpUrl } from '../../utils/safeUrl'
 import Button from '../Button'
@@ -23,6 +26,8 @@ interface PublishDialogProps {
   result: PublishResult
   // Tên trò chơi để điền sẵn vào tin nhắn mẫu gửi phụ huynh.
   gameTitle: string
+  // Phòng chỉ mở được với loại game đã có renderer.
+  gameType: GameType
   // Khối lớp của game, để gợi ý thẻ hợp với lớp.
   gradeLevel: string
   // Giáo viên đã sửa thêm trong lúc chờ xuất bản (phần đó chưa lưu).
@@ -80,11 +85,12 @@ function OptionCard({ id, recommended, children }: { id: CardId; recommended: bo
 }
 
 // Hộp thoại sau khi xuất bản: 3 cách cho trẻ chơi (trình chiếu, mở phòng, giao về nhà) và cài đặt khi chơi. Liên kết và mã QR CHỈ hiện khi địa chỉ là http/https (kể cả khi Backend trả về).
-export default function PublishDialog({ result, gameTitle, gradeLevel, hasUnsavedAfter, onClose }: PublishDialogProps) {
+export default function PublishDialog({ result, gameTitle, gameType, gradeLevel, hasUnsavedAfter, onClose }: PublishDialogProps) {
   const url = safeHttpUrl(resolveShareUrl(result.shareCode, result.shareUrl))
   const settings = usePublishSettings(result.gameId)
   const recommended = RECOMMENDED[resolveAgeBand({ gradeLevel, uiOverride: settings.settings?.uiOverride })]
   const { present, room, home } = text.cards
+  const roomReady = isRoomAvailable() && getPlayableRenderer(gameType) !== undefined
 
   return (
     <Dialog title={text.panelTitle} initialFocusId="share-code" describedById="share-intro" onEscape={onClose} wide hideTitle>
@@ -118,13 +124,20 @@ export default function PublishDialog({ result, gameTitle, gradeLevel, hasUnsave
           </OptionCard>
 
           <OptionCard id="room" recommended={recommended === 'room'}>
-            {/* aria-disabled (không dùng disabled) để nút còn nhận tiêu điểm và đọc được lý do. */}
-            <Button type="button" variant="secondary" aria-disabled="true" aria-describedby="room-reason" onClick={(event) => event.preventDefault()} className="mt-auto cursor-not-allowed opacity-70">
-              {room.action}
-              <span className="ml-2 rounded-full bg-sun-soft px-2 py-0.5 text-sm text-ink ring-1 ring-sun">{text.soon}</span>
-            </Button>
+            {roomReady ? (
+              <Link to={roomHostPath(result.gameId)} target="_blank" rel="noopener noreferrer" aria-describedby="room-reason" className={`${buttonClass('secondary')} mt-auto`}>
+                {room.action}
+                <span className="sr-only"> {present.opensNew}</span>
+              </Link>
+            ) : (
+              // aria-disabled (không dùng disabled) để nút còn nhận tiêu điểm và đọc được lý do.
+              <Button type="button" variant="secondary" aria-disabled="true" aria-describedby="room-reason" onClick={(event) => event.preventDefault()} className="mt-auto cursor-not-allowed opacity-70">
+                {room.action}
+                <span className="ml-2 rounded-full bg-sun-soft px-2 py-0.5 text-sm text-ink ring-1 ring-sun">{text.soon}</span>
+              </Button>
+            )}
             <p id="room-reason" className="text-sm text-ink-soft">
-              {room.reason}
+              {roomReady ? room.tabNote : isRoomAvailable() ? room.unsupported : room.reason}
             </p>
           </OptionCard>
 

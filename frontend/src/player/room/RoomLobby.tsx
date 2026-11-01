@@ -30,7 +30,7 @@ export default function RoomLobby({ room, participants }: RoomLobbyProps) {
   return (
     <div className="flex h-full gap-12 bg-play-night px-14 pb-28 pt-12 text-white">
       <div className="flex w-[440px] flex-none flex-col gap-5">
-        <p className="break-all text-2xl font-extrabold text-play-night-soft">{joinUrl ? text.joinAt(joinUrl.replace(/^https?:\/\//, '')) : text.joinWithCode}</p>
+        <p className="break-all text-2xl font-extrabold text-play-night-soft">{joinUrl ? text.joinAt(joinUrl.replace(/^https?:\/\//, '').replace(/\/\d{6}$/, '')) : text.joinWithCode}</p>
         <div className="rounded-3xl bg-white p-4 text-center text-7xl font-black tracking-[8px] text-play-night">{room.pin}</div>
         <div className="flex items-center gap-5">
           {joinUrl ? (

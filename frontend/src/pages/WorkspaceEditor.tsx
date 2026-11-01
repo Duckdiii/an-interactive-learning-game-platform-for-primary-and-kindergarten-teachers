@@ -481,7 +481,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           />
         </>
       )}
-      {editor.publishResult ? <PublishDialog result={editor.publishResult} gameTitle={draft.metadata.title} gradeLevel={draft.metadata.gradeLevel} hasUnsavedAfter={editor.dirty} onClose={closeSharePanel} /> : null}
+      {editor.publishResult ? <PublishDialog result={editor.publishResult} gameTitle={draft.metadata.title} gameType={draft.gameType} gradeLevel={draft.metadata.gradeLevel} hasUnsavedAfter={editor.dirty} onClose={closeSharePanel} /> : null}
     </div>
     </GameDefaultsContext.Provider>
     </VoiceContext.Provider>

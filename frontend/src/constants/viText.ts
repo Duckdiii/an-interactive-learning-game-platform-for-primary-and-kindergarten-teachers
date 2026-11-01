@@ -515,6 +515,8 @@ export const viText = {
           body: 'Mỗi bạn một máy, tivi hiện bảng xếp hạng. Hợp với lớp 2–5.',
           action: 'Mở phòng',
           reason: 'Phòng chơi nhiều máy đang được nhóm hoàn thiện nên chưa mở được.',
+          unsupported: 'Kiểu trò chơi này chưa chơi được trong phòng.',
+          tabNote: 'Bản thử: phòng mở ở tab mới, học sinh vào bằng tab khác trên máy này.',
         },
         home: {
           title: 'Giao về nhà',
@@ -686,6 +688,12 @@ export const viText = {
   // Phía học sinh: câu ngắn, giọng nhẹ nhàng, nhờ người lớn giúp khi lỗi kỹ thuật.
   // Trình chiếu trên tivi lớp (P4).
   room: {
+    host: {
+      title: 'Phòng thi đấu',
+      tabNote: 'Bản thử: học sinh vào bằng tab khác trên máy này',
+      openFailed: 'Chưa mở được phòng',
+      unavailable: 'Phòng thi đấu chưa mở được',
+    },
     started: 'Phòng đã bắt đầu',
     closed: 'Phòng đã đóng',
     disconnected: 'Mất kết nối',

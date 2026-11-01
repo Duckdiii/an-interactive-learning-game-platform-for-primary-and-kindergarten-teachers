@@ -7,8 +7,16 @@ import App from '../../App'
 import { MockPlayerApi } from '../api/mockPlayerApi'
 import JoinPage from './JoinPage'
 
+const findByPin = vi.hoisted(() => vi.fn())
+
+vi.mock('../room/getRoomApi', () => ({ getRoomApi: async () => ({ findByPin }), isRoomAvailable: () => true }))
+
 function PlayStub() {
   return <p>đã sang {useParams().shareCode}</p>
+}
+
+function RoomStub() {
+  return <p>đã vào phòng {useParams().pin}</p>
 }
 
 function openJoin() {
@@ -20,6 +28,7 @@ function openJoin() {
         <Routes>
           <Route path="/join" element={<JoinPage />} />
           <Route path="/play/:shareCode" element={<PlayStub />} />
+          <Route path="/join/:pin" element={<RoomStub />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -36,11 +45,46 @@ const enter = (value: string) => {
 
 configure({ asyncUtilTimeout: 10_000 })
 
-beforeEach(() => vi.stubEnv('VITE_PLAYER_API', 'mock'))
+beforeEach(() => {
+  vi.stubEnv('VITE_PLAYER_API', 'mock')
+  findByPin.mockReset()
+  findByPin.mockResolvedValue(null)
+})
 afterEach(() => {
   vi.stubEnv('VITE_PLAYER_API', '')
   vi.restoreAllMocks()
   setMockScenario('normal')
+})
+
+describe('JoinPage với PIN phòng', () => {
+  it('6 chữ số trùng phòng đang mở: sang trang vào phòng, không tra mã chia sẻ', async () => {
+    const getPublishInfo = vi.spyOn(MockPlayerApi.prototype, 'getPublishInfo')
+
+    findByPin.mockResolvedValue({ info: {}, game: {} })
+    openJoin()
+    enter('482 913')
+
+    expect(await screen.findByText('đã vào phòng 482913')).toBeInTheDocument()
+    expect(findByPin).toHaveBeenCalledWith('482913')
+    expect(getPublishInfo).not.toHaveBeenCalled()
+  })
+
+  it('6 chữ số không có phòng: thử tiếp như mã chia sẻ', async () => {
+    const getPublishInfo = vi.spyOn(MockPlayerApi.prototype, 'getPublishInfo')
+
+    openJoin()
+    enter('482913')
+
+    await waitFor(() => expect(getPublishInfo).toHaveBeenCalledWith('482913'))
+  })
+
+  it('mã có chữ: không tra phòng', async () => {
+    openJoin()
+    enter('mock 00')
+
+    expect(await screen.findByText('đã sang MOCK00')).toBeInTheDocument()
+    expect(findByPin).not.toHaveBeenCalled()
+  })
 })
 
 describe('JoinPage (/join)', () => {

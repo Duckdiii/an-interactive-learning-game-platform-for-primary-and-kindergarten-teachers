@@ -17,6 +17,8 @@ const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const PlayPage = lazy(() => import('./player/pages/PlayPage'))
 const JoinPage = lazy(() => import('./player/pages/JoinPage'))
 const PresentPage = lazy(() => import('./player/pages/PresentPage'))
+const RoomHostPage = lazy(() => import('./player/pages/RoomHostPage'))
+const RoomJoinPage = lazy(() => import('./player/pages/RoomJoinPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
 const UiKit = lazy(() => import('./pages/dev/UiKit'))
@@ -54,6 +56,7 @@ function App() {
         {/* Học sinh vào bằng mã, không cần tài khoản: nằm ngoài ProtectedRoute. */}
         <Route path={ROUTES.play} element={<PlayPage />} />
         <Route path={ROUTES.join} element={<JoinPage />} />
+        <Route path={ROUTES.roomJoin} element={<RoomJoinPage />} />
 
         {/* Trình chiếu: cần đăng nhập giáo viên nhưng chiếm cả màn hình, không nằm trong AppLayout. */}
         <Route
@@ -61,6 +64,14 @@ function App() {
           element={
             <ProtectedRoute>
               <PresentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.roomHost}
+          element={
+            <ProtectedRoute>
+              <RoomHostPage />
             </ProtectedRoute>
           }
         />
