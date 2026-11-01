@@ -4,7 +4,6 @@ import {
   CONFIRM_BUTTON_HEIGHT,
   isInsideZone,
   ITEM_SIZE,
-  validateDragDropQuestion,
 } from './dragDropLayout'
 import { canSubmit, createDragDropState, dragDropReducer } from './dragDropReducer'
 import type { DragDropDisplayItem } from './dragDropTypes'
@@ -23,23 +22,6 @@ const sampleItems: DragDropDisplayItem[] = [
 ]
 
 describe('Drag & Drop Layout & Geometry', () => {
-  it('validates unique items, drop zones, and non-empty questions', () => {
-    expect(validateDragDropQuestion(sampleItems, sampleZones)).toBeNull()
-    expect(validateDragDropQuestion([], sampleZones)).toBeTruthy()
-    expect(validateDragDropQuestion(sampleItems, [])).toBeTruthy()
-    expect(
-      validateDragDropQuestion(
-        sampleItems,
-        [...sampleZones, { id: 'water', label: 'Trùng' }],
-      ),
-    ).toBeTruthy()
-    expect(
-      validateDragDropQuestion(
-        [...sampleItems, { id: 'fish', text: 'Trùng' }],
-        sampleZones,
-      ),
-    ).toBeTruthy()
-  })
 
   it('verifies points inside rectangular zone boundaries', () => {
     const layout = computeDragDropLayout({

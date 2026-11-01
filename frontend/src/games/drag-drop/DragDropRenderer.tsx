@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 import { Group, Image as KonvaImage, Layer, Rect, Text } from 'react-konva'
 import useImage from 'use-image'
+import { viText } from '../../constants/viText'
 import ConfirmButton from '../common/ConfirmButton'
 import { measureWrappedTextHeight } from '../common/measureText'
 import { STAGE_WIDTH } from '../common/mediaLayout'
@@ -30,7 +31,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
   const { question, mode, disabled } = props
   const palette = useGamePalette()
   const { showFeedback } = useFeedback()
-  const promptText = question.audioText ?? 'Kéo thả các vật thể vào đúng rổ phân loại'
+  const promptText = question.audioText ?? viText.player.dragDrop.prompt
 
   const promptHeight = useMemo(() => {
     return (
@@ -274,7 +275,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
             listening={false}
           />
           <Text
-            text="Khay đồ vật (Chạm hoặc kéo vào rổ)"
+            text={viText.player.dragDrop.trayTitle}
             fontSize={14}
             fill={palette.inkSoft}
             x={16}
@@ -368,13 +369,27 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
           />
         )}
 
+        {/* Thông báo lỗi khi không gửi được bài */}
+        {state.submitFailed && !state.result && (
+          <Text
+            text={viText.player.dragDrop.submitFailed}
+            fontSize={18}
+            fill={palette.accent}
+            x={20}
+            y={layout.confirmY + 76}
+            width={layout.width - 40}
+            align="center"
+            listening={false}
+          />
+        )}
+
         {/* Phản hồi sau khi chấm (ở mode play/preview khi sai, hoặc ở review) */}
         {state.result && (
           <Text
             text={
               state.result.isCorrect
-                ? 'Tuyệt vời! Bé đã phân loại đúng hết!'
-                : 'Bé quan sát kỹ các rổ và thử ôn lại nhé!'
+                ? viText.player.dragDrop.allCorrect
+                : viText.player.dragDrop.tryAgain
             }
             fontSize={20}
             fontStyle="bold"

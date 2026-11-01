@@ -864,6 +864,22 @@ export const viText = {
     oddOneOutPrompt: 'Tìm thứ khác với các thứ còn lại',
     dragDropPrompt: 'Kéo thả các vật thể vào đúng rổ phân loại',
     wordScramblePrompt: 'Ghép các chữ cái thành từ đúng',
+    dragDrop: {
+      prompt: 'Kéo thả các vật thể vào đúng rổ phân loại',
+      trayTitle: 'Khay đồ vật (Chạm hoặc kéo vào rổ)',
+      allCorrect: 'Tuyệt vời! Con đã xếp đúng tất cả!',
+      tryAgain: 'Có chỗ chưa đúng, con thử lại nhé!',
+      correctZoneLabel: (zoneLabel: string) => `Đúng: ${zoneLabel}`,
+      submitFailed: 'Chưa gửi được bài, con thử bấm lại nhé!',
+    },
+    wordScramble: {
+      prompt: 'Ghép các chữ cái thành từ đúng',
+      trayTitle: 'Khay chữ cái (Chạm hoặc kéo vào ô)',
+      allCorrect: 'Tuyệt vời! Con đã ghép đúng từ!',
+      correctWordLabel: (word: string) => `Từ đúng là: ${word}`,
+      tryAgain: 'Chưa đúng rồi, con thử lại nhé!',
+      submitFailed: 'Chưa gửi được bài, con thử bấm lại nhé!',
+    },
     correctCount: (correct: number, total: number) => `${correct}/${total} câu đúng`,
     replay: 'Chơi lại',
     review: {

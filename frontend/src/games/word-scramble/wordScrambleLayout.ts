@@ -6,7 +6,6 @@ export const SLOT_WIDTH = 72
 export const SLOT_HEIGHT = 76
 export const GAP = 12
 export const PADDING = 20
-export const CONFIRM_BUTTON_WIDTH = 260
 export const CONFIRM_BUTTON_HEIGHT = 72
 
 export interface WordScrambleBoardLayout {

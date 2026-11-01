@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 import { Group, Layer, Line, Rect, Text } from 'react-konva'
+import { viText } from '../../constants/viText'
 import ConfirmButton from '../common/ConfirmButton'
 import { measureWrappedTextHeight } from '../common/measureText'
 import { STAGE_WIDTH } from '../common/mediaLayout'
@@ -33,7 +34,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
   const { question, mode, disabled } = props
   const palette = useGamePalette()
   const { showFeedback } = useFeedback()
-  const promptText = question.audioText ?? 'Ghép các chữ cái thành từ đúng'
+  const promptText = question.audioText ?? viText.player.wordScramble.prompt
 
   const promptHeight = useMemo(() => {
     return (
@@ -283,7 +284,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
             listening={false}
           />
           <Text
-            text="Khay chữ cái (Chạm hoặc kéo vào ô)"
+            text={viText.player.wordScramble.trayTitle}
             fontSize={14}
             fill={palette.inkSoft}
             x={16}
@@ -353,15 +354,29 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
           />
         )}
 
+        {/* Thông báo lỗi khi không gửi được bài */}
+        {state.submitFailed && !state.result && (
+          <Text
+            text={viText.player.wordScramble.submitFailed}
+            fontSize={18}
+            fill={palette.accent}
+            x={20}
+            y={layout.confirmY + 76}
+            width={layout.width - 40}
+            align="center"
+            listening={false}
+          />
+        )}
+
         {/* Phản hồi sau khi chấm */}
         {state.result && (
           <Text
             text={
               state.result.isCorrect
-                ? 'Tuyệt vời! Bé đã ghép đúng từ!'
+                ? viText.player.wordScramble.allCorrect
                 : state.result.correctWord
-                  ? `Từ đúng là: ${state.result.correctWord}`
-                  : 'Bé quan sát kỹ và cùng ghép lại nhé!'
+                  ? viText.player.wordScramble.correctWordLabel(state.result.correctWord)
+                  : viText.player.wordScramble.tryAgain
             }
             fontSize={20}
             fontStyle="bold"

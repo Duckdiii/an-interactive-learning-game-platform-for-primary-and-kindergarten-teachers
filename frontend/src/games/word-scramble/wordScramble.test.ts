@@ -6,9 +6,7 @@ import {
   TILE_SIZE,
 } from './wordScrambleLayout'
 import {
-  hasSameLetters,
   isWordMatch,
-  matchesWordPosition,
   normalizeWord,
 } from './wordScrambleLogic'
 import {
@@ -20,12 +18,10 @@ import {
 import type { LetterTile } from './wordScrambleTypes'
 
 describe('Word Scramble Logic (migrated from node test)', () => {
-  it('either P tile matches either P position in APPLE', () => {
-    expect(matchesWordPosition('APPLE', 'P', 1)).toBe(true)
-    expect(matchesWordPosition('APPLE', 'p', 2)).toBe(true)
-    expect(matchesWordPosition('APPLE', 'A', 1)).toBe(false)
-    expect(hasSameLetters('APPLE', ['E', 'P', 'A', 'P', 'L'])).toBe(true)
-    expect(hasSameLetters('APPLE', ['E', 'P', 'A', 'P', 'R'])).toBe(false)
+  it('matches words case-insensitively and handles duplicate letters', () => {
+    expect(isWordMatch('APPLE', 'apple')).toBe(true)
+    expect(isWordMatch('apple', 'APPLE')).toBe(true)
+    expect(isWordMatch('aple', 'APPLE')).toBe(false)
   })
 
   it('normalizes Vietnamese words with accents and whitespace', () => {

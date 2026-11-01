@@ -5,7 +5,6 @@ import type { DropZone } from '../../types/game-dsl.types'
 export const ITEM_SIZE = 76
 export const GAP = 16
 export const PADDING = 20
-export const CONFIRM_BUTTON_WIDTH = 260
 export const CONFIRM_BUTTON_HEIGHT = 72
 export const LABEL_HEIGHT = 44
 
@@ -35,27 +34,6 @@ export function isInsideZone(point: Point, bounds: Bounds): boolean {
     point.y >= bounds.y &&
     point.y <= bounds.y + bounds.height
   )
-}
-
-export function validateDragDropQuestion(
-  items: DragDropDisplayItem[],
-  dropZones: DropZone[],
-): string | null {
-  if (!items.length || !dropZones.length) {
-    return 'Câu hỏi cần có vật thể và rổ phân loại.'
-  }
-  const zoneIds = new Set(dropZones.map((z) => z.id))
-  const itemIds = new Set(items.map((i) => i.id))
-  if (zoneIds.size !== dropZones.length || itemIds.size !== items.length) {
-    return 'Mã vật thể và mã rổ phải duy nhất.'
-  }
-  if (dropZones.some((z) => !z.id || !z.label?.trim())) {
-    return 'Mỗi rổ phân loại cần có mã và nhãn rõ ràng.'
-  }
-  if (items.some((i) => !i.id || (!i.text?.trim() && !i.visualPrompt?.trim() && !i.imageUrl?.trim()))) {
-    return 'Mỗi vật thể cần có nội dung (chữ hoặc ảnh).'
-  }
-  return null
 }
 
 export function computeDragDropLayout(params: {
