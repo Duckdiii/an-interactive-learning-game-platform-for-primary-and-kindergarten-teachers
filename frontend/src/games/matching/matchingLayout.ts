@@ -58,6 +58,13 @@ export interface MatchingLayoutInput {
   cardContentHeights: readonly number[]
   /** Hiện nút «Xong rồi!» (preview, play); chế độ xem lại thì không. */
   showConfirmButton: boolean
+  /** Chiều cao hàng tối thiểu (hệ thiết kế) để thẻ vẫn đủ vùng chạm sau khi canvas co; bỏ trống thì chỉ theo `CARD_MIN_HEIGHT`. Xem `minCardHeightFor`. */
+  minCardHeight?: number
+}
+
+/** Chiều cao thẻ (hệ thiết kế) để sau khi nhân `scale` vẫn cao ít nhất `minTouchPx`. */
+export function minCardHeightFor(minTouchPx: number, scale: number): number {
+  return Math.ceil(minTouchPx / scale)
 }
 
 export interface MatchingLayout {
@@ -78,6 +85,7 @@ export function computeMatchingLayout({
   pairCount,
   cardContentHeights,
   showConfirmButton,
+  minCardHeight = 0,
 }: MatchingLayoutInput): MatchingLayout {
   let y = TOP_PADDING
 
@@ -100,7 +108,7 @@ export function computeMatchingLayout({
   }
 
   const rowsOriginY = y
-  const rowHeight = Math.max(CARD_MIN_HEIGHT, ...cardContentHeights.map(Math.ceil))
+  const rowHeight = Math.max(CARD_MIN_HEIGHT, minCardHeight, ...cardContentHeights.map(Math.ceil))
   const rowsHeight = pairCount > 0 ? pairCount * rowHeight + (pairCount - 1) * ROW_GAP : 0
   y += rowsHeight
 

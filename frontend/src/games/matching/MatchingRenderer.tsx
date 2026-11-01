@@ -9,6 +9,7 @@ import QuestionIllustration from '../common/QuestionIllustration'
 import ResponsiveStage from '../common/ResponsiveStage'
 import { playSound } from '../common/sound'
 import { useFeedback } from '../common/useFeedback'
+import { useGamePalette } from '../common/useGamePalette'
 import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
 import MatchingCard, { type MatchingCardState } from './MatchingCard'
@@ -25,6 +26,7 @@ import {
   computeMatchingLayout,
   estimateTextHeight,
   lineAnchor,
+  minCardHeightFor,
 } from './matchingLayout'
 import { canSubmit, createMatchingState, matchingReducer } from './matchingReducer'
 import { missingCorrectLinks, verdictOfLink, type MatchingResult } from './matchingResult'
@@ -46,7 +48,7 @@ import {
  *   `correctAnswer.matches` để hiện đáp án đúng cho trẻ học khi trả lời sai.
  * - review: xem lại, `matches` là các cặp học sinh đã nối (rỗng nếu hết giờ/bỏ qua); khoá sẵn, không nút nộp.
  */
-export type MatchingRendererProps =
+type MatchingModeProps =
   | {
       mode: 'preview'
       question: MatchingQuestion
@@ -59,15 +61,18 @@ export type MatchingRendererProps =
       question: MatchingStudentQuestion
       onAnswered: (matches: PairLink[]) => MatchingAnswerResult | Promise<MatchingAnswerResult>
       disabled?: boolean
+      /** Tự nộp ngay khi nối xong cặp cuối (khung Bé: chạm là chấm), không cần bấm «Xong rồi!». Lỗi nộp thì chờ trẻ bấm nút, không tự nộp lại. */
+      submitOnComplete?: boolean
     }
   | { mode: 'review'; question: MatchingQuestion; matches: PairLink[] }
 
-const PAIR_MATCHED_SOUND = '/sounds/pair-matched.wav'
+/**
+ * `minTouchPx` (cả 3 mode): vùng chạm tối thiểu SAU khi canvas co theo màn hình; có thì chiều cao hàng được nới để thẻ không thấp hơn số này.
+ * Bỏ trống thì bố cục như cũ (trình soạn của giáo viên).
+ */
+export type MatchingRendererProps = MatchingModeProps & { minTouchPx?: number }
 
-/** Màu theo ô trái, ổn định khi nối/gỡ. Cố ý không có đỏ hay xanh lá: hai màu đó dành cho kết quả. */
-const LINK_COLORS = ['#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#92400E', '#64748B']
-const CORRECT_COLOR = '#43A047'
-const WRONG_COLOR = '#F59E0B'
+const PAIR_MATCHED_SOUND = '/sounds/pair-matched.wav'
 
 const HEADING_PADDING = 8
 
@@ -86,6 +91,8 @@ export default function MatchingRenderer(props: MatchingRendererProps) {
 
 function MatchingBoard(props: MatchingRendererProps) {
   const { question } = props
+  // Màu đường nối theo ô trái, ổn định khi nối/gỡ; cố ý không có đỏ hay xanh lá (hai màu dành cho kết quả). Xem games/common/palette.ts.
+  const { linkColors: LINK_COLORS, correctLine: CORRECT_COLOR, wrongLine: WRONG_COLOR } = useGamePalette()
   const { showFeedback } = useFeedback()
   const { image: illustration, reserveSpace: hasIllustration } = useIllustration(question.imageUrl)
   const playAudio = useQuestionAudio(question.audioUrl)
@@ -150,7 +157,11 @@ function MatchingBoard(props: MatchingRendererProps) {
     [view, failedImages],
   )
 
+  // Hệ số co do ResponsiveStage đo (1 trước khi đo xong); chỉ dùng để nới chiều cao hàng theo `minTouchPx`.
+  const [scale, setScale] = useState(1)
+
   const layout = computeMatchingLayout({
+    minCardHeight: props.minTouchPx ? minCardHeightFor(props.minTouchPx, scale) : undefined,
     hasIllustration,
     hasAudio: Boolean(question.audioUrl),
     headingHeight,
@@ -208,6 +219,23 @@ function MatchingBoard(props: MatchingRendererProps) {
     }
   }
 
+  // Tự nộp một lần mỗi khi vừa nối đủ; sửa lại các cặp (không còn đủ) thì mới tự nộp lại được.
+  const autoSubmittedRef = useRef(false)
+  const submitOnComplete = props.mode === 'play' && props.submitOnComplete === true
+  const readyToSubmit = interactive && canSubmit(state, pairCount)
+  // Chỉ mở lại khi trẻ gỡ bớt cặp: đang nộp hoặc nộp lỗi (vẫn đủ cặp) không được tự nộp lại thành vòng lặp.
+  const incomplete = state.links.length < pairCount
+  useEffect(() => {
+    if (incomplete) autoSubmittedRef.current = false
+  }, [incomplete])
+  useEffect(() => {
+    if (readyToSubmit && submitOnComplete && !autoSubmittedRef.current) {
+      autoSubmittedRef.current = true
+      void handleSubmit()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ phản ứng khi trạng thái "nối đủ" đổi
+  }, [readyToSubmit, submitOnComplete])
+
   // ---- dữ liệu để vẽ ----
   const leftIndexById = new Map(view.leftItems.map((item, index) => [item.id, index]))
   const rightIndexById = new Map(view.rightItems.map((item, index) => [item.id, index]))
@@ -256,7 +284,7 @@ function MatchingBoard(props: MatchingRendererProps) {
   const showConfirm = layout.confirmButtonY !== null && state.phase !== 'done'
 
   return (
-    <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
+    <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight} onScaleChange={setScale}>
       <Layer>
         {layout.illustrationY !== null && <QuestionIllustration image={illustration} y={layout.illustrationY} />}
 

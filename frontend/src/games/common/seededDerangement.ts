@@ -40,3 +40,17 @@ export function seededDerangement<T>(items: readonly T[], seed: string): T[] {
   }
   return result
 }
+
+/**
+ * Xáo thường (Fisher–Yates) xác định theo `seed`: khác `seededDerangement` ở chỗ phần tử CÓ THỂ ở lại vị trí cũ. Dùng khi vị trí
+ * không được tiết lộ đáp án (nếu đáp án đang đứng đầu mảng, derangement sẽ không bao giờ để nó đứng đầu và lộ ra).
+ */
+export function seededShuffle<T>(items: readonly T[], seed: string): T[] {
+  const result = [...items]
+  const random = createRandom(hashSeed(seed))
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}

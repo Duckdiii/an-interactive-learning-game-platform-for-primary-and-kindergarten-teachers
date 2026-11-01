@@ -115,6 +115,10 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 - Cột "Người thực hiện": ghi tên người đang ra lệnh cho agent, lấy từ `git config user.name` (chạy lệnh này để biết, không tự đoán). Cột "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`).
 - Không tự commit. Cột "Mã Commit SHA" ghi `TODO` để user cập nhật sau khi commit; nhắc user làm việc này trong câu báo cáo cuối.
 
+## Trước mỗi task: chọn công cụ
+
+Ở tin nhắn đầu tiên của task, ghi bảng ngắn "Công cụ dự định": skill, MCP, subagent sẽ dùng và lý do một dòng; công cụ phù hợp mà không dùng thì nêu lý do. Repo có `.codegraph/`: tìm hiểu code bằng CodeGraph trước khi grep hay đọc file. Cuối task đối chiếu với dòng "Công cụ đã dùng".
+
 ## Subagent (`.claude/agents/`)
 
 Nguyên tắc: **phiên chính viết code, subagent đọc, chạy và kiểm tra.** Phiên chính lập kế hoạch, quyết định thiết kế, viết code, ghi `ai-usage-log.md`, duyệt kết quả cuối. Khảo sát và kiểm tra giao cho subagent chỉ đọc (không có `Edit`/`Write`, nên chạy song song được).
@@ -217,3 +221,4 @@ Quy trình: khi gặp lỗi của chính mình (test/build fail do mình gây ra
 - Backend: build thử bằng `./mvnw clean install -DskipTests` (hoặc chạy test nếu có DB thật) trước khi báo xong.
 - Frontend: chạy `npm run build` (type-check + build) và/hoặc mở thử bằng dev server trước khi báo xong.
 - Chạy song song các agent theo bảng định tuyến; đợi tất cả xong rồi mới sửa theo kết quả, sau đó chạy lại `test-verifier`. Ngay trước khi đưa commit message, chạy `pre-commit-checker`. Khi sửa `ai-usage-log.md`, chạy `log-auditor`.
+- Cuối mỗi tác vụ có làm việc thật (sửa file, chạy agent, dùng trình duyệt...), chạy `node scripts/tool-usage/summarize.mjs --current` và dán dòng kết quả "Công cụ đã dùng: Skill ... · MCP ... · Subagent ... · Tool ..." vào câu báo cáo cuối. Số liệu đọc từ transcript, không tự khai từ trí nhớ; có thể thiếu vài lệnh gọi cuối cùng vì transcript ghi chậm (nêu rõ nếu thấy lệch). Không dùng skill nào thì ghi `Skill: (không)`. Câu hỏi chỉ trò chuyện thì không cần dòng này.

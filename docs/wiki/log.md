@@ -9,3 +9,4 @@ Mỗi dòng: `ngày | thao tác | nội dung`. Chỉ thêm, không sửa dòng c
 - 2026-10-31 | sửa | Thêm cột nguồn đầy đủ vào trang Ca sử dụng; ghi rõ wiki chậm hơn nguồn; thêm bảng tra nguồn vào `CLAUDE.md`.
 - 2026-10-31 | sửa | Chuyển vault lên `docs/`, biến `index.md` thành mục lục toàn kho, thêm liên kết tới bản đầy đủ; trích thêm `docs/srs/FLD.md`, `docs/srs/KPI.md`.
 - 2026-10-31 | kiểm tra | Hai agent đối chiếu wiki với nguồn; sửa 5 lỗi, bổ sung phần bỏ sót, thêm 3 trang, sinh `docs/SRS-full.md`, `docs/Dinh_huong_de_tai.md`.
+- 2026-11-01 | sửa | Cập nhật trạng thái theo code: 4/10 renderer, P5 có giao diện và mô phỏng hai tab, phòng thật chờ Backend.

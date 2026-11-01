@@ -53,7 +53,7 @@ Quy ước chung (giữ nguyên contract hiện có): vỏ `{ "success": true, "
 
 `uiOverride` thuộc `AUTO | BE | HOC_SINH`. `themeId` là chuỗi tùy ý, `null` thì Frontend tự chọn theme theo loại game và môn. Không thêm vào Game JSON DSL (SPEC mục 3).
 
-Lỗi phân biệt cho màn lỗi (SPEC mục 2): `404` với `error.code` thuộc `SHARE_CODE_NOT_FOUND | GAME_NOT_PUBLISHED | GAME_EXPIRED | GAME_DISABLED` (SELF); `SESSION_NOT_FOUND | SESSION_CLOSED | SESSION_STARTED | SESSION_FULL` (phòng). Hiện spec chỉ có 404/409 chung.
+Lỗi phân biệt cho màn lỗi (SPEC mục 2): `404` với `error.code` thuộc `SHARE_CODE_NOT_FOUND | GAME_NOT_PUBLISHED | GAME_EXPIRED | GAME_DISABLED` (SELF); `SESSION_NOT_FOUND | SESSION_CLOSED | SESSION_ALREADY_STARTED | SESSION_FULL` (phòng). Hiện spec chỉ có 404/409 chung.
 
 ### 2.2 Thông tin xuất bản (SPEC 5.3)
 
@@ -291,17 +291,67 @@ Phương án "soạn sẵn cả 3": mỗi phần tử thêm `gameId` của bản
 `openapi.yaml` ghi rõ: **tài liệu WebSocket Message Format chưa viết**. Wireframe D1–D7 yêu cầu **đồng bộ theo câu do giáo viên điều khiển** ("Câu tiếp", "Kết thúc câu sớm", "Xem đáp án", đồng hồ chung, "đã trả lời 21/32"), trong khi contract hiện tại để từng học sinh làm theo nhịp riêng (`getSessionQuestions` trả cả bộ câu, chỉ có `start/pause/resume/close`). Xin Backend chốt:
 
 1. Phòng đồng bộ theo câu (giáo viên điều khiển) hay theo nhịp riêng (tivi chỉ hiện tổng hợp)? Frontend giả định **đồng bộ theo câu**.
-2. Danh sách sự kiện tối thiểu (đề xuất, cần Backend xác nhận):
+2. Danh sách sự kiện (của `RoomClient` cho P5, đã duyệt phía Frontend, còn cần Backend xác nhận). `createMockRoom` chạy theo đúng bảng này. `index` tính từ 0 như mục 2.10. Thời gian là ISO 8601 UTC.
 
-| Đích `/topic/session/{id}/...` | Nội dung | Ai nhận |
+**Máy chủ phát.** Kênh chung là `/topic/session/{id}/teacher` và `/topic/session/{id}/students`, để dữ liệu của giáo viên không tới máy học sinh. Kênh riêng `/user/queue/session/{id}` là phần thêm so với mô tả trong `openapi.yaml`.
+
+| Sự kiện | Payload | Ai nhận |
 |---|---|---|
-| `lobby` | `{ participantCount, nicknames[] }` | giáo viên (tivi) và học sinh |
-| `question` | `{ questionId, index, total, endsAt }` | tất cả |
-| `answered` | `{ answeredCount, participantCount }` | giáo viên (tivi) |
-| `board` | `{ top: [{rank,nickname,score,delta}], classCorrectRate }` (top 5, không có `participantId`) | tất cả |
-| `reveal` | `{ questionId }` (cho phép hiện đáp án câu đó) | tất cả |
-| `state` | `{ status: WAITING|ACTIVE|PAUSED|CLOSED }` | tất cả |
-| `kicked` | `{}` (gửi riêng cho participant bị loại) | một học sinh |
+| `lobby` | Giáo viên: `{ participantCount, participants: [{ participantId, nickname }] }`. Học sinh: `{ participantCount }` | Kênh chung, mỗi bên một dạng |
+| `state` | `{ status: WAITING\|ACTIVE\|PAUSED\|CLOSED, remainingMs }`. `remainingMs` là thời gian còn lại của câu lúc tạm dừng, ngoài lúc đó là `null` | Tất cả |
+| `question` | `{ questionId, index, total, endsAt, durationMs, serverNow }`. Không có nội dung câu; máy học sinh lấy từ `getSessionQuestions` theo `questionId`. `serverNow` để bù lệch đồng hồ, là giờ lúc gửi nên `sync` phải trả giờ mới. Tiếp tục sau tạm dừng phát lại `question` với `endsAt` mới | Tất cả |
+| `answered` | `{ questionId, answeredCount, participantCount }` | Giáo viên |
+| `board` | `{ afterIndex, top: [{ rank, nickname, score, delta }], classCorrectRate }`. Tối đa 5 dòng, không có `participantId`. Bằng điểm thì cùng hạng (1, 2, 2, 4), trong nhóm hòa sắp theo `nickname`. Câu kết thúc thì phát sự kiện này, máy học sinh khóa câu | Tất cả |
+| `reveal` | `{ questionId, correctAnswer }`, dạng `correctAnswer` như mục 2.4 | Tất cả |
+| `finished` | `{ top: [{ rank, nickname, score }], averageCorrect, total }`. Tối đa 3 dòng cho bục vinh danh | Tất cả |
+| `me` | `{ questionId, isCorrect, delta, streak, streakBonus, score, rank, participantCount }`. Gửi sau mỗi câu, ngay trước `board` | Kênh riêng |
+| `myFinal` | `{ score, correctCount, total, rank, participantCount, bestStreak }` | Kênh riêng |
+| `kicked` | `{}` | Kênh riêng |
+| `sync` | Ảnh chụp sau khi nối lại: `{ status, remainingMs, lobby, question, answeredCount, board, finished, me, myFinal }`, trường nào chưa có thì `null`; `lobby` theo dạng của từng bên, `answeredCount` chỉ gửi cho giáo viên, `me`, `myFinal` chỉ gửi cho đúng học sinh đó. Chưa có `revealed`: nối lại sau khi đã bấm xem đáp án thì nút bật lại, bấm lần nữa không gây hại | Riêng người vừa nối lại |
+
+**Máy khách gửi.** Chỉ giáo viên gửi, qua `/app/session/{id}/...`:
+
+| Lệnh | Payload | Ý nghĩa |
+|---|---|---|
+| `next` | `{}` | Sang câu tiếp, hoặc câu đầu sau khi bắt đầu |
+| `end-question` | `{}` | Kết thúc câu sớm |
+| `reveal` | `{}` | Hiện đáp án câu vừa xong |
+| `finish` | `{}` | Kết thúc ván, phát `finished` và `myFinal`; phòng vẫn mở tới khi giáo viên đóng |
+
+Các việc đã có REST thì giữ nguyên, không thêm lệnh WebSocket: `start`, `pause`, `resume`, `close`, vào phòng (`join`), nộp câu (`POST /sessions/{id}/interactions`), xóa biệt danh (mục 2.10). Mock chạy các việc này qua `RoomClient` để giao diện gọi cùng một cổng.
+
+**Giao diện TypeScript.** Hai vai tách riêng để máy học sinh không có lệnh của giáo viên:
+
+```ts
+type RoomConnection = 'connected' | 'reconnecting' | 'disconnected' // FLD-24
+
+interface RoomClient<E> {
+  connect(): Promise<void>
+  disconnect(): void
+  subscribe(listener: (event: E) => void): () => void
+  subscribeConnection(listener: (status: RoomConnection) => void): () => void
+}
+
+interface TeacherRoomClient extends RoomClient<TeacherRoomEvent> {
+  start(): Promise<void>
+  next(): Promise<void>
+  endQuestion(): Promise<void>
+  reveal(): Promise<void>
+  pause(): Promise<void>
+  resume(): Promise<void>
+  finish(): Promise<void>
+  close(): Promise<void>
+  kick(participantId: string): Promise<void>
+}
+
+interface StudentRoomClient extends RoomClient<StudentRoomEvent> {
+  answer(questionId: string, payload: unknown): Promise<void>
+}
+```
+
+**Lỗi khi vào phòng:** `join` đang chỉ có `409` chung. Giao diện cần phân biệt, đề xuất thêm `error.code`: `SESSION_CLOSED`, `SESSION_ALREADY_STARTED`, `SESSION_FULL`. Mất kết nối: tự nối lại, giữ `participantId`, nhận `sync`; tải lại trang cũng nối lại bằng `participantId` đã lưu.
+
+**Cần Backend chốt trước khi thay mô phỏng hai tab:** (1) xếp hòa: `openapi.yaml` theo `timeSpentMs`, mục này cho cùng hạng và sắp theo biệt danh; (2) `GET /sessions/{id}/questions` trả 409 khi `WAITING` nhưng `RoomStudentScreen` cần `game` ngay từ phòng chờ; (3) `interactions` trả `correctAnswer` ngay sau khi chấm, trong khi phòng chỉ báo đúng sai khi câu kết thúc; (4) kiểm biệt danh trùng, độ dài, từ cấm khi `join`.
 
 3. Tivi chỉ cần dữ liệu tổng hợp; **không gửi nội dung câu hỏi qua kênh tivi** (câu hỏi hiện trên máy từng học sinh, SPEC 1.9).
 4. Ngưỡng ổn định: 30 máy cùng phòng; kết nối lại giữ `participantId`.

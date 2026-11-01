@@ -8,9 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:drag-drop": "node --experimental-strip-types --test scripts/drag-drop.test.mjs",
-    "test:word-scramble": "node --experimental-strip-types --test scripts/word-scramble.test.mjs"
+    "test": "vitest run"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -19,6 +17,7 @@
     "canvas-confetti": "^1.9.4",
     "howler": "^2.2.4",
     "konva": "^10.7.0",
+    "qrcode.react": "4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-konva": "^19.3.0",
