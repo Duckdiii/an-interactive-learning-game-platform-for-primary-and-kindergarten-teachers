@@ -142,6 +142,32 @@ class PilotQuizContentVerifierTest {
     }
 
     @Test
+    void previouslyEmittedVerbalOperatorAndStoryQuestionsRemainUnverifiedAsCaptured() {
+        var verbalOperator = verifier.verify(game("Phép cộng nhẩm trong phạm vi 10",
+                        questionFromCapturedOutput("2 cộng 3 bằng mấy?", List.of("7", "6", "5", "4"), "c")),
+                "Phép cộng nhẩm trong phạm vi 10", evidenceFor("math-g1-007"));
+        var storyProblem = verifier.verify(game("Phép cộng nhẩm trong phạm vi 10",
+                        questionFromCapturedOutput("Nếu có 1 quả bóng và bạn thêm 7 quả bóng nữa, tổng cộng có mấy quả bóng?",
+                                List.of("9", "6", "8", "7"), "c")),
+                "Phép cộng nhẩm trong phạm vi 10", evidenceFor("math-g1-007"));
+
+        assertThat(verbalOperator.status()).isEqualTo(PilotQuizContentVerifier.Status.UNVERIFIED);
+        assertThat(verbalOperator.errors()).extracting(e -> e.message()).contains("QUESTION_NOT_MACHINE_CHECKABLE");
+        assertThat(storyProblem.status()).isEqualTo(PilotQuizContentVerifier.Status.UNVERIFIED);
+        assertThat(storyProblem.errors()).extracting(e -> e.message()).contains("QUESTION_NOT_MACHINE_CHECKABLE");
+    }
+
+    @Test
+    void explicitCorrectExpressionWithoutRequestedMentalArithmeticWordingRemainsUnverified() {
+        var result = verifier.verify(game("Phép cộng nhẩm trong phạm vi 10",
+                        question("2 + 3 = ?", "5", "4", "a")),
+                "Phép cộng nhẩm trong phạm vi 10", evidenceFor("math-g1-007"));
+
+        assertThat(result.status()).isEqualTo(PilotQuizContentVerifier.Status.UNVERIFIED);
+        assertThat(result.errors()).extracting(e -> e.message()).contains("MENTAL_ARITHMETIC_NOT_EXPLICIT_IN_QUESTION");
+    }
+
+    @Test
     void sampleThirtySweetsGiveAwayTwentyFiveAndAnswerFiftyFiveRemainsUnverified() {
         var result = verifier.verify(game("Trừ trong phạm vi 100", question(
                         "Bà có 30 cái kẹo, cho em 25 cái. Bà còn bao nhiêu cái kẹo?", "55", "5", "a")),
@@ -159,6 +185,14 @@ class PilotQuizContentVerifierTest {
     private static QuizQuestionDsl question(String prompt, String right, String distractor, String selectedId) {
         return new QuizQuestionDsl("q1", 30, 10, null, null, null, null, prompt,
                 List.of(new TextChoiceDsl("a", right), new TextChoiceDsl("b", distractor)), selectedId);
+    }
+
+    private static QuizQuestionDsl questionFromCapturedOutput(String prompt, List<String> optionTexts,
+                                                               String correctOptionId) {
+        var options = java.util.stream.IntStream.range(0, optionTexts.size())
+                .mapToObj(index -> new TextChoiceDsl(String.valueOf((char) ('a' + index)), optionTexts.get(index)))
+                .toList();
+        return new QuizQuestionDsl("q1", 38, 10, null, null, null, null, prompt, options, correctOptionId);
     }
 
     private static CurriculumEvidence evidenceFor(String chunkId) {

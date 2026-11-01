@@ -13,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,11 +50,22 @@ class CurriculumRagGeminiLiveSmokeTest {
                     assertThat(chunk.chunkId()).isNotBlank();
                     assertThat(chunk.pdfPages()).isNotEmpty();
                 });
+        assertThat(result.review().status()).isEqualTo(
+                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED);
+        assertThat(result.review().reviewerModel()).isEqualTo("math-g1-quiz-deterministic-v1");
         assertThat(((QuizGameDsl) game).questions()).allSatisfy(question -> {
             assertThat(question.questionText()).isNotBlank();
             assertThat(question.options()).hasSizeGreaterThanOrEqualTo(2);
             assertThat(question.options()).extracting(option -> option.id())
                     .contains(question.correctOptionId());
+            Matcher expression = Pattern.compile("(?<![\\p{L}\\p{N}])(\\d{1,6})\\s*([+\\-])\\s*(\\d{1,6})(?![\\p{L}\\p{N}])")
+                    .matcher(question.questionText());
+            assertThat(expression.find()).as("machine-checkable question: %s", question.questionText()).isTrue();
+            long left = Long.parseLong(expression.group(1));
+            long right = Long.parseLong(expression.group(3));
+            long answer = expression.group(2).equals("+") ? left + right : left - right;
+            assertThat(question.options().stream().filter(option -> option.id().equals(question.correctOptionId()))
+                    .map(option -> Long.parseLong(option.text())).findFirst()).contains(answer);
         });
         Path artifact = Path.of("target", "rag-eval-local", "live-generated-game.json");
         Files.createDirectories(artifact.getParent());

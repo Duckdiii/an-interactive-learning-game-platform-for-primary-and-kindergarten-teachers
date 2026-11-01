@@ -64,6 +64,76 @@ class GeminiGameContentGeneratorTest {
     }
 
     @Test
+    void arithmeticPilotPromptRequiresTheSameExplicitFormThatTheDeterministicVerifierChecks() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
+
+        generator.generate(attempt(quiz, CURRICULUM, "Phép cộng nhẩm trong phạm vi 10", 1, null, List.of()));
+
+        String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
+        assertThat(systemPrompt).contains("2 + 3 = ?", "5 - 2 = ?", "bài toán kể chuyện", "Tính nhẩm:");
+    }
+
+    @Test
+    void arithmeticFormattingInstructionDoesNotRewriteNonArithmeticTeacherRequests() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
+
+        generator.generate(attempt(quiz, CURRICULUM, "Đếm con vật", 1, null, List.of()));
+
+        String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
+        assertThat(systemPrompt).doesNotContain("2 + 3 = ?", "bài toán kể chuyện");
+    }
+
+    @Test
+    void retryExplainsHowToRestoreTheRequestedMentalArithmeticMarker() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
+
+        generator.generate(attempt(quiz, CURRICULUM, "Phép cộng nhẩm trong phạm vi 10", 2, OUTPUT,
+                List.of(new ValidationError("$.questions[0]", "MENTAL_ARITHMETIC_NOT_EXPLICIT_IN_QUESTION"))));
+
+        String userPrompt = UserMessage.findLast(sent.get().messages()).orElseThrow().singleText();
+        assertThat(userPrompt).contains("Tính nhẩm:", "2 + 3 = ?");
+    }
+
+    @Test
+    void retryForNonArithmeticRequestDoesNotChangeTheTeachersRequestedSkill() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
+
+        generator.generate(attempt(quiz, CURRICULUM, "Đếm con vật", 2, OUTPUT,
+                List.of(new ValidationError("$.questions[0]", "QUESTION_NOT_MACHINE_CHECKABLE"))));
+
+        String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
+        String userPrompt = UserMessage.findLast(sent.get().messages()).orElseThrow().singleText();
+        assertThat(systemPrompt).doesNotContain("2 + 3 = ?", "bài toán kể chuyện");
+        assertThat(userPrompt).doesNotContain("2 + 3 = ?", "bài toán kể chuyện", "ký hiệu + hoặc -");
+    }
+
+    @Test
+    void retryForArithmeticRequestGivesSpecificMachineCheckCorrection() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+        QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
+
+        generator.generate(attempt(quiz, CURRICULUM, "Phép cộng nhẩm trong phạm vi 10", 2, OUTPUT,
+                List.of(new ValidationError("$.questions[0]", "QUESTION_NOT_MACHINE_CHECKABLE"))));
+
+        String userPrompt = UserMessage.findLast(sent.get().messages()).orElseThrow().singleText();
+        assertThat(userPrompt).contains("2 + 3 = ?", "không dùng bài toán kể chuyện");
+    }
+
+    @Test
     void pilotGeneratorRejectsUnsupportedGameTypesWithAClientError() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
@@ -90,7 +160,12 @@ class GeminiGameContentGeneratorTest {
 
     private static GenerationAttempt attempt(QuizGameStrategy quiz, String context, int number,
                                                String previousOutput, List<ValidationError> previousErrors) {
-        return new GenerationAttempt(GameType.QUIZ, "Đếm con vật", Subject.MATH, GradeLevel.GRADE_1,
+        return attempt(quiz, context, "Đếm con vật", number, previousOutput, previousErrors);
+    }
+
+    private static GenerationAttempt attempt(QuizGameStrategy quiz, String context, String topic, int number,
+                                               String previousOutput, List<ValidationError> previousErrors) {
+        return new GenerationAttempt(GameType.QUIZ, topic, Subject.MATH, GradeLevel.GRADE_1,
                 quiz.getStructuredSchema(), context, number, previousOutput, previousErrors);
     }
 }
