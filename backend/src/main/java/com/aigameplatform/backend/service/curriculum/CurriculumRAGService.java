@@ -23,9 +23,17 @@ public final class CurriculumRAGService {
     private final String modelName;
     private final int topK;
     private final double minScore;
+    private final java.util.function.Consumer<RetrievalResult> observer;
 
     public CurriculumRAGService(EmbeddingStore<TextSegment> store, EmbeddingModel queryModel,
                                 CurriculumSource source, String modelName, int topK, double minScore) {
+        this(store, queryModel, source, modelName, topK, minScore, ignored -> {});
+    }
+
+    /** Request-local instrumentation used by the offline evaluation harness; never persists teacher text. */
+    CurriculumRAGService(EmbeddingStore<TextSegment> store, EmbeddingModel queryModel,
+            CurriculumSource source, String modelName, int topK, double minScore,
+            java.util.function.Consumer<RetrievalResult> observer) {
         if (store == null || queryModel == null || source == null || modelName == null || modelName.isBlank()
                 || topK < 1 || !Double.isFinite(minScore) || minScore < 0 || minScore > 1)
             throw new IllegalArgumentException("Invalid curriculum retriever configuration");
@@ -35,6 +43,7 @@ public final class CurriculumRAGService {
         this.modelName = modelName;
         this.topK = topK;
         this.minScore = minScore;
+        this.observer = java.util.Objects.requireNonNull(observer);
     }
 
     public enum Status { FOUND, INSUFFICIENT_EVIDENCE }
@@ -95,6 +104,7 @@ public final class CurriculumRAGService {
                 .filter(filter).maxResults(maxResults).minScore(0.0).build();
         var ranked = retriever.retrieve(Query.from(topic)).stream().map(content -> {
             var metadata = content.textSegment().metadata();
+            requireSource(metadata, selectedSource);
             Subject actualSubject = Subject.valueOf(metadata.getString("subject"));
             GradeLevel actualGrade = GradeLevel.valueOf(metadata.getString("gradeLevel"));
             if (actualSubject != subject || actualGrade != gradeLevel
@@ -108,17 +118,26 @@ public final class CurriculumRAGService {
         }).toList();
         var chunks = ranked.stream().filter(c -> c.score() >= scoreFloor).toList();
         var suggestions = ranked.stream().limit(3).toList();
-        return new RetrievalResult(chunks.isEmpty() ? Status.INSUFFICIENT_EVIDENCE : Status.FOUND, chunks,
+        var result = new RetrievalResult(chunks.isEmpty() ? Status.INSUFFICIENT_EVIDENCE : Status.FOUND, chunks,
                 chunks.isEmpty() ? suggestions : List.of());
+        observer.accept(result);
+        return result;
     }
 
     /** Preschool retrieval is constrained to the teacher-selected age band before ranking. */
     public RetrievalResult retrieveKindergarten(String topic, Subject subjectHint, CurriculumSource preschoolSource,
                                                 KindergartenAgeBand ageBand, int preschoolTopK, double preschoolMinScore) {
+        return retrieveKindergarten(topic, subjectHint, preschoolSource, ageBand, preschoolTopK, preschoolMinScore, null);
+    }
+
+    public RetrievalResult retrieveKindergarten(String topic, Subject subjectHint, CurriculumSource preschoolSource,
+            KindergartenAgeBand ageBand, int preschoolTopK, double preschoolMinScore, String domainSelection) {
         if (topic == null || topic.isBlank() || subjectHint == null || preschoolSource == null
                 || ageBand == null || preschoolTopK < 1 || !Double.isFinite(preschoolMinScore)
                 || preschoolMinScore < 0 || preschoolMinScore > 1)
             throw new IllegalArgumentException("Invalid kindergarten retrieval request");
+        if (domainSelection != null && !java.util.Set.of("COGNITIVE", "LANGUAGE").contains(domainSelection))
+            throw new IllegalArgumentException("Unsupported kindergarten domain");
         var filter = metadataKey("gradeLevel").isEqualTo(GradeLevel.KINDERGARTEN.name())
                 .and(metadataKey("contentType").isEqualTo("curriculum_outcome"))
                 .and(metadataKey("control").isEqualTo("false"))
@@ -129,14 +148,17 @@ public final class CurriculumRAGService {
                 .and(metadataKey("curriculumVersion").isEqualTo(preschoolSource.curriculumVersion()))
                 .and(metadataKey("sourceSha256").isEqualTo(preschoolSource.sourceSha256()))
                 .and(metadataKey("embeddingModel").isEqualTo(modelName));
+        if (domainSelection != null) filter = filter.and(metadataKey("domain").isEqualTo(domainSelection));
         var retriever = EmbeddingStoreContentRetriever.builder().embeddingStore(store).embeddingModel(queryModel)
                 .filter(filter).maxResults(preschoolTopK).minScore(0.0).build();
         var ranked = retriever.retrieve(Query.from(topic)).stream().map(content -> {
             var metadata = content.textSegment().metadata();
+            requireSource(metadata, preschoolSource);
             Subject actualSubject = Subject.valueOf(metadata.getString("subject"));
             GradeLevel actualGrade = GradeLevel.valueOf(metadata.getString("gradeLevel"));
             String domain = metadata.getString("domain");
             if (actualGrade != GradeLevel.KINDERGARTEN || !("COGNITIVE".equals(domain) || "LANGUAGE".equals(domain))
+                    || (domainSelection != null && !domainSelection.equals(domain))
                     || !"false".equals(metadata.getString("control"))
                     || !ageBand.metadataValue().equals(metadata.getString("ageBand")))
                 throw new IllegalStateException("Embedding store returned a chunk outside the kindergarten curriculum");
@@ -148,8 +170,10 @@ public final class CurriculumRAGService {
                     domain, metadata.getString("subDomain"), metadata.getString("ageBand"));
         }).toList();
         var chunks = ranked.stream().filter(c -> c.score() >= preschoolMinScore).toList();
-        return new RetrievalResult(chunks.isEmpty() ? Status.INSUFFICIENT_EVIDENCE : Status.FOUND, chunks,
+        var result = new RetrievalResult(chunks.isEmpty() ? Status.INSUFFICIENT_EVIDENCE : Status.FOUND, chunks,
                 chunks.isEmpty() ? ranked.stream().limit(3).toList() : List.of());
+        observer.accept(result);
+        return result;
     }
 
     private static String ageLabel(String ageBand) {
@@ -159,6 +183,16 @@ public final class CurriculumRAGService {
             case "AGE_5_6" -> "5–6 tuổi";
             default -> "độ tuổi mẫu giáo";
         };
+    }
+
+    private void requireSource(dev.langchain4j.data.document.Metadata metadata, CurriculumSource selected) {
+        if (!selected.sourceSha256().equals(metadata.getString("sourceSha256"))
+                || !selected.datasetVersion().equals(metadata.getString("datasetVersion"))
+                || !selected.curriculumVersion().equals(metadata.getString("curriculumVersion"))
+                || !selected.sourceDocument().equals(metadata.getString("sourceDocument"))
+                || !modelName.equals(metadata.getString("embeddingModel"))
+                || !"curriculum_outcome".equals(metadata.getString("contentType")))
+            throw new IllegalStateException("Embedding store returned evidence from another source/version");
     }
 
     private static List<Integer> pages(String pages) {

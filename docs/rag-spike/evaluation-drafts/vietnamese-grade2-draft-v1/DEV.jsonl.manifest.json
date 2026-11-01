@@ -1,0 +1,15 @@
+{
+  "datasetVersion": "vietnamese-grade2-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "querySha256": "fa627119cf53bbcc0a136b71bd64e7804872c9da8f95590950b934dc4644b490",
+  "reviewStatus": "AI_AUTHORED_UNREVIEWED",
+  "split": "DEV",
+  "queryCount": 30,
+  "independentHoldout": false,
+  "limitations": [
+    "Template paraphrases repeat a small set of learning objectives; curriculum coverage is partial.",
+    "Negative topics overlap across splits. HOLDOUT_CANDIDATE is exposed and cannot establish the independent holdout gate.",
+    "Labels and expected IDs require human correction; these are candidate retrieval objectives, not proof a game can assess the skill."
+  ]
+}

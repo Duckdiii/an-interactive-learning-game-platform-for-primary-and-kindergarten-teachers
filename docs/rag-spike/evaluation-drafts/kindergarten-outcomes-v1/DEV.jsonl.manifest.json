@@ -1,0 +1,15 @@
+{
+  "datasetVersion": "kindergarten-outcomes-v1",
+  "curriculumVersion": "01/VBHN-BGDĐT (2021; TT17/2009 as amended by TT28/2016 and TT51/2020)",
+  "sourceSha256": "146c1f23b3515d46f2e2e97afcfc0a1d871ef28b6700c7db4fbacfeb56e8572f",
+  "querySha256": "cd1a64513160701760c5343fc26f5c68c2387febdb79b835b05c6ffa9dd720ab",
+  "reviewStatus": "AI_AUTHORED_UNREVIEWED",
+  "split": "DEV",
+  "queryCount": 30,
+  "independentHoldout": false,
+  "limitations": [
+    "Template paraphrases repeat a small set of learning objectives; curriculum coverage is partial.",
+    "Negative topics overlap across splits. HOLDOUT_CANDIDATE is exposed and cannot establish the independent holdout gate.",
+    "Labels and expected IDs require human correction; these are candidate retrieval objectives, not proof a game can assess the skill."
+  ]
+}

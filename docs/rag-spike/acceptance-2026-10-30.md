@@ -133,3 +133,7 @@ End-to-end game generation remains only implemented for QUIZ / MATH / GRADE_1. `
 Current run evidence: focused RAG/provider/generation suite passed 62 tests with no failures/errors. Full backend `mvn verify` then passed the current tree at 595 tests, 0 failures/errors, 8 skipped, JaCoCo passed. No new live evaluation was run because an authorized local pgvector endpoint was unavailable; remote Supabase was not written. Independent benchmark labels, human/specialist review, live false-accept/false-reject rates, and Kindergarten publication remain pending.
 
 Scope-by-scope outcome counts and pipeline details are in the [current implementation recheck](README.md#current-cross-scope-implementation-recheck-2026-11-01); the sanitized machine-readable status is in [local-acceptance-2026-11-01.json](results/local-acceptance-2026-11-01.json).
+
+## Backend runtime remediation execution — 2026-11-01 (latest)
+
+The latest implementation/pipeline/finding disposition is recorded in [README](README.md#backend-rag-remediation-and-execution--2026-11-01-latest), with per-scope status in [corpus-expansion-status.md](corpus-expansion-status.md). Prior 30/10 samples and measurements above remain unchanged. Context integrity and semantic grounding checks were extended; refusal of an old sample is still not proof its content defect was repaired. Current model-quality evaluation is blocked by absent process credentials/local PostgreSQL; no historical live PASS substitutes for it. No UI/controller/CRUD/strategy/schema was changed.

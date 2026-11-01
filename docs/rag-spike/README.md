@@ -144,3 +144,67 @@ This section supersedes older statements above that described the runtime catalo
 | English Grades 1–5 | 6 / 7 / 15 / 14 / 15 | Source-scoped retrieval and semantic verifier | Blocked by existing strategy/generator guard | Unit/filter tests; no new live quality run; labels not independently reviewed |
 | Vietnamese Grades 1–5 | 36 / 42 / 45 / 42 / 40 | Source-scoped retrieval and semantic verifier | Blocked by existing strategy/generator guard | Unit/filter tests; no new live quality run; labels not independently reviewed |
 | Kindergarten ages 3–4 / 4–5 / 5–6 | 38 / 47 / 49 | Age/domain filter precedes semantic verification; feature flag and source-hash gate | Disabled pending specialist approval; generator prompt is also Grade 1-specific | Age/filter regression passed; no live new evaluation; specialist review pending |
+
+## Backend RAG remediation and execution — 2026-11-01 (latest)
+
+This section supersedes older descriptions of the current runtime; historical measurements above are retained. Input: the supplied 30/10 source/review (`13-V-n-hi-n-ta-i-30-10-2026.txt`), offline/online pipeline (15/17), and improvement options (18). The goal is to let a teacher's request reach the matching curriculum evidence and the existing generation service without changing teammates' product contracts.
+
+### Implementation and traceability
+
+| Requirement | Implemented behavior and failure boundary | Regression |
+|---|---|---|
+| BR-01: select a primary subject/grade's actual source/version | The inherited 16-dataset catalog and per-source readiness are retained. Retrieval rechecks source/model/version metadata; provider rechecks IDs, exact outcome/topic, domain/age and source pages against packaged non-control chunks. Unknown/modified evidence fails as a service/data integrity error, never as support. | `CurriculumRAGServiceTest`, `CurriculumRuntimeEvaluationTest` (all datasets) |
+| BR-02: understand a natural learning objective | Each non-pilot scope uses a structured semantic verifier with subject-specific instructions. Math G1 grammar misses can use that verifier after its reviewed sidecar gate. Missing details, insufficient evidence and unavailable service remain distinct. Similarity alone is never support. | Semantic verifier/provider tests; the all-dataset fixture regression is a contract test, not semantic-quality evidence |
+| BR-03: preserve evidence into existing generation | Context now includes source SHA/dataset/model in addition to exact selected outcomes/pages; retry reuses evidence. Output review checks each question's answer, unique answer, teacher objective/conditions and cited retrieved IDs. Empty/unavailable reviews cannot pass. Non-arithmetic Math G1 forms may use a separate PENDING automated review; parsed arithmetic requirements retain the deterministic gate and cannot be promoted by a model after a pilot rejection. | `GameGenerationServiceTest`, `GeminiGeneratedContentReviewerTest` |
+| BR-04: preschool age/domain selection | Age filtering precedes ranking; the RAG interface additionally accepts optional `COGNITIVE`/`LANGUAGE`, filtered before the model. Existing subject remains a legacy hint. Preschool English is explicitly unsupported because TT50 English is outside this corpus. Whole-dataset readiness still verifies the versioned KG deployment unit. Expert source-hash approval remains mandatory in production. | All three ages and both domains through provider fixtures; explicit domain+age regression; KG English rejection |
+| BR-05: evaluate actual runtime decisions | New test-scope `CurriculumRuntimeEvaluation` invokes the production provider for every dataset. It records raw top-3 ranking separately from selected evidence, false accepts/rejects, evidence correctness, leakage and service outages. It supports unreviewed exploratory runs and reviewed manifests without loading Math G1 constraints for another subject. | Draft checksum/cohort/scope checks; unreviewed labels cannot enter reviewed loader; service failures are excluded from decision-rate denominators and counted separately |
+| BR-06: preserve team scope | No frontend, controller, CRUD, game strategy, factory or DSL/schema changes. Two chat models use explicit qualifiers so enabling RAG and generation together is unambiguous. | Spring configuration regression enables both models without API calls; Git scope check |
+
+Choice: retain exact metadata-filtered ranking over this small corpus and a structured semantic gate. No hybrid, HyDE, graph, reranker, CAG or agentic variant was added merely because it appeared in the options document. The semantic paths inspect the selected small corpus rather than borrowing Math G1's score floor. This is candidate recall policy, not a lowering of the agreed quality gate. KG legacy top-k/min-score settings are not semantic acceptance criteria.
+
+### Offline / online pipeline as implemented
+
+Offline remains: official source → hash/page/fragment verification (declared manual exceptions) → one outcome/chunk and separate controls → document embeddings (768 dimensions) → idempotent local ingest → readiness. This change does not repeat or overwrite prior source audits, migrations or local ingest. A clean clone still needs the externally supplied TT32 PDF to repeat that extraction; its hash in the manifest must match. No source approval was manufactured.
+
+Online is: request scope → catalog dataset/source → per-source readiness → query embedding → exact source/version/model/non-control filters (+ preschool age and optional domain) → ranked candidates → packaged-evidence integrity check → deterministic Math G1 or structured semantic decision → selected outcome context/provenance → existing generation service → existing schema/business/safety checks → specialized arithmetic or semantic grounding gate → separate generation result/evidence/review. Automated semantic acceptance remains `PENDING`, not human approval. `visualPrompt` does not prove a rendered image; unresolved visual/aural content must not be claimed verified.
+
+The service's existing `GameDslRequest` has topic/subject/grade/age but **no lesson-plan field or explicit preschool domain**. A domain-aware RAG overload is implemented for an agreed caller, but the current generation request cannot forward it. `QuizGameStrategy.buildTypeSpecificInstruction` and `GeminiGameContentGenerator.generate` still explicitly restrict the concrete adapter to QUIZ / MATH / GRADE_1. Changing strategy prompts or schemas belongs to their owner. These are precise integration dependencies, not a claim that the other scopes generate games end to end.
+
+### Evaluation commands and interpretation
+
+The checked-in `evaluation-drafts/<datasetVersion>/` contains 30 `DEV` and 60 exposed `HOLDOUT_CANDIDATE` questions per dataset (480 + 960 total). All are `AI_AUTHORED_UNREVIEWED`, with empty independent labeler IDs and SHA/source/version manifests. Natural paraphrases repeat a limited set of learning objectives; negative groups overlap across splits. They are exploratory candidates, **not a frozen independent holdout**, not comprehensive curriculum coverage, and not evidence that a QUIZ can assess every listed skill. Reviewers must correct/extend labels and create genuinely disjoint frozen groups before using the independent gate.
+
+```powershell
+# All 16 datasets; preflight makes no API/DB calls.
+./scripts/rag-spike.ps1 -Mode RuntimePreflight -RuntimeSplit DEV
+./scripts/rag-spike.ps1 -Mode RuntimePreflight -RuntimeSplit HOLDOUT_CANDIDATE
+# Requires an authorized local cluster; the runner verifies server DB/address/port/data_directory.
+# Uses only SELECT/query calls, no migration or ingest. Never falls back to remote Supabase.
+$env:RAG_LOCAL_EVAL = 'true'
+./scripts/rag-spike.ps1 -Mode RuntimeExploratory -RuntimeSplit DEV
+./scripts/rag-spike.ps1 -Mode RuntimeExploratory -RuntimeSplit HOLDOUT_CANDIDATE
+# Independently reviewed files, when available: APPROVED manifest, reviewer/date, source SHA,
+# per-query independent labelers, DEV/HOLDOUT, 30/60 cohort counts; Math G1 also pins constraints SHA.
+./scripts/rag-spike.ps1 -Mode RuntimeReviewed -QueriesPath 'REVIEWED_ROOT' -RuntimeSplit HOLDOUT
+```
+
+Reviewed HOLDOUT also loads approved DEV and rejects overlapping group IDs or normalized topics. The supplied exposed candidates deliberately cannot satisfy that gate. Hit@3 ≥ 90%, supported acceptance ≥ 90%, zero false accepts and zero scope leakage remain unchanged. No expert or teacher sign-off is inferred from AI labels or unit tests. The new runner supersedes the legacy spike's Math-only decision path for multi-dataset runtime evaluation; old artifacts remain historical. Raw teacher inputs are not durably cached or logged; evaluation artifacts contain only these checked-in synthetic queries.
+
+### Finding disposition from 30/10
+
+| Finding | Current disposition |
+|---|---|
+| 1: review data in frozen DSL | Previously corrected; separate evidence/review retained; no DSL changes |
+| 2: no KG routing | Age/domain RAG implemented; publication remains blocked by specialist approval and concrete generator contract |
+| 3: source-copy benchmark | Natural AI draft sets and actual-provider harness implemented; independent labels/diverse frozen holdout still missing |
+| 4: stale online results | Current contract tests/preflight recorded; current live ranking/decision quality is NOT_RUN because local DB/key are unavailable; old PASS is not reused |
+| 5: Math-centric rules / linguistic ambiguity | Other scopes bypass Math constraints; grammar misses have semantic path, preserving accents, requested skills and explicit bounds. Model quality is unmeasured; parser-supported arithmetic remains conservative |
+| 6: serialized persistent teacher-query cache | Production persistence remains disabled; no unnecessary new cache |
+| 7: latency NFR | Deferred in original review; no invented p95 claim or async acceptance bypass |
+| 8: eval mains in application source | Evaluation stays under `src/test`, including the new runner |
+| 9: readiness outage affects startup | Lazy model/store and per-source readiness preserved; RAG failure is service unavailable. General application datasource startup is outside this RAG change |
+| 10: hard rejection without guidance | Nearest-outcome guidance retained; clarification is distinct from insufficient evidence/service outage |
+| 11: no lesson-plan context | Contract dependency: `GameDslRequest` has no lesson-plan input. No undocumented field/teammate API was introduced |
+| 12: no ANN | Deliberate exact filtered scan at current corpus size; not an open defect |
+
+Completion still requires current live evaluation with local DB/model credentials, independent benchmark review, preschool specialist approval, and agreement with the generation owner on non-pilot prompt contracts. Technical tests do not close those gates. See the scope matrix in `corpus-expansion-status.md` and sanitized current-run evidence in `results/local-acceptance-2026-11-01.json`.

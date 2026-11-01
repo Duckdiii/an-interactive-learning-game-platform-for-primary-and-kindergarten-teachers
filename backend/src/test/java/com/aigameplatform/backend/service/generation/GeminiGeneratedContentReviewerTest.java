@@ -20,7 +20,7 @@ import tools.jackson.databind.json.JsonMapper;
 class GeminiGeneratedContentReviewerTest {
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
     private static final String REVIEW = """
-            {"questions":[{"questionId":"q1","answerCorrect":true,"supportedByCurriculum":true,"supportingChunkIds":["math-g1-001"],"reason":"Supported"}]}
+            {"questions":[{"questionId":"q1","answerCorrect":true,"supportedByCurriculum":true,"matchesTeacherRequest":true,"uniqueCorrectAnswer":true,"supportingChunkIds":["math-g1-001"],"reason":"Supported"}]}
             """;
 
     @Test
@@ -55,6 +55,23 @@ class GeminiGeneratedContentReviewerTest {
 
         assertThatThrownBy(() -> reviewer.review(game(), "count to five", evidence()))
                 .isInstanceOf(AiServiceUnavailableException.class);
+    }
+
+    @Test
+    void rejectsSkillDriftAndNonUniqueAnswersEvenWhenOutcomeAndAnswerAreMarkedSupported() {
+        for (String field : List.of("matchesTeacherRequest", "uniqueCorrectAnswer")) {
+            String output = REVIEW.replace("\"" + field + "\":true", "\"" + field + "\":false");
+            var result = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), output), MAPPER, "fixture")
+                    .review(game(), "count to five", evidence());
+            assertThat(result.accepted()).as(field).isFalse();
+        }
+    }
+
+    @Test
+    void emptyOrUnavailableReviewCannotPassTheGenerationGate() {
+        assertThat(new GeneratedContentReviewer.Result(List.of(), null).accepted()).isFalse();
+        assertThat(new GeneratedContentReviewer.Result(List.of(),
+                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable()).accepted()).isFalse();
     }
 
     private static ChatModel model(AtomicReference<ChatRequest> request, String responseText) {

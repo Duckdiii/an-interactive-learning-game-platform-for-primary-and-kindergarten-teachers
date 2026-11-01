@@ -92,7 +92,7 @@ public class CurriculumRagConfiguration {
         if (apiKey.isBlank()) throw new IllegalStateException("GEMINI_API_KEY is required for semantic curriculum verification");
         return GoogleAiGeminiChatModel.builder().apiKey(apiKey).modelName(modelName)
                 .supportedCapabilities(java.util.Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA))
-                .maxRetries(0).build();
+                .maxRetries(0).timeout(Duration.ofSeconds(30)).logRequestsAndResponses(false).build();
     }
 
     @Bean

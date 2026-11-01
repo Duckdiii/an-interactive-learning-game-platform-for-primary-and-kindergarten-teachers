@@ -26,7 +26,8 @@ public class GeminiChatConfiguration {
     }
 
     @Bean
-    GeneratedContentReviewer generatedContentReviewer(ChatModel gameGenerationChatModel,
+    GeneratedContentReviewer generatedContentReviewer(
+            @org.springframework.beans.factory.annotation.Qualifier("gameGenerationChatModel") ChatModel gameGenerationChatModel,
             tools.jackson.databind.json.JsonMapper mapper,
             @Value("${app.ai.gemini.model:gemini-2.5-flash}") String modelName) {
         return new GeminiGeneratedContentReviewer(gameGenerationChatModel, mapper, modelName);

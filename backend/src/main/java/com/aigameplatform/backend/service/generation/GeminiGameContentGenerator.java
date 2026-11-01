@@ -38,7 +38,9 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
     private final GameContentStrategyRegistry strategies;
     private final CurriculumTopicParser topicParser = new CurriculumTopicParser();
 
-    public GeminiGameContentGenerator(ChatModel model, GameContentStrategyRegistry strategies) {
+    public GeminiGameContentGenerator(
+            @org.springframework.beans.factory.annotation.Qualifier("gameGenerationChatModel") ChatModel model,
+            GameContentStrategyRegistry strategies) {
         this.model = model;
         this.strategies = strategies;
     }

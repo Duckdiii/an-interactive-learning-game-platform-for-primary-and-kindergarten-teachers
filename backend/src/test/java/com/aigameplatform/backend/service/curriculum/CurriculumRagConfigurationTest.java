@@ -37,6 +37,28 @@ class CurriculumRagConfigurationTest {
                 .chunks()).hasSize(134);
     }
 
+    @Test void generatorAndSemanticModelsCanBeEnabledTogetherWithoutAmbiguousInjection() {
+        try (var context = new AnnotationConfigApplicationContext()) {
+            context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("test", Map.of(
+                    "app.curriculum-rag.enabled", "true", "app.ai.gemini.game-generation.enabled", "true",
+                    "app.ai.gemini.api-key", "fixture-not-a-real-key")));
+            context.registerBean(DataSource.class, () -> mock(DataSource.class));
+            var mapper = new tools.jackson.databind.json.JsonMapper();
+            context.registerBean(tools.jackson.databind.json.JsonMapper.class, () -> mapper);
+            context.registerBean(com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry.class,
+                    () -> new com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry(
+                            com.aigameplatform.backend.service.testsupport.GameTestFixtures.strategies(mapper)));
+            context.register(CurriculumRagConfiguration.class,
+                    com.aigameplatform.backend.service.generation.GeminiChatConfiguration.class,
+                    com.aigameplatform.backend.service.generation.GeminiGameContentGenerator.class);
+            assertThatCode(context::refresh).doesNotThrowAnyException();
+            assertThat(context.getBean("gameGenerationChatModel"))
+                    .isNotSameAs(context.getBean("curriculumSemanticVerifierChatModel"));
+            assertThat(context.getBean(com.aigameplatform.backend.service.generation.GeneratedContentReviewer.class))
+                    .isNotNull();
+        }
+    }
+
     @Test void ragConfigurationDefersCorpusDbAndProviderAccess() {
         var database = mock(DataSource.class);
         try (var context = new AnnotationConfigApplicationContext()) {

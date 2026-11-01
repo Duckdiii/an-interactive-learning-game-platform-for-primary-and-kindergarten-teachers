@@ -45,6 +45,7 @@ class CurriculumCatalogTest {
 
         assertThat(catalog.requireSupported(GameType.QUIZ, Subject.MATH, GradeLevel.KINDERGARTEN)).isSameAs(dataset);
         assertThat(catalog.requireSupported(GameType.QUIZ, Subject.VIETNAMESE, GradeLevel.KINDERGARTEN)).isSameAs(dataset);
-        assertThat(catalog.requireSupported(GameType.QUIZ, Subject.ENGLISH, GradeLevel.KINDERGARTEN)).isSameAs(dataset);
+        assertThatThrownBy(() -> catalog.requireSupported(GameType.QUIZ, Subject.ENGLISH, GradeLevel.KINDERGARTEN))
+                .isInstanceOf(GenerationScopeUnsupportedException.class);
     }
 }

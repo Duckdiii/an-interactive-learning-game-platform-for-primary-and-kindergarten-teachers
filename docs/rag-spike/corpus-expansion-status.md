@@ -119,3 +119,34 @@ This update supersedes the earlier statements in this file that the runtime cata
 - Cross-dataset in-memory regression passed for all 15 primary datasets plus Kindergarten age/domain filtering. Focused suite: 62 tests passed. Current full backend `mvn verify`: 595 tests, 0 failures/errors, 8 skipped; JaCoCo passed.
 - The existing `QuizGameStrategy` still hardcodes a Math Grade 1 prompt and rejects other grades, while `GeminiGameContentGenerator` retains its Math Grade 1 pilot guard. Therefore only QUIZ / MATH / GRADE_1 is end-to-end generation-enabled. Widening the existing strategy contract requires its owner's coordination and was not done as part of RAG.
 - No new live pgvector/semantic quality run was possible in the local environment. Independent natural-language benchmark, false-accept/false-reject estimates, teacher/specialist label review, live semantic reviewer call, and preschool publication remain pending. Remote Supabase was not modified.
+
+## Latest backend remediation scope matrix — 2026-11-01
+
+All rows below have implementation and fixture regression coverage of the RAG path. That is separate from real-model quality, human review and concrete generation support. Corpus source-verification/ingest evidence is inherited, not repeated here. Current live evaluation is NOT_RUN in every row because the process has no local DB configuration or Gemini key. No remote writes.
+
+| Scope | Outcomes | RAG implementation | Exploratory preparation (AI, unreviewed) | Remaining blocker |
+|---|---:|---|---|---|
+| Mầm non 3–4 tuổi | 38 | COGNITIVE 24; LANGUAGE 14 | 10 dev + 20 exposed candidates / age | Specialist approval + generator contract |
+| Mầm non 4–5 tuổi | 47 | COGNITIVE 31; LANGUAGE 16 | 10 dev + 20 exposed candidates / age | Specialist approval + generator contract |
+| Mầm non 5–6 tuổi | 49 | COGNITIVE 32; LANGUAGE 17 | 10 dev + 20 exposed candidates / age | Specialist approval + generator contract |
+| Toán 1 | 23 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels |
+| Tiếng Anh 1 | 6 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Anh 2 | 7 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Anh 3 | 15 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Anh 4 | 14 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Anh 5 | 15 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Toán 2 | 43 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Toán 3 | 51 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Toán 4 | 53 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Toán 5 | 53 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Việt 1 | 36 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Việt 2 | 42 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Việt 3 | 45 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Việt 4 | 42 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+| Tiếng Việt 5 | 40 | Own source/version + appropriate verifier | 30 dev + 60 exposed candidates | Live DB/key + independent labels + non-pilot generator contract |
+
+Regression uses fixture vectors and fixture verifier decisions through the real provider for all 16 datasets; KG positives span three ages and COGNITIVE/LANGUAGE. A separate test exercises explicit LANGUAGE + AGE_4_5 before verification. This does not measure embedding ranking or the model's semantic correctness. Readiness is per versioned dataset/source; the KG dataset is one deployment unit with request-level age/domain filters. Primary corpora and KG retain their existing source-review status; no label/expert approval was invented.
+
+Only the existing QUIZ / MATH / GRADE_1 concrete adapter is implemented end to end, within its limited verifier grammar. The RAG evidence service and semantic output gate are implemented for other scopes, but the current `QuizGameStrategy`/adapter still block concrete generation outside that pilot. The RAG overload accepts an optional preschool domain; the existing generation request has no domain/lesson-plan field. Those contracts need coordination with their owner; no teammate strategy/schema or DSL was rewritten.
+
+Drafts cover selected objectives and repeated paraphrases, not all outcomes or an independent holdout. Negative intent groups overlap between DEV and exposed candidates. The reviewed benchmark gate rejects these labels and overlapping held-out groups. Acceptance remains Hit@3/support acceptance ≥90%, zero false accepts/leaks, reviewed labels and appropriate specialist/content review. Latest tests and blocked-live run details are in the current-run object in `results/local-acceptance-2026-11-01.json`.

@@ -26,7 +26,8 @@ public final class CurriculumCatalog {
 
     public CurriculumDataset requireSupported(GameType type, Subject subject, GradeLevel grade) {
         var dataset = datasets.get(new Scope(grade == GradeLevel.KINDERGARTEN ? null : subject, grade));
-        if (!gameTypes.contains(type) || dataset == null)
+        if (!gameTypes.contains(type) || dataset == null || subject == null
+                || (grade == GradeLevel.KINDERGARTEN && subject == Subject.ENGLISH))
             throw new GenerationScopeUnsupportedException(
                     "Chưa có chương trình đã công bố cho kiểu game, môn hoặc lớp đã chọn. Hiện hỗ trợ kiểu game QUIZ.");
         return dataset;

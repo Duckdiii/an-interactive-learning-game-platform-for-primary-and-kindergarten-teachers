@@ -59,7 +59,7 @@ class GameGenerationServiceTest {
                 provider, true, List.of(dataset));
         var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
                 com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
-                List.of(), List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), "test-model");
+                List.of(java.util.Map.of("chunkId", chunk.chunkId())), List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), "test-model");
         var reviewCalls = new java.util.concurrent.atomic.AtomicInteger();
         service.setGeneratedContentReviewer((game, topic, curriculumEvidence) -> {
             reviewCalls.incrementAndGet();
@@ -75,6 +75,36 @@ class GameGenerationServiceTest {
         assertThat(result.review().status()).isEqualTo(
                 com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING);
         assertThat(reviewCalls).hasValue(1);
+    }
+
+    @Test
+    void nonArithmeticMathUsesSeparateSemanticReviewWithoutRewritingTheRequest() throws Exception {
+        var generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        CurriculumContextProvider provider = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("Counting outcome", math1Evidence("math-g1-001"));
+        var service = service(generator, 0, moderation(false, false), provider, true);
+        service.setGeneratedContentReviewer((game, topic, evidence) -> new GeneratedContentReviewer.Result(List.of(),
+                new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
+                        com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                        List.of(java.util.Map.of("chunkId", "math-g1-001")), List.of("AUTOMATED_ONLY"), "fixture-semantic")));
+        var result = service.generateResult(GameType.QUIZ, REQUEST);
+        assertThat(result.review().reviewerModel()).isEqualTo("fixture-semantic");
+        assertThat(generator.attempts.getFirst().topic()).isEqualTo(REQUEST.topic());
+    }
+
+    @Test
+    void semanticReviewCannotOverrideAConclusiveWrongArithmeticAnswer() throws Exception {
+        var tree = (tools.jackson.databind.node.ObjectNode) MAPPER.readTree(validArithmeticOutput());
+        ((tools.jackson.databind.node.ObjectNode) tree.path("questions").get(0)).put("correctIndex", 1);
+        CurriculumContextProvider provider = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("Addition outcome", math1Evidence("math-g1-007"));
+        var service = service(new ScriptedGenerator(MAPPER.writeValueAsString(tree)), 0,
+                moderation(false, false), provider, true);
+        service.setGeneratedContentReviewer((game, topic, evidence) -> {
+            throw new AssertionError("A model must never override conclusive arithmetic failure");
+        });
+        assertThatThrownBy(() -> service.generateResult(GameType.QUIZ, ARITHMETIC_REQUEST))
+                .isInstanceOf(AiGenerationTimeoutException.class);
     }
 
     @Test

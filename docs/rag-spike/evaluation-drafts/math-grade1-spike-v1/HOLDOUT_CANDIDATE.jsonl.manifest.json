@@ -1,0 +1,15 @@
+{
+  "datasetVersion": "math-grade1-spike-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "querySha256": "ce5b167cc1a31ad2e848ae91c593a981a112c01e301c509b762134f3a5e3f212",
+  "reviewStatus": "AI_AUTHORED_UNREVIEWED",
+  "split": "HOLDOUT_CANDIDATE",
+  "queryCount": 60,
+  "independentHoldout": false,
+  "limitations": [
+    "Template paraphrases repeat a small set of learning objectives; curriculum coverage is partial.",
+    "Negative topics overlap across splits. HOLDOUT_CANDIDATE is exposed and cannot establish the independent holdout gate.",
+    "Labels and expected IDs require human correction; these are candidate retrieval objectives, not proof a game can assess the skill."
+  ]
+}

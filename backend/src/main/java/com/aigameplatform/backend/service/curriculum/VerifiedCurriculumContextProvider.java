@@ -82,6 +82,16 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
 
     @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade,
                                       KindergartenAgeBand kindergartenAgeBand) {
+        return retrieve(topic, subject, grade, kindergartenAgeBand, null);
+    }
+
+    @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade,
+            KindergartenAgeBand kindergartenAgeBand, String domain) {
+        if (domain != null && (grade != GradeLevel.KINDERGARTEN
+                || !java.util.Set.of("COGNITIVE", "LANGUAGE").contains(domain)))
+            throw new IllegalArgumentException("Domain must be COGNITIVE or LANGUAGE for kindergarten");
+        if (topic == null || topic.isBlank())
+            throw new CurriculumClarificationRequiredException("Cần mô tả mục tiêu học tập cụ thể.");
         if (grade == GradeLevel.KINDERGARTEN && kindergartenAgeBand == null)
             throw new KindergartenAgeBandRequiredException();
         if (grade != GradeLevel.KINDERGARTEN && kindergartenAgeBand != null)
@@ -97,11 +107,13 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                 availability.requireReady(dataset);
                 int ageOutcomeCount = (int) dataset.chunks().stream().filter(c -> !c.control())
                         .filter(c -> kindergartenAgeBand.metadataValue().equals(c.ageBand()))
+                        .filter(c -> domain == null || domain.equals(c.domain()))
                         .filter(c -> "COGNITIVE".equals(c.domain()) || "LANGUAGE".equals(c.domain())).count();
                 var candidates = metrics.measure(CurriculumMetrics.Stage.RETRIEVAL, subject, grade,
                         () -> retrieval.get().retrieveKindergarten(topic, subject, dataset.source(), kindergartenAgeBand,
-                                Math.max(kindergartenTopK, ageOutcomeCount), 0), r -> r.chunks().isEmpty()
+                                Math.max(kindergartenTopK, ageOutcomeCount), 0, domain), r -> r.chunks().isEmpty()
                                 ? CurriculumMetrics.Outcome.REJECTED : CurriculumMetrics.Outcome.SUCCESS);
+                requirePackagedCandidates(dataset, candidates.chunks());
                 if (candidates.chunks().isEmpty())
                     throw new CurriculumEvidenceNotFoundException(kindergartenGuidance(candidates.suggestions()));
                 var supportedIds = semanticVerifier != null
@@ -122,28 +134,12 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                         + "\nNguồn: " + c.sourceDocument() + "; PDF " + c.pdfPages()
                         + "; trang in " + c.printedPages() + "; " + c.curriculumVersion())
                         .collect(java.util.stream.Collectors.joining("\n\n"));
-                return Evidence.found(context,
+                return Evidence.found(provenanceContext(context, dataset),
                         com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
                                 dataset.source(), embeddingModel, supportedChunks));
             }
             if (subject != Subject.MATH || grade != GradeLevel.GRADE_1) {
-                availability.requireReady(dataset);
-                SemanticCurriculumEvidenceVerifier semanticVerifier = semanticEvidenceVerifier.get();
-                if (semanticVerifier == null)
-                    throw new CurriculumServiceUnavailableException("Chưa cấu hình bộ xác minh ngữ nghĩa cho phạm vi chương trình này.", null);
-                int outcomeCount = (int) dataset.chunks().stream().filter(c -> !c.control()).count();
-                var candidates = metrics.measure(CurriculumMetrics.Stage.RETRIEVAL, subject, grade,
-                        () -> retrieval.get().retrieve(topic, subject, grade, dataset.source(), outcomeCount, -1),
-                        r -> r.chunks().isEmpty() ? CurriculumMetrics.Outcome.REJECTED : CurriculumMetrics.Outcome.SUCCESS);
-                var decision = metrics.measure(CurriculumMetrics.Stage.VERIFICATION, subject, grade,
-                        () -> semanticVerifier.verify(topic, subject, grade, null, candidates.chunks()),
-                        d -> d.status() == SemanticCurriculumEvidenceVerifier.Status.SUPPORTED
-                                ? CurriculumMetrics.Outcome.SUCCESS : CurriculumMetrics.Outcome.REJECTED);
-                var selected = selectSemanticEvidence(decision, candidates.chunks(), candidates.chunks());
-                return Evidence.found(new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.FOUND, selected)
-                                .curriculumContext(),
-                        com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
-                                dataset.source(), embeddingModel, selected));
+                return retrieveSemantically(topic, subject, grade, dataset);
             }
             var capabilities = loaded;
             if (capabilities == null) { capabilities = constraints.get(); loaded = capabilities; }
@@ -151,6 +147,9 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
             availability.requireReady(dataset);
             var parsed = parser.parse(topic);
             if (parsed.needsClarification()) {
+                // A bounded grammar's inability to parse natural language is not a curriculum decision.
+                if (semanticEvidenceVerifier.get() != null)
+                    return retrieveSemantically(topic, subject, grade, dataset);
                 var checked = capabilities;
                 var decision = metrics.measure(CurriculumMetrics.Stage.VERIFICATION, subject, grade,
                         () -> verifier.verify(parsed, java.util.List.of(), checked), d -> CurriculumMetrics.Outcome.REJECTED);
@@ -160,6 +159,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                     () -> retrieval.get().retrieve(topic, subject, grade), r -> r.chunks().isEmpty()
                             ? CurriculumMetrics.Outcome.REJECTED : CurriculumMetrics.Outcome.SUCCESS);
             var checked = capabilities;
+            requirePackagedCandidates(dataset, candidates.chunks());
             var decision = metrics.measure(CurriculumMetrics.Stage.VERIFICATION, subject, grade,
                     () -> verifier.verify(parsed, candidates.chunks(), checked), d -> d.status() == CurriculumEvidenceVerifier.Status.SUPPORTED
                             ? CurriculumMetrics.Outcome.SUCCESS : CurriculumMetrics.Outcome.REJECTED);
@@ -167,7 +167,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                 throw new CurriculumEvidenceNotFoundException(guidance.message(decision, dataset,
                         candidates.chunks().isEmpty() ? candidates.suggestions() : candidates.chunks()));
             var selected = candidates.chunks().stream().filter(c -> decision.supportedChunkIds().contains(c.chunkId())).toList();
-            return Evidence.found(new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.FOUND, selected).curriculumContext(),
+            return Evidence.found(provenanceContext(new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.FOUND, selected).curriculumContext(), dataset),
                     com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(dataset.source(), embeddingModel, selected));
         } catch (CurriculumEvidenceNotFoundException | CurriculumClarificationRequiredException
                  | CurriculumServiceUnavailableException exception) {
@@ -175,6 +175,56 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
         } catch (RuntimeException exception) {
             throw new CurriculumServiceUnavailableException(
                     "Không truy xuất được căn cứ chương trình; vui lòng thử lại sau.", null);
+        }
+    }
+
+    private String provenanceContext(String context, CurriculumDataset dataset) {
+        return context + "\n\nProvenance: sourceSha256=" + dataset.source().sourceSha256()
+                + "; datasetVersion=" + dataset.source().datasetVersion() + "; embeddingModel=" + embeddingModel;
+    }
+
+    private Evidence retrieveSemantically(String topic, Subject subject, GradeLevel grade, CurriculumDataset dataset) {
+        availability.requireReady(dataset);
+        var semanticVerifier = semanticEvidenceVerifier.get();
+        if (semanticVerifier == null)
+            throw new CurriculumServiceUnavailableException("Chưa cấu hình bộ xác minh ngữ nghĩa cho phạm vi chương trình này.", null);
+        int outcomeCount = (int) dataset.chunks().stream().filter(c -> !c.control()).count();
+        var candidates = metrics.measure(CurriculumMetrics.Stage.RETRIEVAL, subject, grade,
+                () -> retrieval.get().retrieve(topic, subject, grade, dataset.source(), outcomeCount, -1),
+                r -> r.chunks().isEmpty() ? CurriculumMetrics.Outcome.REJECTED : CurriculumMetrics.Outcome.SUCCESS);
+        requirePackagedCandidates(dataset, candidates.chunks());
+        if (candidates.chunks().isEmpty())
+            throw new CurriculumEvidenceNotFoundException(suggestionGuidance(candidates.suggestions()));
+        var decision = metrics.measure(CurriculumMetrics.Stage.VERIFICATION, subject, grade,
+                () -> semanticVerifier.verify(topic, subject, grade, null, candidates.chunks()),
+                d -> d.status() == SemanticCurriculumEvidenceVerifier.Status.SUPPORTED
+                        ? CurriculumMetrics.Outcome.SUCCESS : CurriculumMetrics.Outcome.REJECTED);
+        var selected = selectSemanticEvidence(decision, candidates.chunks(), candidates.chunks());
+        return Evidence.found(provenanceContext(new CurriculumRAGService.RetrievalResult(CurriculumRAGService.Status.FOUND, selected)
+                .curriculumContext(), dataset), com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
+                        dataset.source(), embeddingModel, selected));
+    }
+
+    /** Recheck the retrieved text against the versioned packaged corpus before trusting model citations. */
+    static void requirePackagedCandidates(CurriculumDataset dataset,
+            java.util.List<CurriculumRAGService.RetrievedChunk> candidates) {
+        var primary = dataset.chunks().stream().filter(c -> !c.control()).collect(
+                java.util.stream.Collectors.toMap(CurriculumChunk::chunkId, java.util.function.Function.identity()));
+        var seen = new java.util.HashSet<String>();
+        for (var candidate : candidates) {
+            var original = primary.get(candidate.chunkId());
+            if (original == null || !seen.add(candidate.chunkId()) || original.subject() != candidate.subject()
+                    || original.gradeLevel() != candidate.gradeLevel() || !original.text().equals(candidate.text())
+                    || !original.topic().equals(candidate.topic())
+                    || !java.util.Objects.equals(original.ageBand(), candidate.ageBand())
+                    || !java.util.Objects.equals(original.domain(), candidate.domain())
+                    || !original.sourceFragments().stream().map(CurriculumChunk.SourceFragment::pdfPage).distinct().toList()
+                            .equals(candidate.pdfPages())
+                    || !original.sourceFragments().stream().map(CurriculumChunk.SourceFragment::printedPage).distinct().toList()
+                            .equals(candidate.printedPages())
+                    || !dataset.source().curriculumVersion().equals(candidate.curriculumVersion())
+                    || !dataset.source().sourceDocument().equals(candidate.sourceDocument()))
+                throw new IllegalStateException("Retrieved evidence differs from the selected packaged corpus");
         }
     }
 

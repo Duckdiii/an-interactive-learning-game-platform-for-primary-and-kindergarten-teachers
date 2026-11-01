@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('CheckConfig', 'Extract', 'Migrate', 'Ingest', 'Query', 'Evaluate')]
+    [ValidateSet('CheckConfig', 'Extract', 'Migrate', 'Ingest', 'Query', 'Evaluate', 'RuntimePreflight', 'RuntimeExploratory', 'RuntimeReviewed')]
     [string]$Mode = 'CheckConfig',
     [ValidateSet('primary-math-g1', 'kindergarten', 'vietnamese-g1-draft', 'vietnamese-g2-draft', 'vietnamese-g3-draft', 'vietnamese-g4-draft', 'vietnamese-g5-draft', 'math-g2-draft', 'math-g3-draft', 'math-g4-draft', 'math-g5-draft', 'english-g1-draft', 'english-g2-draft', 'english-g3-draft', 'english-g4-draft', 'english-g5-draft')]
     [string]$Dataset = 'primary-math-g1',
@@ -13,6 +13,8 @@ param(
     [ValidateSet('legacy','tune','holdout')][string]$EvaluationSet = 'legacy',
     [string]$QueriesPath,
     [string]$TunePath,
+    [ValidateSet('DEV','HOLDOUT_CANDIDATE','HOLDOUT')][string]$RuntimeSplit = 'DEV',
+    [string]$ReportPath,
     [switch]$SkipBuild
 )
 $ErrorActionPreference = 'Stop'
@@ -22,7 +24,7 @@ if (-not $EnvFile) { $EnvFile = Join-Path $ragBackend '.env' }
 $ragAllowedKeys = @('GEMINI_API_KEY','DB_URL','DB_USERNAME','DB_PASSWORD',
     'GEMINI_EMBEDDING_MODEL','RAG_MIN_SCORE','CURRICULUM_PDF','CURRICULUM_CONSTRAINTS_APPROVED_SHA256',
     'CURRICULUM_KINDERGARTEN_ENABLED','CURRICULUM_KINDERGARTEN_TOP_K','CURRICULUM_KINDERGARTEN_MIN_SCORE',
-    'RAG_LOCAL_EVAL')
+    'RAG_LOCAL_EVAL','GEMINI_MODEL','CURRICULUM_KINDERGARTEN_EXPERT_APPROVED_SOURCE_SHA256')
 if (Test-Path -LiteralPath $EnvFile) {
     foreach ($ragLine in [System.IO.File]::ReadAllLines((Resolve-Path -LiteralPath $EnvFile).Path)) {
         if ($ragLine -match '^\s*([A-Z][A-Z0-9_]*)\s*=(.*)$' -and $ragAllowedKeys -contains $Matches[1]) {
@@ -63,6 +65,19 @@ if ($Mode -eq 'Evaluate') {
         }
     }
 }
+$ragMainClass = 'com.aigameplatform.backend.service.curriculum.CurriculumSpikeRunner'
+if ($Mode -in @('RuntimePreflight','RuntimeExploratory','RuntimeReviewed')) {
+    $ragMainClass = 'com.aigameplatform.backend.service.curriculum.CurriculumRuntimeEvaluation'
+    if (-not $QueriesPath) { $QueriesPath = Join-Path $ragRoot 'docs/rag-spike/evaluation-drafts' }
+    if (-not $ReportPath) { $ReportPath = Join-Path $ragBackend ('target/rag-eval-local/runtime-' + $RuntimeSplit + '.json') }
+    $ragRuntimeFlag = switch ($Mode) {
+        'RuntimePreflight' { '--preflight' }
+        'RuntimeExploratory' { '--exploratory' }
+        'RuntimeReviewed' { '--reviewed' }
+    }
+    $ragArguments = @($ragRuntimeFlag, (Resolve-Path -LiteralPath $QueriesPath).Path,
+        $RuntimeSplit, [System.IO.Path]::GetFullPath($ReportPath))
+}
 Push-Location $ragBackend
 try {
     $ragGitCommit = & git -C $ragRoot rev-parse HEAD 2>$null
@@ -84,7 +99,7 @@ try {
     $ragClasspathFile = Join-Path $ragBackend 'target/rag-classpath.txt'
     if (-not (Test-Path -LiteralPath $ragClasspathFile)) { throw 'Classpath missing; rerun without -SkipBuild.' }
     $ragClasspath = (Join-Path $ragBackend 'target/test-classes') + ';' + (Join-Path $ragBackend 'target/classes') + ';' + [System.IO.File]::ReadAllText($ragClasspathFile).Trim()
-    & java -cp $ragClasspath com.aigameplatform.backend.service.curriculum.CurriculumSpikeRunner @ragArguments
+    & java -cp $ragClasspath $ragMainClass @ragArguments
     $ragExitCode = $LASTEXITCODE
 }
 finally { Pop-Location }

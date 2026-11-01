@@ -70,9 +70,12 @@ app:
     constraints-approved-sha256: ${CURRICULUM_CONSTRAINTS_APPROVED_SHA256:}
     enabled: ${CURRICULUM_RAG_ENABLED:false}
     embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
+    # Candidate floor for the deterministic Math Grade 1 path only; never a semantic acceptance gate.
     min-score: ${CURRICULUM_RAG_MIN_SCORE:0.855}
     kindergarten:
       enabled: ${CURRICULUM_KINDERGARTEN_ENABLED:false}
+      # Legacy ranking knobs retained for offline spike compatibility. Semantic runtime examines the
+      # whole selected age/domain corpus; its evidence decision does not use this similarity threshold.
       top-k: ${CURRICULUM_KINDERGARTEN_TOP_K:8}
       min-score: ${CURRICULUM_KINDERGARTEN_MIN_SCORE:0.84}
       expert-approved-source-sha256: ${CURRICULUM_KINDERGARTEN_EXPERT_APPROVED_SOURCE_SHA256:}

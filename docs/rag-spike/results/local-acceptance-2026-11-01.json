@@ -21,8 +21,12 @@
     "localGeminiQuery": {
       "result": "FOUND",
       "requestedAgeBand": "AGE_3_4",
-      "returnedChunkIds": ["kg-cog-science-classify-34"],
-      "returnedAgeBands": ["AGE_3_4"],
+      "returnedChunkIds": [
+        "kg-cog-science-classify-34"
+      ],
+      "returnedAgeBands": [
+        "AGE_3_4"
+      ],
       "score": 0.8537685573,
       "pdfPage": 62,
       "printedPage": 74,
@@ -40,7 +44,9 @@
       "questionsChecked": 4,
       "arithmeticAnswersCorrect": 4,
       "allSumsWithinRequestedLimit10": true,
-      "matchedEvidenceChunkIds": ["math-g1-007"],
+      "matchedEvidenceChunkIds": [
+        "math-g1-007"
+      ],
       "sourcePdfPage": 188,
       "sourcePrintedPage": 22
     },
@@ -95,7 +101,12 @@
     "recordedAt": "2026-11-01",
     "result": "PASS",
     "test": "CurriculumCatalogTest.packagedCorpusDiscoveryLoadsEveryDatasetWithoutTreatingItAsPublished",
-    "focusedRagTests": { "tests": 8, "failures": 0, "errors": 0, "skipped": 0 },
+    "focusedRagTests": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
     "packagedDatasets": 16,
     "chunksIncludingControls": 653,
     "controls": 34,
@@ -103,8 +114,19 @@
   },
   "scopeCleanupVerification": {
     "recordedAt": "2026-11-01",
-    "mvnVerify": { "tests": 584, "failures": 0, "errors": 0, "skipped": 8, "jacocoGate": "PASS" },
-    "focusedRagTests": { "tests": 8, "failures": 0, "errors": 0, "skipped": 0 },
+    "mvnVerify": {
+      "tests": 584,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 8,
+      "jacocoGate": "PASS"
+    },
+    "focusedRagTests": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
     "liveRetrieval": "NOT_RUN; local database and Gemini credentials unavailable"
   },
   "currentRagImplementationRecheck": {
@@ -128,15 +150,35 @@
       "vietnameseGrade5": 40
     },
     "kindergarten": {
-      "ageBandCounts": { "AGE_3_4": 38, "AGE_4_5": 47, "AGE_5_6": 49 },
+      "ageBandCounts": {
+        "AGE_3_4": 38,
+        "AGE_4_5": 47,
+        "AGE_5_6": 49
+      },
       "publication": "DISABLED_PENDING_SPECIALIST_REVIEW",
       "semanticVerifier": "Implemented but not live-evaluated; expert approval is not inferred from AI review"
     },
     "retrievalAndVerificationImplementation": "Dataset-specific source/version/hash/model metadata filters and control=false are applied; each scope has independent readiness cache. Non-MATH/GRADE_1 uses constrained Gemini semantic verification over exact retrieved candidates; Kindergarten retrieval filters the requested age band and allowed domain before semantic verification.",
     "generationIntegration": "NOT_COMPLETE_FOR_ALL_SCOPES: the existing QuizGameStrategy prompt still hardcodes Mathematics Grade 1 and rejects other grades; GeminiGameContentGenerator also retains the pilot guard. Strategy owner coordination is required before the remaining scopes can generate through the current service. No strategy/schema owned by another member was changed.",
-    "crossDatasetRegression": { "result": "PASS", "test": "CurriculumRAGServiceTest.selectedSourceFiltersAndExcludesControlsForEveryPackagedDataset", "scopes": 16, "includesAgeAndDomainFilteringForKindergarten": true },
-    "focusedBackendTests": { "tests": 62, "failures": 0, "errors": 0, "skipped": 0 },
-    "fullBackendVerify": { "tests": 595, "failures": 0, "errors": 0, "skipped": 8, "jacocoGate": "PASS" },
+    "crossDatasetRegression": {
+      "result": "PASS",
+      "test": "CurriculumRAGServiceTest.selectedSourceFiltersAndExcludesControlsForEveryPackagedDataset",
+      "scopes": 16,
+      "includesAgeAndDomainFilteringForKindergarten": true
+    },
+    "focusedBackendTests": {
+      "tests": 62,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "fullBackendVerify": {
+      "tests": 595,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 8,
+      "jacocoGate": "PASS"
+    },
     "qualityEvaluation": {
       "naturalLanguageIndependentBenchmark": "NOT_RUN",
       "falseAcceptAndFalseRejectRates": "NOT_ESTABLISHED",
@@ -144,5 +186,683 @@
       "livePgvectorAndGeminiSemanticVerification": "NOT_RUN; no authorized local pgvector endpoint available; remote Supabase was not written"
     },
     "scopeStatus": "Retrieval/filter/verifier code is implemented for the 15 primary scopes and technical age-filter path; end-to-end non-pilot generation, live quality, independent benchmark and Kindergarten expert approval remain incomplete."
+  },
+  "backendRuntimeRemediationCurrentRun": {
+    "recordedAtUtc": "2026-11-01T17:11:54.467710+00:00",
+    "baseRevision": "87ca82b4b620004e90b4cdc3dcdf0930e94578a8",
+    "workingTreeDirty": true,
+    "codeFingerprintSha256": "cfe0cdb05bef9044b4ced0bc19fab5f8a881123df8d76b5dbb92e2aedc1cfacc",
+    "fingerprintFiles": {
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumAvailability.java": "b86a08cf56cc588a03a3e2ebcd8caecfe4195e4fddad8fff74409e02fead06f1",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumCatalog.java": "b82e7f928f4179d1a22b6625293746a4d02aa6823efe6e13386509cbb23caaba",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumChunk.java": "a781c0f498fc8c8bdc02969a9cb0c7731101eaeb552362245f234884af5288f2",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumConstraints.java": "e0efd7ec08f2619a549ef9ff5e28d01adb7c6299fa0f8b5ed5fab20e3391a47b",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumContextProvider.java": "5f97f1bd0d93292bd71f6f8ed9952a9f561a4c9fc3fa6b8ca122ab0641b81a06",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumDataset.java": "ec1978f29c6ac499965d2adcf8ab080300ce979f594bcfac7bf386f056f971c7",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumDatasetReadiness.java": "0bee39d5b1b0dc50b67164020a53f4809c3e9f0876bc8207e39689f7847d7d3d",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumEmbeddingContract.java": "89ac33a5b3befb6382df4e6f5cb657716f3870b8d17908a885ca6d8d384bb903",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumEvidenceVerifier.java": "95460eba5fcf51ccf1f5662e2c40f65fe47c71f1d4466de3d11da19320493861",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumMetrics.java": "cfd3a7170d60955b56dbb51cb99b5eabd45d1dd21f0590616887d496b14e1885",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumRAGService.java": "1004b744044adcebee59585df58d0d41ef58291c3976242a096d9d12ae682c9d",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumRagConfiguration.java": "195d57b8644cb21674afd303e8c4d16401a9964db83ea4eb164e3c8432673b58",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumRejectionGuidance.java": "a18985a93bc01108005c68d5289d64e9c537b73c49619bf1fd13963860c8b5ab",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumSource.java": "9852f18094fa56b03ee8c072e2db58aa30e43f6435f68daff0c301b4be4fdbdc",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/CurriculumTopicParser.java": "8c18dfdc21f0903dad4ac60734cf3312a1c1bf07b90f7d178efc250d74a8ac55",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/GeminiSemanticCurriculumEvidenceVerifier.java": "ac1ac63c1f6d0e078efbd8decb5be1d6ef705df23ebaa20c286843a8e9551cba",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/KindergartenEvidenceVerifier.java": "47be50e59a885fb13948df3eb4fcc8f9eac1596ae0293f9798b3049651720c3d",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/SemanticCurriculumEvidenceVerifier.java": "b841b505b60ca7c84ca5fc70398e28adc6ca2a682b7ec2da8891086b1dcc0b99",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/VerifiedCurriculumContextProvider.java": "0e40d21e7f26e878083c5b3065fac66d54e162251e44e1ca0af0470765dccb10",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/review/CurriculumEvidence.java": "529830141d4a1a6fd82570e5c79e5e5ffa3e2315ef906f59af6a7a6900f219a7",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/review/CurriculumEvidenceReview.java": "178f51f4ccb1bd62c259bc202339a2366180a695b5997653f62cd86746c11950",
+      "backend/src/main/java/com/aigameplatform/backend/service/curriculum/review/GameCurriculumReviewService.java": "053b3e8b3508e18c86638c8c0810fe56ea5462f73db98f9051057a661dc4cd3c",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/AiServiceUnavailableException.java": "044eb55e59fdccf8b1cff594c2f58c6e78d9e95c1f5f400d193cb66fcf19a197",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/GameContentGenerator.java": "6b2c3a4be3b483787eb2c8912f14ea0a4618926dfc5b826f2000633b11e2d834",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/GameGenerationService.java": "361a19c670094ed3255c29c03669f8f78b5aec10d3abf117400569d86e93eac5",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/GeminiChatConfiguration.java": "787d43c997230d68f67163e6330c3f8f565399411a6097d226eeee33c005c2da",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/GeminiGameContentGenerator.java": "34454b4abffbcc5b8298b08dc2250d1157a77de158f491f674ef23195badaf8e",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/GeminiGeneratedContentReviewer.java": "2596fe17a819d51a1c359314d401cbf958980292b79fe68df4acb2afac4040ea",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/GeneratedContentReviewer.java": "25bbd3075c51d2c1f38c786afe6092f645f8d8269e2363fd8f71596561504772",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/GenerationAttempt.java": "c2f1705a195bc6e76d5ae51d9933789ccf0397f14ffc71aad67f4cf1a21ab67b",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/GenerationResult.java": "6902286fa5906ca5fc9f1c2dd59b49c70c339d845853686496294696be935e20",
+      "backend/src/main/java/com/aigameplatform/backend/service/generation/PilotQuizContentVerifier.java": "305b76a161f71b224299ac84d6aa5a60ee52f10f06c14ac92963c8f16cf1d880",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumAvailabilityTest.java": "974683fc48488f9569fb00b2110dfe831f12ce7e7590d7b0e594b8ae6ab8769d",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumBenchmark.java": "51ca9eb7d82799eb79d2a5301036b4872bc7fe0f2d5a4706c52456058e677595",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumBenchmarkTest.java": "77c968eee2eaeba5553548add59251fbc709fc5eadddc6c25217a2067a19cc9d",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumCatalogTest.java": "44b06d421526bd489322a92624ce429d6d570658eaa0ceb206ae57f7ac989e41",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumConstraintsTest.java": "6d6c4388792096fa65daa2e3622f0d7ecedb4f13768fdc2b38702ef1d643d869",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumEvaluation.java": "eef4552482c8deaa4160ce3f4fb38e83db2eea0c8414d0805b6edda3020e604d",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumEvidenceVerifierTest.java": "aa3c736a3794fdaa39e093ca542296eea870afd536ee04ad98bca8615445f926",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumIngestor.java": "ac0da63b45469b7e8773d33cab971dd2b10d153132b5f64e0ec4f80af604677d",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumMetricsTest.java": "f88acb80573a1de208585930b1a1412127d6726cb2e79681d6c8440f58a6b2ee",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumPdfExtractor.java": "1e4a6ec6169a0c55148d3d9efbd1a409071b80025a1f10fed5a863a83669efa9",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumPdfExtractorTest.java": "7930b6e7d6a35b90545e62e9ac957b7a8755c93531bb49cf150f8f4a5110b5ee",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumRAGServiceTest.java": "29ca6da38b9af2c27ccfebfae620c620298f4600f5a682ddf0feb0362bcf2573",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumRagConfigurationTest.java": "4e34a43055600531500bf052b24f40781aaa0f4570e6763dd5fe07db9e78c5b5",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumRejectionGuidanceTest.java": "d38e44bc6d8607855a770a80e09984e1aef82acb04463486119fa60a69f78fec",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumRuntimeEvaluation.java": "a717069719b87a7d85663386f4112b272a240d051a1b34943043de78daf03c8c",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumRuntimeEvaluationTest.java": "a8144d3db827df03317dff80607a821436462585633b1a4ca83a160ad2b39b97",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumSpikeDatabase.java": "d5df1e49591ecb7efe8c65008c01f6de475bcac66d06065bae332287379bbe39",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumSpikeRunner.java": "2c281f37cd8797f77da5ac80d727c108c1f5bd9a882d3f36464da8fcc49ad42f",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/CurriculumSpikeTest.java": "496754e7349089f464594bc1fbd7d33601efe83ef5d28872bac1fb3098565086",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/GameCurriculumReviewPersistenceLiveTest.java": "f4c42c4fa1b446da351ac8b29bbe8c28df22d761503e4ef24d78783c4fbcfa1a",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/GameCurriculumReviewServiceTest.java": "93f970501f39d3b64cd8a58d75971fa9e62a02482ccc24b931867db43ec36dd7",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/GeminiSemanticCurriculumEvidenceVerifierTest.java": "ad227fa639fd9563ffe6d7ed25e788b1a25bedfc29ded62b93c7cc750deec873",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/PgVectorScoreIntegrationTest.java": "6ab649300e60f47f8d3c98ae1f247eb5ee12b98cf350798c6663b44decd3935b",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/RagSpikeConfig.java": "1a412efc17b7256623b45b6f8a26a67a9601a88337baca22874d2227440a0fe6",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/RagSpikeConfigTest.java": "eb8c96a3fc0591af467e1ad9ae33b5d3e33ac44a24fd7337675c6a3622149cd2",
+      "backend/src/test/java/com/aigameplatform/backend/service/curriculum/VerifiedCurriculumContextProviderTest.java": "7945db3579a3feb095513bde69c2d010422f468257e8200349baffdef340a33c",
+      "backend/src/test/java/com/aigameplatform/backend/service/generation/CurriculumAcceptanceLiveTest.java": "2e574c6f304f72503e42b97f7d866872a2d3fbdf26c4535e57732e0023f82637",
+      "backend/src/test/java/com/aigameplatform/backend/service/generation/CurriculumRagGeminiLiveSmokeTest.java": "e3542dd7040f021864cdbbf866f6aefade315350c5415f722889084ee3724b7d",
+      "backend/src/test/java/com/aigameplatform/backend/service/generation/GameGenerationServiceTest.java": "f05b691fe606ff760538bb5be026f12ef7b6abb9bc2b61b82e99c6741a81b49b",
+      "backend/src/test/java/com/aigameplatform/backend/service/generation/GeminiGameContentGeneratorTest.java": "2b0a06594e78dc46c778bce1818c08776319ddffd47487949cd353ec9ac14283",
+      "backend/src/test/java/com/aigameplatform/backend/service/generation/GeminiGeneratedContentReviewerTest.java": "dcad6931f01d0e921d4de473590c8570ab3ed5087a29c599f54ec673c091cc8d",
+      "backend/src/test/java/com/aigameplatform/backend/service/generation/PilotQuizContentVerifierTest.java": "acdd4c634fbf5a53b5f2b74451ecc6cbfd7a12cc14932dbe07a82ad5b6cb78aa",
+      "scripts/rag-spike.ps1": "5cc28d841ef195cc879cda105a04e86d275592ae73f39ebc892725fda2b6ac42"
+    },
+    "tests": {
+      "tests": 620,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 8
+    },
+    "coverage": {
+      "lineCovered": 2513,
+      "lineMissed": 393,
+      "linePercent": 86.4762560220234,
+      "gatePassed": true
+    },
+    "testEnvironment": {
+      "jdk": "Temurin 21.0.13",
+      "maven": "3.9.16",
+      "command": "mvn -o verify with Mockito preloaded as a Java agent and JaCoCo agent; unchanged project gates",
+      "note": "Mockito self-attach is unavailable in this container, so the test JVM preloads its existing dependency; no POM/dependency/version changes."
+    },
+    "runtimeContractTests": "PASS: all 16 datasets through production provider using fixture vectors/semantic decisions; three preschool ages and both domains; explicit age+domain filtering. NOT a model-quality benchmark.",
+    "draftQueryCounts": {
+      "datasets": 16,
+      "devPerDataset": 30,
+      "exposedHoldoutCandidatePerDataset": 60,
+      "total": 1440,
+      "labelStatus": "AI_AUTHORED_UNREVIEWED",
+      "independentHoldout": false,
+      "limits": "Repeated objectives and overlapping negative intent groups; partial coverage only."
+    },
+    "evaluationRuns": {
+      "preflight_DEV": {
+        "exitCode": 0,
+        "report": {
+          "measuredAt": "2026-11-01T17:11:51.336424140Z",
+          "mode": "--preflight",
+          "environment": {
+            "GEMINI_API_KEY": false,
+            "DB_URL": false,
+            "DB_USERNAME": false,
+            "DB_PASSWORD": false,
+            "CURRICULUM_PDF": false,
+            "RAG_LOCAL_EVAL": true
+          },
+          "releaseGate": "NOT_ESTABLISHED",
+          "labelReview": "AI_AUTHORED_UNREVIEWED",
+          "codeRevision": "87ca82b4b620004e90b4cdc3dcdf0930e94578a8",
+          "scopes": {
+            "english-grade1-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade1-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "english-grade2-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade2-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "english-grade3-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade3-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "english-grade4-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDDT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade4-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "english-grade5-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade5-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "kindergarten-outcomes-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "01-VBHN-BGDĐT-2021.pdf",
+                "sourceSha256": "146c1f23b3515d46f2e2e97afcfc0a1d871ef28b6700c7db4fbacfeb56e8572f",
+                "curriculumVersion": "01/VBHN-BGDĐT (2021; TT17/2009 as amended by TT28/2016 and TT51/2020)",
+                "datasetVersion": "kindergarten-outcomes-v1",
+                "pdfPageCount": 84
+              }
+            },
+            "math-grade1-spike-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade1-spike-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "math-grade2-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade2-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "math-grade3-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade3-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "math-grade4-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade4-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "math-grade5-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade5-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "vietnamese-grade1-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade1-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "vietnamese-grade2-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade2-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "vietnamese-grade3-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade3-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "vietnamese-grade4-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade4-draft-v1",
+                "pdfPageCount": 1555
+              }
+            },
+            "vietnamese-grade5-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "queries": 30,
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade5-draft-v1",
+                "pdfPageCount": 1555
+              }
+            }
+          }
+        }
+      },
+      "preflight_HOLDOUT_CANDIDATE": {
+        "exitCode": 0,
+        "report": {
+          "measuredAt": "2026-11-01T17:11:52.237856133Z",
+          "mode": "--preflight",
+          "environment": {
+            "GEMINI_API_KEY": false,
+            "DB_URL": false,
+            "DB_USERNAME": false,
+            "DB_PASSWORD": false,
+            "CURRICULUM_PDF": false,
+            "RAG_LOCAL_EVAL": true
+          },
+          "releaseGate": "NOT_ESTABLISHED",
+          "labelReview": "AI_AUTHORED_UNREVIEWED",
+          "codeRevision": "87ca82b4b620004e90b4cdc3dcdf0930e94578a8",
+          "scopes": {
+            "english-grade1-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade1-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "english-grade2-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade2-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "english-grade3-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade3-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "english-grade4-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDDT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade4-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "english-grade5-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "english-grade5-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "kindergarten-outcomes-v1": {
+              "source": {
+                "sourceDocument": "01-VBHN-BGDĐT-2021.pdf",
+                "sourceSha256": "146c1f23b3515d46f2e2e97afcfc0a1d871ef28b6700c7db4fbacfeb56e8572f",
+                "curriculumVersion": "01/VBHN-BGDĐT (2021; TT17/2009 as amended by TT28/2016 and TT51/2020)",
+                "datasetVersion": "kindergarten-outcomes-v1",
+                "pdfPageCount": 84
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade1-spike-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade1-spike-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade2-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade2-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade3-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade3-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade4-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade4-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade5-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "math-grade5-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade1-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade1-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade2-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade2-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade3-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade3-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade4-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade4-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade5-draft-v1": {
+              "source": {
+                "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                "curriculumVersion": "32/2018/TT-BGDDT",
+                "datasetVersion": "vietnamese-grade5-draft-v1",
+                "pdfPageCount": 1555
+              },
+              "queries": 60,
+              "liveEvaluation": "NOT_RUN"
+            }
+          }
+        }
+      },
+      "exploratory_DEV": {
+        "exitCode": 1,
+        "report": {
+          "measuredAt": "2026-11-01T17:11:53.105624427Z",
+          "mode": "--exploratory",
+          "environment": {
+            "GEMINI_API_KEY": false,
+            "DB_URL": false,
+            "DB_USERNAME": false,
+            "DB_PASSWORD": false,
+            "CURRICULUM_PDF": false,
+            "RAG_LOCAL_EVAL": true
+          },
+          "releaseGate": "NOT_ESTABLISHED",
+          "labelReview": "AI_AUTHORED_UNREVIEWED",
+          "codeRevision": "87ca82b4b620004e90b4cdc3dcdf0930e94578a8",
+          "execution": "BLOCKED_ENVIRONMENT_OR_SERVICE",
+          "failureType": "IllegalStateException",
+          "scopes": {
+            "english-grade1-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "english-grade2-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "english-grade3-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "english-grade4-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "english-grade5-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "kindergarten-outcomes-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade1-spike-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade2-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade3-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade4-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "math-grade5-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade1-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade2-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade3-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade4-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            },
+            "vietnamese-grade5-draft-v1": {
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE",
+              "liveEvaluation": "NOT_RUN"
+            }
+          }
+        }
+      },
+      "exploratory_HOLDOUT_CANDIDATE": {
+        "exitCode": 1,
+        "report": {
+          "measuredAt": "2026-11-01T17:11:53.933202741Z",
+          "mode": "--exploratory",
+          "environment": {
+            "GEMINI_API_KEY": false,
+            "DB_URL": false,
+            "DB_USERNAME": false,
+            "DB_PASSWORD": false,
+            "CURRICULUM_PDF": false,
+            "RAG_LOCAL_EVAL": true
+          },
+          "releaseGate": "NOT_ESTABLISHED",
+          "labelReview": "AI_AUTHORED_UNREVIEWED",
+          "codeRevision": "87ca82b4b620004e90b4cdc3dcdf0930e94578a8",
+          "execution": "BLOCKED_ENVIRONMENT_OR_SERVICE",
+          "failureType": "IllegalStateException",
+          "scopes": {
+            "english-grade1-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "english-grade2-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "english-grade3-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "english-grade4-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "english-grade5-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "kindergarten-outcomes-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "math-grade1-spike-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "math-grade2-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "math-grade3-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "math-grade4-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "math-grade5-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "vietnamese-grade1-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "vietnamese-grade2-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "vietnamese-grade3-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "vietnamese-grade4-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            },
+            "vietnamese-grade5-draft-v1": {
+              "liveEvaluation": "NOT_RUN",
+              "reason": "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"
+            }
+          }
+        }
+      }
+    },
+    "remoteWrites": false,
+    "corpusChanges": false,
+    "dslStrategyUiControllerChanges": false,
+    "remainingBlockers": [
+      "No GEMINI_API_KEY or local PostgreSQL process configuration; current live quality NOT_RUN for every dataset.",
+      "Independent labels/diverse disjoint frozen holdout; thresholds unchanged.",
+      "KG source specialist approval; no approval fabricated.",
+      "Concrete QuizGameStrategy/GeminiGameContentGenerator still limit generation to QUIZ/MATH/GRADE_1; owner contract coordination required.",
+      "Existing GameDslRequest has no lesson-plan/domain fields; RAG domain overload is ready but caller contract unchanged."
+    ],
+    "findings": "See latest README finding disposition; historical evidence above is retained."
   }
 }

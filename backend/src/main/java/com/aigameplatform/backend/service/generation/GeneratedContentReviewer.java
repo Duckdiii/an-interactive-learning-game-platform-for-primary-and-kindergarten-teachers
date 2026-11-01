@@ -10,7 +10,11 @@ import java.util.List;
 public interface GeneratedContentReviewer {
     record Result(List<ValidationError> errors, CurriculumEvidenceReview review) {
         public Result { errors = List.copyOf(errors); }
-        public boolean accepted() { return errors.isEmpty(); }
+        public boolean accepted() {
+            return errors.isEmpty() && review != null && !review.claims().isEmpty()
+                    && (review.status() == CurriculumEvidenceReview.Status.PENDING
+                        || review.status() == CurriculumEvidenceReview.Status.REVIEWED);
+        }
     }
 
     Result review(GameDsl game, String teacherTopic, CurriculumEvidence evidence);

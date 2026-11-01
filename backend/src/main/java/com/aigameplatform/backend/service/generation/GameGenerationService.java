@@ -151,6 +151,19 @@ public class GameGenerationService {
                             lastUnverifiedReason = decision.errors().isEmpty()
                                     ? "CONTENT_NOT_MACHINE_CHECKABLE" : decision.errors().get(0).message();
                             errors = decision.errors();
+                            // Keep conclusive arithmetic failures authoritative. Only forms outside the
+                            // pilot's grammar may proceed to a separately identified semantic review.
+                            if (generatedContentReviewer != null && !requestsPilotArithmetic(request.topic())
+                                    && java.util.Set.of("REQUEST_NOT_MACHINE_CHECKABLE", "QUESTION_NOT_MACHINE_CHECKABLE",
+                                            "ANSWER_OPTIONS_NOT_MACHINE_CHECKABLE").contains(lastUnverifiedReason)) {
+                                var semantic = reviewSemantically(report.game(), request.topic(), curriculum.evidence());
+                                if (semantic != null && semantic.accepted())
+                                    return new GenerationResult(report.game(), curriculum.evidence(), semantic.review());
+                                if (semantic != null && !semantic.errors().isEmpty()) {
+                                    errors = semantic.errors();
+                                    lastUnverifiedReason = errors.getFirst().message();
+                                }
+                            }
                         } else if (decision.status() == PilotQuizContentVerifier.Status.INVALID) {
                             errors = decision.errors();
                         } else {
@@ -168,10 +181,7 @@ public class GameGenerationService {
                         if (reviewer == null)
                             throw new GeneratedContentUnverifiedException("SEMANTIC_CONTENT_REVIEWER_UNAVAILABLE");
                         GeneratedContentReviewer.Result decision;
-                        try { decision = reviewer.review(report.game(), request.topic(), curriculum.evidence()); }
-                        catch (RuntimeException unavailable) {
-                            throw new AiGenerationTimeoutException("Không kiểm tra được mức bám YCCĐ của nội dung game.", unavailable);
-                        }
+                        decision = reviewSemantically(report.game(), request.topic(), curriculum.evidence());
                         if (decision == null || !decision.accepted()) {
                             lastUnverifiedReason = decision == null || decision.errors().isEmpty()
                                     ? "SEMANTIC_CONTENT_NOT_VERIFIED" : decision.errors().get(0).message();
@@ -189,6 +199,21 @@ public class GameGenerationService {
         }
         if (lastUnverifiedReason != null) throw new GeneratedContentUnverifiedException(lastUnverifiedReason);
         throw new AiGenerationTimeoutException("AI chưa sinh được game hợp lệ sau " + (maxRetries + 1) + " lần thử");
+    }
+
+    private GeneratedContentReviewer.Result reviewSemantically(GameDsl game, String topic,
+            com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence evidence) {
+        try { return generatedContentReviewer.review(game, topic, evidence); }
+        catch (RuntimeException unavailable) {
+            throw new AiGenerationTimeoutException("Không kiểm tra được mức bám YCCĐ của nội dung game.", unavailable);
+        }
+    }
+
+    private static boolean requestsPilotArithmetic(String topic) {
+        return new com.aigameplatform.backend.service.curriculum.CurriculumTopicParser().parse(topic)
+                .requirements().stream().anyMatch(r -> r.skill()
+                        == com.aigameplatform.backend.service.curriculum.CurriculumConstraints.Skill.ADD
+                        || r.skill() == com.aigameplatform.backend.service.curriculum.CurriculumConstraints.Skill.SUBTRACT);
     }
 
     private CurriculumContextProvider.Evidence retrieveCurriculumContext(GameType type, GameDslRequest request) {

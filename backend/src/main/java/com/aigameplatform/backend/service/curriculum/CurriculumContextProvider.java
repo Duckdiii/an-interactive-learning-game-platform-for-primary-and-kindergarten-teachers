@@ -24,6 +24,13 @@ public interface CurriculumContextProvider {
         return retrieve(topic, subject, gradeLevel);
     }
 
+    /** Optional preschool domain at the RAG boundary; does not alter the game DSL or generation request. */
+    default Evidence retrieve(String topic, Subject subject, GradeLevel gradeLevel,
+            KindergartenAgeBand ageBand, String domain) {
+        if (domain == null) return retrieve(topic, subject, gradeLevel, ageBand);
+        throw new CurriculumServiceUnavailableException("Curriculum provider does not support domain-filtered retrieval", null);
+    }
+
     record Evidence(boolean sufficient, String context,
                     com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence evidence) {
         public Evidence(boolean sufficient, String context) {
