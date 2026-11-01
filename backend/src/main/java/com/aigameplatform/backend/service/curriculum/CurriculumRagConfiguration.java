@@ -49,6 +49,14 @@ public class CurriculumRagConfiguration {
     }
 
     @Bean
+    com.aigameplatform.backend.service.generation.PilotQuizContentVerifier pilotQuizContentVerifier(
+            @Qualifier("mathGradeOneCurriculumDataset") CurriculumDataset dataset,
+            @Value("${app.curriculum-rag.constraints-approved-sha256:}") String approvedSha) throws IOException {
+        return new com.aigameplatform.backend.service.generation.PilotQuizContentVerifier(
+                CurriculumConstraints.load(dataset), approvedSha);
+    }
+
+    @Bean
     @Lazy
     EmbeddingModel curriculumQueryEmbeddingModel(
             @Value("${app.ai.gemini.api-key:}") String apiKey,

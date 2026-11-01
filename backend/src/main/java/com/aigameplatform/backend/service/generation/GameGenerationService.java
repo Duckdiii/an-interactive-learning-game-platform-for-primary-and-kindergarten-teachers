@@ -7,6 +7,7 @@ import com.aigameplatform.backend.exception.AiGenerationTimeoutException;
 import com.aigameplatform.backend.exception.CurriculumEvidenceNotFoundException;
 import com.aigameplatform.backend.exception.CurriculumServiceUnavailableException;
 import com.aigameplatform.backend.exception.UnsafeContentException;
+import com.aigameplatform.backend.exception.GeneratedContentUnverifiedException;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.service.curriculum.CurriculumContextProvider;
@@ -41,7 +42,7 @@ public class GameGenerationService {
     private static final int MAX_FEEDBACK_ERRORS = 10;
 
     private final ObjectProvider<GameContentGenerator> generatorProvider;
-    private final ObjectProvider<GeneratedContentReviewer> contentReviewerProvider;
+    private final ObjectProvider<PilotQuizContentVerifier> contentVerifierProvider;
     private final GameContentStrategyRegistry strategies;
     private final AiOutputValidator aiOutputValidator;
     private final GameDslFactoryRegistry factories;
@@ -56,7 +57,7 @@ public class GameGenerationService {
     // ObjectProvider để ứng dụng vẫn khởi động khi chưa có bản cài đặt cổng AI; thiếu thì báo lúc gọi.
     public GameGenerationService(
             ObjectProvider<GameContentGenerator> generatorProvider,
-            ObjectProvider<GeneratedContentReviewer> contentReviewerProvider,
+            ObjectProvider<PilotQuizContentVerifier> contentVerifierProvider,
             GameContentStrategyRegistry strategies,
             AiOutputValidator aiOutputValidator,
             GameDslFactoryRegistry factories,
@@ -71,7 +72,7 @@ public class GameGenerationService {
             throw new IllegalArgumentException("app.generation.max-retries không được âm");
         }
         this.generatorProvider = generatorProvider;
-        this.contentReviewerProvider = contentReviewerProvider;
+        this.contentVerifierProvider = contentVerifierProvider;
         this.strategies = strategies;
         this.aiOutputValidator = aiOutputValidator;
         this.factories = factories;
@@ -109,6 +110,7 @@ public class GameGenerationService {
         String schema = strategies.get(type).getStructuredSchema();
 
         String previousOutput = null;
+        String lastUnverifiedReason = null;
         List<ValidationError> previousErrors = List.of();
         for (int attemptNumber = 1; attemptNumber <= maxRetries + 1; attemptNumber++) {
             String raw = callAi(generator, new GenerationAttempt(type, request.topic(), request.subject(),
@@ -133,32 +135,25 @@ public class GameGenerationService {
                     return new GenerationResult(report.game(), curriculum.evidence(),
                             com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable());
                 } else {
-                    GeneratedContentReviewer reviewer = contentReviewerProvider.getIfAvailable();
-                    if (reviewer == null) {
-                        throw new AiGenerationTimeoutException(
-                                "Không thể xác minh nội dung game theo căn cứ chương trình; vui lòng thử lại sau");
+                    PilotQuizContentVerifier verifier = contentVerifierProvider.getIfAvailable();
+                    if (verifier == null) throw new GeneratedContentUnverifiedException("CONTENT_VERIFIER_UNAVAILABLE");
+                    PilotQuizContentVerifier.Result decision = verifier.verify(report.game(), request.topic(), curriculum.evidence());
+                    if (decision.status() == PilotQuizContentVerifier.Status.UNVERIFIED) {
+                        lastUnverifiedReason = decision.errors().isEmpty()
+                                ? "CONTENT_NOT_MACHINE_CHECKABLE" : decision.errors().get(0).message();
+                        errors = decision.errors();
+                    } else if (decision.status() == PilotQuizContentVerifier.Status.INVALID) {
+                        errors = decision.errors();
+                    } else {
+                        var claims = decision.chunkIds().stream().map(chunkId -> java.util.Map.<String, Object>of(
+                                "chunkId", chunkId,
+                                "claim", "Question arithmetic and numeric scope passed deterministic pilot checks"))
+                                .toList();
+                        var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
+                                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED,
+                                claims, List.of(), "math-g1-quiz-deterministic-v1");
+                        return new GenerationResult(report.game(), curriculum.evidence(), review);
                     }
-                    GeneratedContentReviewer.Result decision;
-                    try {
-                        decision = reviewer.review(report.game(), request.topic(), curriculum.evidence());
-                    } catch (RuntimeException exception) {
-                        log.error("Generated game content review unavailable ({})", exception.getClass().getSimpleName());
-                        throw new AiGenerationTimeoutException(
-                                "Không thể xác minh nội dung game theo căn cứ chương trình; vui lòng thử lại sau", exception);
-                    }
-                    if (decision == null || decision.review() == null) {
-                        throw new AiGenerationTimeoutException(
-                                "Không thể xác minh nội dung game theo căn cứ chương trình; vui lòng thử lại sau");
-                    }
-                    if (decision.accepted()) {
-                        if (decision.review().status()
-                                != com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED) {
-                            throw new AiGenerationTimeoutException(
-                                    "Không thể xác minh nội dung game theo căn cứ chương trình; vui lòng thử lại sau");
-                        }
-                        return new GenerationResult(report.game(), curriculum.evidence(), decision.review());
-                    }
-                    errors = decision.errors();
                 }
             }
 
@@ -166,6 +161,7 @@ public class GameGenerationService {
             previousOutput = raw;
             previousErrors = errors.stream().limit(MAX_FEEDBACK_ERRORS).toList();
         }
+        if (lastUnverifiedReason != null) throw new GeneratedContentUnverifiedException(lastUnverifiedReason);
         throw new AiGenerationTimeoutException("AI chưa sinh được game hợp lệ sau " + (maxRetries + 1) + " lần thử");
     }
 

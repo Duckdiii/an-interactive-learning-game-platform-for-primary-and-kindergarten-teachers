@@ -64,3 +64,22 @@ Renderer được kiểm tra ở `frontend/src/games/quiz/QuizRenderer.tsx`: n�
 5. Có ít nhất20 game hợp lệ và giáo viên review theo rubric: đúng đáp án, duy nhất đáp án, phù hợp YCCĐ, giữ điều kiện, tiếng Việt phù hợp, media hiển thị đủ. Hiện chỉ18 game và có lỗi nên cổng này chưa đạt.
 
 Không commit/push hoặc tuyên bố phát hành từ báo cáo này. Các kết quả không đạt được giữ nguyên để có thể tái kiểm tra.
+
+## Current code recheck — 2026-11-01
+
+This addendum checks the preserved samples against the current generation gate; it does not replace or rewrite the historical 2026-10-30 run.
+
+| Sample / issue | Current finding | Classification |
+| --- | --- | --- |
+| sample-1: natural counting query was rejected before generation | Not rerun as a teacher-style retrieval case in this change; no claim of fixed false rejection | Not addressed |
+| sample-2: counting depends on animal images, but the sample has only `visualPrompt`; renderer consumes `imageUrl` | Current verifier cannot prove visual counting and returns unverified; media delivery still needs integration | Gated, not fixed |
+| sample-3: Gemini HTTP 503 | Provider availability was not altered | Not addressed |
+| samples-4/5: awkward Vietnamese and reading/writing skill drift | Language/visual semantics are outside the deterministic arithmetic pilot; unverified forms are not returned as grounded | Gated, not fixed |
+| sample-6: report described giving away 25 and asking what remained | The checked-in JSON instead says “cho em thêm 25” and asks for the total; 30+25=55 is correct. The old narrative is inaccurate. The current gate still leaves its word-problem form unverified | Historical description corrected; semantic parser still unsupported |
+| samples-7–12: arithmetic examples | Some forms fit the deterministic gate, but these preserved outputs were not replayed through live generation in this turn | Not freshly evaluated |
+| sample-13–15 and 17–20: geometry, visual evidence, language or media issues | No semantic/visual validator was added; such outputs remain unverified | Gated, not fixed |
+| sample-16: rectangle/square ambiguity and unaccented text | A semantic geometry question cannot pass the arithmetic-only verifier, so generation is blocked as unverified; ambiguity itself is not resolved | Gated, not fixed |
+
+New regression tests cover a wrong arithmetic answer, two choices with the same numeric value, a requested-range violation, the adversarial “30 give away 25 but answer 55” form as unverified, and carry/borrow edge cases. They do not retroactively turn the historical samples into passing outputs.
+
+Live smoke against the isolated local database: the unsupported-scope rejection passed; one in-scope generation remained unverified after the configured retry and returned `GENERATED_CONTENT_UNVERIFIED` with `QUESTION_NOT_MACHINE_CHECKABLE`. The positive live-generation check therefore did not pass, and no current positive game is claimed. Remote Supabase was not used.

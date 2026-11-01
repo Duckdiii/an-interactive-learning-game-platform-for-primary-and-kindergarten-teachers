@@ -148,6 +148,20 @@ class BusinessRuleGameValidatorTest {
     }
 
     @Test
+    void quizRejectsMultipleOptionsThatAreBothCorrectForAnArithmeticQuestion() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "2 + 3 = ?");
+        first.put("correctOptionId", "b");
+        element(first, "options", 0).put("text", "5");
+        element(first, "options", 1).put("text", "05");
+
+        ValidationReport report = service.validate(game);
+
+        assertThat(report.errors()).extracting(ValidationError::path).contains("$.questions[0].options");
+    }
+
+    @Test
     void quizRejectsAnAmbiguousPromptContainingMoreThanOneArithmeticExpression() throws IOException {
         ObjectNode game = example(GameType.QUIZ);
         ObjectNode first = question(game, 0);

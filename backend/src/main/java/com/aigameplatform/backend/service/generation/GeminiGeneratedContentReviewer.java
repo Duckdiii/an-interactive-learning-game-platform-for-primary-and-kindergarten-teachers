@@ -16,14 +16,10 @@ import dev.langchain4j.model.chat.request.json.JsonSchema;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
-/** A second pass that can reject generated items; deterministic business rules still run independently. */
-@Component
-@ConditionalOnProperty(name = "app.ai.gemini.game-generation.enabled", havingValue = "true")
+/** Experimental advisory reviewer. It is not a Spring bean and cannot authorize curriculum-grounded generation. */
 public class GeminiGeneratedContentReviewer implements GeneratedContentReviewer {
     private static final String SCHEMA = """
             {"type":"object","additionalProperties":false,"required":["questions"],"properties":{"questions":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["questionId","answerCorrect","supportedByCurriculum","supportingChunkIds","reason"],"properties":{"questionId":{"type":"string"},"answerCorrect":{"type":"boolean"},"supportedByCurriculum":{"type":"boolean"},"supportingChunkIds":{"type":"array","items":{"type":"string"}},"reason":{"type":"string"}}}}}}

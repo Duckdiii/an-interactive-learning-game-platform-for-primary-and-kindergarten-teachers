@@ -42,16 +42,26 @@ final class QuizArithmeticAnswerVerifier {
 
         TextChoiceDsl correct = question.options().stream()
                 .filter(option -> option.id().equals(question.correctOptionId())).findFirst().orElse(null);
-        Matcher answer = correct == null ? null : INTEGER.matcher(correct.text());
-        boolean matches = false;
-        if (answer != null && answer.matches()) {
-            try { matches = Long.parseLong(answer.group(1)) == expected; }
-            catch (NumberFormatException ignored) { /* A non-representable answer cannot match a checked result. */ }
+        long matchingOptions = question.options().stream()
+                .map(option -> numericValue(option.text()))
+                .filter(value -> value != null && value == expected)
+                .count();
+        if (matchingOptions != 1) {
+            errors.add(new ValidationError(path + ".options",
+                    "A direct arithmetic question must have exactly one option matching the computed answer"));
         }
-        if (!matches) {
+        Long selectedValue = correct == null ? null : numericValue(correct.text());
+        if (selectedValue == null || selectedValue != expected) {
             errors.add(new ValidationError(path + ".correctOptionId",
                     "Đáp án được chọn không khớp kết quả phép tính hiển thị trong câu hỏi (" + expected + ")"));
         }
+    }
+
+    private static Long numericValue(String text) {
+        Matcher answer = text == null ? null : INTEGER.matcher(text);
+        if (answer == null || !answer.matches()) return null;
+        try { return Long.parseLong(answer.group(1)); }
+        catch (NumberFormatException ignored) { return null; }
     }
 
     private static Long calculate(long left, String operator, long right) {
