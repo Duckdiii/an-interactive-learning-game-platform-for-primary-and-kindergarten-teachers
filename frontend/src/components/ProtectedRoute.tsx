@@ -4,10 +4,10 @@ import { useAuth } from '../hooks/useAuth'
 import { ROUTES } from '../routes/paths'
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { user, token } = useAuth()
+  const { user, token, isDemo } = useAuth()
   const location = useLocation()
 
-  if (!user || !token) {
+  if (!user || (!token && !(import.meta.env.DEV && isDemo))) {
     return (
       <Navigate
         to={ROUTES.login}
