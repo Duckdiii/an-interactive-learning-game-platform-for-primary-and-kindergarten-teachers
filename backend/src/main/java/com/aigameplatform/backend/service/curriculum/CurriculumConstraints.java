@@ -54,13 +54,15 @@ public final class CurriculumConstraints {
     }
 
     static CurriculumConstraints parse(byte[] bytes, String expectedSha, CurriculumDataset dataset) {
+        String content = new String(bytes, StandardCharsets.UTF_8).replace("\r\n", "\n").replace('\r', '\n');
+        byte[] canonicalBytes = content.getBytes(StandardCharsets.UTF_8);
         String sha;
-        try { sha = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)); }
+        try { sha = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(canonicalBytes)); }
         catch (java.security.NoSuchAlgorithmException e) { throw new IllegalStateException(e); }
         if (!sha.equals(expectedSha)) throw new IllegalStateException("Constraints checksum mismatch");
         var mapper = new JsonMapper();
         var entries = new HashMap<String, List<Capability>>();
-        new String(bytes, StandardCharsets.UTF_8).lines().filter(s -> !s.isBlank()).forEach(line -> {
+        content.lines().filter(s -> !s.isBlank()).forEach(line -> {
             var entry = mapper.readValue(line, Entry.class);
             if (entry.chunkId() == null || entries.putIfAbsent(entry.chunkId(), entry.capabilities()) != null)
                 throw new IllegalStateException("Duplicate or missing constraint chunk ID");

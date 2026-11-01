@@ -27,7 +27,9 @@ public final class CurriculumRuntimeEvaluation {
 
     static List<CurriculumBenchmark.Query> loadQueries(Path path, CurriculumDataset dataset, String split,
             boolean reviewed) throws Exception {
-        byte[] bytes = Files.readAllBytes(path);
+        String content = Files.readString(path, java.nio.charset.StandardCharsets.UTF_8)
+                .replace("\r\n", "\n").replace('\r', '\n');
+        byte[] bytes = content.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         var manifest = JSON.readTree(Files.readString(Path.of(path + ".manifest.json")));
         String sha = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
         if (!sha.equals(manifest.path("querySha256").asString())
@@ -43,7 +45,7 @@ public final class CurriculumRuntimeEvaluation {
                 && dataset.chunks().getFirst().gradeLevel() == GradeLevel.GRADE_1
                 && !CurriculumConstraints.load(dataset).sha256().equals(manifest.path("constraintsSha256").asString()))
             throw new IllegalArgumentException("Reviewed arithmetic constraints checksum mismatch");
-        var queries = new String(bytes, java.nio.charset.StandardCharsets.UTF_8).lines().filter(s -> !s.isBlank())
+        var queries = content.lines().filter(s -> !s.isBlank())
                 .map(line -> JSON.readValue(line, CurriculumBenchmark.Query.class)).toList();
         var primary = dataset.chunks().stream().filter(c -> !c.control()).collect(
                 java.util.stream.Collectors.toMap(CurriculumChunk::chunkId, java.util.function.Function.identity()));

@@ -12,9 +12,29 @@ import java.time.*;
 import java.util.*;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 /** Fixture vectors/decisions: contract regressions, NOT live ranking or semantic quality measurements. */
 class CurriculumRuntimeEvaluationTest {
+    @TempDir Path tempDir;
+
+    @Test void draftChecksumIsStableAcrossWindowsLineEndings() throws Exception {
+        var dataset = CurriculumDataset.loadDefault();
+        var source = Path.of("..", "docs", "rag-spike", "evaluation-drafts",
+                dataset.source().datasetVersion(), "DEV.jsonl");
+        var content = Files.readString(source).replace("\r\n", "\n").replace("\n", "\r\n");
+        var draft = tempDir.resolve("DEV.jsonl");
+        Files.writeString(draft, content);
+        Files.copy(Path.of(source + ".manifest.json"), Path.of(draft + ".manifest.json"));
+
+        assertThat(CurriculumRuntimeEvaluation.loadDraft(draft, dataset, "DEV")).hasSize(30);
+        var edited = content.replace("1 đến 10", "1 đến 11");
+        assertThat(edited).isNotEqualTo(content);
+        Files.writeString(draft, edited);
+        assertThatThrownBy(() -> CurriculumRuntimeEvaluation.loadDraft(draft, dataset, "DEV"))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("manifest/source/checksum mismatch");
+    }
+
     @TestFactory Stream<DynamicTest> allDatasetsUseProductionProviderWithNaturalDraftQueries() throws Exception {
         var datasets = CurriculumDataset.loadPackaged();
         var store = new InMemoryEmbeddingStore<TextSegment>();

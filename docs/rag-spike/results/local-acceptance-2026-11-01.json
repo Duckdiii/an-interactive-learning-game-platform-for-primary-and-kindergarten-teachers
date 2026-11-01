@@ -1,5 +1,32 @@
 {
   "recordedAt": "2026-11-01",
+  "verificationRecheck": {
+    "recordedAt": "2026-11-02",
+    "baseCommit": "f3a7ecd8b637b861e816464c099201c463de9ddd",
+    "preflight": {
+      "DEV": { "result": "PASS", "datasets": 16, "queries": 480, "retrieval": "NOT_RUN" },
+      "HOLDOUT_CANDIDATE": { "result": "PASS", "datasets": 16, "queries": 960, "labels": "AI_AUTHORED_UNREVIEWED", "retrieval": "NOT_RUN" }
+    },
+    "crossPlatformChecksums": {
+      "finding": "Windows checkout CRLF caused manifest checksum mismatch for JSONL query and Math Grade 1 constraints sidecar",
+      "fix": "Normalize text to UTF-8 LF before checksum and parse",
+      "regressions": "Both failed before fix and pass after fix; edited query/sidecar content remains rejected against the unchanged manifest checksum"
+    },
+    "tests": {
+      "focused": { "tests": 24, "failures": 0, "errors": 0, "note": "Focused test command alone does not meet project JaCoCo threshold; full verify below is authoritative" },
+      "fullBackend": { "command": "mvn verify", "tests": 622, "failures": 0, "errors": 0, "skipped": 8, "jacoco": "PASS" }
+    },
+    "liveEvaluation": {
+      "result": "BLOCKED_BEFORE_MODEL_CALL",
+      "datasets": 16,
+      "failureType": "SQLTransientConnectionException",
+      "localTarget": "127.0.0.1:55432/rag_eval did not accept connections",
+      "environmentCheck": "PostgreSQL service responds on 5432; dedicated 55432 target absent; local PostgreSQL 18 installation has no pgvector control file",
+      "remoteDatabaseUsed": false,
+      "remoteWrites": false,
+      "geminiCalls": 0
+    }
+  },
   "environment": {
     "database": "dedicated local PostgreSQL + pgvector",
     "address": "127.0.0.1:55432",

@@ -4,6 +4,23 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class CurriculumConstraintsTest {
+    @Test void constraintsChecksumIsStableAcrossWindowsLineEndings() throws Exception {
+        var dataset = CurriculumDataset.loadDefault();
+        byte[] source;
+        try (var stream = CurriculumDataset.resource("constraints.jsonl")) { source = stream.readAllBytes(); }
+        var text = new String(source, java.nio.charset.StandardCharsets.UTF_8).replace("\r\n", "\n");
+        byte[] windowsBytes = text.replace("\n", "\r\n").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        String canonicalSha = java.util.HexFormat.of().formatHex(
+                java.security.MessageDigest.getInstance("SHA-256").digest(text.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+
+        assertThat(CurriculumConstraints.parse(windowsBytes, canonicalSha, dataset).sha256()).isEqualTo(canonicalSha);
+        var edited = text.replace("math-g1-001", "math-g1-001x");
+        assertThat(edited).isNotEqualTo(text);
+        assertThatThrownBy(() -> CurriculumConstraints.parse(
+                edited.replace("\n", "\r\n").getBytes(java.nio.charset.StandardCharsets.UTF_8), canonicalSha, dataset))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("checksum mismatch");
+    }
+
     @Test void checksumMissingDuplicateAndControlRowsAreRejected() throws Exception {
         var dataset = CurriculumDataset.loadDefault();
         byte[] original;
