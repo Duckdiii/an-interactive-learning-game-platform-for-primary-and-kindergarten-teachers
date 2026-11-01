@@ -82,6 +82,67 @@ class GameGenerationServiceTest {
     }
 
     @Test
+    void kindergartenRequestPassesSelectedDomainToRetrieval() throws Exception {
+        var selectedDomain = new java.util.concurrent.atomic.AtomicReference<String>();
+        var evidence = CurriculumContextProvider.Evidence.found("Preschool outcome");
+        CurriculumContextProvider provider = new CurriculumContextProvider() {
+            @Override
+            public Evidence retrieve(String topic, Subject subject, GradeLevel gradeLevel) {
+                throw new AssertionError("Age-filtered retrieval must be used");
+            }
+
+            @Override
+            public Evidence retrieve(String topic, Subject subject, GradeLevel gradeLevel,
+                    com.aigameplatform.backend.entity.enums.KindergartenAgeBand ageBand) {
+                throw new AssertionError("Selected domain must use the domain-aware overload");
+            }
+
+            @Override
+            public Evidence retrieve(String topic, Subject subject, GradeLevel gradeLevel,
+                    com.aigameplatform.backend.entity.enums.KindergartenAgeBand ageBand, String domain) {
+                selectedDomain.set(domain);
+                return evidence;
+            }
+        };
+        var dataset = com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadKindergarten();
+        GameContentGenerator stopAfterRetrieval = attempt -> { throw new IllegalStateException("STOP_AFTER_RETRIEVAL"); };
+        var service = service(stopAfterRetrieval, 0, moderation(false, false), provider, true, List.of(dataset));
+        var request = new GameDslRequest("Nghe và kể chuyện", Subject.VIETNAMESE, GradeLevel.KINDERGARTEN,
+                com.aigameplatform.backend.entity.enums.KindergartenAgeBand.AGE_4_5, "LANGUAGE");
+
+        assertThatThrownBy(() -> service.generate(GameType.QUIZ, request))
+                .isInstanceOf(IllegalStateException.class).hasMessage("STOP_AFTER_RETRIEVAL");
+        assertThat(selectedDomain).hasValue("LANGUAGE");
+    }
+
+    @Test
+    void nullKindergartenDomainRetainsAgeFilteredProviderBehavior() throws Exception {
+        var retrievedAge = new java.util.concurrent.atomic.AtomicReference<com.aigameplatform.backend.entity.enums.KindergartenAgeBand>();
+        CurriculumContextProvider provider = new CurriculumContextProvider() {
+            @Override
+            public Evidence retrieve(String topic, Subject subject, GradeLevel gradeLevel) {
+                throw new AssertionError("Age-filtered retrieval must be used");
+            }
+
+            @Override
+            public Evidence retrieve(String topic, Subject subject, GradeLevel gradeLevel,
+                    com.aigameplatform.backend.entity.enums.KindergartenAgeBand ageBand) {
+                retrievedAge.set(ageBand);
+                return Evidence.found("Preschool outcome");
+            }
+        };
+        var dataset = com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadKindergarten();
+        GameContentGenerator stopAfterRetrieval = attempt -> { throw new IllegalStateException("STOP_AFTER_RETRIEVAL"); };
+        var service = service(stopAfterRetrieval, 0, moderation(false, false), provider, true, List.of(dataset));
+        var request = new GameDslRequest("Nghe và kể chuyện", Subject.VIETNAMESE, GradeLevel.KINDERGARTEN,
+                com.aigameplatform.backend.entity.enums.KindergartenAgeBand.AGE_4_5, null);
+
+        assertThatThrownBy(() -> service.generate(GameType.QUIZ, request))
+                .isInstanceOf(IllegalStateException.class).hasMessage("STOP_AFTER_RETRIEVAL");
+        assertThat(retrievedAge).hasValue(com.aigameplatform.backend.entity.enums.KindergartenAgeBand.AGE_4_5);
+    }
+
+    @Test
     void nonArithmeticMathUsesSeparateSemanticReviewWithoutRewritingTheRequest() throws Exception {
         var generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
         CurriculumContextProvider provider = (topic, subject, grade) ->

@@ -6,10 +6,15 @@ import com.aigameplatform.backend.entity.enums.KindergartenAgeBand;
 
 /** Thông tin giáo viên yêu cầu, dùng để dựng phần vỏ của game (AI không lặp lại các thông tin này). */
 public record GameDslRequest(String topic, Subject subject, GradeLevel gradeLevel,
-                             KindergartenAgeBand kindergartenAgeBand) {
+                             KindergartenAgeBand kindergartenAgeBand, String curriculumDomain) {
 
     public GameDslRequest(String topic, Subject subject, GradeLevel gradeLevel) {
-        this(topic, subject, gradeLevel, null);
+        this(topic, subject, gradeLevel, null, null);
+    }
+
+    public GameDslRequest(String topic, Subject subject, GradeLevel gradeLevel,
+                          KindergartenAgeBand kindergartenAgeBand) {
+        this(topic, subject, gradeLevel, kindergartenAgeBand, null);
     }
 
     public GameDslRequest {

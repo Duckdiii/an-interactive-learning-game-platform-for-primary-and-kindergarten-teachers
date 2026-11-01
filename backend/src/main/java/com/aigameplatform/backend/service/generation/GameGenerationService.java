@@ -226,7 +226,8 @@ public class GameGenerationService {
         }
         try {
             CurriculumContextProvider.Evidence evidence = provider.retrieve(
-                    request.topic(), request.subject(), request.gradeLevel(), request.kindergartenAgeBand());
+                    request.topic(), request.subject(), request.gradeLevel(), request.kindergartenAgeBand(),
+                    request.curriculumDomain());
             if (evidence == null || !evidence.sufficient()) {
                 throw new CurriculumEvidenceNotFoundException(
                         "Không tìm thấy yêu cầu cần đạt đủ liên quan trong chương trình đã chọn cho chủ đề này");
