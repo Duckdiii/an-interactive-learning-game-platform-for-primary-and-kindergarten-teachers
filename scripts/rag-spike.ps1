@@ -69,7 +69,13 @@ $ragMainClass = 'com.aigameplatform.backend.service.curriculum.CurriculumSpikeRu
 if ($Mode -in @('RuntimePreflight','RuntimeExploratory','RuntimeReviewed')) {
     $ragMainClass = 'com.aigameplatform.backend.service.curriculum.CurriculumRuntimeEvaluation'
     if (-not $QueriesPath) { $QueriesPath = Join-Path $ragRoot 'docs/rag-spike/evaluation-drafts' }
-    if (-not $ReportPath) { $ReportPath = Join-Path $ragBackend ('target/rag-eval-local/runtime-' + $RuntimeSplit + '.json') }
+    if (-not $ReportPath) {
+        if ($Mode -eq 'RuntimeExploratory' -and $RuntimeSplit -eq 'DEV') {
+            $ReportPath = Join-Path $ragBackend 'target/rag-eval-local/live-dev.json'
+        } else {
+            $ReportPath = Join-Path $ragBackend ('target/rag-eval-local/runtime-' + $RuntimeSplit + '.json')
+        }
+    }
     $ragRuntimeFlag = switch ($Mode) {
         'RuntimePreflight' { '--preflight' }
         'RuntimeExploratory' { '--exploratory' }

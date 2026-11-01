@@ -174,7 +174,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
             throw exception;
         } catch (RuntimeException exception) {
             throw new CurriculumServiceUnavailableException(
-                    "Không truy xuất được căn cứ chương trình; vui lòng thử lại sau.", null);
+                    "Không truy xuất được căn cứ chương trình; vui lòng thử lại sau.", exception);
         }
     }
 

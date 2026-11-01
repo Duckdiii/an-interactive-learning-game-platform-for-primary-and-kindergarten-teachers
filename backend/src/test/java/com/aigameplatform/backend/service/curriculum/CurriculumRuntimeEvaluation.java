@@ -3,6 +3,8 @@ package com.aigameplatform.backend.service.curriculum;
 import com.aigameplatform.backend.entity.enums.*;
 import com.aigameplatform.backend.exception.*;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.exception.HttpException;
+import dev.langchain4j.exception.RateLimitException;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.googleai.*;
 import dev.langchain4j.store.embedding.EmbeddingStore;
@@ -18,7 +20,14 @@ public final class CurriculumRuntimeEvaluation {
     private static final JsonMapper JSON = new JsonMapper();
     private CurriculumRuntimeEvaluation() { }
     public record Outcome(CurriculumBenchmark.Query query, String status, List<String> selectedIds,
-                          List<CurriculumRAGService.RetrievedChunk> ranked, long elapsedMillis, long retrievalMillis, long verificationMillis) { }
+                          List<CurriculumRAGService.RetrievedChunk> ranked, long elapsedMillis, long retrievalMillis,
+                          long verificationMillis, String serviceFailureCategory, String failureStage) {
+        public Outcome(CurriculumBenchmark.Query query, String status, List<String> selectedIds,
+                List<CurriculumRAGService.RetrievedChunk> ranked, long elapsedMillis, long retrievalMillis,
+                long verificationMillis) {
+            this(query, status, selectedIds, ranked, elapsedMillis, retrievalMillis, verificationMillis, null, null);
+        }
+    }
 
     public static List<CurriculumBenchmark.Query> loadDraft(Path path, CurriculumDataset dataset, String split)
             throws Exception {
@@ -73,6 +82,14 @@ public final class CurriculumRuntimeEvaluation {
     static List<Outcome> evaluate(CurriculumDataset dataset, List<CurriculumBenchmark.Query> queries,
             EmbeddingStore<TextSegment> store, EmbeddingModel embedding, String embeddingModel,
             SemanticCurriculumEvidenceVerifier semantic, CurriculumAvailability availability, String approvedSha) {
+        return evaluate(dataset, queries, store, embedding, embeddingModel, semantic, availability, approvedSha,
+                ignored -> { }, false);
+    }
+
+    static List<Outcome> evaluate(CurriculumDataset dataset, List<CurriculumBenchmark.Query> queries,
+            EmbeddingStore<TextSegment> store, EmbeddingModel embedding, String embeddingModel,
+            SemanticCurriculumEvidenceVerifier semantic, CurriculumAvailability availability, String approvedSha,
+            java.util.function.Consumer<Outcome> onOutcome, boolean stopOnQuota) {
         var rows = new ArrayList<Outcome>();
         for (var q : queries) {
             var ranked = new AtomicReference<List<CurriculumRAGService.RetrievedChunk>>(List.of());
@@ -87,6 +104,8 @@ public final class CurriculumRuntimeEvaluation {
                     approvedSha, CurriculumMetrics.noop(), embeddingModel, 8, .50, () -> null, () -> semantic);
             long started = System.nanoTime();
             String status;
+            String failureCategory = null;
+            String failureStage = null;
             List<String> ids = List.of();
             try {
                 var evidence = provider.retrieve(q.topic(), q.subject(), q.gradeLevel(), q.ageBand() == null
@@ -96,13 +115,43 @@ public final class CurriculumRuntimeEvaluation {
             } catch (CurriculumClarificationRequiredException | KindergartenAgeBandRequiredException ex) {
                 status = "NEEDS_CLARIFICATION";
             } catch (CurriculumEvidenceNotFoundException ex) { status = "INSUFFICIENT_EVIDENCE";
-            } catch (CurriculumServiceUnavailableException ex) { status = "SERVICE_UNAVAILABLE"; }
+            } catch (CurriculumServiceUnavailableException ex) {
+                status = "SERVICE_UNAVAILABLE";
+                failureCategory = classifyServiceFailure(ex);
+                failureStage = completedRetrieval.get() == 0 ? "BEFORE_RANKING" : "AFTER_RANKING";
+            }
             long finished = System.nanoTime();
             long retrievalEnd = completedRetrieval.get() == 0 ? started : completedRetrieval.get();
-            rows.add(new Outcome(q, status, ids, ranked.get(), (finished - started) / 1_000_000,
-                    (retrievalEnd - started) / 1_000_000, (finished - retrievalEnd) / 1_000_000));
+            var outcome = new Outcome(q, status, ids, ranked.get(), (finished - started) / 1_000_000,
+                    (retrievalEnd - started) / 1_000_000, (finished - retrievalEnd) / 1_000_000,
+                    failureCategory, failureStage);
+            rows.add(outcome);
+            onOutcome.accept(outcome);
+            if (stopOnQuota && "QUOTA".equals(failureCategory))
+                throw new CurriculumEvaluationQuotaExhaustedException();
         }
         return List.copyOf(rows);
+    }
+
+    static String classifyServiceFailure(Throwable exception) {
+        boolean hasCause = false;
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            hasCause = true;
+            if (cause instanceof RateLimitException) return "QUOTA";
+            if (cause instanceof HttpException http) {
+                if (http.statusCode() == 429) return "QUOTA";
+                if (http.statusCode() == 401) return "AUTHENTICATION";
+                if (http.statusCode() == 403) return "PERMISSION";
+                return "HTTP_" + http.statusCode();
+            }
+            if (cause instanceof java.sql.SQLException) return "DATABASE";
+            if (cause instanceof java.net.UnknownHostException) return "DNS";
+            if (cause instanceof java.net.SocketTimeoutException || cause instanceof java.util.concurrent.TimeoutException)
+                return "TIMEOUT";
+        }
+        if (!hasCause || exception.getCause() == null) return "CAUSE_NOT_RETAINED";
+        String simpleName = exception.getCause().getClass().getSimpleName().replaceAll("[^A-Za-z0-9]", "");
+        return simpleName.isBlank() ? "OTHER" : "OTHER_" + simpleName;
     }
 
     static Map<String, Object> summarize(List<Outcome> outcomes, CurriculumDataset dataset) {
@@ -163,6 +212,10 @@ public final class CurriculumRuntimeEvaluation {
             queries.put(d, set);
         }
         var results = new LinkedHashMap<String, Object>();
+        boolean interruptedByQuota = false;
+        long cacheFreshVectors = 0;
+        long cacheReusedVectors = 0;
+        long cacheLiveApiCalls = 0;
         if (args[0].equals("--preflight")) {
             queries.forEach((d, q) -> results.put(d.source().datasetVersion(), Map.of("queries", q.size(),
                     "source", d.source(), "liveEvaluation", "NOT_RUN")));
@@ -188,16 +241,66 @@ public final class CurriculumRuntimeEvaluation {
                             new CurriculumDatasetReadiness(db).requireComplete(d, config.embeddingModel());
                         });
                 for (var entry : queries.entrySet()) {
-                    var outcomes = evaluate(entry.getKey(), entry.getValue(), CurriculumSpikeDatabase.store(db), model,
-                            config.embeddingModel(), judge, readiness,
-                            environment.getOrDefault("CURRICULUM_CONSTRAINTS_APPROVED_SHA256", ""));
-                    // Exploratory KG evaluation deliberately does not publish or bypass runtime expert approval.
-                    var summary = summarize(outcomes, entry.getKey());
-                    if (reviewed) summary.put("labelReview", "REVIEW_MANIFEST_VALIDATED");
-                    results.put(entry.getKey().source().datasetVersion(), Map.of(
-                            "summary", summary, "outcomes", outcomes));
+                    var dataset = entry.getKey();
+                    var datasetVersion = dataset.source().datasetVersion();
+                    boolean syntheticCacheAllowed = args[0].equals("--exploratory")
+                            && entry.getValue().stream().allMatch(q -> "AI_CODEX".equals(q.writerId())
+                                    && q.labelerIds().isEmpty());
+                    String fingerprint = checkpointFingerprint(dataset, entry.getValue(), args[0], args[2],
+                            config.embeddingModel(), name);
+                    Path checkpointPath = outputSidecar(Path.of(args[3]), "." + datasetVersion + ".checkpoint.jsonl");
+                    Path legacyPath = args[0].equals("--exploratory") && args[2].equals("DEV")
+                            ? Path.of(args[3]).resolveSibling("live-dev.json") : null;
+                    try (var checkpoint = CurriculumRuntimeCheckpoint.openOrImport(checkpointPath, fingerprint,
+                            legacyPath, datasetVersion, entry.getValue());
+                         var queryCache = syntheticCacheAllowed
+                                 ? new BenchmarkQueryEmbeddingCache(model,
+                                         outputSidecar(Path.of(args[3]), "." + datasetVersion + ".query-embeddings.jsonl"),
+                                         config.embeddingModel(), datasetVersion, fingerprint, 768)
+                                 : null) {
+                        EmbeddingModel queryModel = queryCache == null ? model : queryCache;
+                        var pendingIds = checkpoint.pendingQueryIds(entry.getValue().stream()
+                                .map(CurriculumBenchmark.Query::queryId).toList());
+                        var pendingSet = Set.copyOf(pendingIds);
+                        var pendingQueries = entry.getValue().stream()
+                                .filter(q -> pendingSet.contains(q.queryId())).toList();
+                        try {
+                            evaluate(dataset, pendingQueries, CurriculumSpikeDatabase.store(db), queryModel,
+                                    config.embeddingModel(), judge, readiness,
+                                    environment.getOrDefault("CURRICULUM_CONSTRAINTS_APPROVED_SHA256", ""),
+                                    outcome -> {
+                                        try { checkpoint.record(outcome); }
+                                        catch (java.io.IOException io) { throw new java.io.UncheckedIOException(io); }
+                                    }, true);
+                        } catch (CurriculumEvaluationQuotaExhaustedException quota) {
+                            interruptedByQuota = true;
+                        }
+                        var outcomes = entry.getValue().stream().map(CurriculumBenchmark.Query::queryId)
+                                .map(id -> checkpoint.latestOutcomes().stream()
+                                        .filter(outcome -> outcome.query().queryId().equals(id)).findFirst().orElse(null))
+                                .filter(Objects::nonNull).toList();
+                        var summary = summarize(outcomes, dataset);
+                        if (reviewed) summary.put("labelReview", "REVIEW_MANIFEST_VALIDATED");
+                        summary.put("pendingQueries", checkpoint.pendingQueryIds(entry.getValue().stream()
+                                .map(CurriculumBenchmark.Query::queryId).toList()).size());
+                        var stats = queryCache == null ? new BenchmarkQueryEmbeddingCache.Stats(0, 0, 0)
+                                : queryCache.stats();
+                        cacheFreshVectors += stats.freshVectors();
+                        cacheReusedVectors += stats.reusedVectors();
+                        cacheLiveApiCalls += stats.liveApiCalls();
+                        results.put(datasetVersion, Map.of("summary", summary, "outcomes", outcomes,
+                                "checkpoint", checkpointPath.getFileName().toString(),
+                                "queryEmbeddingCache", Map.of("mode", syntheticCacheAllowed
+                                        ? "PERSISTENT_SYNTHETIC_EXPLORATORY_ONLY" : "DISABLED",
+                                        "freshVectorsThisRun", stats.freshVectors(),
+                                        "reusedVectorsThisRun", stats.reusedVectors(),
+                                        "liveApiCallsThisRun", stats.liveApiCalls())));
+                    }
+                    if (interruptedByQuota) break;
                 }
             }
+          } catch (CurriculumEvaluationQuotaExhaustedException quota) {
+            interruptedByQuota = true;
           } catch (Exception unavailable) {
             report.put("execution", "BLOCKED_ENVIRONMENT_OR_SERVICE");
             report.put("failureType", unavailable.getClass().getSimpleName());
@@ -205,11 +308,44 @@ public final class CurriculumRuntimeEvaluation {
                     "liveEvaluation", "NOT_RUN", "reason", "LOCAL_DATABASE_OR_MODEL_UNAVAILABLE"));
           }
         }
+        String execution = report.containsKey("failureType") ? "BLOCKED_ENVIRONMENT_OR_SERVICE"
+                : interruptedByQuota ? "STOPPED_ON_CONFIRMED_QUOTA_PENDING_RESUME" : "COMPLETED_OR_PARTIAL";
+        report.put("execution", execution);
+        if (interruptedByQuota) for (var dataset : all) {
+            String version = dataset.source().datasetVersion();
+            if (!results.containsKey(version)) results.put(version, Map.of("liveEvaluation", "NOT_RUN_STOPPED_ON_QUOTA",
+                    "pendingQueries", queries.get(dataset).size()));
+        }
+        report.put("queryEmbeddingCachePolicy", Map.of("persistentCache", "Synthetic AI_CODEX exploratory datasets only",
+                "teacherRequests", "No persistent query embedding cache", "freshVectorsThisRun", cacheFreshVectors,
+                "reusedVectorsThisRun", cacheReusedVectors, "liveApiCallsThisRun", cacheLiveApiCalls));
         report.put("scopes", results);
         Path output = Path.of(args[3]);
-        if (output.toAbsolutePath().getParent() != null) Files.createDirectories(output.toAbsolutePath().getParent());
-        Files.writeString(output, JSON.writerWithDefaultPrettyPrinter().writeValueAsString(report));
+        Path reportPath = report.containsKey("failureType") ? outputSidecar(output, ".blocked.json") : output;
+        if (reportPath.toAbsolutePath().getParent() != null) Files.createDirectories(reportPath.toAbsolutePath().getParent());
+        Files.writeString(reportPath, JSON.writerWithDefaultPrettyPrinter().writeValueAsString(report));
         if (report.containsKey("failureType"))
-            throw new IllegalStateException("Local runtime evaluation blocked; see sanitized report");
+            throw new IllegalStateException("Local runtime evaluation blocked; see sanitized .blocked.json report");
+        if (interruptedByQuota)
+            throw new IllegalStateException("Evaluation stopped after confirmed provider quota exhaustion; resume from checkpoint");
+    }
+
+    private static Path outputSidecar(Path output, String suffix) {
+        return output.resolveSibling(output.getFileName().toString() + suffix);
+    }
+
+    private static String checkpointFingerprint(CurriculumDataset dataset,
+            List<CurriculumBenchmark.Query> queries, String mode, String split, String embeddingModel,
+            String reviewerModel) throws Exception {
+        var settings = new LinkedHashMap<String, Object>();
+        settings.put("protocol", "runtime-eval-checkpoint-v1"); settings.put("mode", mode); settings.put("split", split);
+        settings.put("datasetVersion", dataset.source().datasetVersion());
+        settings.put("curriculumVersion", dataset.source().curriculumVersion());
+        settings.put("sourceSha256", dataset.source().sourceSha256()); settings.put("embeddingModel", embeddingModel);
+        settings.put("reviewerModel", reviewerModel); settings.put("topK", 3);
+        settings.put("similarityThreshold", 0.855); settings.put("semanticMinConfidence", 0.50);
+        settings.put("queryManifest", queries);
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                .digest(JSON.writeValueAsBytes(settings)));
     }
 }

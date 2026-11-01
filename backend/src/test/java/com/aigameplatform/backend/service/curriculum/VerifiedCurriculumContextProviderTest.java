@@ -155,7 +155,8 @@ class VerifiedCurriculumContextProviderTest {
                 .isInstanceOf(CurriculumEvidenceNotFoundException.class).hasMessageContaining("làm rõ");
         failing.set(true);
         assertThatThrownBy(() -> provider.retrieve("Đếm từ 1 đến 5", Subject.MATH, GradeLevel.GRADE_1))
-                .isInstanceOf(CurriculumServiceUnavailableException.class).hasMessageNotContaining("SECRET_TOPIC");
+                .isInstanceOf(CurriculumServiceUnavailableException.class).hasMessageNotContaining("SECRET_TOPIC")
+                .cause().isInstanceOf(IllegalStateException.class).hasMessage("SECRET_TOPIC");
         assertThatThrownBy(() -> provider.retrieve("Đếm", Subject.MATH, GradeLevel.KINDERGARTEN))
                 .isInstanceOf(KindergartenAgeBandRequiredException.class);
     }

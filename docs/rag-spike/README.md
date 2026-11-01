@@ -168,7 +168,7 @@ Offline remains: official source → hash/page/fragment verification (declared m
 
 Online is: request scope → catalog dataset/source → per-source readiness → query embedding → exact source/version/model/non-control filters (+ preschool age and optional domain) → ranked candidates → packaged-evidence integrity check → deterministic Math G1 or structured semantic decision → selected outcome context/provenance → existing generation service → existing schema/business/safety checks → specialized arithmetic or semantic grounding gate → separate generation result/evidence/review. Automated semantic acceptance remains `PENDING`, not human approval. `visualPrompt` does not prove a rendered image; unresolved visual/aural content must not be claimed verified.
 
-The service's existing `GameDslRequest` has topic/subject/grade/age but **no lesson-plan field or explicit preschool domain**. A domain-aware RAG overload is implemented for an agreed caller, but the current generation request cannot forward it. `QuizGameStrategy.buildTypeSpecificInstruction` and `GeminiGameContentGenerator.generate` still explicitly restrict the concrete adapter to QUIZ / MATH / GRADE_1. Changing strategy prompts or schemas belongs to their owner. These are precise integration dependencies, not a claim that the other scopes generate games end to end.
+The service's existing `GameDslRequest` has topic/subject/grade/age but **no lesson-plan field or explicit preschool domain**. `GameGenerationService.retrieveCurriculumContext(GameType, GameDslRequest)` calls the four-argument `CurriculumContextProvider.retrieve`; it cannot pass the optional domain accepted by the five-argument RAG overload. `QuizGameStrategy.buildTypeSpecificInstruction` rejects every grade except GRADE_1, and `GeminiGameContentGenerator.generate(GenerationAttempt)` rejects every scope except QUIZ / MATH / GRADE_1. To generate outside the pilot, the owner must coordinate the request/provider contract and the strategy prompt + generator guard as one change; source history identifies Nguyễn Đức Duy as the `GameDslRequest`/`QuizGameStrategy` owner. This run did not edit those contracts. Therefore RAG retrieval is implemented across scopes, but game generation is not end-to-end supported beyond the Math G1 pilot.
 
 ### Evaluation commands and interpretation
 
@@ -207,4 +207,90 @@ Reviewed HOLDOUT also loads approved DEV and rejects overlapping group IDs or no
 | 11: no lesson-plan context | Contract dependency: `GameDslRequest` has no lesson-plan input. No undocumented field/teammate API was introduced |
 | 12: no ANN | Deliberate exact filtered scan at current corpus size; not an open defect |
 
-Completion still requires current live evaluation with local DB/model credentials, independent benchmark review, preschool specialist approval, and agreement with the generation owner on non-pilot prompt contracts. Technical tests do not close those gates. See the scope matrix in `corpus-expansion-status.md` and sanitized current-run evidence in `results/local-acceptance-2026-11-01.json`.
+Completion still requires complete live decision coverage for all scopes after Gemini quota is available, independent benchmark review, preschool specialist approval, and agreement with the generation owner on non-pilot prompt contracts. Technical tests do not close those gates. See the scope matrix in `corpus-expansion-status.md` and sanitized current-run evidence in `results/local-acceptance-2026-11-01.json`.
+
+## Local PostgreSQL and exploratory runtime evaluation — 2026-11-02
+
+This execution supersedes the 2026-11-02 cross-platform section above where it says no local database or model was available. It does not supersede historical tests or establish independent benchmark approval.
+
+- A dedicated PostgreSQL 18.4 cluster with pgvector was started under the ignored `backend/target/rag-eval-local/` directory, bound only to `127.0.0.1:55432`; database `rag_eval` is separate from all Supabase projects. Existing Flyway migrations V1–V6 completed. The extension/vector smoke query passed.
+- The normal Ingest runner verified source fragments and ingested all 16 datasets. SQL confirmed 653/653 unique embedding IDs, all vectors 768-dimensional, one source hash per dataset, and 34 control chunks. Counts were Math 1–5: 28/43/51/53/53; Vietnamese 1–5: 36/44/47/44/42; English 1–5: 13/13/18/17/17; Kindergarten: 134. A second complete pass through the runner returned `0 written / 653 skipped` across all 16 datasets. No remote writes.
+- `RuntimeExploratory DEV` called the production `VerifiedCurriculumContextProvider` against the local pgvector corpus for 30 queries in each of 16 datasets (480 total). It produced 80 actual decisions (37 `SUPPORTED`, 43 `INSUFFICIENT_EVIDENCE`) and 400 `SERVICE_UNAVAILABLE`; 130 failures occurred before candidates were ranked, 270 after candidate ranking. Those failures remain distinct from evidence decisions.
+- Among the 80 completed decisions, exploratory Hit@3 was 100%, false accepts 0, and scope leakage 0. Supported acceptance was 100% for English G1, Math G1/G3/G5; 70% for English G3 and 87.5% for English G5. Four AI-labeled positive queries were refused despite their expected chunk appearing in the top 3: `english-grade3-draft-v1-DEV-006`, `-009`, `-013`, and `english-grade5-draft-v1-DEV-014`. These require label/content adjudication; they are not established false rejections because all labels are AI-authored and unreviewed. Ten datasets had zero completed decisions. No dataset has a complete 30-query measurement.
+- During bounded live generation smoke, Gemini returned HTTP 429 `RESOURCE_EXHAUSTED`: the configured embedding model had exhausted the Free Tier daily quota of 1,000 requests and reported a reset delay of about 13h51m. The in-scope game was not generated. The out-of-corpus case also surfaced `SERVICE_UNAVAILABLE` before it could establish an evidence rejection. Do not report either as a passing generation test.
+- No holdout-candidate live run was started after the quota response. Existing `HOLDOUT_CANDIDATE` is exposed AI draft material, not an independent holdout. No score threshold or quality gate was changed. `results/local-acceptance-2026-11-01.json` contains the sanitized 16-scope status summary and separate failure/decision counts; raw Gemini errors, keys, prompts from teachers, and generated output are not committed.
+- Full backend `mvn verify` passed after these changes: 622 tests, 0 failures/errors, 8 skipped; JaCoCo passed. The opt-in two-case live generation smoke was attempted but failed as described above due to API quota, so it is not counted as a passing test.
+
+### Review packet for an independent benchmark and Kindergarten expert
+
+Use the existing files under `evaluation-drafts/<datasetVersion>/DEV.jsonl` and `HOLDOUT_CANDIDATE.jsonl`; each line contains the natural-language question, proposed accept/reject label, proposed acceptable `expectedChunkIds`, style, author, split and age where applicable. The adjacent manifest pins query SHA, source SHA and curriculum/dataset versions. Resolve each proposed chunk ID in `backend/src/main/resources/curriculum/primary/math-grade1/chunks.jsonl` for Math G1, `backend/src/main/resources/curriculum/kindergarten/chunks.jsonl` for preschool, or `backend/src/main/resources/curriculum/spike/<subject-grade>/chunks.jsonl` for the other 14 primary datasets. Follow its `sourceFragments` to the official PDF, PDF page, printed page, and region. The corpus evidence manifests retain the source hash and transcription exceptions.
+
+Reviewer checklist (not yet completed):
+
+1. Independently decide whether the request should be supported, clarified, or refused; record every acceptable chunk ID rather than forcing a single answer.
+2. Verify each proposed chunk against the cited PDF fragment, one-outcome boundary, subject/grade, and (for Kindergarten) age band and allowed domain. For Math, verify every explicit number/operation/range; for language objectives, verify the exact skill and condition without adding requirements absent from the source.
+3. Mark ambiguity and rationale, especially the four English DEV IDs above, any question whose top-three contains several plausible outcomes, boundary/negative requests, and questions with compound conditions. Do not relabel these by similarity alone.
+4. Record reviewer identity/date separately from the author; double-label at least 20% independently and resolve disagreement before freezing. Current sets have `AI_AUTHORED_UNREVIEWED` status and empty reviewer IDs.
+5. Keep DEV for tuning only. Replace exposed candidates as needed, create genuinely disjoint groups, hash and freeze a new HOLDOUT before anyone tuning retrieval sees it. Preserve the agreed gate unchanged: Hit@3 and supported acceptance ≥90%, false accepts = 0, scope leakage = 0.
+
+### Current per-scope live outcomes (AI labels; exploratory only)
+
+| Dataset | Attempted | Service unavailable | Live supported | Live insufficient | Hit@3 | Supported acceptance | False accepts / leaks |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| English G1 | 30 | 14 | 15 | 1 | 100% | 100% | 0 / 0 |
+| English G2 | 30 | 30 | 0 | 0 | — | — | — |
+| English G3 | 30 | 15 | 7 | 8 | 100% | 70% | 0 / 0 |
+| English G4 | 30 | 30 | 0 | 0 | — | — | — |
+| English G5 | 30 | 18 | 7 | 5 | 100% | 87.5% | 0 / 0 |
+| Kindergarten | 30 | 30 | 0 | 0 | — | — | — |
+| Math G1 | 30 | 18 | 4 | 8 | 100% | 100% | 0 / 0 |
+| Math G2 | 30 | 30 | 0 | 0 | — | — | — |
+| Math G3 | 30 | 17 | 3 | 10 | 100% | 100% | 0 / 0 |
+| Math G4 | 30 | 30 | 0 | 0 | — | — | — |
+| Math G5 | 30 | 18 | 1 | 11 | 100% | 100% | 0 / 0 |
+| Vietnamese G1 | 30 | 30 | 0 | 0 | — | — | — |
+| Vietnamese G2 | 30 | 30 | 0 | 0 | — | — | — |
+| Vietnamese G3 | 30 | 30 | 0 | 0 | — | — | — |
+| Vietnamese G4 | 30 | 30 | 0 | 0 | — | — | — |
+| Vietnamese G5 | 30 | 30 | 0 | 0 | — | — | — |
+
+The table is not a pass: 400 service failures make every scope incomplete, labels are not independently reviewed, and several scopes have zero live decisions. The next external action is to provide authorized Gemini embedding capacity after the current daily quota resets or is raised; only then can the bounded live evaluation and generation smoke resume. Independently, the benchmark and Kindergarten corpus still need human review, and non-pilot generation still needs a coordinated change to the existing `GameDslRequest`/`QuizGameStrategy`/`GeminiGameContentGenerator` contract owner.
+
+## Quota interruption follow-up — 2026-11-02
+
+### What the 400 historical service failures establish
+
+The prior `live-dev.json` stores status, ranked candidates and timing, but not exception class, HTTP status or cause. All 400 historical failures are therefore classified `CAUSE_NOT_CAPTURED_IN_PRIOR_RUN`, not quota. The artifact can only separate 130 failures before ranking from 270 after ranking. A separate later smoke did capture Gemini embedding HTTP 429 `RESOURCE_EXHAUSTED`, proving quota exhaustion at that later time only; it cannot be projected onto the 400 earlier failures. The runner now preserves sanitized service causes internally so future records can distinguish quota, authentication/permission, other HTTP statuses, database, DNS, timeout and unknown causes. No raw provider message is written to the report.
+
+### Checkpoint, resume and embedding reuse
+
+`CurriculumRuntimeEvaluation` appends each query outcome to a per-dataset JSONL checkpoint under ignored `backend/target/rag-eval-local/`. A decision (`SUPPORTED`, `INSUFFICIENT_EVIDENCE` or `NEEDS_CLARIFICATION`) is complete; service failures stay pending. An explicit HTTP 429/rate-limit cause stops the entire batch after persisting that outcome. Resuming with the same report path, query manifests, source, models and retrieval configuration skips completed decisions and retries only pending questions. Fingerprint changes fail closed. The first resume can import the old exploratory report only when its query payloads match the current frozen DEV questions exactly; old service errors stay pending and retain the `CAUSE_NOT_CAPTURED_IN_PRIOR_RUN` label.
+
+Persistent query-embedding reuse is enabled only in the test-source runner for AI-authored synthetic exploratory drafts. The key hashes the exact query text, embedding model, dataset version, retrieval configuration, task type and vector dimension; the cache file contains hashes and vectors, not query text. Runtime teacher requests have no persistent cache. Each run reports fresh vectors, reused vectors and actual live embedding API calls separately. To resume the existing DEV run, use `scripts/rag-spike.ps1 -Mode RuntimeExploratory -RuntimeSplit DEV` with the same local-only configuration; its default output/checkpoint path is under `backend/target/rag-eval-local/`.
+
+### English false-reject candidates retained for review
+
+| Query | Expected outcome | Retrieval evidence | Decision attribution | Label status |
+|---|---|---|---|---|
+| English G3 `DEV-006` | `en-g3-003` (listen and answer simple familiar questions spoken slowly and clearly) | Expected outcome in top 3 | Retrieved, then semantic verifier returned insufficient evidence | AI-authored, unreviewed |
+| English G3 `DEV-009` | `en-g3-003` | Expected outcome ranked 2; `en-g3-007` ranked 1 | Retrieved, then semantic verifier returned insufficient evidence | AI-authored, unreviewed |
+| English G3 `DEV-013` | `en-g3-003` | Expected outcome in top 3 | Retrieved, then semantic verifier returned insufficient evidence | AI-authored, unreviewed |
+| English G5 `DEV-014` | `en-g5-001` (recognize word stress) | Expected outcome ranked 1 | Retrieved, then semantic verifier returned insufficient evidence | AI-authored, unreviewed |
+
+These are verifier-stage refusals, not retrieval misses. Existing artifacts do not retain the Gemini verifier's exact rejection rationale, and the labels have no independent review; therefore none is asserted as a confirmed false reject. Keep all four unchanged as regression/adjudication cases. No threshold or label was tuned to improve the score.
+
+### Minimal generation contract proposal for Nguyễn Đức Duy
+
+Proposal only; no teammate-owned strategy, generation contract or DSL was edited. `GameDslRequest` currently carries topic, subject, grade and optional Kindergarten age, but no curriculum domain. The existing `CurriculumContextProvider` already has a domain-filtered overload. The minimal integration is to add an optional internal `curriculumDomain` (`COGNITIVE`/`LANGUAGE`) to the request and pass it through to that overload; if omitted, Kindergarten retrieval may consider both already-approved domains. Keep age required and keep DSL 1.0.0 unchanged.
+
+For generator grounding outside Math Grade 1, the owner should agree one internal generation-context contract carrying domain/age alongside the selected YCCĐ and provenance from `GameGenerationService` through `GenerationAttempt` to the strategy/generator prompt. The generator must receive the actual subject/grade/age and scope-specific instructions, while the generation guard continues to reject unsupported scopes. This requires a coordinated contract update across `GameDslRequest`, `GameGenerationService`, `GenerationAttempt`, `QuizGameStrategy` and `GeminiGameContentGenerator`; the RAG work must not silently rewrite those owner-managed files. Exact internal type and ownership are the requested coordination decision.
+
+No post-change live resume result is claimed in this report update. Benchmark labels remain exploratory/unreviewed, Kindergarten remains pending specialist approval, and remote Supabase remains untouched.
+
+### Resume attempt and recovery blocker
+
+The bounded post-change invocation targeted the loopback `rag_eval` database but failed before any Gemini call with `SQLTransientConnectionException`; it made no DB writes, no query embedding calls and no new decision. The quota state was therefore not rechecked. The existing data directory was not recreated and ingestion was not repeated. The cluster is currently inconsistent from the runner's view: its PID file/process exists, but `pg_ctl status` reports no running server and port 55432 has no listener. The recovery action is to restore/restart this exact existing cluster so JDBC can connect to `127.0.0.1:55432/rag_eval`; do not initialize a new data directory.
+
+The previous per-query `live-dev.json` was ignored under `target/` and was overwritten by that failed invocation before the runner had a blocked-report sidecar safeguard. The tracked acceptance JSON and this README still preserve the prior aggregate decision counts, stages, scope metrics and four English review cases, but the old per-query outcomes/rankings are no longer available in this workspace. The aggregate is insufficient to reconstruct exactly which 80 queries had decisions. To respect the instruction not to repeat completed work, the runner will not replay all 480 questions. Exact resume requires restoring that prior ignored artifact from backup; absent a backup, start a newly authorized exploratory run with new checkpoints. Future environment failures write a `.blocked.json` sidecar and leave the main report intact.
+
+After the runner changes, focused tests passed (15/15) and full backend `mvn verify` passed (627 tests, 0 failures/errors, 8 skipped; JaCoCo passed). No post-change live evaluation or generation result is claimed because local JDBC failed before model calls.

@@ -891,5 +891,369 @@
       "Existing GameDslRequest has no lesson-plan/domain fields; RAG domain overload is ready but caller contract unchanged."
     ],
     "findings": "See latest README finding disposition; historical evidence above is retained."
+  },
+  "currentLiveRun2026_11_02":   {
+      "runAtUtc":  "2026-11-01T18:00:20.162309300Z",
+      "codeRevision":  "9d11e11ecc6acc52f254835506033cca6b00d293",
+      "mode":  "--exploratory",
+      "database":  {
+                       "engine":  "PostgreSQL 18.4 + pgvector",
+                       "database":  "rag_eval",
+                       "bindAddress":  "127.0.0.1",
+                       "port":  55432,
+                       "migrations":  "V1-V6",
+                       "remoteWrites":  false
+                   },
+      "idempotencyRerun": {
+        "datasets": 16,
+        "rowsAlreadyPresent": 653,
+        "written": 0,
+        "skipped": 653,
+        "result": "PASS"
+      },
+      "fullBackendVerify": {
+        "tests": 622,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 8,
+        "jacoco": "PASS"
+      },      "corpus":  {
+                     "datasets":  16,
+                     "rows":  653,
+                     "uniqueEmbeddingIds":  653,
+                     "dimensions":  768,
+                     "controlRows":  34,
+                     "sourceHashesPerDataset":  1,
+                     "idempotency":  "Verified by runner reruns; completed datasets skipped on repeat"
+                 },
+      "exploratoryEvaluation":  {
+                                    "split":  "DEV",
+                                    "labels":  "AI_AUTHORED_UNREVIEWED",
+                                    "queriesAttempted":  480,
+                                    "serviceUnavailable":  400,
+                                    "supported":  37,
+                                    "insufficientEvidence":  43,
+                                    "needsClarification":  0,
+                                    "releaseGate":  "NOT_ESTABLISHED",
+                                    "agreedGateUnchanged":  "Hit@3 and supported acceptance \u003e= 90%; false accepts = 0; scope leakage = 0",
+                                    "perDataset":  {
+                                                       "english-grade1-draft-v1":  {
+                                                                                       "attempted":  30,
+                                                                                       "serviceUnavailable":  14,
+                                                                                       "unavailableBeforeRanking":  0,
+                                                                                       "unavailableAfterRanking":  14,
+                                                                                       "liveSupported":  15,
+                                                                                       "liveInsufficientEvidence":  1,
+                                                                                       "liveNeedsClarification":  0,
+                                                                                       "hitAt3":  1.0,
+                                                                                       "supportedAcceptance":  1.0,
+                                                                                       "falseAcceptances":  0,
+                                                                                       "falseRejections":  0,
+                                                                                       "scopeLeaks":  0,
+                                                                                       "measurementComplete":  false
+                                                                                   },
+                                                       "english-grade2-draft-v1":  {
+                                                                                       "attempted":  30,
+                                                                                       "serviceUnavailable":  30,
+                                                                                       "unavailableBeforeRanking":  0,
+                                                                                       "unavailableAfterRanking":  30,
+                                                                                       "liveSupported":  0,
+                                                                                       "liveInsufficientEvidence":  0,
+                                                                                       "liveNeedsClarification":  0,
+                                                                                       "hitAt3":  null,
+                                                                                       "supportedAcceptance":  null,
+                                                                                       "falseAcceptances":  null,
+                                                                                       "falseRejections":  null,
+                                                                                       "scopeLeaks":  null,
+                                                                                       "measurementComplete":  false
+                                                                                   },
+                                                       "english-grade3-draft-v1":  {
+                                                                                       "attempted":  30,
+                                                                                       "serviceUnavailable":  15,
+                                                                                       "unavailableBeforeRanking":  0,
+                                                                                       "unavailableAfterRanking":  15,
+                                                                                       "liveSupported":  7,
+                                                                                       "liveInsufficientEvidence":  8,
+                                                                                       "liveNeedsClarification":  0,
+                                                                                       "hitAt3":  1.0,
+                                                                                       "supportedAcceptance":  0.7,
+                                                                                       "falseAcceptances":  0,
+                                                                                       "falseRejections":  3,
+                                                                                       "scopeLeaks":  0,
+                                                                                       "measurementComplete":  false
+                                                                                   },
+                                                       "english-grade4-draft-v1":  {
+                                                                                       "attempted":  30,
+                                                                                       "serviceUnavailable":  30,
+                                                                                       "unavailableBeforeRanking":  0,
+                                                                                       "unavailableAfterRanking":  30,
+                                                                                       "liveSupported":  0,
+                                                                                       "liveInsufficientEvidence":  0,
+                                                                                       "liveNeedsClarification":  0,
+                                                                                       "hitAt3":  null,
+                                                                                       "supportedAcceptance":  null,
+                                                                                       "falseAcceptances":  null,
+                                                                                       "falseRejections":  null,
+                                                                                       "scopeLeaks":  null,
+                                                                                       "measurementComplete":  false
+                                                                                   },
+                                                       "english-grade5-draft-v1":  {
+                                                                                       "attempted":  30,
+                                                                                       "serviceUnavailable":  18,
+                                                                                       "unavailableBeforeRanking":  0,
+                                                                                       "unavailableAfterRanking":  18,
+                                                                                       "liveSupported":  7,
+                                                                                       "liveInsufficientEvidence":  5,
+                                                                                       "liveNeedsClarification":  0,
+                                                                                       "hitAt3":  1.0,
+                                                                                       "supportedAcceptance":  0.875,
+                                                                                       "falseAcceptances":  0,
+                                                                                       "falseRejections":  1,
+                                                                                       "scopeLeaks":  0,
+                                                                                       "measurementComplete":  false
+                                                                                   },
+                                                       "kindergarten-outcomes-v1":  {
+                                                                                        "attempted":  30,
+                                                                                        "serviceUnavailable":  30,
+                                                                                        "unavailableBeforeRanking":  0,
+                                                                                        "unavailableAfterRanking":  30,
+                                                                                        "liveSupported":  0,
+                                                                                        "liveInsufficientEvidence":  0,
+                                                                                        "liveNeedsClarification":  0,
+                                                                                        "hitAt3":  null,
+                                                                                        "supportedAcceptance":  null,
+                                                                                        "falseAcceptances":  null,
+                                                                                        "falseRejections":  null,
+                                                                                        "scopeLeaks":  null,
+                                                                                        "measurementComplete":  false
+                                                                                    },
+                                                       "math-grade1-spike-v1":  {
+                                                                                    "attempted":  30,
+                                                                                    "serviceUnavailable":  18,
+                                                                                    "unavailableBeforeRanking":  0,
+                                                                                    "unavailableAfterRanking":  18,
+                                                                                    "liveSupported":  4,
+                                                                                    "liveInsufficientEvidence":  8,
+                                                                                    "liveNeedsClarification":  0,
+                                                                                    "hitAt3":  1.0,
+                                                                                    "supportedAcceptance":  1.0,
+                                                                                    "falseAcceptances":  0,
+                                                                                    "falseRejections":  0,
+                                                                                    "scopeLeaks":  0,
+                                                                                    "measurementComplete":  false
+                                                                                },
+                                                       "math-grade2-draft-v1":  {
+                                                                                    "attempted":  30,
+                                                                                    "serviceUnavailable":  30,
+                                                                                    "unavailableBeforeRanking":  0,
+                                                                                    "unavailableAfterRanking":  30,
+                                                                                    "liveSupported":  0,
+                                                                                    "liveInsufficientEvidence":  0,
+                                                                                    "liveNeedsClarification":  0,
+                                                                                    "hitAt3":  null,
+                                                                                    "supportedAcceptance":  null,
+                                                                                    "falseAcceptances":  null,
+                                                                                    "falseRejections":  null,
+                                                                                    "scopeLeaks":  null,
+                                                                                    "measurementComplete":  false
+                                                                                },
+                                                       "math-grade3-draft-v1":  {
+                                                                                    "attempted":  30,
+                                                                                    "serviceUnavailable":  17,
+                                                                                    "unavailableBeforeRanking":  0,
+                                                                                    "unavailableAfterRanking":  17,
+                                                                                    "liveSupported":  3,
+                                                                                    "liveInsufficientEvidence":  10,
+                                                                                    "liveNeedsClarification":  0,
+                                                                                    "hitAt3":  1.0,
+                                                                                    "supportedAcceptance":  1.0,
+                                                                                    "falseAcceptances":  0,
+                                                                                    "falseRejections":  0,
+                                                                                    "scopeLeaks":  0,
+                                                                                    "measurementComplete":  false
+                                                                                },
+                                                       "math-grade4-draft-v1":  {
+                                                                                    "attempted":  30,
+                                                                                    "serviceUnavailable":  30,
+                                                                                    "unavailableBeforeRanking":  0,
+                                                                                    "unavailableAfterRanking":  30,
+                                                                                    "liveSupported":  0,
+                                                                                    "liveInsufficientEvidence":  0,
+                                                                                    "liveNeedsClarification":  0,
+                                                                                    "hitAt3":  null,
+                                                                                    "supportedAcceptance":  null,
+                                                                                    "falseAcceptances":  null,
+                                                                                    "falseRejections":  null,
+                                                                                    "scopeLeaks":  null,
+                                                                                    "measurementComplete":  false
+                                                                                },
+                                                       "math-grade5-draft-v1":  {
+                                                                                    "attempted":  30,
+                                                                                    "serviceUnavailable":  18,
+                                                                                    "unavailableBeforeRanking":  0,
+                                                                                    "unavailableAfterRanking":  18,
+                                                                                    "liveSupported":  1,
+                                                                                    "liveInsufficientEvidence":  11,
+                                                                                    "liveNeedsClarification":  0,
+                                                                                    "hitAt3":  1.0,
+                                                                                    "supportedAcceptance":  1.0,
+                                                                                    "falseAcceptances":  0,
+                                                                                    "falseRejections":  0,
+                                                                                    "scopeLeaks":  0,
+                                                                                    "measurementComplete":  false
+                                                                                },
+                                                       "vietnamese-grade1-draft-v1":  {
+                                                                                          "attempted":  30,
+                                                                                          "serviceUnavailable":  30,
+                                                                                          "unavailableBeforeRanking":  10,
+                                                                                          "unavailableAfterRanking":  20,
+                                                                                          "liveSupported":  0,
+                                                                                          "liveInsufficientEvidence":  0,
+                                                                                          "liveNeedsClarification":  0,
+                                                                                          "hitAt3":  null,
+                                                                                          "supportedAcceptance":  null,
+                                                                                          "falseAcceptances":  null,
+                                                                                          "falseRejections":  null,
+                                                                                          "scopeLeaks":  null,
+                                                                                          "measurementComplete":  false
+                                                                                      },
+                                                       "vietnamese-grade2-draft-v1":  {
+                                                                                          "attempted":  30,
+                                                                                          "serviceUnavailable":  30,
+                                                                                          "unavailableBeforeRanking":  30,
+                                                                                          "unavailableAfterRanking":  0,
+                                                                                          "liveSupported":  0,
+                                                                                          "liveInsufficientEvidence":  0,
+                                                                                          "liveNeedsClarification":  0,
+                                                                                          "hitAt3":  null,
+                                                                                          "supportedAcceptance":  null,
+                                                                                          "falseAcceptances":  null,
+                                                                                          "falseRejections":  null,
+                                                                                          "scopeLeaks":  null,
+                                                                                          "measurementComplete":  false
+                                                                                      },
+                                                       "vietnamese-grade3-draft-v1":  {
+                                                                                          "attempted":  30,
+                                                                                          "serviceUnavailable":  30,
+                                                                                          "unavailableBeforeRanking":  30,
+                                                                                          "unavailableAfterRanking":  0,
+                                                                                          "liveSupported":  0,
+                                                                                          "liveInsufficientEvidence":  0,
+                                                                                          "liveNeedsClarification":  0,
+                                                                                          "hitAt3":  null,
+                                                                                          "supportedAcceptance":  null,
+                                                                                          "falseAcceptances":  null,
+                                                                                          "falseRejections":  null,
+                                                                                          "scopeLeaks":  null,
+                                                                                          "measurementComplete":  false
+                                                                                      },
+                                                       "vietnamese-grade4-draft-v1":  {
+                                                                                          "attempted":  30,
+                                                                                          "serviceUnavailable":  30,
+                                                                                          "unavailableBeforeRanking":  30,
+                                                                                          "unavailableAfterRanking":  0,
+                                                                                          "liveSupported":  0,
+                                                                                          "liveInsufficientEvidence":  0,
+                                                                                          "liveNeedsClarification":  0,
+                                                                                          "hitAt3":  null,
+                                                                                          "supportedAcceptance":  null,
+                                                                                          "falseAcceptances":  null,
+                                                                                          "falseRejections":  null,
+                                                                                          "scopeLeaks":  null,
+                                                                                          "measurementComplete":  false
+                                                                                      },
+                                                       "vietnamese-grade5-draft-v1":  {
+                                                                                          "attempted":  30,
+                                                                                          "serviceUnavailable":  30,
+                                                                                          "unavailableBeforeRanking":  30,
+                                                                                          "unavailableAfterRanking":  0,
+                                                                                          "liveSupported":  0,
+                                                                                          "liveInsufficientEvidence":  0,
+                                                                                          "liveNeedsClarification":  0,
+                                                                                          "hitAt3":  null,
+                                                                                          "supportedAcceptance":  null,
+                                                                                          "falseAcceptances":  null,
+                                                                                          "falseRejections":  null,
+                                                                                          "scopeLeaks":  null,
+                                                                                          "measurementComplete":  false
+                                                                                      }
+                                                   }
+                                },
+      "serviceFailure":  {
+                             "confirmedBy":  "Bounded generation smoke response",
+                             "httpStatus":  429,
+                             "category":  "RESOURCE_EXHAUSTED",
+                             "quota":  "Gemini embedding Free Tier, 1000 requests/day",
+                             "retryDelayAtResponse":  "about 13h51m",
+                             "rawResponseStored":  false
+                         },
+      "generationSmoke":  {
+                              "inScope":  "NOT_GENERATED; embedding service quota error",
+                              "outOfCorpus":  "NOT_PROVEN; retrieval failed before evidence decision",
+                              "result":  "BLOCKED_BY_GEMINI_QUOTA"
+                          },
+      "humanReview":  {
+                          "independentBenchmark":  "PENDING",
+                          "kindergartenExpertApproval":  "PENDING",
+                          "reviewPacket":  "README links existing DEV/HOLDOUT_CANDIDATE questions to source fragments and includes adjudication checklist",
+                          "knownAdjudicationCandidates":  [
+                                                              "english-grade3-draft-v1-DEV-006",
+                                                              "english-grade3-draft-v1-DEV-009",
+                                                              "english-grade3-draft-v1-DEV-013",
+                                                              "english-grade5-draft-v1-DEV-014"
+                                                          ]
+                      },
+      "remoteSupabase":  "NOT_ACCESSED",
+      "rawTopicOrPromptCommitted":  false
+  },
+  "runtimeFailureClassificationFollowup": {
+    "historicRun": {
+      "outcomes": 480,
+      "serviceUnavailable": 400,
+      "causesRetainedInArtifact": 0,
+      "classification": "CAUSE_NOT_CAPTURED_IN_PRIOR_RUN for all 400; the artifact records stage only (130 BEFORE_RANKING, 270 AFTER_RANKING), not exception type/status. They are not retrospectively classified as quota.",
+      "separateLaterSmoke": "HTTP 429 RESOURCE_EXHAUSTED from Gemini embedding, confirming quota exhaustion at that later smoke only; it does not establish the cause of each historic failure."
+    },
+    "runnerChanges": {
+      "serviceCause": "Preserved as an internal cause on sanitized CurriculumServiceUnavailableException for local classification; public message remains sanitized.",
+      "classification": ["QUOTA", "AUTHENTICATION", "PERMISSION", "HTTP status", "DATABASE", "DNS", "TIMEOUT", "OTHER", "CAUSE_NOT_RETAINED"],
+      "batchBehavior": "Checkpoint each query result, stop the full batch only on explicit quota evidence, and leave service failures pending for resume.",
+      "legacyImport": "Reuse previous decisions only after exact query payload match; legacy service failures remain pending and marked cause-not-captured.",
+      "persistentQueryEmbeddingCache": "Synthetic AI-authored exploratory queries only; key includes query content hash, model, dataset, retrieval config and dimension. No production teacher request uses this cache.",
+      "liveCallsVsReuse": "Current run records fresh vectors, cache reuses and live API call counts separately."
+    },
+    "englishFalseRejectTriage": {
+      "english-grade3-draft-v1-DEV-006": {"expectedChunk": "en-g3-003", "retrieval": "Expected chunk present in top 3", "decision": "Semantic verifier returned insufficient evidence", "label": "AI-authored/unreviewed; independent truth not established"},
+      "english-grade3-draft-v1-DEV-009": {"expectedChunk": "en-g3-003", "retrieval": "Expected chunk ranked 2; en-g3-007 ranked 1", "decision": "Semantic verifier returned insufficient evidence", "label": "AI-authored/unreviewed; independent truth not established"},
+      "english-grade3-draft-v1-DEV-013": {"expectedChunk": "en-g3-003", "retrieval": "Expected chunk present in top 3", "decision": "Semantic verifier returned insufficient evidence", "label": "AI-authored/unreviewed; independent truth not established"},
+      "english-grade5-draft-v1-DEV-014": {"expectedChunk": "en-g5-001", "retrieval": "Expected chunk ranked 1", "decision": "Semantic verifier returned insufficient evidence", "label": "AI-authored/unreviewed; independent truth not established"},
+      "resolution": "Keep all four as regressions/reviewer cases. Available artifacts do not retain the Gemini verifier's internal rejection rationale, so they support verifier-stage attribution, not the exact semantic reason or an independently confirmed false-reject label. No labels or thresholds changed."
+    },
+    "generationOwnerContractProposal": {
+      "recipient": "Nguyen Duc Duy",
+      "status": "Proposal only; no strategy, DSL or teammate-owned code changed.",
+      "minimumChange": "Add an internal optional curriculumDomain (COGNITIVE or LANGUAGE) to GameDslRequest for Kindergarten and pass it to the existing domain-filtered CurriculumContextProvider overload; absent domain means search both already-approved domains. Keep age band required and do not add fields to DSL.",
+      "generatorBoundary": "Existing GenerationAttempt must carry domain/age (or an equivalent internal generation context) alongside subject/grade; strategy prompt must receive the selected YCCĐ and provenance, and generation guard must explicitly gate supported scope instead of hardcoding Math Grade 1. Preserve unsupported-scope rejection and DSL 1.0.0.",
+      "ownerDecisionNeeded": "Agree exact internal request/context type and update GameDslRequest -> GameGenerationService -> GenerationAttempt -> QuizGameStrategy/GeminiGameContentGenerator as one contract change."
+    },
+    "resumeStatusAtReportUpdate": "Bounded runner attempted after implementation, but stopped before model calls because local JDBC returned SQLTransientConnectionException.",
+    "currentAttempt": {
+      "database": "127.0.0.1:55432/rag_eval was targeted explicitly; JDBC could not obtain a connection. No database or corpus writes were made.",
+      "modelCalls": 0,
+      "quotaStatus": "Not rechecked; no Gemini call was made.",
+      "clusterAction": "No data directory was recreated and no ingest rerun. Existing cluster status needs recovery: its postmaster PID/process exists, while pg_ctl reports no running server and the port has no listener."
+    },
+    "untrackedArtifactRecovery": {
+      "finding": "The failed pre-check attempt wrote a blocked report to the ignored target/live-dev.json before the blocked-report sidecar safeguard was added. That replaced the prior untracked per-query outcome artifact.",
+      "preserved": "The tracked sanitized aggregate in this file and README retains historical counts, scope metrics, stages and four English adjudication IDs.",
+      "notPreserved": "Per-query prior outcomes and ranked lists are no longer available locally; no exact legacy checkpoint can be built from the aggregate alone.",
+      "policy": "Do not rerun all 480 questions to reconstruct this file. The runner refuses to start that replay when the legacy report is blocked and lacks query rows. Restore the prior raw report from a backup if available, or obtain authorization to establish a new exploratory run. Future environment-blocked runs write a .blocked.json sidecar and do not overwrite the main report."
+    },
+    "verificationAfterRunnerChanges": {
+      "focused": {"tests": 14, "failures": 0, "errors": 0},
+      "fullBackend": {"command": "mvn verify", "tests": 627, "failures": 0, "errors": 0, "skipped": 8, "jacoco": "PASS"},
+      "liveEvaluation": "BLOCKED_BEFORE_MODEL_CALL_BY_LOCAL_JDBC; no new decisions",
+      "remoteWrites": false
+    }
   }
 }
