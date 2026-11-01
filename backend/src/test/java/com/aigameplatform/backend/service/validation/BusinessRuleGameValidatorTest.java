@@ -123,6 +123,56 @@ class BusinessRuleGameValidatorTest {
                 .containsExactly("$.questions[0].options[1].text");
     }
 
+    @Test
+    void quizRejectsAnIncorrectAnswerForAnExplicitArithmeticQuestion() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "2 + 3 = ?");
+        first.put("correctOptionId", "a"); // option a is 2, but 2 + 3 = 5
+
+        ValidationReport report = service.validate(game);
+
+        assertThat(report.errors()).extracting(ValidationError::path)
+                .contains("$.questions[0].correctOptionId");
+    }
+
+    @Test
+    void quizAcceptsTheComputedAnswerForAnExplicitArithmeticQuestion() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "2 + 3 = ?");
+        first.put("correctOptionId", "b"); // option b is 3; replace it with 5
+        element(first, "options", 1).put("text", "5");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizRejectsAnAmbiguousPromptContainingMoreThanOneArithmeticExpression() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "2 + 3 = 5. Now 4 + 4 = ?");
+        first.put("correctOptionId", "b");
+        element(first, "options", 1).put("text", "5");
+
+        ValidationReport report = service.validate(game);
+
+        assertThat(report.errors()).extracting(ValidationError::path).contains("$.questions[0].questionText");
+    }
+
+    @Test
+    void quizRejectsAChainedArithmeticExpressionInsteadOfCheckingOnlyItsFirstPair() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "3 + 2 + 1 = ?");
+        first.put("correctOptionId", "b");
+        element(first, "options", 1).put("text", "5");
+
+        ValidationReport report = service.validate(game);
+
+        assertThat(report.errors()).extracting(ValidationError::path).contains("$.questions[0].questionText");
+    }
+
     // ---- ODD_ONE_OUT ----
 
     @Test

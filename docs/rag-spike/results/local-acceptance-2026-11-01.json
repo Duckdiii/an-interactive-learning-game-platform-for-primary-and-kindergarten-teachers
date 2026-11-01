@@ -68,5 +68,27 @@
     "runtimeScopes": "MATH / GRADE_1 only; no new curriculum scope enabled",
     "preschoolExpertApproval": "PENDING",
     "remoteSupabaseMigrationOrIngest": "NOT_RUN; remote target not confirmed as an approved write target"
+  },
+  "runtimeHardeningFollowUp": {
+    "recordedAt": "2026-11-01",
+    "primaryCorpusResourcePath": "backend/src/main/resources/curriculum/primary/math-grade1",
+    "otherPrimaryScopes": "Remain under curriculum/spike and are not published to runtime",
+    "generatedContentReview": "Implemented as a required second Gemini pass when RAG is enabled; fake-model tests passed, live reviewer call NOT_RUN",
+    "deterministicAnswerCheck": "One explicit integer arithmetic expression is checked against the selected option; chained or separate expressions fail closed as ambiguous",
+    "reviewAcceptanceStatus": "Generation requires review.status=REVIEWED; empty errors with any other status fail closed",
+    "kindergartenSemanticVerifier": "Required by provider but no production verifier is configured; requests fail closed before retrieval",
+    "dslVersion": "1.0.0"
+  },
+  "runtimeHardeningTests": {
+    "focusedTests": 94,
+    "focusedFailures": 0,
+    "focusedErrors": 0,
+    "fullBackendTests": 561,
+    "fullFailures": 0,
+    "fullErrors": 0,
+    "fullSkipped": 8,
+    "jacocoGate": "PASS",
+    "geminiReviewerLiveCall": "NOT_RUN",
+    "reviewerLatency": "NOT_MEASURED"
   }
 }

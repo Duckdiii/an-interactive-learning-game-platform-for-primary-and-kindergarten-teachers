@@ -13,7 +13,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 public record CurriculumDataset(CurriculumSource source, List<CurriculumChunk> chunks,
                                 List<ManualTranscription> manualTranscriptions) {
-    static final String RESOURCE_ROOT = "/curriculum/spike/math-grade1/";
+    static final String RESOURCE_ROOT = "/curriculum/primary/math-grade1/";
     static final String KINDERGARTEN_RESOURCE_ROOT = "/curriculum/kindergarten/";
 
     public CurriculumDataset(CurriculumSource source, List<CurriculumChunk> chunks) {

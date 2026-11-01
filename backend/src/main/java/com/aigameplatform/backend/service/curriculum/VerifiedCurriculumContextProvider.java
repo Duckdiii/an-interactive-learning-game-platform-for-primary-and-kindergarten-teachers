@@ -16,6 +16,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
     private final String embeddingModel;
     private final int kindergartenTopK;
     private final double kindergartenMinScore;
+    private final Supplier<KindergartenEvidenceVerifier> kindergartenEvidenceVerifier;
     private volatile CurriculumConstraints loaded;
     private final CurriculumTopicParser parser = new CurriculumTopicParser();
     private final CurriculumEvidenceVerifier verifier = new CurriculumEvidenceVerifier();
@@ -41,6 +42,14 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
     public VerifiedCurriculumContextProvider(CurriculumCatalog catalog, CurriculumAvailability availability,
             Supplier<CurriculumRAGService> retrieval, Supplier<CurriculumConstraints> constraints, String approvedSha,
             CurriculumMetrics metrics, String embeddingModel, int kindergartenTopK, double kindergartenMinScore) {
+        this(catalog, availability, retrieval, constraints, approvedSha, metrics, embeddingModel,
+                kindergartenTopK, kindergartenMinScore, () -> null);
+    }
+
+    public VerifiedCurriculumContextProvider(CurriculumCatalog catalog, CurriculumAvailability availability,
+            Supplier<CurriculumRAGService> retrieval, Supplier<CurriculumConstraints> constraints, String approvedSha,
+            CurriculumMetrics metrics, String embeddingModel, int kindergartenTopK, double kindergartenMinScore,
+            Supplier<KindergartenEvidenceVerifier> kindergartenEvidenceVerifier) {
         this.catalog = Objects.requireNonNull(catalog);
         this.availability = Objects.requireNonNull(availability);
         this.retrieval = Objects.requireNonNull(retrieval);
@@ -53,6 +62,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
             throw new IllegalArgumentException("Invalid kindergarten retrieval configuration");
         this.kindergartenTopK = kindergartenTopK;
         this.kindergartenMinScore = kindergartenMinScore;
+        this.kindergartenEvidenceVerifier = Objects.requireNonNull(kindergartenEvidenceVerifier);
     }
 
     @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade) {
@@ -68,6 +78,10 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
         var dataset = catalog.requireSupported(GameType.QUIZ, subject, grade);
         try {
             if (grade == GradeLevel.KINDERGARTEN) {
+                KindergartenEvidenceVerifier semanticVerifier = kindergartenEvidenceVerifier.get();
+                if (semanticVerifier == null)
+                    throw new CurriculumServiceUnavailableException(
+                            "Curriculum RAG mầm non đang khóa cho tới khi có bộ xác minh căn cứ theo lĩnh vực và duyệt chuyên môn.", null);
                 availability.requireReady(dataset);
                 var candidates = metrics.measure(CurriculumMetrics.Stage.RETRIEVAL, subject, grade,
                         () -> retrieval.get().retrieveKindergarten(topic, subject, dataset.source(), kindergartenAgeBand,
@@ -75,9 +89,24 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                                 ? CurriculumMetrics.Outcome.REJECTED : CurriculumMetrics.Outcome.SUCCESS);
                 if (candidates.chunks().isEmpty())
                     throw new CurriculumEvidenceNotFoundException(kindergartenGuidance(candidates.suggestions()));
-                return Evidence.found(candidates.curriculumContext(),
+                var supportedIds = semanticVerifier.supportedChunkIds(topic, kindergartenAgeBand, candidates.chunks());
+                if (supportedIds == null || supportedIds.isEmpty())
+                    throw new CurriculumEvidenceNotFoundException(kindergartenGuidance(candidates.chunks()));
+                var candidateIds = candidates.chunks().stream().map(CurriculumRAGService.RetrievedChunk::chunkId)
+                        .collect(java.util.stream.Collectors.toSet());
+                if (!candidateIds.containsAll(supportedIds))
+                    throw new IllegalStateException("Kindergarten verifier returned a chunk outside retrieved candidates");
+                var supportedChunks = candidates.chunks().stream().filter(c -> supportedIds.contains(c.chunkId())).toList();
+                if (supportedChunks.stream().anyMatch(c -> !kindergartenAgeBand.metadataValue().equals(c.ageBand())))
+                    throw new IllegalStateException("Kindergarten verifier returned evidence for another age band");
+                var context = supportedChunks.stream().map(c -> "[" + c.chunkId() + "] " + c.topic()
+                        + "\nKết quả mong đợi: " + c.text() + "\nĐộ tuổi phù hợp: " + ageLabel(c.ageBand())
+                        + "\nNguồn: " + c.sourceDocument() + "; PDF " + c.pdfPages()
+                        + "; trang in " + c.printedPages() + "; " + c.curriculumVersion())
+                        .collect(java.util.stream.Collectors.joining("\n\n"));
+                return Evidence.found(context,
                         com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
-                                dataset.source(), embeddingModel, candidates.chunks()));
+                                dataset.source(), embeddingModel, supportedChunks));
             }
             var capabilities = loaded;
             if (capabilities == null) { capabilities = constraints.get(); loaded = capabilities; }
@@ -125,5 +154,14 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                 .collect(java.util.stream.Collectors.joining("; "));
         return "Chưa tìm thấy căn cứ đủ phù hợp trong chương trình mẫu giáo. Gợi ý gần nhất để cô chọn: "
                 + nearest + ".";
+    }
+
+    private static String ageLabel(String ageBand) {
+        return switch (ageBand) {
+            case "AGE_3_4" -> "3–4 tuổi";
+            case "AGE_4_5" -> "4–5 tuổi";
+            case "AGE_5_6" -> "5–6 tuổi";
+            default -> throw new IllegalArgumentException("Unknown kindergarten age band");
+        };
     }
 }

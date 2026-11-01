@@ -22,7 +22,7 @@ These counts describe packaged resource files, not a fresh query of Supabase:
 
 | Scope | Packaged data | State |
 | --- | ---: | --- |
-| Primary Math, Grade 1 | 23 outcomes + 5 controls | Existing source-verified spike; retain and audit, do not recreate by default |
+| Primary Math, Grade 1 | 23 outcomes + 5 controls | Source-verified pilot corpus now uses `curriculum/primary/math-grade1`; runtime remains the only published elementary scope and still requires its approved constraints fingerprint |
 | Primary Math, Grade 2 | 43 outcomes + 0 controls | All 43 outcomes passed PDFBox and independent source review on pages 190–194; adjacent grade sections do not share those pages; evaluation pending; not published |
 | Primary Math, Grade 3 | 51 outcomes + 0 controls (51 source fragments) | 49 matched by PDFBox; 2 stacked-fraction outcomes are separately marked manual transcriptions; page/footer checks passed on 2026-10-31; amendment applicability and evaluation pending; not published |
 | Primary Math, Grade 4 | 53 outcomes + 0 controls (57 source fragments) | All 53 matched by PDFBox in the declared regions; all six printed-page footers and rendered pages 200–205 checked on 2026-10-31; independent review passed; not published |
@@ -99,3 +99,13 @@ The expansion is complete only when each declared scope has an explicit readines
 - Bounded live generation passed for the only integrated game/scope (QUIZ / MATH / GRADE_1); one out-of-scope query was rejected before generation. See the [sanitized acceptance record](results/local-acceptance-2026-11-01.json).
 - Independent review found two fail-open risks (legacy providers ignoring age and query dataset/grade mismatch); both were changed to fail closed and covered by regression tests.
 - Independent teacher-style development/holdout measurements across all 15 primary scopes and preschool ages are not available, so false-accept/false-reject rates are not claimed. No remote Supabase migration or ingestion was performed.
+
+## Runtime hardening follow-up — 2026-11-01
+
+- The runtime Math Grade 1 corpus was moved from `curriculum/spike/` to `curriculum/primary/`. Other subject/grade datasets remain in `spike/` because their natural-language decision evaluation and publication gates are incomplete; this is not a promotion of all 15 scopes.
+- With Curriculum RAG enabled, generated game content now requires a second Gemini review of every question's marked answer and curriculum support. The review must cover every question and cite IDs from the retrieved evidence; a missing reviewer, malformed response or failed review cannot return a game. Accepted claims are stored in the existing teacher-only curriculum review record, outside the frozen DSL.
+- The business validator now independently computes a single explicit integer arithmetic expression and rejects chained/multiple-expression prompts or a mismatched marked answer before Gemini review. This deterministic check covers explicit calculations; it does not prove arbitrary visual or prose answers. The Gemini check is a guard, not independent human validation or a guarantee of correctness.
+- Kindergarten retrieval now requires an injected `KindergartenEvidenceVerifier` to select supported chunks from the age-filtered candidate set. No production verifier is configured, so even if its flag is enabled the provider fails closed before vector retrieval. Preschool remains disabled pending specialist review and a domain verifier.
+- Focused hardening regressions: 94 tests passed. Full backend suite: 561 tests, 0 failures, 0 errors, 8 skipped; JaCoCo gate passed. The Gemini content-reviewer was tested with a fake model; a live reviewer call and latency measurement were not run.
+- Independent code review found two additional fail-open cases: multi-expression questions and an accepted result with review status other than `REVIEWED`. Both now fail closed and have regression tests.
+- The independent natural-language benchmark, wider runtime publication, preschool specialist approval and remote Supabase deployment remain incomplete. Historical `docs/rag-spike/` reports and evaluation tools retain their name; they document the pilot/evaluation history and are not the production corpus path.

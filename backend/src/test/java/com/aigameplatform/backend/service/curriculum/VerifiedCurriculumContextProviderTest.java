@@ -88,15 +88,47 @@ class VerifiedCurriculumContextProviderTest {
         var provider = new VerifiedCurriculumContextProvider(new CurriculumCatalog(List.of(dataset), Set.of(GameType.QUIZ)),
                 new CurriculumAvailability(Clock.systemUTC(), Duration.ofSeconds(30), ignored -> {}), () -> retriever,
                 () -> { throw new AssertionError("Primary-school constraints must not run for kindergarten"); },
-                "", CurriculumMetrics.noop(), "fixture", 8, 0.5);
+                "", CurriculumMetrics.noop(), "fixture", 8, 0.5,
+                () -> (topic, age, candidates) -> candidates.stream().filter(c -> c.ageBand().equals(age.metadataValue()))
+                        .map(CurriculumRAGService.RetrievedChunk::chunkId).collect(java.util.stream.Collectors.toSet()));
 
         assertThatThrownBy(() -> provider.retrieve("count animals", Subject.VIETNAMESE, GradeLevel.KINDERGARTEN))
                 .isInstanceOf(KindergartenAgeBandRequiredException.class)
                 .hasMessageContaining("3–4, 4–5 hoặc 5–6");
         var evidence = provider.retrieve("count animals", Subject.VIETNAMESE, GradeLevel.KINDERGARTEN, KindergartenAgeBand.AGE_3_4);
 
-        assertThat(evidence.context()).contains("độ tuổi phù hợp: 3–4 tuổi", "Kết quả mong đợi");
+        assertThat(evidence.context()).contains("Kết quả mong đợi");
         assertThat(evidence.evidence().chunks()).extracting(CurriculumRAGService.RetrievedChunk::ageBand)
                 .containsExactly("AGE_3_4");
+    }
+
+    @Test void kindergartenSimilarityIsNotAcceptedWhenNoSemanticVerifierIsConfigured() {
+        var source = new CurriculumSource("preschool.pdf", "b".repeat(64), "01/VBHN-BGDĐT-2021",
+                "kindergarten-outcomes-v1", 84);
+        var text = "Count similar objects to five.";
+        var chunk = new CurriculumChunk("kg-count-34", Subject.MATH, GradeLevel.KINDERGARTEN,
+                "Cognitive / mathematical concepts", text, false,
+                List.of(new CurriculumChunk.SourceFragment(62, 74, "AGE_3_4", text)), "COGNITIVE",
+                List.of("MATHEMATICAL_CONCEPTS"), "AGE_3_4");
+        var dataset = new CurriculumDataset(source, List.of(chunk));
+        var store = new InMemoryEmbeddingStore<TextSegment>();
+        store.add(Embedding.from(new float[]{1, 0}), chunk.toSegment(source, "fixture"));
+        EmbeddingModel model = new EmbeddingModel() {
+            @Override public Response<List<Embedding>> embedAll(List<TextSegment> segments) {
+                return Response.from(segments.stream().map(s -> Embedding.from(new float[]{1, 0})).toList());
+            }
+        };
+        var retriever = new CurriculumRAGService(store, model, source, "fixture", 3, 0.5);
+        var retrievalCalls = new java.util.concurrent.atomic.AtomicInteger();
+        var provider = new VerifiedCurriculumContextProvider(new CurriculumCatalog(List.of(dataset), Set.of(GameType.QUIZ)),
+                new CurriculumAvailability(Clock.systemUTC(), Duration.ofSeconds(30), ignored -> {}),
+                () -> { retrievalCalls.incrementAndGet(); return retriever; }, () -> null, "",
+                CurriculumMetrics.noop(), "fixture", 8, 0.5);
+
+        assertThatThrownBy(() -> provider.retrieve("sort animals by habitat", Subject.MATH,
+                GradeLevel.KINDERGARTEN, KindergartenAgeBand.AGE_3_4))
+                .isInstanceOf(CurriculumServiceUnavailableException.class)
+                .hasMessageContaining("đang khóa");
+        assertThat(retrievalCalls).hasValue(0);
     }
 }

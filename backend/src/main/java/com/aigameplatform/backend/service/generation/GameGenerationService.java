@@ -41,6 +41,7 @@ public class GameGenerationService {
     private static final int MAX_FEEDBACK_ERRORS = 10;
 
     private final ObjectProvider<GameContentGenerator> generatorProvider;
+    private final ObjectProvider<GeneratedContentReviewer> contentReviewerProvider;
     private final GameContentStrategyRegistry strategies;
     private final AiOutputValidator aiOutputValidator;
     private final GameDslFactoryRegistry factories;
@@ -55,6 +56,7 @@ public class GameGenerationService {
     // ObjectProvider để ứng dụng vẫn khởi động khi chưa có bản cài đặt cổng AI; thiếu thì báo lúc gọi.
     public GameGenerationService(
             ObjectProvider<GameContentGenerator> generatorProvider,
+            ObjectProvider<GeneratedContentReviewer> contentReviewerProvider,
             GameContentStrategyRegistry strategies,
             AiOutputValidator aiOutputValidator,
             GameDslFactoryRegistry factories,
@@ -69,6 +71,7 @@ public class GameGenerationService {
             throw new IllegalArgumentException("app.generation.max-retries không được âm");
         }
         this.generatorProvider = generatorProvider;
+        this.contentReviewerProvider = contentReviewerProvider;
         this.strategies = strategies;
         this.aiOutputValidator = aiOutputValidator;
         this.factories = factories;
@@ -113,23 +116,50 @@ public class GameGenerationService {
 
             AiOutputReport aiReport = aiOutputValidator.validate(type, raw);
             List<ValidationError> errors;
-            if (aiReport.valid()) {
+            if (!aiReport.valid()) {
+                errors = aiReport.errors();
+            } else {
                 ValidationReport report = validate(type, aiReport.output(), request);
-                if (report.valid()) {
+                if (!report.valid()) {
+                    if (report.unsafe()) {
+                        log.warn("Generated content rejected by safety validation (attempt {})", attemptNumber);
+                        throw new UnsafeContentException("Nội dung không phù hợp với trẻ em");
+                    }
+                    if (report.unavailable()) {
+                        throw new AiGenerationTimeoutException("Không kiểm tra được độ an toàn của nội dung, vui lòng thử lại sau");
+                    }
+                    errors = report.errors();
+                } else if (!curriculumRagEnabled) {
                     return new GenerationResult(report.game(), curriculum.evidence(),
                             com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable());
+                } else {
+                    GeneratedContentReviewer reviewer = contentReviewerProvider.getIfAvailable();
+                    if (reviewer == null) {
+                        throw new AiGenerationTimeoutException(
+                                "Không thể xác minh nội dung game theo căn cứ chương trình; vui lòng thử lại sau");
+                    }
+                    GeneratedContentReviewer.Result decision;
+                    try {
+                        decision = reviewer.review(report.game(), request.topic(), curriculum.evidence());
+                    } catch (RuntimeException exception) {
+                        log.error("Generated game content review unavailable ({})", exception.getClass().getSimpleName());
+                        throw new AiGenerationTimeoutException(
+                                "Không thể xác minh nội dung game theo căn cứ chương trình; vui lòng thử lại sau", exception);
+                    }
+                    if (decision == null || decision.review() == null) {
+                        throw new AiGenerationTimeoutException(
+                                "Không thể xác minh nội dung game theo căn cứ chương trình; vui lòng thử lại sau");
+                    }
+                    if (decision.accepted()) {
+                        if (decision.review().status()
+                                != com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED) {
+                            throw new AiGenerationTimeoutException(
+                                    "Không thể xác minh nội dung game theo căn cứ chương trình; vui lòng thử lại sau");
+                        }
+                        return new GenerationResult(report.game(), curriculum.evidence(), decision.review());
+                    }
+                    errors = decision.errors();
                 }
-                if (report.unsafe()) {
-                    log.warn("Nội dung AI sinh ra bị từ chối vì không an toàn (lần thử {})", attemptNumber);
-                    throw new UnsafeContentException("Nội dung không phù hợp với trẻ em");
-                }
-                if (report.unavailable()) {
-                    throw new AiGenerationTimeoutException(
-                            "Không kiểm tra được độ an toàn của nội dung, vui lòng thử lại sau");
-                }
-                errors = report.errors();
-            } else {
-                errors = aiReport.errors();
             }
 
             log.info("Lần thử {} cho {} chưa hợp lệ: {} lỗi", attemptNumber, type, errors.size());

@@ -60,8 +60,7 @@ class GameGenerationServiceTest {
         var result = service(generator, 2, moderation(false, false), provider, true).generateResult(GameType.QUIZ, REQUEST);
         assertThat(calls).hasValue(1);
         assertThat(result.evidence().chunks()).containsExactly(chunk);
-        assertThat(result.review().status().name()).isEqualTo("UNAVAILABLE");
-        assertThat(result.review().warnings()).contains("REVIEWER_NOT_CONFIGURED");
+        assertThat(result.review().status().name()).isEqualTo("REVIEWED");
         assertThat(MAPPER.valueToTree(result.game()).path("metadata").has("curriculumReview")).isFalse();
         assertThat(MAPPER.valueToTree(result).has("review")).isTrue();
     }
@@ -124,6 +123,20 @@ class GameGenerationServiceTest {
 
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
             ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled) {
+        return service(generator, maxRetries, moderation, curriculum, ragEnabled,
+                ragEnabled ? (game, topic, evidence) -> acceptedReview() : null);
+    }
+
+    private static GeneratedContentReviewer.Result acceptedReview() {
+        return new GeneratedContentReviewer.Result(List.of(),
+                new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
+                        com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED,
+                        List.of(), List.of(), "fixture"));
+    }
+
+    private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
+            ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled,
+            GeneratedContentReviewer contentReviewer) {
         DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
         try {
             beans.registerSingleton("catalog", new com.aigameplatform.backend.service.curriculum.CurriculumCatalog(
@@ -135,12 +148,16 @@ class GameGenerationServiceTest {
         if (curriculum != null) {
             beans.registerSingleton("curriculumContextProvider", curriculum);
         }
+        if (contentReviewer != null) {
+            beans.registerSingleton("generatedContentReviewer", contentReviewer);
+        }
         List<AbstractGameValidator> validators = new ArrayList<>(GameTestFixtures.schemaAndBusinessRuleValidators(MAPPER));
         validators.add(new SafetyGameValidator(
                 new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")), moderation, false));
         GameValidationService validation = new GameValidationService(validators, MAPPER);
         Random random = new Random(7);
         return new GameGenerationService(beans.getBeanProvider(GameContentGenerator.class),
+                beans.getBeanProvider(GeneratedContentReviewer.class),
                 new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)),
                 new AiOutputValidator(MAPPER),
                 GameTestFixtures.factoryRegistry(random),
@@ -221,6 +238,86 @@ class GameGenerationServiceTest {
         assertThat(generator.attempts).hasSize(2);
         assertThat(generator.attempts).extracting(GenerationAttempt::curriculumContext)
                 .containsOnly("[math-g1-007] Cộng nhẩm trong phạm vi 10. Nguồn: TT32/2018, PDF 188.");
+    }
+
+    @Test
+    void generatedContentMustPassTheReviewerAndARejectedDraftIsRetried() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ), validOutput(GameType.QUIZ));
+        var reviewCount = new java.util.concurrent.atomic.AtomicInteger();
+        GeneratedContentReviewer reviewer = (game, topic, evidence) -> {
+            if (reviewCount.getAndIncrement() == 0) {
+                return new GeneratedContentReviewer.Result(List.of(
+                        new com.aigameplatform.backend.service.validation.ValidationError(
+                                "$.questions[0].correctOptionId", "Wrong answer")),
+                        new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
+                                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.UNAVAILABLE,
+                                List.of(), List.of("CONTENT_REVIEW_REJECTED"), "fixture"));
+            }
+            return acceptedReview();
+        };
+        CurriculumContextProvider curriculum = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("[math-g1-001] Counting");
+
+        var result = service(generator, 1, moderation(false, false), curriculum, true, reviewer)
+                .generateResult(GameType.QUIZ, REQUEST);
+
+        assertThat(generator.attempts).hasSize(2);
+        assertThat(generator.attempts.get(1).previousErrors()).extracting(e -> e.path())
+                .contains("$.questions[0].correctOptionId");
+        assertThat(reviewCount).hasValue(2);
+        assertThat(result.review().status()).isEqualTo(
+                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED);
+    }
+
+    @Test
+    void enabledRagFailsClosedWhenGeneratedContentReviewerIsNotConfigured() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        CurriculumContextProvider curriculum = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("[math-g1-001] Counting");
+
+        assertThatThrownBy(() -> service(generator, 0, moderation(false, false), curriculum, true, null)
+                .generate(GameType.QUIZ, REQUEST))
+                .isInstanceOf(AiGenerationTimeoutException.class)
+                .hasMessageContaining("Không thể xác minh nội dung game");
+        assertThat(generator.attempts).hasSize(1);
+    }
+
+    @Test
+    void enabledRagFailsClosedIfReviewerReturnsNoErrorsButReviewIsUnavailable() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        CurriculumContextProvider curriculum = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("[math-g1-001] Counting");
+        GeneratedContentReviewer reviewer = (game, topic, evidence) ->
+                new GeneratedContentReviewer.Result(List.of(),
+                        com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable());
+
+        assertThatThrownBy(() -> service(generator, 0, moderation(false, false), curriculum, true, reviewer)
+                .generate(GameType.QUIZ, REQUEST))
+                .isInstanceOf(AiGenerationTimeoutException.class)
+                .hasMessageContaining("Không thể xác minh nội dung game");
+        assertThat(generator.attempts).hasSize(1);
+    }
+
+    @Test
+    void aWrongExplicitArithmeticAnswerIsRejectedBeforeTheContentReviewerCanApproveIt() throws IOException {
+        var gameOutput = (tools.jackson.databind.node.ObjectNode) MAPPER.readTree(validOutput(GameType.QUIZ));
+        var first = (tools.jackson.databind.node.ObjectNode) gameOutput.path("questions").get(0);
+        first.put("text", "2 + 3 = ?");
+        first.put("correctIndex", 0); // option 0 is not the result
+        ScriptedGenerator generator = new ScriptedGenerator(MAPPER.writeValueAsString(gameOutput));
+        CurriculumContextProvider curriculum = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("[math-g1-001] Counting");
+        var reviewerCalls = new java.util.concurrent.atomic.AtomicInteger();
+        GeneratedContentReviewer reviewer = (game, topic, evidence) -> {
+            reviewerCalls.incrementAndGet();
+            return acceptedReview();
+        };
+
+        assertThatThrownBy(() -> service(generator, 0, moderation(false, false), curriculum, true, reviewer)
+                .generate(GameType.QUIZ, REQUEST)).isInstanceOf(AiGenerationTimeoutException.class);
+
+        assertThat(reviewerCalls).hasValue(0);
+        assertThat(generator.attempts).hasSize(1);
     }
 
     @Test

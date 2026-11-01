@@ -100,6 +100,7 @@ public class CurriculumRagConfiguration {
     CurriculumContextProvider curriculumContextProvider(CurriculumCatalog catalog,
             @Qualifier("mathGradeOneCurriculumDataset") CurriculumDataset dataset,
             ObjectProvider<CurriculumRAGService> retriever, DataSource database,
+            ObjectProvider<KindergartenEvidenceVerifier> kindergartenEvidenceVerifier,
             @Value("${app.curriculum-rag.embedding-model:gemini-embedding-001}") String model,
             @Value("${app.curriculum-rag.constraints-approved-sha256:}") String approvedSha, CurriculumMetrics metrics,
             @Value("${app.curriculum-rag.kindergarten.top-k:8}") int kindergartenTopK,
@@ -110,6 +111,7 @@ public class CurriculumRagConfiguration {
                 () -> {
                     try { return CurriculumConstraints.load(dataset); }
                     catch (IOException e) { throw new IllegalStateException("Constraints unavailable"); }
-                }, approvedSha, metrics, model, kindergartenTopK, kindergartenMinScore);
+                }, approvedSha, metrics, model, kindergartenTopK, kindergartenMinScore,
+                kindergartenEvidenceVerifier::getIfAvailable);
     }
 }
