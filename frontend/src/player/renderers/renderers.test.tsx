@@ -55,10 +55,59 @@ async function startSession(shareCode: string) {
 beforeEach(() => showFeedbackMock.mockClear())
 
 describe('registry renderer', () => {
-  it('QUIZ và MATCHING chơi được; 8 loại còn lại chưa có (khung hiện "chưa hỗ trợ")', () => {
+  it('chỉ các loại đã có renderer chơi được; loại khác khung hiện "chưa hỗ trợ"', () => {
     const playable = GAME_TYPES.filter((type) => getPlayableRenderer(type))
 
-    expect(playable).toEqual(['QUIZ', 'MATCHING'])
+    expect(playable).toEqual(['QUIZ', 'ODD_ONE_OUT', 'MATCHING', 'VISUAL_CLOZE'])
+  })
+})
+
+describe('Loại dùng lại QuizRenderer, nộp đúng tên trường của contract', () => {
+  const base = { id: 'q1', timeLimitSeconds: 30, points: 10 }
+  const odd = { ...base, items: [{ id: 'a', text: 'mèo' }, { id: 'b', text: 'xe' }, { id: 'c', text: 'chó' }] }
+  const cloze = { ...base, visualPrompt: 'con mèo', sentenceTemplate: 'Con ___ kêu meo', options: ['chó', 'mèo'] }
+  const graded = (isCorrect: boolean, correctAnswer: Record<string, unknown> | null) =>
+    vi.fn().mockResolvedValue({ status: isCorrect ? 'CORRECT' : 'INCORRECT', isCorrect, pointsEarned: 0, totalScore: 0, correctAnswer })
+  const marked = () => screen.getAllByRole('button').filter((button) => button.getAttribute('data-correct') === 'yes')
+
+  it('ODD_ONE_OUT: chọn sai thì phản hồi sai, nộp `selectedItemId` và tô mục khác loại', async () => {
+    const Odd = getPlayableRenderer('ODD_ONE_OUT')!
+    const onSubmit = graded(false, { selectedItemId: 'b' })
+
+    render(<Odd question={odd} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+    tap('mèo')
+
+    await waitFor(() => expect(showFeedbackMock).toHaveBeenCalledWith(false))
+    expect(onSubmit).toHaveBeenCalledWith({ selectedItemId: 'a' })
+    expect(screen.getByText('xe')).toHaveAttribute('data-correct', 'yes')
+  })
+
+  it('VISUAL_CLOZE: hiện câu có chỗ trống, nộp chính từ đã chọn và tô từ đúng', async () => {
+    const Cloze = getPlayableRenderer('VISUAL_CLOZE')!
+    const onSubmit = graded(false, { answer: 'mèo' })
+
+    render(<Cloze question={cloze} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+    expect(screen.getByText('Con ___ kêu meo')).toBeInTheDocument()
+    tap('chó')
+
+    await waitFor(() => expect(showFeedbackMock).toHaveBeenCalledWith(false))
+    expect(onSubmit).toHaveBeenCalledWith({ answer: 'chó' })
+    expect(screen.getByText('mèo')).toHaveAttribute('data-correct', 'yes')
+  })
+
+  it.each([
+    ['ODD_ONE_OUT', odd, 'mèo', { selectedItemId: 1 }],
+    ['VISUAL_CLOZE', cloze, 'chó', { answer: 1 }],
+    ['ODD_ONE_OUT', odd, 'mèo', null],
+    ['VISUAL_CLOZE', cloze, 'chó', null],
+  ] as const)('%s: máy chủ không trả đáp án dùng được thì vẫn phản hồi, không tô ô nào', async (type, question, choice, correctAnswer) => {
+    const Renderer = getPlayableRenderer(type)!
+
+    render(<Renderer question={question as never} profile={PROFILES.hocSinh} onSubmit={graded(true, correctAnswer)} />)
+    tap(choice)
+
+    await waitFor(() => expect(showFeedbackMock).toHaveBeenCalledWith(true))
+    expect(marked()).toEqual([])
   })
 })
 

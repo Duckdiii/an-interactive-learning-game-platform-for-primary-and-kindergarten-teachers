@@ -29,6 +29,28 @@ const expected = { matches: [{ leftPairId: 'l1', rightPairId: 'r1' }, { leftPair
 const quizDescriber = REVIEW_DESCRIBERS.QUIZ!
 const matchingDescriber = REVIEW_DESCRIBERS.MATCHING!
 
+describe('describer ODD_ONE_OUT và VISUAL_CLOZE', () => {
+  const odd = { id: 'q1', items: [{ id: 'a', text: 'mèo' }, { id: 'b', text: 'xe' }] }
+  const cloze = { id: 'q1', sentenceTemplate: 'Con ___ kêu meo', options: ['mèo', 'chó'] }
+
+  it('ODD_ONE_OUT: đọc mục theo id; thiếu đáp án thì không có vế đúng', () => {
+    const describer = REVIEW_DESCRIBERS.ODD_ONE_OUT!
+
+    expect(describer.chosen(odd as never, { selectedItemId: 'a' } as never, null)).toBe('mèo')
+    expect(describer.correct(odd as never, { selectedItemId: 'b' })).toBe('xe')
+    expect(describer.correct(odd as never, null)).toBeNull()
+  })
+
+  it('VISUAL_CLOZE: hiện câu có chỗ trống và từ đã chọn', () => {
+    const describer = REVIEW_DESCRIBERS.VISUAL_CLOZE!
+
+    expect(describer.prompt(cloze as never)).toBe('Con ___ kêu meo')
+    expect(describer.chosen(cloze as never, { answer: 'chó' } as never, null)).toBe('chó')
+    expect(describer.correct(cloze as never, { answer: 'mèo' })).toBe('mèo')
+    expect(describer.correct(cloze as never, { answer: 1 })).toBeNull()
+  })
+})
+
 describe('describer QUIZ', () => {
   it('câu hỏi, lựa chọn đúng và sai theo chữ', () => {
     expect(quizDescriber.prompt(quiz as never)).toBe('1 + 2 = ?')

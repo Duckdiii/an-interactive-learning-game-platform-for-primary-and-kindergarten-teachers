@@ -67,6 +67,22 @@ const MATCHING: ReviewDescriber<'MATCHING'> = {
   },
 }
 
+const ODD_ONE_OUT: ReviewDescriber<'ODD_ONE_OUT'> = {
+  prompt: () => viText.player.oddOneOutPrompt,
+  chosen: (q, a) => q.items.find((i) => i.id === a.selectedItemId)?.text ?? text.unknownOption,
+  correct: (q, correctAnswer) => {
+    const id = correctAnswer?.selectedItemId
+
+    return typeof id === 'string' ? (q.items.find((i) => i.id === id)?.text ?? text.unknownOption) : null
+  },
+}
+
+const VISUAL_CLOZE: ReviewDescriber<'VISUAL_CLOZE'> = {
+  prompt: (q) => q.sentenceTemplate,
+  chosen: (_q, a) => a.answer,
+  correct: (_q, correctAnswer) => (typeof correctAnswer?.answer === 'string' ? correctAnswer.answer : null),
+}
+
 // Điểm xóa kiểu duy nhất, như `renderers/index.ts`: mỗi describer ràng buộc đúng loại game khi đăng ký.
 const define = <T extends GameType>(describer: ReviewDescriber<T>) => describer as unknown as AnyReviewDescriber
 
@@ -74,6 +90,8 @@ const define = <T extends GameType>(describer: ReviewDescriber<T>) => describer 
 export const REVIEW_DESCRIBERS: Partial<Record<GameType, AnyReviewDescriber>> = {
   QUIZ: define(QUIZ),
   MATCHING: define(MATCHING),
+  ODD_ONE_OUT: define(ODD_ONE_OUT),
+  VISUAL_CLOZE: define(VISUAL_CLOZE),
 }
 
 export const isNoAnswer = (answer: AnswerPayload): answer is NoAnswer => 'outcome' in answer

@@ -853,6 +853,7 @@ export const viText = {
     nextQuestion: 'Câu tiếp theo',
     seeResult: 'Xem kết quả',
     finishedTitle: 'Hoàn thành!',
+    oddOneOutPrompt: 'Tìm thứ khác với các thứ còn lại',
     correctCount: (correct: number, total: number) => `${correct}/${total} câu đúng`,
     replay: 'Chơi lại',
     review: {
