@@ -1,7 +1,7 @@
 # Kế hoạch và việc còn lại
 
 Nguồn: `docs/ui/PLAN.md`, `docs/ui/SPEC.md` (2026-10-27), `docs/plan.md`, `docs/analysis.md`, `docs/progress-2026-10-16.md`, `docs/Dinh_huong_de_tai.md` mục 7.
-Cập nhật: 2026-10-31
+Cập nhật: 2026-11-01
 
 Có hai kế hoạch nối tiếp: `docs/plan.md` (nhóm F, A, B, C, D, tháng 10 đầu) và `docs/ui/PLAN.md` (P0–P5, mới hơn). Khi khác nhau, ưu tiên kế hoạch mới. Không tài liệu nào có phân công theo người hay hạn nộp.
 
@@ -11,10 +11,10 @@ Có hai kế hoạch nối tiếp: `docs/plan.md` (nhóm F, A, B, C, D, tháng 1
 |---|---|---|
 | P0 | Backend: bản game học sinh, phiên chơi, chấm, lưu đáp án sai, thông tin xuất bản | Chưa có controller |
 | P1 | Nền tảng player | Xong |
-| P2 | Chơi cá nhân | P2.1–P2.6 xong; P2b (8 renderer) chưa |
+| P2 | Chơi cá nhân | P2.1–P2.6 xong; P2b còn 6 renderer |
 | P3 | Giao diện giáo viên | Xong theo commit |
 | P4 | Trình chiếu lớp | Xong theo commit |
-| P5 | Thi đấu phòng | Chưa, phụ thuộc spike WebSocket |
+| P5 | Thi đấu phòng | Giao diện xong, chỉ chạy mô phỏng giữa các tab cùng máy ở bản dev; phòng thật chờ Backend (API phiên, WebSocket) |
 
 ## Phụ thuộc giữa các bước
 
@@ -37,7 +37,7 @@ P1 rồi P2 (P2b song song với P3), rồi P4. P3.7 cần P1.10. P5 làm cuối
 
 - Mock còn nằm trong bundle build thật.
 - 19 mâu thuẫn và 18 câu hỏi cần nhóm trả lời, xem [[Mâu thuẫn giao diện và câu hỏi mở]].
-- `WorkspaceEditor` 563 dòng và 8 renderer là nút thắt.
+- `WorkspaceEditor` 563 dòng và 6 renderer còn lại là nút thắt.
 - Thư viện cần duyệt: font Baloo 2, Nunito; `jsqr` (không bắt buộc). `@stomp/stompjs`, `sockjs-client` đã duyệt sẵn, chỉ chưa cài (P5). Âm thanh hiện là tiếng bíp tạm.
 - Test chập chờn dưới tải cao; CI dùng `--maxWorkers=2`.
 - Chưa thử trên thiết bị thật.

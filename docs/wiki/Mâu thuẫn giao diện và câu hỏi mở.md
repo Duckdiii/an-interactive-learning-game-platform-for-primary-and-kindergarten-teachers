@@ -1,7 +1,7 @@
 # Mâu thuẫn giao diện và câu hỏi mở
 
 Nguồn: `docs/ui/PLAN.md` mục 2 và mục 6, ngày khảo sát 2026-10-27.
-Cập nhật: 2026-10-31
+Cập nhật: 2026-11-01
 
 Danh sách đủ 19 mâu thuẫn và 18 câu hỏi, tóm tắt mỗi mục một dòng; lý do và cách xử lý tạm xem [[ui/PLAN|ui/PLAN]]. Chưa đối chiếu mục nào đã được giải quyết trong P1–P4.
 
@@ -9,7 +9,7 @@ Danh sách đủ 19 mâu thuẫn và 18 câu hỏi, tóm tắt mỗi mục một
 
 | # | Mâu thuẫn | Cách tạm thời hoặc liên quan |
 |---|---|---|
-| M1 | Wireframe và đề xuất cần đủ 10 loại, hiện mới 2 renderer | Q1; [[Trạng thái thực tế]] |
+| M1 | Wireframe và đề xuất cần đủ 10 loại, hiện mới 4 renderer | Q1; [[Trạng thái thực tế]] |
 | M2 | Bé không đếm giờ, "Cho thử lại" so với `TIMEOUT` và kết quả cũ khi gửi lại | [[Điểm lệch và việc cần chốt]] mục 35 |
 | M3 | Ai lo phản hồi đúng sai: SPEC nói khung, mã hiện có nói renderer | Cần lớp nối; Q9 |
 | M4 | Hai loại mã, một ô nhập, có thể trùng định dạng | Mục 36; Q3 |
