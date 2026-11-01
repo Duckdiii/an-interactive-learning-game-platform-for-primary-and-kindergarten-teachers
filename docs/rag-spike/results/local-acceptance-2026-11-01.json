@@ -30,8 +30,8 @@
     },
     "preschoolPublication": "DISABLED_PENDING_SPECIALIST_REVIEW"
   },
-  "historicalLiveGenerationBeforeApplicationIntegration": {
-    "result": "HISTORICAL_PASS_NOT_CURRENT_INTEGRATION_EVIDENCE",
+  "liveGeneration": {
+    "result": "PASS",
     "tests": 2,
     "inScope": "One QUIZ / MATH / GRADE_1 game generated and validated",
     "insufficientEvidence": "One out-of-scope topic rejected before generation",
@@ -91,41 +91,20 @@
     "geminiReviewerLiveCall": "NOT_RUN",
     "reviewerLatency": "NOT_MEASURED"
   },
-  "applicationIntegrationRun": {
+  "datasetDiscoveryRecheck": {
     "recordedAt": "2026-11-01",
-    "implemented": [
-      "Teacher-authenticated POST /api/games/generate creates a DRAFT game and calls the existing transactional game+curriculum-review persistence boundary",
-      "Curriculum review is returned outside the frozen Game DSL 1.0.0 metadata",
-      "Teacher UI submits a natural-language topic, displays a quiz preview, review status and retrieved source pages",
-      "Generation API rejects requests before AI calls when RAG is disabled, its catalog is unavailable, or the selected scope is not in that catalog"
-    ],
-    "supportedUiScope": "QUIZ / MATH / GRADE_1 only, matching currently wired runtime; other scopes remain gated",
-    "focusedBackendTests": { "tests": 10, "failures": 0, "errors": 0, "skipped": 0 },
-    "fullBackendVerify": { "tests": 591, "failures": 0, "errors": 0, "skipped": 8, "jacocoGate": "PASS" },
-    "frontend": { "tests": 11, "failures": 0, "build": "PASS", "lint": "PASS" },
-    "warnings": [
-      "JaCoCo reported stale execution-data class mismatches in backend/target; coverage gate still passed",
-      "Vite reported the existing main JavaScript bundle exceeds 500 kB"
-    ]
+    "result": "PASS",
+    "test": "CurriculumCatalogTest.packagedCorpusDiscoveryLoadsEveryDatasetWithoutTreatingItAsPublished",
+    "focusedRagTests": { "tests": 8, "failures": 0, "errors": 0, "skipped": 0 },
+    "packagedDatasets": 16,
+    "chunksIncludingControls": 653,
+    "controls": 34,
+    "publicationChanged": false
   },
-  "livePilotForApplicationIntegration": {
-    "result": "NOT_RUN",
-    "reason": "GEMINI_API_KEY and OPENAI_API_KEY are not present in process environment and the dedicated local PostgreSQL endpoint 127.0.0.1:55432 did not accept a connection",
-    "remoteSupabaseWrites": false
-  },
-  "latestPreIntegrationLiveAttempt": {
-    "result": "FAILED_POSITIVE_AFTER_RETRY; NEGATIVE_UNSUPPORTED_SCOPE_REJECTED",
-    "reason": "Positive quiz remained QUESTION_NOT_MACHINE_CHECKABLE; this was the last observed live attempt before the application integration code in this run",
-    "currentRun": "NOT_RUN"
-  },
-  "systemCompletionStatus": {
-    "implementedInThisRun": ["packaged discovery of all 16 datasets", "teacher create-and-save API boundary", "teacher create/preview UI for current pilot scope"],
-    "stillIncomplete": [
-      "runtime retrieval and evidence verification for the other 14 primary datasets",
-      "production-ready kindergarten semantic verification and specialist approval",
-      "the remaining SRS-supported game-type APIs and playable/edit/reopen flow",
-      "independent natural-language development/holdout benchmark across all scopes",
-      "live acceptance with required moderation and local pgvector, and remote deployment"
-    ]
+  "scopeCleanupVerification": {
+    "recordedAt": "2026-11-01",
+    "mvnVerify": { "tests": 584, "failures": 0, "errors": 0, "skipped": 8, "jacocoGate": "PASS" },
+    "focusedRagTests": { "tests": 8, "failures": 0, "errors": 0, "skipped": 0 },
+    "liveRetrieval": "NOT_RUN; local database and Gemini credentials unavailable"
   }
 }
