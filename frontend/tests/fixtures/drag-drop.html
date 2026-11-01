@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="vi">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Drag/drop renderer test</title></head>
+  <body style="margin:0;padding:16px;font-family:Arial,sans-serif">
+    <div id="root" style="max-width:800px;margin:auto"></div>
+    <script type="module">
+      import React from 'react'
+      import { createRoot } from 'react-dom/client'
+      import Konva from 'konva'
+      import DragDropRenderer from '/src/components/game/renderers/drag-drop/DragDropRenderer.tsx'
+      import { dragDropQuestion } from '/src/demo/dragDropQuestion.ts'
+      window.testKonva = Konva
+      window.answers = []
+      window.previews = []
+      window.failSubmission = false
+      createRoot(document.getElementById('root')).render(React.createElement(React.StrictMode, null,
+        React.createElement(DragDropRenderer, {
+          question: dragDropQuestion, participantId: 'test-participant',
+          previewMode: new URLSearchParams(location.search).has('preview'),
+          onAnswered: async (answer) => {
+            window.answers.push(answer)
+            if (window.failSubmission) throw new Error('Mock submission failure')
+          },
+          onPreviewCompleted: (answer) => window.previews.push(answer),
+        })))
+    </script>
+  </body>
+</html>

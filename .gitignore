@@ -1,7 +1,7 @@
 # === Environment / secrets ===
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example
+!.env.*.example
 application-local.yml
 
 # === Node / Frontend ===

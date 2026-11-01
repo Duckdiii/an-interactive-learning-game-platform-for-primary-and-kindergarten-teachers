@@ -86,7 +86,8 @@ function paragraphInfo(p) {
 }
 
 // Ký tự | trong ô bảng phải được escape thành \| nếu không sẽ tạo thêm cột và làm lệch dữ liệu.
-export const escCell = (s) => s.replace(/\|/g, "\\|");
+// Escape cả \ : ô có sẵn `\|` mà chỉ thêm một dấu \ thì thành `\\|`, Markdown lại hiểu là ranh giới cột.
+export const escCell = (s) => s.replace(/[\\|]/g, "\\$&");
 
 function tableToMarkdown(tbl) {
   const rows = kids(tbl, "w:tr").map((tr) =>

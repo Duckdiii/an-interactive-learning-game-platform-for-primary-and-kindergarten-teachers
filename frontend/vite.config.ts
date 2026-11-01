@@ -16,5 +16,7 @@ export default defineConfig({
     // Test đầu tiên của mỗi file nạp trang (lazy) lần đầu nên chậm hơn hẳn khi máy bận; 5 giây mặc định gây chập chờn.
     testTimeout: 20_000,
     hookTimeout: 20_000,
+    // scripts/*.test.mjs chạy bằng `node --test`, không phải Vitest.
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
 })
