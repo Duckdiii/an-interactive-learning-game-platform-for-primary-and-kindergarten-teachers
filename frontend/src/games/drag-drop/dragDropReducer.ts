@@ -16,6 +16,7 @@ export type DragDropAction =
   | { type: 'START_SUBMIT' }
   | { type: 'SUBMIT_SUCCESS'; result: DragDropAnswerResult }
   | { type: 'SUBMIT_ERROR' }
+  | { type: 'SYNC_REVIEW'; placements: Record<string, string> }
   | { type: 'RESET' }
 
 export function createDragDropState(
@@ -92,6 +93,14 @@ export function dragDropReducer(state: DragDropState, action: DragDropAction): D
 
     case 'SUBMIT_ERROR':
       return { ...state, submitting: false, submitFailed: true }
+
+    case 'SYNC_REVIEW':
+      return {
+        ...state,
+        placements: { ...action.placements },
+        locked: true,
+        selectedItemId: null,
+      }
 
     case 'RESET':
       return createDragDropState()

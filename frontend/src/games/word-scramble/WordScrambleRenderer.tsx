@@ -72,13 +72,16 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
   // Khởi tạo các slot ban đầu nếu ở chế độ review
   const initialSlots = useMemo<(string | null)[]>(() => {
     if (mode === 'review' && 'completedWord' in props && props.completedWord) {
-      const chars = [...props.completedWord]
+      const normalizedWord = props.completedWord.normalize('NFC')
+      const chars = [...normalizedWord]
       const usedTiles = new Set<string>()
       const slots: (string | null)[] = []
 
       chars.forEach((c) => {
         const found = tiles.find(
-          (t) => t.character.toUpperCase() === c.toUpperCase() && !usedTiles.has(t.tileId),
+          (t) =>
+            t.character.normalize('NFC').toUpperCase() === c.toUpperCase() &&
+            !usedTiles.has(t.tileId),
         )
         if (found) {
           usedTiles.add(found.tileId)
@@ -108,6 +111,13 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
     }
   }, [question.id, wordLength])
 
+  // Cập nhật slots ở chế độ review khi prop completedWord đổi
+  useEffect(() => {
+    if (mode === 'review') {
+      dispatch({ type: 'SYNC_REVIEW', slots: initialSlots })
+    }
+  }, [mode, initialSlots])
+
   const playAudio = useQuestionAudio(question.audioUrl)
   const illustration = useIllustration(question.imageUrl)
 
@@ -126,7 +136,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
       )
 
       if (targetSlotIndex !== -1) {
-        playSound('/sounds/click.wav')
+        playSound('/sounds/pair-matched.wav')
         dispatch({ type: 'PLACE_TILE', tileId, slotIndex: targetSlotIndex })
       } else {
         // Rơi ra ngoài slot: nếu chữ này đang trong slot thì trả về khay
@@ -141,7 +151,7 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
   const handleTileTap = useCallback(
     (tileId: string) => {
       if (state.locked || disabled) return
-      playSound('/sounds/click.wav')
+      playSound('/sounds/pair-matched.wav')
       dispatch({ type: 'SELECT_TILE', tileId })
     },
     [state.locked, disabled],
@@ -154,11 +164,11 @@ export default function WordScrambleRenderer(props: WordScrambleRendererProps) {
 
       if (currentTileId) {
         // Bấm vào ô đã có chữ -> trả chữ về khay
-        playSound('/sounds/click.wav')
+        playSound('/sounds/pair-matched.wav')
         dispatch({ type: 'RETURN_TILE', tileId: currentTileId })
       } else if (state.selectedTileId) {
         // Bấm vào ô trống khi đang chọn chữ -> đặt chữ vào ô
-        playSound('/sounds/click.wav')
+        playSound('/sounds/pair-matched.wav')
         dispatch({ type: 'PLACE_TILE', tileId: state.selectedTileId, slotIndex })
       }
     },

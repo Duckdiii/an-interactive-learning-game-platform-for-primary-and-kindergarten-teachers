@@ -16,6 +16,7 @@ export type WordScrambleAction =
   | { type: 'START_SUBMIT' }
   | { type: 'SUBMIT_SUCCESS'; result: WordScrambleAnswerResult }
   | { type: 'SUBMIT_ERROR' }
+  | { type: 'SYNC_REVIEW'; slots: (string | null)[] }
   | { type: 'RESET'; wordLength: number }
 
 export function createWordScrambleState(
@@ -133,6 +134,14 @@ export function wordScrambleReducer(state: WordScrambleState, action: WordScramb
 
     case 'SUBMIT_ERROR':
       return { ...state, submitting: false, submitFailed: true }
+
+    case 'SYNC_REVIEW':
+      return {
+        ...state,
+        slots: [...action.slots],
+        locked: true,
+        selectedTileId: null,
+      }
 
     case 'RESET':
       return createWordScrambleState(action.wordLength)

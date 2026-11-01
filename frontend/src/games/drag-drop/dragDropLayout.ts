@@ -70,11 +70,11 @@ export function computeDragDropLayout(params: {
   const availableWidth = width - PADDING * 2
   const zoneWidth = (availableWidth - GAP * (zoneColumns - 1)) / zoneColumns
 
-  // Ước tính số item tối đa trong một rổ để tính chiều cao rổ
-  const maxItemsPerZone = Math.max(3, Math.ceil(items.length / Math.max(1, zoneCount)) + 1)
+  // Chiều cao rổ tính theo trường hợp xấu nhất: mọi vật có thể được xếp vào cùng một rổ
+  const maxItemsPerZone = Math.max(1, items.length)
   const slotsPerRow = Math.max(1, Math.floor((zoneWidth - 16) / (ITEM_SIZE + 8)))
   const slotRowsPerZone = Math.max(1, Math.ceil(maxItemsPerZone / slotsPerRow))
-  const zoneHeight = LABEL_HEIGHT + slotRowsPerZone * (ITEM_SIZE + 8) + 16
+  const zoneHeight = LABEL_HEIGHT + 12 + slotRowsPerZone * (ITEM_SIZE + 8) + 12
 
   const zones: ZoneLayout[] = dropZones.map((zone, index) => {
     const col = index % zoneColumns
@@ -95,11 +95,13 @@ export function computeDragDropLayout(params: {
   const zoneItemPositions: Record<string, Record<number, Point>> = {}
   for (const zone of zones) {
     zoneItemPositions[zone.id] = {}
+    const rowWidth = slotsPerRow * (ITEM_SIZE + 8) - 8
+    const startX = zone.bounds.x + Math.max(8, (zone.bounds.width - rowWidth) / 2)
     for (let i = 0; i < items.length; i++) {
       const col = i % slotsPerRow
       const row = Math.floor(i / slotsPerRow)
-      const slotX = zone.bounds.x + 12 + col * (ITEM_SIZE + 8)
-      const slotY = zone.bounds.y + LABEL_HEIGHT + 6 + row * (ITEM_SIZE + 8)
+      const slotX = startX + col * (ITEM_SIZE + 8)
+      const slotY = zone.bounds.y + LABEL_HEIGHT + 10 + row * (ITEM_SIZE + 8)
       zoneItemPositions[zone.id][i] = { x: slotX, y: slotY }
     }
   }

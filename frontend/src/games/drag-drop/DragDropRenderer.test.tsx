@@ -78,7 +78,7 @@ describe('DragDropRenderer Component', () => {
     expect(screen.getByText(/Tuyệt vời/)).toBeInTheDocument()
   })
 
-  it('renders locked state in review mode', () => {
+  it('renders locked state in review mode and ignores interaction', () => {
     render(
       <DragDropRenderer
         mode="review"
@@ -92,5 +92,71 @@ describe('DragDropRenderer Component', () => {
 
     // Confirm button should not appear in review mode
     expect(screen.queryByText('Xong rồi!')).toBeNull()
+
+    // Clicking items or zones should not trigger changes or errors
+    fireEvent.click(screen.getByText('Cá'))
+    fireEvent.click(screen.getByText('Trên cạn'))
+    expect(screen.queryByText('Xong rồi!')).toBeNull()
+  })
+
+  it('plays without targetZoneId in student mode and submits only once', async () => {
+    // Mode play question does NOT contain targetZoneId
+    const studentQuestion = {
+      id: 'dd_student',
+      timeLimitSeconds: 60,
+      points: 20,
+      audioText: 'Phân loại con vật',
+      dropZones: [
+        { id: 'water', label: 'Dưới nước' },
+        { id: 'land', label: 'Trên cạn' },
+      ],
+      items: [
+        { id: 'fish', text: 'Cá' },
+        { id: 'rabbit', text: 'Thỏ' },
+      ],
+    }
+
+    let resolveAnswer: (value: { isCorrect: boolean; correctPlacements?: { itemId: string; zoneId: string }[] }) => void
+    const answerPromise = new Promise<{ isCorrect: boolean; correctPlacements?: { itemId: string; zoneId: string }[] }>((resolve) => {
+      resolveAnswer = resolve
+    })
+    const onAnswered = vi.fn().mockReturnValue(answerPromise)
+
+    render(<DragDropRenderer mode="play" question={studentQuestion} onAnswered={onAnswered} />)
+
+    // Place Fish -> Land (intentionally wrong)
+    fireEvent.click(screen.getByText('Cá'))
+    fireEvent.click(screen.getByText('Trên cạn'))
+
+    // Place Rabbit -> Land
+    fireEvent.click(screen.getByText('Thỏ'))
+    fireEvent.click(screen.getByText('Trên cạn'))
+
+    // Confirm button appears and is clickable
+    const confirmBtn = screen.getByText('Xong rồi!')
+    fireEvent.click(confirmBtn)
+    // Clicking confirm again while submitting should be ignored (nộp một lần)
+    fireEvent.click(confirmBtn)
+    fireEvent.click(confirmBtn)
+
+    expect(onAnswered).toHaveBeenCalledTimes(1)
+    expect(onAnswered).toHaveBeenCalledWith([
+      { itemId: 'fish', zoneId: 'land' },
+      { itemId: 'rabbit', zoneId: 'land' },
+    ])
+
+    // Resolve with incorrect answer and correctPlacements
+    resolveAnswer!({
+      isCorrect: false,
+      correctPlacements: [
+        { itemId: 'fish', zoneId: 'water' },
+        { itemId: 'rabbit', zoneId: 'land' },
+      ],
+    })
+
+    // Shows correct answer for misplaced item 'Cá'
+    expect(await screen.findByText('Đúng: Dưới nước')).toBeInTheDocument()
+    // Does NOT show correct label for 'Thỏ' because Thỏ was correctly placed in 'land'
+    expect(screen.queryByText('Đúng: Trên cạn')).toBeNull()
   })
 })

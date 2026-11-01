@@ -92,6 +92,13 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
     }
   }, [question.id])
 
+  // Cập nhật placements ở chế độ review khi prop đổi
+  useEffect(() => {
+    if (mode === 'review') {
+      dispatch({ type: 'SYNC_REVIEW', placements: initialPlacements })
+    }
+  }, [mode, initialPlacements])
+
   const playAudio = useQuestionAudio(question.audioUrl)
   const illustration = useIllustration(question.imageUrl)
 
@@ -102,7 +109,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
       const targetZone = layout.zones.find((z) => isInsideZone(center, z.bounds))
 
       if (targetZone) {
-        playSound('/sounds/click.wav')
+        playSound('/sounds/pair-matched.wav')
         dispatch({ type: 'PLACE_ITEM', itemId, zoneId: targetZone.id })
       } else {
         // Rơi ra ngoài: nếu đang ở trong zone thì trả về khay
@@ -134,7 +141,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
     (zoneId: string) => {
       if (state.locked || disabled) return
       if (state.selectedItemId) {
-        playSound('/sounds/click.wav')
+        playSound('/sounds/pair-matched.wav')
         dispatch({ type: 'PLACE_ITEM', itemId: state.selectedItemId, zoneId })
       }
     },
@@ -187,6 +194,28 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
     })
     return map
   }, [items, question.dropZones, state.placements])
+
+  const zoneById = useMemo(() => new Map(question.dropZones.map((z) => [z.id, z])), [question.dropZones])
+
+  const correctZoneByItem = useMemo(() => {
+    const map = new Map<string, string>()
+    if (state.result?.correctPlacements) {
+      for (const p of state.result.correctPlacements) {
+        map.set(p.itemId, p.zoneId)
+      }
+    } else if (mode === 'review' && 'correctPlacements' in props && props.correctPlacements) {
+      for (const p of props.correctPlacements) {
+        map.set(p.itemId, p.zoneId)
+      }
+    } else if (mode === 'preview') {
+      for (const item of items) {
+        if (item.targetZoneId) {
+          map.set(item.id, item.targetZoneId)
+        }
+      }
+    }
+    return map
+  }, [state.result, mode, props, items])
 
   return (
     <ResponsiveStage width={layout.width} height={layout.height}>
@@ -299,9 +328,12 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
           }
 
           // Kiểm tra xem vị trí đặt đúng hay sai ở review / sau khi nộp
-          const isWrongPlacement =
-            (state.locked || mode === 'review') &&
-            Boolean(state.result && !state.result.isCorrect && isPlaced)
+          const targetCorrectZoneId = correctZoneByItem.get(item.id)
+          const isFinishedOrReview = state.locked || mode === 'review'
+          const isMisplaced =
+            isFinishedOrReview &&
+            Boolean(targetCorrectZoneId && zoneId && targetCorrectZoneId !== zoneId)
+          const targetCorrectZone = targetCorrectZoneId ? zoneById.get(targetCorrectZoneId) : null
 
           return (
             <Group
@@ -324,15 +356,15 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
                 width={ITEM_SIZE}
                 height={ITEM_SIZE}
                 cornerRadius={14}
-                fill={palette.surface}
+                fill={isMisplaced ? palette.wrongFill : palette.surface}
                 stroke={
                   isSelected
                     ? palette.accent
-                    : isWrongPlacement
+                    : isMisplaced
                       ? palette.wrongLine
                       : palette.outline
                 }
-                strokeWidth={isSelected ? 4 : 2}
+                strokeWidth={isSelected ? 4 : isMisplaced ? 3 : 2}
                 shadowColor={palette.ink}
                 shadowBlur={isSelected ? 8 : 4}
                 shadowOpacity={isSelected ? 0.25 : 0.1}
@@ -355,6 +387,32 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
                   wrap="word"
                   listening={false}
                 />
+              )}
+
+              {/* Nhãn đáp án đúng nếu đặt sai */}
+              {isMisplaced && targetCorrectZone && (
+                <Group y={ITEM_SIZE - 20}>
+                  <Rect
+                    width={ITEM_SIZE}
+                    height={20}
+                    cornerRadius={[0, 0, 14, 14]}
+                    fill={palette.surface}
+                    stroke={palette.wrongLine}
+                    strokeWidth={1}
+                    listening={false}
+                  />
+                  <Text
+                    text={viText.player.dragDrop.correctZoneLabel(targetCorrectZone.label)}
+                    fontSize={10}
+                    fontStyle="bold"
+                    fill={palette.wrongLine}
+                    width={ITEM_SIZE}
+                    height={20}
+                    align="center"
+                    verticalAlign="middle"
+                    listening={false}
+                  />
+                </Group>
               )}
             </Group>
           )

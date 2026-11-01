@@ -42,6 +42,43 @@ describe('Drag & Drop Layout & Geometry', () => {
     expect(CONFIRM_BUTTON_HEIGHT).toBeGreaterThanOrEqual(64)
   })
 
+  it('keeps all items strictly inside zone bounds in worst-case single-basket placement', () => {
+    const itemCounts = [1, 2, 4, 6, 8]
+    const zoneCounts = [1, 2, 3, 4]
+
+    for (const itemCount of itemCounts) {
+      for (const zoneCount of zoneCounts) {
+        const testItems: DragDropDisplayItem[] = Array.from({ length: itemCount }, (_, i) => ({
+          id: `item_${i}`,
+          text: `Vật ${i}`,
+        }))
+        const testZones: DropZone[] = Array.from({ length: zoneCount }, (_, i) => ({
+          id: `zone_${i}`,
+          label: `Rổ ${i}`,
+        }))
+
+        const layout = computeDragDropLayout({
+          items: testItems,
+          dropZones: testZones,
+          hasAudio: false,
+          hasIllustration: false,
+        })
+
+        // Kiểm tra toạ độ từng slot trong mọi rổ đều nằm trọn trong rổ
+        for (const zone of layout.zones) {
+          const positions = layout.zoneItemPositions[zone.id]
+          for (let i = 0; i < itemCount; i++) {
+            const slot = positions[i]
+            expect(slot.x).toBeGreaterThanOrEqual(zone.bounds.x)
+            expect(slot.x + ITEM_SIZE).toBeLessThanOrEqual(zone.bounds.x + zone.bounds.width)
+            expect(slot.y).toBeGreaterThanOrEqual(zone.bounds.y)
+            expect(slot.y + ITEM_SIZE).toBeLessThanOrEqual(zone.bounds.y + zone.bounds.height)
+          }
+        }
+      }
+    }
+  })
+
   it('positions drop zones and tray without overlap', () => {
     const layout = computeDragDropLayout({
       items: sampleItems,

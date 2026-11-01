@@ -29,6 +29,20 @@ describe('Word Scramble Logic (migrated from node test)', () => {
     expect(isWordMatch('trường', 'TRƯỜNG')).toBe(true)
     expect(isWordMatch('cá', 'CÁ')).toBe(true)
   })
+
+  it('normalizes decomposed NFD Unicode strings to NFC', () => {
+    // 'ca\u0301' is 'cá' decomposed (NFD)
+    const nfdWord = 'ca\u0301'
+    const nfcWord = 'cá'
+    expect(nfdWord).not.toBe(nfcWord)
+    expect(nfdWord.normalize('NFC')).toBe(nfcWord)
+    expect(isWordMatch(nfdWord, nfcWord)).toBe(true)
+    expect(normalizeWord(nfdWord)).toBe(normalizeWord(nfcWord))
+
+    // 'Tr\u01b0\u01a1\u0300ng' is 'Trường' decomposed (NFD)
+    const nfdTruong = 'Tr\u01b0\u01a1\u0300ng'
+    expect(isWordMatch(nfdTruong, 'TRƯỜNG')).toBe(true)
+  })
 })
 
 describe('Word Scramble Reducer with Duplicate Letters', () => {
