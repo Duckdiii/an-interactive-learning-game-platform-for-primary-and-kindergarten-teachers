@@ -19,6 +19,10 @@ test("mã nằm ngoài mục khai báo (ví dụ trong Acceptance Criteria) khô
   assert.deepEqual(extractUc(pr("- UC: UC-02"), known).uc, ["UC-02"]);
 });
 
+test("bình luận HTML lồng để tái tạo sau khi gỡ cũng không được tính", () => {
+  assert.deepEqual(extractUc(pr("<<!-- x -->!-- UC-01 -->\n- UC: UC-02"), known).uc, ["UC-02"]);
+});
+
 test("ví dụ mẫu trong bình luận HTML của template không được tính", () => {
   const body = pr("<!-- ví dụ: UC-04, FR-04 -->\n- UC: \n- FR: ");
   const r = extractUc(body, known);

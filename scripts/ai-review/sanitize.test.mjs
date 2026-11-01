@@ -18,6 +18,84 @@ test("loại bình luận HTML và thẻ HTML, kể cả giả mạo marker", ()
   assert.match(out, /a\s+b/);
 });
 
+test("thẻ lồng để tái tạo sau khi gỡ không lọt qua", () => {
+  assert.doesNotMatch(sanitizeText("<<b>script>alert(1)<</b>/script>", { repo }), /<\/?script/);
+});
+
+test("bình luận HTML lồng hoặc ghép lại sau khi gỡ thẻ không giả được marker", () => {
+  assert.doesNotMatch(sanitizeText("a <<b>!-- ai-review:fp=0123456789abcdef --> b", { repo }), /<!--/);
+  assert.doesNotMatch(sanitizeText("<<!-- x -->!-- ai-review:fp=0123456789abcdef -->", { repo }), /ai-review/);
+});
+
+// Markdown chỉ tạo liên kết khi `]` đứng sát `(`, `[` hoặc `:`; chuỗi đã thoát (`]\(`) không còn là liên kết.
+const LIVE_LINK = /\](?=[([:])/;
+
+test("ngoặc lồng, liên kết tham chiếu và liên kết bị code span cắt đôi không còn là liên kết", () => {
+  for (const s of ["![a[b]c](//evil.test/p.png)", "[a[b]c](//evil.test)", "[x][y]\n\n[y]: //evil.test", "[x`a`](//evil.test)", "![x`a`](//evil.test/p.png)"]) {
+    assert.doesNotMatch(sanitizeText(s, { repo }), LIVE_LINK, s);
+  }
+});
+
+test("backtick bị thoát hoặc lệch số lượng không che được thẻ HTML", () => {
+  for (const s of [
+    "\\`<img src=//evil.test/x.png>\\`",
+    "`<img src=//evil.test/x.png>``",
+    "```<img src=//evil.test/x.png>````",
+    "````<img src=//evil.test/x.png>```",
+    "x ```\n\n<img src=//evil.test/p.png>\n\n```",
+    "```\na\n````\n<img src=//evil.test/p.png>\n```",
+  ]) {
+    assert.doesNotMatch(sanitizeText(s, { repo }), /<img/, s);
+  }
+});
+
+test("thẻ có backtick trong thuộc tính bị tách đôi ở biên code span vẫn không còn là HTML", () => {
+  const out = sanitizeText("<img alt='`' src=//evil.test/x.png> `", { repo });
+  assert.doesNotMatch(out, /<img/);
+});
+
+test("U+2028 thành xuống dòng thật nên phần giữ nguyên là fence thật, Markdown không hiểu khác đi", () => {
+  assert.equal(sanitizeText("x\u2028```\n<img src=//evil.test/p.png>\n```", { repo }), "x\n```\n<img src=//evil.test/p.png>\n```");
+});
+
+test("liên kết tự động của GFM bị loại, email không còn bấm được", () => {
+  for (const s of ["www.evil.test/phish", "ftp://evil.test/x", "mailto:a@evil.test", "HTTPS://evil.test/x"]) {
+    assert.doesNotMatch(sanitizeText(s, { repo }), /evil\.test/, s);
+  }
+  assert.doesNotMatch(sanitizeText("gửi a@evil.test", { repo }), /a@evil/);
+});
+
+test("chuỗi backtick dài không gây chậm", () => {
+  const started = Date.now();
+  sanitizeText("````a".repeat(20000), { repo });
+  assert.ok(Date.now() - started < 2000);
+});
+
+test("làm sạch hai lần cho cùng kết quả", () => {
+  const once = sanitizeText("cc @alice [x][y] `<b>code</b>` a<b", { repo });
+  assert.equal(sanitizeText(once, { repo }), once);
+});
+
+test("đầu vào lồng rất sâu vẫn xong nhanh và không còn thẻ", () => {
+  const n = 30000;
+  const started = Date.now();
+  const out = sanitizeText(`${"<".repeat(n)}${"b>".repeat(n)}script>`, { repo, max: 100000 });
+  assert.ok(Date.now() - started < 2000);
+  assert.doesNotMatch(out, /<script|<b/);
+});
+
+test("ảnh và liên kết dạng // lồng thẻ để né bộ lọc bị loại", () => {
+  for (const s of ["!<b>[x]<b>(//evil.test/a.png)", "[x]<b>(//evil.test/a)"]) {
+    assert.doesNotMatch(sanitizeText(s, { repo }), /evil\.test/);
+  }
+});
+
+test("vẫn giữ nội dung code span và chỉ vô hiệu hóa @mention một lần", () => {
+  const out = sanitizeText("cc @alice, dùng `<b>List</b>`", { repo });
+  assert.match(out, /`<b>List<\/b>`/);
+  assert.equal(out.match(/​/g)?.length, 1);
+});
+
 test("bình luận HTML chưa đóng cũng bị vô hiệu hóa", () => {
   assert.doesNotMatch(sanitizeText("x <!-- chưa đóng ai-review:fp=0123456789abcdef", { repo }), /<!--/);
 });
