@@ -11,3 +11,4 @@ Mỗi dòng: `ngày | thao tác | nội dung`. Chỉ thêm, không sửa dòng c
 - 2026-10-31 | kiểm tra | Hai agent đối chiếu wiki với nguồn; sửa 5 lỗi, bổ sung phần bỏ sót, thêm 3 trang, sinh `docs/SRS-full.md`, `docs/Dinh_huong_de_tai.md`.
 - 2026-11-01 | sửa | Cập nhật trạng thái theo code: 4/10 renderer, P5 có giao diện và mô phỏng hai tab, phòng thật chờ Backend.
 - 2026-11-02 | kiểm tra | Dọn kho: bỏ tài liệu cũ, ảnh chụp, ví dụ DSL cũ, tài liệu quy trình; chép phần còn dùng sang [[Kế hoạch và việc còn lại]]; cập nhật 6/10 renderer.
+- 2026-11-02 | nạp | Thêm sơ đồ nhóm cung cấp vào `docs/diagrams/`, thêm trang [[Sơ đồ hệ thống]], ghi 5 điểm lệch.

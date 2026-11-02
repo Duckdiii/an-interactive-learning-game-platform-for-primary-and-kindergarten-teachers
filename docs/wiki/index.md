@@ -29,6 +29,7 @@ Cửa vào duy nhất của kho: cần tài liệu gì thì bắt đầu từ đ
 ## Kỹ thuật
 
 - [[Kiến trúc và công nghệ]]: các tầng, công nghệ, mô hình miền.
+- [[Sơ đồ hệ thống]]: kiến trúc, activity, use case, class, 14 sơ đồ tuần tự.
 - [[Game JSON DSL]]: khái niệm của contract dữ liệu, không chép field.
 - [[Bản đồ API]]: 49 operation, phần đã cài, phần frontend còn cần.
 - [[Kiểm thử và vận hành]]: 4 tầng kiểm thử, 8 kịch bản, giám sát, sao lưu.
@@ -50,7 +51,8 @@ Khi viết code hay test, đọc ở đây, không đọc bản tóm tắt.
 | Yêu cầu phi chức năng | [[NFR]] |
 | Trường giao diện FLD | [[FLD]] |
 | KPI | [[KPI]] |
-| SRS đầy đủ | [[SRS-full]]; sơ đồ chỉ có ở `docs/SRS.docx` |
+| SRS đầy đủ | [[SRS-full]]; hình trong SRS ở `docs/SRS.docx` |
+| Sơ đồ draw.io | `docs/diagrams/` |
 | Định hướng đề tài | [[Dinh_huong_de_tai]]; bản gốc `docs/Dinh_huong_de_tai.docx` |
 | Game JSON DSL (contract) | [[game-json-dsl-v1.0.0]] |
 | REST API (contract) | `docs/openapi/openapi.yaml` |
