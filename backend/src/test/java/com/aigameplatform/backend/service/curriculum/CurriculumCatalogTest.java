@@ -32,6 +32,16 @@ class CurriculumCatalogTest {
     }
 
     @Test
+    void corpusSelectionIsIndependentFromGameTypeSupport() throws Exception {
+        var dataset = CurriculumDataset.loadDefault();
+        var catalog = new CurriculumCatalog(List.of(dataset), Set.of());
+
+        assertThat(catalog.requireDataset(Subject.MATH, GradeLevel.GRADE_1)).isSameAs(dataset);
+        assertThatThrownBy(() -> catalog.requireSupported(GameType.QUIZ, Subject.MATH, GradeLevel.GRADE_1))
+                .isInstanceOf(GenerationScopeUnsupportedException.class);
+    }
+
+    @Test
     void kindergartenCatalogTreatsSubjectAsHintAndPublishesOneAgeBandAgnosticScope() {
         var source = new CurriculumSource("preschool.pdf", "a".repeat(64), "01/VBHN-BGDĐT",
                 "kindergarten-outcomes-v1", 84);

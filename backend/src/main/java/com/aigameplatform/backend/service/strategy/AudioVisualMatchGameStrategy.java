@@ -20,12 +20,19 @@ public class AudioVisualMatchGameStrategy
 
     public AudioVisualMatchGameStrategy(JsonMapper jsonMapper) {
         super(AudioVisualMatchQuestionDsl.class, AudioVisualMatchQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game AUDIO_VISUAL_MATCH: người học đối chiếu nội dung nghe/nhìn với lựa chọn phù hợp.
+                Dùng correct và distractors theo schema; mỗi lựa chọn là một mô tả hình ảnh có ID, đúng một lựa chọn khớp.
+                Tạo mô tả ngắn, phân biệt được bằng căn cứ đã cho. audioText/visualPrompt chỉ là chỉ dẫn văn bản;
+                không khẳng định đã có tệp âm thanh hay hình ảnh. Không biến cơ chế đối chiếu thành bộ câu hỏi trắc nghiệm chữ.
+                Chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho AUDIO_VISUAL_MATCH");
+        return "Chủ đề: " + topic + ". Mục tiêu nghe/nhìn phải kiểm tra kỹ năng thuộc YCCĐ ở " + grade
+                + "; lựa chọn đúng cần phân biệt rõ với distractors chỉ bằng thông tin sẽ được cung cấp cho người học.";
     }
 
     @Override

@@ -96,7 +96,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
             throw new KindergartenAgeBandRequiredException();
         if (grade != GradeLevel.KINDERGARTEN && kindergartenAgeBand != null)
             throw new IllegalArgumentException("Age band may only be supplied for kindergarten");
-        var dataset = catalog.requireSupported(GameType.QUIZ, subject, grade);
+        var dataset = catalog.requireDataset(subject, grade);
         try {
             if (grade == GradeLevel.KINDERGARTEN) {
                 SemanticCurriculumEvidenceVerifier semanticVerifier = semanticEvidenceVerifier.get();
@@ -146,6 +146,9 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
             capabilities.requireApproved(approvedSha);
             availability.requireReady(dataset);
             var parsed = parser.parse(topic);
+            if (parsed.hasAmbiguousArithmeticInterval())
+                throw new CurriculumClarificationRequiredException(
+                        "Cần làm rõ khoảng từ A đến B áp dụng cho toán hạng hay kết quả phép tính.");
             if (parsed.needsClarification()) {
                 // A bounded grammar's inability to parse natural language is not a curriculum decision.
                 if (semanticEvidenceVerifier.get() != null)
@@ -153,7 +156,7 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
                 var checked = capabilities;
                 var decision = metrics.measure(CurriculumMetrics.Stage.VERIFICATION, subject, grade,
                         () -> verifier.verify(parsed, java.util.List.of(), checked), d -> CurriculumMetrics.Outcome.REJECTED);
-                throw new CurriculumEvidenceNotFoundException(guidance.message(decision, dataset, java.util.List.of()));
+                throw new CurriculumClarificationRequiredException(guidance.message(decision, dataset, java.util.List.of()));
             }
             var candidates = metrics.measure(CurriculumMetrics.Stage.RETRIEVAL, subject, grade,
                     () -> retrieval.get().retrieve(topic, subject, grade), r -> r.chunks().isEmpty()
@@ -163,6 +166,8 @@ public final class VerifiedCurriculumContextProvider implements CurriculumContex
             var decision = metrics.measure(CurriculumMetrics.Stage.VERIFICATION, subject, grade,
                     () -> verifier.verify(parsed, candidates.chunks(), checked), d -> d.status() == CurriculumEvidenceVerifier.Status.SUPPORTED
                             ? CurriculumMetrics.Outcome.SUCCESS : CurriculumMetrics.Outcome.REJECTED);
+            if (decision.status() == CurriculumEvidenceVerifier.Status.NEEDS_CLARIFICATION)
+                throw new CurriculumClarificationRequiredException(guidance.message(decision, dataset, candidates.chunks()));
             if (decision.status() != CurriculumEvidenceVerifier.Status.SUPPORTED)
                 throw new CurriculumEvidenceNotFoundException(guidance.message(decision, dataset,
                         candidates.chunks().isEmpty() ? candidates.suggestions() : candidates.chunks()));

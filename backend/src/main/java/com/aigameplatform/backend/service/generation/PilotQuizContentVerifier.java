@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 /**
  * Conservative deterministic gate for the current Math Grade 1 QUIZ pilot.
- * Unsupported question forms remain UNVERIFIED; a model reviewer cannot promote them.
+ * Unsupported question forms remain UNVERIFIED; conclusive arithmetic errors remain INVALID.
  */
 public final class PilotQuizContentVerifier {
     public enum Status { VERIFIED, INVALID, UNVERIFIED }
@@ -26,6 +26,10 @@ public final class PilotQuizContentVerifier {
     private static final Pattern EXPRESSION = Pattern.compile(
             "(?i)(?<![\\p{L}\\p{N}])(-?\\d{1,6})\\s*([+\\-])\\s*(-?\\d{1,6})(?![\\p{L}\\p{N}])");
     private static final Pattern INTEGER = Pattern.compile("^\\s*(-?\\d+)\\s*[.!?]?\\s*$");
+    private static final Pattern COMPLETE_QUESTION = Pattern.compile(
+            "(?iu)^\\s*(?:(?:tính(?:\\s+nhẩm)?|phép\\s+tính)\\s*:?\\s*)?"
+                    + "-?\\d{1,6}\\s*[+\\-]\\s*-?\\d{1,6}\\s*"
+                    + "(?:=\\s*(?:\\?|\\.{3}|-?\\d+)|(?:bằng\\s+)?(?:bao\\s+nhiêu|mấy)\\s*\\??)?\\s*[.!?]?\\s*$");
     private final CurriculumConstraints constraints;
     private final String approvedConstraintsSha;
     private final CurriculumTopicParser topicParser = new CurriculumTopicParser();
@@ -48,6 +52,9 @@ public final class PilotQuizContentVerifier {
         var parsed = topicParser.parse(topic);
         if (parsed.needsClarification() || parsed.requirements().isEmpty())
             return unverified("REQUEST_NOT_MACHINE_CHECKABLE");
+        if (parsed.requirements().stream().anyMatch(r -> r.minNumber() != null
+                && (r.skill() == CurriculumConstraints.Skill.ADD || r.skill() == CurriculumConstraints.Skill.SUBTRACT)))
+            return unverified("REQUEST_NUMBER_INTERVAL_NOT_MACHINE_CHECKABLE");
         if (parsed.requirements().stream().collect(java.util.stream.Collectors.groupingBy(
                         CurriculumTopicParser.Requirement::skill, java.util.stream.Collectors.counting()))
                 .values().stream().anyMatch(count -> count > 1))
@@ -56,11 +63,13 @@ public final class PilotQuizContentVerifier {
         var usedChunks = new java.util.LinkedHashSet<String>();
         var generatedSkills = new java.util.LinkedHashSet<CurriculumConstraints.Skill>();
         var errors = new java.util.ArrayList<ValidationError>();
+        boolean unparsedInstructions = false;
         var retrieved = evidence.chunks().stream().map(c -> c.chunkId()).collect(java.util.stream.Collectors.toSet());
         for (int index = 0; index < quiz.questions().size(); index++) {
             QuizQuestionDsl question = quiz.questions().get(index);
             Matcher matcher = EXPRESSION.matcher(question.questionText());
-            if (!matcher.find()) return unverified("QUESTION_NOT_MACHINE_CHECKABLE");
+            if (!matcher.find()) { unparsedInstructions = true; continue; }
+            if (!COMPLETE_QUESTION.matcher(question.questionText()).matches()) unparsedInstructions = true;
             String rest = question.questionText().substring(matcher.end());
             String leftToken = matcher.group(1);
             String operator = matcher.group(2);
@@ -168,6 +177,7 @@ public final class PilotQuizContentVerifier {
             if (selected == null || selected != answer) errors.add(error(index, "SELECTED_ANSWER_IS_INCORRECT"));
         }
         if (!errors.isEmpty()) return new Result(Status.INVALID, errors, List.copyOf(usedChunks));
+        if (unparsedInstructions) return unverified("QUESTION_NOT_MACHINE_CHECKABLE");
         if (!generatedSkills.containsAll(parsed.requirements().stream().map(CurriculumTopicParser.Requirement::skill).toList()))
             return unverified("OUTPUT_DOES_NOT_COVER_REQUESTED_SKILLS");
         return new Result(Status.VERIFIED, List.of(), List.copyOf(usedChunks));

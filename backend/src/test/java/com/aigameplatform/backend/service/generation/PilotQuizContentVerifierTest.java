@@ -182,6 +182,30 @@ class PilotQuizContentVerifierTest {
                 new GameplaySettings(1.0), List.of(question));
     }
 
+    @Test
+    void additionalQuestionInstructionsCannotBeCertifiedFromAnExtractedExpression() {
+        var result = verifier.verify(game("Cộng trong phạm vi 10", question(
+                        "2 + 3 = ? Hãy chọn số lớn nhất.", "5", "8", "a")),
+                "Cộng trong phạm vi 10", evidence);
+        assertThat(result.status()).isEqualTo(PilotQuizContentVerifier.Status.UNVERIFIED);
+    }
+
+    @Test
+    void unknownProseCannotHideAConclusiveArithmeticError() {
+        var result = verifier.verify(game("Cộng trong phạm vi 10", question(
+                        "2 + 3 = ? Hãy chọn số lớn nhất.", "8", "5", "a")),
+                "Cộng trong phạm vi 10", evidence);
+        assertThat(result.status()).isEqualTo(PilotQuizContentVerifier.Status.INVALID);
+        assertThat(result.errors()).extracting(e -> e.message()).contains("SELECTED_ANSWER_IS_INCORRECT");
+    }
+
+    @Test
+    void ambiguousArithmeticIntervalCannotCertifyOutputBelowItsLowerBound() {
+        var result = verifier.verify(game("Cộng từ 5 đến 10", question("1 + 2 = ?", "3", "4", "a")),
+                "Cộng từ 5 đến 10", evidence);
+        assertThat(result.status()).isEqualTo(PilotQuizContentVerifier.Status.UNVERIFIED);
+    }
+
     private static QuizQuestionDsl question(String prompt, String right, String distractor, String selectedId) {
         return new QuizQuestionDsl("q1", 30, 10, null, null, null, null, prompt,
                 List.of(new TextChoiceDsl("a", right), new TextChoiceDsl("b", distractor)), selectedId);

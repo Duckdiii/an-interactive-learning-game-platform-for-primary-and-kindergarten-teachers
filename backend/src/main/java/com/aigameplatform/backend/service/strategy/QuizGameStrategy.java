@@ -21,22 +21,32 @@ public class QuizGameStrategy extends GameContentStrategy<QuizQuestionDsl, QuizQ
     public QuizGameStrategy(JsonMapper jsonMapper) {
         super(QuizQuestionDsl.class, QuizQuestion.class, jsonMapper);
         setPromptTemplate("""
-                Bạn là trợ lý tạo câu hỏi trắc nghiệm Toán lớp 1 bằng tiếng Việt cho học sinh 6–7 tuổi.
-                Tạo đúng 4 câu hỏi cho chủ đề được cung cấp. Mỗi câu có 4 lựa chọn khác nhau và đúng một đáp án.
-                Tuân thủ căn cứ chương trình chính thức được cung cấp; giữ nguyên giới hạn số, phép tính và kỹ năng.
-                Nếu căn cứ không hỗ trợ chủ đề, không tự suy diễn hoặc mở rộng kiến thức.
-                Dùng ngữ cảnh ngắn, từ vựng quen thuộc, câu hỏi rõ ràng và phù hợp lứa tuổi.
-                Chỉ tạo dữ liệu câu hỏi, không thêm lời dẫn ngoài JSON.
+                Bạn tạo nội dung cho game QUIZ theo đúng môn, lớp/độ tuổi và chủ đề trong yêu cầu.
+                Mỗi câu dùng các trường của schema hiện có: text, options và correctIndex.
+                Mỗi câu phải có một đáp án đúng duy nhất; lựa chọn sai phải hợp lý nhưng không được đồng thời đúng.
+                Viết câu rõ, phù hợp độ tuổi và ngôn ngữ của môn học. Không mặc định môn Toán, lớp 1 hay một số lượng
+                lựa chọn cố định ngoài các ràng buộc được nêu trong schema.
+                Chỉ trả dữ liệu theo schema JSON, không thêm lời dẫn.
                 """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        if (grade != GradeLevel.GRADE_1) {
-            throw new IllegalArgumentException("QUIZ RAG pilot only supports GRADE_1");
+        String instruction = "Chủ đề cần dạy: " + topic + ". Dùng correctIndex để trỏ tới đáp án duy nhất trong options. "
+                + "Bảo đảm nội dung câu hỏi thực sự kiểm tra kỹ năng được yêu cầu ở " + grade
+                + "; không chuyển sang kỹ năng khác hoặc dựa vào hình/âm thanh chưa có trong dữ liệu.";
+        if (grade == GradeLevel.KINDERGARTEN) {
+            instruction += """
+
+                    Với Mầm non, viết lời dẫn ngắn và các lựa chọn ngắn để giáo viên đọc cho trẻ nghe;
+                    không yêu cầu trẻ tự đọc nhiều, không giả định đã có ảnh hoặc tệp âm thanh.
+                    Câu hỏi phân loại phải nêu đủ dữ kiện để có đúng một đáp án, không suy chất liệu từ tên đồ vật.
+                    Nếu đáp án là đồ gỗ, phải nói rõ các vật làm bằng gỗ trong lời dẫn, ví dụ 'cái ghế làm bằng gỗ'.
+                    Tên bàn, ghế, tủ, giường tự nó chưa chứng minh vật bằng gỗ. Không dùng hình chưa được cung cấp
+                    hoặc kiến thức về vật liệu thường gặp để bù dữ kiện thiếu.
+                    """;
         }
-        return "Chủ đề: " + topic + ". Mỗi câu hỏi có trường text, options (4 chuỗi), correctIndex (0–3); "
-                + "có thể thêm visualPrompt hoặc audioText nếu cần. Không đưa đáp án vào nội dung câu hỏi.";
+        return instruction;
     }
 
     @Override

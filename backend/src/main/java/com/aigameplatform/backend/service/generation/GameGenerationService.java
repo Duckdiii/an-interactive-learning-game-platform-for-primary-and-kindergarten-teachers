@@ -153,9 +153,10 @@ public class GameGenerationService {
                             errors = decision.errors();
                             // Keep conclusive arithmetic failures authoritative. Only forms outside the
                             // pilot's grammar may proceed to a separately identified semantic review.
-                            if (generatedContentReviewer != null && !requestsPilotArithmetic(request.topic())
+                            if (generatedContentReviewer != null && !supportsPilotArithmetic(request.topic())
                                     && java.util.Set.of("REQUEST_NOT_MACHINE_CHECKABLE", "QUESTION_NOT_MACHINE_CHECKABLE",
-                                            "ANSWER_OPTIONS_NOT_MACHINE_CHECKABLE").contains(lastUnverifiedReason)) {
+                                            "ANSWER_OPTIONS_NOT_MACHINE_CHECKABLE", "REQUEST_NUMBER_INTERVAL_NOT_MACHINE_CHECKABLE",
+                                            "MULTIPLE_CONSTRAINTS_FOR_SAME_SKILL_NOT_SUPPORTED").contains(lastUnverifiedReason)) {
                                 var semantic = reviewSemantically(report.game(), request.topic(), curriculum.evidence());
                                 if (semantic != null && semantic.accepted())
                                     return new GenerationResult(report.game(), curriculum.evidence(), semantic.review());
@@ -209,11 +210,9 @@ public class GameGenerationService {
         }
     }
 
-    private static boolean requestsPilotArithmetic(String topic) {
+    private static boolean supportsPilotArithmetic(String topic) {
         return new com.aigameplatform.backend.service.curriculum.CurriculumTopicParser().parse(topic)
-                .requirements().stream().anyMatch(r -> r.skill()
-                        == com.aigameplatform.backend.service.curriculum.CurriculumConstraints.Skill.ADD
-                        || r.skill() == com.aigameplatform.backend.service.curriculum.CurriculumConstraints.Skill.SUBTRACT);
+                .supportsPilotArithmetic();
     }
 
     private CurriculumContextProvider.Evidence retrieveCurriculumContext(GameType type, GameDslRequest request) {

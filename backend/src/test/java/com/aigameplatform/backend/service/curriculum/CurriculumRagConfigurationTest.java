@@ -31,6 +31,17 @@ class CurriculumRagConfigurationTest {
                 .chunks()).hasSize(134);
     }
 
+    @Test void runtimeCatalogAllowsEveryExistingGameTypeForPublishedCurriculumScopes() throws Exception {
+        var catalog = new CurriculumRagConfiguration().curriculumCatalog();
+
+        for (var gameType : com.aigameplatform.backend.entity.enums.GameType.values()) {
+            assertThatCode(() -> catalog.requireSupported(gameType,
+                    com.aigameplatform.backend.entity.enums.Subject.MATH,
+                    com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_1))
+                    .as(gameType.name()).doesNotThrowAnyException();
+        }
+    }
+
     @Test void generatorAndSemanticModelsCanBeEnabledTogetherWithoutAmbiguousInjection() {
         try (var context = new AnnotationConfigApplicationContext()) {
             context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("test", Map.of(

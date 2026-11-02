@@ -43,6 +43,60 @@ import tools.jackson.databind.json.JsonMapper;
 /** Bộ điều phối sinh game với cổng AI và kiểm duyệt giả: không gọi dịch vụ ngoài, không cần DB. */
 class GameGenerationServiceTest {
 
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"Bài toán có lời văn về phép cộng trong phạm vi 10",
+            "Cộng có kết quả từ 5 đến 10"})
+    void naturalLanguageArithmeticOutsidePilotGrammarReachesSemanticReview(String topic) throws Exception {
+        var generator = new ScriptedGenerator(validArithmeticOutput());
+        CurriculumContextProvider provider = (t, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("Addition outcome", math1Evidence("math-g1-007"));
+        var service = service(generator, 0, moderation(false, false), provider, true);
+        var calls = new java.util.concurrent.atomic.AtomicInteger();
+        service.setGeneratedContentReviewer((game, suppliedTopic, evidence) -> {
+            calls.incrementAndGet();
+            assertThat(suppliedTopic).isEqualTo(topic);
+            return new GeneratedContentReviewer.Result(List.of(),
+                    new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
+                            com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                            List.of(java.util.Map.of("chunkId", "math-g1-007", "claim", "Semantic review accepted fixture")), List.of("AUTOMATED_ONLY"), "fixture-semantic"));
+        });
+        assertThat(service.generateResult(GameType.QUIZ,
+                new GameDslRequest(topic, Subject.MATH, GradeLevel.GRADE_1)).review().reviewerModel())
+                .isEqualTo("fixture-semantic");
+        assertThat(calls).hasValue(1);
+    }
+
+    @Test
+    void acceptanceRecordingWrapperPreservesLegacyAndAgeDomainOverloads() {
+        var received = new java.util.ArrayList<String>();
+        CurriculumContextProvider delegate = new CurriculumContextProvider() {
+            @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade) {
+                received.add("legacy"); return Evidence.found("Legacy evidence");
+            }
+            @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade,
+                    com.aigameplatform.backend.entity.enums.KindergartenAgeBand age) {
+                received.add(age + "/age-only"); return Evidence.found("Age evidence");
+            }
+            @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade,
+                    com.aigameplatform.backend.entity.enums.KindergartenAgeBand age, String domain) {
+                received.add(age + "/" + domain); return Evidence.found("Age-domain evidence");
+            }
+        };
+        var recording = new CurriculumAcceptanceLiveTest.RecordingContext();
+        var wrapper = new CurriculumAcceptanceLiveTest.CaptureConfiguration()
+                .acceptanceRecordingProvider(delegate, recording);
+        wrapper.retrieve("count", Subject.MATH, GradeLevel.GRADE_1);
+        wrapper.retrieve("count", Subject.MATH, GradeLevel.KINDERGARTEN,
+                com.aigameplatform.backend.entity.enums.KindergartenAgeBand.AGE_4_5);
+        wrapper.retrieve("count", Subject.MATH, GradeLevel.KINDERGARTEN,
+                com.aigameplatform.backend.entity.enums.KindergartenAgeBand.AGE_5_6, null);
+        wrapper.retrieve("count", Subject.MATH, GradeLevel.KINDERGARTEN,
+                com.aigameplatform.backend.entity.enums.KindergartenAgeBand.AGE_3_4, "COGNITIVE");
+        assertThat(received).containsExactly("legacy", "AGE_4_5/age-only", "AGE_5_6/null", "AGE_3_4/COGNITIVE");
+        assertThat(recording.calls).isEqualTo(4);
+        assertThat(recording.context).isEqualTo("Age-domain evidence");
+    }
+
     @Test
     void nonPilotScopeUsesSemanticGroundingGateAndDoesNotClaimHumanReview() throws Exception {
         var dataset = com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadFromResourceRoot(
@@ -142,6 +196,50 @@ class GameGenerationServiceTest {
         assertThat(retrievedAge).hasValue(com.aigameplatform.backend.entity.enums.KindergartenAgeBand.AGE_4_5);
     }
 
+    @ParameterizedTest
+    @EnumSource(GameType.class)
+    void ragContextAndTypeSchemaReachTheExistingGameOutputPipeline(GameType type) throws Exception {
+        var datasets = com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadPackaged();
+        var dataset = datasets.stream().filter(candidate -> candidate.chunks().stream()
+                .anyMatch(chunk -> !chunk.control() && chunk.subject() == Subject.VIETNAMESE
+                        && chunk.gradeLevel() == GradeLevel.GRADE_1)).findFirst().orElseThrow();
+        var chunk = dataset.chunks().stream().filter(candidate -> !candidate.control()
+                && candidate.subject() == Subject.VIETNAMESE && candidate.gradeLevel() == GradeLevel.GRADE_1)
+                .findFirst().orElseThrow();
+        var fragments = chunk.sourceFragments();
+        var retrieved = new com.aigameplatform.backend.service.curriculum.CurriculumRAGService.RetrievedChunk(
+                chunk.chunkId(), chunk.subject(), chunk.gradeLevel(), chunk.topic(), chunk.text(), .91,
+                dataset.source().sourceDocument(), fragments.stream().map(f -> f.pdfPage()).toList(),
+                fragments.stream().map(f -> f.printedPage()).toList(), dataset.source().curriculumVersion());
+        var evidence = com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence.from(
+                dataset.source(), "fixture", List.of(retrieved));
+        String context = "[" + chunk.chunkId() + "] " + chunk.topic() + "\n" + chunk.text()
+                + "\nProvenance: sourceSha256=" + dataset.source().sourceSha256()
+                + "; datasetVersion=" + dataset.source().datasetVersion() + "; embeddingModel=fixture";
+        CurriculumContextProvider provider = (topic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found(context, evidence);
+        var generator = new ScriptedGenerator(GameTestFixtures.resource("/ai-output-examples/", type));
+        var service = service(generator, 0, moderation(false, false), provider, true, datasets);
+        service.setGeneratedContentReviewer((game, topic, suppliedEvidence) ->
+                new GeneratedContentReviewer.Result(List.of(),
+                        new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
+                                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                                List.of(java.util.Map.of("questionId", game.questions().getFirst().id(),
+                                        "supportingChunkIds", List.of(chunk.chunkId()))),
+                                List.of("FIXTURE_REVIEW_ONLY"), "fixture")));
+
+        var result = service.generateResult(type,
+                new GameDslRequest("Yêu cầu giáo viên theo mẫu hiện có", Subject.VIETNAMESE, GradeLevel.GRADE_1));
+
+        var expectedSchema = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER))
+                .get(type).getStructuredSchema();
+        assertThat(result.game().gameType()).isEqualTo(type);
+        assertThat(result.evidence().chunks()).containsExactly(retrieved);
+        assertThat(generator.attempts.getFirst().gameType()).isEqualTo(type);
+        assertThat(generator.attempts.getFirst().structuredSchema()).isEqualTo(expectedSchema);
+        assertThat(generator.attempts.getFirst().curriculumContext()).contains(chunk.chunkId(), "sourceSha256=");
+    }
+
     @Test
     void nonArithmeticMathUsesSeparateSemanticReviewWithoutRewritingTheRequest() throws Exception {
         var generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
@@ -157,19 +255,41 @@ class GameGenerationServiceTest {
         assertThat(generator.attempts.getFirst().topic()).isEqualTo(REQUEST.topic());
     }
 
-    @Test
-    void semanticReviewCannotOverrideAConclusiveWrongArithmeticAnswer() throws Exception {
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"Cộng nhẩm trong phạm vi 10",
+            "Bài toán có lời văn về phép cộng trong phạm vi 10"})
+    void semanticReviewCannotOverrideAConclusiveWrongArithmeticAnswer(String topic) throws Exception {
         var tree = (tools.jackson.databind.node.ObjectNode) MAPPER.readTree(validArithmeticOutput());
         ((tools.jackson.databind.node.ObjectNode) tree.path("questions").get(0)).put("correctIndex", 1);
+        CurriculumContextProvider provider = (teacherTopic, subject, grade) ->
+                CurriculumContextProvider.Evidence.found("Addition outcome", math1Evidence("math-g1-007"));
+        var service = service(new ScriptedGenerator(MAPPER.writeValueAsString(tree)), 0,
+                moderation(false, false), provider, true);
+        service.setGeneratedContentReviewer((game, teacherTopic, evidence) -> {
+            throw new AssertionError("A model must never override conclusive arithmetic failure");
+        });
+        assertThatThrownBy(() -> service.generateResult(GameType.QUIZ,
+                new GameDslRequest(topic, Subject.MATH, GradeLevel.GRADE_1)))
+                .isInstanceOf(AiGenerationTimeoutException.class);
+    }
+
+    @Test
+    void additionalInstructionsCannotPassTheArithmeticGateOrBeOverriddenByAReviewer() throws Exception {
+        var tree = (tools.jackson.databind.node.ObjectNode) MAPPER.readTree(validArithmeticOutput());
+        var first = (tools.jackson.databind.node.ObjectNode) tree.path("questions").get(0);
+        first.put("text", "2 + 3 = ? Hãy chọn số lớn nhất.");
+        ((tools.jackson.databind.node.ArrayNode) first.path("options")).removeAll().add("5").add("8");
         CurriculumContextProvider provider = (topic, subject, grade) ->
                 CurriculumContextProvider.Evidence.found("Addition outcome", math1Evidence("math-g1-007"));
         var service = service(new ScriptedGenerator(MAPPER.writeValueAsString(tree)), 0,
                 moderation(false, false), provider, true);
         service.setGeneratedContentReviewer((game, topic, evidence) -> {
-            throw new AssertionError("A model must never override conclusive arithmetic failure");
+            throw new AssertionError("A pilot request with unknown additional instructions must remain unverified");
         });
-        assertThatThrownBy(() -> service.generateResult(GameType.QUIZ, ARITHMETIC_REQUEST))
-                .isInstanceOf(AiGenerationTimeoutException.class);
+        assertThatThrownBy(() -> service.generateResult(GameType.QUIZ,
+                new GameDslRequest("Cộng trong phạm vi 10", Subject.MATH, GradeLevel.GRADE_1)))
+                .isInstanceOf(com.aigameplatform.backend.exception.GeneratedContentUnverifiedException.class)
+                .hasMessageContaining("QUESTION_NOT_MACHINE_CHECKABLE");
     }
 
     @Test
@@ -264,7 +384,7 @@ class GameGenerationServiceTest {
             List<com.aigameplatform.backend.service.curriculum.CurriculumDataset> catalogDatasets) {
         DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
         beans.registerSingleton("catalog", new com.aigameplatform.backend.service.curriculum.CurriculumCatalog(
-                catalogDatasets, java.util.Set.of(GameType.QUIZ)));
+                catalogDatasets, java.util.EnumSet.allOf(GameType.class)));
         if (generator != null) {
             beans.registerSingleton("generator", generator);
         }
@@ -479,7 +599,7 @@ class GameGenerationServiceTest {
         assertThatThrownBy(() -> service(generator, 2, moderation(false, false), curriculum, true)
                 .generate(GameType.QUIZ, outOfScope))
                 .isInstanceOf(com.aigameplatform.backend.exception.GenerationScopeUnsupportedException.class)
-                .hasMessageContaining("QUIZ");
+                .hasMessageContaining("chương trình");
         assertThat(generator.attempts).isEmpty();
     }
 
@@ -491,19 +611,6 @@ class GameGenerationServiceTest {
                 .generate(GameType.QUIZ, REQUEST))
                 .isInstanceOf(CurriculumServiceUnavailableException.class)
                 .hasMessageContaining("not configured");
-        assertThat(generator.attempts).isEmpty();
-    }
-
-    @Test
-    void ragPilotRejectsGameTypesOutsideQuiz() {
-        ScriptedGenerator generator = new ScriptedGenerator();
-        CurriculumContextProvider curriculum = (topic, subject, grade) ->
-                CurriculumContextProvider.Evidence.found("some context");
-
-        assertThatThrownBy(() -> service(generator, 2, moderation(false, false), curriculum, true)
-                .generate(GameType.WORD_SCRAMBLE, REQUEST))
-                .isInstanceOf(com.aigameplatform.backend.exception.GenerationScopeUnsupportedException.class)
-                .hasMessageContaining("QUIZ");
         assertThat(generator.attempts).isEmpty();
     }
 

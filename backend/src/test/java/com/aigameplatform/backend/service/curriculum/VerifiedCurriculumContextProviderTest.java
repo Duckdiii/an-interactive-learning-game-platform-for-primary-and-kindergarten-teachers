@@ -14,6 +14,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 class VerifiedCurriculumContextProviderTest {
+    @Test void ambiguousArithmeticIntervalStopsBeforeRetrievalOrSemanticGuessing() throws Exception {
+        var dataset = CurriculumDataset.loadDefault();
+        var constraints = CurriculumConstraints.load(dataset);
+        var provider = new VerifiedCurriculumContextProvider(new CurriculumCatalog(List.of(dataset), Set.of()),
+                new CurriculumAvailability(Clock.systemUTC(), Duration.ofSeconds(30), ignored -> {}),
+                () -> { throw new AssertionError("Ambiguous interval must not query embeddings"); },
+                () -> constraints, constraints.sha256(), CurriculumMetrics.noop(), "fixture", 8, .5,
+                () -> null, () -> (topic, subject, grade, age, candidates) -> {
+                    throw new AssertionError("Do not ask a model to guess the interval's application");
+                });
+        assertThatThrownBy(() -> provider.retrieve("Bài toán có lời văn về phép cộng từ 5 đến 10",
+                Subject.MATH, GradeLevel.GRADE_1))
+                .isInstanceOf(CurriculumClarificationRequiredException.class)
+                .hasMessageContaining("toán hạng", "kết quả");
+    }
+
     @Test void nonPilotPrimaryUsesItsOwnSourceAndSemanticVerifierInsteadOfMathOneConstraints() {
         var source = new CurriculumSource("program.pdf", "c".repeat(64), "32/2018/TT-BGDDT", "vi-grade2-v1", 1555);
         var text = "Nghe, hiểu và thực hiện được yêu cầu đơn giản.";
@@ -51,7 +67,7 @@ class VerifiedCurriculumContextProviderTest {
         assertThat(evidence.evidence().datasetVersion()).isEqualTo("vi-grade2-v1");
     }
 
-    @Test void nonPilotDistinguishesClarificationFromMissingEvidence() {
+    @Test void nonPilotSelectsTheRequestedDatasetInsteadOfTheDefaultMathOneCorpus() throws Exception {
         var source = new CurriculumSource("program.pdf", "e".repeat(64), "32/2018/TT-BGDDT", "en-grade1-v1", 1555);
         var text = "Recognize familiar words and simple classroom instructions.";
         var chunk = new CurriculumChunk("en-g1-001", Subject.ENGLISH, GradeLevel.GRADE_1,
@@ -64,7 +80,8 @@ class VerifiedCurriculumContextProviderTest {
                 return Response.from(segments.stream().map(ignored -> Embedding.from(new float[]{1, 0})).toList());
             }
         };
-        var retriever = new CurriculumRAGService(store, model, source, "fixture", 3, .855);
+        var defaultMathSource = CurriculumDataset.loadDefault().source();
+        var retriever = new CurriculumRAGService(store, model, defaultMathSource, "fixture", 3, .855);
         var provider = new VerifiedCurriculumContextProvider(new CurriculumCatalog(List.of(dataset), Set.of(GameType.QUIZ)),
                 new CurriculumAvailability(Clock.systemUTC(), Duration.ofSeconds(30), ignored -> {}), () -> retriever,
                 () -> null, "", CurriculumMetrics.noop(), "fixture", 8, .84, () -> null,
@@ -73,6 +90,48 @@ class VerifiedCurriculumContextProviderTest {
 
         assertThatThrownBy(() -> provider.retrieve("Ôn tập tiếng Anh", Subject.ENGLISH, GradeLevel.GRADE_1))
                 .isInstanceOf(CurriculumClarificationRequiredException.class);
+    }
+
+    @Test void kindergartenDomainFiltersCandidatesBeforeSemanticVerification() {
+        var source = new CurriculumSource("preschool.pdf", "d".repeat(64), "01/VBHN-BGDĐT-2021",
+                "kindergarten-outcomes-v1", 84);
+        var cognitiveText = "Nhận biết một số đặc điểm của con vật.";
+        var languageText = "Nghe hiểu lời nói trong giao tiếp hằng ngày.";
+        var cognitive = new CurriculumChunk("kg-cognitive-34", Subject.MATH, GradeLevel.KINDERGARTEN,
+                "Nhận thức / Khám phá", cognitiveText, false,
+                List.of(new CurriculumChunk.SourceFragment(62, 74, "AGE_3_4", cognitiveText)), "COGNITIVE",
+                List.of("SCIENCE_EXPLORATION"), "AGE_3_4");
+        var language = new CurriculumChunk("kg-language-34", Subject.VIETNAMESE, GradeLevel.KINDERGARTEN,
+                "Ngôn ngữ", languageText, false,
+                List.of(new CurriculumChunk.SourceFragment(70, 82, "AGE_3_4", languageText)), "LANGUAGE",
+                List.of("LISTENING"), "AGE_3_4");
+        var dataset = new CurriculumDataset(source, List.of(cognitive, language));
+        var store = new InMemoryEmbeddingStore<TextSegment>();
+        store.add(Embedding.from(new float[]{1, 0}), cognitive.toSegment(source, "fixture"));
+        store.add(Embedding.from(new float[]{1, 0}), language.toSegment(source, "fixture"));
+        EmbeddingModel model = new EmbeddingModel() {
+            @Override public Response<List<Embedding>> embedAll(List<TextSegment> segments) {
+                return Response.from(segments.stream().map(ignored -> Embedding.from(new float[]{1, 0})).toList());
+            }
+        };
+        var retriever = new CurriculumRAGService(store, model, source, "fixture", 8, 0.84);
+        var provider = new VerifiedCurriculumContextProvider(new CurriculumCatalog(List.of(dataset), Set.of()),
+                new CurriculumAvailability(Clock.systemUTC(), Duration.ofSeconds(30), ignored -> {}), () -> retriever,
+                () -> null, "", CurriculumMetrics.noop(), "fixture", 8, 0.84, () -> null,
+                () -> (topic, subject, grade, ageBand, candidates) -> {
+                    assertThat(candidates).extracting(CurriculumRAGService.RetrievedChunk::domain)
+                            .containsExactly("COGNITIVE");
+                    return new SemanticCurriculumEvidenceVerifier.Decision(
+                            SemanticCurriculumEvidenceVerifier.Status.SUPPORTED, "DOMAIN_MATCH",
+                            List.of("kg-cognitive-34"));
+                });
+
+        var result = provider.retrieve("Nhận biết con vật", Subject.VIETNAMESE, GradeLevel.KINDERGARTEN,
+                KindergartenAgeBand.AGE_3_4, "COGNITIVE");
+
+        assertThat(result.evidence().chunks()).extracting(CurriculumRAGService.RetrievedChunk::chunkId)
+                .containsExactly("kg-cognitive-34");
+        assertThat(result.context()).contains("Domain: COGNITIVE", "sourceSha256=");
     }
 
     @Test void kindergartenAgeFilterPrecedesSemanticVerificationEvenWhenAnotherAgeHasHigherScore() {
@@ -145,7 +204,7 @@ class VerifiedCurriculumContextProviderTest {
             }
         };
         var service = new CurriculumRAGService(store, model, dataset.source(), "fixture", 3, 0.8);
-        var provider = new VerifiedCurriculumContextProvider(new CurriculumCatalog(List.of(dataset), Set.of(GameType.QUIZ)),
+        var provider = new VerifiedCurriculumContextProvider(new CurriculumCatalog(List.of(dataset), Set.of()),
                 new CurriculumAvailability(Clock.systemUTC(), Duration.ofSeconds(30), d -> {}), () -> service,
                 () -> constraints, constraints.sha256());
         assertThat(provider.retrieve("Đếm từ 1 đến 5", Subject.MATH, GradeLevel.GRADE_1).context())
@@ -153,7 +212,11 @@ class VerifiedCurriculumContextProviderTest {
         assertThatThrownBy(() -> provider.retrieve("Cộng trong phạm vi 1000", Subject.MATH, GradeLevel.GRADE_1))
                 .isInstanceOf(CurriculumEvidenceNotFoundException.class).hasMessageContaining("phạm vi");
         assertThatThrownBy(() -> provider.retrieve("Không đếm", Subject.MATH, GradeLevel.GRADE_1))
-                .isInstanceOf(CurriculumEvidenceNotFoundException.class).hasMessageContaining("làm rõ");
+                .isInstanceOf(CurriculumClarificationRequiredException.class).hasMessageContaining("làm rõ");
+        assertThatThrownBy(() -> provider.retrieve("Đếm", Subject.MATH, GradeLevel.GRADE_1))
+                .isInstanceOf(CurriculumClarificationRequiredException.class);
+        assertThatThrownBy(() -> provider.retrieve("Cộng từ 5 đến 10", Subject.MATH, GradeLevel.GRADE_1))
+                .isInstanceOf(CurriculumClarificationRequiredException.class);
         failing.set(true);
         assertThatThrownBy(() -> provider.retrieve("Đếm từ 1 đến 5", Subject.MATH, GradeLevel.GRADE_1))
                 .isInstanceOf(CurriculumServiceUnavailableException.class).hasMessageNotContaining("SECRET_TOPIC")

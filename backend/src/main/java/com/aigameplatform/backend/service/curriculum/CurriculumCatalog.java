@@ -25,11 +25,25 @@ public final class CurriculumCatalog {
     }
 
     public CurriculumDataset requireSupported(GameType type, Subject subject, GradeLevel grade) {
-        var dataset = datasets.get(new Scope(grade == GradeLevel.KINDERGARTEN ? null : subject, grade));
-        if (!gameTypes.contains(type) || dataset == null || subject == null
-                || (grade == GradeLevel.KINDERGARTEN && subject == Subject.ENGLISH))
+        if (type == null || !gameTypes.contains(type))
             throw new GenerationScopeUnsupportedException(
-                    "Chưa có chương trình đã công bố cho kiểu game, môn hoặc lớp đã chọn. Hiện hỗ trợ kiểu game QUIZ.");
+                    "Chưa đăng ký strategy/schema cho loại game đã chọn.");
+        return requireDataset(subject, grade);
+    }
+
+    /** Selects the curriculum independently from whether a game type is enabled for generation. */
+    public CurriculumDataset requireDataset(Subject subject, GradeLevel grade) {
+        if (grade == null || subject == null)
+            throw new GenerationScopeUnsupportedException("Cần chọn môn và lớp để xác định chương trình.");
+        // Kindergarten LANGUAGE outcomes describe the Vietnamese language domain, not the
+        // separate preschool-English program. That English corpus has not been curated yet.
+        if (grade == GradeLevel.KINDERGARTEN && subject == Subject.ENGLISH)
+            throw new GenerationScopeUnsupportedException(
+                    "Chua co chuong trinh Tieng Anh Mam non da duoc doi chieu.");
+        var dataset = datasets.get(new Scope(grade == GradeLevel.KINDERGARTEN ? null : subject, grade));
+        if (dataset == null)
+            throw new GenerationScopeUnsupportedException(
+                    "Chưa có chương trình đã công bố cho môn hoặc lớp đã chọn.");
         return dataset;
     }
 }

@@ -21,12 +21,19 @@ public class MemoryCardGameStrategy extends GameContentStrategy<MemoryCardQuesti
 
     public MemoryCardGameStrategy(JsonMapper jsonMapper) {
         super(MemoryCardQuestionDsl.class, MemoryCardQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game MEMORY_CARD để người chơi lật thẻ và tìm hai thẻ tạo thành một cặp.
+                Sinh DTO nội dung AI: mỗi phần tử pairs là một object phẳng chứa visualPrompt và text tùy chọn,
+                mô tả mặt hiển thị chung của một cặp thẻ. Factory tự tạo định danh và cấu trúc DSL; không tự sinh ID
+                hoặc bọc thêm object. Nội dung giữa các cặp khác nhau cần phân biệt rõ để tránh ghép mơ hồ.
+                Nội dung ngắn gọn, phù hợp độ tuổi; không tạo câu hỏi trắc nghiệm. Chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho MEMORY_CARD");
+        return "Chủ đề: " + topic + ". Mỗi cặp thẻ phải giúp luyện đúng một quan hệ hoặc nội dung thuộc YCCĐ ở " + grade
+                + "; không dùng kiến thức ngoài căn cứ để tạo cặp.";
     }
 
     @Override

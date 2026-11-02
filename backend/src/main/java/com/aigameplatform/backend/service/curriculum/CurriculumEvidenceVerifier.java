@@ -9,7 +9,13 @@ public final class CurriculumEvidenceVerifier {
     }
     public VerificationDecision verify(CurriculumTopicParser.ParsedTopic topic,
             List<CurriculumRAGService.RetrievedChunk> candidates, CurriculumConstraints constraints) {
-        if (topic.needsClarification()) return new VerificationDecision(Status.NEEDS_CLARIFICATION, "CLARIFY_CONSTRAINTS", List.of());
+        if (topic.hasAmbiguousArithmeticInterval())
+            return new VerificationDecision(Status.NEEDS_CLARIFICATION, "AMBIGUOUS_ARITHMETIC_INTERVAL", List.of());
+        // The bounded verifier does not interpret two-sided arithmetic intervals. Explicitly scoped
+        // intervals are handled by the semantic path with the original request, never reduced to max-only.
+        if (topic.needsClarification() || topic.requirements().stream().anyMatch(r -> r.minNumber() != null
+                && (r.skill() == CurriculumConstraints.Skill.ADD || r.skill() == CurriculumConstraints.Skill.SUBTRACT)))
+            return new VerificationDecision(Status.NEEDS_CLARIFICATION, "CLARIFY_CONSTRAINTS", List.of());
         var ids = new LinkedHashSet<String>();
         for (var request : topic.requirements()) {
             if ((request.skill() == CurriculumConstraints.Skill.CM_MEASURE || request.skill() == CurriculumConstraints.Skill.CM_READ)

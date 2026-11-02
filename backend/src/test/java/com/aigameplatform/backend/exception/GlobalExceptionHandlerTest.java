@@ -54,4 +54,12 @@ class GlobalExceptionHandlerTest {
         assertThat(body.error().code()).isEqualTo(ErrorCode.GENERATED_CONTENT_UNVERIFIED.name());
         assertThat(body.error().message()).contains("QUESTION_NOT_MACHINE_CHECKABLE");
     }
+
+    @Test
+    void curriculumClarificationIsAnExplicitUnprocessableEntity() {
+        var response = handler.handleApiException(new CurriculumClarificationRequiredException("Need age band"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(response.getBody().error().code()).isEqualTo(ErrorCode.CURRICULUM_CLARIFICATION_REQUIRED.name());
+    }
 }

@@ -49,7 +49,6 @@ class GameContentStrategyTest {
     @Test
     void visualClozePromptUsesTheSupportedGradeAndQuestionShape() {
         var strategy = new VisualClozeGameStrategy(MAPPER);
-        strategy.setPromptTemplate("Generate Visual Cloze JSON");
 
         String prompt = strategy.buildPrompt("plant parts",
                 com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_2);

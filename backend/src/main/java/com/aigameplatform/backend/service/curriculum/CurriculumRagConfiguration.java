@@ -43,7 +43,7 @@ public class CurriculumRagConfiguration {
     @Bean
     CurriculumCatalog curriculumCatalog() throws IOException {
         return new CurriculumCatalog(CurriculumDataset.loadPackaged(),
-                java.util.Set.of(com.aigameplatform.backend.entity.enums.GameType.QUIZ));
+                java.util.EnumSet.allOf(com.aigameplatform.backend.entity.enums.GameType.class));
     }
 
     @Bean

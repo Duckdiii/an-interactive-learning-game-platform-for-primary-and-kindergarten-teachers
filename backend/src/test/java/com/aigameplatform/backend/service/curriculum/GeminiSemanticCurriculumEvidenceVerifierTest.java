@@ -18,6 +18,26 @@ class GeminiSemanticCurriculumEvidenceVerifierTest {
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     @Test
+    void wordProblemReviewSeparatesTeacherProductionPreferencesFromTheStudentLearningObjective() throws Exception {
+        var captured = new AtomicReference<ChatRequest>();
+        var dataset = CurriculumDataset.loadDefault();
+        var chunks = dataset.chunks().stream().filter(c -> List.of("math-g1-004", "math-g1-007", "math-g1-009", "math-g1-010").contains(c.chunkId()))
+                .map(c -> new CurriculumRAGService.RetrievedChunk(c.chunkId(), c.subject(), c.gradeLevel(), c.topic(), c.text(), .9,
+                        dataset.source().sourceDocument(), List.of(188), List.of(22), dataset.source().curriculumVersion())).toList();
+        var verifier = new GeminiSemanticCurriculumEvidenceVerifier(model(captured,
+                "{\"status\":\"INSUFFICIENT_EVIDENCE\",\"reasonCode\":\"NO_MATCHING_OUTCOME\",\"supportedChunkIds\":[]}"), MAPPER, "fixture");
+        String topic = "Tạo bài toán có lời văn về phép cộng trong phạm vi 10: gộp hai nhóm đồ vật, chỉ dùng chữ và không cần tranh.";
+        var decision = verifier.verify(topic, Subject.MATH, GradeLevel.GRADE_1, null, chunks);
+        var system = dev.langchain4j.data.message.SystemMessage.findFirst(captured.get().messages()).orElseThrow().text();
+        assertThat(system).contains("application", "student", "presentation", "compatible", "numeric", "listening");
+        var input = dev.langchain4j.data.message.UserMessage.findLast(captured.get().messages()).orElseThrow().singleText();
+        assertThat(MAPPER.readTree(input).path("teacherTopic").asString()).isEqualTo(topic);
+        assertThat(input).contains("math-g1-010", "math-g1-007", "bài toán có lời văn");
+        // A source-compatible presentation is not an automatic approval or an override of the model's decision.
+        assertThat(decision.status()).isEqualTo(SemanticCurriculumEvidenceVerifier.Status.INSUFFICIENT_EVIDENCE);
+    }
+
+    @Test
     void supportsOnlyCandidatesTheVerifierSelectsAndIncludesScopeInPrompt() {
         var request = new AtomicReference<ChatRequest>();
         var verifier = new GeminiSemanticCurriculumEvidenceVerifier(model(request,

@@ -1,12 +1,10 @@
 package com.aigameplatform.backend.service.generation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
-import com.aigameplatform.backend.exception.GenerationScopeUnsupportedException;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import com.aigameplatform.backend.service.strategy.QuizGameStrategy;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
@@ -23,6 +21,67 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
 class GeminiGameContentGeneratorTest {
+
+    @Test
+    void matchingDecoderSchemaKeepsStructureAndMovesArrayCountsToDescriptionsWithoutChangingValidation() throws Exception {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent), strategies);
+        String fullSchema = strategies.get(GameType.MATCHING).getStructuredSchema();
+        generator.generate(new GenerationAttempt(GameType.MATCHING, "Ghép từ chỉ gia đình với nghĩa tiếng Việt",
+                Subject.ENGLISH, GradeLevel.GRADE_3, fullSchema, "[en-g3-010] Đọc hiểu nghĩa các từ quen thuộc", 1, null, List.of()));
+        var raw = (dev.langchain4j.model.chat.request.json.JsonRawSchema)
+                sent.get().parameters().responseFormat().jsonSchema().rootElement();
+        var decoder = MAPPER.readTree(raw.schema());
+        var questions = decoder.path("properties").path("questions");
+        var pairs = questions.path("items").path("properties").path("pairs");
+        assertThat(questions.has("maxItems")).isFalse();
+        assertThat(pairs.has("minItems")).isFalse();
+        assertThat(pairs.has("maxItems")).isFalse();
+        assertThat(questions.path("description").asString()).contains("1", "20");
+        assertThat(pairs.path("description").asString()).contains("3", "6");
+        assertThat(pairs.path("items").path("required").toString()).contains("left", "right");
+        assertThat(pairs.path("items").path("additionalProperties").asBoolean()).isFalse();
+        assertThat(questions.path("items").path("properties").path("audioText").path("maxLength").asInt()).isEqualTo(200);
+        assertThat(MAPPER.readTree(fullSchema).path("properties").path("questions").path("maxItems").asInt()).isEqualTo(20);
+        var invalid = (tools.jackson.databind.node.ObjectNode) MAPPER.readTree(GameTestFixtures.resource("/ai-output-examples/", GameType.MATCHING));
+        var array = (tools.jackson.databind.node.ArrayNode) invalid.path("questions").get(0).path("pairs");
+        while (array.size() > 1) array.remove(array.size()-1);
+        assertThat(new com.aigameplatform.backend.service.validation.ai.AiOutputValidator(MAPPER)
+                .validate(GameType.MATCHING, MAPPER.writeValueAsString(invalid)).valid()).isFalse();
+    }
+
+    @Test
+    void sdkWireRequestUsesJsonSchemaWithBoundedArrayCountersRemoved() throws Exception {
+        var body = new AtomicReference<String>();
+        var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            body.set(new String(exchange.getRequestBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+            byte[] response = "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"{\\\"questions\\\":[]}\"}]},\"finishReason\":\"STOP\"}],\"usageMetadata\":{\"promptTokenCount\":0,\"candidatesTokenCount\":0,\"totalTokenCount\":0}}"
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length);
+            exchange.getResponseBody().write(response); exchange.close();
+        });
+        server.start();
+        try {
+            var model = dev.langchain4j.model.googleai.GoogleAiGeminiChatModel.builder()
+                    .baseUrl("http://127.0.0.1:" + server.getAddress().getPort() + "/v1beta")
+                    .apiKey("fixture-no-secret").modelName("gemini-3.5-flash-lite").maxRetries(0)
+                    .maxOutputTokens(1800).supportedCapabilities(java.util.Set.of(
+                            dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA)).build();
+            var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
+            new GeminiGameContentGenerator(model, strategies).generate(new GenerationAttempt(GameType.MATCHING,
+                    "Ghép từ", Subject.ENGLISH, GradeLevel.GRADE_3, strategies.get(GameType.MATCHING).getStructuredSchema(),
+                    "[en-g3-010] Đọc hiểu nghĩa từ", 1, null, List.of()));
+            var config = MAPPER.readTree(body.get()).path("generationConfig");
+            assertThat(config.path("responseMimeType").asString()).isEqualTo("application/json");
+            assertThat(config.path("responseJsonSchema").path("type").asString()).isEqualTo("object");
+            assertThat(config.has("responseSchema")).isFalse();
+            assertThat(config.path("maxOutputTokens").asInt()).isEqualTo(1800);
+            assertThat(config.path("responseJsonSchema").toString()).doesNotContain("maxItems", "minItems");
+        } finally { server.stop(0); }
+    }
 
     private static final String CURRICULUM = "[math-g1-007] Cộng trong phạm vi 10. Nguồn TT32/2018, PDF 188.";
     private static final String OUTPUT = "{\"questions\":[]}";
@@ -42,7 +101,7 @@ class GeminiGameContentGeneratorTest {
         String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
         assertThat(systemPrompt).contains(CURRICULUM)
                 .contains("<curriculum_context>")
-                .contains("Chủ đề: Đếm con vật")
+                .contains("Chủ đề giáo viên: Đếm con vật")
                 .contains("không tự mở rộng");
         assertThat(sent.get().parameters().responseFormat()).isNotNull();
     }
@@ -62,8 +121,7 @@ class GeminiGameContentGeneratorTest {
         assertThat(generator.generate(attempt)).isEqualTo(OUTPUT);
 
         String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
-        assertThat(systemPrompt).contains("Môn học: ENGLISH", "Khối lớp: GRADE_3", attempt.topic(), context,
-                "exact curriculum evidence", "exactly 4 questions")
+        assertThat(systemPrompt).contains("Môn: ENGLISH", "Lớp/độ tuổi: GRADE_3", attempt.topic(), context)
                 .doesNotContain("Toán lớp 1", "6–7 tuổi", "2 + 3 = ?");
     }
 
@@ -91,8 +149,8 @@ class GeminiGameContentGeneratorTest {
 
             assertThat(generator.generate(attempt)).isEqualTo(OUTPUT);
             String prompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
-            assertThat(prompt).contains("Môn học: " + scope.getKey().name(),
-                    "Khối lớp: " + scope.getValue().name(), "teacher's natural request", context);
+            assertThat(prompt).contains("Môn: " + scope.getKey().name(),
+                    "Lớp/độ tuổi: " + scope.getValue().name(), "teacher's natural request", context);
             assertThat(prompt).doesNotContain("Toán lớp 1", "6–7 tuổi", "2 + 3 = ?");
         }
     }
@@ -112,22 +170,9 @@ class GeminiGameContentGeneratorTest {
         generator.generate(attempt);
 
         String prompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
-        assertThat(prompt).contains("Khối lớp: KINDERGARTEN", "Độ tuổi phù hợp: 4–5 tuổi",
+        assertThat(prompt).contains("Lớp/độ tuổi: KINDERGARTEN", "Độ tuổi phù hợp: 4–5 tuổi",
                 "Domain: COGNITIVE", "subDomain: MATHEMATICAL_CONCEPTS", "kindergarten-outcomes-v1")
                 .doesNotContain("Toán lớp 1", "2 + 3 = ?");
-    }
-
-    @Test
-    void nonPilotScopeWithoutProvenanceIsRejectedBeforeCallingGemini() {
-        AtomicReference<ChatRequest> sent = new AtomicReference<>();
-        var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
-        var attempt = new GenerationAttempt(GameType.QUIZ, "Count to 20", Subject.MATH, GradeLevel.GRADE_2,
-                new QuizGameStrategy(MAPPER).getStructuredSchema(), "unverified text only", 1, null, List.of());
-
-        assertThatThrownBy(() -> generator.generate(attempt))
-                .isInstanceOf(GenerationScopeUnsupportedException.class);
-        assertThat(sent).hasValue(null);
     }
     @Test
     void retryKeepsCurriculumInSystemPromptAndSendsValidationFeedbackAsUserMessage() {
@@ -158,14 +203,16 @@ class GeminiGameContentGeneratorTest {
         assertThat(systemPrompt).contains("2 + 3 = ?", "5 - 2 = ?", "bài toán kể chuyện", "Tính nhẩm:");
     }
 
-    @Test
-    void arithmeticFormattingInstructionDoesNotRewriteNonArithmeticTeacherRequests() {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"Đếm con vật",
+            "Bài toán có lời văn về phép cộng trong phạm vi 10", "Cộng có kết quả từ 5 đến 10"})
+    void arithmeticFormattingInstructionDoesNotRewriteRequestsOutsideItsGrammar(String topic) {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
                 new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
 
-        generator.generate(attempt(quiz, CURRICULUM, "Đếm con vật", 1, null, List.of()));
+        generator.generate(attempt(quiz, CURRICULUM, topic, 1, null, List.of()));
 
         String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
         assertThat(systemPrompt).doesNotContain("2 + 3 = ?", "bài toán kể chuyện");
@@ -216,18 +263,39 @@ class GeminiGameContentGeneratorTest {
     }
 
     @Test
-    void pilotGeneratorRejectsUnsupportedGameTypesWithAClientError() {
+    void quizGeneratorKeepsTheRequestedSubjectAndGradeOutsideTheMathOnePilot() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
                 new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
-        GenerationAttempt quizAttempt = attempt(new QuizGameStrategy(MAPPER), CURRICULUM, 1, null, List.of());
-        GenerationAttempt otherGame = new GenerationAttempt(GameType.WORD_SCRAMBLE, quizAttempt.topic(),
-                quizAttempt.subject(), quizAttempt.gradeLevel(), quizAttempt.structuredSchema(), CURRICULUM,
+        QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
+        var englishGradeFive = new GenerationAttempt(GameType.QUIZ, "describe a family", Subject.ENGLISH,
+                GradeLevel.GRADE_5, quiz.getStructuredSchema(), "[eng-g5-001] Family words; PDF 80",
                 1, null, List.of());
 
-        assertThatThrownBy(() -> generator.generate(otherGame))
-                .isInstanceOf(GenerationScopeUnsupportedException.class);
-        assertThat(sent).hasValue(null);
+        assertThat(generator.generate(englishGradeFive)).isEqualTo(OUTPUT);
+        String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
+        assertThat(systemPrompt).contains("ENGLISH", "GRADE_5", "describe a family", "eng-g5-001", "correctIndex")
+                .doesNotContain("Toán lớp 1");
+    }
+
+    @Test
+    void adapterSelectsEachGameTypePromptAndCarriesTheSameCurriculumEvidence() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var registry = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent), registry);
+        String englishCurriculum = "[eng-g3-001] English outcome with source page provenance.";
+
+        for (GameType type : GameType.values()) {
+            var strategy = registry.get(type);
+            var attempt = new GenerationAttempt(type, "teacher topic", Subject.ENGLISH, GradeLevel.GRADE_3,
+                    strategy.getStructuredSchema(), englishCurriculum, 1, null, List.of());
+
+            assertThat(generator.generate(attempt)).isEqualTo(OUTPUT);
+            String systemPrompt = SystemMessage.findFirst(sent.get().messages()).orElseThrow().text();
+            assertThat(systemPrompt).as(type.name())
+                    .contains("ENGLISH", "GRADE_3", "teacher topic", englishCurriculum, "curriculum_context");
+            assertThat(sent.get().parameters().responseFormat()).isNotNull();
+        }
     }
 
     private static ChatModel modelCapturing(AtomicReference<ChatRequest> sent) {

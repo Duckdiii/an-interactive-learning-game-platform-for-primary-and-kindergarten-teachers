@@ -7,9 +7,26 @@ import java.util.regex.Pattern;
 
 /** Deliberately bounded grammar. Unconsumed language requests clarification, never approval. */
 public final class CurriculumTopicParser {
-    public record Requirement(Skill skill, Long maxNumber, Carry carry, boolean mental, boolean roundTens, String unit) { }
+    public enum RangeApplication { ALL_VALUES, OPERANDS, RESULT, UNSPECIFIED }
+    public record Requirement(Skill skill, Long maxNumber, Carry carry, boolean mental, boolean roundTens, String unit,
+                              Long minNumber, RangeApplication rangeApplication) {
+        public Requirement(Skill skill, Long maxNumber, Carry carry, boolean mental, boolean roundTens, String unit) {
+            this(skill, maxNumber, carry, mental, roundTens, unit, null, RangeApplication.ALL_VALUES);
+        }
+    }
     public record ParsedTopic(List<Requirement> requirements, boolean needsClarification) {
         public ParsedTopic { requirements = List.copyOf(requirements); }
+        public boolean hasAmbiguousArithmeticInterval() {
+            return requirements.stream().anyMatch(r -> (r.skill() == Skill.ADD || r.skill() == Skill.SUBTRACT)
+                    && r.minNumber() != null && r.rangeApplication() == RangeApplication.UNSPECIFIED);
+        }
+        /** One shared capability predicate for generation formatting and verifier routing. */
+        public boolean supportsPilotArithmetic() {
+            return !needsClarification && !requirements.isEmpty()
+                    && requirements.stream().allMatch(r -> (r.skill() == Skill.ADD || r.skill() == Skill.SUBTRACT)
+                            && r.minNumber() == null)
+                    && requirements.stream().map(Requirement::skill).distinct().count() == requirements.size();
+        }
     }
     private record Term(Skill skill, String expression) { }
     private static final List<Term> TERMS = List.of(
@@ -37,6 +54,8 @@ public final class CurriculumTopicParser {
             if (clause.isBlank()) continue;
             String remaining = clause;
             Long max = null;
+            Long min = null;
+            RangeApplication rangeApplication = RangeApplication.ALL_VALUES;
             var range = RANGE.matcher(remaining);
             int ranges = 0;
             while (range.find()) {
@@ -46,6 +65,13 @@ public final class CurriculumTopicParser {
                     long start = range.group(2) == null ? 0 : Long.parseLong(range.group(2));
                     if (start > end) unknown = true;
                     max = end;
+                    if (range.group(2) != null) {
+                        min = start;
+                        boolean operands = words("toán hạng|số hạng|số bị trừ|số trừ").matcher(clause).find();
+                        boolean result = words("kết quả|tổng|hiệu").matcher(clause).find();
+                        rangeApplication = operands == result ? RangeApplication.UNSPECIFIED
+                                : operands ? RangeApplication.OPERANDS : RangeApplication.RESULT;
+                    }
                 } catch (NumberFormatException e) { unknown = true; }
             }
             if (ranges > 1) unknown = true;
@@ -69,7 +95,7 @@ public final class CurriculumTopicParser {
             if (!remaining.isBlank() || skills.isEmpty()) unknown = true;
             if ((mental || round || carry != Carry.UNSPECIFIED) && skills.stream().anyMatch(s -> s != Skill.ADD && s != Skill.SUBTRACT)) unknown = true;
             if (unit != null && skills.stream().anyMatch(s -> s != Skill.CM_MEASURE && s != Skill.CM_READ)) unknown = true;
-            for (var skill : skills) requirements.add(new Requirement(skill, max, carry, mental, round, unit));
+            for (var skill : skills) requirements.add(new Requirement(skill, max, carry, mental, round, unit, min, rangeApplication));
         }
         return new ParsedTopic(requirements, unknown || requirements.isEmpty());
     }

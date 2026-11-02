@@ -52,11 +52,25 @@ class CurriculumAcceptanceLiveTest {
         @Bean RecordingContext acceptanceRecordingContext() { return new RecordingContext(); }
         @Bean @Primary CurriculumContextProvider acceptanceRecordingProvider(
                 @Qualifier("curriculumContextProvider") CurriculumContextProvider delegate, RecordingContext recording) {
-            return (topic, subject, grade) -> {
-                recording.calls++;
-                var evidence = delegate.retrieve(topic, subject, grade);
-                recording.context = evidence.context();
-                return evidence;
+            return new CurriculumContextProvider() {
+                @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade) {
+                    recording.calls++;
+                    return capture(delegate.retrieve(topic, subject, grade));
+                }
+                @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade,
+                        KindergartenAgeBand ageBand) {
+                    recording.calls++;
+                    return capture(delegate.retrieve(topic, subject, grade, ageBand));
+                }
+                @Override public Evidence retrieve(String topic, Subject subject, GradeLevel grade,
+                        KindergartenAgeBand ageBand, String domain) {
+                    recording.calls++;
+                    return capture(delegate.retrieve(topic, subject, grade, ageBand, domain));
+                }
+                private Evidence capture(Evidence evidence) {
+                    recording.context = evidence.context();
+                    return evidence;
+                }
             };
         }
     }
@@ -128,12 +142,12 @@ class CurriculumAcceptanceLiveTest {
                 }));
     }
 
-    @Test void unsupportedScopeStopsBeforeContextAndGeneration() {
+    @Test void kindergartenWithoutAgeRequiresClarificationBeforeGeneration() {
         int before = recording.calls;
         assertThatThrownBy(() -> generation.generate(GameType.QUIZ,
                 new GameDslRequest("Đếm từ 1 đến 5", Subject.MATH, GradeLevel.KINDERGARTEN)))
-                .isInstanceOf(GenerationScopeUnsupportedException.class);
-        assertThat(recording.calls).isEqualTo(before);
+                .isInstanceOf(KindergartenAgeBandRequiredException.class);
+        assertThat(recording.calls).isEqualTo(before + 1);
     }
 
     @AfterAll void report() throws Exception {

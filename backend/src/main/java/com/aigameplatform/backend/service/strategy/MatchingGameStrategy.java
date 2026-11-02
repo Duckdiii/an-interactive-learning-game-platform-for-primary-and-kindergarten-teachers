@@ -21,12 +21,19 @@ public class MatchingGameStrategy extends GameContentStrategy<MatchingQuestionDs
 
     public MatchingGameStrategy(JsonMapper jsonMapper) {
         super(MatchingQuestionDsl.class, MatchingQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game MATCHING: mỗi câu là một hoạt động nối hai vế thành các cặp có quan hệ rõ ràng.
+                Sinh DTO nội dung AI: mỗi phần tử pairs chỉ có left và right, mỗi vế chứa text và/hoặc visualPrompt
+                theo schema. Hệ thống tự thêm định danh khi factory tạo DSL; không tự sinh ID.
+                Mỗi mục ở hai phía chỉ thuộc một cặp; quan hệ ghép phải đúng, không mơ hồ và được căn cứ bởi YCCĐ.
+                Không biến hoạt động nối cặp thành câu hỏi nhiều lựa chọn. Chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho MATCHING");
+        return "Chủ đề: " + topic + ". Tạo các cặp để người học nối khái niệm, từ, hình-mô tả hoặc biểu diễn tương đương "
+                + "chỉ khi quan hệ đó nằm trong YCCĐ; dùng từ ngữ phù hợp " + grade + ".";
     }
 
     @Override

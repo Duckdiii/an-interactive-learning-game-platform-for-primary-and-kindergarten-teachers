@@ -6,6 +6,34 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 
 class CurriculumEvidenceVerifierTest {
+    @Test void ambiguousArithmeticIntervalNeedsClarificationInsteadOfDroppingItsLowerBound() throws Exception {
+        var parsed = new CurriculumTopicParser().parse("Cộng từ 5 đến 10");
+        assertThat(parsed.requirements().getFirst().minNumber()).isEqualTo(5L);
+        assertThat(parsed.requirements().getFirst().maxNumber()).isEqualTo(10L);
+        assertThat(parsed.hasAmbiguousArithmeticInterval()).isTrue();
+        assertThat(parsed.supportsPilotArithmetic()).isFalse();
+        assertThat(verify("Cộng từ 5 đến 10", "math-g1-007").status())
+                .isEqualTo(CurriculumEvidenceVerifier.Status.NEEDS_CLARIFICATION);
+        assertThat(verify("Cộng trong phạm vi 10", "math-g1-007").status())
+                .isEqualTo(CurriculumEvidenceVerifier.Status.SUPPORTED);
+    }
+
+    @Test void explicitIntervalApplicationsRetainBothBoundsForSemanticVerification() {
+        var parser = new CurriculumTopicParser();
+        for (var entry : Map.of("Cộng các toán hạng từ 5 đến 10", CurriculumTopicParser.RangeApplication.OPERANDS,
+                "Cộng có kết quả từ 5 đến 10", CurriculumTopicParser.RangeApplication.RESULT).entrySet()) {
+            var parsed = parser.parse(entry.getKey());
+            var requirement = parsed.requirements().stream().filter(r -> r.skill() == CurriculumConstraints.Skill.ADD)
+                    .findFirst().orElseThrow();
+            assertThat(requirement.minNumber()).isEqualTo(5L);
+            assertThat(requirement.maxNumber()).isEqualTo(10L);
+            assertThat(requirement.rangeApplication()).isEqualTo(entry.getValue());
+            assertThat(parsed.hasAmbiguousArithmeticInterval()).isFalse();
+            assertThat(parsed.supportsPilotArithmetic()).isFalse();
+        }
+        assertThat(parser.parse("Cộng trong phạm vi 10").supportsPilotArithmetic()).isTrue();
+    }
+
     private CurriculumEvidenceVerifier.VerificationDecision verify(String topic, String... ids) throws Exception {
         var dataset = CurriculumDataset.loadDefault();
         var candidates = dataset.chunks().stream().filter(c -> List.of(ids).contains(c.chunkId()))

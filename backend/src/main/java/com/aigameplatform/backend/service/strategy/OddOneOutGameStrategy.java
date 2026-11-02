@@ -19,12 +19,20 @@ public class OddOneOutGameStrategy extends GameContentStrategy<OddOneOutQuestion
 
     public OddOneOutGameStrategy(JsonMapper jsonMapper) {
         super(OddOneOutQuestionDsl.class, OddOneOutQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game ODD_ONE_OUT: người học chọn một mục khác với các mục còn lại.
+                Sinh DTO nội dung AI: items là mảng chuỗi và oddOneOutIndex là chỉ số bắt đầu từ 0 của mục khác biệt.
+                Factory tự tạo định danh của DSL; không tự sinh ID. Tạo một tiêu chí phân loại rõ ràng:
+                các mục còn lại cùng nhóm, chỉ một mục khác nhóm, và chỉ số phải trỏ đúng mục khác biệt.
+                Sự khác biệt phải liên quan trực tiếp đến YCCĐ, không dựa vào chi tiết hình/âm thanh không được cung cấp.
+                Chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho ODD_ONE_OUT");
+        return "Chủ đề: " + topic + ". Tạo nhóm mục phù hợp chủ đề và YCCĐ ở " + grade
+                + "; cần có đúng một mục khác biệt theo tiêu chí mà người học có thể nhận ra từ nội dung được cung cấp.";
     }
 
     @Override

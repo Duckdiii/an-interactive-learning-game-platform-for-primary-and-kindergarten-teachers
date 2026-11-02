@@ -1,0 +1,429 @@
+{
+    "runId":  "two-case-followup-20261102-01",
+    "date":  "2026-11-02",
+    "timezone":  "Asia/Saigon",
+    "model":  "gemini-3.5-flash-lite",
+    "apiRequests":  9,
+    "requestLimit":  10,
+    "automaticRetries":  0,
+    "database":  "LOCAL_READ_ONLY_EXISTING_CLUSTER_653_ROWS",
+    "moderation":  "BLOCKLIST_ONLY",
+    "acceptanceScope":  "ONLY_THE_TWO_SYNTHETIC_CASES_NOT_ALL_SCOPES_OR_GAME_TYPES",
+    "status":  "TWO_CASES_GENERATED_AND_CHECKED",
+    "independentExpertApproval":  "NOT_PERFORMED",
+    "testEvidence":  {
+                         "exitCode":  0,
+                         "errors":  0,
+                         "command":  "mvn -Djacoco.skip=true -Dtest=GeminiGameContentGeneratorTest,GeminiSemanticCurriculumEvidenceVerifierTest,GameGenerationServiceTest,PilotQuizContentVerifierTest test",
+                         "failures":  0,
+                         "tests":  87,
+                         "skipped":  0
+                     },
+    "codeSha256":  {
+                       "backend/src/main/java/com/aigameplatform/backend/service/curriculum/GeminiSemanticCurriculumEvidenceVerifier.java":  "9d9c3dbe799ea3e13425c8e6f2540933c6aa330a2a4e24e0558e89d4c83cdacf",
+                       "backend/src/main/java/com/aigameplatform/backend/service/generation/GeminiGameContentGenerator.java":  "1bf4e2ec93cfa2f8378e748227d3fccbf82460063fe6c9d8e04ac50e5774745a"
+                   },
+    "stages":  [
+                   {
+                       "number":  2,
+                       "stage":  "QUERY_EMBEDDING",
+                       "status":  "SUCCESS"
+                   },
+                   {
+                       "number":  3,
+                       "stage":  "EVIDENCE_SEMANTIC_REVIEW",
+                       "status":  "SUCCESS"
+                   },
+                   {
+                       "number":  4,
+                       "stage":  "GAME_GENERATION",
+                       "status":  "SUCCESS"
+                   },
+                   {
+                       "number":  5,
+                       "stage":  "GENERATED_CONTENT_REVIEW",
+                       "status":  "SUCCESS"
+                   },
+                   {
+                       "number":  6,
+                       "stage":  "QUERY_EMBEDDING",
+                       "status":  "SUCCESS"
+                   },
+                   {
+                       "number":  7,
+                       "stage":  "EVIDENCE_SEMANTIC_REVIEW",
+                       "status":  "SUCCESS"
+                   },
+                   {
+                       "number":  8,
+                       "stage":  "GAME_GENERATION",
+                       "status":  "SUCCESS"
+                   },
+                   {
+                       "number":  9,
+                       "stage":  "GENERATED_CONTENT_REVIEW",
+                       "status":  "SUCCESS"
+                   }
+               ],
+    "mathDiagnostic":  {
+                           "requestNumber":  1,
+                           "stage":  "MATH_EVIDENCE_DIAGNOSTIC",
+                           "model":  "gemini-3.5-flash-lite",
+                           "status":  "RESPONSE_RECEIVED_DIAGNOSTIC_ONLY",
+                           "decision":  {
+                                            "missingConstraints":  [
+                                                                       "Yêu cầu tạo bài toán có lời văn về phép cộng trong phạm vi 10 bằng cách gộp hai nhóm đồ vật, chỉ dùng chữ và không cần tranh"
+                                                                   ],
+                                            "supported":  false,
+                                            "chunkIds":  [
+
+                                                         ],
+                                            "explanation":  "Các chuẩn đầu ra chương trình lớp 1 cung cấp có đề cập đến phép cộng trong phạm vi 10 và bài toán có lời văn, nhưng chưa có chuẩn đầu ra nào quy định chi tiết về việc tạo bài toán bằng cách gộp hai nhóm đồ vật chỉ dùng chữ và không cần tranh.",
+                                            "teacherAction":  "Giáo viên yêu cầu ứng dụng tạo một bài toán có lời văn về phép cộng trong phạm vi 10 bằng cách gộp hai nhóm đồ vật, chỉ sử dụng văn bản chữ viết và không kèm tranh ảnh.",
+                                            "studentActivity":  "Học sinh đọc bài toán có lời văn bằng chữ, nhận diện yêu cầu gộp hai nhóm đồ vật, viết phép tính cộng thích hợp trong phạm vi 10 và tính ra kết quả đúng."
+                                        },
+                           "usage":  {
+                                         "promptTokenCount":  3429,
+                                         "candidatesTokenCount":  234,
+                                         "totalTokenCount":  3663,
+                                         "promptTokensDetails":  [
+                                                                     {
+                                                                         "modality":  "TEXT",
+                                                                         "tokenCount":  3429
+                                                                     }
+                                                                 ],
+                                         "serviceTier":  "standard"
+                                     }
+                       },
+    "mathQuiz":  {
+                     "game":  {
+                                  "schemaVersion":  "1.0.0",
+                                  "gameType":  "QUIZ",
+                                  "metadata":  {
+                                                   "title":  "Tạo bài toán có lời văn về phép cộng trong phạm vi 10: gộp hai nhóm đồ vật, chỉ dùng chữ và không cầ",
+                                                   "subject":  "MATH",
+                                                   "gradeLevel":  "GRADE_1",
+                                                   "topic":  "Tạo bài toán có lời văn về phép cộng trong phạm vi 10: gộp hai nhóm đồ vật, chỉ dùng chữ và không cần tranh."
+                                               },
+                                  "gameplaySettings":  {
+                                                           "hitboxScale":  1.5
+                                                       },
+                                  "questions":  [
+                                                    {
+                                                        "id":  "q1",
+                                                        "timeLimitSeconds":  38,
+                                                        "points":  10,
+                                                        "audioText":  "Lan có 3 quả táo, Nam cho Lan thêm 2 quả táo nữa. Hỏi Lan có tất cả bao nhiêu quả táo?",
+                                                        "visualPrompt":  "Hinh anh 3 qua tao va 2 qua tao",
+                                                        "questionText":  "Lan có 3 quả táo, Nam cho Lan thêm 2 quả táo nữa. Hỏi Lan có tất cả bao nhiêu quả táo?",
+                                                        "options":  [
+                                                                        {
+                                                                            "id":  "a",
+                                                                            "text":  "4 quả táo"
+                                                                        },
+                                                                        {
+                                                                            "id":  "b",
+                                                                            "text":  "5 quả táo"
+                                                                        },
+                                                                        {
+                                                                            "id":  "c",
+                                                                            "text":  "7 quả táo"
+                                                                        },
+                                                                        {
+                                                                            "id":  "d",
+                                                                            "text":  "6 quả táo"
+                                                                        }
+                                                                    ],
+                                                        "correctOptionId":  "b"
+                                                    },
+                                                    {
+                                                        "id":  "q2",
+                                                        "timeLimitSeconds":  38,
+                                                        "points":  10,
+                                                        "audioText":  "Trên cành có 4 con chim, có thêm 3 con chim bay đến đậu cùng. Hỏi trên cành có tất cả bao nhiêu con chim?",
+                                                        "visualPrompt":  "Hinh anh 4 con chim va 3 con chim",
+                                                        "questionText":  "Trên cành có 4 con chim, có thêm 3 con chim bay đến đậu cùng. Hỏi trên cành có tất cả bao nhiêu con chim?",
+                                                        "options":  [
+                                                                        {
+                                                                            "id":  "a",
+                                                                            "text":  "8 con chim"
+                                                                        },
+                                                                        {
+                                                                            "id":  "b",
+                                                                            "text":  "9 con chim"
+                                                                        },
+                                                                        {
+                                                                            "id":  "c",
+                                                                            "text":  "7 con chim"
+                                                                        },
+                                                                        {
+                                                                            "id":  "d",
+                                                                            "text":  "6 con chim"
+                                                                        }
+                                                                    ],
+                                                        "correctOptionId":  "c"
+                                                    },
+                                                    {
+                                                        "id":  "q3",
+                                                        "timeLimitSeconds":  38,
+                                                        "points":  10,
+                                                        "audioText":  "An có 5 viên bi đỏ và 4 viên bi xanh. Hỏi An có tất cả bao nhiêu viên bi?",
+                                                        "visualPrompt":  "Hinh anh 5 vien bi do va 4 vien bi xanh",
+                                                        "questionText":  "An có 5 viên bi đỏ và 4 viên bi xanh. Hỏi An có tất cả bao nhiêu viên bi?",
+                                                        "options":  [
+                                                                        {
+                                                                            "id":  "a",
+                                                                            "text":  "7 viên bi"
+                                                                        },
+                                                                        {
+                                                                            "id":  "b",
+                                                                            "text":  "8 viên bi"
+                                                                        },
+                                                                        {
+                                                                            "id":  "c",
+                                                                            "text":  "9 viên bi"
+                                                                        },
+                                                                        {
+                                                                            "id":  "d",
+                                                                            "text":  "10 viên bi"
+                                                                        }
+                                                                    ],
+                                                        "correctOptionId":  "c"
+                                                    },
+                                                    {
+                                                        "id":  "q4",
+                                                        "timeLimitSeconds":  38,
+                                                        "points":  10,
+                                                        "audioText":  "Mẹ mua 2 cái bánh ngọt và 5 cái bánh quy. Hỏi mẹ mua tất cả bao nhiêu cái bánh?",
+                                                        "visualPrompt":  "Hinh anh 2 cai banh ngot va 5 cai banh quy",
+                                                        "questionText":  "Mẹ mua 2 cái bánh ngọt và 5 cái bánh quy. Hỏi mẹ mua tất cả bao nhiêu cái bánh?",
+                                                        "options":  [
+                                                                        {
+                                                                            "id":  "a",
+                                                                            "text":  "9 cái bánh"
+                                                                        },
+                                                                        {
+                                                                            "id":  "b",
+                                                                            "text":  "7 cái bánh"
+                                                                        },
+                                                                        {
+                                                                            "id":  "c",
+                                                                            "text":  "6 cái bánh"
+                                                                        },
+                                                                        {
+                                                                            "id":  "d",
+                                                                            "text":  "8 cái bánh"
+                                                                        }
+                                                                    ],
+                                                        "correctOptionId":  "b"
+                                                    }
+                                                ]
+                              },
+                     "evidence":  {
+                                      "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                                      "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                                      "datasetVersion":  "math-grade1-spike-v1",
+                                      "curriculumVersion":  "32/2018/TT-BGDDT",
+                                      "embeddingModel":  "gemini-embedding-001",
+                                      "chunks":  [
+                                                     {
+                                                         "chunkId":  "math-g1-010",
+                                                         "subject":  "MATH",
+                                                         "gradeLevel":  "GRADE_1",
+                                                         "topic":  "Thực hành giải quyết vấn đề liên quan đến các phép tính cộng, trừ / Bài toán có lời văn",
+                                                         "text":  "Nhận biết và viết được phép tính (cộng, trừ) phù hợp với câu trả lời của bài toán có lời văn và tính được kết quả đúng.",
+                                                         "score":  0.8975914612109079,
+                                                         "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                                                         "pdfPages":  [
+                                                                          188
+                                                                      ],
+                                                         "printedPages":  [
+                                                                              22
+                                                                          ],
+                                                         "curriculumVersion":  "32/2018/TT-BGDDT",
+                                                         "domain":  null,
+                                                         "subDomain":  null,
+                                                         "ageBand":  null
+                                                     }
+                                                 ]
+                                  },
+                     "review":  {
+                                    "status":  "REVIEWED",
+                                    "claims":  [
+                                                   {
+                                                       "questionId":  "q1",
+                                                       "answerCorrect":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "math-g1-010"
+                                                                              ],
+                                                       "supportedByCurriculum":  true
+                                                   },
+                                                   {
+                                                       "questionId":  "q2",
+                                                       "answerCorrect":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "math-g1-010"
+                                                                              ],
+                                                       "supportedByCurriculum":  true
+                                                   },
+                                                   {
+                                                       "questionId":  "q3",
+                                                       "answerCorrect":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "math-g1-010"
+                                                                              ],
+                                                       "supportedByCurriculum":  true
+                                                   },
+                                                   {
+                                                       "questionId":  "q4",
+                                                       "answerCorrect":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "math-g1-010"
+                                                                              ],
+                                                       "supportedByCurriculum":  true
+                                                   }
+                                               ],
+                                    "warnings":  [
+
+                                                 ],
+                                    "reviewerModel":  "gemini-3.5-flash-lite"
+                                }
+                 },
+    "englishMatching":  {
+                            "game":  {
+                                         "schemaVersion":  "1.0.0",
+                                         "gameType":  "MATCHING",
+                                         "metadata":  {
+                                                          "title":  "Ghép các từ tiếng Anh quen thuộc chỉ thành viên gia đình với nghĩa tiếng Việt, mỗi bên là chữ, không",
+                                                          "subject":  "ENGLISH",
+                                                          "gradeLevel":  "GRADE_3",
+                                                          "topic":  "Ghép các từ tiếng Anh quen thuộc chỉ thành viên gia đình với nghĩa tiếng Việt, mỗi bên là chữ, không cần tranh hay âm thanh."
+                                                      },
+                                         "gameplaySettings":  {
+                                                                  "hitboxScale":  1.0
+                                                              },
+                                         "questions":  [
+                                                           {
+                                                               "id":  "q1",
+                                                               "timeLimitSeconds":  60,
+                                                               "points":  20,
+                                                               "audioText":  "Ghép các từ tiếng Anh chỉ thành viên gia đình với nghĩa tiếng Việt tương ứng.",
+                                                               "pairs":  [
+                                                                             {
+                                                                                 "pairId":  "p1",
+                                                                                 "left":  {
+                                                                                              "text":  "father"
+                                                                                          },
+                                                                                 "right":  {
+                                                                                               "text":  "bố"
+                                                                                           }
+                                                                             },
+                                                                             {
+                                                                                 "pairId":  "p2",
+                                                                                 "left":  {
+                                                                                              "text":  "mother"
+                                                                                          },
+                                                                                 "right":  {
+                                                                                               "text":  "mẹ"
+                                                                                           }
+                                                                             },
+                                                                             {
+                                                                                 "pairId":  "p3",
+                                                                                 "left":  {
+                                                                                              "text":  "brother"
+                                                                                          },
+                                                                                 "right":  {
+                                                                                               "text":  "anh/em trai"
+                                                                                           }
+                                                                             },
+                                                                             {
+                                                                                 "pairId":  "p4",
+                                                                                 "left":  {
+                                                                                              "text":  "sister"
+                                                                                          },
+                                                                                 "right":  {
+                                                                                               "text":  "chị/em gái"
+                                                                                           }
+                                                                             }
+                                                                         ]
+                                                           }
+                                                       ]
+                                     },
+                            "evidence":  {
+                                             "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                                             "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                                             "datasetVersion":  "english-grade3-draft-v1",
+                                             "curriculumVersion":  "32/2018/TT-BGDDT",
+                                             "embeddingModel":  "gemini-embedding-001",
+                                             "chunks":  [
+                                                            {
+                                                                "chunkId":  "en-g3-010",
+                                                                "subject":  "ENGLISH",
+                                                                "gradeLevel":  "GRADE_3",
+                                                                "topic":  "Tiếng Anh / Kỹ năng ngôn ngữ / Đọc",
+                                                                "text":  "Đọc hiểu nghĩa các từ và cụm từ quen thuộc, rất đơn giản.",
+                                                                "score":  0.8562651141205163,
+                                                                "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                                                                "pdfPages":  [
+                                                                                 1276
+                                                                             ],
+                                                                "printedPages":  [
+                                                                                     27
+                                                                                 ],
+                                                                "curriculumVersion":  "32/2018/TT-BGDDT",
+                                                                "domain":  null,
+                                                                "subDomain":  null,
+                                                                "ageBand":  null
+                                                            }
+                                                        ]
+                                         },
+                            "review":  {
+                                           "status":  "REVIEWED",
+                                           "claims":  [
+                                                          {
+                                                              "questionId":  "q1",
+                                                              "answerCorrect":  true,
+                                                              "supportingChunkIds":  [
+                                                                                         "en-g3-010"
+                                                                                     ],
+                                                              "supportedByCurriculum":  true
+                                                          }
+                                                      ],
+                                           "warnings":  [
+
+                                                        ],
+                                           "reviewerModel":  "gemini-3.5-flash-lite"
+                                       }
+                        },
+    "contentChecks":  {
+                          "matching":  "father/bố; mother/mẹ; brother/anh-em trai; sister/chị-em gái: all four mappings checked",
+                          "textSufficiency":  "All questions solvable from text; imageUrl/audioUrl absent; visualPrompt is not an asset",
+                          "arithmetic":  [
+                                             {
+                                                 "expected":  5,
+                                                 "status":  "PASS",
+                                                 "selected":  5,
+                                                 "questionId":  "q1"
+                                             },
+                                             {
+                                                 "expected":  7,
+                                                 "status":  "PASS",
+                                                 "selected":  7,
+                                                 "questionId":  "q2"
+                                             },
+                                             {
+                                                 "expected":  9,
+                                                 "status":  "PASS",
+                                                 "selected":  9,
+                                                 "questionId":  "q3"
+                                             },
+                                             {
+                                                 "expected":  7,
+                                                 "status":  "PASS",
+                                                 "selected":  7,
+                                                 "questionId":  "q4"
+                                             }
+                                         ],
+                          "reviewMethod":  "Codex read all synthetic questions and pairs; explicit expected answers checked by local assertions; not independent teacher approval"
+                      }
+}
