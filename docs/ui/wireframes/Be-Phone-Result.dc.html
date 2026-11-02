@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bé điện thoại – Kết quả</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 844px; height: 390px; box-sizing: border-box; background: #FFF4DC; padding: 20px 48px; display: flex; align-items: center; gap: 28px">
+  <div style="width: 170px; height: 170px; flex: none; box-sizing: border-box; border-radius: 50%; border: 4px dashed #6B7FA8; background: rgba(255,255,255,0.75); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #3A4A6B">
+    <strong style="font-size: 15px">Nhân vật theo theme</strong>
+    <span style="font-size: 12px; font-weight: 700">ăn mừng</span>
+  </div>
+  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 14px">
+    <h1 style="margin: 0; font-size: 46px; font-weight: 900">Giỏi quá!</h1>
+    <div style="display: flex; gap: 8px" aria-label="4 trên 5 câu đúng">
+      <sc-for list="{{stars}}" as="s" hint-placeholder-count="5">
+        <svg width="50" height="50" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="{{s.fill}}" stroke="{{s.stroke}}" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </sc-for>
+    </div>
+    <button style="height: 72px; padding: 0 34px; border-radius: 36px; border: 4px solid #8A4B00; background: #FF9F1C; box-shadow: 0 6px 0 #8A4B00; display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 900; color: #3B2200; cursor: pointer">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3B2200" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      Chơi lại
+    </button>
+    <button style="height: 44px; padding: 0 14px; border: none; background: transparent; color: #1F3F7A; font-size: 14px; font-weight: 800; text-decoration: underline; cursor: pointer">Dành cho phụ huynh</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":844,"height":390}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const stars = [0,1,2,3,4].map((i) => i < 4 ? { fill: '#FFC93C', stroke: '#B07800' } : { fill: '#FFFFFF', stroke: '#C9B48A' });
+    return { stars };
+  }
+}
+</script>
+</body>
+</html>

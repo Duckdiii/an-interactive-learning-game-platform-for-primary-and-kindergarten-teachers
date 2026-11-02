@@ -1,7 +1,7 @@
 # === Environment / secrets ===
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example
+!.env.*.example
 application-local.yml
 
 # === Node / Frontend ===
@@ -44,3 +44,30 @@ logs/
 # because the English Grade 1/2 manifests use it for reproducible source checks.
 /tmp/*
 !/tmp/curriculum-source.pdf
+
+# === AI review (file sinh ra khi chạy thử script ở máy cục bộ hoặc trong workflow) ===
+# Thư mục đầu vào vòng 2 do scripts/ai-review/precheck.mjs ghi
+/ai-review-input/
+# Bản checkout nhánh base dùng trong workflow
+/trusted/
+# Thư mục kết quả / artifact khi chạy thử tay
+/out/
+/result/
+
+# Cấu hình Claude Code riêng của máy và nhật ký dùng tool
+/.claude/settings.local.json
+/.claude/tool-usage.log
+/.claude/tool-usage.error.log
+
+# Ảnh chụp và nhật ký do Playwright MCP tạo khi kiểm tra giao diện
+/.playwright-mcp/
+
+# File do script sinh ảnh/âm thanh và các lượt thử nghiệm tạo ra
+/frontend/.img-out/
+/frontend/.tts-out/
+/frontend/.img-ledger.json
+/frontend/public/experiments-demo-audio/
+/docs/experiments/
+
+# Cấu hình cá nhân của Obsidian
+.obsidian/

@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:./.env[.properties]
   application:
     name: aigame-backend
 
@@ -34,6 +36,15 @@ spring:
 
 server:
   port: 8080
+
+# Swagger UI (/swagger-ui.html) và spec sinh từ controller (/v3/api-docs). Mặc định bật để dev xem;
+# môi trường triển khai thật đặt SWAGGER_ENABLED=false.
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
+    operations-sorter: method
 
 app:
   cors:

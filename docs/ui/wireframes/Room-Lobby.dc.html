@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Phòng thi đấu – Phòng chờ</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#FFFFFF}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; box-sizing: border-box; background: #13306B; padding: 48px 56px 112px; display: flex; gap: 48px; position: relative">
+  <div style="width: 440px; flex: none; display: flex; flex-direction: column; gap: 18px">
+    <p style="margin: 0; font-size: 22px; font-weight: 800; color: #C9D8F5">Vào phòng tại [TÊN MIỀN]/play với mã</p>
+    <div style="background: #FFFFFF; color: #13306B; border-radius: 24px; padding: 18px; text-align: center; font-size: 76px; font-weight: 900; letter-spacing: 8px">482 913</div>
+    <div style="display: flex; gap: 18px; align-items: center">
+      <div style="width: 180px; height: 180px; box-sizing: border-box; border-radius: 18px; background: #FFFFFF; border: 4px dashed #6B7FA8; display: flex; align-items: center; justify-content: center; color: #3A4A6B; font-size: 18px; font-weight: 800">Mã QR</div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 26px; font-weight: 900">Đếm con vật</span>
+        <span style="font-size: 18px; font-weight: 700; color: #C9D8F5">Toán · Lớp 2 · 10 câu</span>
+      </div>
+    </div>
+  </div>
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0">
+    <div style="display: flex; align-items: baseline; gap: 12px">
+      <span style="font-size: 54px; font-weight: 900">24</span>
+      <span style="font-size: 24px; font-weight: 800; color: #C9D8F5">bạn đã vào phòng</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+      <sc-for list="{{names}}" as="n" hint-placeholder-count="12">
+        <div style="display: flex; align-items: center; gap: 10px; background: #1F3F84; border-radius: 14px; padding: 10px 12px; font-size: 18px; font-weight: 800">
+          <div style="{{n.dot}}"></div>{{n.name}}
+        </div>
+      </sc-for>
+    </div>
+    <span style="font-size: 16px; font-weight: 700; color: #C9D8F5">… và 12 bạn khác</span>
+  </div>
+  <div style="position: absolute; left: 24px; right: 24px; bottom: 20px; height: 72px; box-sizing: border-box; border-radius: 20px; background: rgba(8,18,40,0.9); display: flex; align-items: center; gap: 10px; padding: 0 14px">
+    <span style="background: #34476B; border-radius: 10px; padding: 6px 10px; font-size: 13px; font-weight: 800">Giáo viên</span>
+    <button style="height: 48px; padding: 0 22px; border-radius: 12px; border: none; background: #FF9F1C; color: #3B2200; font-size: 18px; font-weight: 900; cursor: pointer">Bắt đầu</button>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Khóa phòng</button>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Xóa biệt danh</button>
+    <span style="margin-left: auto; font-size: 14px; font-weight: 700; color: #C9D3E6">Giáo viên xóa được biệt danh không phù hợp</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const list = ['Ong Vàng 27','Mèo Mướp','Sao Băng','Cá Heo Xanh','Gấu Trúc 9','Thỏ Ngọc','Rồng Lửa','Chim Sẻ','Hổ Con','Mây Trắng','Sóc Nâu','Cầu Vồng'];
+    const colors = ['#FFD43B','#FF9EBB','#7CC8FF','#8BD98B','#FFB347','#B79CFF'];
+    const names = list.map((name, i) => ({ name, dot: 'flex: none; width: 26px; height: 26px; border-radius: 50%; background: ' + colors[i % colors.length] }));
+    return { names };
+  }
+}
+</script>
+</body>
+</html>

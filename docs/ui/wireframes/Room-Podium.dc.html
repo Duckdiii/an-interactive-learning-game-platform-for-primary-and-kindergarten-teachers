@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Phòng thi đấu – Vinh danh</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#FFFFFF}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; box-sizing: border-box; background: #13306B; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 40px; gap: 10px">
+  <h1 style="margin: 0; font-size: 50px; font-weight: 900">Chúc mừng cả lớp!</h1>
+  <p style="margin: 0; font-size: 22px; font-weight: 800; color: #C9D8F5">Trung bình cả lớp đúng 7/10 câu</p>
+  <div style="position: absolute; left: 0; right: 0; bottom: 112px; display: flex; justify-content: center; align-items: flex-end; gap: 16px">
+    <div style="width: 240px; display: flex; flex-direction: column; align-items: center; gap: 8px">
+      <div style="width: 70px; height: 70px; border-radius: 50%; background: #FFD43B; border: 4px solid #FFFFFF"></div>
+      <span style="font-size: 24px; font-weight: 900">Ong Vàng 27</span>
+      <span style="font-size: 18px; font-weight: 800; color: #C9D8F5">880 điểm</span>
+      <div style="width: 100%; height: 150px; border-radius: 18px 18px 0 0; background: #2A4C93; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: 900">2</div>
+    </div>
+    <div style="width: 260px; display: flex; flex-direction: column; align-items: center; gap: 8px">
+      <div style="width: 84px; height: 84px; border-radius: 50%; background: #7CC8FF; border: 5px solid #FFC93C"></div>
+      <span style="font-size: 28px; font-weight: 900">Sao Băng</span>
+      <span style="font-size: 20px; font-weight: 800; color: #FFE08A">920 điểm</span>
+      <div style="width: 100%; height: 220px; border-radius: 18px 18px 0 0; background: #FF9F1C; color: #3B2200; display: flex; align-items: center; justify-content: center; font-size: 76px; font-weight: 900">1</div>
+    </div>
+    <div style="width: 240px; display: flex; flex-direction: column; align-items: center; gap: 8px">
+      <div style="width: 70px; height: 70px; border-radius: 50%; background: #8BD98B; border: 4px solid #FFFFFF"></div>
+      <span style="font-size: 24px; font-weight: 900">Cá Heo Xanh</span>
+      <span style="font-size: 18px; font-weight: 800; color: #C9D8F5">850 điểm</span>
+      <div style="width: 100%; height: 110px; border-radius: 18px 18px 0 0; background: #2A4C93; display: flex; align-items: center; justify-content: center; font-size: 52px; font-weight: 900">3</div>
+    </div>
+  </div>
+  <div style="position: absolute; left: 24px; right: 24px; bottom: 20px; height: 72px; box-sizing: border-box; border-radius: 20px; background: rgba(8,18,40,0.9); display: flex; align-items: center; gap: 10px; padding: 0 14px">
+    <span style="background: #34476B; border-radius: 10px; padding: 6px 10px; font-size: 13px; font-weight: 800">Giáo viên</span>
+    <button style="height: 48px; padding: 0 18px; border-radius: 12px; border: none; background: #FF9F1C; color: #3B2200; font-size: 16px; font-weight: 900; cursor: pointer">Chơi ván mới</button>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Thống kê từng câu</button>
+    <button style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #4A5B7D; background: #22324F; color: #FFFFFF; font-size: 16px; font-weight: 800; cursor: pointer">Đóng phòng</button>
+    <span style="margin-left: auto; font-size: 14px; font-weight: 700; color: #C9D3E6">Đóng phòng thì xóa biệt danh và bảng xếp hạng</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

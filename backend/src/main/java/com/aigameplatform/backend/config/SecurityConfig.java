@@ -40,6 +40,9 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Swagger UI và spec sinh từ code; tắt hẳn bằng SWAGGER_ENABLED=false khi triển khai.
+                .requestMatchers(HttpMethod.GET,
+                        "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // Logout không nằm trong danh sách này: phải có access token hợp lệ.
                 .requestMatchers(HttpMethod.POST,
                         "/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()

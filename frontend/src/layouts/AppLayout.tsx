@@ -1,80 +1,85 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef } from 'react'
+import { NavLink, Outlet, useLocation, useNavigationType } from 'react-router-dom'
+import Icon from '../components/ui/Icon'
+import MockBanner from '../components/ui/MockBanner'
+import type { IconName } from '../components/ui/Icon'
+import { viText } from '../constants/viText'
 import { useAuth } from '../hooks/useAuth'
 import { ROUTES } from '../routes/paths'
+import { initialOf } from '../utils/initials'
 
-const navigationItems = [
-  { label: 'Dashboard', to: ROUTES.dashboard, end: true },
-  { label: 'Workspace', to: ROUTES.workspace, end: true },
-  { label: 'Editor', to: ROUTES.workspaceEditor, end: true },
+// Trình soạn thảo (ROUTES.workspaceEditor) không nằm trên thanh điều hướng: giáo viên mở nó từ trang "Trò chơi của tôi",
+// nên mục này không dùng `end` để vẫn được tô sáng khi đang ở trình soạn thảo.
+const navigationItems: ReadonlyArray<{
+  label: string
+  to: string
+  end: boolean
+  icon: IconName
+}> = [
+  { label: viText.nav.home, to: ROUTES.dashboard, end: true, icon: 'home' },
+  { label: viText.nav.myGames, to: ROUTES.workspace, end: false, icon: 'library' },
+  { label: viText.nav.results, to: ROUTES.results, end: true, icon: 'chart' },
+  { label: viText.nav.createGame, to: ROUTES.createGame, end: true, icon: 'sparkles' },
 ]
 
 export default function AppLayout() {
   const { user, logout } = useAuth()
+  const queryClient = useQueryClient()
+  const location = useLocation()
+  const mainRef = useRef<HTMLElement>(null)
+  // Đăng xuất cũng xóa bộ nhớ đệm truy vấn (danh sách game, game đang mở): máy dùng chung không giữ dữ liệu của người trước.
+  const handleLogout = () => {
+    logout()
+    queryClient.clear()
+  }
+  // Người Việt gọi bằng tên (từ cuối): "Nguyễn Thị Lan" -> "Cô Lan". Chưa có họ tên thì dùng email, không thêm "Cô".
+  const firstName = user?.fullName?.trim().split(/\s+/).pop()
+  const displayName = firstName
+    ? `${viText.layout.teacherPrefix} ${firstName}`
+    : user?.email || viText.layout.fallbackUser
+
+  // Sang trang mới (trong ứng dụng) thì đưa tiêu điểm về nội dung chính và cuộn lên đầu: người dùng bàn phím và trình
+  // đọc màn hình không bị kẹt ở thanh điều hướng, người dùng điện thoại không đứng giữa trang cũ. Lúc vừa mở trang thì
+  // KHÔNG chuyển tiêu điểm, để phím Tab đầu tiên vẫn tới liên kết "Bỏ qua điều hướng".
+  // Mở thẳng hoặc tải lại trang (loại điều hướng POP, kể cả F5 sau khi đã đi vài trang: trình duyệt tự khôi phục vị trí
+  // cuộn) thì coi như đã ở đúng trang; đến từ trang khác trong ứng dụng (vd. vừa đăng nhập xong, nút đăng nhập đã biến
+  // mất, loại PUSH/REPLACE) thì vẫn đưa tiêu điểm về nội dung chính.
+  const navigationType = useNavigationType()
+  const lastPath = useRef<string | null>(
+    navigationType === 'POP' ? location.pathname : null,
+  )
+  useEffect(() => {
+    if (lastPath.current === location.pathname) return
+
+    lastPath.current = location.pathname
+    window.scrollTo({ top: 0 })
+
+    // Trang mới đã tự đặt tiêu điểm vào một ô cụ thể (ví dụ ô chọn khối lớp khi vào "Tạo ngẫu nhiên") thì giữ nguyên.
+    // Effect của trang con chạy trước effect của layout nên kiểm tra được ở đây.
+    const main = mainRef.current
+    const active = document.activeElement
+    if (main && active && active !== main && main.contains(active)) return
+
+    main?.focus({ preventScroll: true })
+  }, [location.pathname])
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-950">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white px-4 py-5 lg:block">
-        <div className="flex items-center gap-3 px-2">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-500 font-bold text-white">
-            AI
-          </span>
-          <div>
-            <p className="font-semibold">AI Game Platform</p>
-            <p className="text-xs text-slate-500">Teacher Console</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-paper text-ink lg:grid lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-xl focus:bg-white focus:px-4 focus:py-3 focus:font-semibold focus:text-brand-strong focus:shadow-lg"
+      >
+        {viText.layout.skipToContent}
+      </a>
 
-        <nav className="mt-8 space-y-1">
-          {navigationItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                [
-                  'flex min-h-11 items-center rounded-md px-3 text-sm font-medium transition',
-                  isActive
-                    ? 'bg-slate-950 text-white'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950',
-                ].join(' ')
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-      </aside>
+      {/* Cột sidebar là một ô của lưới nên luôn cao bằng cả trang (nền trắng liền mạch dù trang dài hơn màn hình);
+          phần nội dung bên trong dính trên cùng và cao đúng một màn hình nên không cuộn theo trang. */}
+      <aside className="hidden border-r border-line bg-surface lg:block">
+        <div className="sticky top-0 flex h-screen flex-col px-4 py-6">
+          <Brand />
 
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium text-slate-500">
-                Primary & Kindergarten Learning Games
-              </p>
-              <h1 className="text-xl font-semibold">Teacher Console</h1>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="hidden text-right sm:block">
-                <p className="text-sm font-semibold">
-                  {user?.email ?? 'Demo teacher'}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {user ? 'Signed in' : 'No session yet'}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={logout}
-                className="min-h-10 rounded-md border border-slate-300 px-3 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:text-slate-950"
-              >
-                Sign out
-              </button>
-            </div>
-          </div>
-
-          <nav className="mt-3 flex gap-2 overflow-x-auto lg:hidden">
+          <nav aria-label={viText.layout.navLabel} className="mt-8 space-y-2">
             {navigationItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -82,23 +87,126 @@ export default function AppLayout() {
                 end={item.end}
                 className={({ isActive }) =>
                   [
-                    'min-h-10 shrink-0 rounded-md px-3 py-2 text-sm font-medium',
+                    'flex min-h-12 items-center gap-3 rounded-full px-4 text-base font-bold transition',
                     isActive
-                      ? 'bg-slate-950 text-white'
-                      : 'bg-slate-100 text-slate-700',
+                      ? 'bg-brand-soft text-brand-strong'
+                      : 'text-ink-soft hover:bg-brand-soft/60 hover:text-brand-strong',
                   ].join(' ')
                 }
               >
+                <Icon name={item.icon} />
                 {item.label}
               </NavLink>
             ))}
           </nav>
-        </header>
 
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+          <div className="mt-auto rounded-2xl bg-paper p-4 shadow-card">
+            <div className="flex items-center gap-3">
+              <Avatar name={displayName} />
+              <div className="min-w-0">
+                <p className="truncate font-display text-base font-extrabold">{displayName}</p>
+                {user?.fullName ? (
+                  <p className="truncate text-sm text-ink-soft">{user.email}</p>
+                ) : null}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-ink/15 bg-white px-4 text-base font-semibold text-ink-soft transition hover:border-brand hover:text-brand-strong"
+            >
+              <Icon name="logout" />
+              {viText.layout.signOut}
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-ink/10 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+        <Brand compact />
+        <div className="flex items-center gap-2">
+          <Avatar name={displayName} />
+          <button
+            type="button"
+            onClick={handleLogout}
+            aria-label={viText.layout.signOut}
+            className="grid h-11 w-11 place-items-center rounded-xl border-2 border-ink/15 text-ink-soft transition hover:border-brand hover:text-brand-strong"
+          >
+            <Icon name="logout" />
+          </button>
+        </div>
+      </header>
+
+      <main
+        id="main"
+        ref={mainRef}
+        tabIndex={-1}
+        className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-6 outline-none sm:px-6 sm:pt-8 lg:mx-0 lg:max-w-none lg:px-10 lg:pb-12"
+      >
+        <div key={location.pathname} className="page-in mx-auto max-w-5xl">
+          <MockBanner />
           <Outlet />
-        </main>
+        </div>
+      </main>
+
+      <nav
+        aria-label={viText.layout.navLabelCompact}
+        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-ink/10 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+      >
+        {navigationItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              [
+                'relative flex min-h-16 flex-col items-center justify-center gap-1 px-2 text-sm font-semibold transition',
+                isActive ? 'text-brand-strong' : 'text-ink-soft',
+              ].join(' ')
+            }
+          >
+            {({ isActive }) => (
+              <>
+                {isActive ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-6 top-0 h-1 rounded-b-full bg-brand"
+                  />
+                ) : null}
+                <Icon name={item.icon} className="h-6 w-6" />
+                {item.label}
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+    </div>
+  )
+}
+
+function Brand({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className="flex items-center gap-3 px-1">
+      <span className="grid h-11 w-11 shrink-0 -rotate-6 place-items-center rounded-xl bg-sun font-display text-lg font-extrabold text-sun-ink shadow-base-sun">
+        AI
+      </span>
+      <div className="min-w-0">
+        <p className="truncate font-display text-lg font-extrabold">{viText.appName}</p>
+        {compact ? null : (
+          <p className="text-sm text-ink-soft">{viText.layout.sidebarSubtitle}</p>
+        )}
       </div>
     </div>
+  )
+}
+
+function Avatar({ name }: { name: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sun-soft font-display text-lg font-extrabold text-ink ring-2 ring-sun"
+    >
+      {initialOf(name)}
+    </span>
   )
 }

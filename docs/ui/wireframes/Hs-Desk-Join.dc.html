@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Học sinh máy tính – Vào game</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+button,input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #E7EEF8; display: flex; align-items: center; justify-content: center; gap: 56px">
+  <div style="width: 440px; box-sizing: border-box; background: #FFFFFF; border: 2px solid #D5DEEA; border-radius: 24px; padding: 40px 36px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 10px 30px rgba(27,35,51,0.08)">
+    <div style="display: flex; align-items: center; gap: 14px">
+      <div style="width: 56px; height: 56px; border-radius: 18px; background: #1F5BD8; display: flex; align-items: center; justify-content: center">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="4"/><path d="M7 11v4"/><path d="M5 13h4"/><circle cx="16" cy="12" r="1" fill="#FFFFFF"/><circle cx="18" cy="14" r="1" fill="#FFFFFF"/></svg>
+      </div>
+      <h1 style="margin: 0; font-size: 30px; font-weight: 900">Vào chơi</h1>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <label for="dcode" style="font-size: 15px; font-weight: 800">Mã trò chơi</label>
+      <input id="dcode" value="482 913" style="height: 64px; box-sizing: border-box; border-radius: 14px; border: 3px solid #1F5BD8; font-size: 32px; font-weight: 900; letter-spacing: 10px; text-align: center; color: #1B2333">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <label for="dnick" style="font-size: 15px; font-weight: 800">Biệt danh</label>
+      <input id="dnick" value="Ong Vàng 27" style="height: 52px; box-sizing: border-box; border-radius: 14px; border: 2px solid #B8C6DA; padding: 0 14px; font-size: 18px; font-weight: 800; color: #1B2333">
+    </div>
+    <button style="height: 56px; border-radius: 14px; border: none; background: #1F5BD8; color: #FFFFFF; font-size: 19px; font-weight: 900; box-shadow: 0 5px 0 #133C94; cursor: pointer">Vào chơi (Enter)</button>
+    <p style="margin: 0; font-size: 13px; font-weight: 600; color: #4A5568">Mở bằng đường dẫn thầy cô gửi thì mã được điền sẵn. Không cần tài khoản.</p>
+  </div>
+  <div style="width: 380px; display: flex; flex-direction: column; gap: 12px">
+    <span style="font-size: 18px; font-weight: 900">Khác với điện thoại</span>
+    <div style="background: #FFFFFF; border-radius: 14px; padding: 14px 16px; font-size: 15px; font-weight: 600; line-height: 1.45">Gộp nhập mã và biệt danh vào một thẻ, vì màn hình đủ rộng và có bàn phím.</div>
+    <div style="background: #FFFFFF; border-radius: 14px; padding: 14px 16px; font-size: 15px; font-weight: 600; line-height: 1.45">Không có nút quét QR (máy tính thường không quét).</div>
+    <div style="background: #FFFFFF; border-radius: 14px; padding: 14px 16px; font-size: 15px; font-weight: 600; line-height: 1.45">Avatar chọn ở màn tiếp theo hoặc bỏ qua để vào nhanh.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { getGames } from '../api/gamesApi'
+import App from '../App'
+import LoadingSpinner from '../components/LoadingSpinner'
+import { loginAsTeacher, makeGame, renderWithProviders } from '../test/renderWithApp'
+
+vi.mock('../api/gamesApi', () => ({ getGames: vi.fn() }))
+// Sandbox Canvas (chỉ có ở bản dev) kéo theo react-konva, không cần cho test giao diện giáo viên.
+vi.mock('./dev/CanvasSandbox', () => ({ default: () => null }))
+
+// Từ tiếng Anh dành cho lập trình viên không được lọt ra giao diện giáo viên.
+const ENGLISH_UI_TEXT =
+  /Teacher Console|Teacher workspace|Teacher access|Sign out|Signed in|Workspace|Dashboard|Drafts|Published|Shared|Editor|Library|Placeholder|Welcome back|Page not found|Back to|Create workspace|Open editor|Loading|Frontend skeleton|\bLogin\b|\bRegister\b|\bAdd\b/
+
+const mockedGetGames = vi.mocked(getGames)
+
+const renderApp = (path: string) => renderWithProviders(<App />, path)
+
+// Mỗi route lazy nên phải chờ tiêu đề trang chính (h1) hiện ra rồi mới kiểm.
+const waitForPage = (name: RegExp | string) =>
+  screen.findByRole('heading', { level: 1, name }, { timeout: 10_000 })
+
+describe('giao diện giáo viên bằng tiếng Việt', () => {
+  beforeEach(() => {
+    loginAsTeacher()
+    mockedGetGames.mockResolvedValue([makeGame(1)])
+  })
+  afterEach(() => {
+    localStorage.clear()
+    vi.clearAllMocks()
+  })
+
+  it.each([
+    ['/login', 'Chào cô quay lại!'],
+    ['/register', 'Tạo tài khoản giáo viên'],
+    ['/dashboard', /Chào cô/],
+    ['/games/new', 'Hôm nay cô muốn dạy gì?'],
+    ['/workspace', 'Kệ trò chơi của cô'],
+    ['/results', 'Kết quả'],
+    ['/workspace/editor', /Chưa chọn trò chơi/],
+    ['/khong-ton-tai', 'Không tìm thấy trang'],
+  ])('trang %s không còn chữ tiếng Anh dành cho lập trình viên', async (path, heading) => {
+    renderApp(path)
+    await waitForPage(heading)
+    if (path === '/dashboard' || path === '/workspace') await screen.findByText(makeGame(1).title)
+
+    expect(document.body.textContent).not.toMatch(ENGLISH_UI_TEXT)
+  })
+
+  it.each([
+    ['/login', 'Đăng nhập'],
+    ['/register', 'Đăng ký'],
+    ['/dashboard', 'Trang chủ'],
+    ['/games/new', 'Tạo game mới'],
+    ['/workspace', 'Kệ trò chơi của cô'],
+    ['/workspace/editor', 'Soạn thảo'],
+    ['/khong-ton-tai', 'Không tìm thấy trang'],
+  ])('trang %s có tiêu đề tab riêng "%s · AI Game Platform"', async (path, title) => {
+    renderApp(path)
+    await screen.findByRole('heading', { level: 1 })
+
+    await waitFor(() => expect(document.title).toBe(`${title} · AI Game Platform`))
+  })
+
+  it('cả thanh bên (máy tính) và thanh dưới (điện thoại) đều có đúng 4 mục', async () => {
+    renderApp('/workspace')
+    await waitForPage('Kệ trò chơi của cô')
+
+    for (const name of ['Điều hướng chính', 'Điều hướng chính (thanh dưới)']) {
+      const nav = screen.getByRole('navigation', { name })
+      const links = within(nav).getAllByRole('link')
+
+      expect(links.map((link) => link.textContent)).toEqual([
+        'Trang chủ',
+        'Trò chơi của tôi',
+        'Kết quả',
+        'Tạo game mới',
+      ])
+      expect(links.map((link) => link.getAttribute('href'))).toEqual([
+        '/dashboard',
+        '/workspace',
+        '/results',
+        '/games/new',
+      ])
+    }
+  })
+
+  it('đang ở trình soạn thảo thì mục "Trò chơi của tôi" vẫn sáng ở cả hai thanh', async () => {
+    renderApp('/workspace/editor')
+    await waitForPage(/Chưa chọn trò chơi/)
+
+    for (const name of ['Điều hướng chính', 'Điều hướng chính (thanh dưới)']) {
+      const nav = screen.getByRole('navigation', { name })
+
+      expect(within(nav).getByRole('link', { name: 'Trò chơi của tôi' })).toHaveAttribute('aria-current', 'page')
+      expect(within(nav).getByRole('link', { name: 'Trang chủ' })).not.toHaveAttribute('aria-current')
+    }
+  })
+
+  it('thẻ người dùng hiện tên và email; Đăng xuất đưa về trang đăng nhập', async () => {
+    const user = userEvent.setup()
+    renderApp('/dashboard')
+    await waitForPage(/Chào cô/)
+
+    expect(screen.getAllByText('Cô Lan').length).toBeGreaterThan(0)
+    expect(screen.getByText('lan@truong.edu.vn')).toBeInTheDocument()
+
+    await user.click(screen.getAllByRole('button', { name: 'Đăng xuất' })[0])
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Chào cô quay lại!' })).toBeInTheDocument()
+    expect(localStorage.getItem('accessToken')).toBeNull()
+  })
+
+  it('chưa đăng nhập mà vào trang giáo viên thì bị đưa về trang đăng nhập', async () => {
+    localStorage.clear()
+    renderApp('/workspace')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Chào cô quay lại!' })).toBeInTheDocument()
+  })
+
+  it('có liên kết "Bỏ qua điều hướng" trỏ tới nội dung chính và nằm trước mọi liên kết khác', async () => {
+    renderApp('/dashboard')
+    await waitForPage(/Chào cô/)
+
+    const skip = screen.getByRole('link', { name: /Bỏ qua điều hướng/ })
+    expect(skip).toHaveAttribute('href', '#main')
+    expect(document.getElementById('main')).toHaveAttribute('tabindex', '-1')
+    expect(document.querySelector('a')).toBe(skip)
+  })
+
+  it('lúc vừa mở trang KHÔNG chuyển tiêu điểm; đổi trang trong ứng dụng thì tiêu điểm về nội dung chính', async () => {
+    const user = userEvent.setup()
+    renderApp('/dashboard')
+    await waitForPage(/Chào cô/)
+    expect(document.getElementById('main')).not.toHaveFocus()
+
+    const nav = screen.getByRole('navigation', { name: 'Điều hướng chính' })
+    await user.click(within(nav).getByRole('link', { name: 'Tạo game mới' }))
+    await waitForPage('Hôm nay cô muốn dạy gì?')
+
+    await waitFor(() => expect(document.getElementById('main')).toHaveFocus())
+  })
+
+  it('"Tạo ngẫu nhiên" từ Trang chủ: tiêu điểm ở lại ô khối lớp, không bị layout kéo về nội dung chính', async () => {
+    const user = userEvent.setup()
+    renderApp('/dashboard')
+    await waitForPage(/Chào cô/)
+
+    await user.click(screen.getByRole('link', { name: /Tạo ngẫu nhiên/ }))
+    await waitForPage('Hôm nay cô muốn dạy gì?')
+
+    const grade = screen.getByRole('button', { name: 'Mầm non' })
+    await waitFor(() => expect(grade).toHaveFocus())
+    expect(document.getElementById('main')).not.toHaveFocus()
+  })
+
+  it('sidebar nằm trong cột lưới cao bằng cả trang, phần bên trong dính ở đầu và cao đúng một màn hình', async () => {
+    renderApp('/games/new')
+    await waitForPage('Hôm nay cô muốn dạy gì?')
+
+    const aside = document.querySelector('aside') as HTMLElement
+    const inner = aside.firstElementChild as HTMLElement
+
+    expect(aside.className).toMatch(/\bbg-surface\b/)
+    expect(aside.className).not.toMatch(/\bfixed\b/)
+    expect(inner.className).toMatch(/\bsticky\b/)
+    expect(inner.className).toMatch(/\btop-0\b/)
+    expect(inner.className).toMatch(/\bh-screen\b/)
+  })
+
+  it('placeholder và tên trợ năng cũng bằng tiếng Việt', async () => {
+    localStorage.clear()
+    renderApp('/login')
+    await waitForPage('Chào cô quay lại!')
+
+    expect(screen.getByPlaceholderText('giaovien@example.com')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Nhập mật khẩu')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Hiện mật khẩu' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Đăng nhập hoặc đăng ký' })).toBeInTheDocument()
+  })
+
+  it('trang đăng nhập có đúng một h1 và là tiêu đề của biểu mẫu', async () => {
+    localStorage.clear()
+    renderApp('/login')
+    await waitForPage('Chào cô quay lại!')
+
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+  })
+
+  it('LoadingSpinner có nhãn mặc định tiếng Việt', () => {
+    render(<LoadingSpinner />)
+
+    expect(screen.getByText('Đang tải')).toBeInTheDocument()
+  })
+})

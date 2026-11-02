@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.config;
 
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -160,6 +161,19 @@ class SecurityConfigTest {
         mockMvc.perform(get("/api/games").header(HttpHeaders.AUTHORIZATION, "Bearer " + validAccessToken()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+    }
+
+    @Test
+    void swaggerPathsAreNotBehindAuthentication() throws Exception {
+        // Trong slice này springdoc có thể chưa nạp nên phản hồi là 404; điều cần kiểm là không phải 401.
+        for (String path : new String[] {"/v3/api-docs", "/swagger-ui.html", "/swagger-ui/index.html"}) {
+            mockMvc.perform(get(path)).andExpect(status().is(not(401)));
+        }
+    }
+
+    @Test
+    void swaggerPathsDoNotOpenUpOtherGetEndpoints() throws Exception {
+        mockMvc.perform(get("/api/games")).andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -17,6 +17,7 @@
     "canvas-confetti": "^1.9.4",
     "howler": "^2.2.4",
     "konva": "^10.7.0",
+    "qrcode.react": "4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-konva": "^19.3.0",
@@ -37,7 +38,7 @@
     "jsdom": "^29.1.1",
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0",
-    "vitest": "^4.1.11"
+    "vite": "^8.3.4",
+    "vitest": "^4.1.12"
   }
 }

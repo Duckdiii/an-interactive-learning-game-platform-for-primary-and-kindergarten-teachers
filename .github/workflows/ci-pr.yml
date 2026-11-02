@@ -37,7 +37,15 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: ./mvnw --batch-mode test
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        # PR của Dependabot không nhận Actions secret nên không kết nối được Supabase; chỉ bỏ test khởi động thật,
+        # không thêm secret DB cho Dependabot vì code của gói bên thứ ba chạy trong job này.
+        run: |
+          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
+            ./mvnw --batch-mode test '-Dtest=!AigameBackendApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
+          else
+            ./mvnw --batch-mode test
+          fi
 
       - name: Upload JaCoCo coverage report
         if: always()
@@ -58,13 +66,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24.22.1"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
       - run: npm run lint
-      - run: npm run test
+      # Chỉ trên CI: giới hạn số luồng vitest (máy chạy CI ít nhân nên nhiều luồng làm test thời gian chập chờn, xem mục Nợ và rủi ro trong "docs/wiki/Kế hoạch và việc còn lại.md").
+      # Chạy cục bộ vẫn dùng mặc định của vite.config.ts.
+      - run: npm run test -- --maxWorkers=2
       - run: npm run build
 
   secret-scan:

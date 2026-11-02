@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bé ở nhà – Đang tải</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+</style>
+</helmet>
+<div style="width: 1024px; height: 640px; box-sizing: border-box; background: #F4F7FB; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px">
+  <div style="width: 140px; height: 140px; border-radius: 40px; background: #1F5BD8; display: flex; align-items: center; justify-content: center">
+    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="4"/><path d="M7 11v4"/><path d="M5 13h4"/><circle cx="16" cy="12" r="1" fill="#FFFFFF"/><circle cx="18" cy="14" r="1" fill="#FFFFFF"/></svg>
+  </div>
+  <div style="display: flex; gap: 16px" aria-hidden="true">
+    <div style="width: 24px; height: 24px; border-radius: 50%; background: #1F5BD8"></div>
+    <div style="width: 24px; height: 24px; border-radius: 50%; background: #6F95E6"></div>
+    <div style="width: 24px; height: 24px; border-radius: 50%; background: #BFD0F4"></div>
+  </div>
+  <p style="margin: 0; font-size: 20px; font-weight: 800">Đang mở trò chơi…</p>
+  <p style="margin: 0; font-size: 15px; font-weight: 600; color: #4A5568">Biểu tượng của nền tảng, chưa có nhân vật vì theme chưa tải xong</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1024,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

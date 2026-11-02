@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng A – Soạn thảo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1B2333}
+h1,h2,h3{font-family:'Baloo 2','Nunito',sans-serif}
+button,a,input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1440px; height: 960px; box-sizing: border-box; background: #FBF6EC; display: flex; flex-direction: column">
+  <header style="height: 84px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 28px">
+    <a href="A-Games.dc.html" aria-label="Quay lại kệ trò chơi" style="width: 44px; height: 44px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #1B2333; text-decoration: none; font-weight: 900; box-shadow: 0 4px 14px rgba(80,55,10,0.08)">‹</a>
+    <div style="width: 52px; height: 52px; border-radius: 15px; background: #E3ECFD; display: flex; align-items: center; justify-content: center">
+      <span style="width: 34px; height: 34px; border-radius: 10px; background: #FFFFFF; border: 3px solid #2F6FED; color: #1F4FC4; font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; transform: rotate(-6deg)">10</span>
+    </div>
+    <div>
+      <h1 style="margin: 0; font-size: 26px; font-weight: 800; line-height: 1.1">Đếm số đến 10</h1>
+      <div style="display: flex; gap: 6px; margin-top: 4px">
+        <span style="background: #E3ECFD; color: #1F4FC4; border-radius: 8px; padding: 2px 8px; font-size: 12px; font-weight: 900">Toán · Mầm non</span>
+        <span style="background: #FFFFFF; border-radius: 8px; padding: 2px 8px; font-size: 12px; font-weight: 800">Trắc nghiệm · 3 câu</span>
+      </div>
+    </div>
+    <span style="margin-left: 10px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #0A5A3C"><span style="width: 10px; height: 10px; border-radius: 50%; background: #16A34A"></span>Đã tự lưu</span>
+    <div style="margin-left: auto; display: flex; gap: 10px">
+      <button style="height: 46px; padding: 0 16px; border-radius: 14px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">Hoàn tác</button>
+      <button style="height: 46px; padding: 0 16px; border-radius: 14px; border: 2px solid #0E7A57; background: #FFFFFF; color: #0A5A3C; font-size: 14px; font-weight: 900; cursor: pointer">Chơi thử</button>
+      <a href="A-Publish.dc.html" style="height: 46px; padding: 0 22px; border-radius: 14px; background: #F6B93B; color: #3B2600; font-size: 15px; font-weight: 900; display: flex; align-items: center; text-decoration: none; box-shadow: 0 5px 0 #C98A12">Xuất bản</a>
+    </div>
+  </header>
+  <div style="flex: 1; display: flex; gap: 20px; padding: 4px 28px 24px; min-height: 0">
+    <div style="width: 250px; flex: none; display: flex; flex-direction: column; gap: 10px">
+      <sc-for list="{{qs}}" as="q" hint-placeholder-count="3">
+        <div style="{{q.card}}">
+          <span style="{{q.num}}">{{q.n}}</span>
+          <span style="flex: 1; min-width: 0"><span style="display: block; font-size: 14px; font-weight: 900">{{q.t}}</span><span style="{{q.noteStyle}}">{{q.note}}</span></span>
+        </div>
+      </sc-for>
+      <button style="height: 46px; border-radius: 16px; border: 2px dashed #C9B48A; background: transparent; color: #5C3D00; font-size: 14px; font-weight: 800; cursor: pointer">+ Thêm câu</button>
+      <button style="height: 46px; border-radius: 16px; border: none; background: #EEE6FC; color: #5B2DB8; font-size: 14px; font-weight: 900; cursor: pointer">AI soạn thêm 2 câu</button>
+    </div>
+    <section style="flex: 1; min-width: 0; background: #FFFFFF; border-radius: 26px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 12px 30px rgba(80,55,10,0.08)">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <h2 style="margin: 0; font-size: 24px; font-weight: 800">Câu 1</h2>
+        <button style="height: 40px; padding: 0 14px; border-radius: 12px; border: none; background: #EEE6FC; color: #5B2DB8; font-size: 13px; font-weight: 900; cursor: pointer">AI làm lại câu này</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="aq" style="font-size: 14px; font-weight: 900">Câu hỏi</label>
+        <input id="aq" value="Có mấy quả táo trong hình?" style="height: 52px; box-sizing: border-box; border: 2px solid #E7DCC5; border-radius: 14px; padding: 0 14px; font-size: 17px; font-weight: 800">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 14px; font-weight: 900">Đáp án · bấm vào ô để chọn đáp án đúng</span>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+          <sc-for list="{{opts}}" as="o" hint-placeholder-count="3">
+            <button aria-label="{{o.label}}" style="{{o.style}}"><span style="{{o.tag}}">{{o.k}}</span><span style="font-size: 26px; font-weight: 900; font-family: 'Baloo 2', sans-serif">{{o.t}}</span></button>
+          </sc-for>
+        </div>
+        <button style="align-self: flex-start; height: 38px; padding: 0 12px; border-radius: 12px; border: 2px dashed #C9B48A; background: transparent; color: #5C3D00; font-size: 13px; font-weight: 800; cursor: pointer">+ Thêm đáp án</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <div style="display: flex; align-items: center; gap: 12px; background: #FBF6EC; border-radius: 16px; padding: 12px">
+          <div style="width: 60px; height: 60px; border-radius: 12px; background: #FDEBD3; flex: none"></div>
+          <div style="flex: 1; min-width: 0"><div style="font-size: 14px; font-weight: 900">Hình minh họa</div><div style="font-size: 12px; font-weight: 700; color: #4A5568">three red apples</div></div>
+          <button style="height: 38px; padding: 0 12px; border-radius: 12px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 13px; font-weight: 800; cursor: pointer">Đổi</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #FBF6EC; border-radius: 16px; padding: 12px">
+          <button aria-label="Nghe thử giọng đọc" style="width: 48px; height: 48px; flex: none; border-radius: 50%; border: none; background: #0E7A57; color: #FFFFFF; font-size: 16px; cursor: pointer">▶</button>
+          <div style="flex: 1; min-width: 0"><div style="font-size: 14px; font-weight: 900">Giọng đọc</div><div style="font-size: 12px; font-weight: 700; color: #4A5568">"Có mấy quả táo?" · giọng nữ</div></div>
+          <button style="height: 38px; padding: 0 12px; border-radius: 12px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 13px; font-weight: 800; cursor: pointer">Sửa</button>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #4A5568">
+        <span style="background: #FBF6EC; border-radius: 10px; padding: 6px 10px; font-weight: 800; color: #1B2333">30 giây · 10 điểm</span> theo mặc định của game
+        <button style="height: 32px; padding: 0 10px; border-radius: 10px; border: 2px solid #E7DCC5; background: #FFFFFF; font-size: 12px; font-weight: 800; cursor: pointer">Đặt riêng</button>
+      </div>
+    </section>
+    <div style="width: 440px; flex: none; display: flex; flex-direction: column; gap: 12px">
+      <section style="background: #FFFFFF; border-radius: 26px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 12px 30px rgba(80,55,10,0.08)">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <h2 style="margin: 0; font-size: 19px; font-weight: 800">Bé sẽ thấy</h2>
+          <div style="display: flex; background: #FBF6EC; border-radius: 12px; padding: 3px">
+            <button style="height: 32px; padding: 0 10px; border-radius: 10px; border: none; background: #FFFFFF; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 2px 6px rgba(80,55,10,0.1)">Tivi</button>
+            <button style="height: 32px; padding: 0 10px; border-radius: 10px; border: none; background: transparent; font-size: 12px; font-weight: 700; cursor: pointer">Máy tính bảng</button>
+            <button style="height: 32px; padding: 0 10px; border-radius: 10px; border: none; background: transparent; font-size: 12px; font-weight: 700; cursor: pointer">Điện thoại</button>
+          </div>
+        </div>
+        <div style="height: 236px; box-sizing: border-box; border-radius: 18px; background: #FFF4DC; border: 3px dashed #6B7FA8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; color: #3A4A6B; padding: 12px">
+          <strong style="font-size: 16px">Khung Bé + renderer QUIZ thật</strong>
+          <span style="font-size: 13px; font-weight: 700">Bấm vào chữ trong khung để sửa trực tiếp</span>
+        </div>
+      </section>
+      <section style="background: #FFFFFF; border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 12px 30px rgba(80,55,10,0.08)">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 800">Sẵn sàng xuất bản?</h2>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; color: #14532D"><span style="width: 24px; height: 24px; border-radius: 50%; background: #DCF3E6; display: flex; align-items: center; justify-content: center">✓</span>Câu 1, 2 hợp lệ</div>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; color: #8A4B00"><span style="width: 24px; height: 24px; border-radius: 50%; background: #FFE8C2; display: flex; align-items: center; justify-content: center">!</span>Câu 3: hai đáp án trùng nhau</div>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #4A5568"><span style="width: 24px; height: 24px; border-radius: 50%; background: #F1E8D6; display: flex; align-items: center; justify-content: center">i</span>Câu 2 chưa có giọng đọc (không bắt buộc)</div>
+      </section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const qs = [
+      { n: 1, t: 'Có mấy quả táo?', note: 'Đủ hình và giọng đọc', state: 'active' },
+      { n: 2, t: 'Có mấy bông hoa?', note: 'Thiếu giọng đọc', state: 'ok' },
+      { n: 3, t: 'Số nào sau số 8?', note: '1 lỗi cần sửa', state: 'err' }
+    ].map((q) => ({
+      ...q,
+      card: 'display: flex; align-items: center; gap: 12px; border-radius: 18px; padding: 12px; cursor: grab; ' + (q.state === 'active' ? 'background: #FFFFFF; box-shadow: 0 8px 20px rgba(80,55,10,0.1); outline: 3px solid #0E7A57' : 'background: #FFFFFF; box-shadow: 0 4px 12px rgba(80,55,10,0.06)'),
+      num: 'flex: none; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: Baloo 2, sans-serif; font-size: 18px; font-weight: 800; ' + (q.state === 'active' ? 'background: #0E7A57; color: #FFFFFF' : q.state === 'err' ? 'background: #FFE8C2; color: #8A4B00' : 'background: #F1E8D6; color: #5C3D00'),
+      noteStyle: 'display: block; font-size: 12px; font-weight: 800; color: ' + (q.state === 'err' ? '#8A4B00' : '#4A5568')
+    }));
+    const opts = [['A','2',false],['B','3',true],['C','4',false]].map((o) => ({
+      k: o[0], t: o[1], label: 'Đáp án ' + o[0] + (o[2] ? ', đúng' : ''),
+      style: 'height: 92px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; ' + (o[2] ? 'border: 3px solid #0E7A57; background: #E3F3EC; color: #0A5A3C' : 'border: 2px solid #E7DCC5; background: #FFFFFF; color: #1B2333'),
+      tag: 'font-size: 12px; font-weight: 900; ' + (o[2] ? 'color: #0A5A3C' : 'color: #6B5A30')
+    }));
+    return { qs, opts };
+  }
+}
+</script>
+</body>
+</html>

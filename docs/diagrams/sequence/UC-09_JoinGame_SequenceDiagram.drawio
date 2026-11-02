@@ -1,0 +1,551 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="uc09seq" name="UC-09 Sequence Diagram">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1820" pageHeight="2808" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="frame4b" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;width=60;height=30;fontSize=15;" value="alt" vertex="1">
+          <mxGeometry height="340" width="1720" x="40" y="2162" as="geometry" />
+        </mxCell>
+        <mxCell id="frameLoop" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;width=60;height=30;fontSize=15;" value="loop" vertex="1">
+          <mxGeometry height="1020" width="1760" x="20" y="1492" as="geometry" />
+        </mxCell>
+        <mxCell id="frameRecon" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;width=60;height=30;fontSize=15;" value="alt" vertex="1">
+          <mxGeometry height="234" width="1680" x="60" y="2258" as="geometry" />
+        </mxCell>
+        <mxCell id="frame4a" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;width=60;height=30;fontSize=15;" value="alt" vertex="1">
+          <mxGeometry height="188" width="1720" x="40" y="1938" as="geometry" />
+        </mxCell>
+        <mxCell id="frame2" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;width=60;height=30;fontSize=15;" value="alt" vertex="1">
+          <mxGeometry height="1064" width="1760" x="20" y="392" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;labelBackgroundColor=#FFFFFF;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=15;fontStyle=1;" value="Student" vertex="1">
+          <mxGeometry height="60" width="60" x="80" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;" value="ArenaJoinPage" vertex="1">
+          <mxGeometry height="60" width="200" x="270" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;" value="ArenaController" vertex="1">
+          <mxGeometry height="60" width="200" x="530" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;" value="ArenaSessionService" vertex="1">
+          <mxGeometry height="60" width="200" x="790" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=15;fontStyle=1;" value="ArenaSessionRepository" vertex="1">
+          <mxGeometry height="60" width="200" x="1050" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=15;fontStyle=1;" value="PostgreSQL" vertex="1">
+          <mxGeometry height="70" width="120" x="1350" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;" value="TeacherDashboard&lt;br&gt;(live monitoring, via WebSocket)" vertex="1">
+          <mxGeometry height="60" width="200" x="1570" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l1" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="100" as="sourcePoint" />
+            <mxPoint x="110" y="2808" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l2" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="370" y="100" as="sourcePoint" />
+            <mxPoint x="370" y="2808" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l3" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="100" as="sourcePoint" />
+            <mxPoint x="630" y="2808" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l4" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="100" as="sourcePoint" />
+            <mxPoint x="890" y="2808" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l5" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="100" as="sourcePoint" />
+            <mxPoint x="1150" y="2808" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l6" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1410" y="105" as="sourcePoint" />
+            <mxPoint x="1410" y="2808" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l7" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1670" y="100" as="sourcePoint" />
+            <mxPoint x="1670" y="2808" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m0" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Scan QR code / enter room code, input display name, click &quot;Join&quot;">
+          <mxGeometry relative="1" y="20" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="110" y="160" as="sourcePoint" />
+            <mxPoint x="370" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="joinRoom(roomCode, displayName)">
+          <mxGeometry relative="1" y="16" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="370" y="200" as="sourcePoint" />
+            <mxPoint x="630" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="joinRoom(roomCode, displayName)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="212" as="sourcePoint" />
+            <mxPoint x="890" y="212" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="findRoomByCode(roomCode)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="248" as="sourcePoint" />
+            <mxPoint x="1150" y="248" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qNew1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="selectRoomByCode(roomCode)">
+          <mxGeometry relative="1" y="14" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="310" as="sourcePoint" />
+            <mxPoint x="1410" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qNew2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="row (or no row)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1410" y="340" as="sourcePoint" />
+            <mxPoint x="1150" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ga" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[2c. room not found]" vertex="1">
+          <mxGeometry height="20" width="400" x="80" y="398" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="null">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="436" as="sourcePoint" />
+            <mxPoint x="890" y="436" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="RoomNotFoundException">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="472" as="sourcePoint" />
+            <mxPoint x="630" y="472" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="404 Not Found">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="508" as="sourcePoint" />
+            <mxPoint x="370" y="508" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a4" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Show &quot;Room not found, please check the information again.&quot;">
+          <mxGeometry relative="1" x="0.0426" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="530" />
+              <mxPoint x="440" y="530" />
+              <mxPoint x="440" y="564" />
+            </Array>
+            <mxPoint x="370" y="544" as="sourcePoint" />
+            <mxPoint x="370" y="564" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="div_a" edge="1" parent="1" source="frame2" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0.002;exitY=0.184;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.999;entryY=0.186;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=15;" target="frame2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="590" as="sourcePoint" />
+            <mxPoint x="1760" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gb" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[2d. play session has already ended]" vertex="1">
+          <mxGeometry height="20" width="450" x="40" y="602" as="geometry" />
+        </mxCell>
+        <mxCell id="b1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="room (status = ENDED)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="632" as="sourcePoint" />
+            <mxPoint x="890" y="632" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="SessionEndedException">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="668" as="sourcePoint" />
+            <mxPoint x="630" y="668" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="410 Gone">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="704" as="sourcePoint" />
+            <mxPoint x="370" y="704" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b4" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Show &quot;This room is no longer accepting participants.&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="730" />
+              <mxPoint x="440" y="730" />
+              <mxPoint x="440" y="760" />
+            </Array>
+            <mxPoint x="370" y="740" as="sourcePoint" />
+            <mxPoint x="370" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="div_b" edge="1" parent="1" source="frame2" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0.002;exitY=0.37;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.999;entryY=0.37;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=15;" target="frame2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="786" as="sourcePoint" />
+            <mxPoint x="1760" y="786" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gc" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[2a. room exists but has not started yet]" vertex="1">
+          <mxGeometry height="20" width="450" x="40" y="798" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="room (status = WAITING)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="818" as="sourcePoint" />
+            <mxPoint x="890" y="818" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="addParticipant(roomCode, displayName)">
+          <mxGeometry relative="1" y="14" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="890" y="864" as="sourcePoint" />
+            <mxPoint x="1150" y="864" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="insertParticipant(participant)">
+          <mxGeometry relative="1" y="20" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="910" as="sourcePoint" />
+            <mxPoint x="1410" y="910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="joinedWaiting">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="936" as="sourcePoint" />
+            <mxPoint x="630" y="936" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="200 OK (waiting)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="972" as="sourcePoint" />
+            <mxPoint x="370" y="972" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c6" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Show waiting screen, &quot;You have successfully joined.&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="1000" />
+              <mxPoint x="440" y="1000" />
+              <mxPoint x="440" y="1028" />
+            </Array>
+            <mxPoint x="370" y="1008" as="sourcePoint" />
+            <mxPoint x="370" y="1028" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c7" edge="1" parent="1" style="endArrow=open;html=1;rounded=0;endFill=0;fontSize=15;labelBackgroundColor=#FFFFFF;" value="broadcast participantJoined(displayName) [WebSocket]">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="1044" as="sourcePoint" />
+            <mxPoint x="1670" y="1044" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c8" edge="1" parent="1" style="endArrow=open;html=1;rounded=0;endFill=0;fontSize=15;labelBackgroundColor=#FFFFFF;" value="broadcast gameStarted(firstContent) [WebSocket, when Teacher starts the game]">
+          <mxGeometry relative="1" y="-20" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="630" y="1080" as="sourcePoint" />
+            <mxPoint x="370" y="1080" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c9" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Display first content; continue at Main Flow step 3">
+          <mxGeometry relative="1" x="0.0625" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="1100" />
+              <mxPoint x="440" y="1100" />
+              <mxPoint x="440" y="1136" />
+            </Array>
+            <mxPoint x="370" y="1116" as="sourcePoint" />
+            <mxPoint x="370" y="1136" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="div_c" edge="1" parent="1" source="frame2" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0.001;exitY=0.723;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.725;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=15;" target="frame2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="1162" as="sourcePoint" />
+            <mxPoint x="1760" y="1162" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gd" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[2b. room exists and is already in progress]" vertex="1">
+          <mxGeometry height="20" width="450" x="40" y="1174" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="room (status = IN_PROGRESS)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="1204" as="sourcePoint" />
+            <mxPoint x="890" y="1204" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="addParticipant(roomCode, displayName, progress = NEW)">
+          <mxGeometry relative="1" y="20" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="890" y="1250" as="sourcePoint" />
+            <mxPoint x="1150" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="insertParticipant(participant)">
+          <mxGeometry relative="1" y="16" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="1290" as="sourcePoint" />
+            <mxPoint x="1410" y="1290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="joinedInProgress(firstContent)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="1312" as="sourcePoint" />
+            <mxPoint x="630" y="1312" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="200 OK (firstContent)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="1348" as="sourcePoint" />
+            <mxPoint x="370" y="1348" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d6" edge="1" parent="1" style="endArrow=open;html=1;rounded=0;endFill=0;fontSize=15;labelBackgroundColor=#FFFFFF;" value="broadcast participantStatusChanged(displayName, &quot;Playing&quot;) [WebSocket]">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="1384" as="sourcePoint" />
+            <mxPoint x="1670" y="1384" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d7" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Display first content">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="1410" />
+              <mxPoint x="440" y="1410" />
+              <mxPoint x="440" y="1440" />
+            </Array>
+            <mxPoint x="370" y="1420" as="sourcePoint" />
+            <mxPoint x="370" y="1440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gLoop" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[while content not yet completed]" vertex="1">
+          <mxGeometry height="20" width="450" x="80" y="1502" as="geometry" />
+        </mxCell>
+        <mxCell id="L1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Answer / perform the game&#39;s requirement">
+          <mxGeometry relative="1" y="22" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="110" y="1550" as="sourcePoint" />
+            <mxPoint x="370" y="1550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="submitAnswer(roomCode, itemId, answer)">
+          <mxGeometry relative="1" y="18" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="370" y="1590" as="sourcePoint" />
+            <mxPoint x="630" y="1590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="recordAnswer(roomCode, participantId, itemId, answer)">
+          <mxGeometry relative="1" y="14" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="630" y="1620" as="sourcePoint" />
+            <mxPoint x="890" y="1620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L4" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Evaluate answer, update progress and score">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="890" y="1640" />
+              <mxPoint x="960" y="1640" />
+              <mxPoint x="960" y="1670" />
+            </Array>
+            <mxPoint x="890" y="1650" as="sourcePoint" />
+            <mxPoint x="890" y="1670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="updateProgress(participantId, progress, score)">
+          <mxGeometry relative="1" y="16" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="890" y="1700" as="sourcePoint" />
+            <mxPoint x="1150" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="updateParticipantProgressById(participantId, progress, score)">
+          <mxGeometry relative="1" y="22" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="1740" as="sourcePoint" />
+            <mxPoint x="1410" y="1740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="feedback">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="1758" as="sourcePoint" />
+            <mxPoint x="630" y="1758" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="200 OK (feedback)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="1794" as="sourcePoint" />
+            <mxPoint x="370" y="1794" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L9" edge="1" parent="1" style="endArrow=open;html=1;rounded=0;endFill=0;fontSize=15;labelBackgroundColor=#FFFFFF;" value="broadcast participantProgress(displayName, progress, score) [WebSocket]">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="1830" as="sourcePoint" />
+            <mxPoint x="1670" y="1830" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L10" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Display feedback, show next content">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="1860" />
+              <mxPoint x="440" y="1860" />
+              <mxPoint x="440" y="1886" />
+            </Array>
+            <mxPoint x="370" y="1866" as="sourcePoint" />
+            <mxPoint x="370" y="1886" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g4a" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[4a. teacher pauses the game]" vertex="1">
+          <mxGeometry height="20" width="400" x="105" y="1944" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" style="endArrow=open;html=1;rounded=0;endFill=0;fontSize=15;labelBackgroundColor=#FFFFFF;" value="broadcast gamePaused [WebSocket]">
+          <mxGeometry relative="1" y="-22" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="630" y="1982" as="sourcePoint" />
+            <mxPoint x="370" y="1982" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Show &quot;The game is paused, please try again later.&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="2010" />
+              <mxPoint x="440" y="2010" />
+              <mxPoint x="440" y="2038" />
+            </Array>
+            <mxPoint x="370" y="2018" as="sourcePoint" />
+            <mxPoint x="370" y="2038" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" style="endArrow=open;html=1;rounded=0;endFill=0;fontSize=15;labelBackgroundColor=#FFFFFF;" value="broadcast gameResumed(currentContent) [WebSocket]">
+          <mxGeometry relative="1" y="-14" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="630" y="2070" as="sourcePoint" />
+            <mxPoint x="370" y="2070" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Resume from the content Actor was on">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="440" y="2090" />
+              <mxPoint x="440" y="2110" />
+            </Array>
+            <mxPoint x="370" y="2090" as="sourcePoint" />
+            <mxPoint x="370" y="2110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g4b" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[4b. connection is interrupted during play]" vertex="1">
+          <mxGeometry height="20" width="450" x="105" y="2168" as="geometry" />
+        </mxCell>
+        <mxCell id="f1" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="show &quot;The connection has been interrupted.&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="2200" />
+              <mxPoint x="440" y="2200" />
+              <mxPoint x="440" y="2226" />
+            </Array>
+            <mxPoint x="370" y="2206" as="sourcePoint" />
+            <mxPoint x="370" y="2226" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gRecon1" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[reconnects while the play session is still active]" vertex="1">
+          <mxGeometry height="20" width="450" x="130" y="2264" as="geometry" />
+        </mxCell>
+        <mxCell id="g1" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Resume from current state">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="2290" />
+              <mxPoint x="440" y="2290" />
+              <mxPoint x="440" y="2322" />
+            </Array>
+            <mxPoint x="370" y="2302" as="sourcePoint" />
+            <mxPoint x="370" y="2322" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="divRecon" edge="1" parent="1" source="frameRecon" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0.001;exitY=0.377;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.999;entryY=0.386;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=15;" target="frameRecon">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="80" y="2350" as="sourcePoint" />
+            <mxPoint x="1720" y="2348" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gRecon2" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[4c. cannot reconnect and the teacher has ended the session]" vertex="1">
+          <mxGeometry height="20" width="500" x="80" y="2360" as="geometry" />
+        </mxCell>
+        <mxCell id="g2a_new" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="markSessionEnded(participantId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="2390" as="sourcePoint" />
+            <mxPoint x="1150" y="2390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g2b_new" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="updateParticipantStatusById(participantId, ENDED)">
+          <mxGeometry relative="1" y="16" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="2450" as="sourcePoint" />
+            <mxPoint x="1410" y="2450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="markCompleted(participantId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="2562" as="sourcePoint" />
+            <mxPoint x="1150" y="2562" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="updateParticipantStatusById(participantId, COMPLETED)">
+          <mxGeometry relative="1" y="18" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="2610" as="sourcePoint" />
+            <mxPoint x="1410" y="2610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="finalResult">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="2634" as="sourcePoint" />
+            <mxPoint x="630" y="2634" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="200 OK (finalResult)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="2670" as="sourcePoint" />
+            <mxPoint x="370" y="2670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8" edge="1" parent="1" style="endArrow=open;html=1;rounded=0;endFill=0;fontSize=15;labelBackgroundColor=#FFFFFF;" value="broadcast participantCompleted(displayName) [WebSocket]">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="2706" as="sourcePoint" />
+            <mxPoint x="1670" y="2706" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Display final result for this play session">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="370" y="2730" />
+              <mxPoint x="440" y="2730" />
+              <mxPoint x="440" y="2762" />
+            </Array>
+            <mxPoint x="370" y="2742" as="sourcePoint" />
+            <mxPoint x="370" y="2762" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

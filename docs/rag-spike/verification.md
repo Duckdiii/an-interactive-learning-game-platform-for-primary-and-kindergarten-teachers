@@ -211,3 +211,6 @@ Budget and evidence integrity:
 ## Prepared branch backend regression — 2026-11-02
 
 Ran the full backend Maven suite on the staged Curriculum RAG code after fixing the stale prompt fixture, requiring the semantic reviewer to check full teacher-request alignment and answer uniqueness, and explicitly rejecting uncurated Kindergarten English requests. Live Gemini acceptance flags were disabled. `mvn -f backend/pom.xml test` exited 0: 674 tests, 0 failures, 0 errors, 8 skipped. The fresh JaCoCo line report is 87.39% (2648/3030); all configured coverage checks passed. The focused regression run was 81 tests, 0 failures/errors, 0 skipped. This verifies local behavior; it is not a new live generation or an independent expert benchmark.
+## Latest-main integration regression — 2026-11-02
+
+After merging `origin/main` at `e59acbb6e2425680808ef89ea87b4c6255f61284`, reran the full backend suite with live Gemini tests disabled. `mvn -f backend/pom.xml test` exited 0: 676 tests, 0 failures, 0 errors, 8 skipped. Fresh JaCoCo line coverage: 87.25% (2608/2989); configured coverage checks passed. The merge imports unrelated main-branch work as an ancestor; no UI/controller work was authored as part of this RAG change.

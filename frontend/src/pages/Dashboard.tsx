@@ -1,241 +1,336 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import { getGames } from '../api/gamesApi'
-import LoadingSpinner from '../components/LoadingSpinner'
-import PageHeader from '../components/ui/PageHeader'
+import { useMemo, useState } from 'react'
+import type { FormEvent, ReactNode } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import Button from '../components/Button'
+import ButtonLink from '../components/ButtonLink'
+import Card from '../components/ui/Card'
+import ErrorNotice from '../components/ui/ErrorNotice'
+import LetterTiles from '../components/ui/LetterTiles'
+import MockBadge from '../components/ui/MockBadge'
+import { subjectTheme } from '../components/ui/subjectTheme'
+import { MIXED_TILES } from '../components/ui/tileSets'
+import { gameTypeLabel, gradeLevelLabel, subjectLabel } from '../constants/labels'
+import { viText } from '../constants/viText'
+import { sortByUpdatedDesc, useGames } from '../hooks/useGames'
+import { useAuth } from '../hooks/useAuth'
+import { useLiveSessions, useReviewNeeded } from '../hooks/useHomeData'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { ROUTES } from '../routes/paths'
-import type { GameFilters, GameSummary } from '../types/game-summary.types'
+import type { LiveSession, ReviewNeeded } from '../services/home'
+import type { GameSummary } from '../types/game-summary.types'
+import { parseApiError } from '../utils/apiError'
+import { IDEA_MAX_LENGTH } from '../utils/generateRequest'
+import { resultsLink } from '../utils/insights'
+import { suggestTopics, topicToCreateLink } from '../utils/topicSuggestions'
 
-const initialFilters: GameFilters = {
-  subject: '',
-  gradeLevel: '',
-  status: '',
-}
+// Số bản nháp tối đa hiện ở mục "Soạn dở": đủ để chọn nhanh, không biến Trang chủ thành danh sách dài.
+const RECENT_DRAFTS = 3
+
+const createLink = (idea: string) => `${ROUTES.createGame}?${new URLSearchParams({ idea }).toString()}`
 
 export default function Dashboard() {
-  const [filters, setFilters] = useState(initialFilters)
+  usePageTitle(viText.home.kicker)
+  const { user } = useAuth()
+  const gamesQuery = useGames()
 
-  const gamesQuery = useQuery({
-    queryKey: ['games', filters],
-    queryFn: () => getGames(filters),
-  })
-
-  const games = gamesQuery.data ?? []
-  const subjectOptions = mergeOptions(
-    filters.subject ? [filters.subject] : [],
-    games.map((game) => game.subject),
-  )
-  const gradeOptions = mergeOptions(
-    filters.gradeLevel ? [filters.gradeLevel] : [],
-    games.map((game) => game.gradeLevel),
-  )
-  const statusOptions = mergeOptions(
-    ['DRAFT', 'PUBLISHED', ...(filters.status ? [filters.status] : [])],
-    games.map((game) => game.status),
-  )
-
-  const updateFilter = (field: keyof GameFilters, value: string) => {
-    setFilters((current) => ({ ...current, [field]: value }))
-  }
+  const topics = useMemo(() => suggestTopics(sortByUpdatedDesc(gamesQuery.data ?? [])), [gamesQuery.data])
+  const drafts = sortByUpdatedDesc(gamesQuery.data ?? [])
+    .filter((game) => game.status === 'DRAFT')
+    .slice(0, RECENT_DRAFTS)
+  const firstName = user?.fullName?.trim().split(/\s+/).pop()
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Teacher Console"
-        title="Trò chơi của bạn"
-        description="Quản lý bản nháp, theo dõi trò chơi đã xuất bản và tiếp tục công việc đang dang dở."
-        actions={
+      <Hero firstName={firstName} topics={topics} />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <LiveSessionsSection />
+        <ReviewSection />
+      </div>
+
+      <section aria-labelledby="drafts-title" className="space-y-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 id="drafts-title" className="font-display text-2xl font-extrabold">
+            {viText.home.draftsTitle}
+          </h2>
           <Link
-            to={ROUTES.createGame}
-            className="inline-flex min-h-11 items-center rounded-md bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
+            to={ROUTES.workspace}
+            className="inline-flex min-h-11 items-center font-bold text-brand-strong underline underline-offset-4"
           >
-            + Tạo game mới
+            {viText.home.seeAll}
           </Link>
-        }
-      />
+        </div>
 
-      <section
-        aria-label="Bộ lọc trò chơi"
-        className="grid gap-3 border-b border-slate-200 pb-6 sm:grid-cols-3"
-      >
-        <FilterSelect
-          label="Môn học"
-          value={filters.subject}
-          options={subjectOptions}
-          onChange={(value) => updateFilter('subject', value)}
-        />
-        <FilterSelect
-          label="Khối lớp"
-          value={filters.gradeLevel}
-          options={gradeOptions}
-          onChange={(value) => updateFilter('gradeLevel', value)}
-        />
-        <FilterSelect
-          label="Trạng thái"
-          value={filters.status}
-          options={statusOptions}
-          onChange={(value) => updateFilter('status', value)}
-        />
-      </section>
+        {gamesQuery.isPending ? <HomeSkeleton /> : null}
 
-      {gamesQuery.isPending ? <DashboardLoading /> : null}
+        {gamesQuery.isError ? (
+          <ErrorNotice
+            title={viText.home.errorTitle}
+            message={parseApiError(gamesQuery.error, viText.home.errorFallback).message}
+            action={
+              <Button variant="secondary" onClick={() => gamesQuery.refetch()}>
+                {viText.home.retry}
+              </Button>
+            }
+          />
+        ) : null}
 
-      {gamesQuery.isError ? (
-        <section className="rounded-lg border border-rose-200 bg-white p-6 text-center">
-          <h3 className="font-semibold text-slate-950">
-            Không thể tải danh sách trò chơi
-          </h3>
-          <p className="mt-2 text-sm text-slate-600">
-            Vui lòng kiểm tra kết nối hoặc thử lại sau.
+        {gamesQuery.data && drafts.length === 0 ? (
+          <p className="rounded-card border-2 border-dashed border-line bg-surface p-5 text-base text-ink-soft">
+            {viText.home.draftsEmpty}
           </p>
-          <button
-            type="button"
-            onClick={() => gamesQuery.refetch()}
-            className="mt-4 min-h-10 rounded-md border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:text-slate-950"
-          >
-            Thử lại
-          </button>
-        </section>
-      ) : null}
+        ) : null}
 
-      {gamesQuery.isSuccess && games.length === 0 ? <EmptyState /> : null}
-
-      {gamesQuery.isSuccess && games.length > 0 ? (
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {games.map((game) => (
-            <GameCard key={game.id} game={game} />
-          ))}
-        </section>
-      ) : null}
+        {drafts.length > 0 ? (
+          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {drafts.map((game) => (
+              <DraftItem key={game.gameId} game={game} />
+            ))}
+          </ul>
+        ) : null}
+      </section>
     </div>
   )
 }
 
-function FilterSelect({
-  label,
-  value,
-  options,
-  onChange,
+function Hero({
+  firstName,
+  topics,
 }: {
-  label: string
-  value: string
-  options: string[]
-  onChange: (value: string) => void
+  firstName: string | undefined
+  topics: ReturnType<typeof suggestTopics>
 }) {
+  const navigate = useNavigate()
+  const [idea, setIdea] = useState('')
+
+  // Ô trống vẫn sang trang tạo (không chặn): ở đó cô có thể chọn gợi ý hoặc tạo ngẫu nhiên.
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault()
+    const text = idea.trim()
+    navigate(text ? createLink(text) : ROUTES.createGame)
+  }
+
   return (
-    <label className="block">
-      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-        {label}
-      </span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-      >
-        <option value="">Tất cả</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {formatLabel(option)}
-          </option>
+    <section
+      aria-labelledby="home-title"
+      className="relative overflow-hidden rounded-card-lg bg-brand-strong p-6 text-white shadow-card sm:p-8"
+    >
+      <LetterTiles
+        tiles={MIXED_TILES}
+        size="md"
+        className="pointer-events-none absolute right-8 top-6 hidden lg:flex"
+      />
+      <h1 id="home-title" className="font-display text-3xl font-extrabold leading-tight sm:text-4xl lg:pr-72">
+        {viText.home.greeting}
+        {firstName ? ` ${firstName}` : ''}, {viText.home.greetingQuestion}
+      </h1>
+      <p className="mb-5 mt-2 text-base font-semibold text-white/85 sm:text-lg">{viText.home.subtitle}</p>
+
+      <form onSubmit={handleSubmit} className="flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-stretch">
+        <label className="flex-1">
+          <span className="sr-only">{viText.home.ideaLabel}</span>
+          <textarea
+            value={idea}
+            onChange={(event) => setIdea(event.target.value)}
+            maxLength={IDEA_MAX_LENGTH}
+            rows={2}
+            placeholder={viText.home.ideaPlaceholder}
+            className="min-h-14 w-full resize-none rounded-2xl bg-surface px-4 py-3 text-base font-semibold text-ink placeholder:text-ink-soft"
+          />
+        </label>
+        <Button type="submit" variant="accent" size="lg" className="sm:self-start">
+          {viText.home.createAction}
+        </Button>
+      </form>
+
+      <ul aria-label={viText.home.topicsLabel} className="mt-4 flex flex-wrap gap-2">
+        {topics.map((topic) => (
+          <li key={topic.id}>
+            <Link
+              to={topicToCreateLink(ROUTES.createGame, topic)}
+              className="inline-flex min-h-11 items-center rounded-full bg-white/15 px-4 text-sm font-extrabold transition hover:bg-white/25"
+            >
+              {subjectLabel(topic.subject)} · {gradeLevelLabel(topic.gradeLevel)} · {topic.title}
+            </Link>
+          </li>
         ))}
-      </select>
-    </label>
+        <li>
+          <Link
+            to={`${ROUTES.createGame}?random=1`}
+            className="inline-flex min-h-11 items-center rounded-full border-2 border-white/50 px-4 text-sm font-extrabold transition hover:bg-white/15"
+          >
+            {viText.home.createRandom}
+          </Link>
+        </li>
+      </ul>
+    </section>
   )
 }
 
-function DashboardLoading() {
+function SectionCard({
+  id,
+  title,
+  isSample,
+  children,
+}: {
+  id: string
+  title: string
+  isSample?: boolean
+  children: ReactNode
+}) {
   return (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {[1, 2, 3].map((item) => (
-        <div
-          key={item}
-          className="min-h-72 rounded-lg border border-slate-200 bg-white p-5"
-        >
-          <div className="grid min-h-48 place-items-center rounded-md bg-slate-100">
-            <LoadingSpinner label="Đang tải trò chơi" />
+    <Card as="section" aria-labelledby={id} className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 id={id} className="font-display text-2xl font-extrabold">
+          {title}
+        </h2>
+        {isSample ? <MockBadge /> : null}
+      </div>
+      {children}
+    </Card>
+  )
+}
+
+function SectionPending() {
+  return <div aria-hidden="true" className="h-16 animate-pulse rounded-2xl bg-ink/5 motion-reduce:animate-none" />
+}
+
+function SectionError() {
+  return <ErrorNotice message={viText.home.sectionError} />
+}
+
+function liveDetail(session: LiveSession) {
+  const parts = [viText.home.liveStatus[session.status], `${session.participantCount} ${viText.home.liveKids}`]
+  if (session.currentQuestionIndex !== null) {
+    const current = session.currentQuestionIndex + 1
+    const total = session.questionCount
+    parts.push(`${viText.home.liveQuestion} ${total ? `${current}/${total}` : current}`)
+  }
+
+  return parts.join(' · ')
+}
+
+function LiveSessionsSection() {
+  const query = useLiveSessions()
+  const sessions = query.data?.items ?? []
+
+  return (
+    <SectionCard id="live-title" title={viText.home.liveTitle} isSample={query.data?.isSample}>
+      {query.isPending ? <SectionPending /> : null}
+      {query.isError ? <SectionError /> : null}
+      {sessions.map((session) => (
+        <div key={session.sessionId} className="flex flex-wrap items-center gap-3 rounded-2xl bg-sun-soft p-3">
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-lg font-extrabold">{session.gameTitle}</p>
+            <p className="text-sm font-bold text-warn-ink">{liveDetail(session)}</p>
+          </div>
+          {/* Chưa có màn phòng (P4/P5): nút khóa kèm chú thích thay vì dẫn tới trang chưa tồn tại. */}
+          <div className="flex flex-col items-center gap-1">
+            <Button disabled aria-label={`${viText.home.liveEnter}: ${session.gameTitle}`} aria-describedby={`live-soon-${session.sessionId}`}>
+              {viText.home.liveEnter}
+            </Button>
+            <span id={`live-soon-${session.sessionId}`} className="text-xs font-semibold text-ink-soft">
+              {viText.home.liveSoon}
+            </span>
           </div>
         </div>
       ))}
-    </section>
+      {query.data && sessions.length === 0 ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-dashed border-line p-3">
+          <p className="flex-1 text-base font-bold text-ink-soft">{viText.home.liveEmpty}</p>
+          <ButtonLink to={ROUTES.workspace} variant="secondary">
+            {viText.home.liveShowGame}
+          </ButtonLink>
+        </div>
+      ) : null}
+    </SectionCard>
   )
 }
 
-function EmptyState() {
+function ReviewItem({ item }: { item: ReviewNeeded }) {
+  const wrong = item.commonWrong?.label
+
   return (
-    <section className="grid min-h-80 place-items-center rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center">
-      <div>
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-lg bg-emerald-100 text-2xl font-semibold text-emerald-800">
-          +
-        </div>
-        <h3 className="mt-5 text-lg font-semibold">Chưa có trò chơi nào</h3>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
-          Tạo trò chơi học tập đầu tiên để bắt đầu xây dựng thư viện nội dung
-          cho lớp học.
+    <li className="flex flex-wrap items-center gap-3 rounded-2xl bg-warn-soft p-3 text-warn-ink">
+      <div className="min-w-0 flex-1">
+        <p className="font-extrabold">{viText.home.reviewQuestion(item.questionText, item.gameTitle)}</p>
+        <p className="text-sm font-bold">
+          {viText.home.reviewRate(Math.round(item.correctRate * 100))}
+          {wrong ? ` · ${viText.home.reviewCommonWrong(wrong)}` : ''}
         </p>
-        <Link
-          to={ROUTES.createGame}
-          className="mt-5 inline-flex min-h-11 items-center rounded-md bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-        >
-          + Tạo game mới
-        </Link>
       </div>
-    </section>
+      {/* Chỉ đưa tên game của giáo viên vào `idea`, không đưa câu trả lời của học sinh (xem API-CONTRACT 2.8). */}
+      <ButtonLink to={createLink(`${viText.home.reviewIdeaPrefix}${item.gameTitle}`)} variant="accent">
+        {viText.home.reviewCreate}
+      </ButtonLink>
+      <Link
+        to={resultsLink(item.gameId)}
+        aria-label={`${viText.home.reviewSeeResults}: ${item.gameTitle}`}
+        className="inline-flex min-h-11 items-center font-bold underline underline-offset-4"
+      >
+        {viText.home.reviewSeeResults}
+      </Link>
+    </li>
   )
 }
 
-function GameCard({ game }: { game: GameSummary }) {
-  const isPublished = game.status === 'PUBLISHED'
+function ReviewSection() {
+  const query = useReviewNeeded()
+  const items = query.data?.items ?? []
 
   return (
-    <article className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-      <div className="aspect-[16/9] bg-slate-100">
-        {game.thumbnailUrl ? (
-          <img
-            src={game.thumbnailUrl}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="grid h-full place-items-center text-sm font-semibold text-slate-400">
-            Chưa có hình minh họa
-          </div>
-        )}
-      </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-              {formatLabel(game.subject)} · {formatLabel(game.gradeLevel)}
-            </p>
-            <h3 className="mt-2 text-base font-semibold text-slate-950">
-              {game.title}
-            </h3>
-          </div>
-          <span
-            className={[
-              'shrink-0 rounded px-2 py-1 text-xs font-semibold',
-              isPublished
-                ? 'bg-emerald-100 text-emerald-800'
-                : 'bg-amber-100 text-amber-800',
-            ].join(' ')}
-          >
-            {formatLabel(game.status)}
-          </span>
-        </div>
-      </div>
-    </article>
+    <SectionCard id="review-title" title={viText.home.reviewTitle} isSample={query.data?.isSample}>
+      {query.isPending ? <SectionPending /> : null}
+      {query.isError ? <SectionError /> : null}
+      {items.length > 0 ? (
+        <ul className="space-y-3">
+          {items.map((item) => (
+            <ReviewItem key={item.questionId} item={item} />
+          ))}
+        </ul>
+      ) : null}
+      {query.data && items.length === 0 ? (
+        <p className="text-base font-bold text-ink-soft">{viText.home.reviewEmpty}</p>
+      ) : null}
+      <p className="text-sm font-bold text-ink-soft">{viText.home.reviewNote}</p>
+    </SectionCard>
   )
 }
 
-function mergeOptions(current: string[], incoming: string[]) {
-  return [...new Set([...current, ...incoming.filter(Boolean)])].sort()
+function DraftItem({ game }: { game: GameSummary }) {
+  const theme = subjectTheme(game.subject)
+
+  return (
+    <li>
+      <Link
+        to={`${ROUTES.workspaceEditor}?gameId=${encodeURIComponent(game.gameId)}`}
+        className="flex items-center gap-3 rounded-card border border-line/60 bg-surface p-3 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      >
+        <span aria-hidden="true" className={`grid h-16 w-16 shrink-0 place-items-center rounded-2xl ${theme.cover}`}>
+          <span
+            className={`grid h-10 w-10 -rotate-6 place-items-center rounded-xl border-2 border-b-4 bg-surface font-display text-2xl font-extrabold ${theme.chipBorder} ${theme.mark}`}
+          >
+            {theme.tiles[0]}
+          </span>
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-display text-lg font-extrabold">{game.title}</span>
+          <span className="block truncate text-sm font-bold text-ink-soft">
+            {subjectLabel(game.subject)} · {gradeLevelLabel(game.gradeLevel)} · {gameTypeLabel(game.gameType)}
+          </span>
+        </span>
+      </Link>
+    </li>
+  )
 }
 
-function formatLabel(value: string) {
-  return value
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
+function HomeSkeleton() {
+  return (
+    <div role="status" aria-label={viText.home.loadingLabel} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[1, 2, 3].map((item) => (
+        <div key={item} className="h-20 animate-pulse rounded-card bg-ink/5 motion-reduce:animate-none" />
+      ))}
+      <span className="sr-only">{viText.home.loadingLabel}</span>
+    </div>
+  )
 }
