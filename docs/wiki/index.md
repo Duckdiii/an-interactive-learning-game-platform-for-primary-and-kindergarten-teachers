@@ -14,8 +14,6 @@ Cửa vào duy nhất của kho: cần tài liệu gì thì bắt đầu từ đ
 
 - [[Các luồng nghiệp vụ]]: 5 bước, hành trình giáo viên, học sinh, quản trị.
 - [[Ca sử dụng]]: tóm tắt 15 UC và nguyên tắc chung.
-- [[Yêu cầu chức năng]]: 15 FR theo 3 phân hệ.
-- [[Yêu cầu phi chức năng]]: 5 KPI, 5 nhóm NFR, ràng buộc.
 - [[Quy tắc nghiệp vụ]]: tra nhanh các con số, giới hạn, điểm số, xử lý sự cố.
 
 ## Định hướng
@@ -39,13 +37,6 @@ Cửa vào duy nhất của kho: cần tài liệu gì thì bắt đầu từ đ
 ## Quyết định
 
 - [[Các quyết định đã chốt]]: tóm tắt `docs/decisions.md` và việc chờ nhóm.
-- [[Quyết định về subagent]]: vì sao phiên chính viết code, subagent đọc, chạy và kiểm tra.
-- [[Quyết định về memory]]: memory cho subagent, Obsidian và wiki được chọn thế nào.
-
-## Quy trình
-
-- [[Danh sách subagent]]: 18 agent theo nhóm.
-- [[AI review trên CI]]: hệ thống review tự động trên PR.
 
 ## Tài liệu gốc
 
@@ -68,14 +59,7 @@ Khi viết code hay test, đọc ở đây, không đọc bản tóm tắt.
 | API frontend cần | [[API-CONTRACT]] |
 | Wireframe | `docs/ui/wireframes/` (không xem được trong Obsidian) |
 | Quyết định | [[decisions]] |
-| Kế hoạch và phân tích cũ | [[plan]], [[analysis]], [[progress-2026-10-16]] |
-| Thí nghiệm sinh game | [[task-1-quiz-spike-plan]], `docs/task-1-results/` |
-| Subagent | [[subagents]] |
-| AI review trên CI | [[ai-auto-review]] |
-
-## Không dùng để viết code
-
-[[json-dsl/v1.0.0/README|json-dsl/README]] và `docs/json-dsl/v1.0.0/examples/` là ví dụ cũ, khác DSL hiện hành.
+| Số đo thí nghiệm sinh game | `docs/task-1-results/` |
 
 ## Nằm ngoài vault
 
@@ -87,7 +71,7 @@ Các file này phải ở đúng chỗ để công cụ hoạt động, nên kh�
 | `README.md` | GitHub hiển thị từ gốc repo |
 | `ai-usage-log.md` | Log bắt buộc, quy ước ghi ở gốc repo |
 | `.claude/agents/`, `.claude/lessons-inbox.md` | Định nghĩa subagent và hộp bài học |
-| `.github/ai-review/` | Prompt và hướng dẫn của CI |
+| `.github/ai-review/` | Prompt, hướng dẫn và thiết kế AI review trên CI |
 | `backend/src/main/resources/schema/` | JSON Schema, code nạp khi chạy |
 | `backend/src/main/resources/moderation/blocked-words-vi.txt` | Danh sách từ cấm, code nạp khi chạy |
 | `frontend/README.md` | Hướng dẫn riêng của frontend |
@@ -95,4 +79,4 @@ Các file này phải ở đúng chỗ để công cụ hoạt động, nên kh�
 
 ## Chưa nạp vào tóm tắt
 
-Nội dung từng wireframe, các sơ đồ trong SRS ngoài 5 sơ đồ chính, mục 2–10 của AI review, chi tiết `docs/task-1-results/`. Ảnh `screenshots/` chỉ có trên `everyone/UI`. Thư mục `experiments/` chưa được git theo dõi.
+Nội dung từng wireframe, các sơ đồ trong SRS ngoài 5 sơ đồ chính, chi tiết `docs/task-1-results/`. Thư mục `experiments/` chưa được git theo dõi.

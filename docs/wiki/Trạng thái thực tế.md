@@ -1,7 +1,7 @@
 # Trạng thái thực tế
 
 Nguồn: đối chiếu code và lịch sử git trên nhánh `everyone/UI` ngày 2026-10-31, `docs/ui/PLAN.md`, `docs/openapi/openapi.yaml`.
-Cập nhật: 2026-11-01
+Cập nhật: 2026-11-02
 
 Trang này trả lời "đã làm tới đâu". Đã kiểm sự tồn tại của file, route và commit; **chưa chạy thử ứng dụng** nên chưa biết từng màn hoàn thiện đến đâu. Số phần trăm trong tài liệu định hướng không dùng được.
 
@@ -13,7 +13,7 @@ Trang này trả lời "đã làm tới đâu". Đã kiểm sự tồn tại c�
 
 | Tài liệu định hướng ghi                 | Thực tế   | Ghi chú                                                                   |
 | --------------------------------------- | --------- | ------------------------------------------------------------------------- |
-| 4/10 loại có trình chơi                 | **Đúng**  | QUIZ, ODD_ONE_OUT, MATCHING, VISUAL_CLOZE trong `player/renderers/index.ts` |
+| 6/10 loại có trình chơi                 | **Đúng**  | QUIZ, ODD_ONE_OUT, MATCHING, VISUAL_CLOZE, DRAG_DROP, WORD_SCRAMBLE trong `player/renderers/index.ts` |
 | Giao diện học sinh chưa bắt đầu         | **Đã cũ** | Có `/play/:shareCode`, `/join`, các màn chơi, nhưng dùng dữ liệu mô phỏng |
 | Teacher Portal 50%, Editor mới là khung | **Đã cũ** | Có đủ F1–F10 theo commit P3                                               |
 | Chưa có endpoint gọi sinh game          | **Đúng**  | Có service sinh game, chưa có controller                                  |
@@ -26,7 +26,7 @@ Trang này trả lời "đã làm tới đâu". Đã kiểm sự tồn tại c�
 |---|---|---|
 | P1 | Nền tảng player | Đã commit `67add76` |
 | P2.1–P2.6 | Chơi cá nhân | Đã commit `ec02b6f` |
-| P2b | Renderer còn lại | **Còn 6 loại**: AUDIO_VISUAL_MATCH, WORD_SCRAMBLE, MEMORY_CARD, ORDERING, SPOT_THE_TARGET, DRAG_DROP |
+| P2b | Renderer còn lại | **Còn 4 loại**: AUDIO_VISUAL_MATCH, MEMORY_CARD, ORDERING, SPOT_THE_TARGET |
 | P3 | Giao diện giáo viên F1–F10 | Đã commit `5655278` |
 | P4 | Trình chiếu Mầm non | Đã commit `ba88fb2` |
 | P5 | Thi đấu theo phòng | Giao diện xong, chỉ chạy mô phỏng giữa các tab cùng máy ở bản dev; phòng thật chờ Backend (API phiên, WebSocket) |
@@ -42,7 +42,7 @@ Có 178 file test trên `everyone/UI`.
 ## Việc lớn còn lại
 
 1. Backend cho game, xuất bản, phiên chơi, chấm điểm.
-2. 6 renderer còn lại, hoặc giới hạn gợi ý AI về loại đã có.
+2. 4 renderer còn lại, hoặc giới hạn gợi ý AI về loại đã có.
 3. Thi đấu theo phòng.
 4. Kho YCCĐ.
 5. Nối frontend với API thật, bỏ dữ liệu mô phỏng khỏi bản build.

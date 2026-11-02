@@ -59,7 +59,7 @@ Mỗi dòng: **quyết định**, lý do. Tất cả mục dưới đây đã đ
 ## Backlog
 
 - **FLD-13 khối giải thích / gợi ý sư phạm:** chờ DSL 1.1.0.
-- **Form sửa tay và renderer chơi thử cho 8 loại game còn lại** (giai đoạn sau, xem `docs/plan.md`).
+- **Form sửa tay và renderer chơi thử cho 8 loại game còn lại** (giai đoạn sau, xem `docs/ui/PLAN.md`).
 - **Chia đội thủ công và học sinh tự chọn đội** (cần giao diện học sinh).
 - **Cổng STOMP thật** (cần tài liệu message format từ backend).
 - **Trường thống kê theo câu** ở `SessionResults` (cần backend bổ sung).

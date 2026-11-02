@@ -1,7 +1,7 @@
 # Tổng quan đề tài
 
 Nguồn: `docs/Dinh_huong_de_tai.md` mục 0, 1, 9; `docs/SRS-full.md` chương 1, 2.
-Cập nhật: 2026-11-01
+Cập nhật: 2026-11-02
 
 ## Đề tài là gì
 
@@ -31,13 +31,13 @@ Phép thử của đề tài: gỡ AI khỏi Wordwall hay Kahoot thì nền tả
 
 ## Mục tiêu đo được
 
-Năm KPI chi tiết ở [[Yêu cầu phi chức năng]]. Ngoài ra có yêu cầu của thầy Thanh: chất lượng (độ mượt, sức hấp dẫn, đồ họa) phải hơn web tool, và AI phải xử lý được mô tả nằm ngoài khung có sẵn, xem [[Mô tả ngoài danh mục game]] và [[Trải nghiệm cho trẻ]].
+Năm KPI chi tiết ở [[KPI]]. Ngoài ra có yêu cầu của thầy Thanh: chất lượng (độ mượt, sức hấp dẫn, đồ họa) phải hơn web tool, và AI phải xử lý được mô tả nằm ngoài khung có sẵn, xem [[Mô tả ngoài danh mục game]] và [[Trải nghiệm cho trẻ]].
 
 ## Rủi ro chính
 
 | Rủi ro | Cách giảm |
 |---|---|
-| Mới 4/10 loại có trình chơi | Ưu tiên nhóm P0, nói rõ phần còn lại là mở rộng |
+| Mới 6/10 loại có trình chơi | Ưu tiên nhóm P0, nói rõ phần còn lại là mở rộng |
 | Chất lượng nội dung AI | Validation nhiều lớp, tính lại đáp án Toán bằng code, bộ mô tả mẫu kiểm hồi quy |
 | Mô tả ngoài danh mục | Phân loại A–D, phản hồi rõ |
 | Chi phí mô hình, người dùng đồng thời | Dự toán chi phí, nêu con số mục tiêu rồi kiểm tra tải |

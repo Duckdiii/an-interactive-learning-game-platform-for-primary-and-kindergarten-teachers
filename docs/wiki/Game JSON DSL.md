@@ -1,7 +1,7 @@
 # Game JSON DSL
 
 Nguồn: `docs/game-json-dsl-v1.0.0.md`, bảng nhóm trả lời lấy từ `CLAUDE.md`. `CLAUDE.md` coi đây là contract đã freeze, còn đầu file DSL ghi "chờ đóng băng" (2026-09-26); trang này chỉ giải thích khái niệm. Field và ràng buộc phải đọc từ nguồn.
-Cập nhật: 2026-10-31
+Cập nhật: 2026-11-02
 
 ## Vai trò
 
@@ -51,7 +51,6 @@ Mỗi màn một kết quả; đúng toàn bộ mới `CORRECT`. Chấm từng p
 
 - Lọc từ cấm theo ranh giới từ và đúng dấu; thiếu key OpenAI thì chỉ dùng từ cấm khi môi trường cho phép.
 - Migration V4 chuyển dữ liệu cũ (`ELEMENTARY` thành `GRADE_1`, Spot the Target cũ về bản nháp).
-- `docs/json-dsl/v1.0.0/README.md` là ví dụ cũ, khác DSL hiện hành (khối lớp, `correctPosition`, `hitRegion`). **Không dùng để viết code.**
 
 ## Việc để sau
 

@@ -1,7 +1,7 @@
 # Kiểm thử và vận hành
 
 Nguồn: `docs/SRS-full.md` mục 3.4, 3.5.
-Cập nhật: 2026-10-31
+Cập nhật: 2026-11-02
 
 ## Bốn tầng kiểm thử
 
@@ -49,4 +49,4 @@ Các mục tiêu vận hành này cần đối chiếu với gói miễn phí đ
 
 Bản đầy đủ: [[SRS-full]] mục 3.4, 3.5.
 
-Xem thêm: [[Yêu cầu phi chức năng]], [[Quy tắc nghiệp vụ]]
+Xem thêm: [[NFR]], [[Quy tắc nghiệp vụ]]

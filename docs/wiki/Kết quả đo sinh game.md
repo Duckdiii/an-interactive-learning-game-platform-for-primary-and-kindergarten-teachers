@@ -1,7 +1,7 @@
 # Kết quả đo sinh game
 
-Nguồn: `docs/task-1-quiz-spike-plan.md` (cập nhật 2026-10-04), `docs/task-1-results/`.
-Cập nhật: 2026-10-31
+Nguồn: `docs/task-1-results/`.
+Cập nhật: 2026-11-02
 
 Thí nghiệm cô lập: sinh 4 câu Quiz đếm con vật tiếng Việt cho Mầm non, không lưu DB, không qua endpoint. Giới hạn 4 câu là ràng buộc thí nghiệm. **Không đại diện cho toàn pipeline.** Đây chưa phải số đo KPI.
 
@@ -35,4 +35,4 @@ Nhận định của người viết:
 
 Lịch sử 2026-09-27 dùng đường gọi cũ, không phải bằng chứng cho v4: 9/10 thành công, 1 lỗi HTTP 503, độ trễ 5.098–8.020 ms.
 
-Xem thêm: [[Yêu cầu phi chức năng]], [[Kiểm thử và vận hành]]
+Xem thêm: [[NFR]], [[Kiểm thử và vận hành]]

@@ -1,7 +1,7 @@
 # Các quyết định đã chốt
 
 Nguồn: `docs/decisions.md` (2026-10-14 đến 2026-10-16). Tóm tắt theo chủ đề; đủ chi tiết và lý do xem nguồn.
-Cập nhật: 2026-11-01
+Cập nhật: 2026-11-02
 
 Các quyết định này ra đời trước đợt P1–P4, và thuộc giai đoạn giao diện cũ. Một phần có thể đã bị `docs/ui/SPEC.md` thay thế, ví dụ soạn thảo nay tự lưu. **Chưa đối chiếu từng mục với code.**
 
@@ -66,6 +66,6 @@ Các quyết định này ra đời trước đợt P1–P4, và thuộc giai đ
 - Nơi lưu giọng đọc: thêm trường DSL 1.1.0 hay metadata backend.
 - Khôi phục bản trước khi AI tạo lại toàn bộ.
 - Phân công trang học sinh và Canvas engine.
-- Cách xử lý 6 loại chưa có renderer.
+- Cách xử lý 4 loại chưa có renderer.
 
 Xem thêm: [[Kế hoạch và việc còn lại]], [[Điểm lệch và việc cần chốt]]

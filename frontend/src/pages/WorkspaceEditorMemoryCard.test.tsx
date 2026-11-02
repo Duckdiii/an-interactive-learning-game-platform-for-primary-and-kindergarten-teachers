@@ -320,7 +320,7 @@ describe('MEMORY_CARD: dùng được bằng bàn phím', () => {
 })
 
 describe('MEMORY_CARD: bố cục', () => {
-  // jsdom không có bố cục thật: độ vừa khít ở 390px được kiểm bằng ảnh chụp trình duyệt (docs/screenshots/form-memory-card-mobile-390.jpg).
+  // jsdom không có bố cục thật: độ vừa khít ở 390px được kiểm bằng ảnh chụp trình duyệt.
   it('mặt thẻ chỉ xếp một cột (không dùng lưới hai cột như MATCHING)', async () => {
     await openLoaded()
 

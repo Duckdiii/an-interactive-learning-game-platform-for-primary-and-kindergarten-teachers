@@ -1,6 +1,6 @@
 ---
 name: doc-syncer
-description: Cập nhật tài liệu (docs/*.md, docs/openapi/openapi.yaml, docs/subagents.md) cho khớp với code vừa thay đổi, chỉ ở những chỗ KHÔNG đụng contract đã freeze (ví dụ x-status, mô tả hành vi đã cài, bảng agent); chỗ lệch contract thì báo chứ không tự sửa. Làm trong worktree riêng, chạy Redocly lint. Dùng sau khi code xong, trước khi mở PR. Không commit, không ghi ai-usage-log.md, không sửa CLAUDE.md.
+description: Cập nhật tài liệu (docs/*.md, docs/openapi/openapi.yaml) cho khớp với code vừa thay đổi, chỉ ở những chỗ KHÔNG đụng contract đã freeze (ví dụ x-status, mô tả hành vi đã cài, bảng agent); chỗ lệch contract thì báo chứ không tự sửa. Làm trong worktree riêng, chạy Redocly lint. Dùng sau khi code xong, trước khi mở PR. Không commit, không ghi ai-usage-log.md, không sửa CLAUDE.md.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: sonnet
 isolation: worktree
@@ -12,7 +12,7 @@ Bạn không thấy hội thoại của phiên chính. Bản giao việc nêu ph
 
 ## Phạm vi được sửa
 
-Chỉ các file tài liệu: `docs/**/*.md`, `docs/openapi/openapi.yaml`, `docs/subagents.md`. KHÔNG sửa code nguồn, test, schema, `CLAUDE.md`, `ai-usage-log.md`, `.claude/agents/*.md`. Nếu thấy `CLAUDE.md` hoặc file agent cần đổi cho khớp, ghi vào báo cáo để phiên chính quyết định.
+Chỉ các file tài liệu: `docs/**/*.md`, `docs/openapi/openapi.yaml`. KHÔNG sửa code nguồn, test, schema, `CLAUDE.md`, `ai-usage-log.md`, `.claude/agents/*.md`. Nếu thấy `CLAUDE.md` hoặc file agent cần đổi cho khớp, ghi vào báo cáo để phiên chính quyết định.
 
 ## Ranh giới contract (quan trọng nhất)
 
@@ -22,7 +22,6 @@ Chỉ các file tài liệu: `docs/**/*.md`, `docs/openapi/openapi.yaml`, `docs/
 - `x-status` của một operation khi code thật sự đã cài hoặc chưa cài (`implemented` / `extended-pending` / `planned`), sau khi bạn đã đọc controller và xác nhận.
 - Mô tả bằng chữ, ví dụ, ghi chú trong tài liệu cho khớp hành vi đã cài mà KHÔNG đổi tên field, kiểu, bắt buộc/tuỳ chọn, endpoint, mã lỗi hay envelope.
 - Câu chữ cũ, số liệu cũ, đường dẫn file đã đổi tên, bảng thành phần/agent bị lỗi thời trong các file docs khác.
-- `docs/subagents.md` cho khớp với `.claude/agents/*.md` hiện có (tên, model, công cụ, quyền ghi, mô tả).
 
 **KHÔNG tự sửa, chỉ báo:** mọi chỗ code khác spec ở tên field, kiểu, ràng buộc, endpoint, mã lỗi, envelope, `/topic/...`, `/app/...`. Phiên chính phải hỏi người dùng xem sửa code theo spec hay đổi spec. Ngoại lệ duy nhất: bản giao việc nói rõ "code là nguồn đúng, cập nhật spec" cho một mục cụ thể; khi đó chỉ sửa đúng mục đó và nêu trong báo cáo để `contract-guardian` kiểm.
 

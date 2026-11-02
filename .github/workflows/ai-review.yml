@@ -1,4 +1,4 @@
-# ai-review: review PR bằng AI theo thiết kế trong docs/ai-auto-review.md.
+# ai-review: review PR bằng AI theo thiết kế trong .github/ai-review/ai-auto-review.md.
 # Hai job tách quyền:
 #   analyze  — chạy agent, CHỈ ĐỌC (contents: read, pull-requests: read), trả JSON theo schema.
 #   post     — KHÔNG chạy agent, KHÔNG có OAuth token; chạy script đăng kết quả (pull-requests: write).

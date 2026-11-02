@@ -1,7 +1,7 @@
 # Ca sử dụng
 
 Nguồn: `docs/SRS-full.md` mục 4.2, bản trích ở `docs/srs/UC-01.md` đến `UC-15.md`.
-Cập nhật: 2026-10-31
+Cập nhật: 2026-11-02
 
 Trang này tóm tắt điều cần nhớ của từng ca. Thông báo đúng từng chữ và các bước đầy đủ xem nguồn.
 
@@ -33,4 +33,4 @@ Theo sơ đồ ca sử dụng: UC-05 và UC-06 mở rộng UC-04; UC-11 mở r�
 - Cái gì không an toàn thì hủy, không lưu.
 - Phụ trợ hỏng (ảnh phụ, âm thanh) thì trò chơi vẫn chạy.
 
-Xem thêm: [[Các luồng nghiệp vụ]], [[Yêu cầu chức năng]], [[Quy tắc nghiệp vụ]]
+Xem thêm: [[Các luồng nghiệp vụ]], [[FR-summary]], [[Quy tắc nghiệp vụ]]

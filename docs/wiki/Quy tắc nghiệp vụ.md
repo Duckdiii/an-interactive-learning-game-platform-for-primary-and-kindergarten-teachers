@@ -1,7 +1,7 @@
 # Quy tắc nghiệp vụ
 
 Nguồn: `docs/srs/FLD.md`, `docs/srs/FR-summary.md`, `docs/srs/NFR.md`, các file UC; mục 3.1.1 ở `docs/SRS-full.md`.
-Cập nhật: 2026-10-31
+Cập nhật: 2026-11-02
 
 Tra nhanh các con số. Khi viết code hay test, đối chiếu lại nguồn và contract, xem [[wiki/README|quy tắc wiki]].
 
@@ -79,4 +79,4 @@ Giới hạn gọi API: 10 yêu cầu mỗi phút mỗi người dùng. Quá 5 l
 
 Bản đầy đủ của 30 trường: [[FLD]].
 
-Xem thêm: [[Ca sử dụng]], [[Yêu cầu phi chức năng]]
+Xem thêm: [[Ca sử dụng]], [[NFR]]

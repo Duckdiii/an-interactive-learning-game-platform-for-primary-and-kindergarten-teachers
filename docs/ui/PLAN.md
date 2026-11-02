@@ -2,7 +2,7 @@
 
 Ngày: 27/10/2026 · Phạm vi: **chỉ frontend**. Không đụng `backend/`, DSL v1.0.0, schema, prompt đóng băng. SPEC mục 5 (yêu cầu backend) và giai đoạn P0 không làm trong đợt này; phần Frontend cần Backend được gom ở `docs/ui/API-CONTRACT.md`.
 
-Tài liệu đã đọc: `docs/ui/SPEC.md` (mục 1, 2, 3, 4, 6, 8), `docs/game-json-dsl-v1.0.0.md`, `docs/openapi/openapi.yaml`, `docs/plan.md`, `docs/decisions.md`, `docs/progress-2026-10-16.md`; 24 trong 37 wireframe (A-Home, A-Games, A-Create*, A-Editor, A-Publish, A-Results, A-Login, Be-*, Hs-*, Tv-*, Room-*), đọc theo hướng dẫn đầu SPEC (bỏ cú pháp công cụ vẽ). Chưa mở ảnh PNG (thư mục chỉ có `.dc.html`).
+Tài liệu đã đọc: `docs/ui/SPEC.md` (mục 1, 2, 3, 4, 6, 8), `docs/game-json-dsl-v1.0.0.md`, `docs/openapi/openapi.yaml`, `docs/decisions.md`; 24 trong 37 wireframe (A-Home, A-Games, A-Create*, A-Editor, A-Publish, A-Results, A-Login, Be-*, Hs-*, Tv-*, Room-*), đọc theo hướng dẫn đầu SPEC (bỏ cú pháp công cụ vẽ). Chưa mở ảnh PNG (thư mục chỉ có `.dc.html`).
 
 ## 1. Hiện trạng đã kiểm chứng
 
@@ -17,7 +17,7 @@ Tài liệu đã đọc: `docs/ui/SPEC.md` (mục 1, 2, 3, 4, 6, 8), `docs/game-
 - Trang giáo viên: `Dashboard` (283 dòng), `MyGamesPage` (319), `CreateGamePage` (541), `WorkspaceEditor` (563), `LoginPage`, `RegisterPage`; khoảng 30 file test trang.
 - Thành phần chơi (`src/games/`): có **2 trong 10** renderer là `QUIZ` và `MATCHING`, cùng thư mục `common/` (`ResponsiveStage`, `QuestionAudioButton`, `useQuestionAudio`, `useIllustration`, `playSound`, `useFeedback`, `measureText`, `mediaLayout`, `answerResult`...). Bố cục là hàm thuần có test (`computeQuizLayout`, `computeMatchingLayout`). Prop theo union `mode: 'preview' | 'play' | 'review'`; ở `play` renderer nhận `onAnswered` **trả `boolean`** (Quiz) hoặc `MatchingAnswerResult` (Matching), và **tự gọi `useFeedback`** (confetti + âm thanh).
 - Kiểu dữ liệu học sinh: `types/game-student.types.ts` **chỉ có MATCHING** (`MatchingStudentQuestion`). `config/studentApp.ts` đã dựng sẵn `resolveShareUrl` → `/play/{shareCode}` (trang đích chưa tồn tại).
-- Trình soạn thảo: có chơi thử (QUIZ, MATCHING), tải ảnh/âm thanh, xuất bản, chia sẻ + QR, tin nhắn phụ huynh, AI làm lại một câu, và form sửa tay cho 7 loại (còn thiếu SPOT_THE_TARGET, DRAG_DROP, ORDERING; `docs/progress-2026-10-16.md`).
+- Trình soạn thảo: có chơi thử (QUIZ, MATCHING), tải ảnh/âm thanh, xuất bản, chia sẻ + QR, tin nhắn phụ huynh, AI làm lại một câu, và form sửa tay cho 7 loại (còn thiếu SPOT_THE_TARGET, DRAG_DROP, ORDERING).
 - Styling hiện tại: token màu trong `@theme` (`paper #f6f7f2`, `brand #0b7a5b`, màu theo môn...), font hệ thống/Inter; **khác bảng token SPEC mục 4** (nền kem `#FBF6EC`, xanh lá `#0E7A57`, Baloo 2 + Nunito). `src/games/` có quy ước màu riêng, không dùng chung token giáo viên.
 
 ## 2. Bảng màn hình/tính năng ↔ API
@@ -58,7 +58,7 @@ Theo SPEC mục 8, các điểm dưới đây cần nhóm xác nhận trước k
 
 | # | Mâu thuẫn | Tạm thời |
 |---|---|---|
-| M1 | **Số renderer.** SPEC P1 chỉ cần QUIZ + MATCHING, P2 "chơi hết một game", nhưng wireframe (Hs-Review có ODD_ONE_OUT, VISUAL_CLOZE) và Bước A8 đề xuất đủ 10 loại; hiện chỉ có 2/10 renderer và 1/10 kiểu học sinh. SPEC không có giai đoạn nào cho 8 renderer còn lại. | Thêm giai đoạn **P2b** (mỗi loại một bước nhỏ). Hỏi nhóm có giới hạn v1 ở 2 loại không (`progress-2026-10-16.md` đã nêu câu này) → Q1 |
+| M1 | **Số renderer.** SPEC P1 chỉ cần QUIZ + MATCHING, P2 "chơi hết một game", nhưng wireframe (Hs-Review có ODD_ONE_OUT, VISUAL_CLOZE) và Bước A8 đề xuất đủ 10 loại; hiện chỉ có 2/10 renderer và 1/10 kiểu học sinh. SPEC không có giai đoạn nào cho 8 renderer còn lại. | Thêm giai đoạn **P2b** (mỗi loại một bước nhỏ). Hỏi nhóm có giới hạn v1 ở 2 loại không → Q1 |
 | M2 | **Bé "không đếm giờ"** (SPEC 1.10) và "Cho thử lại" (Tv-Play) so với contract: Backend đổi sang `TIMEOUT` khi vượt giờ + 1s; gửi lại cùng câu trả về kết quả cũ, không ghi lần thử mới. SPEC 5.2 lại muốn "lưu cả đáp án sai", "attemptsCount". | Frontend không hiện đồng hồ cho Bé; gửi `timeSpentMs` chặn ở giới hạn; thử lại chỉ ở giao diện. Đề xuất API ở `API-CONTRACT.md` 2.5 |
 | M3 | **Ai lo phản hồi đúng/sai.** SPEC mục 3: khung lo phản hồi, renderer gọi `onSubmit(answer)`. Mã hiện có và quy ước CLAUDE.md: renderer ở `play` tự gọi `useFeedback`, nhận `onAnswered` trả `boolean`/`MatchingAnswerResult`. | Giữ renderer hiện có, thêm **adapter** `PlayableRenderer` chuẩn hóa về `onSubmit(answer) → Promise<AnswerResult>`; di chuyển dần phản hồi lên khung (P1.6). Cần xác nhận tách phản hồi khỏi renderer có làm hỏng chơi thử ở editor không → Q9 |
 | M4 | **Hai loại mã, một ô nhập.** Hs-Join chỉ có "Mã trò chơi". `shareCode` (SELF) là 6 ký tự chữ-số (ví dụ `A3F9K2`, có thể toàn số); `accessCode` (phòng) là 6 chữ số. Hai mã có thể trùng định dạng. | Hai route riêng (`/play/:shareCode`, `/join/:pin`); ô nhập chung gọi thử `by-code` rồi `shared` (Q3) |
@@ -75,12 +75,12 @@ Theo SPEC mục 8, các điểm dưới đây cần nhóm xác nhận trước k
 | M15 | **Phạm vi lưu trong thông tin xuất bản** (`uiOverride`, `themeId`, hạn, tắt mã) nhưng `PublishResult` chỉ có `shareCode`/`shareUrl`; phiên `SELF` cố định hết hạn sau 24 giờ. | Cần API (2.2); tạm lưu cục bộ cùng nhãn mô phỏng (Q8) |
 | M16 | **Bảng token SPEC mục 4** khác `@theme` trong `index.css` (nền, xanh lá, vàng, màu môn, font). | Đổi giá trị ở một chỗ (P3.0); không viết cứng màu. Cần xác nhận hiệu ứng lên khoảng 30 file test chứa chuỗi giao diện cũ |
 | M17 | **Đăng nhập Frontend theo contract cũ** (`refreshToken` trong body, `AuthUser.id`); contract mới dùng cookie `HttpOnly`, `teacherId` (CLAUDE.md đã ghi). F9 có "Giữ đăng nhập". | P3.1 chuyển theo contract; "Giữ đăng nhập" cần Backend (Q12) |
-| M18 | **Hạn chế hitbox** của MATCHING trên điện thoại 390 px dưới 64 px (đã ghi `progress-2026-10-16.md`) mâu thuẫn trực tiếp với Be-Phone-Play (touch target 64 px, vùng an toàn). | Sửa bố cục trước khi đưa Matching vào khung Bé trên điện thoại (P2.5) |
+| M18 | **Hạn chế hitbox** của MATCHING trên điện thoại 390 px dưới 64 px mâu thuẫn trực tiếp với Be-Phone-Play (touch target 64 px, vùng an toàn). | Sửa bố cục trước khi đưa Matching vào khung Bé trên điện thoại (P2.5) |
 | M19 | **SPEC mục 12 (bắt buộc xoay ngang)** nhưng ví dụ hiện có `ResponsiveStage` chưa khóa hướng; Safari iOS không có `screen.orientation.lock`. | Màn nhắc xoay dựa vào `matchMedia('(orientation: portrait)')`; thử khóa hướng nếu trình duyệt cho phép; `viewport-fit=cover` + `env(safe-area-inset-*)` |
 
 ## 4. Kế hoạch P1 → P5
 
-Quy ước chung cho mọi bước (theo `docs/plan.md`): mỗi bước tối đa khoảng 300 dòng thay đổi (không tính test), TypeScript chặt không `any`, dùng token không viết cứng màu, mọi hành động có thể lỗi phải có trạng thái lỗi + nút thử lại, mock có nhãn "Dữ liệu mô phỏng", test chạy `npm test`, cuối bước chạy `tsc -b`, `oxlint`, `npm run build`. Mỗi bước xong dừng chờ "duyệt". Không thêm thư viện ngoài mục 5; sau mỗi bước ghi một dòng vào `ai-usage-log.md`, chạy `reviewer` + `test-verifier` (theo bảng định tuyến trong CLAUDE.md).
+Quy ước chung cho mọi bước: mỗi bước tối đa khoảng 300 dòng thay đổi (không tính test), TypeScript chặt không `any`, dùng token không viết cứng màu, mọi hành động có thể lỗi phải có trạng thái lỗi + nút thử lại, mock có nhãn "Dữ liệu mô phỏng", test chạy `npm test`, cuối bước chạy `tsc -b`, `oxlint`, `npm run build`. Mỗi bước xong dừng chờ "duyệt". Không thêm thư viện ngoài mục 5; sau mỗi bước ghi một dòng vào `ai-usage-log.md`, chạy `reviewer` + `test-verifier` (theo bảng định tuyến trong CLAUDE.md).
 
 ### P1: Nền tảng player (SPEC mục 3)
 
