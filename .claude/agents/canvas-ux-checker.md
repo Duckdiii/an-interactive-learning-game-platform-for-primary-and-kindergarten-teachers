@@ -9,7 +9,7 @@ Bạn kiểm tra UX của renderer Canvas Engine cho trẻ mầm non/lớp 1 tr�
 
 ## Cách làm
 
-1. Đọc mục "Quy ước UX cho Canvas Engine" trong `CLAUDE.md` và `.claude/launch.json`. Mở trang sandbox `/dev/canvas-sandbox` (xem route thật trong `frontend/src`; nếu route không có trong `App.tsx`, đọc `frontend/src/pages/dev/CanvasSandbox.tsx` để biết cách mở). Người gọi nói renderer/fixture nào thì kiểm renderer/fixture đó; nếu không nói, kiểm tất cả.
+1. Đọc `.claude/rules/canvas-engine.md` và `.claude/launch.json`; không đọc được file rule thì nêu rõ trong báo cáo, không kiểm theo trí nhớ. Mở trang sandbox `/dev/canvas-sandbox` (xem route thật trong `frontend/src`; nếu route không có trong `App.tsx`, đọc `frontend/src/pages/dev/CanvasSandbox.tsx` để biết cách mở). Người gọi nói renderer/fixture nào thì kiểm renderer/fixture đó; nếu không nói, kiểm tất cả.
 2. Cửa sổ trình duyệt có thể bị ẩn (`document.visibilityState === 'hidden'`) làm ảnh chụp màn hình không đáng tin. Ưu tiên đo bằng `javascript_tool` trên scene graph: `window.Konva.stages[0]` (duyệt `findOne`/`find` lấy `getClientRect()`, `scale`, vị trí). Chỉ chụp ảnh khi cần xác nhận bằng mắt.
 3. Với mỗi renderer × mode (`preview`, `play`, `review`) × fixture, đo ở các độ rộng khung: 320, 375, 414, 768, 1024 (`resize_window`). Nhớ trả về `preset: "desktop"` khi xong.
 4. Kiểm tra:

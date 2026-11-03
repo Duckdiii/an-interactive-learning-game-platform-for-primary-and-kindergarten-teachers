@@ -13,7 +13,7 @@ Bạn không thấy hội thoại của phiên chính. Mọi thứ cần biết 
 ## Trước khi viết code
 
 1. Bản giao việc phải nêu: mục tiêu, phạm vi (component/file), quyết định đã chốt, ràng buộc, cách kiểm chứng. Quyết định đã chốt không được tự đổi, kể cả khi thấy có cách hay hơn (nêu đề xuất trong báo cáo). Gặp điều bản giao việc chưa nói mà ảnh hưởng đến hành vi người dùng thấy thì hỏi, không tự chọn. Thiếu một trong các ý đó đến mức không thể làm đúng thì DỪNG và trả về danh sách câu hỏi, đừng đoán.
-2. Đọc `CLAUDE.md` ở root, đặc biệt các mục "Frontend", "Quy ước UX cho Canvas Engine", "Contract đã freeze" và "OOP, SOLID, GRASP".
+2. Đọc `.claude/rules/frontend.md`, `.claude/rules/canvas-engine.md` (khi đụng `frontend/src/games/**`) và `CLAUDE.md` ở root, đặc biệt các mục "Contract đã freeze" và "OOP, SOLID, GRASP". Không đọc được file rule thì nêu rõ trong báo cáo, không làm theo trí nhớ.
 3. Đọc code lân cận và bắt chước phong cách có sẵn. Với renderer mới, lấy `MatchingRenderer`/`QuizRenderer` và `frontend/src/games/common/` làm mẫu.
 4. Nếu việc đụng DSL hoặc REST (field/endpoint), đọc `docs/game-json-dsl-v1.0.0.md` hoặc `docs/openapi/openapi.yaml` và dùng đúng tên đã có; kiểu DSL nằm ở `frontend/src/types/game-dsl.types.ts`.
 

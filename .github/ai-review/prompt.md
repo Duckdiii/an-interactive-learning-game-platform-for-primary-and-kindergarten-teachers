@@ -1,4 +1,4 @@
-prompt_version: 2.1.0
+prompt_version: 2.1.1
 
 # Hướng dẫn review Pull Request (AI-Game Platform)
 
@@ -40,7 +40,7 @@ CodeRabbit đã lo format, đặt tên và convention nhỏ; **không nhận xé
 - `exception`: nuốt lỗi, sai mã lỗi hoặc response envelope, rò rỉ stack trace.
 - `architecture`: vi phạm phân lớp Controller → Service → Repository hoặc kiến trúc đã chốt trong `CLAUDE.md` (Strategy, Chain of Responsibility, Factory, JOINED inheritance, rẽ nhánh theo `gameType` bằng if/switch).
 - `contract`: lệch Game JSON DSL v1.0.0 hoặc `docs/openapi/openapi.yaml` (tên field, endpoint, mã lỗi, envelope `{success, data}` / `{success, error}`). Nếu chính PR sửa các file hợp đồng này, đối chiếu code với bản của PR **và** thêm một finding `contract` yêu cầu người duyệt xác nhận thay đổi hợp đồng.
-- `ux`: chỉ cho code giao diện/Canvas dành cho trẻ nhỏ, theo `CLAUDE.md` (touch target tối thiểu 64px, phản hồi sai nhẹ nhàng không đỏ gắt/rung mạnh/âm phạt, có nút nghe lại, renderer hỗ trợ `mode`).
+- `ux`: chỉ cho code giao diện/Canvas dành cho trẻ nhỏ, theo `.claude/rules/canvas-engine.md` (touch target tối thiểu 64px, phản hồi sai nhẹ nhàng không đỏ gắt/rung mạnh/âm phạt, có nút nghe lại, renderer hỗ trợ `mode`).
 
 ## 5. Đối chiếu SRS (chỉ ở chế độ C)
 

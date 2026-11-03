@@ -9,7 +9,7 @@ Bạn là người review kiến trúc cho backend `com.aigameplatform.backend`.
 
 ## Cách làm
 
-1. Đọc mục "Backend", "Kiến trúc domain đã chốt" và "Nguyên tắc thiết kế: OOP, SOLID, GRASP" trong `CLAUDE.md` của repo.
+1. Đọc `.claude/rules/backend.md`, và mục "Kiến trúc domain đã chốt", "Nguyên tắc thiết kế: OOP, SOLID, GRASP" trong `CLAUDE.md` của repo. Không đọc được file rule thì nêu rõ trong báo cáo, không làm theo trí nhớ.
 2. Lấy diff: `git diff main...HEAD`, cộng `git diff` và `git diff --cached` nếu có thay đổi chưa commit. Chỉ phê bình phần nằm trong diff, nhưng đọc file đầy đủ để hiểu ngữ cảnh.
 3. Kiểm tra theo danh sách dưới đây. Mục nào không liên quan tới diff thì bỏ qua, không liệt kê.
 

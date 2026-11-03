@@ -15,27 +15,13 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 - Comment ngắn gọn, chỉ giải thích phần không tự rõ nghĩa (ví dụ: lý do dùng Session Pooler thay vì Transaction Pooler).
 - Trước khi `git add -A` hoặc commit, kiểm tra `git status`/diff để không lỡ commit `.env`, file build (`target/`, `node_modules/`, `dist/`) hay secret.
 
-## Backend (`backend/`)
+## Quy ước theo khu vực (`.claude/rules/`)
 
-- Package gốc: `com.aigameplatform.backend`. Giữ đúng cấu trúc package đã có (`entity`, `service`, `repository`, `controller`, `dto`, `config`, `exception`, `security`); thư mục con mới đặt đúng nhóm chức năng tương ứng, không tạo tràn lan ở root package. Những chỗ dễ đặt nhầm:
-  - Entity gốc `Game`, `Teacher`, `Classroom`, `EditLog` nằm trực tiếp trong `entity/`; thành phần nhúng (cặp, vùng thả) ở `entity/question/embedded`.
-  - `service/generation`: bộ điều phối sinh game bằng AI, cổng `GameContentGenerator` cùng bản cài đặt Gemini/LangChain4j, vòng thử lại có phản hồi lỗi.
-  - `service/validation/rule` (luật Layer 2 từng loại game) và `service/validation/safety` (Layer 3: danh sách từ cấm, client OpenAI Moderation).
-  - `dto/dsl`: các record của Game JSON DSL.
-- **Schema do Flyway quản lý** — `jpa.hibernate.ddl-auto` luôn là `validate`, không được đổi sang `update`/`create`. Mọi thay đổi schema phải viết migration mới trong `src/main/resources/db/migration/` theo thứ tự version tăng dần (`V1__...sql`, `V2__...sql`), không sửa lại migration đã tồn tại.
-- Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
-- Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
-- Dùng Lombok cho entity/DTO thay vì viết getter/setter tay.
-- Test Spring: backend dùng Spring Boot 4.x nên mock bean bằng `@MockitoBean` (`org.springframework.test.context.bean.override.mockito`), không dùng `@MockBean`. Bỏ qua mẫu Spring Boot 3.x trong skill `spring-boot-engineer`.
-- Kiểm duyệt an toàn (Layer 3): mặc định `app.moderation.required=true`, thiếu `OPENAI_API_KEY` thì app không khởi động. Chỉ đặt `MODERATION_REQUIRED=false` (trong `.env` cá nhân) khi chạy thử ở máy mình, khi đó chỉ dùng danh sách từ cấm; môi trường triển khai thật phải có `OPENAI_API_KEY` và không được đặt cờ này. Trong `.env.example` để trống `OPENAI_API_KEY`, không điền giá trị mẫu (giá trị mẫu bị coi là key thật và làm mọi lần sinh game lỗi).
+Claude Code tự nạp các file này khi đọc file khớp `paths`. Lập kế hoạch hoặc tạo file mới ở khu vực nào thì tự đọc trước file rule của khu vực đó.
 
-## Frontend (`frontend/`)
-
-- **Chỉ dùng Context API + `useState`/`useReducer` của React cho client state** — tuyệt đối không thêm Zustand, Redux, Jotai, hay bất kỳ state-management library nào khác.
-- `@tanstack/react-query` chỉ dùng cho data fetching/cache từ API (loading, error, retry), không dùng để thay thế client state.
-- Gọi API qua `src/api/axiosInstance.ts` (đã có interceptor đính token + xử lý 401), không tạo thêm axios instance khác trừ khi có lý do rõ ràng.
-- Đọc/ghi session qua `useAuth()` (từ `AuthContext`), không thao tác trực tiếp `localStorage` ở nơi khác.
-- Tailwind v4: cấu hình qua `@tailwindcss/vite` plugin + `@import "tailwindcss"` trong `index.css`. `tailwind.config.js` được nạp qua `@config` — nếu sửa `content` globs thì sửa ở đây.
+- `backend.md` (`backend/**`): package, Flyway, Supabase, Hikari, Lombok, `@MockitoBean`, kiểm duyệt Layer 3.
+- `frontend.md` (`frontend/**`): client state, react-query, `axiosInstance`, `useAuth()`, Tailwind v4, thư viện đã duyệt sẵn.
+- `canvas-engine.md` (`frontend/src/games/**`): UX cho trẻ, prop `mode`, cách nộp bài, phần dùng chung của renderer.
 
 ## Kiến trúc domain đã chốt — KHÔNG tự ý thay đổi
 
@@ -62,19 +48,6 @@ Hướng dẫn cho AI agent khi làm việc trong repo này. Đây là đồ án
 - WebSocket Message Format v1.0.0 (`/topic/session/{sessionId}/...`, `/app/session/{sessionId}/...`)
 
 Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi.yaml`; tài liệu WebSocket Message Format riêng chưa viết (TODO, tạm xem tag `Realtime` trong `openapi.yaml`). Trước khi sinh code liên quan đến field JSON, endpoint mới hay message WebSocket mới, đọc đúng doc tương ứng; không tự đặt tên field/endpoint khác đi.
-
-## Thư viện frontend đã duyệt sẵn
-
-`react-konva`, `howler`, `qrcode.react`, `@stomp/stompjs`, `sockjs-client`, `use-image` (cùng axios, react-router-dom, @tanstack/react-query đã cài). Chỉ hỏi user khi cần thêm thư viện NGOÀI danh sách này.
-
-## Quy ước UX cho Canvas Engine (đối tượng: trẻ mầm non/lớp 1)
-
-- Touch target tối thiểu 64px.
-- Trả lời sai: KHÔNG dùng màu đỏ gắt/rung mạnh/âm thanh phạt. Dùng phản hồi nhẹ nhàng (rung nhẹ, âm thanh trung tính) và ưu tiên chỉ luôn đáp án đúng để trẻ học được.
-- Audio prompt luôn có nút "nghe lại" không giới hạn số lần.
-- Renderer mới phải hỗ trợ prop `mode: 'preview' | 'play' | 'review'` (`preview` cho Workspace Editor live preview tự so đáp án cục bộ; `play` cho học sinh chơi thật, không tự lộ đáp án đúng, báo kết quả lên component cha qua callback `onAnswered` (bắt buộc ở mode này và PHẢI trả `boolean` hoặc `Promise<boolean>` là đúng/sai thật do Backend chấm; kiểu prop là union theo `mode` nên thiếu là lỗi lúc build); `review` xem lại câu đã trả lời, khoá sẵn, nhận thêm prop `selectedOptionId` cho biết đáp án đã chọn trước đó).
-- Renderer nhiều phần tử (Matching, Memory Card — cùng nhóm `PairMatch`, xem ánh xạ ở trên) nộp **một lần** sau khi trẻ hoàn thành cả màn, không nộp từng lượt chạm. Payload khác nhau giữa hai loại: Matching là `matches: [{ leftPairId, rightPairId }]`, Memory Card là `matchedPairIds` + `flips`. `MatchingRenderer` ở mode `play` nhận câu hỏi dạng học sinh (`MatchingStudentQuestion`, id mờ, cột đã do Backend xáo, KHÔNG xáo lại ở client); callback trả `MatchingAnswerResult` (`isCorrect` + `correctAnswer.matches` nếu có) để hiện đáp án đúng khi trẻ sai.
-- Renderer mới dùng lại phần chung trong `frontend/src/games/common/` (`ResponsiveStage`, `QuestionAudioButton`, `useQuestionAudio`, `useIllustration`/`QuestionIllustration`, `playSound`, `useFeedback`, `measureWrappedTextHeight`) thay vì viết lại. Bố cục tính bằng hàm thuần có test duyệt mọi tổ hợp (`computeQuizLayout`, `computeMatchingLayout`) để không phần nào đè lên phần khác; logic trạng thái tách thành reducer/hàm thuần để test được trong jsdom (không có Canvas).
 
 ## Nguyên tắc thiết kế: OOP, SOLID, GRASP
 
@@ -131,33 +104,9 @@ Người viết không tự xác nhận code của mình: code do phiên chính 
 
 Subagent chỉ biết `CLAUDE.md`, file agent, git status và bản giao việc: không thấy hội thoại, không thấy auto memory. Vì vậy **không giao** việc ghi `ai-usage-log.md` hay quyết định thiết kế; quy tắc nào subagent cần biết thì phải ghi ở một trong các nơi đó.
 
-Tự chạy (chỉ đọc, rẻ):
-- `test-verifier`: chạy `tsc`/lint/test/build (frontend), `./mvnw test` (backend) và báo kết quả gọn.
-- `contract-guardian`: kiểm tra đồng bộ DSL (4 nơi + test) và `openapi.yaml` (`x-status`, Redocly lint).
-- `reviewer`: review diff độc lập theo các quy ước trong file này (trọng tâm frontend, Canvas Engine, UX, secret).
-- `backend-architect-reviewer`: review kiến trúc backend (Strategy/Chain/Factory, JOINED inheritance, SOLID/GRASP, phân tầng).
-- `migration-checker`: kiểm tra Flyway (không sửa migration cũ, version, `ddl-auto: validate`, entity khớp migration).
-- `pr-triage`: phân loại nhận xét của bot/người trên một PR (Đúng / Sai / Hoãn), không đăng bình luận.
-- `log-auditor`: kiểm định dạng `ai-usage-log.md` (STT, cột, cấu trúc, SHA `TODO`).
-- `pre-commit-checker`: soi lần cuối file nhạy cảm, secret, cấu hình nguy hiểm trước khi commit.
+Mô tả từng agent nằm trong `.claude/agents/`, khi nào chạy xem bảng định tuyến. `canvas-ux-checker` và `mutation-checker` chỉ chạy khi người dùng yêu cầu rõ (tốn usage); các agent còn lại tự chạy theo bảng định tuyến. Agent có quyền ghi (`backend-implementer`, `frontend-implementer`, `test-writer`, `doc-syncer`) luôn chạy trong worktree riêng, không commit.
 
-Chỉ chạy khi người dùng yêu cầu rõ (tốn usage):
-- `canvas-ux-checker`: mở sandbox trên trình duyệt, đo touch target 64px sau co giãn, đè khối, phản hồi, nút nghe lại.
-- `mutation-checker`: chèn lỗi vào module trong worktree riêng để chứng minh test bắt được lỗi.
-
-Agent khảo sát/lập kế hoạch (chỉ đọc, chạy ở bước khảo sát trước khi lập kế hoạch để phiên chính khỏi tự đọc nhiều file):
-- `codebase-explorer`: trả lời "chức năng X nằm ở đâu, chạy thế nào" kèm `file:dòng`, phân biệt phần đã cài với khung/TODO/planned.
-- `impact-analyzer`: cho một thay đổi dự định, liệt kê mọi nơi bị ảnh hưởng (DSL 4 nơi, openapi, test, renderer, migration), thứ tự làm và agent kiểm tra nên chạy sau.
-- `ai-prompt-evaluator`: đánh giá pipeline sinh game bằng AI hoàn toàn offline (fixture, test có mock), tuyệt đối không gọi API thật; chạy khi đổi prompt, schema đầu ra của AI hoặc `GameGenerationService`.
-
-Agent tài liệu và bảo mật:
-- `doc-syncer`: có quyền ghi nhưng chỉ file tài liệu, chạy trong worktree riêng, không commit; tự sửa `x-status` và mô tả đã lỗi thời, KHÔNG tự đổi contract đã freeze (chỗ code khác spec thì báo để phiên chính hỏi user).
-- `security-auditor`: chỉ đọc, rà soát bảo mật sâu (xác thực, phân quyền theo chủ sở hữu, CORS, WebSocket, dữ liệu trẻ em, kiểm duyệt AI, lạm dụng chi phí AI); không gọi mạng; chạy khi đổi code liên quan bảo mật và trước khi triển khai, bổ sung chứ không thay `pre-commit-checker`.
-
-Agent thực thi (có quyền ghi, luôn chạy trong worktree riêng, không commit; chỉ giao khi đủ điều kiện ở đầu mục này):
-- `backend-implementer`: cài đặt code backend theo bản giao việc, tự build và chạy test lớp của mình.
-- `frontend-implementer`: cài đặt code frontend/renderer theo bản giao việc, tự `tsc`/lint/test/build.
-- `test-writer`: chỉ thêm/sửa file test (ví dụ lấp mutant sống sót), không sửa code nguồn.
+Agent mới hoặc file agent được sửa phải ghi rõ bước đọc đúng file trong `.claude/rules/`, không dựa vào việc tự nạp, vì chưa xác nhận rule có tự nạp cho subagent.
 
 Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/class, quyết định đã chốt của người dùng cho việc này (agent không tự đổi), ràng buộc (kiến trúc, contract, không thêm dependency), tiêu chí xong kiểm được, lệnh kiểm chứng, và chỗ phải dừng lại hỏi. Chỉ dẫn đường tới tài liệu trong repo thay vì chép lại; phải ghi rõ những gì không có trong repo. Không giao quyết định thiết kế. Không giao hai agent thực thi sửa cùng file; nếu bắt buộc thì chạy tuần tự. Phiên chính phải xem diff trong worktree của agent, chạy agent kiểm tra theo bảng định tuyến rồi mới đưa thay đổi vào cây chính.
 
@@ -177,7 +126,7 @@ Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/c
 | `backend/**/*.java` | `backend-architect-reviewer` |
 | `dto/dsl`, `schema/game-dsl`, `schema/game-ai-output`, `game-dsl.types.ts`, `docs/openapi/openapi.yaml`, controller/DTO REST | `contract-guardian` |
 | `backend/src/main/resources/db/migration/`, `entity/`, `application*.yml` | `migration-checker` |
-| `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` |
+| `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` (bổ sung, không thay `pre-commit-checker`) |
 | `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
 | `ai-usage-log.md` | `log-auditor` |
 | `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |

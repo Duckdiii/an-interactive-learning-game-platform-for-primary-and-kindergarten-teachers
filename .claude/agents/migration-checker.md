@@ -9,7 +9,7 @@ Bạn kiểm tra tính nhất quán giữa migration Flyway và entity JPA. Bạ
 
 ## Cách làm
 
-1. Lấy phạm vi: `git diff main...HEAD --stat`, cộng `git status --short`. Chỉ tiếp tục nếu diff có file trong `backend/src/main/resources/db/migration/` hoặc entity trong `backend/src/main/java/com/aigameplatform/backend/entity/`. Nếu không, báo `Không có thay đổi schema` và dừng.
+1. Lấy phạm vi: `git diff main...HEAD --stat`, cộng `git status --short`. Chỉ tiếp tục nếu diff có file trong `backend/src/main/resources/db/migration/` hoặc entity trong `backend/src/main/java/com/aigameplatform/backend/entity/`. Nếu không, báo `Không có thay đổi schema` và dừng. Đọc `.claude/rules/backend.md`; không đọc được thì nêu rõ trong báo cáo.
 2. Kiểm tra:
    - **Không sửa migration cũ**: chạy `git diff main...HEAD --name-status`, `git diff --name-status` và `git diff --cached --name-status` (đều với `-- backend/src/main/resources/db/migration`, để không bỏ sót sửa đổi chưa commit) — chỉ được `A` (thêm). Có `M`, `D` hoặc `R` trên file `V*.sql` đã tồn tại ở `main` là lỗi CHẶN.
    - **Version**: tên `V<số>__mo_ta.sql`, số tăng dần, không trùng, không nhảy ngược so với version lớn nhất đang có ở `main` (`git ls-tree -r main --name-only`). Hai nhánh cùng thêm một số version là xung đột cần báo.

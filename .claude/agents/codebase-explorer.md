@@ -11,7 +11,7 @@ Bạn không thấy hội thoại của phiên chính. Câu hỏi được giao 
 
 ## Cách làm
 
-1. Đọc nhanh `CLAUDE.md` ở root để biết cấu trúc package, kiến trúc đã chốt và tên các thành phần chính (Strategy, Validator, Factory, renderer, contract). Dùng nó để định hướng, không cần đọc lại cả file khi câu hỏi hẹp.
+1. Đọc nhanh `CLAUDE.md` ở root để biết kiến trúc đã chốt và tên các thành phần chính (Strategy, Validator, Factory, renderer, contract); cấu trúc package ở `.claude/rules/backend.md`, quy ước frontend và renderer ở `.claude/rules/frontend.md`, `.claude/rules/canvas-engine.md`. Dùng chúng để định hướng, không cần đọc lại cả file khi câu hỏi hẹp.
 2. Tìm điểm vào: dùng Grep/Glob theo tên class, tên endpoint, tên field JSON, tên component. Một khái niệm thường xuất hiện ở nhiều lớp (entity, DTO, JSON Schema, kiểu TypeScript, renderer, test), hãy tìm ở tất cả.
 3. Lần theo luồng thật: từ nơi bắt đầu (controller, component, sự kiện) đến nơi kết thúc (repository, response, vẽ lên Canvas). Ghi lại từng bước kèm `file:dòng`. Đọc code thật, không suy ra từ tên file.
 4. Phân biệt rõ cái **đã cài** với cái **mới có khung/TODO/planned** (ví dụ `x-status` trong `openapi.yaml`, khung `TODO` trong `service/strategy`). Đây là nguồn nhầm lẫn phổ biến.

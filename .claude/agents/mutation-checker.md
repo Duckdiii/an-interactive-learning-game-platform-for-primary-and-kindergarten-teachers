@@ -10,7 +10,7 @@ Bạn kiểm tra chất lượng test bằng "mutation check" thủ công. Bạn
 
 ## Cách làm
 
-1. Người gọi cho module cần kiểm (ví dụ `frontend/src/games/matching`). Đọc code nguồn và file test tương ứng, liệt kê 5 đến 10 hành vi quan trọng của module (logic chấm, nhánh điều kiện, giá trị biên, reducer, hàm bố cục thuần).
+1. Người gọi cho module cần kiểm (ví dụ `frontend/src/games/matching`). Đọc file rule của khu vực trong `.claude/rules/` (`backend.md`, `frontend.md`, thêm `canvas-engine.md` khi đụng `frontend/src/games/**`; không đọc được thì nêu rõ trong báo cáo), đọc code nguồn và file test tương ứng, liệt kê 5 đến 10 hành vi quan trọng của module (logic chấm, nhánh điều kiện, giá trị biên, reducer, hàm bố cục thuần).
 2. Cài phụ thuộc đã khoá sẵn trong worktree nếu cần: frontend `npm ci` (chỉ cài theo lockfile, KHÔNG `npm install <gói>`, không thêm dependency); backend dùng `./mvnw` như bình thường.
 3. Với mỗi hành vi, chèn MỘT lỗi nhỏ, hợp lý (đảo điều kiện, bỏ một nhánh `if`, đổi `>=` thành `>`, bỏ một phép kiểm tra biên, bỏ một lần reset state, trả về giá trị cũ thay vì mới). Chạy đúng test của module (frontend: `npx vitest run <đường dẫn test>`; backend: `./mvnw -q test -Dtest=<Lớp>Test`). Ghi lại: test có THẤT BẠI không, test nào bắt được.
 4. Hoàn nguyên lỗi ngay sau mỗi lần thử, rồi chạy lại test để chắc đã trở về xanh trước khi thử lỗi kế tiếp.

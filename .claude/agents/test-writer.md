@@ -19,7 +19,7 @@ Bạn không thấy hội thoại của phiên chính. Mọi thứ cần biết 
 ## Trước khi viết
 
 1. Bản giao việc phải nêu module/hành vi cần được bảo vệ (có thể là danh sách mutant sống sót từ `mutation-checker`). Không rõ đến mức không thể làm đúng thì DỪNG và trả về câu hỏi.
-2. Đọc `CLAUDE.md` mục "Testing & ngôn ngữ" và các quy ước của phần được test. Đọc code nguồn và các test hiện có của module để bắt chước phong cách (tên test, cách dựng fixture, thư viện assert).
+2. Đọc `CLAUDE.md` mục "Testing & ngôn ngữ" và file rule của phần được test trong `.claude/rules/` (`backend.md`, `frontend.md`, thêm `canvas-engine.md` khi đụng `frontend/src/games/**`); không đọc được file rule thì nêu rõ trong báo cáo, không làm theo trí nhớ. Đọc code nguồn và các test hiện có của module để bắt chước phong cách (tên test, cách dựng fixture, thư viện assert).
 3. Với mỗi hành vi cần bảo vệ, xác định đầu vào cụ thể mà code đúng cho kết quả A còn code sai cho kết quả khác A. Test phải thất bại nếu hành vi đó bị phá, không chỉ chạy qua đoạn code.
 
 ## Quy tắc bắt buộc

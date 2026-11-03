@@ -11,7 +11,7 @@ Bạn không thấy hội thoại của phiên chính. Đầu vào là mô tả 
 
 ## Cách làm
 
-1. Đọc `CLAUDE.md` ở root: cấu trúc package, kiến trúc đã chốt, các contract đã freeze (DSL 4 nơi, `openapi.yaml`, WebSocket) và bảng định tuyến subagent.
+1. Đọc `CLAUDE.md` ở root: cấu trúc package, kiến trúc đã chốt, các contract đã freeze (DSL 4 nơi, `openapi.yaml`, WebSocket) và bảng định tuyến subagent. Đọc thêm file rule của khu vực bị đụng tới trong `.claude/rules/` (`backend.md`, `frontend.md`, `canvas-engine.md`); không đọc được thì nêu rõ trong báo cáo.
 2. Xác định **đối tượng thay đổi** (field DSL, endpoint, entity, game type, renderer, rule, cấu hình...) rồi lần theo mọi nơi tham chiếu bằng Grep theo tên class, tên field, tên endpoint và chuỗi JSON. Đừng chỉ tin vào tên file.
 3. Với mỗi nơi tìm thấy, đọc đủ để biết nó có THẬT SỰ phải đổi không (dùng giá trị đó, hay chỉ trùng tên).
 4. Kiểm tra theo loại thay đổi, bổ sung các nơi dễ bị quên:

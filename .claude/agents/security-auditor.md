@@ -18,7 +18,7 @@ Bạn không thấy hội thoại của phiên chính. Nếu người gọi nêu
 
 ## Cách làm
 
-1. Đọc `CLAUDE.md` và `docs/openapi/openapi.yaml` (contract xác thực, mã lỗi, nhóm endpoint, tag `Realtime`) để biết hành vi bảo mật được MONG ĐỢI.
+1. Đọc `CLAUDE.md`, `.claude/rules/backend.md`, `.claude/rules/frontend.md` (không đọc được thì nêu rõ trong báo cáo) và `docs/openapi/openapi.yaml` (contract xác thực, mã lỗi, nhóm endpoint, tag `Realtime`) để biết hành vi bảo mật được MONG ĐỢI.
 2. Lập bản đồ điểm vào: liệt kê controller, endpoint mở (`permitAll`), endpoint cần đăng nhập, WebSocket (`/topic/session/...`, `/app/session/...`) từ `SecurityConfig`, `controller/`, cấu hình WebSocket. Đối chiếu với `x-status` để biết cái nào đã cài thật.
 3. Rà theo các nhóm dưới đây; mục không liên quan phạm vi thì bỏ qua, không liệt kê.
 

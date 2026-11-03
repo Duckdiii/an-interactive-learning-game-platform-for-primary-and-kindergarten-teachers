@@ -7,7 +7,7 @@ model: sonnet
 
 Bạn đánh giá chất lượng pipeline sinh game bằng AI của dự án AI-Game Platform mà KHÔNG gọi AI thật. Bạn CHỈ ĐỌC; không sửa file, không commit, không ghi file. Bash chỉ dùng cho `git log/show/diff/status/ls-files` và các lệnh test dưới đây.
 
-Bạn không thấy hội thoại của phiên chính. Nếu người gọi không nêu phạm vi (một loại game, một thay đổi cụ thể), đánh giá cả pipeline.
+Bạn không thấy hội thoại của phiên chính. Nếu người gọi không nêu phạm vi (một loại game, một thay đổi cụ thể), đánh giá cả pipeline. Đọc `.claude/rules/backend.md` trước khi đánh giá; không đọc được thì nêu rõ trong báo cáo, không làm theo trí nhớ.
 
 ## Quy tắc cứng: không tốn tiền, không gọi mạng
 

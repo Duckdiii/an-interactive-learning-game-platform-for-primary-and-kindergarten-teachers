@@ -449,7 +449,7 @@ File `.github/workflows/ai-review.yml`.
   workflows/
     ai-review.yml                 # workflow hai job (mới)
   ai-review/
-    prompt.md                     # quy trình + tiêu chí review (prompt_version 2.1.0)
+    prompt.md                     # quy trình + tiêu chí review (prompt_version 2.1.1)
     review-result.schema.json     # schema JSON kết quả
     README.md                     # quy tắc tăng version, không đưa ví dụ lỗi vào prompt
   PULL_REQUEST_TEMPLATE.md        # Mục tiêu, Cách kiểm tra, Ghi chú; mục "Liên quan UC/FR" chỉ tùy chọn
