@@ -1,0 +1,292 @@
+{
+  "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "verifiedChunks" : 16,
+  "sourceFragmentCount" : 18,
+  "extractedPages" : 4,
+  "datasetVersion" : "english-grade5-draft-v1",
+  "curriculumVersion" : "32/2018/TT-BGDDT",
+  "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "verifiedOutcomes" : 14,
+  "verifiedControls" : 2,
+  "manualTranscribedOutcomes" : 1,
+  "manualTranscribedControls" : 0,
+  "manualTranscriptionChunkIds" : [ "en-g5-012" ],
+  "chunks" : [ {
+    "chunkId" : "en-g5-001",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nghe",
+    "text" : "Nghe và nhận biết trọng âm từ.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1279,
+      "printedPage" : 30,
+      "region" : "SKILLS_G5",
+      "text" : "Nghe và nhận biết trọng âm từ."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-002",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nghe",
+    "text" : "Nghe hiểu và làm theo những chỉ dẫn đơn giản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1279,
+      "printedPage" : 30,
+      "region" : "SKILLS_G5",
+      "text" : "Nghe hiểu và làm theo những chỉ dẫn đơn giản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-003",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nghe",
+    "text" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1279,
+      "printedPage" : 30,
+      "region" : "SKILLS_G5",
+      "text" : "Nghe và trả lời các câu hỏi đơn giản về các chủ đề trong Chương trình."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-004",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nghe",
+    "text" : "Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1279,
+      "printedPage" : 30,
+      "region" : "SKILLS_G5",
+      "text" : "Nghe hiểu các đoạn hội thoại, độc thoại ngắn, cấu trúc đơn giản khoảng 45 - 60 từ về các chủ đề trong Chương trình."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-005",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nghe",
+    "text" : "Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp).",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1279,
+      "printedPage" : 30,
+      "region" : "SKILLS_G5",
+      "text" : "Nghe hiểu nội dung chính các câu chuyện ngắn rất đơn giản về các chủ đề quen thuộc (có sự trợ giúp)."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-006",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nói",
+    "text" : "Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1280,
+      "printedPage" : 31,
+      "region" : "SKILLS_G5",
+      "text" : "Nói các câu chỉ dẫn và đề nghị; khởi đầu và trả lời những câu lệnh đơn giản trong và ngoài lớp học."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-007",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nói",
+    "text" : "Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1280,
+      "printedPage" : 31,
+      "region" : "SKILLS_G5",
+      "text" : "Hỏi và trả lời những câu hỏi đơn giản về những chủ đề quen thuộc như bản thân, gia đình, trường học, … hoặc liên quan đến nhu cầu giao tiếp tối thiểu hằng ngày."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-008",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nói",
+    "text" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp).",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1280,
+      "printedPage" : 31,
+      "region" : "SKILLS_G5",
+      "text" : "Nói về một số chủ đề trong Chương trình (có sự trợ giúp)."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-009",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Nói",
+    "text" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1280,
+      "printedPage" : 31,
+      "region" : "SKILLS_G5",
+      "text" : "Trả lời các câu hỏi trực tiếp trong những phỏng vấn đơn giản với tốc độ nói chậm và rõ ràng về những chủ đề quen thuộc."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-010",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Đọc",
+    "text" : "Đọc những đoạn văn bản ngắn, đơn giản đã được chuẩn bị trước về những chủ đề quen thuộc như bạn bè, gia đình, nhà trường, …",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1280,
+      "printedPage" : 31,
+      "region" : "SKILLS_G5",
+      "text" : "Đọc những đoạn văn bản ngắn, đơn giản đã được chuẩn bị trước về những chủ đề quen thuộc như bạn bè, gia đình, nhà trường, …"
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-011",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Đọc",
+    "text" : "Đọc hiểu các đoạn văn bản ngắn, đơn giản khoảng 60 - 80 từ về các chủ đề quen thuộc.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1280,
+      "printedPage" : 31,
+      "region" : "SKILLS_G5",
+      "text" : "Đọc hiểu các đoạn văn bản ngắn, đơn giản khoảng 60 - 80 từ về các chủ đề quen thuộc."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-012",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Đọc",
+    "text" : "Đọc hiểu các thông điệp ngắn, đơn giản trên bưu thiếp; các chỉ dẫn ngắn, đơn giản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1280,
+      "printedPage" : 31,
+      "region" : "SKILLS_G5",
+      "text" : "Đọc hiểu các thông điệp ngắn, đơn giản trên bưu thiếp; các chỉ dẫn ngắn, đơn giản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-013",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Viết",
+    "text" : "Viết các cụm từ, câu đơn giản về các chủ đề quen thuộc như bản thân, gia đình, trường học, bạn bè, …",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1281,
+      "printedPage" : 32,
+      "region" : "SKILLS_G5",
+      "text" : "Viết các cụm từ, câu đơn giản về các chủ đề quen thuộc như bản thân, gia đình, trường học, bạn bè, …"
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-014",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Viết",
+    "text" : "Viết các đoạn văn bản ngắn, đơn giản khoảng 30 - 40 từ (có gợi ý) về các chủ đề quen thuộc.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1281,
+      "printedPage" : 32,
+      "region" : "SKILLS_G5",
+      "text" : "Viết các đoạn văn bản ngắn, đơn giản khoảng 30 - 40 từ (có gợi ý) về các chủ đề quen thuộc."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-015",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_5",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Viết",
+    "text" : "Viết hoặc điền thông tin vào biểu bảng đơn giản, tin nhắn, …",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1281,
+      "printedPage" : 32,
+      "region" : "SKILLS_G5",
+      "text" : "Viết hoặc điền thông tin vào biểu bảng đơn giản, tin nhắn, …"
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-ctrl-001",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Viết",
+    "text" : "Điền thông tin vào các mẫu đơn giản (thời khoá biểu, thiếp sinh nhật, nhãn vở, …).",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 1278,
+      "printedPage" : 29,
+      "region" : "SKILLS_G4",
+      "text" : "Điền thông tin vào các mẫu đơn giản (thời"
+    }, {
+      "pdfPage" : 1279,
+      "printedPage" : 30,
+      "region" : "SKILLS_G4",
+      "text" : "khoá biểu, thiếp sinh nhật, nhãn vở, …)."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g5-ctrl-002",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_4",
+    "topic" : "Tiếng Anh / Kỹ năng ngôn ngữ / Viết",
+    "text" : "Viết các văn bản ngắn, rất đơn giản khoảng 20 - 30 từ (có gợi ý) về các chủ đề quen thuộc.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 1279,
+      "printedPage" : 30,
+      "region" : "SKILLS_G4",
+      "text" : "Viết các văn bản ngắn, rất đơn giản khoảng 20 - 30 từ (có gợi ý) về các chủ đề quen thuộc."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  } ]
+}

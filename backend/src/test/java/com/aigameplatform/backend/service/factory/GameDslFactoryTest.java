@@ -29,6 +29,7 @@ import com.aigameplatform.backend.dto.dsl.ai.WordScrambleAiOutput;
 import com.aigameplatform.backend.dto.dsl.ai.WordScrambleAiQuestion;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.KindergartenAgeBand;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.service.validation.GameValidationService;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
@@ -140,6 +141,22 @@ class GameDslFactoryTest {
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new GameDslRequest("x", Subject.MATH, null))
                 .isInstanceOf(IllegalArgumentException.class);
+        assertThat(new GameDslRequest("x", Subject.MATH, GradeLevel.KINDERGARTEN).kindergartenAgeBand())
+                .isNull();
+        assertThat(new GameDslRequest("x", Subject.MATH, GradeLevel.KINDERGARTEN,
+                KindergartenAgeBand.AGE_3_4).curriculumDomain()).isNull();
+        assertThat(new GameDslRequest("x", Subject.MATH, GradeLevel.GRADE_1).curriculumDomain()).isNull();
+        assertThatThrownBy(() -> new GameDslRequest("x", Subject.MATH, GradeLevel.GRADE_1,
+                KindergartenAgeBand.AGE_3_4)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void kindergartenRequestCanCarryAnOptionalCurriculumDomain() {
+        var request = new GameDslRequest("Nghe và kể chuyện", Subject.VIETNAMESE, GradeLevel.KINDERGARTEN,
+                KindergartenAgeBand.AGE_4_5, "LANGUAGE");
+
+        assertThat(request.kindergartenAgeBand()).isEqualTo(KindergartenAgeBand.AGE_4_5);
+        assertThat(request.curriculumDomain()).isEqualTo("LANGUAGE");
     }
 
     @Test

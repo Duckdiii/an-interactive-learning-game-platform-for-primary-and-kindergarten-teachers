@@ -1,0 +1,15 @@
+{
+  "datasetVersion": "math-grade4-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "querySha256": "ceb04a50e1bdc2b87c2aa9f30364fdb133a7ab1f2a9cc42cef001c33b08cf058",
+  "reviewStatus": "AI_AUTHORED_UNREVIEWED",
+  "split": "DEV",
+  "queryCount": 30,
+  "independentHoldout": false,
+  "limitations": [
+    "Template paraphrases repeat a small set of learning objectives; curriculum coverage is partial.",
+    "Negative topics overlap across splits. HOLDOUT_CANDIDATE is exposed and cannot establish the independent holdout gate.",
+    "Labels and expected IDs require human correction; these are candidate retrieval objectives, not proof a game can assess the skill."
+  ]
+}

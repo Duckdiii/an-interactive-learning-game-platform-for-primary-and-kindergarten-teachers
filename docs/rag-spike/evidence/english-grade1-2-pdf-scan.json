@@ -1,0 +1,120 @@
+{
+    "sourcePdf":  "tmp/curriculum-source.pdf",
+    "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "pdfPageCount":  1555,
+    "pdfBoxVersion":  "3.0.8",
+    "scanStatus":  "COMPLETE",
+    "searchTerms":  [
+                        "LÀM QUEN TIẾNG ANH LỚP 1 VÀ LỚP 2",
+                        "Đối với học sinh lớp 1",
+                        "Đối với học sinh lớp 2",
+                        "Bước đầu nhắc lại được các cụm từ, câu đơn giản, bài vè, bài hát",
+                        "Nhận biết được các số từ 1 đến 10 và dùng các số đếm này để đếm",
+                        "Nhắc lại được các cụm từ, câu đơn giản, bài vè, bài hát",
+                        "Nhận biết được các số từ 1 - 20 và có thể dùng các số đếm này",
+                        "Trả lời được câu hỏi đơn giản và hồi đáp được bằng một hoặc hai từ"
+                    ],
+    "textMatchPages":  [
+                           64,
+                           1232,
+                           1235,
+                           1237,
+                           1238,
+                           1239,
+                           1240,
+                           1245,
+                           1248
+                       ],
+    "visualReview":  {
+                         "pagesReviewed":  [
+                                               64,
+                                               1232,
+                                               1235,
+                                               1237,
+                                               1238,
+                                               1239,
+                                               1240,
+                                               1245,
+                                               1248
+                                           ],
+                         "relevantPdfPages":  [
+                                                  1238,
+                                                  1239
+                                              ],
+                         "irrelevantOrContextPages":  [
+                                                          64,
+                                                          1232,
+                                                          1235,
+                                                          1237,
+                                                          1240,
+                                                          1245,
+                                                          1248
+                                                      ],
+                         "pageFindings":  [
+                                              {
+                                                  "pdfPage":  64,
+                                                  "finding":  "Generic “Đối với học sinh lớp 1” search hit in unrelated Vietnamese curriculum text."
+                                              },
+                                              {
+                                                  "pdfPage":  1232,
+                                                  "finding":  "Cover page for the English Grade 1–2 annex; title only, no YCCĐ."
+                                              },
+                                              {
+                                                  "pdfPage":  1235,
+                                                  "finding":  "Printed page 4, course characteristics and general context, not end-of-grade YCCĐ."
+                                              },
+                                              {
+                                                  "pdfPage":  1237,
+                                                  "finding":  "Printed page 6, program objectives, not the requested end-of-grade YCCĐ section."
+                                              },
+                                              {
+                                                  "pdfPage":  1238,
+                                                  "finding":  "Printed page 7; Grade 1 outcomes a–b."
+                                              },
+                                              {
+                                                  "pdfPage":  1239,
+                                                  "finding":  "Printed page 8; remaining Grade 1 outcomes and Grade 2 outcomes a–g."
+                                              },
+                                              {
+                                                  "pdfPage":  1240,
+                                                  "finding":  "Printed page 9, education content."
+                                              },
+                                              {
+                                                  "pdfPage":  1245,
+                                                  "finding":  "Printed page 14, teaching methods."
+                                              },
+                                              {
+                                                  "pdfPage":  1248,
+                                                  "finding":  "Printed page 17, implementation guidance."
+                                              }
+                                          ]
+                     },
+    "verifiedPageMap":  [
+                            {
+                                "pdfPage":  1238,
+                                "printedPage":  7,
+                                "region":  "FULL",
+                                "content":  "Grade 1 outcomes a-b; preceding text from the annex"
+                            },
+                            {
+                                "pdfPage":  1239,
+                                "printedPage":  8,
+                                "region":  "FULL",
+                                "content":  "Grade 1 outcomes c-e and Grade 2 outcomes a-g"
+                            }
+                        ],
+    "chunkVerification":  {
+                              "uniqueOutcomes":  13,
+                              "grade1":  {
+                                             "verified":  6,
+                                             "controls":  7
+                                         },
+                              "grade2":  {
+                                             "verified":  7,
+                                             "controls":  6
+                                         },
+                              "manualTranscriptions":  0,
+                              "status":  "PASS"
+                          },
+    "reviewLimit":  "Source extraction verified; curriculum amendment applicability and evaluation-set review remain pending."
+}

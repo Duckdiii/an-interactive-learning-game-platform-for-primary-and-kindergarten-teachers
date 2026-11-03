@@ -1,0 +1,24 @@
+{
+  "datasetVersion": "english-grade3-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Tiếng Anh / Nội dung cụ thể / Lớp 3 / Kỹ năng ngôn ngữ",
+  "pdfPages": [1275, 1276, 1277],
+  "printedPages": [26, 27, 28],
+  "pageMap": [
+    {"pdfPage": 1275, "printedPage": 26},
+    {"pdfPage": 1276, "printedPage": 27},
+    {"pdfPage": 1277, "printedPage": 28}
+  ],
+  "regions": ["SKILLS", "SKILLS_CONTROL"],
+  "primaryOutcomeCount": 15,
+  "controlOutcomeCount": 3,
+  "sourceFragmentCount": 20,
+  "corpusStatus": "SOURCE_VERIFIED_CONTENT_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "reviewNote": "All 15 Grade 3 outcomes and 3 Grade 4 control outcomes are tied to source fragments. PDFBox verification uses separate vertical bands for the Grade 3 table and adjacent Grade 4 control rows. Amendment applicability and evaluation-set review remain pending. Extraction-only; not published or eligible for production ingest."
+}

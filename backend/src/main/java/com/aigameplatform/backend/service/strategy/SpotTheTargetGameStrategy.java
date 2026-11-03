@@ -19,12 +19,19 @@ public class SpotTheTargetGameStrategy extends GameContentStrategy<SpotTheTarget
 
     public SpotTheTargetGameStrategy(JsonMapper jsonMapper) {
         super(SpotTheTargetQuestionDsl.class, SpotTheTargetQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game SPOT_THE_TARGET để người học tìm một mục tiêu được mô tả trong cảnh.
+                Dùng targetDescription để nêu mục tiêu duy nhất, cụ thể và gắn trực tiếp với YCCĐ.
+                hitRegion chỉ điền tọa độ nếu có ảnh nguồn với vị trí xác định; nếu không có ảnh/tọa độ đáng tin cậy,
+                để hitRegion null khi schema cho phép. visualPrompt không có nghĩa ảnh đã được tạo.
+                Không dùng câu hỏi lựa chọn; chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho SPOT_THE_TARGET");
+        return "Chủ đề: " + topic + ". Mục tiêu cần tìm phải thể hiện kỹ năng/khái niệm thuộc YCCĐ ở " + grade
+                + "; không cần dùng vị trí hình ảnh để chứng minh căn cứ chương trình.";
     }
 
     @Override

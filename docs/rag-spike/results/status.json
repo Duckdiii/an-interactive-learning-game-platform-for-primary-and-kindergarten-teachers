@@ -1,0 +1,34 @@
+{
+    "measurementStatus":  "LIVE_COMPLETED",
+    "scope":  {
+                  "subject":  "MATH",
+                  "gradeLevel":  "GRADE_1"
+              },
+    "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "sourceVerifiedChunks":  28,
+    "indexedChunks":  28,
+    "repeatIngest":  {
+                         "written":  0,
+                         "skipped":  28
+                     },
+    "embeddingModel":  "gemini-embedding-001",
+    "embeddingDimension":  768,
+    "minScore":  0.855,
+    "positiveQueries":  10,
+    "hits":  10,
+    "hitAt3":  1,
+    "leakedChunks":  0,
+    "negativeQueries":  3,
+    "negativeRejections":  3,
+    "controlQueries":  5,
+    "controlsPassed":  true,
+    "retrievalGatePassed":  true,
+    "negativeGatePassed":  true,
+    "passed":  true,
+    "thresholdCalibration":  "Exploratory; selected after reviewing this same 10-positive/3-negative set; holdout still needed",
+    "reports":  [
+                    "results/live-2026-10-10T16-35-07.114857800Z.json",
+                    "results/live-2026-10-10T16-36-56.842743600Z.json"
+                ],
+    "manualReview":  "Completed: retrieved outcome text and source pages checked against the audited PDF"
+}

@@ -1,0 +1,99 @@
+{
+  "sampleId" : "sample-11",
+  "topic" : "Trừ nhẩm các số tròn chục",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Trừ nhẩm các số tròn chục",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Trừ nhẩm các số tròn chục"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Kết quả của phép tính nhẩm 50 - 20 là bao nhiêu?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "50"
+      }, {
+        "id" : "b",
+        "text" : "30"
+      }, {
+        "id" : "c",
+        "text" : "20"
+      }, {
+        "id" : "d",
+        "text" : "40"
+      } ],
+      "correctOptionId" : "b"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Tính nhẩm: 70 - 40 = ?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "20"
+      }, {
+        "id" : "b",
+        "text" : "30"
+      }, {
+        "id" : "c",
+        "text" : "40"
+      }, {
+        "id" : "d",
+        "text" : "50"
+      } ],
+      "correctOptionId" : "b"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Mẹ có 80 nghìn đồng, mẹ mua rau hết 30 nghìn đồng. Hỏi mẹ còn lại bao nhiêu nghìn đồng?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "60 nghìn đồng"
+      }, {
+        "id" : "b",
+        "text" : "40 nghìn đồng"
+      }, {
+        "id" : "c",
+        "text" : "70 nghìn đồng"
+      }, {
+        "id" : "d",
+        "text" : "50 nghìn đồng"
+      } ],
+      "correctOptionId" : "d"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Số thích hợp điền vào dấu chấm để 90 - ... = 60 là:",
+      "options" : [ {
+        "id" : "a",
+        "text" : "40"
+      }, {
+        "id" : "b",
+        "text" : "20"
+      }, {
+        "id" : "c",
+        "text" : "50"
+      }, {
+        "id" : "d",
+        "text" : "30"
+      } ],
+      "correctOptionId" : "d"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-008] Các phép tính với số tự nhiên / Tính nhẩm\nThực hiện được việc cộng, trừ nhẩm các số tròn chục.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 3834
+}

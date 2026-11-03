@@ -1,0 +1,1855 @@
+{
+  "measuredAtUtc" : "2026-10-30T16:31:30.010115200Z",
+  "pipeline" : "A_EXISTING_VECTOR_TYPED_VERIFIER",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "generated" : 18,
+  "failed" : 2,
+  "humanReview" : "PENDING",
+  "independentHoldout" : "NOT_AVAILABLE",
+  "releaseAccepted" : false,
+  "samples" : [ {
+    "sampleId" : "sample-1",
+    "topic" : "Đếm số con vật từ 1 đến 5",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "FAILED",
+    "errorType" : "CurriculumEvidenceNotFoundException",
+    "errorCode" : "CURRICULUM_EVIDENCE_NOT_FOUND",
+    "elapsedMillis" : 1267
+  }, {
+    "sampleId" : "sample-2",
+    "topic" : "Đếm số con vật từ 1 đến 10",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Đếm số con vật từ 1 đến 10",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Đếm số con vật từ 1 đến 10"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Có bao nhiêu chú mèo đang chơi đùa trong vườn?",
+        "visualPrompt" : "5 con mèo",
+        "questionText" : "Có bao nhiêu chú mèo đang chơi đùa trong vườn?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "5"
+        }, {
+          "id" : "b",
+          "text" : "6"
+        }, {
+          "id" : "c",
+          "text" : "4"
+        }, {
+          "id" : "d",
+          "text" : "3"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Đếm giúp bé có tất cả mấy chú vịt dưới ao?",
+        "visualPrompt" : "7 con vịt",
+        "questionText" : "Đếm giúp bé có tất cả mấy chú vịt dưới ao?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "8"
+        }, {
+          "id" : "b",
+          "text" : "6"
+        }, {
+          "id" : "c",
+          "text" : "9"
+        }, {
+          "id" : "d",
+          "text" : "7"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Bé hãy đếm xem có bao nhiêu chú thỏ đang ăn cà rốt?",
+        "visualPrompt" : "4 con thỏ",
+        "questionText" : "Bé hãy đếm xem có bao nhiêu chú thỏ đang ăn cà rốt?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "3"
+        }, {
+          "id" : "b",
+          "text" : "2"
+        }, {
+          "id" : "c",
+          "text" : "4"
+        }, {
+          "id" : "d",
+          "text" : "5"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Có bao nhiêu chú chim đang bay trên bầu trời?",
+        "visualPrompt" : "8 con chim",
+        "questionText" : "Có bao nhiêu chú chim đang bay trên bầu trời?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "8"
+        }, {
+          "id" : "b",
+          "text" : "7"
+        }, {
+          "id" : "c",
+          "text" : "9"
+        }, {
+          "id" : "d",
+          "text" : "6"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-001] Số tự nhiên / Đếm, đọc, viết các số trong phạm vi 100\nĐếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong phạm vi 100.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 187; trang in 21; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 9949
+  }, {
+    "sampleId" : "sample-3",
+    "topic" : "Đếm trong phạm vi 20",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "FAILED",
+    "errorType" : "AiGenerationTimeoutException",
+    "errorCode" : "AI_GENERATION_TIMEOUT",
+    "elapsedMillis" : 2928
+  }, {
+    "sampleId" : "sample-4",
+    "topic" : "Đọc các số trong phạm vi 20",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Đọc các số trong phạm vi 20",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Đọc các số trong phạm vi 20"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Số 15 đọc là gì?",
+        "questionText" : "Số 15 đọc là gì?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Mười bảy"
+        }, {
+          "id" : "b",
+          "text" : "Mười sáu"
+        }, {
+          "id" : "c",
+          "text" : "Mười lăm"
+        }, {
+          "id" : "d",
+          "text" : "Mười bốn"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Số mười hai được viết như thế nào?",
+        "questionText" : "Số mười hai được viết như thế nào?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "10"
+        }, {
+          "id" : "b",
+          "text" : "12"
+        }, {
+          "id" : "c",
+          "text" : "13"
+        }, {
+          "id" : "d",
+          "text" : "11"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Số 18 đọc là gì?",
+        "questionText" : "Số 18 đọc là gì?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Mười tám"
+        }, {
+          "id" : "b",
+          "text" : "Mười bảy"
+        }, {
+          "id" : "c",
+          "text" : "Mười lăm"
+        }, {
+          "id" : "d",
+          "text" : "Mười chín"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Số mấy viết là 14?",
+        "questionText" : "Số mười mấy viết là 14?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Mười ba"
+        }, {
+          "id" : "b",
+          "text" : "Mười lăm"
+        }, {
+          "id" : "c",
+          "text" : "Mười sáu"
+        }, {
+          "id" : "d",
+          "text" : "Mười bốn"
+        } ],
+        "correctOptionId" : "d"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-001] Số tự nhiên / Đếm, đọc, viết các số trong phạm vi 100\nĐếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong phạm vi 100.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 187; trang in 21; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 4287
+  }, {
+    "sampleId" : "sample-5",
+    "topic" : "Viết các số trong phạm vi 100",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Viết các số trong phạm vi 100",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Viết các số trong phạm vi 100"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "So gom bon chuc va nam don vi viet la gi?",
+        "questionText" : "Số gồm 4 chục và 5 đơn vị viết là gì?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "40"
+        }, {
+          "id" : "b",
+          "text" : "50"
+        }, {
+          "id" : "c",
+          "text" : "45"
+        }, {
+          "id" : "d",
+          "text" : "54"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Viet so bay muoi mot",
+        "questionText" : "Viết số bảy mươi mươi mốt hay còn gọi là bảy mươi mốt?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "91"
+        }, {
+          "id" : "b",
+          "text" : "71"
+        }, {
+          "id" : "c",
+          "text" : "81"
+        }, {
+          "id" : "d",
+          "text" : "61"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "So lien sau cua so 39 la so may?",
+        "questionText" : "Số liền sau của số 39 là số mấy?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "40"
+        }, {
+          "id" : "b",
+          "text" : "49"
+        }, {
+          "id" : "c",
+          "text" : "38"
+        }, {
+          "id" : "d",
+          "text" : "30"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Doc so 82 ta viet bang chu la gi?",
+        "questionText" : "Đọc số 82 ta viết bằng chữ là gì?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Tám mươi mốt"
+        }, {
+          "id" : "b",
+          "text" : "Hai mươi tám"
+        }, {
+          "id" : "c",
+          "text" : "Tám mươi hai"
+        }, {
+          "id" : "d",
+          "text" : "Tám mươi"
+        } ],
+        "correctOptionId" : "c"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-001] Số tự nhiên / Đếm, đọc, viết các số trong phạm vi 100\nĐếm, đọc, viết được các số trong phạm vi 10; trong phạm vi 20; trong phạm vi 100.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 187; trang in 21; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 3377
+  }, {
+    "sampleId" : "sample-6",
+    "topic" : "Cộng không nhớ trong phạm vi 100",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Cộng không nhớ trong phạm vi 100",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Cộng không nhớ trong phạm vi 100"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Kết quả của phép tính 24 + 12 là bao nhiêu?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "46"
+        }, {
+          "id" : "b",
+          "text" : "34"
+        }, {
+          "id" : "c",
+          "text" : "36"
+        }, {
+          "id" : "d",
+          "text" : "38"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Bà có 30 cái kẹo, bà cho em thêm 25 cái kẹo nữa. Hỏi bà có tất cả bao nhiêu cái kẹo?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "65 cái kẹo"
+        }, {
+          "id" : "b",
+          "text" : "45 cái kẹo"
+        }, {
+          "id" : "c",
+          "text" : "55 cái kẹo"
+        }, {
+          "id" : "d",
+          "text" : "50 cái kẹo"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Tính nhẩm: 52 + 43 = ?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "86"
+        }, {
+          "id" : "b",
+          "text" : "85"
+        }, {
+          "id" : "c",
+          "text" : "96"
+        }, {
+          "id" : "d",
+          "text" : "95"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Số thích hợp điền vào chỗ chấm để 41 + 17 = ... là:",
+        "options" : [ {
+          "id" : "a",
+          "text" : "68"
+        }, {
+          "id" : "b",
+          "text" : "57"
+        }, {
+          "id" : "c",
+          "text" : "48"
+        }, {
+          "id" : "d",
+          "text" : "58"
+        } ],
+        "correctOptionId" : "d"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-005] Các phép tính với số tự nhiên / Phép cộng, phép trừ\nThực hiện được phép cộng, phép trừ (không nhớ) các số trong phạm vi 100.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 2862
+  }, {
+    "sampleId" : "sample-7",
+    "topic" : "Trừ không nhớ trong phạm vi 100",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Trừ không nhớ trong phạm vi 100",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Trừ không nhớ trong phạm vi 100"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Kết quả của phép tính 45 - 23 bằng bao nhiêu?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "23"
+        }, {
+          "id" : "b",
+          "text" : "22"
+        }, {
+          "id" : "c",
+          "text" : "24"
+        }, {
+          "id" : "d",
+          "text" : "21"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Mẹ có 68 cái kẹo, mẹ cho em 35 cái kẹo. Hỏi mẹ còn lại bao nhiêu cái kẹo?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "33"
+        }, {
+          "id" : "b",
+          "text" : "31"
+        }, {
+          "id" : "c",
+          "text" : "32"
+        }, {
+          "id" : "d",
+          "text" : "34"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Tính nhẩm: 79 - 40 =",
+        "options" : [ {
+          "id" : "a",
+          "text" : "36"
+        }, {
+          "id" : "b",
+          "text" : "37"
+        }, {
+          "id" : "c",
+          "text" : "38"
+        }, {
+          "id" : "d",
+          "text" : "39"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Số thích hợp điền vào phép tính 56 - 14 là bao nhiêu?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "42"
+        }, {
+          "id" : "b",
+          "text" : "41"
+        }, {
+          "id" : "c",
+          "text" : "40"
+        }, {
+          "id" : "d",
+          "text" : "43"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-005] Các phép tính với số tự nhiên / Phép cộng, phép trừ\nThực hiện được phép cộng, phép trừ (không nhớ) các số trong phạm vi 100.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 4447
+  }, {
+    "sampleId" : "sample-8",
+    "topic" : "Cộng nhẩm trong phạm vi 10",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Cộng nhẩm trong phạm vi 10",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Cộng nhẩm trong phạm vi 10"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Kết quả của phép tính 3 + 2 là bao nhiêu?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "4"
+        }, {
+          "id" : "b",
+          "text" : "5"
+        }, {
+          "id" : "c",
+          "text" : "6"
+        }, {
+          "id" : "d",
+          "text" : "7"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Tính nhẩm: 4 + 4 = ?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "8"
+        }, {
+          "id" : "b",
+          "text" : "7"
+        }, {
+          "id" : "c",
+          "text" : "10"
+        }, {
+          "id" : "d",
+          "text" : "9"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Số nào là kết quả của 5 + 3?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "7"
+        }, {
+          "id" : "b",
+          "text" : "9"
+        }, {
+          "id" : "c",
+          "text" : "10"
+        }, {
+          "id" : "d",
+          "text" : "8"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Cộng nhẩm: 2 + 7 bằng mấy?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "10"
+        }, {
+          "id" : "b",
+          "text" : "6"
+        }, {
+          "id" : "c",
+          "text" : "8"
+        }, {
+          "id" : "d",
+          "text" : "9"
+        } ],
+        "correctOptionId" : "d"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-007] Các phép tính với số tự nhiên / Tính nhẩm\nThực hiện được việc cộng, trừ nhẩm trong phạm vi 10.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 4200
+  }, {
+    "sampleId" : "sample-9",
+    "topic" : "Trừ nhẩm trong phạm vi 10",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Trừ nhẩm trong phạm vi 10",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Trừ nhẩm trong phạm vi 10"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Kết quả của phép tính năm trừ hai bằng bao nhiêu?",
+        "visualPrompt" : "5 - 2",
+        "questionText" : "Kết quả của phép tính 5 - 2 bằng bao nhiêu?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "2"
+        }, {
+          "id" : "b",
+          "text" : "3"
+        }, {
+          "id" : "c",
+          "text" : "4"
+        }, {
+          "id" : "d",
+          "text" : "5"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Tính nhẩm: tám trừ bốn bằng mấy?",
+        "visualPrompt" : "8 - 4",
+        "questionText" : "Tính nhẩm: 8 - 4 = ?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "6"
+        }, {
+          "id" : "b",
+          "text" : "5"
+        }, {
+          "id" : "c",
+          "text" : "4"
+        }, {
+          "id" : "d",
+          "text" : "3"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Mẹ có 7 quả táo, mẹ cho em 3 quả. Hỏi mẹ còn lại mấy quả táo?",
+        "visualPrompt" : "7 - 3",
+        "questionText" : "Mẹ có 7 quả táo, mẹ cho em 3 quả. Hỏi mẹ còn lại mấy quả táo?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "5"
+        }, {
+          "id" : "b",
+          "text" : "3"
+        }, {
+          "id" : "c",
+          "text" : "6"
+        }, {
+          "id" : "d",
+          "text" : "4"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Phép tính nào dưới đây có kết quả bằng 2?",
+        "visualPrompt" : "? - ?",
+        "questionText" : "Phép tính nào dưới đây có kết quả bằng 2?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "7 - 5"
+        }, {
+          "id" : "b",
+          "text" : "5 - 2"
+        }, {
+          "id" : "c",
+          "text" : "6 - 3"
+        }, {
+          "id" : "d",
+          "text" : "4 - 1"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-007] Các phép tính với số tự nhiên / Tính nhẩm\nThực hiện được việc cộng, trừ nhẩm trong phạm vi 10.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 3365
+  }, {
+    "sampleId" : "sample-10",
+    "topic" : "Cộng nhẩm các số tròn chục",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Cộng nhẩm các số tròn chục",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Cộng nhẩm các số tròn chục"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Kết quả của phép tính 20 + 30 là bao nhiêu?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "50"
+        }, {
+          "id" : "b",
+          "text" : "60"
+        }, {
+          "id" : "c",
+          "text" : "40"
+        }, {
+          "id" : "d",
+          "text" : "70"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Tính nhẩm: 40 + 20 =",
+        "options" : [ {
+          "id" : "a",
+          "text" : "80"
+        }, {
+          "id" : "b",
+          "text" : "50"
+        }, {
+          "id" : "c",
+          "text" : "70"
+        }, {
+          "id" : "d",
+          "text" : "60"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Số nào là kết quả của 10 + 70?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "70"
+        }, {
+          "id" : "b",
+          "text" : "80"
+        }, {
+          "id" : "c",
+          "text" : "60"
+        }, {
+          "id" : "d",
+          "text" : "90"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Cộng nhẩm 30 + 30 bằng mấy?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "60"
+        }, {
+          "id" : "b",
+          "text" : "70"
+        }, {
+          "id" : "c",
+          "text" : "80"
+        }, {
+          "id" : "d",
+          "text" : "50"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-008] Các phép tính với số tự nhiên / Tính nhẩm\nThực hiện được việc cộng, trừ nhẩm các số tròn chục.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 4422
+  }, {
+    "sampleId" : "sample-11",
+    "topic" : "Trừ nhẩm các số tròn chục",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Trừ nhẩm các số tròn chục",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Trừ nhẩm các số tròn chục"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Kết quả của phép tính nhẩm 50 - 20 là bao nhiêu?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "50"
+        }, {
+          "id" : "b",
+          "text" : "30"
+        }, {
+          "id" : "c",
+          "text" : "20"
+        }, {
+          "id" : "d",
+          "text" : "40"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Tính nhẩm: 70 - 40 = ?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "20"
+        }, {
+          "id" : "b",
+          "text" : "30"
+        }, {
+          "id" : "c",
+          "text" : "40"
+        }, {
+          "id" : "d",
+          "text" : "50"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Mẹ có 80 nghìn đồng, mẹ mua rau hết 30 nghìn đồng. Hỏi mẹ còn lại bao nhiêu nghìn đồng?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "60 nghìn đồng"
+        }, {
+          "id" : "b",
+          "text" : "40 nghìn đồng"
+        }, {
+          "id" : "c",
+          "text" : "70 nghìn đồng"
+        }, {
+          "id" : "d",
+          "text" : "50 nghìn đồng"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Số thích hợp điền vào dấu chấm để 90 - ... = 60 là:",
+        "options" : [ {
+          "id" : "a",
+          "text" : "40"
+        }, {
+          "id" : "b",
+          "text" : "20"
+        }, {
+          "id" : "c",
+          "text" : "50"
+        }, {
+          "id" : "d",
+          "text" : "30"
+        } ],
+        "correctOptionId" : "d"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-008] Các phép tính với số tự nhiên / Tính nhẩm\nThực hiện được việc cộng, trừ nhẩm các số tròn chục.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 3834
+  }, {
+    "sampleId" : "sample-12",
+    "topic" : "So sánh các số trong phạm vi 100",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "So sánh các số trong phạm vi 100",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "So sánh các số trong phạm vi 100"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Số nào lớn hơn trong hai số 34 và 43?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Cả hai số bằng nhau"
+        }, {
+          "id" : "b",
+          "text" : "34"
+        }, {
+          "id" : "c",
+          "text" : "Không so sánh được"
+        }, {
+          "id" : "d",
+          "text" : "43"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Số nào bé hơn trong hai số 78 và 69?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "69"
+        }, {
+          "id" : "b",
+          "text" : "Bằng nhau"
+        }, {
+          "id" : "c",
+          "text" : "Không biết"
+        }, {
+          "id" : "d",
+          "text" : "78"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Sắp xếp các số sau theo thứ tự từ bé đến lớn: 52, 25, 45, 54.",
+        "options" : [ {
+          "id" : "a",
+          "text" : "45, 25, 54, 52"
+        }, {
+          "id" : "b",
+          "text" : "25, 52, 45, 54"
+        }, {
+          "id" : "c",
+          "text" : "25, 45, 52, 54"
+        }, {
+          "id" : "d",
+          "text" : "54, 52, 45, 25"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Sắp xếp các số sau theo thứ tự từ lớn đến bé: 81, 91, 19, 89.",
+        "options" : [ {
+          "id" : "a",
+          "text" : "91, 81, 89, 19"
+        }, {
+          "id" : "b",
+          "text" : "19, 81, 89, 91"
+        }, {
+          "id" : "c",
+          "text" : "91, 89, 81, 19"
+        }, {
+          "id" : "d",
+          "text" : "89, 91, 81, 19"
+        } ],
+        "correctOptionId" : "c"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-003] Số tự nhiên / So sánh các số trong phạm vi 100\nNhận biết được cách so sánh, xếp thứ tự các số trong phạm vi 100 (ở các nhóm có không quá 4 số).\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 5915
+  }, {
+    "sampleId" : "sample-13",
+    "topic" : "Nhận biết hình vuông",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Nhận biết hình vuông",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Nhận biết hình vuông"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Em hãy tìm hình nào là hình vuông trong các hình dưới đây?",
+        "visualPrompt" : "Bốn hình phẳng khác nhau",
+        "questionText" : "Em hãy tìm hình nào là hình vuông trong các hình dưới đây?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình chữ nhật"
+        }, {
+          "id" : "b",
+          "text" : "Hình tam giác"
+        }, {
+          "id" : "c",
+          "text" : "Hình vuông"
+        }, {
+          "id" : "d",
+          "text" : "Hình tròn"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Vật nào sau đây có dạng hình vuông?",
+        "visualPrompt" : "Các đồ vật có hình dạng khác nhau",
+        "questionText" : "Vật nào sau đây có dạng hình vuông?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Viên bi"
+        }, {
+          "id" : "b",
+          "text" : "Khăn tay"
+        }, {
+          "id" : "c",
+          "text" : "Cái bút"
+        }, {
+          "id" : "d",
+          "text" : "Quả bóng"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Trong các hình sau, đâu là hình vuông?",
+        "visualPrompt" : "Đặc điểm các hình",
+        "questionText" : "Trong các hình sau, đâu là hình vuông?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình có chiều dài lớn hơn chiều rộng"
+        }, {
+          "id" : "b",
+          "text" : "Hình có bốn cạnh bằng nhau và bốn góc vuông"
+        }, {
+          "id" : "c",
+          "text" : "Hình có ba cạnh"
+        }, {
+          "id" : "d",
+          "text" : "Hình có đường cong khép kín"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Em hãy nhận biết tên gọi của hình có bốn cạnh bằng nhau dưới đây:",
+        "visualPrompt" : "Một hình vuông đơn lẻ",
+        "questionText" : "Em hãy nhận biết tên gọi của hình có bốn cạnh bằng nhau dưới đây:",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình tròn"
+        }, {
+          "id" : "b",
+          "text" : "Hình vuông"
+        }, {
+          "id" : "c",
+          "text" : "Hình tam giác"
+        }, {
+          "id" : "d",
+          "text" : "Hình chữ nhật"
+        } ],
+        "correctOptionId" : "b"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-012] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được hình vuông, hình tròn, hình tam giác, hình chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 3832
+  }, {
+    "sampleId" : "sample-14",
+    "topic" : "Nhận biết hình tròn",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Nhận biết hình tròn",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Nhận biết hình tròn"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Hình nào dưới đây là hình tròn?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình chữ nhật"
+        }, {
+          "id" : "b",
+          "text" : "Hình tam giác"
+        }, {
+          "id" : "c",
+          "text" : "Hình tròn"
+        }, {
+          "id" : "d",
+          "text" : "Hình vuông"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Vật nào sau đây có dạng hình tròn?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Chiếc thước kẻ"
+        }, {
+          "id" : "b",
+          "text" : "Đồng hồ treo tường dạng tròn"
+        }, {
+          "id" : "c",
+          "text" : "Viên gạch hoa hình vuông"
+        }, {
+          "id" : "d",
+          "text" : "Quyển vở"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Chọn hình có đường viền cong khép kín và không có góc nào trong các hình sau:",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình vuông"
+        }, {
+          "id" : "b",
+          "text" : "Hình tam giác"
+        }, {
+          "id" : "c",
+          "text" : "Hình tròn"
+        }, {
+          "id" : "d",
+          "text" : "Hình chữ nhật"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Đâu là tên của hình phẳng có dạng như chiếc đĩa ăn cơm?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình tròn"
+        }, {
+          "id" : "b",
+          "text" : "Hình chữ nhật"
+        }, {
+          "id" : "c",
+          "text" : "Hình tam giác"
+        }, {
+          "id" : "d",
+          "text" : "Hình vuông"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-012] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được hình vuông, hình tròn, hình tam giác, hình chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 3407
+  }, {
+    "sampleId" : "sample-15",
+    "topic" : "Nhận biết hình tam giác",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Nhận biết hình tam giác",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Nhận biết hình tam giác"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Em hãy tìm hình tam giác trong các hình dưới đây.",
+        "visualPrompt" : "Bốn hình phẳng khác nhau",
+        "questionText" : "Em hãy tìm hình tam giác trong các hình dưới đây.",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình chữ nhật"
+        }, {
+          "id" : "b",
+          "text" : "Hình tròn"
+        }, {
+          "id" : "c",
+          "text" : "Hình tam giác"
+        }, {
+          "id" : "d",
+          "text" : "Hình vuông"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Biển báo giao thông nào có dạng hình tam giác?",
+        "visualPrompt" : "Các loại biển báo giao thông",
+        "questionText" : "Biển báo giao thông nào có dạng hình tam giác?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Biển báo hình tam giác"
+        }, {
+          "id" : "b",
+          "text" : "Biển báo hình vuông"
+        }, {
+          "id" : "c",
+          "text" : "Biển báo hình chữ nhật"
+        }, {
+          "id" : "d",
+          "text" : "Biển báo hình tròn"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Hình nào có ba cạnh và ba góc?",
+        "visualPrompt" : "Các hình học cơ bản",
+        "questionText" : "Hình nào có ba cạnh và ba góc?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình tròn"
+        }, {
+          "id" : "b",
+          "text" : "Hình chữ nhật"
+        }, {
+          "id" : "c",
+          "text" : "Hình vuông"
+        }, {
+          "id" : "d",
+          "text" : "Hình tam giác"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Em hãy chọn hình là hình tam giác.",
+        "visualPrompt" : "Mô tả các hình",
+        "questionText" : "Em hãy chọn hình là hình tam giác.",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hình có 4 cạnh bằng nhau"
+        }, {
+          "id" : "b",
+          "text" : "Hình có 3 cạnh"
+        }, {
+          "id" : "c",
+          "text" : "Hình không có góc"
+        }, {
+          "id" : "d",
+          "text" : "Hình có 4 cạnh"
+        } ],
+        "correctOptionId" : "b"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-012] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được hình vuông, hình tròn, hình tam giác, hình chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 3204
+  }, {
+    "sampleId" : "sample-16",
+    "topic" : "Nhận biết hình chữ nhật",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Nhận biết hình chữ nhật",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Nhận biết hình chữ nhật"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Hinh nao duoi day la hinh chu nhat?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hinh tron"
+        }, {
+          "id" : "b",
+          "text" : "Hinh tam giac"
+        }, {
+          "id" : "c",
+          "text" : "Hinh chu nhat"
+        }, {
+          "id" : "d",
+          "text" : "Hinh vuong"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Vat nao co dang hinh chu nhat?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Cai ec-ke hinh tam giac"
+        }, {
+          "id" : "b",
+          "text" : "Qua bong"
+        }, {
+          "id" : "c",
+          "text" : "Quyen vo hoc tap"
+        }, {
+          "id" : "d",
+          "text" : "Bien bao giao thong hinh tron"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Trong cac hinh sau, hinh nao co hai canh dai va hai canh ngan?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hinh chu nhat"
+        }, {
+          "id" : "b",
+          "text" : "Hinh vuong deu"
+        }, {
+          "id" : "c",
+          "text" : "Hinh tron"
+        }, {
+          "id" : "d",
+          "text" : "Hinh tam giac"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Em hay chi ra ten cua hinh co bon canh va bon goc vuong, trong do hai canh doi dien dai bang nhau.",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hinh chu nhat"
+        }, {
+          "id" : "b",
+          "text" : "Hinh tron"
+        }, {
+          "id" : "c",
+          "text" : "Hinh tam giac"
+        }, {
+          "id" : "d",
+          "text" : "Hinh vuong"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-012] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được hình vuông, hình tròn, hình tam giác, hình chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 5183
+  }, {
+    "sampleId" : "sample-17",
+    "topic" : "Nhận biết khối lập phương",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Nhận biết khối lập phương",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Nhận biết khối lập phương"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Vật nào dưới đây có dạng khối lập phương?",
+        "visualPrompt" : "Hình ảnh viên Rubik",
+        "questionText" : "Vật nào dưới đây có dạng khối lập phương?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Lon sữa bò"
+        }, {
+          "id" : "b",
+          "text" : "Viên Rubik"
+        }, {
+          "id" : "c",
+          "text" : "Quả bóng đá"
+        }, {
+          "id" : "d",
+          "text" : "Viên gạch xây nhà"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Khối lập phương có đặc điểm nào dưới đây?",
+        "questionText" : "Khối lập phương có đặc điểm nào dưới đây?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Có dạng quả bóng tròn"
+        }, {
+          "id" : "b",
+          "text" : "Có dạng chiếc hộp dài"
+        }, {
+          "id" : "c",
+          "text" : "Có các mặt đều là hình vuông"
+        }, {
+          "id" : "d",
+          "text" : "Không có mặt nào là hình phẳng"
+        } ],
+        "correctOptionId" : "c"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Trong các đồ vật sau, đồ vật nào có hình khối lập phương?",
+        "visualPrompt" : "Hộp quà hình lập phương",
+        "questionText" : "Trong các đồ vật sau, đồ vật nào có hình khối lập phương?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hộp quà hình vuông"
+        }, {
+          "id" : "b",
+          "text" : "Quả trứng gà"
+        }, {
+          "id" : "c",
+          "text" : "Quyển vở"
+        }, {
+          "id" : "d",
+          "text" : "Cái thước kẻ"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Con hãy chọn khối lập phương trong các hình dưới đây",
+        "visualPrompt" : "Các khối hình học",
+        "questionText" : "Con hãy chọn khối lập phương trong các hình dưới đây:",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Khối cầu"
+        }, {
+          "id" : "b",
+          "text" : "Khối trụ"
+        }, {
+          "id" : "c",
+          "text" : "Khối hộp chữ nhật"
+        }, {
+          "id" : "d",
+          "text" : "Khối lập phương"
+        } ],
+        "correctOptionId" : "d"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-013] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được khối lập phương, khối hộp chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188, 189; trang in 22, 23; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 4440
+  }, {
+    "sampleId" : "sample-18",
+    "topic" : "Nhận biết khối hộp chữ nhật",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Nhận biết khối hộp chữ nhật",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Nhận biết khối hộp chữ nhật"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "visualPrompt" : "Hình ảnh viên gạch hình hộp chữ nhật",
+        "questionText" : "Vật nào dưới đây có dạng khối hộp chữ nhật?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hòn bi ve"
+        }, {
+          "id" : "b",
+          "text" : "Quả bóng tròn"
+        }, {
+          "id" : "c",
+          "text" : "Cái phễu"
+        }, {
+          "id" : "d",
+          "text" : "Viên gạch xây nhà"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "visualPrompt" : "Hình ảnh hộp bút dài",
+        "questionText" : "Hộp quà nào sau đây có dạng khối hộp chữ nhật?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Hộp kẹo hình tròn"
+        }, {
+          "id" : "b",
+          "text" : "Hộp quà dài đựng bút"
+        }, {
+          "id" : "c",
+          "text" : "Cái mũ sinh nhật"
+        }, {
+          "id" : "d",
+          "text" : "Quả bóng đá"
+        } ],
+        "correctOptionId" : "b"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "visualPrompt" : "Hình ảnh quyển sách",
+        "questionText" : "Em hãy tìm vật có dạng khối hộp chữ nhật trong các đồ vật sau:",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Quyển sách Toán lớp 1"
+        }, {
+          "id" : "b",
+          "text" : "Quả cam"
+        }, {
+          "id" : "c",
+          "text" : "Lon sữa bò"
+        }, {
+          "id" : "d",
+          "text" : "Đèn giao thông"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "visualPrompt" : "Hình ảnh quả bóng bàn",
+        "questionText" : "Đồ vật nào dưới đây không phải là khối hộp chữ nhật?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Quả bóng bàn"
+        }, {
+          "id" : "b",
+          "text" : "Quyển vở"
+        }, {
+          "id" : "c",
+          "text" : "Viên gạch"
+        }, {
+          "id" : "d",
+          "text" : "Hộp sữa tươi dài"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-013] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được khối lập phương, khối hộp chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188, 189; trang in 22, 23; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 6849
+  }, {
+    "sampleId" : "sample-19",
+    "topic" : "Đo độ dài bằng cm",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Đo độ dài bằng cm",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Đo độ dài bằng cm"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "visualPrompt" : "Hình vẽ thước thẳng có bút chì đặt từ 0 đến 5 cm",
+        "questionText" : "Bút chì dài từ vạch số 0 đến vạch số 5 trên thước thẳng. Hỏi bút chì dài bao nhiêu xăng-ti-mét?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "5 cm"
+        }, {
+          "id" : "b",
+          "text" : "6 cm"
+        }, {
+          "id" : "c",
+          "text" : "4 cm"
+        }, {
+          "id" : "d",
+          "text" : "3 cm"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "visualPrompt" : "Hình vẽ thước thẳng có thanh gỗ đặt từ 1 đến 7 cm",
+        "questionText" : "Một thanh gỗ dài từ vạch số 1 đến vạch số 7 trên thước. Hỏi thanh gỗ dài mấy xăng-ti-mét?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "5 cm"
+        }, {
+          "id" : "b",
+          "text" : "8 cm"
+        }, {
+          "id" : "c",
+          "text" : "7 cm"
+        }, {
+          "id" : "d",
+          "text" : "6 cm"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "questionText" : "Đơn vị đo độ dài nào dưới đây được viết tắt là cm?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Mét"
+        }, {
+          "id" : "b",
+          "text" : "Đề-xi-mét"
+        }, {
+          "id" : "c",
+          "text" : "Ki-lô-mét"
+        }, {
+          "id" : "d",
+          "text" : "Xăng-ti-mét"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "visualPrompt" : "Hình vẽ thước thẳng có dải băng giấy đặt từ 2 đến 9 cm",
+        "questionText" : "Dải băng giấy dài từ vạch số 2 đến vạch số 9 trên thước thẳng. Hỏi dải băng giấy dài bao nhiêu xăng-ti-mét?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "7 cm"
+        }, {
+          "id" : "b",
+          "text" : "6 cm"
+        }, {
+          "id" : "c",
+          "text" : "8 cm"
+        }, {
+          "id" : "d",
+          "text" : "9 cm"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-020] Đo lường / Đo độ dài bằng thước thẳng\nThực hiện được việc đo độ dài bằng thước thẳng với đơn vị đo là cm.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 189; trang in 23; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 14779
+  }, {
+    "sampleId" : "sample-20",
+    "topic" : "Đọc giờ đúng",
+    "moderationMode" : "BLOCKLIST_ONLY",
+    "humanReview" : "PENDING",
+    "status" : "GENERATED",
+    "game" : {
+      "schemaVersion" : "1.0.0",
+      "gameType" : "QUIZ",
+      "metadata" : {
+        "title" : "Đọc giờ đúng",
+        "subject" : "MATH",
+        "gradeLevel" : "GRADE_1",
+        "topic" : "Đọc giờ đúng"
+      },
+      "gameplaySettings" : {
+        "hitboxScale" : 1.5
+      },
+      "questions" : [ {
+        "id" : "q1",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Đồng hồ có kim phút chỉ số 12 và kim giờ chỉ số 3. Đố em biết đó là mấy giờ?",
+        "visualPrompt" : "Đồng hồ chỉ 3 giờ",
+        "questionText" : "Đồng hồ có kim phút chỉ số 12 và kim giờ chỉ số 3. Đố em biết đó là mấy giờ?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "12 giờ"
+        }, {
+          "id" : "b",
+          "text" : "2 giờ"
+        }, {
+          "id" : "c",
+          "text" : "1 giờ"
+        }, {
+          "id" : "d",
+          "text" : "3 giờ"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q2",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Nhìn lên đồng hồ thấy kim dài chỉ số 12, kim ngắn chỉ số 8. Hỏi đồng hồ chỉ mấy giờ?",
+        "visualPrompt" : "Đồng hồ chỉ 8 giờ",
+        "questionText" : "Nhìn lên đồng hồ thấy kim dài chỉ số 12, kim ngắn chỉ số 8. Hỏi đồng hồ chỉ mấy giờ?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "6 giờ"
+        }, {
+          "id" : "b",
+          "text" : "10 giờ"
+        }, {
+          "id" : "c",
+          "text" : "12 giờ"
+        }, {
+          "id" : "d",
+          "text" : "8 giờ"
+        } ],
+        "correctOptionId" : "d"
+      }, {
+        "id" : "q3",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Khi kim phút chỉ số 12 và kim giờ chỉ số 6, ta đọc là mấy giờ?",
+        "visualPrompt" : "Đồng hồ chỉ 6 giờ",
+        "questionText" : "Khi kim phút chỉ số 12 và kim giờ chỉ số 6, ta đọc là mấy giờ?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "6 giờ"
+        }, {
+          "id" : "b",
+          "text" : "7 giờ"
+        }, {
+          "id" : "c",
+          "text" : "12 giờ"
+        }, {
+          "id" : "d",
+          "text" : "5 giờ"
+        } ],
+        "correctOptionId" : "a"
+      }, {
+        "id" : "q4",
+        "timeLimitSeconds" : 38,
+        "points" : 10,
+        "audioText" : "Đồng hồ treo tường chỉ đúng 10 giờ khi kim ngắn chỉ vào số nào?",
+        "visualPrompt" : "Đồng hồ chỉ 10 giờ",
+        "questionText" : "Đồng hồ treo tường chỉ đúng 10 giờ khi kim ngắn chỉ vào số nào?",
+        "options" : [ {
+          "id" : "a",
+          "text" : "Số 10"
+        }, {
+          "id" : "b",
+          "text" : "Số 12"
+        }, {
+          "id" : "c",
+          "text" : "Số 11"
+        }, {
+          "id" : "d",
+          "text" : "Số 9"
+        } ],
+        "correctOptionId" : "a"
+      } ]
+    },
+    "retrievedContext" : "[math-g1-018] Đo lường / Giờ đúng trên đồng hồ\nNhận biết được giờ đúng trên đồng hồ.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 189; trang in 23; 32/2018/TT-BGDDT",
+    "elapsedMillis" : 6478
+  } ]
+}

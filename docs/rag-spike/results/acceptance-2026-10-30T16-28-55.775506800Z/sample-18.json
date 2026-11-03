@@ -1,0 +1,103 @@
+{
+  "sampleId" : "sample-18",
+  "topic" : "Nhận biết khối hộp chữ nhật",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Nhận biết khối hộp chữ nhật",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Nhận biết khối hộp chữ nhật"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "visualPrompt" : "Hình ảnh viên gạch hình hộp chữ nhật",
+      "questionText" : "Vật nào dưới đây có dạng khối hộp chữ nhật?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hòn bi ve"
+      }, {
+        "id" : "b",
+        "text" : "Quả bóng tròn"
+      }, {
+        "id" : "c",
+        "text" : "Cái phễu"
+      }, {
+        "id" : "d",
+        "text" : "Viên gạch xây nhà"
+      } ],
+      "correctOptionId" : "d"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "visualPrompt" : "Hình ảnh hộp bút dài",
+      "questionText" : "Hộp quà nào sau đây có dạng khối hộp chữ nhật?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Hộp kẹo hình tròn"
+      }, {
+        "id" : "b",
+        "text" : "Hộp quà dài đựng bút"
+      }, {
+        "id" : "c",
+        "text" : "Cái mũ sinh nhật"
+      }, {
+        "id" : "d",
+        "text" : "Quả bóng đá"
+      } ],
+      "correctOptionId" : "b"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "visualPrompt" : "Hình ảnh quyển sách",
+      "questionText" : "Em hãy tìm vật có dạng khối hộp chữ nhật trong các đồ vật sau:",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Quyển sách Toán lớp 1"
+      }, {
+        "id" : "b",
+        "text" : "Quả cam"
+      }, {
+        "id" : "c",
+        "text" : "Lon sữa bò"
+      }, {
+        "id" : "d",
+        "text" : "Đèn giao thông"
+      } ],
+      "correctOptionId" : "a"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "visualPrompt" : "Hình ảnh quả bóng bàn",
+      "questionText" : "Đồ vật nào dưới đây không phải là khối hộp chữ nhật?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "Quả bóng bàn"
+      }, {
+        "id" : "b",
+        "text" : "Quyển vở"
+      }, {
+        "id" : "c",
+        "text" : "Viên gạch"
+      }, {
+        "id" : "d",
+        "text" : "Hộp sữa tươi dài"
+      } ],
+      "correctOptionId" : "a"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-013] Hình học trực quan / Quan sát, nhận biết hình dạng của một số hình phẳng và hình khối đơn giản\nNhận dạng được khối lập phương, khối hộp chữ nhật thông qua việc sử dụng bộ đồ dùng học tập cá nhân hoặc vật thật.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188, 189; trang in 22, 23; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 6849
+}

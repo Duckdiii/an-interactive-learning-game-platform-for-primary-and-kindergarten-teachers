@@ -1,0 +1,28 @@
+{
+  "datasetVersion": "vietnamese-grade4-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Tiếng Việt / Nội dung cụ thể / Lớp 4 / Yêu cầu cần đạt",
+  "pdfPages": [87, 88, 89, 90, 91],
+  "printedPages": [31, 32, 33, 34, 35],
+  "pageMap": [
+    {"pdfPage": 87, "printedPage": 31},
+    {"pdfPage": 88, "printedPage": 32},
+    {"pdfPage": 89, "printedPage": 33},
+    {"pdfPage": 90, "printedPage": 34},
+    {"pdfPage": 91, "printedPage": 35}
+  ],
+  "region": "LEFT",
+  "primaryOutcomeCount": 42,
+  "controlOutcomeCount": 2,
+  "sourceFragmentCount": 45,
+  "corpusStatus": "SOURCE_VERIFIED_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "manualTranscriptions": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/vietnamese-grade4-source-verification.json",
+  "reviewNote": "All 42 Grade 4 outcomes and two Grade 3 control outcomes are declared as source chunks for PDFBox verification across 45 source fragments. Extraction-only; not published or eligible for production ingest."
+}

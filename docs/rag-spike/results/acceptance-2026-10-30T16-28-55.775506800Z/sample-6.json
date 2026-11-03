@@ -1,0 +1,99 @@
+{
+  "sampleId" : "sample-6",
+  "topic" : "Cộng không nhớ trong phạm vi 100",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "GENERATED",
+  "game" : {
+    "schemaVersion" : "1.0.0",
+    "gameType" : "QUIZ",
+    "metadata" : {
+      "title" : "Cộng không nhớ trong phạm vi 100",
+      "subject" : "MATH",
+      "gradeLevel" : "GRADE_1",
+      "topic" : "Cộng không nhớ trong phạm vi 100"
+    },
+    "gameplaySettings" : {
+      "hitboxScale" : 1.5
+    },
+    "questions" : [ {
+      "id" : "q1",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Kết quả của phép tính 24 + 12 là bao nhiêu?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "46"
+      }, {
+        "id" : "b",
+        "text" : "34"
+      }, {
+        "id" : "c",
+        "text" : "36"
+      }, {
+        "id" : "d",
+        "text" : "38"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q2",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Bà có 30 cái kẹo, bà cho em thêm 25 cái kẹo nữa. Hỏi bà có tất cả bao nhiêu cái kẹo?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "65 cái kẹo"
+      }, {
+        "id" : "b",
+        "text" : "45 cái kẹo"
+      }, {
+        "id" : "c",
+        "text" : "55 cái kẹo"
+      }, {
+        "id" : "d",
+        "text" : "50 cái kẹo"
+      } ],
+      "correctOptionId" : "c"
+    }, {
+      "id" : "q3",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Tính nhẩm: 52 + 43 = ?",
+      "options" : [ {
+        "id" : "a",
+        "text" : "86"
+      }, {
+        "id" : "b",
+        "text" : "85"
+      }, {
+        "id" : "c",
+        "text" : "96"
+      }, {
+        "id" : "d",
+        "text" : "95"
+      } ],
+      "correctOptionId" : "d"
+    }, {
+      "id" : "q4",
+      "timeLimitSeconds" : 38,
+      "points" : 10,
+      "questionText" : "Số thích hợp điền vào chỗ chấm để 41 + 17 = ... là:",
+      "options" : [ {
+        "id" : "a",
+        "text" : "68"
+      }, {
+        "id" : "b",
+        "text" : "57"
+      }, {
+        "id" : "c",
+        "text" : "48"
+      }, {
+        "id" : "d",
+        "text" : "58"
+      } ],
+      "correctOptionId" : "d"
+    } ]
+  },
+  "retrievedContext" : "[math-g1-005] Các phép tính với số tự nhiên / Phép cộng, phép trừ\nThực hiện được phép cộng, phép trừ (không nhớ) các số trong phạm vi 100.\nNguồn: Thông-tư-32-2018-TT-BGDĐT.pdf; PDF 188; trang in 22; 32/2018/TT-BGDDT",
+  "elapsedMillis" : 2862
+}

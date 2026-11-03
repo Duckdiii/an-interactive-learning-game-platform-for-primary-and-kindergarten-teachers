@@ -1,0 +1,29 @@
+{
+  "datasetVersion": "vietnamese-grade3-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Tiếng Việt / Nội dung cụ thể / Lớp 3 / Yêu cầu cần đạt",
+  "pdfPages": [82, 83, 84, 85, 86, 87],
+  "printedPages": [26, 27, 28, 29, 30, 31],
+  "pageMap": [
+    {"pdfPage": 82, "printedPage": 26},
+    {"pdfPage": 83, "printedPage": 27},
+    {"pdfPage": 84, "printedPage": 28},
+    {"pdfPage": 85, "printedPage": 29},
+    {"pdfPage": 86, "printedPage": 30},
+    {"pdfPage": 87, "printedPage": 31}
+  ],
+  "region": "LEFT",
+  "primaryOutcomeCount": 45,
+  "controlOutcomeCount": 2,
+  "sourceFragmentCount": 50,
+  "corpusStatus": "SOURCE_VERIFIED_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "manualTranscriptions": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/vietnamese-grade3-source-verification.json",
+  "reviewNote": "All 45 Grade 3 outcomes and two Grade 4 control outcomes passed PDFBox region checks across 50 source fragments; all six printed-page footers passed on 2026-10-31. Independent review is pending. Extraction-only; not published or eligible for production ingest."
+}

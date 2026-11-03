@@ -19,12 +19,19 @@ public class WordScrambleGameStrategy extends GameContentStrategy<WordScrambleQu
 
     public WordScrambleGameStrategy(JsonMapper jsonMapper) {
         super(WordScrambleQuestionDsl.class, WordScrambleQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game WORD_SCRAMBLE để người học sắp xếp các chữ cái thành từ đích.
+                Dùng correctWord và scrambledLetters đúng schema. scrambledLetters phải chứa chính xác các chữ cái của
+                correctWord, không thêm/bớt/thay chữ; correctWord phải là từ có nghĩa và thuộc nội dung được dạy.
+                Giữ đúng dấu và chữ cái tiếng Việt nếu môn học yêu cầu. Không dùng định nghĩa cần kiến thức ngoài YCCĐ.
+                Chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho WORD_SCRAMBLE");
+        return "Chủ đề: " + topic + ". Chọn từ đích và gợi ý văn bản ngắn phù hợp YCCĐ ở " + grade
+                + "; không yêu cầu người học xáo/sắp xếp biểu thức hoặc kiến thức ngoài phạm vi.";
     }
 
     @Override

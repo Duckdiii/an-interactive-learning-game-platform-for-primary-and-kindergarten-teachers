@@ -23,12 +23,20 @@ public class DragDropGameStrategy extends GameContentStrategy<DragDropQuestionDs
 
     public DragDropGameStrategy(JsonMapper jsonMapper) {
         super(DragDropQuestionDsl.class, DragDropQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game DRAG_DROP: người chơi kéo từng mục vào một drop zone phù hợp.
+                Sinh DTO nội dung AI: dropZones gồm các object có label; mỗi item có text, visualPrompt và zoneIndex
+                theo schema. zoneIndex là chỉ số bắt đầu từ 0 trong mảng dropZones, phải trỏ tới vùng hiện có.
+                Factory tự tạo định danh và liên kết của DSL; không tự sinh ID.
+                Nhãn zone và nội dung item phải cho thấy cách phân loại/ghép vị trí rõ ràng, có một cách đặt đúng theo YCCĐ.
+                Không giả định hình ảnh đã tồn tại chỉ từ visualPrompt. Chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho DRAG_DROP");
+        return "Chủ đề: " + topic + ". Chọn thao tác kéo-thả có ý nghĩa với kỹ năng trong YCCĐ ở " + grade
+                + "; không yêu cầu phân loại theo tiêu chí chưa được dạy hoặc không có trong căn cứ.";
     }
 
     @Override

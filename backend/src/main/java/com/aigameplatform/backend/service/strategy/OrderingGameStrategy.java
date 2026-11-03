@@ -23,12 +23,18 @@ public class OrderingGameStrategy extends GameContentStrategy<OrderingQuestionDs
 
     public OrderingGameStrategy(JsonMapper jsonMapper) {
         super(OrderingQuestionDsl.class, OrderingQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game ORDERING để người chơi sắp xếp các bước theo thứ tự đúng.
+                Dùng steps đúng schema; mỗi bước có text và correctPosition là vị trí đúng (đánh số từ 1, trong giới hạn schema).
+                Thứ tự phải có căn cứ và có một trình tự hợp lý; không dùng thứ tự tùy ý hoặc biến thành câu hỏi trắc nghiệm.
+                Chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho ORDERING");
+        return "Chủ đề: " + topic + ". Tạo trình tự, chuỗi số hoặc các bước chỉ khi kỹ năng sắp xếp đó được nêu/đỡ bởi YCCĐ ở "
+                + grade + "; không áp đặt quy trình ngoài nguồn.";
     }
 
     /**

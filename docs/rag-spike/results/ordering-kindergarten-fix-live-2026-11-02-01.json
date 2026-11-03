@@ -1,0 +1,759 @@
+{
+    "runId":  "ordering-kindergarten-fix-20261102-01",
+    "date":  "2026-11-02",
+    "timezone":  "Asia/Saigon",
+    "model":  "gemini-3.5-flash-lite",
+    "status":  "BOTH_REQUESTED_CASES_PASSED_BOUNDED_ACCEPTANCE",
+    "actualHttpRequests":  10,
+    "requestLimit":  10,
+    "countedAt":  "HTTP_CLIENT_CHAT_AND_EMBEDDING",
+    "automaticRetries":  0,
+    "quotaObserved":  false,
+    "database":  "EXISTING_LOCAL_CLUSTER_READ_ONLY",
+    "moderation":  "BLOCKLIST_ONLY",
+    "regressionTests":  {
+                            "skipped":  0,
+                            "errors":  0,
+                            "tests":  77,
+                            "mavenExitCode":  0,
+                            "failures":  0
+                        },
+    "savedOutputRegressions":  [
+                                   {
+                                       "status":  "PASS",
+                                       "caseId":  "saved-ordering-review-regression",
+                                       "callsAfter":  1,
+                                       "expected":  "Accept correct encoded sequence AND its source support"
+                                   },
+                                   {
+                                       "expected":  "Reject q1/q5 missing material; retain clear q2/q3/q4",
+                                       "callsAfter":  2,
+                                       "answers":  {
+                                                       "q1":  false,
+                                                       "q2":  true,
+                                                       "q3":  true,
+                                                       "q4":  true,
+                                                       "q5":  false
+                                                   },
+                                       "caseId":  "saved-preschool-material-review-regression",
+                                       "status":  "PASS"
+                                   }
+                               ],
+    "cases":  [
+                  {
+                      "caseId":  "ordering-math-g2",
+                      "gameType":  "ORDERING",
+                      "scope":  "MATH/GRADE_2",
+                      "syntheticRequest":  "Cho học sinh lớp 2 sắp xếp mỗi nhóm 4 số tự nhiên khác nhau trong phạm vi 1000 theo thứ tự từ bé đến lớn. Chỉ dùng chữ số, không cần hình hay âm thanh.",
+                      "callsBefore":  2,
+                      "status":  "GENERATED_SCHEMA_BUSINESS_GROUNDING_GATE_PASSED",
+                      "datasetVersion":  "math-grade2-draft-v1",
+                      "evidenceIds":  [
+                                          "math-g2-008"
+                                      ],
+                      "questionCount":  2,
+                      "callsAfter":  6
+                  },
+                  {
+                      "caseId":  "quiz-kindergarten-language-45",
+                      "gameType":  "QUIZ",
+                      "scope":  "VIETNAMESE/KINDERGARTEN",
+                      "syntheticRequest":  "Cho trẻ 4–5 tuổi nghe cô đọc tên vài con vật, rau quả hoặc đồ gỗ quen thuộc rồi chọn từ gọi chung của nhóm. Mỗi câu có lời dẫn ngắn cho giáo viên đọc nguyên văn và 2 đáp án rất ngắn để cô đọc cho trẻ chọn bằng lời; không bắt trẻ tự đọc, không cần tranh hoặc tệp âm thanh.",
+                      "ageBand":  "AGE_4_5",
+                      "domain":  "LANGUAGE",
+                      "callsBefore":  6,
+                      "status":  "GENERATED_SCHEMA_BUSINESS_GROUNDING_GATE_PASSED",
+                      "datasetVersion":  "kindergarten-outcomes-v1",
+                      "evidenceIds":  [
+                                          "kg-lang-vocabulary-45"
+                                      ],
+                      "questionCount":  4,
+                      "callsAfter":  10
+                  }
+              ],
+    "httpCalls":  [
+                      {
+                          "number":  1,
+                          "status":  "SUCCESS",
+                          "caseId":  "saved-ordering-review-regression",
+                          "stage":  "GENERATED_CONTENT_REVIEW"
+                      },
+                      {
+                          "number":  2,
+                          "status":  "SUCCESS",
+                          "caseId":  "saved-preschool-material-review-regression",
+                          "stage":  "GENERATED_CONTENT_REVIEW"
+                      },
+                      {
+                          "number":  3,
+                          "status":  "SUCCESS",
+                          "caseId":  "ordering-math-g2",
+                          "stage":  "QUERY_EMBEDDING"
+                      },
+                      {
+                          "number":  4,
+                          "status":  "SUCCESS",
+                          "caseId":  "ordering-math-g2",
+                          "stage":  "EVIDENCE_SEMANTIC_REVIEW"
+                      },
+                      {
+                          "number":  5,
+                          "status":  "SUCCESS",
+                          "caseId":  "ordering-math-g2",
+                          "stage":  "GAME_GENERATION"
+                      },
+                      {
+                          "number":  6,
+                          "status":  "SUCCESS",
+                          "caseId":  "ordering-math-g2",
+                          "stage":  "GENERATED_CONTENT_REVIEW"
+                      },
+                      {
+                          "number":  7,
+                          "status":  "SUCCESS",
+                          "caseId":  "quiz-kindergarten-language-45",
+                          "stage":  "QUERY_EMBEDDING"
+                      },
+                      {
+                          "number":  8,
+                          "status":  "SUCCESS",
+                          "caseId":  "quiz-kindergarten-language-45",
+                          "stage":  "EVIDENCE_SEMANTIC_REVIEW"
+                      },
+                      {
+                          "number":  9,
+                          "status":  "SUCCESS",
+                          "caseId":  "quiz-kindergarten-language-45",
+                          "stage":  "GAME_GENERATION"
+                      },
+                      {
+                          "number":  10,
+                          "status":  "SUCCESS",
+                          "caseId":  "quiz-kindergarten-language-45",
+                          "stage":  "GENERATED_CONTENT_REVIEW"
+                      }
+                  ],
+    "stageEvents":  [
+                        {
+                            "detail":  [
+
+                                       ],
+                            "stage":  "GROUNDING_REVIEW",
+                            "requestCount":  1,
+                            "caseId":  "saved-ordering-review-regression",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  [
+                                           {
+                                               "path":  "$.questions[0].correctOptionId",
+                                               "message":  "Không xác minh được đáp án là chính xác",
+                                               "kind":  "INVALID"
+                                           },
+                                           {
+                                               "path":  "$.questions[4].correctOptionId",
+                                               "message":  "Không xác minh được đáp án là chính xác",
+                                               "kind":  "INVALID"
+                                           }
+                                       ],
+                            "stage":  "GROUNDING_REVIEW",
+                            "requestCount":  2,
+                            "caseId":  "saved-preschool-material-review-regression",
+                            "status":  "FAILED"
+                        },
+                        {
+                            "detail":  {
+                                           "chunkIds":  [
+                                                            "math-g2-008",
+                                                            "math-g2-007",
+                                                            "math-g2-006",
+                                                            "math-g2-001",
+                                                            "math-g2-005",
+                                                            "math-g2-003",
+                                                            "math-g2-009",
+                                                            "math-g2-004",
+                                                            "math-g2-002",
+                                                            "math-g2-019",
+                                                            "math-g2-011",
+                                                            "math-g2-018",
+                                                            "math-g2-040",
+                                                            "math-g2-017",
+                                                            "math-g2-020",
+                                                            "math-g2-039",
+                                                            "math-g2-041",
+                                                            "math-g2-013",
+                                                            "math-g2-012",
+                                                            "math-g2-010",
+                                                            "math-g2-027",
+                                                            "math-g2-015",
+                                                            "math-g2-042",
+                                                            "math-g2-033",
+                                                            "math-g2-016",
+                                                            "math-g2-025",
+                                                            "math-g2-014",
+                                                            "math-g2-022",
+                                                            "math-g2-036",
+                                                            "math-g2-037",
+                                                            "math-g2-043",
+                                                            "math-g2-026",
+                                                            "math-g2-034",
+                                                            "math-g2-028",
+                                                            "math-g2-029",
+                                                            "math-g2-032",
+                                                            "math-g2-038",
+                                                            "math-g2-031",
+                                                            "math-g2-030",
+                                                            "math-g2-021",
+                                                            "math-g2-035",
+                                                            "math-g2-024",
+                                                            "math-g2-023"
+                                                        ],
+                                           "candidateCount":  43
+                                       },
+                            "stage":  "RETRIEVAL",
+                            "requestCount":  3,
+                            "caseId":  "ordering-math-g2",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  {
+                                           "selectedChunkIds":  [
+                                                                    "math-g2-008"
+                                                                ],
+                                           "reason":  "EXPLICIT_MATCH"
+                                       },
+                            "stage":  "EVIDENCE_VERIFICATION",
+                            "requestCount":  4,
+                            "caseId":  "ordering-math-g2",
+                            "status":  "SUPPORTED"
+                        },
+                        {
+                            "detail":  [
+
+                                       ],
+                            "stage":  "AI_OUTPUT_SCHEMA_VALIDATION",
+                            "requestCount":  5,
+                            "caseId":  "ordering-math-g2",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  "Existing factory returned DSL",
+                            "stage":  "DSL_FACTORY",
+                            "requestCount":  5,
+                            "caseId":  "ordering-math-g2",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  [
+
+                                       ],
+                            "stage":  "DSL_SCHEMA_BUSINESS_BLOCKLIST_VALIDATION",
+                            "requestCount":  5,
+                            "caseId":  "ordering-math-g2",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  [
+
+                                       ],
+                            "stage":  "GROUNDING_REVIEW",
+                            "requestCount":  6,
+                            "caseId":  "ordering-math-g2",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  {
+                                           "chunkIds":  [
+                                                            "kg-lang-vocabulary-45",
+                                                            "kg-lang-words-45",
+                                                            "kg-lang-books-45",
+                                                            "kg-lang-picture-45",
+                                                            "kg-lang-sentence-45",
+                                                            "kg-lang-speech-clear-45",
+                                                            "kg-lang-conversation-45",
+                                                            "kg-lang-poems-45",
+                                                            "kg-lang-listen-45",
+                                                            "kg-lang-recall-45",
+                                                            "kg-lang-reading-habit-45",
+                                                            "kg-lang-symbols-45",
+                                                            "kg-lang-retell-story-45",
+                                                            "kg-lang-character-45",
+                                                            "kg-lang-writing-symbols-45",
+                                                            "kg-lang-politeness-45"
+                                                        ],
+                                           "candidateCount":  16
+                                       },
+                            "stage":  "RETRIEVAL",
+                            "requestCount":  7,
+                            "caseId":  "quiz-kindergarten-language-45",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  {
+                                           "selectedChunkIds":  [
+                                                                    "kg-lang-vocabulary-45"
+                                                                ],
+                                           "reason":  "EXPLICIT_MATCH"
+                                       },
+                            "stage":  "EVIDENCE_VERIFICATION",
+                            "requestCount":  8,
+                            "caseId":  "quiz-kindergarten-language-45",
+                            "status":  "SUPPORTED"
+                        },
+                        {
+                            "detail":  [
+
+                                       ],
+                            "stage":  "AI_OUTPUT_SCHEMA_VALIDATION",
+                            "requestCount":  9,
+                            "caseId":  "quiz-kindergarten-language-45",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  "Existing factory returned DSL",
+                            "stage":  "DSL_FACTORY",
+                            "requestCount":  9,
+                            "caseId":  "quiz-kindergarten-language-45",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  [
+
+                                       ],
+                            "stage":  "DSL_SCHEMA_BUSINESS_BLOCKLIST_VALIDATION",
+                            "requestCount":  9,
+                            "caseId":  "quiz-kindergarten-language-45",
+                            "status":  "PASS"
+                        },
+                        {
+                            "detail":  [
+
+                                       ],
+                            "stage":  "GROUNDING_REVIEW",
+                            "requestCount":  10,
+                            "caseId":  "quiz-kindergarten-language-45",
+                            "status":  "PASS"
+                        }
+                    ],
+    "savedOrderingReview":  {
+                                "questions":  [
+                                                  {
+                                                      "questionId":  "q1",
+                                                      "answerCorrect":  true,
+                                                      "supportedByCurriculum":  true,
+                                                      "supportingChunkIds":  [
+                                                                                 "math-g2-008"
+                                                                             ],
+                                                      "reason":  "The numbers are correctly ordered from smallest to largest and the task is fully supported by the curriculum outcome for grade 2."
+                                                  }
+                                              ]
+                            },
+    "savedPreschoolReview":  {
+                                 "questions":  [
+                                                   {
+                                                       "questionId":  "q1",
+                                                       "answerCorrect":  false,
+                                                       "supportedByCurriculum":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "kg-lang-vocabulary-45"
+                                                                              ],
+                                                       "reason":  "The text states the objects are cái bàn, cái ghế, cái tủ, but the material (wood) is not explicitly stated in the audioText/questionText or supported by supplied evidence, which violates the strict rule regarding material categorization."
+                                                   },
+                                                   {
+                                                       "questionId":  "q2",
+                                                       "answerCorrect":  true,
+                                                       "supportedByCurriculum":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "kg-lang-vocabulary-45"
+                                                                              ],
+                                                       "reason":  "The question correctly asks children to identify the general category for con gà, con vịt, con lợn as con vật, which is supported by curriculum and factual category membership."
+                                                   },
+                                                   {
+                                                       "questionId":  "q3",
+                                                       "answerCorrect":  true,
+                                                       "supportedByCurriculum":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "kg-lang-vocabulary-45"
+                                                                              ],
+                                                       "reason":  "The question correctly identifies quả cam, quả chuối, rau cải under the general category rau quả, matching curriculum outcomes."
+                                                   },
+                                                   {
+                                                       "questionId":  "q4",
+                                                       "answerCorrect":  true,
+                                                       "supportedByCurriculum":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "kg-lang-vocabulary-45"
+                                                                              ],
+                                                       "reason":  "The question correctly categorizes con mèo, con chó, con gà as con vật, meeting both factual category and curriculum checks."
+                                                   },
+                                                   {
+                                                       "questionId":  "q5",
+                                                       "answerCorrect":  false,
+                                                       "supportedByCurriculum":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "kg-lang-vocabulary-45"
+                                                                              ],
+                                                       "reason":  "The text lists cái giường, cái tủ, cái bàn, but their material (wood) is not explicitly stated in the supplied question text, violating the strict material classification rule."
+                                                   }
+                                               ]
+                             },
+    "ordering":  {
+                     "game":  {
+                                  "schemaVersion":  "1.0.0",
+                                  "gameType":  "ORDERING",
+                                  "metadata":  {
+                                                   "title":  "Cho học sinh lớp 2 sắp xếp mỗi nhóm 4 số tự nhiên khác nhau trong phạm vi 1000 theo thứ tự từ bé đến",
+                                                   "subject":  "MATH",
+                                                   "gradeLevel":  "GRADE_2",
+                                                   "topic":  "Cho học sinh lớp 2 sắp xếp mỗi nhóm 4 số tự nhiên khác nhau trong phạm vi 1000 theo thứ tự từ bé đến lớn. Chỉ dùng chữ số, không cần hình hay âm thanh."
+                                               },
+                                  "gameplaySettings":  {
+                                                           "hitboxScale":  1.0
+                                                       },
+                                  "questions":  [
+                                                    {
+                                                        "id":  "q1",
+                                                        "timeLimitSeconds":  60,
+                                                        "points":  20,
+                                                        "audioText":  "Sap xep cac so tu be den lon",
+                                                        "steps":  [
+                                                                      {
+                                                                          "id":  "s1",
+                                                                          "text":  "342",
+                                                                          "visualPrompt":  "Hien thi so 342",
+                                                                          "correctPosition":  1
+                                                                      },
+                                                                      {
+                                                                          "id":  "s2",
+                                                                          "text":  "456",
+                                                                          "visualPrompt":  "Hien thi so 456",
+                                                                          "correctPosition":  2
+                                                                      },
+                                                                      {
+                                                                          "id":  "s3",
+                                                                          "text":  "912",
+                                                                          "visualPrompt":  "Hien thi so 912",
+                                                                          "correctPosition":  4
+                                                                      },
+                                                                      {
+                                                                          "id":  "s4",
+                                                                          "text":  "789",
+                                                                          "visualPrompt":  "Hien thi so 789",
+                                                                          "correctPosition":  3
+                                                                      }
+                                                                  ]
+                                                    },
+                                                    {
+                                                        "id":  "q2",
+                                                        "timeLimitSeconds":  60,
+                                                        "points":  20,
+                                                        "audioText":  "Sap xep cac so tu be den lon",
+                                                        "steps":  [
+                                                                      {
+                                                                          "id":  "s1",
+                                                                          "text":  "567",
+                                                                          "visualPrompt":  "Hien thi so 567",
+                                                                          "correctPosition":  3
+                                                                      },
+                                                                      {
+                                                                          "id":  "s2",
+                                                                          "text":  "890",
+                                                                          "visualPrompt":  "Hien thi so 890",
+                                                                          "correctPosition":  4
+                                                                      },
+                                                                      {
+                                                                          "id":  "s3",
+                                                                          "text":  "234",
+                                                                          "visualPrompt":  "Hien thi so 234",
+                                                                          "correctPosition":  2
+                                                                      },
+                                                                      {
+                                                                          "id":  "s4",
+                                                                          "text":  "125",
+                                                                          "visualPrompt":  "Hien thi so 125",
+                                                                          "correctPosition":  1
+                                                                      }
+                                                                  ]
+                                                    }
+                                                ]
+                              },
+                     "evidence":  {
+                                      "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                                      "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+                                      "datasetVersion":  "math-grade2-draft-v1",
+                                      "curriculumVersion":  "32/2018/TT-BGDDT",
+                                      "embeddingModel":  "gemini-embedding-001",
+                                      "chunks":  [
+                                                     {
+                                                         "chunkId":  "math-g2-008",
+                                                         "subject":  "MATH",
+                                                         "gradeLevel":  "GRADE_2",
+                                                         "topic":  "Toán / Số và phép tính / Số tự nhiên / So sánh các số",
+                                                         "text":  "Thực hiện được việc sắp xếp các số theo thứ tự (từ bé đến lớn hoặc ngược lại) trong một nhóm có không quá 4 số (trong phạm vi 1000).",
+                                                         "score":  0.8987023970936661,
+                                                         "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+                                                         "pdfPages":  [
+                                                                          191
+                                                                      ],
+                                                         "printedPages":  [
+                                                                              25
+                                                                          ],
+                                                         "curriculumVersion":  "32/2018/TT-BGDDT",
+                                                         "domain":  null,
+                                                         "subDomain":  null,
+                                                         "ageBand":  null
+                                                     }
+                                                 ]
+                                  },
+                     "review":  {
+                                    "status":  "REVIEWED",
+                                    "claims":  [
+                                                   {
+                                                       "questionId":  "q1",
+                                                       "answerCorrect":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "math-g2-008"
+                                                                              ],
+                                                       "supportedByCurriculum":  true
+                                                   },
+                                                   {
+                                                       "questionId":  "q2",
+                                                       "answerCorrect":  true,
+                                                       "supportingChunkIds":  [
+                                                                                  "math-g2-008"
+                                                                              ],
+                                                       "supportedByCurriculum":  true
+                                                   }
+                                               ],
+                                    "warnings":  [
+
+                                                 ],
+                                    "reviewerModel":  "gemini-3.5-flash-lite"
+                                }
+                 },
+    "preschoolQuiz":  {
+                          "game":  {
+                                       "schemaVersion":  "1.0.0",
+                                       "gameType":  "QUIZ",
+                                       "metadata":  {
+                                                        "title":  "Cho trẻ 4–5 tuổi nghe cô đọc tên vài con vật, rau quả hoặc đồ gỗ quen thuộc rồi chọn từ gọi chung củ",
+                                                        "subject":  "VIETNAMESE",
+                                                        "gradeLevel":  "KINDERGARTEN",
+                                                        "topic":  "Cho trẻ 4–5 tuổi nghe cô đọc tên vài con vật, rau quả hoặc đồ gỗ quen thuộc rồi chọn từ gọi chung của nhóm. Mỗi câu có lời dẫn ngắn cho giáo viên đọc nguyên văn và 2 đáp án rất ngắn để cô đọc cho trẻ"
+                                                    },
+                                       "gameplaySettings":  {
+                                                                "hitboxScale":  1.5
+                                                            },
+                                       "questions":  [
+                                                         {
+                                                             "id":  "q1",
+                                                             "timeLimitSeconds":  45,
+                                                             "points":  10,
+                                                             "audioText":  "Cô đọc tên các vật sau: cái ghế làm bằng gỗ, cái bàn làm bằng gỗ. Đó là đồ dùng thuộc nhóm nào?",
+                                                             "visualPrompt":  "Co doc ten do go",
+                                                             "questionText":  "Cô đọc tên các vật sau: cái ghế làm bằng gỗ, cái bàn làm bằng gỗ. Đó là đồ dùng thuộc nhóm nào?",
+                                                             "options":  [
+                                                                             {
+                                                                                 "id":  "a",
+                                                                                 "text":  "Đồ gỗ"
+                                                                             },
+                                                                             {
+                                                                                 "id":  "b",
+                                                                                 "text":  "Con vật"
+                                                                             }
+                                                                         ],
+                                                             "correctOptionId":  "a"
+                                                         },
+                                                         {
+                                                             "id":  "q2",
+                                                             "timeLimitSeconds":  45,
+                                                             "points":  10,
+                                                             "audioText":  "Cô đọc tên các con vật sau: con gà, con vịt, con lợn. Đó là nhóm nào?",
+                                                             "visualPrompt":  "Co doc ten con vat",
+                                                             "questionText":  "Cô đọc tên các con vật sau: con gà, con vịt, con lợn. Đó là nhóm nào?",
+                                                             "options":  [
+                                                                             {
+                                                                                 "id":  "a",
+                                                                                 "text":  "Rau quả"
+                                                                             },
+                                                                             {
+                                                                                 "id":  "b",
+                                                                                 "text":  "Con vật"
+                                                                             }
+                                                                         ],
+                                                             "correctOptionId":  "b"
+                                                         },
+                                                         {
+                                                             "id":  "q3",
+                                                             "timeLimitSeconds":  45,
+                                                             "points":  10,
+                                                             "audioText":  "Cô đọc tên các loại sau: quả cam, quả chuối, rau cải. Đó là nhóm nào?",
+                                                             "visualPrompt":  "Co doc ten rau qua",
+                                                             "questionText":  "Cô đọc tên các loại sau: quả cam, quả chuối, rau cải. Đó là nhóm nào?",
+                                                             "options":  [
+                                                                             {
+                                                                                 "id":  "a",
+                                                                                 "text":  "Rau quả"
+                                                                             },
+                                                                             {
+                                                                                 "id":  "b",
+                                                                                 "text":  "Đồ gỗ"
+                                                                             }
+                                                                         ],
+                                                             "correctOptionId":  "a"
+                                                         },
+                                                         {
+                                                             "id":  "q4",
+                                                             "timeLimitSeconds":  45,
+                                                             "points":  10,
+                                                             "audioText":  "Cô đọc tên các vật sau: cái tủ làm bằng gỗ, cái giường làm bằng gỗ. Đó là đồ dùng thuộc nhóm nào?",
+                                                             "visualPrompt":  "Co doc ten do go",
+                                                             "questionText":  "Cô đọc tên các vật sau: cái tủ làm bằng gỗ, cái giường làm bằng gỗ. Đó là đồ dùng thuộc nhóm nào?",
+                                                             "options":  [
+                                                                             {
+                                                                                 "id":  "a",
+                                                                                 "text":  "Con vật"
+                                                                             },
+                                                                             {
+                                                                                 "id":  "b",
+                                                                                 "text":  "Đồ gỗ"
+                                                                             }
+                                                                         ],
+                                                             "correctOptionId":  "b"
+                                                         }
+                                                     ]
+                                   },
+                          "evidence":  {
+                                           "sourceDocument":  "01-VBHN-BGDĐT-2021.pdf",
+                                           "sourceSha256":  "146c1f23b3515d46f2e2e97afcfc0a1d871ef28b6700c7db4fbacfeb56e8572f",
+                                           "datasetVersion":  "kindergarten-outcomes-v1",
+                                           "curriculumVersion":  "01/VBHN-BGDĐT (2021; TT17/2009 as amended by TT28/2016 and TT51/2020)",
+                                           "embeddingModel":  "gemini-embedding-001",
+                                           "chunks":  [
+                                                          {
+                                                              "chunkId":  "kg-lang-vocabulary-45",
+                                                              "subject":  "VIETNAMESE",
+                                                              "gradeLevel":  "KINDERGARTEN",
+                                                              "topic":  "Ngôn ngữ / Nghe hiểu lời nói / Từ khái quát",
+                                                              "text":  "1.2. Hiểu nghĩa từ khái quát: rau quả, con vật, đồ gỗ…",
+                                                              "score":  0.8906877807677087,
+                                                              "sourceDocument":  "01-VBHN-BGDĐT-2021.pdf",
+                                                              "pdfPages":  [
+                                                                               68
+                                                                           ],
+                                                              "printedPages":  [
+                                                                                   80
+                                                                               ],
+                                                              "curriculumVersion":  "01/VBHN-BGDĐT (2021; TT17/2009 as amended by TT28/2016 and TT51/2020)",
+                                                              "domain":  "LANGUAGE",
+                                                              "subDomain":  "LISTENING|VOCABULARY",
+                                                              "ageBand":  "AGE_4_5"
+                                                          }
+                                                      ]
+                                       },
+                          "review":  {
+                                         "status":  "REVIEWED",
+                                         "claims":  [
+                                                        {
+                                                            "questionId":  "q1",
+                                                            "answerCorrect":  true,
+                                                            "supportingChunkIds":  [
+                                                                                       "kg-lang-vocabulary-45"
+                                                                                   ],
+                                                            "supportedByCurriculum":  true
+                                                        },
+                                                        {
+                                                            "questionId":  "q2",
+                                                            "answerCorrect":  true,
+                                                            "supportingChunkIds":  [
+                                                                                       "kg-lang-vocabulary-45"
+                                                                                   ],
+                                                            "supportedByCurriculum":  true
+                                                        },
+                                                        {
+                                                            "questionId":  "q3",
+                                                            "answerCorrect":  true,
+                                                            "supportingChunkIds":  [
+                                                                                       "kg-lang-vocabulary-45"
+                                                                                   ],
+                                                            "supportedByCurriculum":  true
+                                                        },
+                                                        {
+                                                            "questionId":  "q4",
+                                                            "answerCorrect":  true,
+                                                            "supportingChunkIds":  [
+                                                                                       "kg-lang-vocabulary-45"
+                                                                                   ],
+                                                            "supportedByCurriculum":  true
+                                                        }
+                                                    ],
+                                         "warnings":  [
+
+                                                      ],
+                                         "reviewerModel":  "gemini-3.5-flash-lite"
+                                     }
+                      },
+    "contentChecks":  {
+                          "method":  "Codex read every saved/new question; local numeric, answer and material-text assertions; not independent human approval",
+                          "kindergartenQuiz":  [
+                                                   {
+                                                       "distinctShortChoices":  2,
+                                                       "questionId":  "q1",
+                                                       "teacherReadTextSupplied":  true,
+                                                       "explicitMaterial":  "Both named objects explicitly làm bằng gỗ",
+                                                       "selectedAnswer":  "Đồ gỗ",
+                                                       "status":  "PASS"
+                                                   },
+                                                   {
+                                                       "distinctShortChoices":  2,
+                                                       "questionId":  "q2",
+                                                       "teacherReadTextSupplied":  true,
+                                                       "explicitMaterial":  "Not required for intrinsic animal/fruit-vegetable categories",
+                                                       "selectedAnswer":  "Con vật",
+                                                       "status":  "PASS"
+                                                   },
+                                                   {
+                                                       "distinctShortChoices":  2,
+                                                       "questionId":  "q3",
+                                                       "teacherReadTextSupplied":  true,
+                                                       "explicitMaterial":  "Not required for intrinsic animal/fruit-vegetable categories",
+                                                       "selectedAnswer":  "Rau quả",
+                                                       "status":  "PASS"
+                                                   },
+                                                   {
+                                                       "distinctShortChoices":  2,
+                                                       "questionId":  "q4",
+                                                       "teacherReadTextSupplied":  true,
+                                                       "explicitMaterial":  "Both named objects explicitly làm bằng gỗ",
+                                                       "selectedAnswer":  "Đồ gỗ",
+                                                       "status":  "PASS"
+                                                   }
+                                               ],
+                          "ordering":  [
+                                           {
+                                               "groupSize":  4,
+                                               "status":  "PASS",
+                                               "rangeMaximum":  1000,
+                                               "sequenceByCorrectPosition":  [
+                                                                                 342,
+                                                                                 456,
+                                                                                 789,
+                                                                                 912
+                                                                             ],
+                                               "questionId":  "q1"
+                                           },
+                                           {
+                                               "groupSize":  4,
+                                               "status":  "PASS",
+                                               "rangeMaximum":  1000,
+                                               "sequenceByCorrectPosition":  [
+                                                                                 125,
+                                                                                 234,
+                                                                                 567,
+                                                                                 890
+                                                                             ],
+                                               "questionId":  "q2"
+                                           }
+                                       ]
+                      }
+}

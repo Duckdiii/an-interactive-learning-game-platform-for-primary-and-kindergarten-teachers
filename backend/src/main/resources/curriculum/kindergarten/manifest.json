@@ -1,0 +1,151 @@
+{
+    "sourceDocument":  "01-VBHN-BGDĐT-2021.pdf",
+    "sourceUrl":  "https://congbao.chinhphu.vn/van-ban/van-ban-hop-nhat-so-01-vbhn-bgddt-33656/35646.htm",
+    "sourceSha256":  "146c1f23b3515d46f2e2e97afcfc0a1d871ef28b6700c7db4fbacfeb56e8572f",
+    "curriculumVersion":  "01/VBHN-BGDĐT (2021; TT17/2009 as amended by TT28/2016 and TT51/2020)",
+    "applicabilityNote":  "This pilot corpus represents the consolidated 2021 program. It is not the experimental 2026-2027 program approved under Decision 388/QĐ-BGDĐT for participating schools.",
+    "applicabilityReference":  "https://hanoi.edu.vn/giao-duc-thu-do-doi-moi-hoi-nhap-phat-trien/so-gddt-tap-huan-huong-dan-thuc-hien-chuong-trinh-giao-duc-mam-non-thi-diem-nam/ctmb/1142/17087",
+    "datasetVersion":  "kindergarten-outcomes-v1",
+    "pdfPageCount":  84,
+    "scope":  "KINDERGARTEN / preschool age bands 3-4, 4-5, 5-6; domains COGNITIVE and LANGUAGE only",
+    "sourceAuthority":  "Government Gazette 565+566, 2021",
+    "amendmentsChecked":  [
+                              "28/2016/TT-BGDĐT",
+                              "51/2020/TT-BGDĐT"
+                          ],
+    "primaryOutcomeCount":  134,
+    "controlOutcomeCount":  0,
+    "corpusStatus":  "SOURCE_VERIFIED_OWNER_APPROVED",
+    "ownerApprovalBasis":  "Project owner policy: outcomes extracted from and verified against this exact official PDF source are approved as curriculum corpus data. This does not claim separate preschool-specialist pedagogical review.",
+    "supportedSubDomains":  [
+                                "SCIENCE_EXPLORATION",
+                                "MATHEMATICAL_CONCEPTS",
+                                "SOCIAL_EXPLORATION",
+                                "EXPERIMENTATION",
+                                "OBSERVATION",
+                                "INFORMATION_GATHERING",
+                                "CLASSIFICATION",
+                                "RELATIONSHIPS",
+                                "PROBLEM_SOLVING",
+                                "UNDERSTANDING",
+                                "NUMBER_AND_QUANTITY",
+                                "HOLIDAYS",
+                                "LANDMARKS",
+                                "SELF_FAMILY_SCHOOL",
+                                "OCCUPATIONS",
+                                "LISTENING",
+                                "FOLLOWING_DIRECTIONS",
+                                "PATTERNING",
+                                "MEASUREMENT",
+                                "SHAPES",
+                                "POSITION_AND_TIME",
+                                "VOCABULARY",
+                                "CONVERSATION",
+                                "SPEAKING",
+                                "PRONUNCIATION",
+                                "NARRATION",
+                                "GRAMMAR",
+                                "POETRY",
+                                "STORYTELLING",
+                                "SOCIAL_LANGUAGE",
+                                "EARLY_READING",
+                                "BOOK_AWARENESS",
+                                "PICTURE_NARRATION",
+                                "EARLY_WRITING",
+                                "ENVIRONMENTAL_PRINT",
+                                "VIETNAMESE_ALPHABET"
+                            ],
+    "manualTranscriptions":  [
+                                 {
+                                     "region":  "AGE_4_5",
+                                     "chunkId":  "kg-math-measure-45",
+                                     "printedPage":  78,
+                                     "pdfPage":  66
+                                 },
+                                 {
+                                     "region":  "AGE_5_6",
+                                     "chunkId":  "kg-math-measure-56",
+                                     "printedPage":  78,
+                                     "pdfPage":  66
+                                 },
+                                 {
+                                     "region":  "AGE_5_6",
+                                     "chunkId":  "kg-lang-recall-56",
+                                     "printedPage":  81,
+                                     "pdfPage":  69
+                                 }
+                             ],
+    "reviewNote":  "The declared scope contains all 134 expected outcomes on PDF pages 61-70 (printed 73-82) for cognitive and language development, across age bands 3-4, 4-5 and 5-6. Independent source reviewers passed each completed batch. PDFBox verifies 131 outcomes directly; 3 are separately transcribed because PDFBox attaches superscript amendment footnote markers 71, 72 and 73 to adjacent words. The owner approves this corpus under the recorded exact-PDF extraction policy; no separate preschool-specialist pedagogical review is claimed.",
+    "sourceFragmentCount":  134,
+    "pdfPages":  [
+                     61,
+                     62,
+                     63,
+                     64,
+                     65,
+                     66,
+                     67,
+                     68,
+                     69,
+                     70
+                 ],
+    "printedPages":  [
+                         73,
+                         74,
+                         75,
+                         76,
+                         77,
+                         78,
+                         79,
+                         80,
+                         81,
+                         82
+                     ],
+    "pageMap":  [
+                    {
+                        "pdfPage":  61,
+                        "printedPage":  73
+                    },
+                    {
+                        "pdfPage":  62,
+                        "printedPage":  74
+                    },
+                    {
+                        "pdfPage":  63,
+                        "printedPage":  75
+                    },
+                    {
+                        "pdfPage":  64,
+                        "printedPage":  76
+                    },
+                    {
+                        "pdfPage":  65,
+                        "printedPage":  77
+                    },
+                    {
+                        "pdfPage":  66,
+                        "printedPage":  78
+                    },
+                    {
+                        "pdfPage":  67,
+                        "printedPage":  79
+                    },
+                    {
+                        "pdfPage":  68,
+                        "printedPage":  80
+                    },
+                    {
+                        "pdfPage":  69,
+                        "printedPage":  81
+                    },
+                    {
+                        "pdfPage":  70,
+                        "printedPage":  82
+                    }
+                ],
+    "regions":  [
+                    "AGE_3_4",
+                    "AGE_4_5",
+                    "AGE_5_6"
+                ]
+}

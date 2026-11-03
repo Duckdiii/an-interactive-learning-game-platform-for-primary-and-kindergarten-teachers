@@ -1,0 +1,10 @@
+{
+  "sampleId" : "sample-3",
+  "topic" : "Đếm trong phạm vi 20",
+  "moderationMode" : "BLOCKLIST_ONLY",
+  "humanReview" : "PENDING",
+  "status" : "FAILED",
+  "errorType" : "AiGenerationTimeoutException",
+  "errorCode" : "AI_GENERATION_TIMEOUT",
+  "elapsedMillis" : 2928
+}

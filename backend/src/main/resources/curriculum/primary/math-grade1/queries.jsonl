@@ -1,0 +1,13 @@
+{"queryId":"q01","topic":"Phép cộng nhẩm trong phạm vi 10","expectedChunkIds":["math-g1-007"],"negative":false}
+{"queryId":"q02","topic":"Bé tập đọc và viết các số từ 0 đến 100","expectedChunkIds":["math-g1-001"],"negative":false}
+{"queryId":"q03","topic":"So sánh và sắp xếp bốn số trong phạm vi 100","expectedChunkIds":["math-g1-003"],"negative":false}
+{"queryId":"q04","topic":"Cộng trừ hai số không nhớ trong phạm vi 100","expectedChunkIds":["math-g1-005"],"negative":false}
+{"queryId":"q05","topic":"Tính nhẩm cộng trừ các số tròn chục","expectedChunkIds":["math-g1-008"],"negative":false}
+{"queryId":"q06","topic":"Nhận biết hình vuông, hình tròn, hình tam giác và hình chữ nhật","expectedChunkIds":["math-g1-012"],"negative":false}
+{"queryId":"q07","topic":"Nhận biết khối lập phương và khối hộp chữ nhật qua vật thật","expectedChunkIds":["math-g1-013"],"negative":false}
+{"queryId":"q08","topic":"Bé dùng thước đo độ dài bằng xăng-ti-mét","expectedChunkIds":["math-g1-020","math-g1-016"],"negative":false}
+{"queryId":"q09","topic":"Xem đồng hồ và đọc giờ đúng","expectedChunkIds":["math-g1-018","math-g1-021"],"negative":false}
+{"queryId":"q10","topic":"Một tuần có mấy ngày, thứ tự các ngày trong tuần","expectedChunkIds":["math-g1-017"],"negative":false}
+{"queryId":"n01","topic":"Cộng và trừ phân số khác mẫu số","expectedChunkIds":[],"negative":true}
+{"queryId":"n02","topic":"Phép nhân và bảng cửu chương 7","expectedChunkIds":[],"negative":true}
+{"queryId":"n03","topic":"Lập trình vòng lặp bằng Python","expectedChunkIds":[],"negative":true}

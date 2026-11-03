@@ -44,4 +44,22 @@ class GlobalExceptionHandlerTest {
         assertThat(body.error().code()).isEqualTo(ErrorCode.VALIDATION_ERROR.name());
         assertThat(body.error().message()).isEqualTo("Yêu cầu không hợp lệ");
     }
+
+    @Test
+    void unverifiedGeneratedContentIsAnExplicitUnprocessableEntity() {
+        var response = handler.handleApiException(new GeneratedContentUnverifiedException("QUESTION_NOT_MACHINE_CHECKABLE"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        ApiResponse<Void> body = response.getBody();
+        assertThat(body.error().code()).isEqualTo(ErrorCode.GENERATED_CONTENT_UNVERIFIED.name());
+        assertThat(body.error().message()).contains("QUESTION_NOT_MACHINE_CHECKABLE");
+    }
+
+    @Test
+    void curriculumClarificationIsAnExplicitUnprocessableEntity() {
+        var response = handler.handleApiException(new CurriculumClarificationRequiredException("Need age band"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(response.getBody().error().code()).isEqualTo(ErrorCode.CURRICULUM_CLARIFICATION_REQUIRED.name());
+    }
 }

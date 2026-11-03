@@ -1,0 +1,28 @@
+{
+  "datasetVersion": "vietnamese-grade2-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Ngữ văn / Nội dung cụ thể / Lớp 2 / Yêu cầu cần đạt",
+  "pdfPages": [78, 79, 80, 81, 82, 83],
+  "printedPages": [22, 23, 24, 25, 26, 27],
+  "pageMap": [
+    {"pdfPage": 78, "printedPage": 22},
+    {"pdfPage": 79, "printedPage": 23},
+    {"pdfPage": 80, "printedPage": 24},
+    {"pdfPage": 81, "printedPage": 25},
+    {"pdfPage": 82, "printedPage": 26},
+    {"pdfPage": 83, "printedPage": 27}
+  ],
+  "region": "LEFT",
+  "primaryOutcomeCount": 42,
+  "controlOutcomeCount": 2,
+  "sourceFragmentCount": 49,
+  "corpusStatus": "SOURCE_VERIFIED_CONTENT_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "sourceVerifiedOn": "2026-10-31",
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/vietnamese-grade2-source-verification.json",
+  "reviewNote": "All 42 Grade 2 outcomes plus two Grade 3 control outcomes from the overlapping final source page are tied to 49 fragments. PDFBox source verification has passed; independent source review remains pending. Extraction-only; not published or eligible for production ingest."
+}

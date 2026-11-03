@@ -40,6 +40,11 @@ Thumbs.db
 *.log
 logs/
 
+# Local PDF extraction/rendering scratch artifacts. Keep the source PDF available
+# because the English Grade 1/2 manifests use it for reproducible source checks.
+/tmp/*
+!/tmp/curriculum-source.pdf
+
 # === AI review (file sinh ra khi chạy thử script ở máy cục bộ hoặc trong workflow) ===
 # Thư mục đầu vào vòng 2 do scripts/ai-review/precheck.mjs ghi
 /ai-review-input/

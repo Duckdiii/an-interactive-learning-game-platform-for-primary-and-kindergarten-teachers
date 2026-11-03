@@ -1,0 +1,223 @@
+{
+  "sourceSha256" : "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "verifiedChunks" : 13,
+  "sourceFragmentCount" : 13,
+  "extractedPages" : 2,
+  "datasetVersion" : "english-grade2-draft-v1",
+  "curriculumVersion" : "32/2018/TT-BGDDT",
+  "sourceDocument" : "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "verifiedOutcomes" : 7,
+  "verifiedControls" : 6,
+  "manualTranscribedOutcomes" : 0,
+  "manualTranscribedControls" : 0,
+  "manualTranscriptionChunkIds" : [ ],
+  "chunks" : [ {
+    "chunkId" : "en-g1-001",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_1",
+    "topic" : "Làm quen tiếng Anh / Nói và nhắc lại",
+    "text" : "Bước đầu nhắc lại được các cụm từ, câu đơn giản, bài vè, bài hát phù hợp với năng lực tư duy, cảm xúc và tâm sinh lí lứa tuổi lớp 1.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 1238,
+      "printedPage" : 7,
+      "region" : "FULL",
+      "text" : "Bước đầu nhắc lại được các cụm từ, câu đơn giản, bài vè, bài hát phù hợp với năng lực tư duy, cảm xúc và tâm sinh lí lứa tuổi lớp 1."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g1-002",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_1",
+    "topic" : "Làm quen tiếng Anh / Số đếm",
+    "text" : "Nhận biết được các số từ 1 đến 10 và dùng các số đếm này để đếm hoặc trả lời một số câu hỏi về số lượng đơn giản.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 1238,
+      "printedPage" : 7,
+      "region" : "FULL",
+      "text" : "Nhận biết được các số từ 1 đến 10 và dùng các số đếm này để đếm hoặc trả lời một số câu hỏi về số lượng đơn giản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g1-003",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_1",
+    "topic" : "Làm quen tiếng Anh / Từ vựng theo chủ đề",
+    "text" : "Nhận biết và gọi tên được các từ vựng cụ thể, đơn giản theo chủ đề đã học trong ngữ cảnh giao tiếp.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Nhận biết và gọi tên được các từ vựng cụ thể, đơn giản theo chủ đề đã học trong ngữ cảnh giao tiếp."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g1-004",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_1",
+    "topic" : "Làm quen tiếng Anh / Hỏi đáp",
+    "text" : "Phản hồi được bằng tiếng Anh một cách đơn giản trong các tình huống hỏi đáp rất đơn giản, gắn liền với trải nghiệm của học sinh lớp 1.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Phản hồi được bằng tiếng Anh một cách đơn giản trong các tình huống hỏi đáp rất đơn giản, gắn liền với trải nghiệm của học sinh lớp 1."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g1-005",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_1",
+    "topic" : "Làm quen tiếng Anh / Nghe hiểu và hồi đáp",
+    "text" : "Nghe hiểu được và biết cách hồi đáp phi ngôn ngữ trong các hội thoại rất đơn giản và ngắn gọn, câu lệnh đơn giản trong lớp học.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Nghe hiểu được và biết cách hồi đáp phi ngôn ngữ trong các hội thoại rất đơn giản và ngắn gọn, câu lệnh đơn giản trong lớp học."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g1-006",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_1",
+    "topic" : "Làm quen tiếng Anh / Chào hỏi",
+    "text" : "Biết cách chào hỏi, tạm biệt rất đơn giản.",
+    "control" : true,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Biết cách chào hỏi, tạm biệt rất đơn giản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g2-001",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_2",
+    "topic" : "Làm quen tiếng Anh / Nói và nhắc lại",
+    "text" : "Nhắc lại được các cụm từ, câu đơn giản, bài vè, bài hát phù hợp với năng lực tư duy, cảm xúc và tâm sinh lí lứa tuổi lớp 2.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Nhắc lại được các cụm từ, câu đơn giản, bài vè, bài hát phù hợp với năng lực tư duy, cảm xúc và tâm sinh lí lứa tuổi lớp 2."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g2-002",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_2",
+    "topic" : "Làm quen tiếng Anh / Từ vựng theo chủ đề",
+    "text" : "Nhận biết được và gọi tên các danh từ cụ thể, các động từ theo chủ đề đã học trong ngữ cảnh giao tiếp cụ thể.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Nhận biết được và gọi tên các danh từ cụ thể, các động từ theo chủ đề đã học trong ngữ cảnh giao tiếp cụ thể."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g2-003",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_2",
+    "topic" : "Làm quen tiếng Anh / Số đếm",
+    "text" : "Nhận biết được các số từ 1 - 20 và có thể dùng các số đếm này để đếm hoặc trả lời một số câu hỏi về số lượng đơn giản.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Nhận biết được các số từ 1 - 20 và có thể dùng các số đếm này để đếm hoặc trả lời một số câu hỏi về số lượng đơn giản."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g2-004",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_2",
+    "topic" : "Làm quen tiếng Anh / Hỏi đáp",
+    "text" : "Nghe hiểu và phản hồi được bằng tiếng Anh một cách đơn giản trong các tình huống hỏi đáp rất đơn giản và quen thuộc.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Nghe hiểu và phản hồi được bằng tiếng Anh một cách đơn giản trong các tình huống hỏi đáp rất đơn giản và quen thuộc."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g2-005",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_2",
+    "topic" : "Làm quen tiếng Anh / Nghe hiểu và thực hiện chỉ dẫn",
+    "text" : "Làm theo và thực hiện được các câu lệnh rất đơn giản trong lớp học, mở rộng hơn về số lượng và độ dài câu lệnh.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Làm theo và thực hiện được các câu lệnh rất đơn giản trong lớp học, mở rộng hơn về số lượng và độ dài câu lệnh."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g2-006",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_2",
+    "topic" : "Làm quen tiếng Anh / Đưa ra chỉ dẫn",
+    "text" : "Đưa ra được một số câu lệnh quen thuộc khi tham gia một số hoạt động tập thể trong giờ học, có mở rộng về số lượng và cấu trúc so với lớp 1.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Đưa ra được một số câu lệnh quen thuộc khi tham gia một số hoạt động tập thể trong giờ học, có mở rộng về số lượng và cấu trúc so với lớp 1."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  }, {
+    "chunkId" : "en-g2-007",
+    "subject" : "ENGLISH",
+    "gradeLevel" : "GRADE_2",
+    "topic" : "Làm quen tiếng Anh / Hỏi đáp bằng từ hoặc cụm từ",
+    "text" : "Trả lời được câu hỏi đơn giản và hồi đáp được bằng một hoặc hai từ trong ngữ cảnh cụ thể và quen thuộc.",
+    "control" : false,
+    "sourceFragments" : [ {
+      "pdfPage" : 1239,
+      "printedPage" : 8,
+      "region" : "FULL",
+      "text" : "Trả lời được câu hỏi đơn giản và hồi đáp được bằng một hoặc hai từ trong ngữ cảnh cụ thể và quen thuộc."
+    } ],
+    "domain" : null,
+    "subDomain" : [ ],
+    "ageBand" : null
+  } ]
+}

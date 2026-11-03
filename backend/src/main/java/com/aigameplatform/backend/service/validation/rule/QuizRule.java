@@ -31,6 +31,8 @@ public class QuizRule extends AbstractGameRule<QuizGameDsl, QuizQuestionDsl> {
             errors.add(new ValidationError(path + ".correctOptionId",
                     "correctOptionId \"" + question.correctOptionId() + "\" không thuộc danh sách options; "
                             + "phải là id của đúng một đáp án"));
+        } else {
+            QuizArithmeticAnswerVerifier.check(question, path, errors);
         }
     }
 }

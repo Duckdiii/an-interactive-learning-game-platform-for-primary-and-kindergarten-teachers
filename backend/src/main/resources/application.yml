@@ -14,6 +14,8 @@ spring:
     hikari:
       # Supabase free tier caps concurrent connections, keep the pool small.
       maximum-pool-size: 5
+      # Supabase installs pgvector in the extensions schema; LangChain4j needs it on the search path.
+      connection-init-sql: SET search_path TO public, extensions
 
   jpa:
     hibernate:
@@ -72,4 +74,17 @@ app:
   ai:
     gemini:
       api-key: ${GEMINI_API_KEY:}
-      model: ${GEMINI_MODEL:}
+      model: ${GEMINI_MODEL:gemini-2.5-flash}
+      game-generation:
+        enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
+  curriculum-rag:
+    constraints-approved-sha256: ${CURRICULUM_CONSTRAINTS_APPROVED_SHA256:}
+    enabled: ${CURRICULUM_RAG_ENABLED:false}
+    embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
+    # Candidate floor for the deterministic Math Grade 1 path only; never a semantic acceptance gate.
+    min-score: ${CURRICULUM_RAG_MIN_SCORE:0.855}
+    kindergarten:
+      # Legacy ranking knobs retained for offline spike compatibility. Semantic runtime examines the
+      # whole selected age/domain corpus; its evidence decision does not use this similarity threshold.
+      top-k: ${CURRICULUM_KINDERGARTEN_TOP_K:8}
+      min-score: ${CURRICULUM_KINDERGARTEN_MIN_SCORE:0.84}

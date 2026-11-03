@@ -1,0 +1,7 @@
+{
+  "stage": "OPENAI_MODERATION_PREFLIGHT",
+  "measuredAtUtc": "2026-10-30T16:24:23.7211127Z",
+  "status": "FAILED",
+  "httpStatus": 401,
+  "secretsLogged": false
+}

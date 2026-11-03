@@ -19,12 +19,19 @@ public class VisualClozeGameStrategy extends GameContentStrategy<VisualClozeQues
 
     public VisualClozeGameStrategy(JsonMapper jsonMapper) {
         super(VisualClozeQuestionDsl.class, VisualClozeQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo game VISUAL_CLOZE: người học hoàn thành câu có một chỗ trống dựa trên ngữ cảnh học tập.
+                Dùng sentenceTemplate với đúng một dấu ___, correctAnswer và distractors theo schema hiện có.
+                Đáp án phải hoàn thành câu đúng và được YCCĐ hỗ trợ; distractors phải sai trong ngữ cảnh nhưng cùng mức độ.
+                visualPrompt chỉ mô tả gợi ý hình ảnh mong muốn, không có nghĩa hình ảnh đã được tạo.
+                Chỉ trả JSON theo schema.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho VISUAL_CLOZE");
+        return "Chủ đề: " + topic + ". Dùng từ và cấu trúc câu phù hợp " + grade
+                + "; không yêu cầu suy luận từ một hình ảnh chưa hiện hữu hoặc kiến thức ngoài căn cứ.";
     }
 
     @Override

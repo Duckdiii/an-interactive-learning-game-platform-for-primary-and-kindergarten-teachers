@@ -1,0 +1,73 @@
+﻿{
+    "datasetVersion":  "english-grade1-draft-v1",
+    "curriculumVersion":  "32/2018/TT-BGDDT",
+    "sourceDocument":  "Thông-tư-32-2018-TT-BGDĐT.pdf",
+    "sourceSha256":  "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+    "pdfPageCount":  1555,
+    "sourceSection":  "Chương trình giáo dục phổ thông / Làm quen Tiếng Anh lớp 1 và lớp 2 / IV. Yêu cầu cần đạt / lớp 1 và lớp 2",
+    "pdfPages":  [
+                     1238,
+                     1239
+                 ],
+    "printedPages":  [
+                         7,
+                         8
+                     ],
+    "pageMap":  [
+                    {
+                        "pdfPage":  1238,
+                        "printedPage":  7
+                    },
+                    {
+                        "pdfPage":  1239,
+                        "printedPage":  8
+                    }
+                ],
+    "regions":  [
+                    "FULL"
+                ],
+    "primaryOutcomeCount":  6,
+    "controlOutcomeCount":  7,
+    "sourceFragmentCount":  13,
+    "corpusStatus":  "SOURCE_PDFBOX_VERIFIED_DRAFT",
+    "sourcePdfAvailableInWorkspace":  true,
+    "sourceTranscriptionReviewStatus":  "PASS",
+    "sourceTranscriptionReviewedOn":  "2026-10-31",
+    "sourceTranscriptionReviewNote":  "Full PDFBox 3.0.8 scan located the annex in the exact-hash TT 32 PDF. All 13 unique Grade 1/2 outcome texts were visually checked on PDF pages 1238–1239 (printed pages 7–8), and all 13 fragments in this dataset passed CurriculumPdfExtractor using FULL region; zero manual transcriptions.",
+    "sourceVerifiedOn":  "2026-10-31",
+    "sourcePdfWorkspacePath":  "tmp/curriculum-source.pdf",
+    "sourcePdfVerificationStatus":  "PASS_ALL_CHUNKS_AND_CONTROLS",
+    "sourcePdfVerificationAttemptedOn":  "2026-10-31",
+    "pdfBoxVersion":  "3.0.8",
+    "reviewNote":  "Nguồn PDF, hash, trang PDF/trang in, vùng FULL, 13/13 chunk gồm đối chứng và rà soát phạm vi sửa đổi hoàn tất ngày 2026-10-31. Dataset vẫn draft/extraction-only, chưa đủ điều kiện ingest hoặc production; đánh giá retrieval chờ ingest và bộ câu hỏi được duyệt.",
+    "applicabilityReviewNote":  "Rà soát chuỗi sửa đổi được tìm thấy đến 2026-10-31. YCCĐ làm quen Tiếng Anh lớp 1–2 trong phụ lục TT 32/2018 không bị thay đổi bởi các văn bản liệt kê; đây là rà soát phạm vi pháp quy, không phải thẩm định chuyên môn chương trình.",
+    "applicabilityReviewedOn":  "2026-10-31",
+    "applicabilityReviewStatus":  "PASS_NO_AMENDMENT_AFFECTS_ENGLISH_GRADE_1_2",
+    "reviewedAmendments":  [
+                               {
+                                   "id":  "20/2021/TT-BGDDT",
+                                   "issuedOn":  "2021-07-01",
+                                   "effectiveOn":  "2021-08-16",
+                                   "officialSource":  "https://vanban.chinhphu.vn/default.aspx?docid=203766\u0026pageid=27160",
+                                   "scope":  "Sửa đổi, bổ sung Điều 3 Thông tư 32/2018/TT-BGDĐT về điều khoản thi hành/lộ trình; không sửa phụ lục YCCĐ làm quen Tiếng Anh lớp 1–2.",
+                                   "affectsEnglishGrade1Or2Outcomes":  false
+                               },
+                               {
+                                   "id":  "13/2022/TT-BGDDT",
+                                   "issuedOn":  "2022-08-03",
+                                   "effectiveOn":  "2022-08-03",
+                                   "officialSource":  "https://vanban.chinhphu.vn/?docid=206343\u0026pageid=27160",
+                                   "scope":  "Sửa Chương trình tổng thể và Chương trình môn Lịch sử; không sửa phụ lục YCCĐ làm quen Tiếng Anh lớp 1–2.",
+                                   "affectsEnglishGrade1Or2Outcomes":  false
+                               },
+                               {
+                                   "id":  "17/2025/TT-BGDDT",
+                                   "issuedOn":  "2025-09-12",
+                                   "effectiveOn":  "2025-09-12",
+                                   "officialSource":  "https://vanban.chinhphu.vn/default.aspx?docid=215347\u0026pageid=27160",
+                                   "officialAttachment":  "https://datafiles.chinhphu.vn/cpp/files/vbpq/2025/9/17-bgddt.pdf",
+                                   "scope":  "Điều 1 liệt kê phần sửa đổi: Lịch sử và Địa lí tiểu học/THCS, Lịch sử lớp 10, Địa lí, Giáo dục công dân; không có chương trình làm quen Tiếng Anh lớp 1–2.",
+                                   "affectsEnglishGrade1Or2Outcomes":  false
+                               }
+                           ]
+}

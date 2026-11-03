@@ -1,0 +1,19 @@
+{
+  "datasetVersion": "vietnamese-grade1-draft-v1",
+  "curriculumVersion": "32/2018/TT-BGDDT",
+  "sourceDocument": "Thông-tư-32-2018-TT-BGDĐT.pdf",
+  "sourceSha256": "cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013",
+  "pdfPageCount": 1555,
+  "sourceSection": "Chương trình môn Ngữ văn / Nội dung cụ thể / Lớp 1 / Yêu cầu cần đạt",
+  "pdfPages": [74, 75, 76, 77],
+  "printedPages": [18, 19, 20, 21],
+  "region": "LEFT",
+  "primaryOutcomeCount": 36,
+  "controlOutcomeCount": 0,
+  "corpusStatus": "SOURCE_VERIFIED_CONTENT_REVIEW_PENDING",
+  "applicabilityReviewedOn": null,
+  "reviewedAmendments": [],
+  "sourceVerificationEvidence": "docs/rag-spike/evidence/vietnamese-grade1-source-verification.json",
+  "sourceVerifiedOn": "2026-10-31",
+  "reviewNote": "PDF hash, page count and all 36 fragments passed PDFBox verification. Amendment applicability, curriculum-expert review, control examples and evaluation-set review are pending. Do not publish or ingest as a production-ready dataset."
+}

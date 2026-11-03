@@ -20,12 +20,33 @@ public class QuizGameStrategy extends GameContentStrategy<QuizQuestionDsl, QuizQ
 
     public QuizGameStrategy(JsonMapper jsonMapper) {
         super(QuizQuestionDsl.class, QuizQuestion.class, jsonMapper);
+        setPromptTemplate("""
+                Bạn tạo nội dung cho game QUIZ theo đúng môn, lớp/độ tuổi và chủ đề trong yêu cầu.
+                Mỗi câu dùng các trường của schema hiện có: text, options và correctIndex.
+                Mỗi câu phải có một đáp án đúng duy nhất; lựa chọn sai phải hợp lý nhưng không được đồng thời đúng.
+                Viết câu rõ, phù hợp độ tuổi và ngôn ngữ của môn học. Không mặc định môn Toán, lớp 1 hay một số lượng
+                lựa chọn cố định ngoài các ràng buộc được nêu trong schema.
+                Chỉ trả dữ liệu theo schema JSON, không thêm lời dẫn.
+                """);
     }
 
     @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
-        // TODO: điền theo JSON DSL Schema v1.0.0 khi có tài liệu contract.
-        throw new UnsupportedOperationException("Chưa cài đặt buildTypeSpecificInstruction cho QUIZ");
+        String instruction = "Chủ đề cần dạy: " + topic + ". Dùng correctIndex để trỏ tới đáp án duy nhất trong options. "
+                + "Bảo đảm nội dung câu hỏi thực sự kiểm tra kỹ năng được yêu cầu ở " + grade
+                + "; không chuyển sang kỹ năng khác hoặc dựa vào hình/âm thanh chưa có trong dữ liệu.";
+        if (grade == GradeLevel.KINDERGARTEN) {
+            instruction += """
+
+                    Với Mầm non, viết lời dẫn ngắn và các lựa chọn ngắn để giáo viên đọc cho trẻ nghe;
+                    không yêu cầu trẻ tự đọc nhiều, không giả định đã có ảnh hoặc tệp âm thanh.
+                    Câu hỏi phân loại phải nêu đủ dữ kiện để có đúng một đáp án, không suy chất liệu từ tên đồ vật.
+                    Nếu đáp án là đồ gỗ, phải nói rõ các vật làm bằng gỗ trong lời dẫn, ví dụ 'cái ghế làm bằng gỗ'.
+                    Tên bàn, ghế, tủ, giường tự nó chưa chứng minh vật bằng gỗ. Không dùng hình chưa được cung cấp
+                    hoặc kiến thức về vật liệu thường gặp để bù dữ kiện thiếu.
+                    """;
+        }
+        return instruction;
     }
 
     @Override
