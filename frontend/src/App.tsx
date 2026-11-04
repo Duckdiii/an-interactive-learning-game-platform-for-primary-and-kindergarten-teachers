@@ -23,6 +23,7 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
 const UiKit = lazy(() => import('./pages/dev/UiKit'))
 const RoomSandbox = lazy(() => import('./pages/dev/RoomSandbox'))
+const PipelinePlayground = lazy(() => import('./experiments/pipeline/PipelinePlayground'))
 
 function PageFallback() {
   return (
@@ -46,6 +47,9 @@ function App() {
         {import.meta.env.DEV && <Route path="/dev/room-sandbox" element={<RoomSandbox />} />}
         {import.meta.env.DEV && (
           <Route path="/dev/type-specimen" element={<Navigate to="/dev/ui-kit" replace />} />
+        )}
+        {import.meta.env.DEV && (
+          <Route path={ROUTES.pipelinePlayground} element={<PipelinePlayground />} />
         )}
 
         <Route element={<AuthLayout />}>

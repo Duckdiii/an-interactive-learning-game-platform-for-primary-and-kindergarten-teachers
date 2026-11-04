@@ -14,6 +14,7 @@ export const ROUTES = {
   present: '/present/:gameId',
   // Mở phòng thi đấu từ một game; `/rooms/:sessionId` để dành cho phòng đã có phiên ở Backend.
   roomHost: '/rooms/host/:gameId',
+  pipelinePlayground: '/dev/pipeline-playground',
 } as const
 
 export const presentPath = (gameId: string) => `/present/${encodeURIComponent(gameId)}`
