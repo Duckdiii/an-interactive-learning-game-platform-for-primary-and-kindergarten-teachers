@@ -16,7 +16,7 @@ public class GeminiChatConfiguration {
 
     @Bean
     ChatModel gameGenerationChatModel(@Value("${app.ai.gemini.api-key:}") String apiKey,
-                                      @Value("${app.ai.gemini.model:gemini-2.5-flash}") String modelName) {
+                                      @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName) {
         if (apiKey.isBlank()) {
             throw new IllegalStateException("GEMINI_API_KEY is required when Gemini game generation is enabled");
         }
@@ -29,7 +29,7 @@ public class GeminiChatConfiguration {
     GeneratedContentReviewer generatedContentReviewer(
             @org.springframework.beans.factory.annotation.Qualifier("gameGenerationChatModel") ChatModel gameGenerationChatModel,
             tools.jackson.databind.json.JsonMapper mapper,
-            @Value("${app.ai.gemini.model:gemini-2.5-flash}") String modelName) {
+            @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName) {
         return new GeminiGeneratedContentReviewer(gameGenerationChatModel, mapper, modelName);
     }
 }

@@ -106,6 +106,42 @@ export async function postPublishGame(gameId: string, body: GameEnvelopeBody, si
 // DUAL-TRACK PIPELINE & PRODUCTION PLAY INTEGRATION
 // -----------------------------------------------------------------------------
 
+export interface GenerateGameApiResponse {
+  dsl: unknown
+  report: {
+    valid?: boolean
+    errors?: Array<{ field: string; message: string }>
+  }
+  latencyMs: number
+}
+
+export async function generateGameApi(
+  prompt: string,
+  gradeLevel = 2,
+  subject = 'MATH',
+  gameType = 'QUIZ'
+): Promise<GenerateGameApiResponse | null> {
+  try {
+    const res = await axiosInstance.post<ApiSuccessResponse<GenerateGameApiResponse>>(
+      '/games/generate',
+      {
+        prompt,
+        topic: prompt,
+        gradeLevel: 'GRADE_' + gradeLevel,
+        subject,
+        gameType,
+      },
+      { timeout: 15_000 }
+    )
+    if (res.data?.data) {
+      return res.data.data
+    }
+  } catch {
+    // Graceful fallback
+  }
+  return null
+}
+
 export interface BloomRecommendationDto {
   title: string
   gameType: string

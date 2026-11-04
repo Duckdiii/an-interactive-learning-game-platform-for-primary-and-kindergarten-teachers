@@ -10,6 +10,8 @@ import com.aigameplatform.backend.dto.response.GamePlayResponse;
 import com.aigameplatform.backend.dto.response.GameRecommendationResponse;
 import com.aigameplatform.backend.dto.response.GameRecommendationResponse.GameRecommendationItem;
 import com.aigameplatform.backend.dto.response.PublishGameResponse;
+import com.aigameplatform.backend.entity.Game;
+import com.aigameplatform.backend.entity.enums.GameStatus;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
@@ -156,6 +158,24 @@ public class GameGenerationController {
                 shareCode,
                 request.dsl()
         );
+
+        try {
+            Game gameEntity = new Game();
+            gameEntity.setTitle(request.title() != null ? request.title() : "Trò chơi học tập tương tác");
+            gameEntity.setGameType(request.gameType() != null ? request.gameType() : GameType.QUIZ);
+            gameEntity.setGrade(request.grade() != null ? request.grade() : GradeLevel.GRADE_2);
+            gameEntity.setSubject(request.subject() != null ? request.subject() : Subject.MATH);
+            gameEntity.setShareCode(shareCode);
+            gameEntity.setStatus(GameStatus.PUBLISHED);
+            gameEntity.setSchemaVersion("1.0.0");
+            Game saved = gameRepository.save(gameEntity);
+            if (saved != null && saved.getId() != null) {
+                id = saved.getId();
+            }
+            log.info("Persisted game to PostgreSQL with id: {}, shareCode: {}", id, shareCode);
+        } catch (Exception e) {
+            log.warn("Database persistence fallback to memory store: {}", e.getMessage());
+        }
 
         publishedGamesStore.put(shareCode, playData);
         log.info("Published game {} with shareCode: {}", id, shareCode);

@@ -10,10 +10,12 @@ import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import {
   runGamePipeline,
+  parseIntent,
   type PipelineExecutionResult,
   type BloomRecommendation,
+  type PresetQuizData,
 } from './pipelineOrchestrator'
-import { publishGameApi, type PublishGameDtoResponse } from '../../api/gamesApi'
+import { publishGameApi, generateGameApi, type PublishGameDtoResponse } from '../../api/gamesApi'
 import { FarmQuizCanvas } from './renderers/FarmQuizCanvas'
 import { ArcheryCpfCanvas } from './renderers/ArcheryCpfCanvas'
 
@@ -47,16 +49,79 @@ export default function PipelinePlayground() {
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false)
   const [copiedLink, setCopiedLink] = useState<boolean>(false)
 
-  const handleRunPipeline = (overridePrompt?: string, forceTrack?: 'PRESET' | 'CPF') => {
+  const [isGenerating, setIsGenerating] = useState<boolean>(false)
+
+  const handleRunPipeline = async (overridePrompt?: string, forceTrack?: 'PRESET' | 'CPF') => {
     const textToRun = overridePrompt ?? prompt
-    const res = runGamePipeline(textToRun, forceTrack)
-    setPipelineResult(res)
-    if (res.track === 'PRESET') {
-      setActiveTab('track1')
-      setSelectedBloom(1)
-    } else {
-      setActiveTab('track2')
-      setSelectedBloom(3)
+    setIsGenerating(true)
+    try {
+      const intent = parseIntent(textToRun)
+      const targetTrack = forceTrack ?? intent.track
+
+      let dynamicPreset: PresetQuizData | undefined
+      let aiLatency: number | undefined
+
+      try {
+        const aiRes = await generateGameApi(
+          textToRun,
+          intent.gradeLevel,
+          intent.subject === 'Vietnamese' ? 'VIETNAMESE' : 'MATH',
+          targetTrack === 'CPF' ? 'QUIZ' : 'QUIZ'
+        )
+        if (aiRes?.dsl && typeof aiRes.dsl === 'object') {
+          const dslObj = aiRes.dsl as Record<string, unknown>
+          if (dslObj.questions && Array.isArray(dslObj.questions) && dslObj.questions.length > 0) {
+            const q0 = dslObj.questions[0] as Record<string, unknown>
+            const rawOpts = q0.options
+            if (Array.isArray(rawOpts) && rawOpts.length >= 2) {
+              const opts = rawOpts.map((opt: unknown, idx: number) => {
+                const optObj = typeof opt === 'object' && opt !== null ? (opt as Record<string, unknown>) : null
+                const textVal = optObj ? String(optObj.text ?? '') : String(opt)
+                const isCorr = optObj ? Boolean(optObj.isCorrect) : idx === (Number(q0.correctIndex) || 0)
+                return {
+                  id: String(idx + 1),
+                  text: textVal,
+                  isCorrect: isCorr,
+                }
+              })
+              dynamicPreset = {
+                gameType: 'QUIZ',
+                id: 'ai-gen-' + Date.now().toString(36),
+                title: String(dslObj.title ?? (targetTrack === 'CPF' ? 'Thợ Săn Số Học' : 'Nông Trại Toán Học')),
+                gradeLevel: intent.gradeLevel,
+                theme: intent.theme,
+                questionText: String(q0.questionText ?? textToRun),
+                numA: Number(q0.numA ?? 38),
+                numB: Number(q0.numB ?? 27),
+                operation: '+',
+                options: opts,
+                correctIndex: Number(q0.correctIndex ?? 0),
+                explanation: String(q0.explanation ?? 'Đáp án chính xác do AI kiểm định.'),
+              }
+            }
+          }
+          if (aiRes.latencyMs) {
+            aiLatency = aiRes.latencyMs
+          }
+        }
+      } catch {
+        // Fallback sang deterministic pipeline
+      }
+
+      const res = runGamePipeline(textToRun, targetTrack, dynamicPreset)
+      if (aiLatency) {
+        res.latencyMs = aiLatency
+      }
+      setPipelineResult(res)
+      if (res.track === 'PRESET') {
+        setActiveTab('track1')
+        setSelectedBloom(1)
+      } else {
+        setActiveTab('track2')
+        setSelectedBloom(3)
+      }
+    } finally {
+      setIsGenerating(false)
     }
   }
 
@@ -280,10 +345,13 @@ export default function PipelinePlayground() {
             />
             <button
               type="button"
-              onClick={() => handleRunPipeline()}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 font-bold text-white shadow-lg shadow-sky-500/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isGenerating}
+              onClick={() => void handleRunPipeline()}
+              className={`px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 font-bold text-white shadow-lg shadow-sky-500/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer ${
+                isGenerating ? 'opacity-75 cursor-not-allowed animate-pulse' : ''
+              }`}
             >
-              <span>⚡</span> Chạy Pipeline
+              <span>{isGenerating ? '✨' : '⚡'}</span> {isGenerating ? 'AI Đang Xử Lý...' : 'Chạy Pipeline AI'}
             </button>
           </div>
         </div>

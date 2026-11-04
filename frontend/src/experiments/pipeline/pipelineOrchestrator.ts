@@ -598,7 +598,7 @@ export function recommendGames(intent: ParsedIntent): BloomRecommendation[] {
 // STAGE 5: PIPELINE EXECUTION & TELEMETRY
 // -----------------------------------------------------------------------------
 
-export function runGamePipeline(prompt: string, overrideTrack?: TrackType): PipelineExecutionResult {
+export function runGamePipeline(prompt: string, overrideTrack?: TrackType, customPreset?: PresetQuizData): PipelineExecutionResult {
   const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
 
   // 1. Intent Parsing
@@ -615,7 +615,7 @@ export function runGamePipeline(prompt: string, overrideTrack?: TrackType): Pipe
   let cpfGraph: CpfSceneGraph | undefined
 
   if (intent.track === 'PRESET') {
-    presetData = generatePresetGame(intent)
+    presetData = customPreset ?? generatePresetGame(intent)
   } else {
     cpfGraph = generateCpfGame(intent)
   }
