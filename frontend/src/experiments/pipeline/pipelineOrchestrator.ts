@@ -4,7 +4,8 @@
  * Stage 1: Intent Parsing & Track Routing (Preset In-Distribution vs CPF Out-of-Distribution).
  * Stage 2: 3-Gate Deterministic Quality Inspection (Syntax, 0% AI Math/Pedagogy, Canvas Playability).
  * Stage 3: Dual-Track Assembler (DSL v1.0.0 vs CPF Scene Graph AST).
- * Stage 4: Execution Telemetry & Performance Timing.
+ * Stage 4: Bloom Cognitive Taxonomy Recommender (Nhận biết, Thông hiểu, Vận dụng).
+ * Stage 5: Execution Telemetry & Performance Timing.
  */
 
 import { CANDY_PALETTE, UI_SPECS } from './assetPalette'
@@ -51,11 +52,24 @@ export interface PresetQuizData {
   explanation: string
 }
 
+export interface BloomRecommendation {
+  id: string
+  title: string
+  gameType: string
+  bloomLevel: 'Nhận biết' | 'Thông hiểu' | 'Vận dụng'
+  bloomIndex: 1 | 2 | 3
+  description: string
+  estimatedDuration: string
+  track: TrackType
+  icon: string
+}
+
 export interface PipelineExecutionResult {
   intent: ParsedIntent
   track: TrackType
   latencyMs: number
   gates: QualityGateSummary
+  recommendations: BloomRecommendation[]
   presetData?: PresetQuizData
   cpfGraph?: CpfSceneGraph
 }
@@ -539,16 +553,64 @@ export function generateCpfGame(intent: ParsedIntent): CpfSceneGraph {
 }
 
 // -----------------------------------------------------------------------------
-// STAGE 4 & 5: PIPELINE EXECUTION & TELEMETRY
+// STAGE 4: BLOOM COGNITIVE TAXONOMY RECOMMENDER
 // -----------------------------------------------------------------------------
 
-export function runGamePipeline(prompt: string): PipelineExecutionResult {
+export function recommendGames(intent: ParsedIntent): BloomRecommendation[] {
+  return [
+    {
+      id: 'bloom-1-quiz',
+      title: `${intent.theme} - Trắc Nghiệm Candy Gloss`,
+      gameType: 'QUIZ',
+      bloomLevel: 'Nhận biết',
+      bloomIndex: 1,
+      description: 'Quan sát các thẻ hình trực quan và chọn đáp án chính xác nhất.',
+      estimatedDuration: '3 - 5 phút',
+      track: 'PRESET',
+      icon: '🌾',
+    },
+    {
+      id: 'bloom-2-matching',
+      title: `${intent.theme} - Phân Loại Kéo Thả`,
+      gameType: 'DRAG_DROP',
+      bloomLevel: 'Thông hiểu',
+      bloomIndex: 2,
+      description: 'Kéo thả phân loại các con số hoặc phép tính vào đúng nhóm tương ứng.',
+      estimatedDuration: '5 - 7 phút',
+      track: 'PRESET',
+      icon: '🧩',
+    },
+    {
+      id: 'bloom-3-archery',
+      title: 'Thợ Săn Số Chẵn - Kéo Ná Bắn Cung Vật Lý',
+      gameType: 'PHYSICS_SLING_ARCHERY',
+      bloomLevel: 'Vận dụng',
+      bloomIndex: 3,
+      description: 'Cơ chế vật lý tương tác mở rộng (CPF VRE): Kéo căng dây ná ngắm bắn bóng bay số chẵn.',
+      estimatedDuration: '5 - 10 phút',
+      track: 'CPF',
+      icon: '🏹',
+    },
+  ]
+}
+
+// -----------------------------------------------------------------------------
+// STAGE 5: PIPELINE EXECUTION & TELEMETRY
+// -----------------------------------------------------------------------------
+
+export function runGamePipeline(prompt: string, overrideTrack?: TrackType): PipelineExecutionResult {
   const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now()
 
   // 1. Intent Parsing
   const intent = parseIntent(prompt)
+  if (overrideTrack) {
+    intent.track = overrideTrack
+  }
 
-  // 2. Generation based on Track
+  // 2. Recommend 3 Bloom options
+  const recommendations = recommendGames(intent)
+
+  // 3. Generation based on Track
   let presetData: PresetQuizData | undefined
   let cpfGraph: CpfSceneGraph | undefined
 
@@ -558,7 +620,7 @@ export function runGamePipeline(prompt: string): PipelineExecutionResult {
     cpfGraph = generateCpfGame(intent)
   }
 
-  // 3. Three-Gate Quality Checks
+  // 4. Three-Gate Quality Checks
   const gate1 = verifyGate1Syntax(intent.track, presetData, cpfGraph)
   const gate2 = verifyGate2Pedagogy(intent, presetData, cpfGraph)
   const gate3 = verifyGate3Playability(intent.track, presetData, cpfGraph)
@@ -578,6 +640,7 @@ export function runGamePipeline(prompt: string): PipelineExecutionResult {
       gate3Playability: gate3,
       allPassed,
     },
+    recommendations,
     presetData,
     cpfGraph,
   }

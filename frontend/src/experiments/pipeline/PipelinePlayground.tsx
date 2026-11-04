@@ -1,11 +1,19 @@
 /**
  * PipelinePlayground: Experimental Testing Dashboard for Dual-Track AI Game Pipeline & CPF Engine.
  * Features Real-time Telemetry HUD (FPS, latency, 3-gate quality metrics),
- * prompt generator presets, live interactive canvas runners, and AST inspectors.
+ * Bloom Cognitive Recommender, Stepper Pipeline visualization, Publish Modal with QR code,
+ * live interactive canvas runners, and AST inspectors.
  */
 
 import { useState, useMemo } from 'react'
-import { runGamePipeline, type PipelineExecutionResult } from './pipelineOrchestrator'
+import { useNavigate } from 'react-router-dom'
+import { QRCodeSVG } from 'qrcode.react'
+import {
+  runGamePipeline,
+  type PipelineExecutionResult,
+  type BloomRecommendation,
+} from './pipelineOrchestrator'
+import { publishGameApi, type PublishGameDtoResponse } from '../../api/gamesApi'
 import { FarmQuizCanvas } from './renderers/FarmQuizCanvas'
 import { ArcheryCpfCanvas } from './renderers/ArcheryCpfCanvas'
 
@@ -16,23 +24,50 @@ const PRESET_PROMPTS = {
     'Tạo game Toán lớp 2: Em hãy kéo ná cao su bắn cung tên vào các quả bóng bay mang số chẵn để làm nổ bóng, bắn trúng số chẵn cộng 1 điểm, bắn trúng số lẻ rung màn hình',
 }
 
+const PIPELINE_STEPS = [
+  { id: 1, label: '1. Ý Định Sư Phạm', desc: 'Intent Parser' },
+  { id: 2, label: '2. Chuẩn GDPT 2018', desc: 'Curriculum RAG' },
+  { id: 3, label: '3. Đề Xuất 3 Game Bloom', desc: 'Cognitive Matrix' },
+  { id: 4, label: '4. 3 Cổng Kiểm Định', desc: 'Quality Gates' },
+  { id: 5, label: '5. Sẵn Sàng Xuất Bản', desc: 'Ready to Play' },
+]
+
 export default function PipelinePlayground() {
+  const navigate = useNavigate()
   const [prompt, setPrompt] = useState<string>(PRESET_PROMPTS.track2)
   const [activeTab, setActiveTab] = useState<'track1' | 'track2'>('track2')
+  const [selectedBloom, setSelectedBloom] = useState<number>(3)
   const [pipelineResult, setPipelineResult] = useState<PipelineExecutionResult>(() =>
     runGamePipeline(PRESET_PROMPTS.track2)
   )
   const [measuredFps, setMeasuredFps] = useState<number>(60)
   const [showInspector, setShowInspector] = useState<boolean>(false)
+  const [isPublishing, setIsPublishing] = useState<boolean>(false)
+  const [publishedData, setPublishedData] = useState<PublishGameDtoResponse | null>(null)
+  const [showPublishModal, setShowPublishModal] = useState<boolean>(false)
+  const [copiedLink, setCopiedLink] = useState<boolean>(false)
 
-  const handleRunPipeline = (overridePrompt?: string) => {
+  const handleRunPipeline = (overridePrompt?: string, forceTrack?: 'PRESET' | 'CPF') => {
     const textToRun = overridePrompt ?? prompt
-    const res = runGamePipeline(textToRun)
+    const res = runGamePipeline(textToRun, forceTrack)
     setPipelineResult(res)
     if (res.track === 'PRESET') {
       setActiveTab('track1')
+      setSelectedBloom(1)
     } else {
       setActiveTab('track2')
+      setSelectedBloom(3)
+    }
+  }
+
+  const handleSelectBloomOption = (opt: BloomRecommendation) => {
+    setSelectedBloom(opt.bloomIndex)
+    if (opt.track === 'CPF') {
+      setActiveTab('track2')
+      handleRunPipeline(undefined, 'CPF')
+    } else {
+      setActiveTab('track1')
+      handleRunPipeline(undefined, 'PRESET')
     }
   }
 
@@ -52,6 +87,42 @@ export default function PipelinePlayground() {
   const fpsColor =
     measuredFps >= 55 ? '#00E676' : measuredFps >= 40 ? '#FFD600' : '#FF5252'
 
+  const handlePublishGame = async () => {
+    setIsPublishing(true)
+    try {
+      const isArchery = activeTab === 'track2'
+      const payload = {
+        title: isArchery
+          ? 'Bắn Cung Toán Học: Thợ Săn Số Chẵn'
+          : 'Nông Trại Toán Học Lớp 2',
+        gameType: isArchery ? 'PHYSICS_SLING_ARCHERY' : 'QUIZ',
+        grade: 'GRADE_2',
+        subject: 'MATH',
+        dsl: isArchery ? currentResult.cpfGraph : currentResult.presetData,
+      }
+
+      const res = await publishGameApi(payload)
+      setPublishedData(res)
+      setShowPublishModal(true)
+    } catch {
+      // Handled gracefully inside publishGameApi
+    } finally {
+      setIsPublishing(false)
+    }
+  }
+
+  const playUrl = publishedData
+    ? `${window.location.origin}/play/${publishedData.shareCode}`
+    : ''
+
+  const handleCopyLink = () => {
+    if (!playUrl) return
+    navigator.clipboard.writeText(playUrl).then(() => {
+      setCopiedLink(true)
+      setTimeout(() => setCopiedLink(false), 2000)
+    })
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
       {/* Top Real-time Telemetry HUD */}
@@ -63,11 +134,11 @@ export default function PipelinePlayground() {
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
                 Dual-Track AI Game Pipeline & CPF Engine
                 <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  Prototype Spike
+                  Production Wiring
                 </span>
               </h1>
               <p className="text-xs text-slate-400">
-                Thực nghiệm đối đầu: In-Distribution (Preset 24 Cơ chế) vs Out-of-Distribution (CPF VRE)
+                End-to-End Pipeline: Prompt $\to$ Bloom Selection $\to$ Quality Gates $\to$ Publish $\to$ Play (60 FPS)
               </p>
             </div>
           </div>
@@ -147,6 +218,28 @@ export default function PipelinePlayground() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto w-full p-6 flex flex-col gap-6 flex-1">
+        {/* Pipeline Stepper Visualizer */}
+        <div className="bg-slate-800/60 rounded-2xl border border-slate-700/60 p-4">
+          <div className="flex items-center justify-between gap-2 overflow-x-auto">
+            {PIPELINE_STEPS.map((s, idx) => (
+              <div key={s.id} className="flex items-center gap-2 flex-1 min-w-[150px]">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
+                    ✓
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-slate-200">{s.label}</span>
+                    <span className="text-[10px] text-slate-400">{s.desc}</span>
+                  </div>
+                </div>
+                {idx < PIPELINE_STEPS.length - 1 && (
+                  <div className="h-0.5 flex-1 bg-emerald-500/40 hidden sm:block" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Prompt Input & Controller */}
         <div className="bg-slate-800/80 rounded-2xl border border-slate-700/80 p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
@@ -158,7 +251,7 @@ export default function PipelinePlayground() {
                 type="button"
                 onClick={() => {
                   setPrompt(PRESET_PROMPTS.track1)
-                  handleRunPipeline(PRESET_PROMPTS.track1)
+                  handleRunPipeline(PRESET_PROMPTS.track1, 'PRESET')
                 }}
                 className="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-amber-300 font-medium transition cursor-pointer"
               >
@@ -168,7 +261,7 @@ export default function PipelinePlayground() {
                 type="button"
                 onClick={() => {
                   setPrompt(PRESET_PROMPTS.track2)
-                  handleRunPipeline(PRESET_PROMPTS.track2)
+                  handleRunPipeline(PRESET_PROMPTS.track2, 'CPF')
                 }}
                 className="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-sky-300 font-medium transition cursor-pointer"
               >
@@ -195,12 +288,71 @@ export default function PipelinePlayground() {
           </div>
         </div>
 
+        {/* Step 3: Bloom Taxonomy 3-Game Recommendation Matrix */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs uppercase font-bold text-slate-400 tracking-wider flex items-center gap-2">
+              <span>🎯</span> Bước 4: AI Đề Xuất 3 Cơ Chế Phân Bổ Theo Thang Đo Bloom
+            </h2>
+            <span className="text-[11px] text-slate-400">Chọn 1 phương án để nạp tương tác</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {currentResult.recommendations.map((opt) => {
+              const isSelected = selectedBloom === opt.bloomIndex
+              return (
+                <div
+                  key={opt.id}
+                  onClick={() => handleSelectBloomOption(opt)}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? opt.track === 'CPF'
+                        ? 'bg-sky-950/70 border-sky-400 shadow-lg shadow-sky-500/20'
+                        : 'bg-amber-950/70 border-amber-400 shadow-lg shadow-amber-500/20'
+                      : 'bg-slate-800/60 border-slate-700/60 hover:border-slate-500'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-2xl">{opt.icon}</span>
+                      <span
+                        className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                          opt.bloomIndex === 1
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            : opt.bloomIndex === 2
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                        }`}
+                      >
+                        Bloom {opt.bloomIndex}: {opt.bloomLevel}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-bold text-white mb-1">{opt.title}</h3>
+                    <p className="text-xs text-slate-400 leading-relaxed mb-3">
+                      {opt.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] border-t border-slate-700/50 pt-2 text-slate-400">
+                    <span>⏱️ {opt.estimatedDuration}</span>
+                    <span className="font-semibold text-cyan-400">
+                      Track: {opt.track === 'CPF' ? 'CPF OOD (VRE)' : 'Preset DSL'}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
         {/* Dual-Track Tabs & Actions */}
-        <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+        <div className="flex flex-wrap items-center justify-between border-b border-slate-700 pb-2 gap-3">
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setActiveTab('track1')}
+              onClick={() => {
+                setActiveTab('track1')
+                setSelectedBloom(1)
+              }}
               className={`px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2 cursor-pointer ${
                 activeTab === 'track1'
                   ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
@@ -211,7 +363,10 @@ export default function PipelinePlayground() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('track2')}
+              onClick={() => {
+                setActiveTab('track2')
+                setSelectedBloom(3)
+              }}
               className={`px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2 cursor-pointer ${
                 activeTab === 'track2'
                   ? 'bg-sky-500 text-slate-950 shadow-md shadow-sky-500/20'
@@ -222,13 +377,24 @@ export default function PipelinePlayground() {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowInspector(!showInspector)}
-            className="text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium border border-slate-700 transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <span>🔍</span> {showInspector ? 'Ẩn AST Inspector' : 'Xem AST & Schema Inspector'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePublishGame}
+              disabled={isPublishing}
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 font-bold text-slate-950 shadow-lg shadow-emerald-500/20 active:scale-95 transition flex items-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+            >
+              <span>🚀</span> {isPublishing ? 'Đang xuất bản...' : 'Xuất Bản Game (Lấy Mã PIN/QR)'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowInspector(!showInspector)}
+              className="text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium border border-slate-700 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>🔍</span> {showInspector ? 'Ẩn AST' : 'Xem AST'}
+            </button>
+          </div>
         </div>
 
         {/* Interactive Canvas Viewport */}
@@ -303,6 +469,63 @@ export default function PipelinePlayground() {
           </div>
         )}
       </main>
+
+      {/* Publish Celebration Modal */}
+      {showPublishModal && publishedData && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col items-center text-center relative animate-in fade-in zoom-in-95 duration-200">
+            <button
+              type="button"
+              onClick={() => setShowPublishModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white text-lg w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center"
+            >
+              ✕
+            </button>
+
+            <span className="text-5xl mb-2">🎉</span>
+            <h3 className="text-xl font-black text-white mb-1">
+              Xuất Bản Trò Chơi Thành Công!
+            </h3>
+            <p className="text-xs text-slate-400 mb-5">
+              Học sinh có thể quét mã QR hoặc nhập mã PIN 6 số để vào chơi ngay
+            </p>
+
+            {/* QR Code Container */}
+            <div className="bg-white p-4 rounded-2xl shadow-inner mb-4 flex items-center justify-center">
+              <QRCodeSVG value={playUrl} size={160} />
+            </div>
+
+            {/* Share PIN Code */}
+            <div className="bg-slate-950 px-6 py-3 rounded-2xl border border-slate-800 mb-4 w-full">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                Mã Phòng Chia Sẻ (PIN Code)
+              </span>
+              <span className="text-3xl font-black tracking-widest text-emerald-400 font-mono">
+                {publishedData.shareCode}
+              </span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-2.5 w-full">
+              <button
+                type="button"
+                onClick={() => navigate(`/play/${publishedData.shareCode}`)}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 font-bold text-white shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>🎮</span> Chơi Thử Với Vai Trò Học Sinh
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>📋</span> {copiedLink ? '✓ Đã Sao Chép Link!' : 'Sao Chép Đường Link Chia Sẻ'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

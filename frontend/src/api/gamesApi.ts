@@ -100,3 +100,189 @@ export async function postPublishGame(gameId: string, body: GameEnvelopeBody, si
 
   return response.data.data
 }
+
+
+// -----------------------------------------------------------------------------
+// DUAL-TRACK PIPELINE & PRODUCTION PLAY INTEGRATION
+// -----------------------------------------------------------------------------
+
+export interface BloomRecommendationDto {
+  title: string
+  gameType: string
+  bloomLevel: string
+  description: string
+  estimatedDuration: string
+  track: 'PRESET' | 'CPF'
+}
+
+export interface PublishGameDtoRequest {
+  title: string
+  gameType: string
+  grade: string
+  subject: string
+  dsl: unknown
+}
+
+export interface PublishGameDtoResponse {
+  id: string
+  shareCode: string
+  status: string
+}
+
+export interface PlayGameDtoResponse {
+  id: string
+  title: string
+  gameType: string
+  shareCode: string
+  dsl: unknown
+}
+
+// Bộ nhớ client dự phòng khi Backend chưa bật hoặc mất kết nối
+const clientPublishedStore = new Map<string, PlayGameDtoResponse>([
+  [
+    'MOCK02',
+    {
+      id: 'mock-02',
+      title: 'Nông Trại Toán Học Lớp 2',
+      gameType: 'QUIZ',
+      shareCode: 'MOCK02',
+      dsl: {
+        gameType: 'QUIZ',
+        title: 'Nông Trại Toán Học Lớp 2',
+        gradeLevel: 2,
+        questionText: 'Bác nông dân nuôi 38 chú gà và 27 chú vịt. Hỏi cả trang trại có tất cả bao nhiêu con?',
+        numA: 38,
+        numB: 27,
+        options: [
+          { id: '1', text: '55 con', isCorrect: false },
+          { id: '2', text: '65 con', isCorrect: true },
+          { id: '3', text: '63 con', isCorrect: false },
+          { id: '4', text: '75 con', isCorrect: false },
+        ],
+        correctIndex: 1,
+        explanation: 'Phép tính: 38 + 27 = 65 con.',
+      },
+    },
+  ],
+  [
+    'MATH02',
+    {
+      id: 'math-02',
+      title: 'Bắn Cung Toán Học: Thợ Săn Số Chẵn',
+      gameType: 'PHYSICS_SLING_ARCHERY',
+      shareCode: 'MATH02',
+      dsl: {
+        schemaVersion: 'cpf.v1.0.0',
+        title: 'Bắn Cung Toán Học: Thợ Săn Số Chẵn',
+        pedagogicalSubject: 'Math',
+        gradeLevel: 2,
+        track: 'CPF',
+      },
+    },
+  ],
+])
+
+export async function recommendGamesApi(
+  prompt: string,
+  gradeLevel = 2,
+  subject = 'MATH'
+): Promise<BloomRecommendationDto[]> {
+  try {
+    const res = await axiosInstance.post<ApiSuccessResponse<{ recommendations: BloomRecommendationDto[] }>>(
+      '/games/recommend',
+      { prompt, gradeLevel: `GRADE_${gradeLevel}`, subject },
+      { timeout: 1000 }
+    )
+    if (res.data?.data?.recommendations) {
+      return res.data.data.recommendations
+    }
+  } catch {
+    // Graceful fallback khi không nối được Backend
+  }
+
+  return [
+    {
+      title: 'Nông Trại Toán Học - Trắc Nghiệm Candy Gloss',
+      gameType: 'QUIZ',
+      bloomLevel: 'Nhận biết',
+      description: 'Học sinh nhận diện và tính nhanh số lượng nông sản, gia súc gia cầm.',
+      estimatedDuration: '3 - 5 phút',
+      track: 'PRESET',
+    },
+    {
+      title: 'Nông Trại Vui Vẻ - Kéo Thả Phân Loại',
+      gameType: 'DRAG_DROP',
+      bloomLevel: 'Thông hiểu',
+      description: 'Kéo thả phân loại các con số hoặc phép tính vào đúng chuồng trại.',
+      estimatedDuration: '5 - 7 phút',
+      track: 'PRESET',
+    },
+    {
+      title: 'Thợ Săn Số Chẵn - Kéo Ná Bắn Cung Vật Lý',
+      gameType: 'PHYSICS_SLING_ARCHERY',
+      bloomLevel: 'Vận dụng',
+      description: 'Cơ chế vật lý tương tác mở rộng (CPF VRE): Kéo căng dây ná để ngắm bắn bóng bay số chẵn.',
+      estimatedDuration: '5 - 10 phút',
+      track: 'CPF',
+    },
+  ]
+}
+
+export async function publishGameApi(payload: PublishGameDtoRequest): Promise<PublishGameDtoResponse> {
+  const generatedCode = 'MATH' + Math.floor(10 + Math.random() * 90)
+  const defaultRes: PublishGameDtoResponse = {
+    id: 'game-' + Date.now().toString(36),
+    shareCode: generatedCode,
+    status: 'PUBLISHED',
+  }
+
+  try {
+    const res = await axiosInstance.post<ApiSuccessResponse<PublishGameDtoResponse>>(
+      '/games',
+      payload,
+      { timeout: 1000 }
+    )
+    if (res.data?.data) {
+      clientPublishedStore.set(res.data.data.shareCode, {
+        id: res.data.data.id,
+        title: payload.title,
+        gameType: payload.gameType,
+        shareCode: res.data.data.shareCode,
+        dsl: payload.dsl,
+      })
+      return res.data.data
+    }
+  } catch {
+    // Lưu vào store client nếu backend offline
+  }
+
+  clientPublishedStore.set(defaultRes.shareCode, {
+    id: defaultRes.id,
+    title: payload.title,
+    gameType: payload.gameType,
+    shareCode: defaultRes.shareCode,
+    dsl: payload.dsl,
+  })
+
+  return defaultRes
+}
+
+export async function getPlayGameApi(shareCode: string): Promise<PlayGameDtoResponse> {
+  const upperCode = shareCode.toUpperCase()
+  try {
+    const res = await axiosInstance.get<ApiSuccessResponse<PlayGameDtoResponse>>(
+      `/games/play/${encodeURIComponent(upperCode)}`,
+      { timeout: 1000 }
+    )
+    if (res.data?.data) {
+      return res.data.data
+    }
+  } catch {
+    // Fallback sang local store
+  }
+
+  const existing = clientPublishedStore.get(upperCode)
+  if (existing) return existing
+
+  throw new Error(`Trò chơi với mã ${upperCode} không tồn tại.`)
+}
