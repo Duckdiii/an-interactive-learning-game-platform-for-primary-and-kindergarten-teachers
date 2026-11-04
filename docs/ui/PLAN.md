@@ -1,5 +1,8 @@
 # Kế hoạch triển khai giao diện (khảo sát, chưa sửa code)
 
+> **Wiki chủ quản**: [[Tiêu chuẩn Đồ họa và Asset Pipeline]] | [[Sơ đồ hệ thống]] | [[index]]
+
+
 Ngày: 27/10/2026 · Phạm vi: **chỉ frontend**. Không đụng `backend/`, DSL v1.0.0, schema, prompt đóng băng. SPEC mục 5 (yêu cầu backend) và giai đoạn P0 không làm trong đợt này; phần Frontend cần Backend được gom ở `docs/ui/API-CONTRACT.md`.
 
 Tài liệu đã đọc: `docs/ui/SPEC.md` (mục 1, 2, 3, 4, 6, 8), `docs/game-json-dsl-v1.0.0.md`, `docs/openapi/openapi.yaml`, `docs/decisions.md`; 24 trong 37 wireframe (A-Home, A-Games, A-Create*, A-Editor, A-Publish, A-Results, A-Login, Be-*, Hs-*, Tv-*, Room-*), đọc theo hướng dẫn đầu SPEC (bỏ cú pháp công cụ vẽ). Chưa mở ảnh PNG (thư mục chỉ có `.dc.html`).
@@ -210,3 +213,10 @@ Các thư viện đã cài và đủ dùng: `canvas-confetti`, `howler`, `konva`
 - Chưa chạy `npm test`, `tsc`, `oxlint`, hay mở ứng dụng; số liệu mô tả mã đến từ đọc tệp.
 - Chưa đo dung lượng font; số liệu `jsqr` lấy từ `npm view` (dung lượng chưa nén của gói).
 - `docs/openapi/openapi.yaml` đọc các phần liên quan học sinh/phiên/xuất bản; chưa đọc hết phần Admin (ngoài phạm vi).
+
+---
+
+## Liên kết Giao diện & Kỹ thuật
+- Tiêu chuẩn đồ họa: [[Tiêu chuẩn Đồ họa và Asset Pipeline]]
+- Sơ đồ hệ thống: [[Sơ đồ hệ thống]]
+- Mục lục giao diện: [[ui/SPEC|Đặc tả UI]]

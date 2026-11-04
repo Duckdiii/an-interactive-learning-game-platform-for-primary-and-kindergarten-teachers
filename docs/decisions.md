@@ -1,5 +1,9 @@
 # Nhật ký quyết định
 
+> **Tài liệu Dự án**: [[Các quyết định đã chốt]]
+
+
+
 Mỗi dòng: **quyết định**, lý do. Tất cả mục dưới đây đã được bạn chốt (kế hoạch được duyệt ngày 2026-10-14).
 
 ## Đã chốt

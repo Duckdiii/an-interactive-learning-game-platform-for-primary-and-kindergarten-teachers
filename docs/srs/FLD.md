@@ -1,8 +1,12 @@
-# 3.1.4. Ma trận Đặc tả Trường Giao diện Tương tác (Interface Field Specs - FLD-01 đến FLD-30)
+# 3.1.4. Ma trận Đặc tả Trường Giao diện Tương tác (Interface Field Specs - FLD-01 đến FLD-53)
 
-Chi tiết về loại điều khiển giao diện, kiểu dữ liệu và quy tắc kiểm tra logic cho 30 trường thành phần tương tác cốt lõi được đặc tả tại Bảng 3.2.
+> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[srs/SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
 
-Bảng 3.2: Ma trận Đặc tả Trường Giao diện Tương tác (FLD-01 đến FLD-30)
+
+
+Chi tiết về loại điều khiển giao diện, kiểu dữ liệu và quy tắc kiểm tra logic cho 53 trường thành phần tương tác cốt lõi được đặc tả tại Bảng 3.2.
+
+Bảng 3.2: Ma trận Đặc tả Trường Giao diện Tương tác (FLD-01 đến FLD-53)
 
 | Mã FLD | Tên Component | Loại Control | Kiểu dữ liệu | Bắt buộc | Quy tắc Kiểm tra Logic |
 | --- | --- | --- | --- | --- | --- |
@@ -36,3 +40,26 @@ Bảng 3.2: Ma trận Đặc tả Trường Giao diện Tương tác (FLD-01 đ�
 | FLD-28 | Nhật ký Thao tác An ninh (Audit Log) | Data Grid Table | Array of Objects | Tự động | Lưu vết IP, Timestamp, Actor ID, Thao tác API và kết quả kiểm duyệt an toàn. |
 | FLD-29 | Biểu đồ Chi phí & Token API | Line / Bar Chart | Array of Metrics | Tự động | Thống kê lượng token tiêu thụ và chi phí API quy đổi theo ngày/tháng. |
 | FLD-30 | Nút Xuất bản & Chia sẻ Trò chơi | Button Group | Trigger | Có | Đóng gói Game JSON DSL, cấp mã chia sẻ trò chơi (ShareCode) và xuất bản lên kho học liệu dùng chung. |
+| FLD-31 | Trường / Đơn vị công tác | Text Input | String (≤ 150 ký tự) | Không | Nhập lúc đăng ký (UC-01); hồ sơ chỉ hiển thị và cho chỉnh sửa. Tên trường hoặc cơ sở giáo dục, dùng làm ngữ cảnh địa phương, không bắt buộc. |
+| FLD-32 | Bộ sách giáo khoa đang dùng | Dropdown Select | Enum | Không | Kết nối tri thức với cuộc sống / Chân trời sáng tạo / Cánh Diều / Khác; giúp chọn đúng bài và ví dụ theo bộ sách. |
+| FLD-33 | Giọng đọc mặc định | Radio Group | Enum | Không | Bắc / Nam; mặc định giọng chuẩn của dịch vụ Text-to-Speech khi để trống (UC-11). |
+| FLD-34 | Môn và khối lớp đang dạy | Multi-select | Array of Enum | Có | Chọn trong danh mục môn (Toán, Tiếng Việt, Tiếng Anh) và khối (Mầm non, Lớp 1–5); dùng để điền sẵn ở UC-02. |
+| FLD-35 | Sĩ số lớp | Number Input | Integer | Không | Từ 1 đến 60; ảnh hưởng đến gợi ý hình thức chơi (cả lớp hoặc theo nhóm). |
+| FLD-36 | Phạm vi kiến thức đã học | Textarea | String (≤ 500 ký tự) | Không | Ví dụ "số đến 10", "20 từ vựng chủ đề con vật"; được chuyển thành luật kiểm tra nội dung và rà soát từ ngữ nhạy cảm như các ô văn bản khác. |
+| FLD-37 | Đặc điểm chung và chủ đề yêu thích của lớp | Checkbox Group + Tag Input | Array of String | Không | Ví dụ "nhiều em chưa đọc được", chủ đề lớp thích; chỉ lưu dạng mô tả chung của lớp, không nêu tên học sinh. |
+| FLD-38 | Tình huống sử dụng trò chơi | Dropdown Select (2 nhóm) | Enum | Không | Mục đích (khởi động / dạy bài mới / củng cố / ôn tập) và hình thức (trình chiếu cả lớp / mỗi em một máy); chọn ở UC-02, có giá trị mặc định. |
+| FLD-39 | Danh sách trò chơi của tôi | Data Table | Array of Objects | Tự động | Hiển thị tên, môn, khối, loại trò chơi, trạng thái (Bản nháp / Đã xuất bản) và ngày cập nhật; sắp xếp mới nhất trước. |
+| FLD-40 | Bộ lọc kho trò chơi | Search Input + Dropdown Select | Object | Không | Từ khóa tên trò chơi; lọc theo môn, khối và trạng thái. |
+| FLD-41 | Nhóm thao tác trên trò chơi | Button Group | Trigger | Có | Chỉnh sửa (chỉ bản nháp), Chơi thử, Chia sẻ, Mở phòng chơi, Nhân bản, Hủy xuất bản, Xóa; thao tác hủy xuất bản và xóa phải có hộp thoại xác nhận. |
+| FLD-42 | Bộ lọc thống kê kết quả | Dropdown Select + Date Range Picker | Object | Không | Chọn trò chơi đã xuất bản, lớp (từ hồ sơ lớp) và khoảng thời gian. |
+| FLD-43 | Thẻ chỉ số tổng quan của lớp | Stat Cards | Object | Tự động | Số lượt chơi, tỉ lệ hoàn thành, điểm trung bình; chỉ là số liệu tổng hợp, không có tên học sinh. |
+| FLD-44 | Biểu đồ tỉ lệ đúng theo câu | Bar Chart | Array of Metrics | Tự động | Tỉ lệ đúng từng câu, các đáp án sai thường gặp; đánh dấu "Lớp mình cần ôn lại" với câu có tỉ lệ đúng thấp. |
+| FLD-45 | Họ tên giáo viên | Text Input | String (≤ 100 ký tự) | Có | Họ tên của tài khoản, nhập ở biểu mẫu đăng ký (UC-01). |
+| FLD-46 | Email đăng nhập | Email Input | String (email) | Có | Dùng làm tên đăng nhập; không trùng với tài khoản khác (UC-01, UC-15). |
+| FLD-47 | Mật khẩu | Password Input | String (8–72 ký tự) | Có | Gồm chữ hoa, chữ thường, số và ký tự đặc biệt; không hiển thị rõ khi nhập; áp dụng cho đăng ký và đặt lại mật khẩu. |
+| FLD-48 | Đồng ý chính sách bảo vệ dữ liệu cá nhân | Checkbox | Boolean | Có | Bắt buộc chọn trước khi đăng ký (UC-01); hệ thống lưu thời điểm giáo viên đồng ý. |
+| FLD-49 | Ghi nhớ đăng nhập | Checkbox | Boolean | Không | Giữ phiên 30 ngày thay vì 24 giờ trên thiết bị hiện tại (UC-15). |
+| FLD-50 | Nút Tạo lại trò chơi (sau lỗi an toàn) | Button Action | Trigger | Không | Chỉ hiện khi quá trình tạo trò chơi dừng do tài nguyên không an toàn (UC-02, luồng 6a); chạy lại từ bước 5 với ý tưởng, tệp và thông số giáo viên đã nhập. |
+| FLD-51 | Ngân sách chi phí AI mỗi tháng | Number Input | Decimal | Không | Quản trị viên nhập ở UC-12 (luồng 5c); số dương; để trống nghĩa là chưa áp dụng ngưỡng cảnh báo chi phí. |
+| FLD-52 | Ngưỡng cảnh báo chi phí | Number Input (2 mức) | Integer (%) | Không | Mặc định 70% (cảnh báo vàng) và 90% (cảnh báo đỏ), mức sau lớn hơn mức trước và nhỏ hơn 100%. Mức 100% là hết ngân sách và không đổi được (PRM-31). |
+| FLD-53 | Thẻ chi phí trung bình mỗi trò chơi và dự kiến cuối tháng | Metric Card | Number | Tự động | Chi phí trung bình mỗi trò chơi bằng tổng chi phí AI/API trong kỳ chia số trò chơi được sinh; dự kiến cuối tháng ngoại suy theo tốc độ chi tiêu hiện tại; hiển thị "Chưa có dữ liệu chi phí" khi chưa đủ dữ liệu. |

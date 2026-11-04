@@ -1,5 +1,9 @@
 # Kindergarten source audit
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 Status: source-verified and owner-approved as curriculum corpus data under the exact-PDF extraction policy; independent source transcription reviews passed. No separate preschool-specialist pedagogical review is claimed.
 
 ## Owner approval policy — 2026-11-02

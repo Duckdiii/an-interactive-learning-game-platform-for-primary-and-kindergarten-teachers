@@ -1,5 +1,9 @@
 # Thử nghiệm các biến thể RAG — chưa thay pipeline nghiệm thu
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 Ngày 2026-10-30. Người dùng chọn: **cập nhật brainstorm/plan thử nghiệm, tiếp tục nghiệm thu pipeline hiện có**. Tài liệu này không cho phép tự bật thuật toán mới hoặc dùng kết quả của nó làm bằng chứng cho phiên bản hiện tại.
 
 ## Kết quả nghiệp vụ cần chứng minh

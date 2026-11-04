@@ -1,5 +1,9 @@
 # Source audit: Math Grade 5 draft
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 ## Scope and source
 
 - Scope: `MATH / GRADE_5`, the YCCĐ in the Grade 5 section of the mathematics curriculum.

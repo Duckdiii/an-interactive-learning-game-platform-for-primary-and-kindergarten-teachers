@@ -1,5 +1,9 @@
 # Chạy spike RAG Toán lớp 1
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 **Kết luận nghiệm thu mới nhất (2026-10-30): chưa đạt phát hành.** Regression backend và pgvector đạt, nhưng bộ20 lần sinh mới có2 lỗi và game được tạo có lỗi nội dung. Xem [báo cáo nghiệm thu](acceptance-2026-10-30.md). Kết quả exploratory cũ bên dưới không chứng minh phiên bản hiện tại đã nghiệm thu đầy đủ. Các đề xuất hybrid/HyDE/judge nằm trong [plan thử nghiệm](rag-variants-experiment.md), chưa bật vào pipeline.
 
 Trạng thái lịch sử (2026-10-30): bộ 10 câu Toán lớp 1 đạt tiêu chí exploratory (Hit@3 10/10), nhưng không phải holdout độc lập và không chứng minh chất lượng release; xem báo cáo nghiệm thu 2026-10-30. Các báo cáo mới tách tỷ lệ từ chối/chấp nhận sai, đúng căn cứ, gợi ý cứu được, MRR và khoảng tin cậy. p50/p95 trong benchmark là thời gian retrieval + verification, chưa gồm sinh game.

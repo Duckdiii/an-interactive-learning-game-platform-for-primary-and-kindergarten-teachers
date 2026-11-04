@@ -1,0 +1,497 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="Electron">
+  <diagram name="UC-04 Edit Game (Workspace Editor)" id="uc04seq">
+    <mxGraphModel dx="4234" dy="989" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2570" pageHeight="3297" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c33" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="alt" vertex="1">
+          <mxGeometry height="332" width="2500" x="20" y="2765.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c61" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="alt" vertex="1">
+          <mxGeometry height="602" width="2500" x="20" y="2127.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c16" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="alt" vertex="1">
+          <mxGeometry height="1248.0" width="1400" x="20" y="561.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c16_d1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="alt" vertex="1">
+          <mxGeometry height="616.0" width="1370" x="40" y="1183.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c16_d1_opt" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="opt" vertex="1">
+          <mxGeometry height="154" width="1330" x="60" y="1349.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c63" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=15;fontStyle=1;align=center;" value="Teacher (Actor)" vertex="1">
+          <mxGeometry height="60" width="160" x="30" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l63" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="100" as="sourcePoint" />
+            <mxPoint x="110" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c65" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="WorkspaceEditorPage" vertex="1">
+          <mxGeometry height="60" width="160" x="250" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l65" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="90" as="sourcePoint" />
+            <mxPoint x="330" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c67" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="GameController" vertex="1">
+          <mxGeometry height="60" width="160" x="500" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l67" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="100" as="sourcePoint" />
+            <mxPoint x="580" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c69" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="GameService" vertex="1">
+          <mxGeometry height="60" width="160" x="750" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l69" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="100" as="sourcePoint" />
+            <mxPoint x="830" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c71" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="ManualEditService" vertex="1">
+          <mxGeometry height="60" width="160" x="1000" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l71" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1080" y="100" as="sourcePoint" />
+            <mxPoint x="1080" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c73" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="AIRegenerateService" vertex="1">
+          <mxGeometry height="60" width="160" x="1250" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l73" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1330" y="100" as="sourcePoint" />
+            <mxPoint x="1330" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c75" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="GameValidationService" vertex="1">
+          <mxGeometry height="60" width="160" x="1520" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l75" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1600" y="100" as="sourcePoint" />
+            <mxPoint x="1600" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c79" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=15;fontStyle=5;align=center;" value="game : Game" vertex="1">
+          <mxGeometry height="60" width="160" x="1780" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l79" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1860" y="100" as="sourcePoint" />
+            <mxPoint x="1860" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c81" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=15;fontStyle=1;align=center;" value="GameRepository" vertex="1">
+          <mxGeometry height="60" width="160" x="2040" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l81" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2120" y="100" as="sourcePoint" />
+            <mxPoint x="2120" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c83" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=15;fontStyle=1;" value="PostgreSQL" vertex="1">
+          <mxGeometry height="60" width="160" x="2290" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l83" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2370" y="100" as="sourcePoint" />
+            <mxPoint x="2370" y="3217.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Select a draft game from personal library, click &quot;Edit&quot;">
+          <mxGeometry relative="1" y="20" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="110" y="140" as="sourcePoint" />
+            <mxPoint x="330" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="openWorkspace(gameId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="180" as="sourcePoint" />
+            <mxPoint x="580" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="getGameForEditing(gameId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="220" as="sourcePoint" />
+            <mxPoint x="830" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="findById(gameId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="260" as="sourcePoint" />
+            <mxPoint x="2120" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="selectGameById(gameId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2120" y="300" as="sourcePoint" />
+            <mxPoint x="2370" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="row">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2370" y="340" as="sourcePoint" />
+            <mxPoint x="2120" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c9" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="game">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2120" y="380" as="sourcePoint" />
+            <mxPoint x="830" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c10" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="game">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="420" as="sourcePoint" />
+            <mxPoint x="580" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c11" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="gameDetail (questions + illustrations + narration)">
+          <mxGeometry relative="1" x="0.04" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="580" y="455.0" as="sourcePoint" />
+            <mxPoint x="330" y="455.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c12" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display integrated editor: question list (left) + interactive Canvas preview with illustrations and narration already rendered (right)">
+          <mxGeometry relative="1" y="-20" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="330" y="505.0" as="sourcePoint" />
+            <mxPoint x="110" y="505.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c13" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=3;fontSize=15;fontColor=#333333;" value="[4a. Actor uses Manual Edit]" vertex="1">
+          <mxGeometry height="20" width="1160" x="90" y="565.0" as="geometry" />
+        </mxCell>
+        <mxCell id="m4a1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Directly edit question text / change the correct answer / upload a new image or narration">
+          <mxGeometry relative="1" y="12" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="110" y="630.0" as="sourcePoint" />
+            <mxPoint x="330" y="630.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4a2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="submitManualEdit(questionId, changes)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="670.0" as="sourcePoint" />
+            <mxPoint x="580" y="670.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4a3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="submitManualEdit(questionId, changes)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="705.0" as="sourcePoint" />
+            <mxPoint x="830" y="705.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4a4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="applyEdit(questionId, changes)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="745.0" as="sourcePoint" />
+            <mxPoint x="1080" y="745.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4a5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="updatedQuestion">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1080" y="785.0" as="sourcePoint" />
+            <mxPoint x="830" y="785.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4a6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="updatedQuestion">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="825.0" as="sourcePoint" />
+            <mxPoint x="580" y="825.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4a7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="updatedQuestion">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="865.0" as="sourcePoint" />
+            <mxPoint x="330" y="865.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4a8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Redraw interactive Canvas with the updated question immediately">
+          <mxGeometry relative="1" y="-22" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="330" y="913.0" as="sourcePoint" />
+            <mxPoint x="110" y="913.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c14" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="20" y="955.0" as="sourcePoint" />
+            <mxPoint x="1420" y="955.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c15" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=3;fontSize=15;fontColor=#333333;" value="[4b. Actor uses Request AI Redo]" vertex="1">
+          <mxGeometry height="20" width="1160" x="40" y="963.0" as="geometry" />
+        </mxCell>
+        <mxCell id="m4b1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Click &quot;Request AI Redo&quot; on a specific question card">
+          <mxGeometry relative="1" y="18" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="110" y="1011.0" as="sourcePoint" />
+            <mxPoint x="330" y="1011.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4b2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="requestAIRedo(questionId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="1051.0" as="sourcePoint" />
+            <mxPoint x="580" y="1051.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4b3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="requestAIRedo(questionId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="1091.0" as="sourcePoint" />
+            <mxPoint x="830" y="1091.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4b4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="regenerateQuestion(questionId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="1131.0" as="sourcePoint" />
+            <mxPoint x="1330" y="1131.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4d_lbl" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=3;fontSize=15;fontColor=#333333;" value="[4d. AI subsystem has a connection failure or responds slowly at Step 2 of Flow 4b]" vertex="1">
+          <mxGeometry height="20" width="1130" x="115" y="1187.0" as="geometry" />
+        </mxCell>
+        <mxCell id="m4d1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Detect connection failure / slow response">
+          <mxGeometry relative="1" as="geometry" x="1">
+            <Array as="points"><mxPoint x="1570.0" y="1217.0" /><mxPoint x="1570.0" y="1247.0" /></Array><mxPoint x="1330" y="1217.0" as="sourcePoint" />
+            <mxPoint x="1330" y="1247.0" as="targetPoint" />
+          <mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m4d2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Automatically retry regenerateQuestion (up to 2 attempts)">
+          <mxGeometry relative="1" as="geometry" x="1">
+            <Array as="points"><mxPoint x="1050.0" y="1287.0" /><mxPoint x="1050.0" y="1317.0" /></Array><mxPoint x="830" y="1287.0" as="sourcePoint" />
+            <mxPoint x="830" y="1317.0" as="targetPoint" />
+          <mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m4d2b_lbl" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=3;fontSize=15;fontColor=#333333;" value="[retries exhausted — still failing]" vertex="1">
+          <mxGeometry height="20" width="1100" x="130" y="1349.0" as="geometry" />
+        </mxCell>
+        <mxCell id="m4d3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="redesignFailed">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="1383.0" as="sourcePoint" />
+            <mxPoint x="580" y="1383.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4d4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="redesignFailed">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="1423.0" as="sourcePoint" />
+            <mxPoint x="330" y="1423.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4d5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display error: &quot;The AI system is currently overloaded and cannot redesign this question right now. Please try again in a few minutes.&quot;">
+          <mxGeometry relative="1" y="-16" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="330" y="1463.0" as="sourcePoint" />
+            <mxPoint x="110" y="1463.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4d_div" edge="1" parent="1" source="c16_d1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0;exitY=0.537;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.537;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=15;fontStyle=1" target="c16_d1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="280" y="1513.0" as="sourcePoint" />
+            <mxPoint x="1410" y="1513.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4d_ok_lbl" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=3;fontSize=15;fontColor=#333333;" value="[AI subsystem responds successfully within the retries]" vertex="1">
+          <mxGeometry height="20" width="1130" x="60" y="1539.0" as="geometry" />
+        </mxCell>
+        <mxCell id="m4b5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Scan content safety; search replacement image; synthesize narration audio">
+          <mxGeometry relative="1" as="geometry" x="1">
+            <Array as="points"><mxPoint x="1570.0" y="1569.0" /><mxPoint x="1570.0" y="1599.0" /></Array><mxPoint x="1330" y="1569.0" as="sourcePoint" />
+            <mxPoint x="1330" y="1599.0" as="targetPoint" />
+          <mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m4b6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="newQuestionCard (text + image + narration)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1330" y="1639.0" as="sourcePoint" />
+            <mxPoint x="830" y="1639.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4b7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="newQuestionCard">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="1679.0" as="sourcePoint" />
+            <mxPoint x="580" y="1679.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4b8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="newQuestionCard">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="1719.0" as="sourcePoint" />
+            <mxPoint x="330" y="1719.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4b9" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Redraw interactive Canvas with the new question">
+          <mxGeometry relative="1" y="-18" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="330" y="1759.0" as="sourcePoint" />
+            <mxPoint x="110" y="1759.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c17" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Click &quot;Save Draft&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="1835.0" as="sourcePoint" />
+            <mxPoint x="330" y="1835.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c18" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="saveDraft(gameId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="1875.0" as="sourcePoint" />
+            <mxPoint x="580" y="1875.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c19" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="saveDraft(gameId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="1915.0" as="sourcePoint" />
+            <mxPoint x="830" y="1915.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c20" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="validate(game)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="1955.0" as="sourcePoint" />
+            <mxPoint x="1600" y="1955.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c21" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="checkSchema(game)  [Layer 1]">
+          <mxGeometry relative="1" as="geometry" x="1">
+            <Array as="points"><mxPoint x="1830.0" y="2001.0" /><mxPoint x="1830.0" y="2031.0" /></Array><mxPoint x="1600" y="2001.0" as="sourcePoint" />
+            <mxPoint x="1600" y="2031.0" as="targetPoint" />
+          <mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="c22" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="checkGameLogic(game)  [Layer 2]">
+          <mxGeometry relative="1" as="geometry" x="1">
+            <Array as="points"><mxPoint x="1830.0" y="2071.0" /><mxPoint x="1830.0" y="2101.0" /></Array><mxPoint x="1600" y="2071.0" as="sourcePoint" />
+            <mxPoint x="1600" y="2101.0" as="targetPoint" />
+          <mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="c23" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=3;fontSize=15;fontColor=#333333;" value="[5a. a question is missing a correct answer / configuration is not intact]" vertex="1">
+          <mxGeometry height="20" width="2460" x="90" y="2133.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c24" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="invalid">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1600" y="2173.0" as="sourcePoint" />
+            <mxPoint x="830" y="2173.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c25" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="invalid">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="2213.0" as="sourcePoint" />
+            <mxPoint x="580" y="2213.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c26" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="error: &quot;The system detected that some of your questions do not have a correct answer yet. Please check and complete them before saving or publishing.&quot;">
+          <mxGeometry relative="1" x="0.04" y="-18" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="580" y="2253.0" as="sourcePoint" />
+            <mxPoint x="330" y="2253.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c27" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display error message; return to Main Flow Step 4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="2293.0" as="sourcePoint" />
+            <mxPoint x="110" y="2293.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c28" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;fontSize=15;fontStyle=1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="20" y="2343.0" as="sourcePoint" />
+            <mxPoint x="2500" y="2343.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c29" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=3;fontSize=15;fontColor=#333333;" value="[content is intact and valid]" vertex="1">
+          <mxGeometry height="20" width="2460" x="30" y="2369.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c30" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="valid">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1600" y="2399.0" as="sourcePoint" />
+            <mxPoint x="830" y="2399.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c54" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="save(game)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="2439.0" as="sourcePoint" />
+            <mxPoint x="2120" y="2439.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c55" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="updateGameStatusAndContentById(gameId, DRAFT, content)">
+          <mxGeometry relative="1" x="0.04" y="14" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="2120" y="2479.0" as="sourcePoint" />
+            <mxPoint x="2370" y="2479.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c56" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="OK">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2370" y="2519.0" as="sourcePoint" />
+            <mxPoint x="2120" y="2519.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c57" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="game">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2120" y="2559.0" as="sourcePoint" />
+            <mxPoint x="830" y="2559.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c58" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="game">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="2599.0" as="sourcePoint" />
+            <mxPoint x="580" y="2599.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c59" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="gameData (200 OK)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="2639.0" as="sourcePoint" />
+            <mxPoint x="330" y="2639.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c60" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="&quot;You have successfully saved the draft.&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="2679.0" as="sourcePoint" />
+            <mxPoint x="110" y="2679.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c31" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=3;fontSize=15;fontColor=#333333;" value="[4c. Actor selects &quot;Publish&quot; instead of &quot;Save Draft&quot; at Step 4]" vertex="1">
+          <mxGeometry height="20" width="1600" x="250" y="2791.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c17b" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Click &quot;Publish&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="2821.0" as="sourcePoint" />
+            <mxPoint x="330" y="2821.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c18b" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="publish(gameId)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="2861.0" as="sourcePoint" />
+            <mxPoint x="580" y="2861.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c32" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#000000;verticalAlign=top;align=center;fontStyle=1;fontSize=15;width=80;height=30;" value="ref UC-07: Save and Publish Game" vertex="1">
+          <mxGeometry height="80" width="2200" x="250" y="2901.0" as="geometry" />
+        </mxCell>
+        <mxCell id="c46" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Result of UC-07 (published successfully, or rejected per UC-07's own validation / safety check)">
+          <mxGeometry relative="1" x="-0.04" y="-12" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="580" y="3007.0" as="sourcePoint" />
+            <mxPoint x="330" y="3007.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c50" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display the outcome returned by UC-07">
+          <mxGeometry relative="1" y="-12" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="330" y="3047.0" as="sourcePoint" />
+            <mxPoint x="110" y="3047.0" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

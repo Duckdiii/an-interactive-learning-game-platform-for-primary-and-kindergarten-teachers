@@ -1,5 +1,9 @@
 # Source audit: Vietnamese Grade 4 draft
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 ## Scope and source
 
 - Scope: `VIETNAMESE / GRADE_4`, the YCCĐ in the Grade 4 section of the supplied curriculum PDF.

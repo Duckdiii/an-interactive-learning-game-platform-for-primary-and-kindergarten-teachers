@@ -1,5 +1,8 @@
 # API frontend CẦN mà Backend chưa có
 
+> **Wiki chủ quản**: [[Tiêu chuẩn Đồ họa và Asset Pipeline]] | [[Sơ đồ hệ thống]] | [[index]]
+
+
 Ngày: 27/10/2026 · Phạm vi: chỉ đề xuất, **không sửa** `openapi.yaml`, DSL hay code Backend. Nhóm Backend duyệt rồi mới đưa vào `docs/openapi/openapi.yaml` (nguồn sự thật, thiết kế trước, code sau).
 
 Căn cứ: `docs/ui/SPEC.md` mục 5, `docs/openapi/openapi.yaml` (REST API Contract v1.1.0), `docs/game-json-dsl-v1.0.0.md`, và mã Backend hiện tại.
@@ -383,3 +386,10 @@ Phía Frontend khi cài `RealPlayerApi`: dùng một axios instance **riêng cho
 - Chuỗi đúng liên tiếp trong lượt chơi: Frontend tự đếm.
 - Lời khích lệ: Frontend chọn theo tỉ lệ đúng (đã đúng với spec `my-result`).
 - Trình chiếu trên lớp (nhóm A): chạy cục bộ ở máy giáo viên bằng `GET /games/{id}` (bản đầy đủ), không cần endpoint mới; xem Q5 trong PLAN.
+
+---
+
+## Liên kết Giao diện & Kỹ thuật
+- Tiêu chuẩn đồ họa: [[Tiêu chuẩn Đồ họa và Asset Pipeline]]
+- Sơ đồ hệ thống: [[Sơ đồ hệ thống]]
+- Mục lục giao diện: [[ui/SPEC|Đặc tả UI]]

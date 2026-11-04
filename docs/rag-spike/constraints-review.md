@@ -1,5 +1,9 @@
 # Review ràng buộc chương trình
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 Trạng thái: **APPROVED_BY_USER**. Người dùng đã chốt bản nhãn hiện tại trong phiên làm việc này. Các nhãn do Codex soạn từ YCCĐ đã xác minh PDF; việc chốt này không thay thế benchmark độc lập hoặc kiểm tra game thủ công.
 
 SHA-256 của file constraints.jsonl hiện tại: `b44066d375f2f591800ded3c0fceaf89ef8c1a4992f9bac5e6e28396a19f189a`.
@@ -34,7 +38,7 @@ Mỗi nhãn cần đối chiếu với nguyên văn chunk và trang PDF. Xác nh
 | math-g1-022 | CALENDAR |
 | math-g1-023 | CM_MEASURE<br>TIME_HOUR<br>CALENDAR |
 
-YCCĐ gốc: [chunks.jsonl](../../backend/src/main/resources/curriculum/primary/math-grade1/chunks.jsonl). Nhãn đầy đủ: [constraints.jsonl](../../backend/src/main/resources/curriculum/primary/math-grade1/constraints.jsonl).
+YCCĐ gốc: `backend/src/main/resources/curriculum/primary/math-grade1/chunks.jsonl`. Nhãn đầy đủ: `backend/src/main/resources/curriculum/primary/math-grade1/constraints.jsonl`.
 
 Khi duyệt: ghi tên người duyệt, thời điểm, SHA đã duyệt và quyết định cùng nhận xét ngay trong biên bản này. Chỉ sau quyết định APPROVED mới cấu hình `CURRICULUM_CONSTRAINTS_APPROVED_SHA256` bằng SHA đã duyệt. Việc chỉ biết hoặc copy checksum không phải là phê duyệt. Bất kỳ thay đổi byte nào cần checksum mới và duyệt lại.
 

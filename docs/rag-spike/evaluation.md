@@ -1,5 +1,9 @@
 # Bằng chứng spike RAG Toán lớp 1
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 ## Trạng thái đo
 
 **Đã chạy retrieval live trên Gemini + Supabase.** Lần đầu với `minScore=0.75` đạt positive Hit@3 10/10 nhưng trượt negative gate: cả ba câu ngoài phạm vi nhận kết quả. Báo cáo gốc: `results/live-2026-10-10T16-35-07.114857800Z.json`.

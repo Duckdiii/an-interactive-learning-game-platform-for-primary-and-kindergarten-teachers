@@ -1,5 +1,9 @@
 # Game JSON DSL v1.0.0
 
+> **Đặc tả Kỹ thuật**: [[Game JSON DSL]]
+
+
+
 Trạng thái: **đặc tả đã duyệt, chờ đóng băng** (2026-09-26).
 
 Tài liệu này là hợp đồng dữ liệu giữa AI (sinh nội dung), Backend (kiểm duyệt, lưu trữ) và Frontend (Konva.js vẽ và chạy game). Mọi thay đổi trường phải cập nhật tài liệu này và đồng bộ cả Backend lẫn Frontend.

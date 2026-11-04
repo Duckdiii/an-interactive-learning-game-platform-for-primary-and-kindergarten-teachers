@@ -1,5 +1,9 @@
 # 3.1.3. Danh mục Yêu cầu Chức năng Chi tiết (Functional Requirements Summary - FR-01 đến FR-15)
 
+> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[srs/SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
+
+
+
 Để đáp ứng đầy đủ các mục tiêu nghiệp vụ sư phạm đã đề ra và tối ưu hóa trải nghiệm của giáo viên lẫn học sinh, hệ thống quy định 15 yêu cầu chức năng cốt lõi (FR-01 đến FR-15). Danh mục chi tiết các chức năng, ca sử dụng ánh xạ, tác nhân chính và tiêu chí chấp nhận tương ứng được trình bày cụ thể tại Bảng 3.1.
 
 Bảng 3.1: Bảng Tổng hợp Yêu cầu Chức năng & Ánh xạ Ca sử dụng (FR vs UC Mapping)
@@ -21,3 +25,6 @@ Bảng 3.1: Bảng Tổng hợp Yêu cầu Chức năng & Ánh xạ Ca sử dụ
 | FR-13 | Quản lý Tài khoản Giáo viên & Audit Log Hệ thống | UC-13 | Quản lý danh sách giáo viên | Quản trị viên | Hiển thị danh sách tài khoản giáo viên theo bộ lọc/tìm kiếm; điều phối trạng thái (Hoạt động / Bị khóa) và ghi vết nhật ký thao tác quản trị (Audit Log) đầy đủ. |
 | FR-14 | Điều chỉnh Cấu hình Bộ não AI | UC-14 | Điều chỉnh cài đặt bộ não AI | Quản trị viên | Cho phép quản trị viên tinh chỉnh các tham số kỹ thuật điều khiển AI (Temperature, Max Tokens, ngưỡng kiểm duyệt an toàn), đóng băng hoặc khôi phục phiên bản Prompt chuẩn và ghi nhận đầy đủ vào nhật ký thao tác quản trị. |
 | FR-15 | Đăng nhập Hệ thống | UC-15 | Đăng nhập | Giáo viên, Quản trị viên | Cho phép Actor đã có tài khoản đăng nhập an toàn vào hệ thống, xác thực đúng vai trò và được chuyển đến màn hình chính tương ứng; từ chối đăng nhập khi sai thông tin hoặc tài khoản đang bị khóa. |
+| FR-16 | Quản lý Hồ sơ Giáo viên & Lớp học | UC-16 | Quản lý hồ sơ giáo viên và lớp học | Giáo viên | Cho phép giáo viên khai báo một lần hồ sơ cá nhân và các lớp phụ trách để điền sẵn môn, khối lớp và ngữ cảnh sư phạm khi tạo game; hỗ trợ xem, sửa, xóa hồ sơ và gợi ý đã ghi nhớ. |
+| FR-17 | Quản lý Kho Trò chơi | UC-17 | Quản lý kho trò chơi | Giáo viên | Cho phép giáo viên xem, tìm kiếm, lọc danh sách trò chơi; mở chỉnh sửa bản nháp, chơi thử, chia sẻ mã QR, nhân bản, xóa hoặc mở phòng chơi Live Arena. |
+| FR-18 | Xem Kết quả & Thống kê Lớp học | UC-18 | Xem kết quả và thống kê lớp học | Giáo viên | Cho phép giáo viên xem kết quả chơi tổng hợp theo lượt và theo từng câu, nhận diện phần kiến thức yếu của học sinh ("Lớp mình cần ôn lại"), hỗ trợ tạo game ôn tập từ lỗi hay gặp mà không lưu PII của học sinh. |

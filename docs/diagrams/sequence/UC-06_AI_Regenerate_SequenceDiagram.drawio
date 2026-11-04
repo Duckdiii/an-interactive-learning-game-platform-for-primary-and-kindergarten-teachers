@@ -1,20 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
 <mxfile host="app.diagrams.net">
   <diagram name="UC-06 AI Regenerate" id="uc06seq">
-    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="2580" pageHeight="2982" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="2580" pageHeight="3325" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="frameAlt4a" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="alt" vertex="1">
-          <mxGeometry height="1426" width="2520" x="20" y="1526" as="geometry" />
+          <mxGeometry height="1440.0" width="2520" x="20" y="1735.0" as="geometry" />
         </mxCell>
         <mxCell id="frameMain" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="alt" vertex="1">
-          <mxGeometry height="1150" width="2520" x="20" y="336" as="geometry" />
+          <mxGeometry height="1354.0" width="2520" x="20" y="341.0" as="geometry" />
         </mxCell>
         <mxCell id="frameAlt4a_d1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="alt" vertex="1">
-          <mxGeometry height="398" width="2480" x="40" y="1834" as="geometry" />
+          <mxGeometry height="412.0" width="2480" x="40" y="2043.0" as="geometry" />
         </mxCell>
         <mxCell id="frameAlt4a_d2" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=15;width=60;height=30;" value="alt" vertex="1">
-          <mxGeometry height="700" width="2480" x="40" y="2242" as="geometry" />
+          <mxGeometry height="700" width="2480" x="40" y="2465.0" as="geometry" />
         </mxCell>
         <mxCell id="p1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=15;fontStyle=1;align=center;" value="Teacher (Actor)" vertex="1">
           <mxGeometry height="60" width="160" x="30" y="40" as="geometry" />
@@ -22,7 +23,7 @@
         <mxCell id="l1" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="110" y="100" as="sourcePoint" />
-            <mxPoint x="110" y="2982" as="targetPoint" />
+            <mxPoint x="110" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="WorkspaceEditorPage" vertex="1">
@@ -31,7 +32,7 @@
         <mxCell id="l2" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="370" y="100" as="sourcePoint" />
-            <mxPoint x="370" y="2982" as="targetPoint" />
+            <mxPoint x="370" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="GameController" vertex="1">
@@ -40,7 +41,7 @@
         <mxCell id="l3" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="630" y="100" as="sourcePoint" />
-            <mxPoint x="630" y="2982" as="targetPoint" />
+            <mxPoint x="630" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;" value="AIRegenerationService" vertex="1">
@@ -49,7 +50,7 @@
         <mxCell id="l4" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="890" y="100" as="sourcePoint" />
-            <mxPoint x="890" y="2982" as="targetPoint" />
+            <mxPoint x="890" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=15;fontStyle=1;align=center;" value="Gemini LLM &amp;lt;&amp;gt;" vertex="1">
@@ -58,7 +59,7 @@
         <mxCell id="l5" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1150" y="100" as="sourcePoint" />
-            <mxPoint x="1150" y="2982" as="targetPoint" />
+            <mxPoint x="1150" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=15;fontStyle=1;align=center;" value="OpenAI Moderation API &amp;lt;&amp;gt;" vertex="1">
@@ -67,7 +68,7 @@
         <mxCell id="l6" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1410" y="100" as="sourcePoint" />
-            <mxPoint x="1410" y="2982" as="targetPoint" />
+            <mxPoint x="1410" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=15;fontStyle=1;align=center;" value="Media Enrichment API &amp;lt;&amp;gt;" vertex="1">
@@ -76,7 +77,7 @@
         <mxCell id="l7" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1670" y="100" as="sourcePoint" />
-            <mxPoint x="1670" y="2982" as="targetPoint" />
+            <mxPoint x="1670" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=15;fontStyle=4;align=center;" value="game : Game" vertex="1">
@@ -85,7 +86,7 @@
         <mxCell id="l8" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1930" y="100" as="sourcePoint" />
-            <mxPoint x="1930" y="2982" as="targetPoint" />
+            <mxPoint x="1930" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=15;fontStyle=1;align=center;" value="GameRepository" vertex="1">
@@ -94,7 +95,7 @@
         <mxCell id="l9" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2190" y="100" as="sourcePoint" />
-            <mxPoint x="2190" y="2982" as="targetPoint" />
+            <mxPoint x="2190" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="p10" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=15;fontStyle=1;" value="PostgreSQL" vertex="1">
@@ -103,418 +104,410 @@
         <mxCell id="l10" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;strokeWidth=1;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2450" y="100" as="sourcePoint" />
-            <mxPoint x="2450" y="2982" as="targetPoint" />
+            <mxPoint x="2450" y="3245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r0" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Click &quot;Regenerate with AI&quot; button on a specific question card">
+        <mxCell id="r0" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Click &quot;Regenerate with AI&quot; button on a specific question card">
           <mxGeometry relative="1" y="20" as="geometry">
             <mxPoint as="offset" />
             <mxPoint x="110" y="140" as="sourcePoint" />
             <mxPoint x="370" y="140" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Display hint input dialog (optional)">
+        <mxCell id="r1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display hint input dialog (optional)">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="370" y="180" as="sourcePoint" />
             <mxPoint x="110" y="180" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Enter adjustment hint (optional), click &quot;Confirm Regenerate&quot;">
+        <mxCell id="r2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Enter adjustment hint (optional), click &quot;Confirm Regenerate&quot;">
           <mxGeometry relative="1" y="20" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="110" y="240" as="sourcePoint" />
-            <mxPoint x="370" y="240" as="targetPoint" />
+            <mxPoint x="110" y="230" as="sourcePoint" />
+            <mxPoint x="370" y="230" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="regenerateQuestion(cardId, hint)">
+        <mxCell id="r3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="regenerateQuestion(cardId, hint)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="370" y="260" as="sourcePoint" />
-            <mxPoint x="630" y="260" as="targetPoint" />
+            <mxPoint x="370" y="270" as="sourcePoint" />
+            <mxPoint x="630" y="270" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="regenerateQuestion(cardId, hint)">
+        <mxCell id="r4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="regenerateQuestion(cardId, hint)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="300" as="sourcePoint" />
-            <mxPoint x="890" y="300" as="targetPoint" />
+            <mxPoint x="630" y="305.0" as="sourcePoint" />
+            <mxPoint x="890" y="305.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="g1" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[5b. AI service timeout / connection failure]" vertex="1">
-          <mxGeometry height="20" width="2500" x="90" y="340" as="geometry" />
+          <mxGeometry height="20" width="2500" x="90" y="535.0" as="geometry" />
         </mxCell>
-        <mxCell id="r5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="generateQuestion(context, hint)">
+        <mxCell id="r5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="generateQuestion(context, hint)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="396" as="sourcePoint" />
-            <mxPoint x="1150" y="396" as="targetPoint" />
+            <mxPoint x="890" y="591.0" as="sourcePoint" />
+            <mxPoint x="1150" y="591.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="timeout (&amp;gt;10s)">
+        <mxCell id="r6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="timeout (&amp;gt;10s)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1150" y="436" as="sourcePoint" />
-            <mxPoint x="890" y="436" as="targetPoint" />
+            <mxPoint x="1150" y="631.0" as="sourcePoint" />
+            <mxPoint x="890" y="631.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="rRetry" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Automatically retry generateQuestion (up to 2 attempts)">
+        <mxCell id="rRetry" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Automatically retry generateQuestion (up to 2 attempts)">
+          <mxGeometry relative="1" as="geometry" x="1">
+            <Array as="points"><mxPoint x="1120.0" y="671.0" /><mxPoint x="1120.0" y="701.0" /></Array><mxPoint x="890" y="671.0" as="sourcePoint" />
+            <mxPoint x="890" y="701.0" as="targetPoint" />
+          <mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="r7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="AI service error">
           <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="960" y="476" />
-              <mxPoint x="960" y="506" />
-            </Array>
-            <mxPoint x="890" y="476" as="sourcePoint" />
-            <mxPoint x="890" y="506" as="targetPoint" />
+            <mxPoint x="890" y="741.0" as="sourcePoint" />
+            <mxPoint x="630" y="741.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="AI service error">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="532" as="sourcePoint" />
-            <mxPoint x="630" y="532" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="r8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="error: &quot;The AI server is currently busy processing requests. Your regenerate request could not be completed; please try again in a few minutes.&quot;">
+        <mxCell id="r8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="error: &quot;The AI server is currently busy processing requests. Your regenerate request could not be completed; please try again in a few minutes.&quot;">
           <mxGeometry relative="1" y="-12" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="630" y="572" as="sourcePoint" />
-            <mxPoint x="370" y="572" as="targetPoint" />
+            <mxPoint x="630" y="781.0" as="sourcePoint" />
+            <mxPoint x="370" y="781.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r9" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Display error, restore original question unchanged">
+        <mxCell id="r9" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display error, restore original question unchanged">
           <mxGeometry relative="1" y="-22" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="370" y="612" as="sourcePoint" />
-            <mxPoint x="110" y="612" as="targetPoint" />
+            <mxPoint x="370" y="821.0" as="sourcePoint" />
+            <mxPoint x="110" y="821.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="div1" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="20" y="662" as="sourcePoint" />
-            <mxPoint x="2540" y="662" as="targetPoint" />
+            <mxPoint x="20" y="871.0" as="sourcePoint" />
+            <mxPoint x="2540" y="871.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="g2" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[5a. regenerated content fails safety check]" vertex="1">
-          <mxGeometry height="20" width="2500" x="30" y="688" as="geometry" />
+          <mxGeometry height="20" width="2500" x="30" y="897.0" as="geometry" />
         </mxCell>
-        <mxCell id="r10" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="newQuestionContent">
+        <mxCell id="r10" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="newQuestionContent">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1150" y="724" as="sourcePoint" />
-            <mxPoint x="890" y="724" as="targetPoint" />
+            <mxPoint x="1150" y="933.0" as="sourcePoint" />
+            <mxPoint x="890" y="933.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r11" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="validateAndCheckSafety(newQuestionContent)">
+        <mxCell id="r11" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="validateAndCheckSafety(newQuestionContent)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="764" as="sourcePoint" />
-            <mxPoint x="1410" y="764" as="targetPoint" />
+            <mxPoint x="890" y="973.0" as="sourcePoint" />
+            <mxPoint x="1410" y="973.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r12" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="unsafe">
+        <mxCell id="r12" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="unsafe">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1410" y="804" as="sourcePoint" />
-            <mxPoint x="890" y="804" as="targetPoint" />
+            <mxPoint x="1410" y="1013.0" as="sourcePoint" />
+            <mxPoint x="890" y="1013.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r13" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="content rejected">
+        <mxCell id="r13" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="content rejected">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="844" as="sourcePoint" />
-            <mxPoint x="630" y="844" as="targetPoint" />
+            <mxPoint x="890" y="1053.0" as="sourcePoint" />
+            <mxPoint x="630" y="1053.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r14" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="error: &quot;The regenerated content does not meet the school-safety standard. The system has restored the previous question; please try again with a different hint.&quot;">
+        <mxCell id="r14" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="error: &quot;The regenerated content does not meet the school-safety standard. The system has restored the previous question; please try again with a different hint.&quot;">
           <mxGeometry relative="1" y="-14" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="630" y="884" as="sourcePoint" />
-            <mxPoint x="370" y="884" as="targetPoint" />
+            <mxPoint x="630" y="1093.0" as="sourcePoint" />
+            <mxPoint x="370" y="1093.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r15" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Display error, restore original question unchanged">
+        <mxCell id="r15" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display error, restore original question unchanged">
           <mxGeometry relative="1" y="-14" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="370" y="924" as="sourcePoint" />
-            <mxPoint x="110" y="924" as="targetPoint" />
+            <mxPoint x="370" y="1133.0" as="sourcePoint" />
+            <mxPoint x="110" y="1133.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="div2" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="20" y="974" as="sourcePoint" />
-            <mxPoint x="2540" y="974" as="targetPoint" />
+            <mxPoint x="20" y="1183.0" as="sourcePoint" />
+            <mxPoint x="2540" y="1183.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="g3" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[valid and safe]" vertex="1">
-          <mxGeometry height="20" width="2500" x="30" y="1000" as="geometry" />
+          <mxGeometry height="20" width="2500" x="30" y="1209.0" as="geometry" />
         </mxCell>
-        <mxCell id="r16" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="safe">
+        <mxCell id="r16" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="safe">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1410" y="1036" as="sourcePoint" />
-            <mxPoint x="890" y="1036" as="targetPoint" />
+            <mxPoint x="1410" y="1245.0" as="sourcePoint" />
+            <mxPoint x="890" y="1245.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r17" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="fetchImageAndVoice(newQuestionContent)">
+        <mxCell id="r17" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="fetchImageAndVoice(newQuestionContent)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="1076" as="sourcePoint" />
-            <mxPoint x="1670" y="1076" as="targetPoint" />
+            <mxPoint x="890" y="1285.0" as="sourcePoint" />
+            <mxPoint x="1670" y="1285.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r18" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="mediaAssets (image + narration audio)">
+        <mxCell id="r18" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="mediaAssets (image + narration audio)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1670" y="1116" as="sourcePoint" />
-            <mxPoint x="890" y="1116" as="targetPoint" />
+            <mxPoint x="1670" y="1325.0" as="sourcePoint" />
+            <mxPoint x="890" y="1325.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r19" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="updateQuestion(cardId, newQuestionContent, mediaAssets)">
+        <mxCell id="r19" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="updateQuestion(cardId, newQuestionContent, mediaAssets)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="1156" as="sourcePoint" />
-            <mxPoint x="1930" y="1156" as="targetPoint" />
+            <mxPoint x="890" y="1365.0" as="sourcePoint" />
+            <mxPoint x="1930" y="1365.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r20" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="save(game)">
+        <mxCell id="r20" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="save(game)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="1196" as="sourcePoint" />
-            <mxPoint x="2190" y="1196" as="targetPoint" />
+            <mxPoint x="890" y="1405.0" as="sourcePoint" />
+            <mxPoint x="2190" y="1405.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r21" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="updateGameContentById(gameId, gameContent)">
+        <mxCell id="r21" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="updateGameContentById(gameId, gameContent)">
           <mxGeometry relative="1" y="16" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="2190" y="1236" as="sourcePoint" />
-            <mxPoint x="2450" y="1236" as="targetPoint" />
+            <mxPoint x="2190" y="1445.0" as="sourcePoint" />
+            <mxPoint x="2450" y="1445.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r22" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="OK">
+        <mxCell id="r22" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="OK">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="2450" y="1276" as="sourcePoint" />
-            <mxPoint x="2190" y="1276" as="targetPoint" />
+            <mxPoint x="2450" y="1485.0" as="sourcePoint" />
+            <mxPoint x="2190" y="1485.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r23" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="game">
+        <mxCell id="r23" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="game">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="2190" y="1316" as="sourcePoint" />
-            <mxPoint x="890" y="1316" as="targetPoint" />
+            <mxPoint x="2190" y="1525.0" as="sourcePoint" />
+            <mxPoint x="890" y="1525.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r24" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="game">
+        <mxCell id="r24" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="game">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="1356" as="sourcePoint" />
-            <mxPoint x="630" y="1356" as="targetPoint" />
+            <mxPoint x="890" y="1565.0" as="sourcePoint" />
+            <mxPoint x="630" y="1565.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r25" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="200 OK">
+        <mxCell id="r25" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="200 OK">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="1396" as="sourcePoint" />
-            <mxPoint x="370" y="1396" as="targetPoint" />
+            <mxPoint x="630" y="1605.0" as="sourcePoint" />
+            <mxPoint x="370" y="1605.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r26" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Redraw interactive Canvas preview; display &quot;Game adjustment successful.&quot;">
+        <mxCell id="r26" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Redraw interactive Canvas preview; display &quot;Game adjustment successful.&quot;">
           <mxGeometry relative="1" y="-16" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="370" y="1436" as="sourcePoint" />
-            <mxPoint x="110" y="1436" as="targetPoint" />
+            <mxPoint x="370" y="1645.0" as="sourcePoint" />
+            <mxPoint x="110" y="1645.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="g4" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[4a. Actor requests AI to regenerate the entire game instead of a single question]" vertex="1">
-          <mxGeometry height="20" width="2400" x="90" y="1526" as="geometry" />
+          <mxGeometry height="20" width="2400" x="90" y="1735.0" as="geometry" />
         </mxCell>
-        <mxCell id="s1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Click &quot;Regenerate Entire Game&quot; button on the main toolbar">
+        <mxCell id="s1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Click &quot;Regenerate Entire Game&quot; button on the main toolbar">
           <mxGeometry relative="1" y="12" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="110" y="1582" as="sourcePoint" />
-            <mxPoint x="370" y="1582" as="targetPoint" />
+            <mxPoint x="110" y="1791.0" as="sourcePoint" />
+            <mxPoint x="370" y="1791.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Display confirmation dialog + overall direction input">
+        <mxCell id="s2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display confirmation dialog + overall direction input">
           <mxGeometry relative="1" y="-12" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="370" y="1622" as="sourcePoint" />
-            <mxPoint x="110" y="1622" as="targetPoint" />
+            <mxPoint x="370" y="1831.0" as="sourcePoint" />
+            <mxPoint x="110" y="1831.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Enter new overall direction (optional), click &quot;Confirm Regenerate All&quot;">
+        <mxCell id="s3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Enter new overall direction (optional), click &quot;Confirm Regenerate All&quot;">
           <mxGeometry relative="1" y="12" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="110" y="1662" as="sourcePoint" />
-            <mxPoint x="370" y="1662" as="targetPoint" />
+            <mxPoint x="110" y="1871.0" as="sourcePoint" />
+            <mxPoint x="370" y="1871.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="regenerateGame(gameId, direction)">
+        <mxCell id="s4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="regenerateGame(gameId, direction)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="370" y="1702" as="sourcePoint" />
-            <mxPoint x="630" y="1702" as="targetPoint" />
+            <mxPoint x="370" y="1911.0" as="sourcePoint" />
+            <mxPoint x="630" y="1911.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="regenerateGame(gameId, direction)">
+        <mxCell id="s5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="regenerateGame(gameId, direction)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="1742" as="sourcePoint" />
-            <mxPoint x="890" y="1742" as="targetPoint" />
+            <mxPoint x="630" y="1951.0" as="sourcePoint" />
+            <mxPoint x="890" y="1951.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="generateAllQuestions(gameContext, direction)">
+        <mxCell id="s6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="generateAllQuestions(gameContext, direction)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="1782" as="sourcePoint" />
-            <mxPoint x="1150" y="1782" as="targetPoint" />
+            <mxPoint x="890" y="1991.0" as="sourcePoint" />
+            <mxPoint x="1150" y="1991.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="s_to_lbl" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[if the AI service times out / fails to connect — same handling as Exception 5b]" vertex="1">
-          <mxGeometry height="20" width="2340" x="110" y="1838" as="geometry" />
+          <mxGeometry height="20" width="2340" x="110" y="2047.0" as="geometry" />
         </mxCell>
-        <mxCell id="s_to1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="timeout (&amp;gt;10s)">
+        <mxCell id="s_to1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="timeout (&amp;gt;10s)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1150" y="1868" as="sourcePoint" />
-            <mxPoint x="890" y="1868" as="targetPoint" />
+            <mxPoint x="1150" y="2077.0" as="sourcePoint" />
+            <mxPoint x="890" y="2077.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s_to_retry" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Automatically retry generateAllQuestions (up to 2 attempts)">
+        <mxCell id="s_to_retry" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Automatically retry generateAllQuestions (up to 2 attempts)">
+          <mxGeometry relative="1" as="geometry" x="1">
+            <Array as="points"><mxPoint x="1120.0" y="2117.0" /><mxPoint x="1120.0" y="2147.0" /></Array><mxPoint x="890" y="2117.0" as="sourcePoint" />
+            <mxPoint x="890" y="2147.0" as="targetPoint" />
+          <mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="s_to2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="AI service error">
           <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="960" y="1908" />
-              <mxPoint x="960" y="1938" />
-            </Array>
-            <mxPoint x="890" y="1908" as="sourcePoint" />
-            <mxPoint x="890" y="1938" as="targetPoint" />
+            <mxPoint x="890" y="2187.0" as="sourcePoint" />
+            <mxPoint x="630" y="2187.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s_to2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="AI service error">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="1964" as="sourcePoint" />
-            <mxPoint x="630" y="1964" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="s_to3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="error: &quot;The AI server is currently busy processing requests. Your regenerate request could not be completed; please try again in a few minutes.&quot;">
+        <mxCell id="s_to3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="error: &quot;The AI server is currently busy processing requests. Your regenerate request could not be completed; please try again in a few minutes.&quot;">
           <mxGeometry relative="1" y="-14" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="630" y="2004" as="sourcePoint" />
-            <mxPoint x="370" y="2004" as="targetPoint" />
+            <mxPoint x="630" y="2227.0" as="sourcePoint" />
+            <mxPoint x="370" y="2227.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s_to4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Display error, restore the game to its previous stable state">
+        <mxCell id="s_to4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display error, restore the game to its previous stable state">
           <mxGeometry relative="1" y="-14" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="370" y="2044" as="sourcePoint" />
-            <mxPoint x="110" y="2044" as="targetPoint" />
+            <mxPoint x="370" y="2267.0" as="sourcePoint" />
+            <mxPoint x="110" y="2267.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="div_s1" edge="1" parent="1" source="frameAlt4a_d1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0;exitY=0.654;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.654;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=15;" target="frameAlt4a_d1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="90" y="2094" as="sourcePoint" />
-            <mxPoint x="2470" y="2094" as="targetPoint" />
+            <mxPoint x="90" y="2317.0" as="sourcePoint" />
+            <mxPoint x="2470" y="2317.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="s_ok_lbl" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[otherwise: AI responds successfully within the retries]" vertex="1">
-          <mxGeometry height="20" width="2340" x="110" y="2120" as="geometry" />
+          <mxGeometry height="20" width="2340" x="110" y="2343.0" as="geometry" />
         </mxCell>
-        <mxCell id="s7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="newQuestionList">
+        <mxCell id="s7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="newQuestionList">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1150" y="2150" as="sourcePoint" />
-            <mxPoint x="890" y="2150" as="targetPoint" />
+            <mxPoint x="1150" y="2373.0" as="sourcePoint" />
+            <mxPoint x="890" y="2373.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="validateAndCheckSafety(newQuestionList)">
+        <mxCell id="s8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="validateAndCheckSafety(newQuestionList)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="2190" as="sourcePoint" />
-            <mxPoint x="1410" y="2190" as="targetPoint" />
+            <mxPoint x="890" y="2413.0" as="sourcePoint" />
+            <mxPoint x="1410" y="2413.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="s_un_lbl" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[if content is unsafe — same handling as Exception 5a]" vertex="1">
-          <mxGeometry height="20" width="2240" x="160" y="2246" as="geometry" />
+          <mxGeometry height="20" width="2240" x="160" y="2469.0" as="geometry" />
         </mxCell>
-        <mxCell id="s_un1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="unsafe">
+        <mxCell id="s_un1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="unsafe">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1410" y="2276" as="sourcePoint" />
-            <mxPoint x="890" y="2276" as="targetPoint" />
+            <mxPoint x="1410" y="2499.0" as="sourcePoint" />
+            <mxPoint x="890" y="2499.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s_un2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="content rejected">
+        <mxCell id="s_un2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="content rejected">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="2316" as="sourcePoint" />
-            <mxPoint x="630" y="2316" as="targetPoint" />
+            <mxPoint x="890" y="2539.0" as="sourcePoint" />
+            <mxPoint x="630" y="2539.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s_un3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="error: &quot;The regenerated content does not meet the school-safety standard. The system has restored the previous game; please try again with a different direction.&quot;">
+        <mxCell id="s_un3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="error: &quot;The regenerated content does not meet the school-safety standard. The system has restored the previous game; please try again with a different direction.&quot;">
           <mxGeometry relative="1" y="-16" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="630" y="2356" as="sourcePoint" />
-            <mxPoint x="370" y="2356" as="targetPoint" />
+            <mxPoint x="630" y="2579.0" as="sourcePoint" />
+            <mxPoint x="370" y="2579.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s_un4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Display error, restore the game to its previous stable state">
+        <mxCell id="s_un4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Display error, restore the game to its previous stable state">
           <mxGeometry relative="1" y="-16" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="370" y="2396" as="sourcePoint" />
-            <mxPoint x="110" y="2396" as="targetPoint" />
+            <mxPoint x="370" y="2619.0" as="sourcePoint" />
+            <mxPoint x="110" y="2619.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="div_s2" edge="1" parent="1" source="frameAlt4a_d2" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0;exitY=0.291;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.291;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=15;" target="frameAlt4a_d2">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="140" y="2446" as="sourcePoint" />
-            <mxPoint x="2420" y="2446" as="targetPoint" />
+            <mxPoint x="140" y="2669.0" as="sourcePoint" />
+            <mxPoint x="2420" y="2669.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="s_valid_lbl" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[otherwise: content valid and safe]" vertex="1">
-          <mxGeometry height="20" width="2240" x="160" y="2472" as="geometry" />
+          <mxGeometry height="20" width="2240" x="160" y="2695.0" as="geometry" />
         </mxCell>
-        <mxCell id="s9" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="safe">
+        <mxCell id="s9" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="safe">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1410" y="2502" as="sourcePoint" />
-            <mxPoint x="890" y="2502" as="targetPoint" />
+            <mxPoint x="1410" y="2725.0" as="sourcePoint" />
+            <mxPoint x="890" y="2725.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s10" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="fetchImageAndVoice(newQuestionList)">
+        <mxCell id="s10" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="fetchImageAndVoice(newQuestionList)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="2542" as="sourcePoint" />
-            <mxPoint x="1670" y="2542" as="targetPoint" />
+            <mxPoint x="890" y="2765.0" as="sourcePoint" />
+            <mxPoint x="1670" y="2765.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s11" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="mediaAssetsList">
+        <mxCell id="s11" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="mediaAssetsList">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1670" y="2582" as="sourcePoint" />
-            <mxPoint x="890" y="2582" as="targetPoint" />
+            <mxPoint x="1670" y="2805.0" as="sourcePoint" />
+            <mxPoint x="890" y="2805.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s12" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="replaceAllQuestions(newQuestionList, mediaAssetsList)">
+        <mxCell id="s12" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="replaceAllQuestions(newQuestionList, mediaAssetsList)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="2622" as="sourcePoint" />
-            <mxPoint x="1930" y="2622" as="targetPoint" />
+            <mxPoint x="890" y="2845.0" as="sourcePoint" />
+            <mxPoint x="1930" y="2845.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s13" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="save(game)">
+        <mxCell id="s13" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="save(game)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="2662" as="sourcePoint" />
-            <mxPoint x="2190" y="2662" as="targetPoint" />
+            <mxPoint x="890" y="2885.0" as="sourcePoint" />
+            <mxPoint x="2190" y="2885.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s14" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="updateGameContentById(gameId, gameContent)">
+        <mxCell id="s14" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="updateGameContentById(gameId, gameContent)">
           <mxGeometry relative="1" y="12" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="2190" y="2702" as="sourcePoint" />
-            <mxPoint x="2450" y="2702" as="targetPoint" />
+            <mxPoint x="2190" y="2925.0" as="sourcePoint" />
+            <mxPoint x="2450" y="2925.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s15" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="OK">
+        <mxCell id="s15" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="OK">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="2450" y="2742" as="sourcePoint" />
-            <mxPoint x="2190" y="2742" as="targetPoint" />
+            <mxPoint x="2450" y="2965.0" as="sourcePoint" />
+            <mxPoint x="2190" y="2965.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s16" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="game">
+        <mxCell id="s16" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="game">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="2190" y="2782" as="sourcePoint" />
-            <mxPoint x="890" y="2782" as="targetPoint" />
+            <mxPoint x="2190" y="3005.0" as="sourcePoint" />
+            <mxPoint x="890" y="3005.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s17" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="game">
+        <mxCell id="s17" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="game">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="2822" as="sourcePoint" />
-            <mxPoint x="630" y="2822" as="targetPoint" />
+            <mxPoint x="890" y="3045.0" as="sourcePoint" />
+            <mxPoint x="630" y="3045.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s18" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="200 OK">
+        <mxCell id="s18" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="200 OK">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="2862" as="sourcePoint" />
-            <mxPoint x="370" y="2862" as="targetPoint" />
+            <mxPoint x="630" y="3085.0" as="sourcePoint" />
+            <mxPoint x="370" y="3085.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="s19" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Update editor board + Canvas preview with the new game for review">
+        <mxCell id="s19" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Update editor board + Canvas preview with the new game for review">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="370" y="2902" as="sourcePoint" />
-            <mxPoint x="110" y="2902" as="targetPoint" />
+            <mxPoint x="370" y="3125.0" as="sourcePoint" />
+            <mxPoint x="110" y="3125.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-      </root>
+      <mxCell id="g5d" value="[5d. AI redo paused due to operational cost cap (costCapExceeded == true)]" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontFamily=Helvetica;fontSize=15;" vertex="1" parent="1"><mxGeometry x="80" y="345.0" width="580" height="20" as="geometry" /></mxCell><mxCell id="m5d_1" value="isAiGenerationPaused() == true" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" edge="1" parent="1"><mxGeometry width="50" height="50" relative="1" as="geometry" x="1"><mxPoint x="630" y="375.0" as="sourcePoint" /><mxPoint x="630" y="405.0" as="targetPoint" /><Array as="points"><mxPoint x="860.0" y="375.0" /><mxPoint x="860.0" y="405.0" /></Array><mxPoint as="offset" /></mxGeometry></mxCell><mxCell id="m5d_2" value="429 Too Many Requests (&quot;AI redo paused due to budget limit&quot;)" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" edge="1" parent="1"><mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="630" y="445.0" as="sourcePoint" /><mxPoint x="370" y="445.0" as="targetPoint" /></mxGeometry></mxCell><mxCell id="m5d_3" value="Display &quot;AI redo is paused due to budget limit. You can still manually edit existing games.&quot;" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" edge="1" parent="1"><mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="370" y="485.0" as="sourcePoint" /><mxPoint x="110" y="485.0" as="targetPoint" /></mxGeometry></mxCell><mxCell id="div_5d" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;" edge="1" parent="1"><mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="20" y="525.0" as="sourcePoint" /><mxPoint x="2540" y="525.0" as="targetPoint" /></mxGeometry></mxCell></root>
     </mxGraphModel>
   </diagram>
 </mxfile>

@@ -1,5 +1,9 @@
 # Source audit: English Grade 3 draft
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 ## Scope and source
 
 - Scope: `ENGLISH / GRADE_3`, language-skill outcomes (listening, speaking, reading and writing).

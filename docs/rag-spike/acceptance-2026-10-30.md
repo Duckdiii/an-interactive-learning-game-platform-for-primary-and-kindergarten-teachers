@@ -1,5 +1,9 @@
 # Kết quả nghiệm thu pipeline A — 2026-10-30
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 **Kết luận: NOT_ACCEPTED.** Có bằng chứng kỹ thuật đạt, nhưng nội dung game và một số ca online chưa đạt. Không thay thuật toán, ngưỡng hoặc model để làm đẹp số liệu trong lúc chạy. Hybrid/HyDE/LLM judge chỉ nằm trong [plan thử nghiệm](rag-variants-experiment.md).
 
 ## Điều kiện và phạm vi

@@ -1,5 +1,9 @@
 # 1.2.3. Các Chỉ số KPI Nghiệp vụ Định lượng (Key Business KPIs)
 
+> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[srs/SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
+
+
+
 Nhằm nâng cao năng suất tạo lập học liệu sư phạm, bảo đảm hiệu quả vận hành và đáp ứng trọn vẹn tiêu chí đánh giá định lượng đồ án, hệ thống thiết lập năm chỉ số KPI nghiệp vụ định lượng cốt lõi được đặc tả tại Bảng 1.1.
 
 Bảng 1.1: Bảng Chỉ số Hiệu quả Nghiệp vụ Định lượng (Key Business KPIs)

@@ -1,5 +1,9 @@
 # 3.3. Non-Functional Requirements (Yêu cầu Phi Chức năng - NFR)
 
+> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[srs/SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
+
+
+
 Hệ thống quy định các chỉ số kỹ thuật phi chức năng (NFR-01 đến NFR-05) nhằm thực thi và bảo đảm 05 chỉ số KPI nghiệp vụ định lượng đã chốt ở Chương 1 (Thời gian tạo game < 60s, First Gen Acceptance ≥ 75%, Edit Rate ≤ 25%, Regeneration Rate ≤ 10%, điểm SUS ≥ 80/100) cùng quy trình kiểm soát chất lượng AI nghiêm ngặt (Tỷ lệ ảo giác kiến thức Hallucination Rate < 5%, Phòng thủ Prompt Injection gián tiếp từ file giáo án). Chi tiết các SLO/Metric, giải pháp kỹ thuật và công cụ thẩm định được đặc tả tại Bảng 3.3.
 
 ## Bảng 3.3: Bảng Ma trận Kỹ thuật Phi Chức năng (Dev-Oriented NFR Matrix)

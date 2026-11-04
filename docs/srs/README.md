@@ -19,9 +19,16 @@
 - [UC-13](UC-13.md)
 - [UC-14](UC-14.md)
 - [UC-15](UC-15.md)
+- [UC-16](UC-16.md)
+- [UC-17](UC-17.md)
+- [UC-18](UC-18.md)
 
 ## Khác
 - [NFR.md](NFR.md)
 - [FR-summary.md](FR-summary.md)
 - [FLD.md](FLD.md)
 - [KPI.md](KPI.md)
+## Tài liệu SRS Gốc
+- [[srs/SRS-full|Toàn văn Đặc tả SRS v3 (SRS-full.md)]]
+- [[srs/Dinh_huong_de_tai|Định hướng đề tài v10 (Dinh_huong_de_tai.md)]]
+

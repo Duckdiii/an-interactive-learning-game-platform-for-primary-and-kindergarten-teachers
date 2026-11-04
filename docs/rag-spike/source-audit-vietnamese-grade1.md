@@ -1,5 +1,9 @@
 # Source audit: Vietnamese Grade 1 draft
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 ## Scope and source
 
 - Subject/scope: `VIETNAMESE / GRADE_1`; curriculum source section is the Grade 1 outcome table in the Vietnamese language arts (`Ngữ văn`) program.

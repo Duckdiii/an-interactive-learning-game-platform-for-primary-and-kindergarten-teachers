@@ -1,5 +1,9 @@
 # Source audit: English Grade 4 draft
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 ## Scope and source
 
 - Scope: `ENGLISH / GRADE_4`, language skills in the supplied curriculum PDF.

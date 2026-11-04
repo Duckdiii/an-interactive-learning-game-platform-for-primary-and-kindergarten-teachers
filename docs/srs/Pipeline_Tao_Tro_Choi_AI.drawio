@@ -1,0 +1,168 @@
+<mxfile host="Electron">
+  <diagram id="pipeline-compact" name="AI Educational Game Generation Pipeline Compact">
+    <mxGraphModel dx="1030" dy="626" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="1650" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n_step1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="1. GIÁO VIÊN NHẬP MÔ TẢ (PROMPT BAN ĐẦU)&#xa;• Mô tả tự nhiên: Môn học, Khối lớp &amp; Yêu cầu bài giảng" vertex="1">
+          <mxGeometry height="60" width="440" x="440" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="res_rag" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#F0FDFA;strokeColor=#0D9488;strokeWidth=1.5;fontColor=#134E4A;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="TRI THỨC CTGDPT 2018&#xa;(Curriculum-RAG Database)&#xa;Chuẩn kỹ năng Toán/Tiếng Việt" vertex="1">
+          <mxGeometry height="70" width="270" x="90" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="n_step2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#6366F1;strokeWidth=2;fontColor=#1E1B4B;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="2. PHÂN TÍCH Ý ĐỊNH &amp; BÓC TÁCH 3 TẦNG&#xa;(AI Intent Parser &amp; Reasoning Engine)&#xa;Bóc tách: Sư phạm - Hành vi tương tác - Cốt truyện" vertex="1">
+          <mxGeometry height="70" width="440" x="440" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="e_1_2" edge="1" parent="1" source="n_step1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;fontSize=9.5;fontColor=#1E293B;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_step2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rag_2" edge="1" parent="1" source="res_rag" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0D9488;strokeWidth=1.5;dashed=1;fontSize=9.5;fontColor=#0F766E;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" target="n_step2" value="Tra cứu chuẩn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dec_intent" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FEF08A;strokeColor=#EAB308;strokeWidth=2;fontColor=#713F12;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="ĐỦ DỮ KIỆN?&#xa;(Intent Check)" vertex="1">
+          <mxGeometry height="65" width="170" x="575" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="e_2_dec1" edge="1" parent="1" source="n_step2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;fontSize=9.5;fontColor=#1E293B;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="dec_intent" value="Đánh giá ngữ cảnh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n_clarify" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="HỎI LÀM RÕ (CLARIFICATION LOOP)&#xa;AI chủ động hỏi lại khi thiếu khối lớp/kỹ năng" vertex="1">
+          <mxGeometry height="65" width="290" x="950" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="e_intent_no" edge="1" parent="1" source="dec_intent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E11D48;strokeWidth=2;dashed=1;fontSize=9.5;fontColor=#BE123C;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" target="n_clarify" value="THIẾU / MƠ HỒ">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_clarify_back" edge="1" parent="1" source="n_clarify" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;fontSize=9.5;fontColor=#1E293B;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0" target="n_step1" value="Bổ sung thông tin">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1095" y="70" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="res_patterns" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#F0FDFA;strokeColor=#0D9488;strokeWidth=1.5;fontColor=#134E4A;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="NGÂN HÀNG MẪU CƠ CHẾ (PATTERN BANK)&#xa;10 Cốt lõi + 14 Mở rộng + Generic Hotspot" vertex="1">
+          <mxGeometry height="65" width="270" x="90" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="res_age" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#F0FDFA;strokeColor=#0D9488;strokeWidth=1.5;fontColor=#134E4A;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="HỒ SƠ LỨA TUỔI (AGE PROFILE)&#xa;Luật số chữ (&lt;=15 từ) &amp; Vùng chạm (&gt;=56px)" vertex="1">
+          <mxGeometry height="65" width="270" x="90" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="n_step3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#6366F1;strokeWidth=2;fontColor=#1E1B4B;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="3. LẬP KẾ HOẠCH TRÒ CHƠI (AI GAME PLANNER)&#xa;Khớp cơ chế Pattern Bank -&gt; Xuất bản thiết kế JSON GDD&#xa;Nguyên tắc: Tích hợp nội tại (Học = Chơi)" vertex="1">
+          <mxGeometry height="75" width="440" x="440" y="335" as="geometry" />
+        </mxCell>
+        <mxCell id="e_dec1_3" edge="1" parent="1" source="dec_intent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16A34A;strokeWidth=2;fontSize=9.5;fontColor=#15803D;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_step3" value="ĐỦ DỮ KIỆN">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pat_3" edge="1" parent="1" source="res_patterns" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0D9488;strokeWidth=1.5;dashed=1;fontSize=9.5;fontColor=#0F766E;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0" target="n_step3" value="Khớp cơ chế">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_age_3" edge="1" parent="1" source="res_age" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0D9488;strokeWidth=1.5;dashed=1;fontSize=9.5;fontColor=#0F766E;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0" target="n_step3" value="Luật lứa tuổi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n_proposal" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="4. ĐỀ XUẤT 5 TỰA GAME &amp; GIẢI TRÌNH SƯ PHẠM&#xa;(Explainable Game Proposals &amp; Rationale)&#xa;• AI gợi ý 5 tựa game đa dạng cơ chế kèm lý do sư phạm cụ thể&#xa;• Giáo viên xem giải trình -&gt; Bấm chọn tựa game tối ưu nhất" vertex="1">
+          <mxGeometry height="80" width="440" x="440" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="e_3_prop" edge="1" parent="1" source="n_step3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;fontSize=9.5;fontColor=#1E293B;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_proposal" value="Khớp 24 cơ chế có sẵn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prop_reject" edge="1" parent="1" source="n_proposal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E11D48;strokeWidth=2;dashed=1;fontSize=9.5;fontColor=#BE123C;labelBackgroundColor=#FFFFFF;;exitX=0.88;exitY=0;exitDx=0;exitDy=0;entryX=0.88;entryY=1;entryDx=0;entryDy=0" target="n_step3" value="Đổi 5 ý tưởng khác">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="res_assets" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#F0FDFA;strokeColor=#0D9488;strokeWidth=1.5;fontColor=#134E4A;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="KHO THEME &amp; ASSET ĐỒ HỌA&#xa;Icon SVG chuẩn hóa &amp; Âm thanh an toàn" vertex="1">
+          <mxGeometry height="65" width="270" x="90" y="555" as="geometry" />
+        </mxCell>
+        <mxCell id="n_step4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#6366F1;strokeWidth=2;fontColor=#1E1B4B;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="5. SINH NỘI DUNG BÀI HỌC (AI CONTENT GENERATOR)&#xa;Sinh câu hỏi, bài toán &amp; đóng gói JSON DSL v1.0.0&#xa;Áp dụng kỹ thuật Best-of-N ứng viên tối ưu" vertex="1">
+          <mxGeometry height="75" width="440" x="440" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prop_accept" edge="1" parent="1" source="n_proposal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16A34A;strokeWidth=2;fontSize=9.5;fontColor=#15803D;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_step4" value="Duyệt tựa game">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ast_4" edge="1" parent="1" source="res_assets" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0D9488;strokeWidth=1.5;dashed=1;fontSize=9.5;fontColor=#0F766E;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" target="n_step4" value="Ghép Assets">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c_gates" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=11.5;fontColor=#166534;fillColor=#F0FDF4;strokeColor=#22C55E;strokeWidth=1.5;arcSize=6;collapsible=0;align=center;" value="6. BỘ 3 LỚP KIỂM TRA TỰ ĐỘNG (CHẶN ĐỨNG ẢO GIÁC &amp; LỖI GAME)" vertex="1">
+          <mxGeometry height="160" width="940" x="190" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="n_g1" parent="c_gates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#16A34A;strokeWidth=1.5;fontColor=#14532D;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="CỔNG 1: KIỂM TRA CÚ PHÁP (JSON Schema)&#xa;Bảo đảm file không bị lỗi định dạng&#xa;hay thiếu trường dữ liệu bắt buộc" vertex="1">
+          <mxGeometry height="70" width="250" x="25" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n_g2" parent="c_gates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#16A34A;strokeWidth=1.5;fontColor=#14532D;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="CỔNG 2: MÁY TÍNH TỰ GIẢI LẠI TOÁN (0% AI)&#xa;Code Java tự tính lại 100% phép toán&#xa;&amp; Dò từ điển chính tả tiếng Việt chuẩn" vertex="1">
+          <mxGeometry height="75" width="330" x="310" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n_g3" parent="c_gates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#16A34A;strokeWidth=1.5;fontColor=#14532D;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="CỔNG 3: THẢ BOT CHƠI THỬ TRÌNH DUYỆT&#xa;Playwright Headless giả lập click kéo thả&#xa;Bảo đảm game không bị đơ hoặc crash" vertex="1">
+          <mxGeometry height="70" width="235" x="675" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n_gate_note" parent="c_gates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontColor=#14532D;fontSize=10;fontStyle=2;align=center;" value="Mục tiêu cốt lõi: Triệt tiêu 100% rủi ro ảo giác toán học &amp; lỗi runtime trước khi game đến tay học sinh" vertex="1">
+          <mxGeometry height="25" width="885" x="25" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="e_g1_g2" edge="1" parent="c_gates" source="n_g1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16A34A;strokeWidth=2;fontSize=9.5;fontColor=#15803D;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" target="n_g2" value="Cú pháp OK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_g2_g3" edge="1" parent="c_gates" source="n_g2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16A34A;strokeWidth=2;fontSize=9.5;fontColor=#15803D;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" target="n_g3" value="Toán chuẩn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_4_5" edge="1" parent="1" source="n_step4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;fontSize=9.5;fontColor=#1E293B;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="c_gates" value="Ứng viên JSON DSL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FEF08A;strokeColor=#EAB308;strokeWidth=2;fontColor=#713F12;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="CẢ 3 CỔNG&#xa;ĐỀU ĐẠT?&#xa;(All Passed?)" vertex="1">
+          <mxGeometry height="70" width="170" x="575" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="e_5_dec" edge="1" parent="1" source="c_gates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;fontSize=9.5;fontColor=#1E293B;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_dec" value="Thẩm định">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n_repair" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF1F2;strokeColor=#E11D48;strokeWidth=2;fontColor=#881337;fontSize=10.5;fontStyle=1;align=center;spacing=3;" value="BỘ PHẢN HỒI LỖI (FEEDBACK ENGINE)&#xa;Gói lỗi cụ thể cho AI sửa (Tối đa 3 lần)" vertex="1">
+          <mxGeometry height="75" width="290" x="950" y="845" as="geometry" />
+        </mxCell>
+        <mxCell id="n_fallback" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="DỰ PHÒNG AN TOÀN (SAFE FALLBACK)&#xa;Chuyển sang Generic Hotspot / Mẫu an toàn" vertex="1">
+          <mxGeometry height="70" width="290" x="950" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="e_dec_no" edge="1" parent="1" source="n_dec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E11D48;strokeWidth=2;dashed=1;fontSize=9.5;fontColor=#BE123C;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" target="n_repair" value="CÓ LỖI">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_repair_fallback" edge="1" parent="1" source="n_repair" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E11D48;strokeWidth=2;dashed=1;fontSize=9.5;fontColor=#BE123C;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_fallback" value="Quá 3 lần">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_loop_back" edge="1" parent="1" source="n_repair" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E11D48;strokeWidth=2;dashed=1;fontSize=9.5;fontColor=#BE123C;labelBackgroundColor=#FFFFFF;;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0" target="n_step4" value="Gửi lỗi yêu cầu sửa (Repair Loop)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1280" y="882" />
+              <mxPoint x="1280" y="587" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n_certified" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=10;verticalAlign=middle;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;fontColor=#78350F;fontSize=10.5;fontStyle=1;align=center;spacing=2;" value="KỊCH BẢN CHỨNG THỰC (CERTIFIED DSL)&#xa;Đạt chuẩn 100% toán học, cú pháp &amp; runtime 0 crash" vertex="1">
+          <mxGeometry height="60" width="440" x="440" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="e_dec_yes" edge="1" parent="1" source="n_dec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16A34A;strokeWidth=2;fontSize=9.5;fontColor=#15803D;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_certified" value="ĐẠT 100%">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n_engine" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F9FF;strokeColor=#0284C7;strokeWidth=2;fontColor=#0C4A6E;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="7. TRÌNH HIỂN THỊ ĐA NĂNG (HYBRID KONVA ENGINE)&amp;#10;• Với Preset: Render 24 cơ chế có sẵn (Quiz, Drag-drop...)&amp;#10;• Với Custom: Chạy CPF Runtime (Module 2, 3, 4) mượt mà 60 FPS" vertex="1">
+          <mxGeometry height="65" width="440" x="440" y="1045" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cert_eng" edge="1" parent="1" source="n_certified" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;fontSize=9.5;fontColor=#1E293B;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_engine" value="Nạp DSL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n_preview" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="8. CHƠI THỬ &amp; TÙY BIẾN 1-CLICK (PLAYABLE PREVIEW)&#xa;Giáo viên chơi thử trên web &amp; đổi biến thể cơ chế (A/B/C) với 1 click" vertex="1">
+          <mxGeometry height="65" width="440" x="440" y="1145" as="geometry" />
+        </mxCell>
+        <mxCell id="e_eng_prev" edge="1" parent="1" source="n_engine" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;fontSize=9.5;fontColor=#1E293B;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_preview" value="Hiển thị chơi thử">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n_publish" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#15803D;strokeWidth=2.5;fontColor=#14532D;fontSize=12;fontStyle=1;align=center;spacing=4;" value="9. XUẤT BẢN GAME CHO HỌC SINH (PUBLISHED GAME)&#xa;Cấp mã PIN / Link cho học sinh chơi trên iPad &amp; Lưu tiến trình học" vertex="1">
+          <mxGeometry height="65" width="440" x="440" y="1245" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prev_pub" edge="1" parent="1" source="n_preview" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16A34A;strokeWidth=2;fontSize=9.5;fontColor=#15803D;labelBackgroundColor=#FFFFFF;;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="n_publish" value="Duyệt xuất bản">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n_cpf" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E8FF;strokeColor=#9333EA;strokeWidth=2;fontColor=#581C87;fontSize=11.5;fontStyle=1;align=center;spacing=4;" value="COMPOSABLE PRIMITIVES FRAMEWORK (CPF)" vertex="1">
+          <mxGeometry height="65" width="290" x="1120" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="e_3_cpf" edge="1" parent="1" source="n_step3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9333EA;strokeWidth=2;dashed=1;fontSize=9.5;fontColor=#6B21A8;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n_cpf" value="Ngoài danh mục (Bắn cung, Đua xe...)">
+          <mxGeometry relative="1" y="13" as="geometry">
+            <mxPoint y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_cpf_gates" edge="1" parent="1" source="n_cpf" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9333EA;strokeWidth=2;fontSize=9.5;fontColor=#6B21A8;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.963;entryY=0;entryDx=0;entryDy=0;" target="c_gates" value="JSON DSL tùy biến (Custom)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

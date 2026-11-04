@@ -1,11 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
 <mxfile host="app.diagrams.net">
   <diagram id="uc11seq" name="UC-11 Sequence Diagram">
-    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="820" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="820" pageHeight="1077" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="frameAlt" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;width=60;height=30;fontSize=15;" value="alt" vertex="1">
-          <mxGeometry height="462" width="760" x="20" y="212" as="geometry" />
+          <mxGeometry height="470.0" width="760" x="20" y="212" as="geometry" />
         </mxCell>
         <mxCell id="p1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;labelBackgroundColor=#FFFFFF;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=15;fontStyle=1;" value="Student" vertex="1">
           <mxGeometry height="60" width="60" x="80" y="40" as="geometry" />
@@ -19,157 +20,142 @@
         <mxCell id="l1" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="110" y="100" as="sourcePoint" />
-            <mxPoint x="110" y="984" as="targetPoint" />
+            <mxPoint x="110" y="997.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="l2" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="370" y="100" as="sourcePoint" />
-            <mxPoint x="370" y="984" as="targetPoint" />
+            <mxPoint x="370" y="997.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="l3" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=15;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="630" y="100" as="sourcePoint" />
-            <mxPoint x="630" y="984" as="targetPoint" />
+            <mxPoint x="630" y="997.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="m0" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Open screen with narration content / click &quot;play narration&quot;">
+        <mxCell id="m0" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Open screen with narration content / click &quot;play narration&quot;">
           <mxGeometry relative="1" y="20" as="geometry">
             <mxPoint as="offset" />
             <mxPoint x="110" y="160" as="sourcePoint" />
             <mxPoint x="370" y="160" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="m1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="play(audioUrl)">
+        <mxCell id="m1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="play(audioUrl)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="370" y="176" as="sourcePoint" />
-            <mxPoint x="630" y="176" as="targetPoint" />
+            <mxPoint x="370" y="200" as="sourcePoint" />
+            <mxPoint x="630" y="200" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="g1" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[2c. cannot play narration content (file or system failure)]" vertex="1">
           <mxGeometry height="20" width="700" x="80" y="220" as="geometry" />
         </mxCell>
-        <mxCell id="r1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="playbackError">
+        <mxCell id="r1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="playbackError">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="630" y="262" as="sourcePoint" />
             <mxPoint x="370" y="262" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r2" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Still display game content so Actor can continue if possible; offer retry">
-          <mxGeometry relative="1" y="10" as="geometry">
+        <mxCell id="r2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Still display game content so Actor can continue if possible; offer retry">
+          <mxGeometry relative="1" as="geometry" x="1">
             <mxPoint as="offset" />
-            <Array as="points">
-              <mxPoint x="370" y="290" />
-              <mxPoint x="440" y="290" />
-              <mxPoint x="440" y="318" />
-            </Array>
-            <mxPoint x="370" y="298" as="sourcePoint" />
+            <Array as="points"><mxPoint x="600.0" y="298" /><mxPoint x="600.0" y="318" /></Array><mxPoint x="370" y="298" as="sourcePoint" />
             <mxPoint x="370" y="318" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="div1" edge="1" parent="1" source="frameAlt" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=-0.002;exitY=0.265;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.996;entryY=0.263;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=15;" target="frameAlt">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="40" y="334" as="sourcePoint" />
-            <mxPoint x="760" y="334" as="targetPoint" />
+            <mxPoint x="40" y="358.0" as="sourcePoint" />
+            <mxPoint x="760" y="358.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="g2" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[2d. device cannot output audio]" vertex="1">
-          <mxGeometry height="20" width="500" x="40" y="346" as="geometry" />
+          <mxGeometry height="23.0" width="500" x="40" y="346" as="geometry" />
         </mxCell>
-        <mxCell id="r3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="deviceAudioUnavailable">
+        <mxCell id="r3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="deviceAudioUnavailable">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="376" as="sourcePoint" />
-            <mxPoint x="370" y="376" as="targetPoint" />
+            <mxPoint x="630" y="398.0" as="sourcePoint" />
+            <mxPoint x="370" y="398.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r4" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Notify Actor to check volume / device audio capability; Actor may continue if visible content is sufficient">
-          <mxGeometry relative="1" x="0.0217" as="geometry">
+        <mxCell id="r4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Notify Actor to check volume / device audio capability; Actor may continue if visible content is sufficient">
+          <mxGeometry relative="1" as="geometry" x="1">
             <mxPoint as="offset" />
-            <Array as="points">
-              <mxPoint x="370" y="400" />
-              <mxPoint x="440" y="400" />
-              <mxPoint x="440" y="432" />
-            </Array>
-            <mxPoint x="370" y="412" as="sourcePoint" />
-            <mxPoint x="370" y="432" as="targetPoint" />
+            <Array as="points"><mxPoint x="600.0" y="438.0" /><mxPoint x="600.0" y="468.0" /></Array><mxPoint x="370" y="438.0" as="sourcePoint" />
+            <mxPoint x="370" y="468.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="div2" edge="1" parent="1" source="frameAlt" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;entryX=0.996;entryY=0.514;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.002;exitY=0.508;exitDx=0;exitDy=0;exitPerimeter=0;fontSize=15;" target="frameAlt">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="40" y="448" as="sourcePoint" />
-            <mxPoint x="760" y="448" as="targetPoint" />
+            <mxPoint x="40" y="508.0" as="sourcePoint" />
+            <mxPoint x="760" y="508.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="g3" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[narration plays successfully]" vertex="1">
-          <mxGeometry height="20" width="400" x="40" y="460" as="geometry" />
+          <mxGeometry height="20" width="400" x="40" y="463.0" as="geometry" />
         </mxCell>
-        <mxCell id="r5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="playbackStarted">
+        <mxCell id="r5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="playbackStarted">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="490" as="sourcePoint" />
-            <mxPoint x="370" y="490" as="targetPoint" />
+            <mxPoint x="630" y="548.0" as="sourcePoint" />
+            <mxPoint x="370" y="548.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="playbackEnded">
+        <mxCell id="r6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="playbackEnded">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="526" as="sourcePoint" />
-            <mxPoint x="370" y="526" as="targetPoint" />
+            <mxPoint x="630" y="588.0" as="sourcePoint" />
+            <mxPoint x="370" y="588.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r7" edge="1" parent="1" style="html=1;verticalAlign=middle;startArrow=none;endArrow=block;endFill=1;rounded=0;fontSize=15;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;" value="Enable &quot;Replay&quot; option">
-          <mxGeometry relative="1" as="geometry">
+        <mxCell id="r7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Enable &quot;Replay&quot; option">
+          <mxGeometry relative="1" as="geometry" x="1">
             <mxPoint as="offset" />
-            <Array as="points">
-              <mxPoint x="370" y="550" />
-              <mxPoint x="440" y="550" />
-              <mxPoint x="440" y="582" />
-            </Array>
-            <mxPoint x="370" y="562" as="sourcePoint" />
-            <mxPoint x="370" y="582" as="targetPoint" />
+            <Array as="points"><mxPoint x="575.0" y="623.0" /><mxPoint x="575.0" y="653.0" /></Array><mxPoint x="370" y="623.0" as="sourcePoint" />
+            <mxPoint x="370" y="653.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Listen to narration and continue with the game&#39;s requirement&amp;nbsp;">
+        <mxCell id="r8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Listen to narration and continue with the game's requirement&amp;nbsp;">
           <mxGeometry relative="1" y="18" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="110" y="618" as="sourcePoint" />
-            <mxPoint x="370" y="618" as="targetPoint" />
+            <mxPoint x="110" y="693.0" as="sourcePoint" />
+            <mxPoint x="370" y="693.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="frameReplay" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;width=60;height=30;fontSize=15;" value="alt" vertex="1">
-          <mxGeometry height="234" width="760" x="20" y="710" as="geometry" />
+          <mxGeometry height="234" width="760" x="20" y="723.0" as="geometry" />
         </mxCell>
         <mxCell id="gReplay" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=15;fontColor=#333333;" value="[2a. Actor wants to replay the narration]" vertex="1">
-          <mxGeometry height="20" width="500" x="80" y="720" as="geometry" />
+          <mxGeometry height="20" width="500" x="80" y="733.0" as="geometry" />
         </mxCell>
-        <mxCell id="t1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Click &quot;Replay&quot;">
+        <mxCell id="t1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Click &quot;Replay&quot;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="110" y="760" as="sourcePoint" />
-            <mxPoint x="370" y="760" as="targetPoint" />
+            <mxPoint x="110" y="773.0" as="sourcePoint" />
+            <mxPoint x="370" y="773.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="t2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="play(audioUrl)">
+        <mxCell id="t2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="play(audioUrl)">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="370" y="796" as="sourcePoint" />
-            <mxPoint x="630" y="796" as="targetPoint" />
+            <mxPoint x="370" y="809.0" as="sourcePoint" />
+            <mxPoint x="630" y="809.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="t3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="playbackStarted">
+        <mxCell id="t3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="playbackStarted">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="832" as="sourcePoint" />
-            <mxPoint x="370" y="832" as="targetPoint" />
+            <mxPoint x="630" y="845.0" as="sourcePoint" />
+            <mxPoint x="370" y="845.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="t4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="playbackEnded">
+        <mxCell id="t4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="playbackEnded">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="630" y="868" as="sourcePoint" />
-            <mxPoint x="370" y="868" as="targetPoint" />
+            <mxPoint x="630" y="881.0" as="sourcePoint" />
+            <mxPoint x="370" y="881.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="pjckpYHXE5pxMGzmtpqG-1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=#FFFFFF;" value="Listen to narration and continue with the game&#39;s requirement">
+        <mxCell id="pjckpYHXE5pxMGzmtpqG-1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Listen to narration and continue with the game's requirement">
           <mxGeometry relative="1" y="20" as="geometry">
             <mxPoint as="offset" />
-            <mxPoint x="110" y="920" as="sourcePoint" />
-            <mxPoint x="370" y="920" as="targetPoint" />
+            <mxPoint x="110" y="933.0" as="sourcePoint" />
+            <mxPoint x="370" y="933.0" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>

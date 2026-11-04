@@ -1,5 +1,9 @@
 # Verification record — 2026-10-10
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 ## Current corpus verification - 2026-10-31
 
 Fresh `Extract` runs verified all 15 elementary scope datasets against the 1,555-page TT 32/2018 PDF (SHA-256 `cd59f67d72fceb17902be95000e9c49f00a2c389d4ba617264bbb27db2472013`) and the 134-outcome kindergarten dataset against its 84-page consolidated PDF (SHA-256 `146c1f23b3515d46f2e2e97afcfc0a1d871ef28b6700c7db4fbacfeb56e8572f`). Elementary totals are 485 outcomes and 34 controls; kindergarten has 134 outcomes. PDFBox directly matched 482 primary outcomes, all 34 controls and 131 kindergarten outcomes; 6 outcomes (2 Math Grade 3, 1 Math Grade 5, 3 kindergarten) use explicitly declared manual transcriptions. No duplicate chunk IDs or duplicate primary texts were found, and manifest counts match all 15 elementary files. English Grades 1-2 now verify on PDF pages 1238-1239, printed pages 7-8, `FULL` region.

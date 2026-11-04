@@ -1,5 +1,9 @@
 # Kiểm tra nguồn cho spike Toán lớp 1
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 Ngày đối chiếu: 10/10/2026. Đây là báo cáo dữ liệu nguồn, không phải kết quả đo retrieval.
 
 ## Kết luận về file 32/2018

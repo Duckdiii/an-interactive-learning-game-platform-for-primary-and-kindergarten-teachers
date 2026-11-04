@@ -1,5 +1,8 @@
 # RAG và sinh game có căn cứ — Implementation Plan
 
+> **Wiki chủ quản**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[Cơ sở khoa học và GamED-AI]] | [[index]]
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans khi triển khai trực tiếp, hoặc superpowers:subagent-driven-development nếu người dùng chọn cách làm qua agent. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Củng cố backend pilot để chỉ sinh game khi có căn cứ phù hợp, phân biệt các nguyên nhân từ chối, giữ DSL và đo được chất lượng.
@@ -181,3 +184,10 @@ Phụ lục mới theo lựa chọn người dùng: [plan thử nghiệm biến 
 | BR-12 | T6, T8 | Benchmark exact, CLI smoke, release evidence scope mới |
 
 Tài liệu bàn giao gồm spec, plan, diff đã review, kết quả test mới nhất, báo cáo live nếu đã chạy và danh sách giới hạn. Trước thực thi, người dùng duyệt lựa chọn P0/P1 hoặc cả P2, chỉ tiêu nghiệm thu và phương thức thực hiện. Việc hoàn tất hai tài liệu này không có nghĩa các task trên đã được triển khai.
+
+---
+
+## Liên kết liên quan
+- Kiến trúc RAG: [[Chương trình GDPT 2018 và Curriculum RAG]]
+- Cơ sở khoa học: [[Cơ sở khoa học và GamED-AI]]
+- Ca sử dụng: [[UC-02]]

@@ -1,0 +1,360 @@
+<mxfile host="Electron">
+  <diagram id="uc01seq" name="UC-01 Sequence Diagram">
+    <mxGraphModel dx="1571" dy="934" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;labelBackgroundColor=#FFFFFF;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=16;fontStyle=1;" value="User&lt;br&gt;(Teacher)" vertex="1">
+          <mxGeometry height="60" width="60" x="80" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=16;fontStyle=1;" value="RegisterPage" vertex="1">
+          <mxGeometry height="60" width="200" x="270" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=16;fontStyle=1;" value="AuthController" vertex="1">
+          <mxGeometry height="60" width="200" x="530" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=16;fontStyle=1;" value="AuthService" vertex="1">
+          <mxGeometry height="60" width="200" x="790" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=16;fontStyle=1;" value="UserRepository" vertex="1">
+          <mxGeometry height="60" width="200" x="1050" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=16;fontStyle=1;" value="PostgreSQL" vertex="1">
+          <mxGeometry height="70" width="120" x="1350" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="l1" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="100" as="sourcePoint" />
+            <mxPoint x="110" y="1666" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l2" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="370" y="100" as="sourcePoint" />
+            <mxPoint x="370" y="1666" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l3" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="100" as="sourcePoint" />
+            <mxPoint x="630" y="1666" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l4" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="100" as="sourcePoint" />
+            <mxPoint x="890" y="1666" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l5" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="100" as="sourcePoint" />
+            <mxPoint x="1150" y="1666" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l6" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1410" y="105" as="sourcePoint" />
+            <mxPoint x="1410" y="1666" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m0" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Open system, select &quot;Register&quot; function">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="110" y="180" as="sourcePoint" />
+            <mxPoint x="370" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Display registration form and personal data protection policy">
+          <mxGeometry relative="1" x="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="530" y="200" />
+              <mxPoint x="530" y="230" />
+              <mxPoint x="450" y="230" />
+            </Array>
+            <mxPoint x="370" y="200" as="sourcePoint" />
+            <mxPoint x="370" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="Enter required info, confirm policy agreement, click &quot;Register&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="110" y="260" as="sourcePoint" />
+            <mxPoint x="370" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="register(registrationDto)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="370" y="300" as="sourcePoint" />
+            <mxPoint x="630" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="register(registrationDto)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="320" as="sourcePoint" />
+            <mxPoint x="890" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="frameAlt" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;width=60;height=30;fontSize=16;" value="alt" vertex="1">
+          <mxGeometry height="1306" width="1560" x="20" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="g4a" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=16;fontColor=#333333;" value="[4a. email already in use]" vertex="1">
+          <mxGeometry height="20" width="400" x="80" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="existsByEmail(email)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="390" as="sourcePoint" />
+            <mxPoint x="1150" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r2" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="countUsersByEmail(email)">
+          <mxGeometry relative="1" y="16" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="426" as="sourcePoint" />
+            <mxPoint x="1410" y="426" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r3" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="count">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1410" y="462" as="sourcePoint" />
+            <mxPoint x="1150" y="462" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r4" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="true">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="498" as="sourcePoint" />
+            <mxPoint x="890" y="498" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r5" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="EmailAlreadyExistsException">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="520" as="sourcePoint" />
+            <mxPoint x="630" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r6" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="409 Conflict (&quot;This email is already in use. Please use a different email.&quot;)">
+          <mxGeometry relative="1" y="-20" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="630" y="570" as="sourcePoint" />
+            <mxPoint x="370" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r7" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Show error message">
+          <mxGeometry relative="1" x="0.7059" y="4" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="530" y="606" />
+              <mxPoint x="530" y="626" />
+            </Array>
+            <mxPoint x="370" y="606" as="sourcePoint" />
+            <mxPoint x="370" y="626" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="div1" edge="1" parent="1" source="frameAlt" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0;exitY=0.232;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.231;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=16;" target="frameAlt">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="642" as="sourcePoint" />
+            <mxPoint x="1560" y="642" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g4b" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=16;fontColor=#333333;" value="[4b. registration info is incomplete or invalid]" vertex="1">
+          <mxGeometry height="20" width="500" x="40" y="654" as="geometry" />
+        </mxCell>
+        <mxCell id="r8" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Validate required fields and data formats">
+          <mxGeometry relative="1" x="0.9412" y="6" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1050" y="684" />
+              <mxPoint x="1050" y="704" />
+            </Array>
+            <mxPoint x="890" y="684" as="sourcePoint" />
+            <mxPoint x="890" y="704" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r9" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="ValidationException(fieldErrors)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="740" as="sourcePoint" />
+            <mxPoint x="630" y="740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r10" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="400 Bad Request (fieldErrors)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="776" as="sourcePoint" />
+            <mxPoint x="370" y="776" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r11" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Show &quot;Registration information is incomplete or invalid. Please check and re-enter.&quot;">
+          <mxGeometry relative="1" x="1" y="-10" as="geometry">
+            <mxPoint x="-10" y="8" as="offset" />
+            <Array as="points">
+              <mxPoint x="450" y="800" />
+              <mxPoint x="530" y="800" />
+              <mxPoint x="530" y="832" />
+            </Array>
+            <mxPoint x="370" y="800" as="sourcePoint" />
+            <mxPoint x="370" y="832" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g4c" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=16;fontColor=#333333;" value="[4c. actor has not agreed to the data-protection policy]" vertex="1">
+          <mxGeometry height="20" width="550" x="40" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="r12" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Detect missing policy-consent flag">
+          <mxGeometry relative="1" x="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="970" y="880" />
+              <mxPoint x="1050" y="880" />
+              <mxPoint x="1050" y="910" />
+            </Array>
+            <mxPoint x="890" y="880" as="sourcePoint" />
+            <mxPoint x="890" y="910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r13" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="PolicyNotAcceptedException">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="946" as="sourcePoint" />
+            <mxPoint x="630" y="946" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r14" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="400 Bad Request">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="982" as="sourcePoint" />
+            <mxPoint x="370" y="982" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r15" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Prompt actor to read and confirm policy agreement">
+          <mxGeometry relative="1" x="1" y="-8" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="450" y="1000" />
+              <mxPoint x="530" y="1000" />
+              <mxPoint x="530" y="1038" />
+            </Array>
+            <mxPoint x="370" y="1000" as="sourcePoint" />
+            <mxPoint x="370" y="1038" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g4d" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=16;fontColor=#333333;" value="[4d. system encounters a technical error while creating the account]" vertex="1">
+          <mxGeometry height="20" width="600" x="40" y="1066" as="geometry" />
+        </mxCell>
+        <mxCell id="r16" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="save(newUser)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="1096" as="sourcePoint" />
+            <mxPoint x="1150" y="1096" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r17" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="insertUser(newUser)">
+          <mxGeometry relative="1" y="22" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="1132" as="sourcePoint" />
+            <mxPoint x="1410" y="1132" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r18" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="connectionError / timeout">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1410" y="1168" as="sourcePoint" />
+            <mxPoint x="1150" y="1168" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r19" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="PersistenceException">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="1204" as="sourcePoint" />
+            <mxPoint x="890" y="1204" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r20" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="500 Internal Server Error">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="1240" as="sourcePoint" />
+            <mxPoint x="630" y="1240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r21" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="error">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="1276" as="sourcePoint" />
+            <mxPoint x="370" y="1276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r22" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Show &quot;Unable to register an account at this time. Please try again later.&quot;">
+          <mxGeometry relative="1" x="1" y="-2" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="530" y="1300" />
+              <mxPoint x="530" y="1332" />
+            </Array>
+            <mxPoint x="370" y="1300" as="sourcePoint" />
+            <mxPoint x="370" y="1332" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gValid" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontSize=16;fontColor=#333333;" value="[all validations pass and the account is created successfully]" vertex="1">
+          <mxGeometry height="20" width="600" x="40" y="1360" as="geometry" />
+        </mxCell>
+        <mxCell id="r23" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="save(newUser)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="1390" as="sourcePoint" />
+            <mxPoint x="1150" y="1390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r24" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="insertUser(newUser)">
+          <mxGeometry relative="1" y="16" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1150" y="1426" as="sourcePoint" />
+            <mxPoint x="1410" y="1426" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r25" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="OK">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1410" y="1462" as="sourcePoint" />
+            <mxPoint x="1150" y="1462" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r26" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="savedUser">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="1498" as="sourcePoint" />
+            <mxPoint x="890" y="1498" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r27" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="registeredUser">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="1534" as="sourcePoint" />
+            <mxPoint x="630" y="1534" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r28" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;dashed=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;" value="201 Created">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="1570" as="sourcePoint" />
+            <mxPoint x="370" y="1570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r29" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=15;labelBackgroundColor=none;verticalAlign=bottom;spacingBottom=4;align=left;spacingLeft=10;" value="Show &quot;Account registered successfully.&quot;">
+          <mxGeometry relative="1" x="1" y="-6" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="530" y="1590" />
+              <mxPoint x="530" y="1626" />
+            </Array>
+            <mxPoint x="370" y="1590" as="sourcePoint" />
+            <mxPoint x="370" y="1626" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="V_eUgAmM-HAy2gDUPXzQ-3" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0;exitY=0.232;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.231;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="20" y="841" as="sourcePoint" />
+            <mxPoint x="1580" y="841" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="V_eUgAmM-HAy2gDUPXzQ-4" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0;exitY=0.232;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.231;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="20" y="1051" as="sourcePoint" />
+            <mxPoint x="1580" y="1051" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="V_eUgAmM-HAy2gDUPXzQ-5" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#666666;exitX=0;exitY=0.232;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.231;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=16;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="20" y="1351" as="sourcePoint" />
+            <mxPoint x="1580" y="1351" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

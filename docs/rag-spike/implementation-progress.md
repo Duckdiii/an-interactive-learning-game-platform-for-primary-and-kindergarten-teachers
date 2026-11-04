@@ -1,5 +1,9 @@
 # Execution ledger — plan: docs/superpowers/plans/2026-10-30-rag-generation-business-plan.md
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 User authorized implementation on 2026-10-30. Scope: P0/P1 (T1–T6); T7/T8 remain deferred.
 
 Ruling: Work in the existing feature checkout `duc/task-1-ai-services-structured-output` and preserve uncommitted pipeline changes. Do not create a separate checkout that omits those approved changes or commit unrelated changes.

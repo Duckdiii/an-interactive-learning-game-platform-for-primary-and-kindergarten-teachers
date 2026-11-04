@@ -22,6 +22,9 @@ Trang này tóm tắt điều cần nhớ của từng ca. Thông báo đúng t�
 | UC-13 Quản lý giáo viên | Quản trị            | Xem, tìm, thao tác, lưu, thông báo                                                         | Thêm, sửa, khóa, mở khóa đều có xác nhận và nhật ký                                                                    | [[UC-13]] `docs/srs/UC-13.md` |
 | UC-14 Bộ não AI         | Quản trị            | Sửa câu lệnh, tham số; lưu thành phiên bản mới                                             | Đóng băng; khôi phục; giá trị sai thì giữ cấu hình cũ                                                                  | [[UC-14]] `docs/srs/UC-14.md` |
 | UC-15 Đăng nhập         | Giáo viên, Quản trị | Xác thực, chuyển màn theo vai trò                                                          | Quên mật khẩu; ghi nhớ 30 ngày; sai mật khẩu; bị khóa; sai quá 5 lần                                                   | [[UC-15]] `docs/srs/UC-15.md` |
+| UC-16 Hồ sơ lớp học     | Giáo viên           | Khai báo thông tin cá nhân và hồ sơ lớp (sĩ số, bộ SGK, phạm vi kiến thức, đặc điểm lớp)   | Xóa lớp; xóa gợi ý ghi nhớ; dữ liệu sai hoặc chứa từ nhạy cảm thì giữ nguyên                                            | [[UC-16]] `docs/srs/UC-16.md` |
+| UC-17 Kho trò chơi      | Giáo viên           | Xem, tìm kiếm, lọc danh sách game; chỉnh sửa bản nháp, chơi thử, chia sẻ mã QR, mở phòng   | Nhân bản game; hủy xuất bản; xóa game; mở phòng Live Arena; chặn sửa trực tiếp game đã xuất bản                         | [[UC-17]] `docs/srs/UC-17.md` |
+| UC-18 Thống kê kết quả  | Giáo viên           | Xem báo cáo tổng hợp theo lượt chơi và từng câu; phát hiện điểm yếu ("Lớp mình cần ôn lại") | Lọc theo lớp, thời gian; tạo game ôn tập từ lỗi hay gặp; trò chơi chưa có lượt chơi hoặc quá ít lượt                    | [[UC-18]] `docs/srs/UC-18.md` |
 
 ## Quan hệ giữa các ca
 

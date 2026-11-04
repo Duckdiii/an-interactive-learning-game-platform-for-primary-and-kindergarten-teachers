@@ -5,6 +5,8 @@ Cửa vào duy nhất của kho: cần tài liệu gì thì bắt đầu từ đ
 ## Bắt đầu từ đây
 
 - [[Tổng quan đề tài]]: đề tài giải quyết gì, cho ai, phạm vi, rủi ro.
+- [[Góp ý Thầy Thanh và 8 vấn đề]]: nhận xét chỉ đạo từ Thầy Thanh (buổi họp 13/10) và giải pháp cho 8 vấn đề cốt lõi.
+- [[Cơ sở khoa học và GamED-AI]]: căn cứ học thuật quốc tế GamED.AI (arXiv 2024), chống ảo giác 100% bằng Quality Gates.
 - [[Trạng thái thực tế]]: đã làm tới đâu, đối chiếu từ code.
 - [[Điểm lệch và việc cần chốt]]: các điểm lệch giữa tài liệu và khoảng trống đặc tả. Đọc trước khi sửa SRS hoặc viết báo cáo.
 - [[Kế hoạch và việc còn lại]]: P0–P5, nợ, rủi ro, thứ tự nên ưu tiên.
@@ -13,14 +15,17 @@ Cửa vào duy nhất của kho: cần tài liệu gì thì bắt đầu từ đ
 ## Sản phẩm
 
 - [[Các luồng nghiệp vụ]]: 5 bước, hành trình giáo viên, học sinh, quản trị.
-- [[Ca sử dụng]]: tóm tắt 15 UC và nguyên tắc chung.
+- [[Ca sử dụng]]: tóm tắt đầy đủ 18 UC (từ UC-01 đến UC-18) và nguyên tắc chung.
 - [[Quy tắc nghiệp vụ]]: tra nhanh các con số, giới hạn, điểm số, xử lý sự cố.
 
-## Định hướng
+## Định hướng & Nghiên cứu Đối thủ
 
-- [[So sánh với web tool]]: hiện trạng, luận điểm khác biệt.
-- [[Mô tả ngoài danh mục game]]: phân loại A–D, mức cam kết.
-- [[Trải nghiệm cho trẻ]]: nguyên tắc theo lứa tuổi, đồ họa, âm thanh, cách đo.
+- [[So sánh với web tool]]: hiện trạng, luận điểm khác biệt giữa Web tool tĩnh và AI-Native.
+- [[Khảo sát 7 nhóm nền tảng đối thủ]]: phân loại và đánh giá 30+ công cụ (Wordwall, Kahoot, Canva, PhET, Genially...).
+- [[24 Cơ chế game chuẩn hóa]]: danh mục 24 cơ chế preset chuẩn hóa (STT 1-24, mã DSL, hành vi tương tác, môn học, độ phức tạp renderer).
+- [[Tiêu chuẩn Đồ họa và Asset Pipeline]]: 5 trụ cột đồ họa K-5, bảng đánh giá 16 nguồn asset quốc tế (CC0/MIT), 3 tầng Canvas 60 FPS, Toy Palette, Juiciness.
+- [[Mô tả ngoài danh mục game]]: giải pháp Composable Primitives Framework (CPF) 20 khối nguyên tử, ma trận bao phủ 10 game và 4 module chuyên sâu.
+- [[Trải nghiệm cho trẻ]]: nguyên tắc theo lứa tuổi, đồ họa Candy Gloss, âm thanh, cách đo 60 FPS.
 
 ## Giao diện
 
@@ -29,7 +34,8 @@ Cửa vào duy nhất của kho: cần tài liệu gì thì bắt đầu từ đ
 ## Kỹ thuật
 
 - [[Kiến trúc và công nghệ]]: các tầng, công nghệ, mô hình miền.
-- [[Sơ đồ hệ thống]]: kiến trúc, activity, use case, class, 14 sơ đồ tuần tự.
+- [[Sơ đồ hệ thống]]: Pipeline tạo game AI, kiến trúc N-Tier, activity, use case, class, 18 sơ đồ tuần tự.
+- [[Chương trình GDPT 2018 và Curriculum RAG]]: tri thức sư phạm neo chuẩn kiến thức Bộ GD&ĐT K-5, kho 19 tài liệu kiểm toán SGK.
 - [[Game JSON DSL]]: khái niệm của contract dữ liệu, không chép field.
 - [[Bản đồ API]]: 49 operation, phần đã cài, phần frontend còn cần.
 - [[Kiểm thử và vận hành]]: 4 tầng kiểm thử, 8 kịch bản, giám sát, sao lưu.
@@ -45,19 +51,25 @@ Khi viết code hay test, đọc ở đây, không đọc bản tóm tắt.
 
 | Tài liệu | Mở ở đâu |
 |---|---|
-| Danh sách bản trích SRS | [[srs/README\|srs/README]] |
-| 15 ca sử dụng | [[UC-01]] đến [[UC-15]], `docs/srs/` |
-| Yêu cầu chức năng | [[FR-summary]] |
+| Danh sách bản trích SRS | [[srs/README]] |
+| 18 ca sử dụng | [[UC-01]] đến [[UC-18]], `docs/srs/` |
+| Yêu cầu chức năng | [[FR-summary]] (FR-01 đến FR-18) |
 | Yêu cầu phi chức năng | [[NFR]] |
-| Trường giao diện FLD | [[FLD]] |
+| Trường giao diện FLD | [[FLD]] (FLD-01 đến FLD-53) |
 | KPI | [[KPI]] |
-| SRS đầy đủ | [[SRS-full]]; hình trong SRS ở `docs/SRS.docx` |
-| Sơ đồ draw.io | `docs/diagrams/` |
-| Định hướng đề tài | [[Dinh_huong_de_tai]]; bản gốc `docs/Dinh_huong_de_tai.docx` |
+| SRS đầy đủ v3 | [[SRS-full]]; hình và bản gốc tại `docs/SRS.docx`, `docs/SRS_v3.docx` |
+| Định hướng đề tài v10 | [[Dinh_huong_de_tai]]; bản gốc `docs/Dinh_huong_de_tai.docx` |
+| Cơ sở khoa học & Dẫn chứng | [[Cơ sở khoa học và Dẫn chứng Kiến trúc]]; bản gốc `docs/Co_so_khoa_hoc.docx` |
+| Góp ý Thầy Thanh & 8 Vấn đề | [[Góp ý Thầy Thanh và 8 vấn đề]]; trích xuất chi tiết tại `docs/Vấn đề tìm thấy sau khi được góp ý/` |
+| 14 Báo cáo khảo sát đối thủ | [[Khảo sát 7 nhóm nền tảng đối thủ]]; trích xuất chi tiết tại `docs/khảo sát các nền tảng khác/` |
+| Kiến trúc CPF & Cơ chế game ngoài danh mục | [[Mô tả ngoài danh mục game]]; chi tiết tại `docs/Giáo viên mô tả ngoài danh sách game có sẵn/` (`vấn đề/` & `giải pháp/`) |
+| Danh mục 24 Cơ chế Game | [[24 Cơ chế game chuẩn hóa]]; chi tiết tại `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Các cơ chế game.md` |
+| Tiêu chuẩn Đồ họa & Asset | [[Tiêu chuẩn Đồ họa và Asset Pipeline]]; chi tiết tại `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Đồ họa game.md` |
+| Sơ đồ draw.io | `docs/diagrams/` (kèm `Pipeline_Tao_Tro_Choi_AI.drawio` và 18 sequence) |
 | Game JSON DSL (contract) | [[game-json-dsl-v1.0.0]] |
 | REST API (contract) | `docs/openapi/openapi.yaml` |
 | Đặc tả giao diện | [[SPEC]] |
-| Kế hoạch giao diện | [[ui/PLAN\|ui/PLAN]] |
+| Kế hoạch giao diện | [[ui/PLAN]] |
 | API frontend cần | [[API-CONTRACT]] |
 | Wireframe | `docs/ui/wireframes/` (không xem được trong Obsidian) |
 | Quyết định | [[decisions]] |
@@ -81,4 +93,4 @@ Các file này phải ở đúng chỗ để công cụ hoạt động, nên kh�
 
 ## Chưa nạp vào tóm tắt
 
-Nội dung từng wireframe, các sơ đồ trong SRS ngoài 5 sơ đồ chính, chi tiết `docs/task-1-results/`. Thư mục `experiments/` chưa được git theo dõi.
+Nội dung từng wireframe, các sơ đồ trong SRS ngoài các sơ đồ chính, chi tiết `docs/task-1-results/`. Thư mục `experiments/` chưa được git theo dõi.

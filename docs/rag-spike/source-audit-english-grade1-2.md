@@ -1,5 +1,9 @@
 # Source audit: English Grades 1–2 draft
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 ## Scope and source
 
 - Scope: optional English familiarization program for primary Grades 1 and 2; this is separate from mandatory English Grades 3–5.

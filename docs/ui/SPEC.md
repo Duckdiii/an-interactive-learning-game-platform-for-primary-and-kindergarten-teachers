@@ -1,5 +1,8 @@
 # SPEC giao diện – AI Game Platform
 
+> **Wiki chủ quản**: [[Tiêu chuẩn Đồ họa và Asset Pipeline]] | [[Sơ đồ hệ thống]] | [[index]]
+
+
 Phiên bản: 27/10/2026 · Trạng thái: đã chốt hướng, chờ triển khai theo giai đoạn
 
 Tài liệu này gom các quyết định thiết kế giao diện phía **học sinh** và phía **giáo viên** để Claude Code (và cả nhóm) triển khai đúng. Wireframe nằm trong `docs/ui/wireframes/`.
@@ -160,3 +163,10 @@ Mỗi giai đoạn một prompt riêng, làm từng bước nhỏ, dừng chờ 
 - Không thêm thư viện, font, asset khi chưa được duyệt (nêu tên, phiên bản, giấy phép, dung lượng).
 - Không đụng dòng 17–20 và 25 của file log/Plan; không điền cột "Sinh viên tinh chỉnh".
 - Wireframe là tham khảo; nếu thấy wireframe mâu thuẫn với DSL hoặc code hiện có, dừng và hỏi.
+
+---
+
+## Liên kết Giao diện & Kỹ thuật
+- Tiêu chuẩn đồ họa: [[Tiêu chuẩn Đồ họa và Asset Pipeline]]
+- Sơ đồ hệ thống: [[Sơ đồ hệ thống]]
+- Mục lục giao diện: [[ui/SPEC|Đặc tả UI]]

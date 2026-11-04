@@ -1,5 +1,9 @@
 # Source audit: Math Grade 3 draft
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 ## Scope and source
 
 - Scope: `MATH / GRADE_3`, the outcomes under the Grade 3 section of the mathematics curriculum.

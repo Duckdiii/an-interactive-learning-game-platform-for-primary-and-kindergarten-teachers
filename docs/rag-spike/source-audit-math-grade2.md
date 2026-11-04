@@ -1,5 +1,9 @@
 # Source audit: Math Grade 2 draft
 
+> **Kiểm toán SGK CTGDPT 2018**: [[Chương trình GDPT 2018 và Curriculum RAG]] | [[source-audit|Báo cáo tổng hợp]]
+
+
+
 ## Scope and source
 
 - Scope: `MATH / GRADE_2`, outcomes in the Grade 2 table of the Mathematics program.

@@ -1,5 +1,9 @@
 # Curriculum corpus expansion: scope and workflow
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 Status: primary corpus expansion remains draft. On 2026-10-31, fresh PDFBox extraction verified all 15 primary-scope datasets against the exact-hash 1,555-page TT 32/2018 PDF, plus the 84-page kindergarten source. On 2026-11-02, the owner approved the Kindergarten corpus as sourced curriculum data under the exact-PDF extraction policy; this does not claim separate specialist pedagogical review. A separate loopback-only evaluation database contains all 653 rows (519 primary: 485 outcomes + 34 controls; kindergarten: 134 outcomes). Extraction evidence is retained per dataset under `backend/target/curriculum-spike/extracted/<dataset>/` and `docs/rag-spike/evidence/*-source-verification.json`.
 
 ## Business outcome

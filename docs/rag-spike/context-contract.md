@@ -1,5 +1,9 @@
 # Contract curriculumContext đã chọn cho spike
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 Người dùng đã chọn phương án này để triển khai pilot. Duy chưa review; tài liệu vẫn là contract để nhóm đối chiếu trước khi merge.
 
 ## Các interface

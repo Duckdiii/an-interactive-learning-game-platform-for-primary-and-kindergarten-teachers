@@ -1,5 +1,9 @@
 # Toán lớp 1 RAG spike
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 Initial approved brief: the user's eight requirements for the Toán lớp 1 retrieval spike, including the source gate before chunking and embeddings. After the retrieval spike passed, the user approved a separate pilot extension to game-generation orchestration; its implementation and remaining handoff are documented in [integration-plan.md](integration-plan.md). The pilot adds no HTTP endpoint and leaves the frozen game DSL unchanged.
 
 ## Question and pass criterion

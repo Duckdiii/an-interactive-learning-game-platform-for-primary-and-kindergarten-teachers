@@ -1,5 +1,9 @@
 # Kế hoạch tích hợp RAG vào luồng sinh game
 
+> **Chuyên đề Curriculum-RAG**: [[Chương trình GDPT 2018 và Curriculum RAG]]
+
+
+
 **Trạng thái:** đã triển khai pilot orchestration QUIZ / Toán lớp 1 trên nhánh hiện tại. Contract được người dùng chọn; Duy chưa review. Live smoke một chủ đề trong corpus và một chủ đề ngoài corpus đều pass.
 
 ## Mục tiêu
