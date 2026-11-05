@@ -14,6 +14,8 @@ import { CpfRuntimeEngine } from './cpfRuntime'
 import { UI_SPECS } from './assetPalette'
 import axiosInstance from '../../api/axiosInstance'
 import { publishGameApi, getPlayGameApi } from '../../api/gamesApi'
+import { resolveGameTheme, GAME_WORLD_THEMES } from './themeResolver'
+import { findBestSprite, bindAssetsToPreset } from './assetBank'
 
 vi.mock('../../api/axiosInstance', () => ({
   default: {
@@ -339,4 +341,74 @@ describe('Dual-Track AI Game Creation Pipeline Tests', () => {
       expect(cpfGame.gameType).toBe('PHYSICS_SLING_ARCHERY')
     })
   })
+  describe('Stage 2.5: Asset & Theme Dressing Pipeline', () => {
+    it('themeResolver: tự động suy luận chủ đề FARM, OCEAN, SPACE, FOREST, CANDY', () => {
+      expect(resolveGameTheme('đếm cà rốt và chú thỏ').key).toBe('FARM')
+      expect(resolveGameTheme('bắt cá dưới đại dương xanh').key).toBe('OCEAN')
+      expect(resolveGameTheme('phi thuyền bay vào vũ trụ và các vì sao').key).toBe('SPACE')
+      expect(resolveGameTheme('khám phá cây cối và các loài hoa trong rừng').key).toBe('FOREST')
+      expect(resolveGameTheme('đếm kẹo mút và bánh ngọt bảy màu').key).toBe('CANDY')
+    })
+
+    it('themeResolver: cung cấp bảng màu Candy Gloss, Mascot và ambient details', () => {
+      const theme = resolveGameTheme('đếm gà trong nông trại')
+      expect(theme.name).toBe('Nông Trại Vui Vẻ')
+      expect(theme.palette.canvasBg).toBe('#FFF9C4')
+      expect(theme.mascot.id).toBe('rabbit')
+      expect(theme.mascot.avatarUrl).toBe('/assets/animals/rabbit.svg')
+      expect(theme.mascot.happyQuote).toBeDefined()
+      expect(theme.mascot.encouragingQuote).toBeDefined()
+      expect(theme.ambientDetails.length).toBeGreaterThan(0)
+    })
+
+    it('assetBank: nhận diện chính xác các Vector Sprite chuẩn K-5 từ từ khóa đề bài', () => {
+      expect(findBestSprite('Có 3 quả táo đỏ')?.id).toBe('apple')
+      expect(findBestSprite('Một đàn vịt bơi dưới ao')?.id).toBe('duck')
+      expect(findBestSprite('Bé nhìn thấy ngôi sao lấp lánh')?.id).toBe('star')
+      expect(findBestSprite('Cây kẹo ngọt ngào')?.id).toBe('candy')
+      expect(findBestSprite('từ khóa trừu tượng chưa có trong từ điển')).toBeNull()
+    })
+
+    it('assetBank: gắn tài nguyên hình ảnh đảm bảo không bao giờ để imageUrl null', () => {
+      const theme = GAME_WORLD_THEMES.FARM
+      const preset: PresetQuizData = {
+        gameType: 'QUIZ',
+        id: 'test-quiz',
+        title: 'Toán lớp 1',
+        gradeLevel: 1,
+        theme: 'Toán',
+        questionText: 'Bác nông dân hái 4 quả cam và 3 quả chuối.',
+        numA: 4,
+        numB: 3,
+        operation: '+',
+        options: [{ id: '1', text: '7 quả', isCorrect: true }],
+        correctIndex: 0,
+        explanation: '4 + 3 = 7',
+      }
+
+      const { dressedPreset, assetsAttached } = bindAssetsToPreset(preset, theme)
+
+      expect(dressedPreset.imageUrl).not.toBeNull()
+      expect(dressedPreset.imageUrl).toBeDefined()
+      expect(dressedPreset.audioUrl).toBe('/mock/q1.wav')
+      expect(dressedPreset.spriteItems).toBeDefined()
+      expect(dressedPreset.spriteItems!.length).toBeGreaterThan(0)
+      expect(assetsAttached.length).toBeGreaterThan(0)
+    })
+
+    it('pipelineOrchestrator: runGamePipeline xuất xưởng đầy đủ themeData, assetsAttached và narrationConfig', () => {
+      const result = runGamePipeline('Tạo trò chơi đếm hoa quả cho học sinh lớp 1')
+
+      expect(result.themeData).toBeDefined()
+      expect(result.assetsAttached).toBeDefined()
+      expect(result.assetsAttached?.primarySpriteUrl).toBeDefined()
+      expect(result.assetsAttached?.sprites.length).toBeGreaterThan(0)
+      expect(result.narrationConfig).toBeDefined()
+      expect(result.narrationConfig?.autoPlay).toBe(true)
+      expect(result.narrationConfig?.audioText).toBeDefined()
+      expect(result.presetData?.imageUrl).toBeDefined()
+      expect(result.presetData?.imageUrl).not.toBeNull()
+    })
+  })
+
 })

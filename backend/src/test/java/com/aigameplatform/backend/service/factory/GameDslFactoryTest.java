@@ -109,10 +109,23 @@ class GameDslFactoryTest {
     @Test
     void doesNotInventMediaUrls() throws IOException {
         for (GameType type : GameType.values()) {
+            if (type == GameType.QUIZ) {
+                // Chặng 2.5: QuizGameDslFactory tự động gắn asset SVG chuẩn K-5 khi có visualPrompt
+                continue;
+            }
             JsonNode json = MAPPER.valueToTree(create(type, 1));
 
             assertThat(json.toString()).as(type.name()).doesNotContain("audioUrl").doesNotContain("imageUrl");
         }
+    }
+
+    @Test
+    void quizDslBindsK5AssetsWhenVisualPromptPresent() throws IOException {
+        QuizGameDsl game = (QuizGameDsl) create(GameType.QUIZ, 1);
+        QuizQuestionDsl q1 = game.questions().get(0);
+        // q1 có visualPrompt "three cats" -> tự động gắn sprite SVG /assets/animals/cat.svg
+        assertThat(q1.imageUrl()).isEqualTo("/assets/animals/cat.svg");
+        assertThat(q1.audioUrl()).isEqualTo("/mock/q1.wav");
     }
 
     @Test

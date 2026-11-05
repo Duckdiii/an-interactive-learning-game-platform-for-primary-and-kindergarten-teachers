@@ -116,6 +116,38 @@ Thay vì vẽ dồn toàn bộ trò chơi lên một thẻ `<canvas>` duy nhất
 
 ---
 
-## 5. Tài liệu Nghiên cứu Gốc & Thực nghiệm
+---
+
+## 8. Chặng 2.5 trong Pipeline Tạo Game AI: Bộ Điều Phối Đồ Họa, Assets & Giao Diện (Asset & Theme Dressing)
+
+Nhằm giải quyết triệt để vấn đề: *AI chỉ sinh câu hỏi chữ và trắc nghiệm tĩnh, thiếu vắng hoàn toàn đồ họa, giao diện và tài nguyên game trực quan*, Pipeline tạo game AI tích hợp **Chặng 2.5 (Asset & Theme Dressing Pipeline)** nằm ngay giữa Chặng 2 (Content Generator) và Chặng 3 (Quality Gates).
+
+```mermaid
+flowchart LR
+    S2["2. Sinh Kịch Bản AI<br/>(Gemini sinh Text & Logic)"] --> S25["⭐ 2.5. BỘ GẮN ASSETS & THEME<br/>(Theme & Asset Dressing Pipeline)"]
+    S25 --> S3["3. Quality Gates<br/>(Kiểm tra cú pháp, logic, bounds)"]
+    S3 --> S5["5. Render Canvas Engine<br/>(Hiển thị Đồ họa & Âm thanh thật)"]
+
+    subgraph Detail ["Chi tiết 4 Module Chặng 2.5"]
+        direction TB
+        A1["6a. Theme Resolver<br/>Tự động gán Theme: Nông trại, Biển, Vũ trụ, Rừng"]
+        A2["6b. Visual Asset Binder (Lai 80/20)<br/>• 80% Kho SVG Vector K-5 nội bộ<br/>• 20% Safe Web Images (Pexels SafeSearch)"]
+        A3["6c. Audio & Narration Pipeline<br/>• Edge-TTS đọc to đề bài cho K-1<br/>• SoundBus Web Audio (Pop, Click, Chuông)"]
+        A4["6d. Mascot & Juiciness Injector<br/>Mascot thở nhẹ, Squash & Stretch, Pháo hoa"]
+        A1 --- A2 --- A3 --- A4
+    end
+    S25 -.-> Detail
+```
+
+### 8.1. Nhiệm vụ và Cơ chế Vận hành
+* **Đầu vào**: Bản JSON DSL thô do AI sinh (mới chỉ có câu hỏi text, số lượng toán học, `visualPrompt` và `audioText`).
+* **Nhiệm vụ cốt lõi**:
+  1. **Khắc phục triệt để lỗi `imageUrl = null` và `audioUrl = null`**: Backend và Frontend không còn bỏ trống trường media, mà tự động bóc tách từ khóa trong `visualPrompt` (ví dụ: *"quả táo đỏ"*, *"chú thỏ con"*) để map thẳng vào đường dẫn tài nguyên Vector SVG (ví dụ: `/assets/sprites/apple.svg`).
+  2. **Tự động khoác áo Theme thế giới game**: Gán bộ bảng màu Candy Palette bo tròn, hình nền Parallax 2.5D của nông trại, bờ biển hoặc trạm không gian.
+  3. **Tích hợp giọng đọc trợ giảng AI (TTS)**: Đọc to đề bài bằng tiếng Việt chuẩn cho học sinh lứa tuổi mầm non và lớp 1 chưa biết đọc chữ.
+* **Đầu ra**: **Dressed Game DSL** hoàn chỉnh với đầy đủ Theme, Sprites, Hitbox bounds, Audio URL và Visual Effects sẵn sàng chuyển vào Bộ 3 Cổng Kiểm Định Quality Gates.
+
+
+## 9. Tài liệu Nghiên cứu Gốc & Thực nghiệm
 - [[Đồ họa game|Toàn văn nghiên cứu Đồ họa game giáo dục]]
 - [[experiments/results/t10-bee-garden/README|Thực nghiệm Đồ họa Vườn hoa của ong (T10)]]

@@ -9,6 +9,8 @@
  */
 
 import { CANDY_PALETTE, UI_SPECS } from './assetPalette'
+import { resolveGameTheme, type GameWorldTheme } from './themeResolver'
+import { bindAssetsToPreset } from './assetBank'
 import type { CpfSceneGraph, CpfSceneNode, CpfActionRule } from './cpfTypes'
 
 export type TrackType = 'PRESET' | 'CPF'
@@ -50,6 +52,12 @@ export interface PresetQuizData {
   options: { id: string; text: string; isCorrect: boolean }[]
   correctIndex: number
   explanation: string
+  imageUrl?: string
+  audioUrl?: string
+  visualPrompt?: string
+  spriteItems?: { name: string; url: string; count: number }[]
+  narrationText?: string
+  themeData?: GameWorldTheme
 }
 
 export interface BloomRecommendation {
@@ -72,6 +80,20 @@ export interface PipelineExecutionResult {
   recommendations: BloomRecommendation[]
   presetData?: PresetQuizData
   cpfGraph?: CpfSceneGraph
+  themeData?: GameWorldTheme
+  assetsAttached?: {
+    themeKey: string
+    themeName: string
+    spriteCount: number
+    primarySpriteUrl: string
+    sprites: { name: string; url: string; count: number }[]
+  }
+  narrationConfig?: {
+    autoPlay: boolean
+    audioText: string
+    voiceRate: number
+    voicePitch: number
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -620,6 +642,33 @@ export function runGamePipeline(prompt: string, overrideTrack?: TrackType, custo
     cpfGraph = generateCpfGame(intent)
   }
 
+  // 3.5. Stage 2.5: Asset & Theme Dressing Pipeline
+  const theme = resolveGameTheme(prompt, intent.subject)
+  let assetsAttached: PipelineExecutionResult['assetsAttached']
+  let narrationConfig: PipelineExecutionResult['narrationConfig']
+
+  if (presetData) {
+    const dressedResult = bindAssetsToPreset(presetData, theme)
+    presetData = {
+      ...dressedResult.dressedPreset,
+      themeData: theme,
+    }
+    const safeData = presetData
+    assetsAttached = {
+      themeKey: theme.key,
+      themeName: theme.name,
+      spriteCount: safeData.spriteItems?.length ?? 1,
+      primarySpriteUrl: safeData.imageUrl || theme.mascot.avatarUrl,
+      sprites: safeData.spriteItems || [{ name: theme.mascot.name, url: safeData.imageUrl || '', count: 1 }],
+    }
+    narrationConfig = {
+      autoPlay: true,
+      audioText: safeData.narrationText || safeData.questionText,
+      voiceRate: 0.9,
+      voicePitch: 1.1,
+    }
+  }
+
   // 4. Three-Gate Quality Checks
   const gate1 = verifyGate1Syntax(intent.track, presetData, cpfGraph)
   const gate2 = verifyGate2Pedagogy(intent, presetData, cpfGraph)
@@ -643,5 +692,8 @@ export function runGamePipeline(prompt: string, overrideTrack?: TrackType, custo
     recommendations,
     presetData,
     cpfGraph,
+    themeData: theme,
+    assetsAttached,
+    narrationConfig,
   }
 }

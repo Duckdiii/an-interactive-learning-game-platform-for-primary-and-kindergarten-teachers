@@ -1,8 +1,9 @@
 /**
  * PipelinePlayground: Experimental Testing Dashboard for Dual-Track AI Game Pipeline & CPF Engine.
  * Features Real-time Telemetry HUD (FPS, latency, 3-gate quality metrics),
- * Bloom Cognitive Recommender, Stepper Pipeline visualization, Publish Modal with QR code,
- * live interactive canvas runners, and AST inspectors.
+ * Bloom Cognitive Recommender, 6-Step Visual Pipeline Stepper,
+ * Stage 2.5: Asset & Theme Dressing Studio (1-Click Theme Switcher, SVG Sprites, TTS Narration),
+ * Publish Modal with QR code, live interactive canvas runners, and AST inspectors.
  */
 
 import { useState, useMemo } from 'react'
@@ -18,6 +19,8 @@ import {
 import { publishGameApi, generateGameApi, type PublishGameDtoResponse } from '../../api/gamesApi'
 import { FarmQuizCanvas } from './renderers/FarmQuizCanvas'
 import { ArcheryCpfCanvas } from './renderers/ArcheryCpfCanvas'
+import { GAME_WORLD_THEMES, type ThemeKey, type GameWorldTheme } from './themeResolver'
+import { speakVietnamese, bindAssetsToPreset } from './assetBank'
 
 const PRESET_PROMPTS = {
   track1:
@@ -27,21 +30,24 @@ const PRESET_PROMPTS = {
 }
 
 const PIPELINE_STEPS = [
-  { id: 1, label: '1. Ý Định Sư Phạm', desc: 'Intent Parser' },
-  { id: 2, label: '2. Chuẩn GDPT 2018', desc: 'Curriculum RAG' },
-  { id: 3, label: '3. Đề Xuất 3 Game Bloom', desc: 'Cognitive Matrix' },
-  { id: 4, label: '4. 3 Cổng Kiểm Định', desc: 'Quality Gates' },
-  { id: 5, label: '5. Sẵn Sàng Xuất Bản', desc: 'Ready to Play' },
+  { id: 1, label: '1. Phân Tích Ý Định', desc: 'Intent Parser' },
+  { id: 2, label: '2. Khuyến Nghị Bloom', desc: 'Cognitive Matrix' },
+  { id: 3, label: '3. Kịch Bản AI', desc: 'Dual-Track Gen' },
+  { id: 4, label: '🎨 4. Theme & Asset', desc: 'Stage 2.5 Dressing' },
+  { id: 5, label: '5. Quality Gates', desc: '3-Gate Verify' },
+  { id: 6, label: '6. Sẵn Sàng Xuất Bản', desc: 'Ready to Play' },
 ]
 
 export default function PipelinePlayground() {
   const navigate = useNavigate()
-  const [prompt, setPrompt] = useState<string>(PRESET_PROMPTS.track2)
-  const [activeTab, setActiveTab] = useState<'track1' | 'track2'>('track2')
-  const [selectedBloom, setSelectedBloom] = useState<number>(3)
+  const [prompt, setPrompt] = useState<string>(PRESET_PROMPTS.track1)
+  const [activeTab, setActiveTab] = useState<'track1' | 'track2'>('track1')
+  const [selectedBloom, setSelectedBloom] = useState<number>(1)
   const [pipelineResult, setPipelineResult] = useState<PipelineExecutionResult>(() =>
-    runGamePipeline(PRESET_PROMPTS.track2)
+    runGamePipeline(PRESET_PROMPTS.track1)
   )
+  const [customTheme, setCustomTheme] = useState<GameWorldTheme | null>(null)
+  const [isPlayingTts, setIsPlayingTts] = useState<boolean>(false)
   const [measuredFps, setMeasuredFps] = useState<number>(60)
   const [showInspector, setShowInspector] = useState<boolean>(false)
   const [isPublishing, setIsPublishing] = useState<boolean>(false)
@@ -112,6 +118,7 @@ export default function PipelinePlayground() {
       if (aiLatency) {
         res.latencyMs = aiLatency
       }
+      setCustomTheme(null)
       setPipelineResult(res)
       if (res.track === 'PRESET') {
         setActiveTab('track1')
@@ -149,6 +156,80 @@ export default function PipelinePlayground() {
       ? pipelineResult
       : track2Result
 
+  // Active theme resolving with manual 1-click override support
+  const currentTheme: GameWorldTheme = useMemo(() => {
+    if (customTheme) return customTheme
+    return currentResult.themeData ?? GAME_WORLD_THEMES.FARM
+  }, [customTheme, currentResult.themeData])
+
+  // Active preset quiz data with dressed theme
+  const activePresetData: PresetQuizData | undefined = useMemo(() => {
+    const base = activeTab === 'track1'
+      ? (pipelineResult.track === 'PRESET' ? pipelineResult.presetData : track1Result.presetData)
+      : pipelineResult.presetData
+    if (!base) return undefined
+    return {
+      ...base,
+      themeData: currentTheme,
+      theme: currentTheme.name,
+    }
+  }, [activeTab, pipelineResult, track1Result, currentTheme])
+
+  // Attached SVG Sprites list for UI display
+  const attachedSprites = useMemo(() => {
+    if (activePresetData?.spriteItems && activePresetData.spriteItems.length > 0) {
+      return activePresetData.spriteItems
+    }
+    if (activePresetData?.imageUrl) {
+      return [{ name: activePresetData.theme || 'Vật phẩm học liệu', url: activePresetData.imageUrl, count: 3 }]
+    }
+    return [
+      { name: 'Quả Táo Đỏ', url: '/assets/fruits/apple.svg', count: 3 },
+      { name: 'Quả Cam Mọng', url: '/assets/fruits/orange.svg', count: 2 },
+    ]
+  }, [activePresetData])
+
+  // 1-Click Theme Switcher handler
+  const handleSwitchTheme = (themeKey: ThemeKey) => {
+    const newTheme = GAME_WORLD_THEMES[themeKey]
+    setCustomTheme(newTheme)
+    setPipelineResult((prev) => {
+      let updatedPreset = prev.presetData ?? track1Result.presetData
+      if (updatedPreset) {
+        const dressed = bindAssetsToPreset(updatedPreset, newTheme)
+        updatedPreset = {
+          ...dressed.dressedPreset,
+          themeData: newTheme,
+        }
+      }
+      return {
+        ...prev,
+        themeData: newTheme,
+        presetData: updatedPreset,
+        assetsAttached: updatedPreset
+          ? {
+              themeKey: newTheme.key,
+              themeName: newTheme.name,
+              spriteCount: updatedPreset.spriteItems?.length ?? 1,
+              primarySpriteUrl: updatedPreset.imageUrl || newTheme.mascot.avatarUrl,
+              sprites: updatedPreset.spriteItems || [{ name: newTheme.mascot.name, url: updatedPreset.imageUrl || '', count: 1 }],
+            }
+          : prev.assetsAttached,
+      }
+    })
+  }
+
+  // TTS Voice Preview handler
+  const handlePlayTtsPreview = () => {
+    if (isPlayingTts) return
+    setIsPlayingTts(true)
+    const textToSpeak =
+      activePresetData?.narrationText ||
+      activePresetData?.questionText ||
+      prompt
+    speakVietnamese(textToSpeak, () => setIsPlayingTts(false))
+  }
+
   const fpsColor =
     measuredFps >= 55 ? '#00E676' : measuredFps >= 40 ? '#FFD600' : '#FF5252'
 
@@ -159,11 +240,11 @@ export default function PipelinePlayground() {
       const payload = {
         title: isArchery
           ? 'Bắn Cung Toán Học: Thợ Săn Số Chẵn'
-          : 'Nông Trại Toán Học Lớp 2',
+          : activePresetData?.title || 'Nông Trại Toán Học Lớp 2',
         gameType: isArchery ? 'PHYSICS_SLING_ARCHERY' : 'QUIZ',
         grade: 'GRADE_2',
         subject: 'MATH',
-        dsl: isArchery ? currentResult.cpfGraph : currentResult.presetData,
+        dsl: isArchery ? currentResult.cpfGraph : activePresetData,
       }
 
       const res = await publishGameApi(payload)
@@ -199,11 +280,11 @@ export default function PipelinePlayground() {
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
                 Dual-Track AI Game Pipeline & CPF Engine
                 <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  Production Wiring
+                  Chặng 2.5 Asset Dressing
                 </span>
               </h1>
               <p className="text-xs text-slate-400">
-                End-to-End Pipeline: Prompt $\to$ Bloom Selection $\to$ Quality Gates $\to$ Publish $\to$ Play (60 FPS)
+                End-to-End Pipeline: Prompt $\to$ Bloom Selection $\to$ 🎨 Theme & Asset Dressing $\to$ Quality Gates $\to$ Publish
               </p>
             </div>
           </div>
@@ -283,11 +364,11 @@ export default function PipelinePlayground() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto w-full p-6 flex flex-col gap-6 flex-1">
-        {/* Pipeline Stepper Visualizer */}
+        {/* Pipeline Stepper Visualizer (6 Steps) */}
         <div className="bg-slate-800/60 rounded-2xl border border-slate-700/60 p-4">
           <div className="flex items-center justify-between gap-2 overflow-x-auto">
             {PIPELINE_STEPS.map((s, idx) => (
-              <div key={s.id} className="flex items-center gap-2 flex-1 min-w-[150px]">
+              <div key={s.id} className="flex items-center gap-2 flex-1 min-w-[140px]">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
                     ✓
@@ -309,7 +390,7 @@ export default function PipelinePlayground() {
         <div className="bg-slate-800/80 rounded-2xl border border-slate-700/80 p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
             <span className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-              <span>✍️</span> Nhập Prompt Yêu Cầu Của Giáo Viên:
+              <span>✍️</span> Bước 1: Nhập Prompt Yêu Cầu Của Giáo Viên:
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -356,11 +437,11 @@ export default function PipelinePlayground() {
           </div>
         </div>
 
-        {/* Step 3: Bloom Taxonomy 3-Game Recommendation Matrix */}
+        {/* Step 2 & 3: Bloom Taxonomy 3-Game Recommendation Matrix */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <h2 className="text-xs uppercase font-bold text-slate-400 tracking-wider flex items-center gap-2">
-              <span>🎯</span> Bước 4: AI Đề Xuất 3 Cơ Chế Phân Bổ Theo Thang Đo Bloom
+              <span>🎯</span> Bước 2 & 3: AI Đề Xuất 3 Cơ Chế Phân Bổ Theo Thang Đo Bloom
             </h2>
             <span className="text-[11px] text-slate-400">Chọn 1 phương án để nạp tương tác</span>
           </div>
@@ -409,6 +490,146 @@ export default function PipelinePlayground() {
                 </div>
               )
             })}
+          </div>
+        </div>
+
+        {/* Step 4: Theme & Asset Dressing Studio (Stage 2.5) */}
+        <div className="bg-slate-800/80 rounded-2xl border border-slate-700/80 p-5 shadow-sm flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/60 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🎨</span>
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  Bước 4: Bối Cảnh Thế Giới Game & Kho Asset Đồ Họa (Stage 2.5 Dressing)
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">
+                    Hybrid 80/20 Engine
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Tự động khoác áo đồ họa SVG K-5, Mascot hoạt hình và âm thanh giọng đọc tiếng Việt
+                </p>
+              </div>
+            </div>
+
+            {/* TTS Voice Preview Button */}
+            <button
+              type="button"
+              onClick={handlePlayTtsPreview}
+              className={`text-xs px-4 py-2 rounded-xl border transition flex items-center gap-2 font-bold cursor-pointer ${
+                isPlayingTts
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/30 animate-pulse'
+                  : 'bg-slate-700 hover:bg-slate-600 text-slate-200 border-slate-600'
+              }`}
+            >
+              <span>{isPlayingTts ? '🔊' : '🔈'}</span>
+              <span>{isPlayingTts ? 'Đang đọc đề bài...' : 'Nghe Thử Giọng Đọc Đề Bài (TTS)'}</span>
+            </button>
+          </div>
+
+          {/* Theme Selector & Mascot info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Active Theme Card */}
+            <div className="bg-slate-900/80 rounded-xl p-3 border border-slate-700/70 flex flex-col justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+                  Thế Giới Game Được Chọn (Theme)
+                </span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">{currentTheme.icon}</span>
+                  <div>
+                    <h4 className="text-sm font-black text-white">{currentTheme.name}</h4>
+                    <span className="text-[11px] text-slate-400 font-mono">Key: {currentTheme.key}</span>
+                  </div>
+                </div>
+                {/* Palette pills */}
+                <div className="flex items-center gap-1.5 mt-2">
+                  <span className="text-[10px] text-slate-400">Bảng màu:</span>
+                  <div className="w-4 h-4 rounded-full border border-slate-600" style={{ backgroundColor: currentTheme.palette.primary }} title="Primary" />
+                  <div className="w-4 h-4 rounded-full border border-slate-600" style={{ backgroundColor: currentTheme.palette.secondary }} title="Secondary" />
+                  <div className="w-4 h-4 rounded-full border border-slate-600" style={{ backgroundColor: currentTheme.palette.canvasBg }} title="Canvas Bg" />
+                </div>
+              </div>
+
+              {/* 1-Click Theme Switcher */}
+              <div className="mt-3 pt-2 border-t border-slate-800">
+                <span className="text-[10px] text-slate-400 block mb-1 font-semibold">Đổi Theme 1-Click:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {(Object.keys(GAME_WORLD_THEMES) as ThemeKey[]).map((tKey) => {
+                    const t = GAME_WORLD_THEMES[tKey]
+                    const isActive = currentTheme.key === tKey
+                    return (
+                      <button
+                        key={tKey}
+                        type="button"
+                        onClick={() => handleSwitchTheme(tKey)}
+                        className={`text-[11px] px-2 py-1 rounded-lg font-medium transition cursor-pointer flex items-center gap-1 ${
+                          isActive
+                            ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                        }`}
+                      >
+                        <span>{t.icon}</span>
+                        <span>{t.name.split(' ')[0]}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Mascot Companion Card */}
+            <div className="bg-slate-900/80 rounded-xl p-3 border border-slate-700/70 flex flex-col justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+                  Linh Vật Đồng Hành (Mascot)
+                </span>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 rounded-full bg-white border border-slate-600 flex items-center justify-center p-1 overflow-hidden">
+                    <img src={currentTheme.mascot.avatarUrl} alt={currentTheme.mascot.name} className="w-10 h-10 object-contain" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-1">
+                      {currentTheme.mascot.name}
+                      <span>{currentTheme.mascot.emoji}</span>
+                    </h4>
+                    <span className="text-[10px] text-emerald-400 font-semibold">Tương tác Squash & Stretch</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-[11px] text-slate-400 italic bg-slate-950/60 p-2 rounded-lg border border-slate-800">
+                "{currentTheme.mascot.happyQuote}"
+              </div>
+            </div>
+
+            {/* Attached Sprites Grid */}
+            <div className="bg-slate-900/80 rounded-xl p-3 border border-slate-700/70 flex flex-col justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+                  Kho Sprite Đồ Họa Đã Gắn (Tự động 80/20)
+                </span>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {attachedSprites.map((sp, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-slate-800/80 border border-slate-700 rounded-lg p-2 flex items-center gap-2 flex-1 min-w-[130px]"
+                    >
+                      <div className="w-9 h-9 rounded-md bg-white p-1 flex items-center justify-center shrink-0">
+                        <img src={sp.url} alt={sp.name} className="w-7 h-7 object-contain" />
+                      </div>
+                      <div className="overflow-hidden">
+                        <span className="text-xs font-bold text-white block truncate">{sp.name}</span>
+                        <span className="text-[10px] text-emerald-300 font-mono">
+                          {sp.count ? `x${sp.count} item` : '✓ Vector SVG'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 mt-2">
+                <span>✓</span> Đảm bảo imageUrl luôn có giá trị (Zero null image guarantee)
+              </div>
+            </div>
           </div>
         </div>
 
@@ -468,9 +689,9 @@ export default function PipelinePlayground() {
         {/* Interactive Canvas Viewport */}
         <div className="flex flex-col items-center justify-center bg-slate-950/60 rounded-3xl border border-slate-800 p-4 shadow-2xl relative">
           <div className="w-full max-w-5xl">
-            {activeTab === 'track1' && track1Result.presetData && (
+            {activeTab === 'track1' && activePresetData && (
               <FarmQuizCanvas
-                data={track1Result.presetData}
+                data={activePresetData}
                 onFpsUpdate={(fps) => setMeasuredFps(fps)}
               />
             )}
@@ -483,7 +704,7 @@ export default function PipelinePlayground() {
           </div>
         </div>
 
-        {/* Quality Gates Detailed Feedback */}
+        {/* Step 5: Quality Gates Detailed Feedback */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-slate-800/60 rounded-xl border border-slate-700/60 p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -529,7 +750,7 @@ export default function PipelinePlayground() {
             </div>
             <pre className="bg-slate-900 rounded-xl p-4 text-xs font-mono text-emerald-300 max-h-96 overflow-y-auto border border-slate-800 leading-relaxed">
               {JSON.stringify(
-                activeTab === 'track1' ? currentResult.presetData : currentResult.cpfGraph,
+                activeTab === 'track1' ? activePresetData : currentResult.cpfGraph,
                 null,
                 2
               )}
@@ -538,7 +759,7 @@ export default function PipelinePlayground() {
         )}
       </main>
 
-      {/* Publish Celebration Modal */}
+      {/* Step 6: Publish Celebration Modal */}
       {showPublishModal && publishedData && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col items-center text-center relative animate-in fade-in zoom-in-95 duration-200">

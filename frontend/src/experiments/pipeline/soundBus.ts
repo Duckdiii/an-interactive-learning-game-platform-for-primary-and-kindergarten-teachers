@@ -185,6 +185,47 @@ class SoundBusEngine {
       // Audio playback suppressed safely
     }
   }
+
+  /**
+   * SFX_BOUNCE: Elastic cartoon spring boing (frequency up-ramp).
+   */
+  public playBounce(): void {
+    const ctx = this.getContext()
+    if (!ctx) return
+
+    try {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      const now = ctx.currentTime
+      const duration = 0.18
+
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(200, now)
+      osc.frequency.exponentialRampToValueAtTime(600, now + duration * 0.7)
+      osc.frequency.exponentialRampToValueAtTime(320, now + duration)
+
+      gain.gain.setValueAtTime(0.28, now)
+      gain.gain.exponentialRampToValueAtTime(0.01, now + duration)
+
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+
+      osc.start(now)
+      osc.stop(now + duration)
+    } catch {
+      // Suppressed
+    }
+  }
+
+  /**
+   * SFX_FANFARE: Celebratory fanfare chord for finishing questions.
+   */
+  public playFanfare(): void {
+    this.playCorrect()
+    setTimeout(() => {
+      this.playPop()
+    }, 120)
+  }
 }
 
 export const soundBus = new SoundBusEngine()

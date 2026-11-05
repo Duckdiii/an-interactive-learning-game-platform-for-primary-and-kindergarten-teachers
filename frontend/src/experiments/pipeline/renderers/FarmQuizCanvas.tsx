@@ -1,14 +1,20 @@
 /**
  * FarmQuizCanvas: High-performance Candy Gloss Quiz Renderer (Track 1 - In-Distribution).
- * Implements K-5 UI specifications: touch targets >= 64px, stroke 4px, rounded-2xl,
- * pure Web Audio feedback, real-time FPS telemetry.
+ * Upgraded with Stage 2.5: Asset & Theme Dressing Pipeline:
+ * - Dynamic World Themes (FARM, OCEAN, SPACE, FOREST, CANDY)
+ * - 80/20 Visual SVG Sprites with Idle Breathing (2-3%)
+ * - Animated Mascot Companion with Squash & Stretch feedback
+ * - Web Speech Vietnamese TTS Narration with Interactive Speaker Button
  */
 
 import { useState, useEffect, useRef, type FC } from 'react'
-import { Stage, Layer, Rect, Text, Group, Circle } from 'react-konva'
+import { Stage, Layer, Rect, Text, Group, Circle, Image as KonvaImage } from 'react-konva'
+import useImage from 'use-image'
 import { soundBus } from '../soundBus'
 import { CANDY_PALETTE, UI_SPECS } from '../assetPalette'
+import { speakVietnamese } from '../assetBank'
 import type { PresetQuizData } from '../pipelineOrchestrator'
+import type { MascotConfig } from '../themeResolver'
 
 interface FarmQuizCanvasProps {
   data: PresetQuizData
@@ -26,6 +32,169 @@ interface ConfettiDot {
   alpha: number
 }
 
+// ---------------------------------------------------------------------------
+// Sub-component: Visual SVG Sprite with Idle Breathing (2-3% scale oscillation)
+// ---------------------------------------------------------------------------
+const SpriteItem: FC<{
+  url: string
+  x: number
+  y: number
+  size: number
+  animPhase: number
+  animTime: number
+}> = ({ url, x, y, size, animPhase, animTime }) => {
+  const [image] = useImage(url, 'anonymous')
+  // Idle breathing 2-3% scale oscillation
+  const scale = 1 + 0.03 * Math.sin(animTime * 0.003 + animPhase)
+  const offset = (size * scale - size) / 2
+
+  if (!image) {
+    return (
+      <Circle
+        x={x + size / 2}
+        y={y + size / 2}
+        radius={size / 2}
+        fill="#FFD54F"
+        stroke="#78350F"
+        strokeWidth={2}
+      />
+    )
+  }
+
+  return (
+    <Group x={x - offset} y={y - offset} scaleX={scale} scaleY={scale}>
+      <KonvaImage image={image} width={size} height={size} />
+    </Group>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Sub-component: Animated Mascot Companion with Squash & Stretch feedback
+// ---------------------------------------------------------------------------
+const MascotCompanion: FC<{
+  mascot: MascotConfig
+  status: 'idle' | 'correct' | 'wrong'
+  animTime: number
+  speechText?: string
+}> = ({ mascot, status, animTime, speechText }) => {
+  const [avatar] = useImage(mascot.avatarUrl, 'anonymous')
+
+  // Squash & Stretch physics oscillation
+  let scaleX = 1 + 0.02 * Math.sin(animTime * 0.004)
+  let scaleY = 1 - 0.02 * Math.sin(animTime * 0.004)
+  let mascotYOffset = 0
+
+  if (status === 'correct') {
+    // Spring upward bounce + squash & stretch
+    const bouncePhase = (animTime * 0.012) % (Math.PI * 2)
+    mascotYOffset = -24 * Math.abs(Math.sin(bouncePhase))
+    scaleX = 1 + 0.18 * Math.cos(bouncePhase)
+    scaleY = 1 - 0.18 * Math.cos(bouncePhase)
+  } else if (status === 'wrong') {
+    // Mild shiver
+    scaleX = 0.94 + 0.06 * Math.sin(animTime * 0.03)
+    scaleY = 0.94
+  }
+
+  const quote =
+    speechText ||
+    (status === 'correct'
+      ? mascot.happyQuote
+      : status === 'wrong'
+        ? mascot.encouragingQuote
+        : `Xin chào! Cùng ${mascot.name} giải đố nhé!`)
+
+  return (
+    <Group x={70} y={750}>
+      {/* Speech Bubble */}
+      <Group x={110} y={-45}>
+        <Rect
+          width={280}
+          height={85}
+          cornerRadius={20}
+          fill="#FFFFFF"
+          stroke="#475569"
+          strokeWidth={3}
+          shadowColor="rgba(0,0,0,0.12)"
+          shadowBlur={10}
+          shadowOffsetY={5}
+        />
+        <Text
+          x={16}
+          y={16}
+          width={248}
+          text={quote}
+          fontSize={18}
+          fontStyle="bold"
+          fill="#1E293B"
+          lineHeight={1.3}
+          fontFamily={UI_SPECS.fontFamily}
+        />
+      </Group>
+
+      {/* Mascot Avatar Card with Squash & Stretch */}
+      <Group
+        x={0}
+        y={mascotYOffset}
+        scaleX={scaleX}
+        scaleY={scaleY}
+        offsetX={55}
+        offsetY={55}
+      >
+        <Circle
+          x={55}
+          y={55}
+          radius={52}
+          fill="#FFFFFF"
+          stroke="#334155"
+          strokeWidth={4}
+          shadowColor="rgba(0,0,0,0.15)"
+          shadowBlur={12}
+          shadowOffsetY={6}
+        />
+        {avatar ? (
+          <KonvaImage image={avatar} x={12} y={12} width={86} height={86} />
+        ) : (
+          <Text x={25} y={25} text={mascot.emoji} fontSize={50} />
+        )}
+      </Group>
+    </Group>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Sub-component: Audio Narration Speaker Button (🔊)
+// ---------------------------------------------------------------------------
+const SpeakerButton: FC<{
+  x: number
+  y: number
+  isSpeaking: boolean
+  onClick: () => void
+}> = ({ x, y, isSpeaking, onClick }) => {
+  return (
+    <Group x={x} y={y} onClick={onClick} onTap={onClick} style={{ cursor: 'pointer' }}>
+      <Circle
+        radius={34}
+        fill={isSpeaking ? '#F59E0B' : '#FFFFFF'}
+        stroke="#475569"
+        strokeWidth={3}
+        shadowColor="rgba(0,0,0,0.15)"
+        shadowBlur={10}
+        shadowOffsetY={5}
+      />
+      <Text
+        x={-20}
+        y={-18}
+        text={isSpeaking ? '🔊' : '🔈'}
+        fontSize={34}
+      />
+    </Group>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Main Component: FarmQuizCanvas
+// ---------------------------------------------------------------------------
 export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
@@ -33,10 +202,34 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
   const [status, setStatus] = useState<'idle' | 'correct' | 'wrong'>('idle')
   const [confetti, setConfetti] = useState<ConfettiDot[]>([])
   const [shakeOffset, setShakeOffset] = useState({ x: 0, y: 0 })
+  const [animTime, setAnimTime] = useState(0)
+  const [isSpeaking, setIsSpeaking] = useState(false)
 
   // Performance telemetry
   const frameCountRef = useRef(0)
   const lastFpsTimeRef = useRef(performance.now())
+
+  // Default mascot fallback
+  const mascot: MascotConfig = data.themeData?.mascot ?? {
+    id: 'rabbit',
+    name: 'Thỏ Trắng Nông Dân',
+    emoji: '🐰',
+    avatarUrl: '/assets/animals/rabbit.svg',
+    encouragingQuote: 'Cố lên bé ơi! Đếm cùng thỏ nào!',
+    happyQuote: 'Hoan hô! Bé tính siêu quá!',
+  }
+
+  // Theme palettes
+  const themePalette = data.themeData?.palette ?? {
+    background: '#FFFBEB',
+    cardBg: CANDY_PALETTE.cardBg,
+    primary: CANDY_PALETTE.primary,
+    secondary: CANDY_PALETTE.mintGreen,
+    border: CANDY_PALETTE.inkBorder,
+    accent: '#EF4444',
+    canvasBg: '#FFF9C4',
+    textColor: CANDY_PALETTE.inkBorder,
+  }
 
   // Responsive scaling
   useEffect(() => {
@@ -57,6 +250,7 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
     let shakeTimer = 0
 
     const loop = (timestamp: number) => {
+      setAnimTime(timestamp)
       frameCountRef.current++
       if (timestamp - lastFpsTimeRef.current >= 500) {
         const measuredFps = Math.round(
@@ -99,6 +293,16 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
     return () => cancelAnimationFrame(animId)
   }, [onFpsUpdate])
 
+  // Handle speaker click
+  const handleToggleSpeak = () => {
+    if (isSpeaking) return
+    setIsSpeaking(true)
+    soundBus.playPop()
+    speakVietnamese(data.narrationText || data.questionText, () => {
+      setIsSpeaking(false)
+    })
+  }
+
   const handleSelectOption = (index: number) => {
     if (status !== 'idle') return
 
@@ -110,6 +314,8 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
     if (isCorrect) {
       setStatus('correct')
       soundBus.playCorrect()
+      soundBus.playBounce()
+      soundBus.playFanfare()
 
       // Spawn festive confetti
       const dots: ConfettiDot[] = []
@@ -143,11 +349,18 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
 
   // Option coordinates for 2x2 grid
   const optionLayouts = [
-    { x: 360, y: 560, width: 560, height: 130 },
-    { x: 1000, y: 560, width: 560, height: 130 },
-    { x: 360, y: 730, width: 560, height: 130 },
-    { x: 1000, y: 730, width: 560, height: 130 },
+    { x: 380, y: 550, width: 550, height: 130 },
+    { x: 990, y: 550, width: 550, height: 130 },
+    { x: 380, y: 710, width: 550, height: 130 },
+    { x: 990, y: 710, width: 550, height: 130 },
   ]
+
+  // Prepared visual sprite items to render
+  const visualSprites = data.spriteItems && data.spriteItems.length > 0
+    ? data.spriteItems
+    : data.imageUrl
+      ? [{ name: 'Hình ảnh học liệu', url: data.imageUrl, count: 3 }]
+      : []
 
   return (
     <div
@@ -158,7 +371,7 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
         overflow: 'hidden',
         borderRadius: 20,
         boxShadow: '0 12px 32px rgba(0,0,0,0.1)',
-        backgroundColor: '#FFF9C4', // Sunny pastel farm pasture
+        backgroundColor: themePalette.canvasBg,
       }}
     >
       <Stage
@@ -170,13 +383,13 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
         <Layer>
           <Group x={shakeOffset.x} y={shakeOffset.y}>
             {/* Header Theme Badge */}
-            <Group x={360} y={60}>
+            <Group x={360} y={50}>
               <Rect
                 width={1200}
                 height={80}
                 cornerRadius={24}
-                fill={CANDY_PALETTE.primary}
-                stroke={CANDY_PALETTE.inkBorder}
+                fill={themePalette.primary}
+                stroke={themePalette.border}
                 strokeWidth={UI_SPECS.borderWidth}
                 shadowColor="rgba(0,0,0,0.15)"
                 shadowBlur={10}
@@ -186,7 +399,7 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
                 x={0}
                 y={20}
                 width={1200}
-                text={`🌾 ${data.title.toUpperCase()} • TOÁN LỚP ${data.gradeLevel} 🚜`}
+                text={`${data.themeData?.icon || '🌾'} ${data.title.toUpperCase()} • TOÁN LỚP ${data.gradeLevel} ${data.themeData?.icon || '🚜'}`}
                 align="center"
                 fontSize={32}
                 fontStyle="bold"
@@ -196,59 +409,121 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
             </Group>
 
             {/* Farm Backdrop Card */}
-            <Group x={260} y={180}>
+            <Group x={260} y={160}>
               <Rect
                 width={1400}
-                height={320}
+                height={350}
                 cornerRadius={UI_SPECS.borderRadius}
-                fill={CANDY_PALETTE.cardBg}
-                stroke={CANDY_PALETTE.inkBorder}
+                fill={themePalette.cardBg}
+                stroke={themePalette.border}
                 strokeWidth={UI_SPECS.borderWidth}
                 shadowColor="rgba(0,0,0,0.12)"
                 shadowBlur={16}
                 shadowOffsetY={8}
               />
 
-              {/* Decorative Farm Badges */}
-              <Group x={50} y={35}>
-                <Circle radius={36} fill="#FFE082" stroke={CANDY_PALETTE.inkBorder} strokeWidth={3} />
-                <Text x={-24} y={-18} text="🐔" fontSize={36} />
-              </Group>
-              <Group x={130} y={35}>
-                <Circle radius={36} fill="#B2DFDB" stroke={CANDY_PALETTE.inkBorder} strokeWidth={3} />
-                <Text x={-24} y={-18} text="🦆" fontSize={36} />
+              {/* Decorative Theme Badges */}
+              <Group x={45} y={35}>
+                <Circle radius={34} fill="#FFE082" stroke={themePalette.border} strokeWidth={3} />
+                <Text x={-22} y={-18} text={data.themeData?.icon || '🌾'} fontSize={36} />
               </Group>
 
               {/* Question Text */}
               <Text
-                x={210}
-                y={45}
-                width={1120}
+                x={130}
+                y={35}
+                width={1140}
                 text={data.questionText}
-                fontSize={40}
+                fontSize={36}
                 lineHeight={1.4}
                 fontStyle="bold"
-                fill={CANDY_PALETTE.inkBorder}
+                fill={themePalette.textColor}
                 fontFamily={UI_SPECS.fontFamily}
               />
 
-              {/* Math Hint Box */}
-              <Group x={210} y={200}>
+              {/* Speaker TTS Narration Button */}
+              <SpeakerButton
+                x={1330}
+                y={55}
+                isSpeaking={isSpeaking}
+                onClick={handleToggleSpeak}
+              />
+
+              {/* Visual Sprites Showcase Row (Stage 2.5: Idle Breathing SVG Sprites) */}
+              <Group x={130} y={170}>
                 <Rect
-                  width={600}
-                  height={75}
-                  cornerRadius={16}
-                  fill="#FFF3E0"
-                  stroke={CANDY_PALETTE.primary}
+                  width={680}
+                  height={140}
+                  cornerRadius={18}
+                  fill="#FFFBEB"
+                  stroke={themePalette.border}
+                  strokeWidth={2}
+                />
+                <Text
+                  x={16}
+                  y={12}
+                  text="🎨 HÌNH ẢNH TRỰC QUAN:"
+                  fontSize={16}
+                  fontStyle="bold"
+                  fill="#92400E"
+                  fontFamily={UI_SPECS.fontFamily}
+                />
+                {visualSprites.map((item, idx) => {
+                  const displayCount = Math.min(item.count, 6)
+                  return (
+                    <Group key={`${item.name}-${idx}`} x={16 + idx * 320} y={40}>
+                      {Array.from({ length: displayCount }).map((_, cIdx) => (
+                        <SpriteItem
+                          key={cIdx}
+                          url={item.url}
+                          x={cIdx * 48}
+                          y={10}
+                          size={54}
+                          animPhase={cIdx * 0.4}
+                          animTime={animTime}
+                        />
+                      ))}
+                      <Text
+                        x={0}
+                        y={68}
+                        text={`• ${item.count} ${item.name}`}
+                        fontSize={18}
+                        fontStyle="bold"
+                        fill="#78350F"
+                        fontFamily={UI_SPECS.fontFamily}
+                      />
+                    </Group>
+                  )
+                })}
+              </Group>
+
+              {/* Math Hint Box */}
+              <Group x={840} y={170}>
+                <Rect
+                  width={510}
+                  height={140}
+                  cornerRadius={18}
+                  fill="#EFF6FF"
+                  stroke="#3B82F6"
                   strokeWidth={2}
                 />
                 <Text
                   x={20}
-                  y={22}
-                  text={`💡 Gợi ý: Có ${data.numA} chú gà + ${data.numB} chú vịt = ?`}
-                  fontSize={26}
+                  y={16}
+                  text="💡 GỢI Ý CỦA BẠN ĐỒNG HÀNH:"
+                  fontSize={16}
                   fontStyle="bold"
-                  fill="#E65100"
+                  fill="#1E40AF"
+                  fontFamily={UI_SPECS.fontFamily}
+                />
+                <Text
+                  x={20}
+                  y={46}
+                  width={470}
+                  text={data.explanation || `Phép tính: ${data.numA} ${data.operation} ${data.numB} = ?`}
+                  fontSize={20}
+                  lineHeight={1.4}
+                  fill="#1E3A8A"
                   fontFamily={UI_SPECS.fontFamily}
                 />
               </Group>
@@ -259,9 +534,9 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
               const layout = optionLayouts[idx]
               const isSelected = selectedIndex === idx
 
-              let btnFill: string = CANDY_PALETTE.cardBg
-              let btnStroke: string = CANDY_PALETTE.inkBorder
-              let textColor: string = CANDY_PALETTE.inkBorder
+              let btnFill: string = themePalette.cardBg
+              let btnStroke: string = themePalette.border
+              let textColor: string = themePalette.textColor
 
               if (isSelected) {
                 if (status === 'correct') {
@@ -314,8 +589,8 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
                     x={65}
                     y={layout.height / 2}
                     radius={34}
-                    fill={isSelected && status === 'correct' ? '#FFFFFF' : CANDY_PALETTE.skyBlue}
-                    stroke={CANDY_PALETTE.inkBorder}
+                    fill={isSelected && status === 'correct' ? '#FFFFFF' : themePalette.primary}
+                    stroke={themePalette.border}
                     strokeWidth={3}
                   />
                   <Text
@@ -324,7 +599,7 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
                     text={letters[idx]}
                     fontSize={34}
                     fontStyle="bold"
-                    fill={isSelected && status === 'correct' ? CANDY_PALETTE.skyBlue : '#FFFFFF'}
+                    fill={isSelected && status === 'correct' ? themePalette.primary : '#FFFFFF'}
                     fontFamily={UI_SPECS.fontFamily}
                   />
 
@@ -343,12 +618,19 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
               )
             })}
 
+            {/* Mascot Companion at Corner with Squash & Stretch */}
+            <MascotCompanion
+              mascot={mascot}
+              status={status}
+              animTime={animTime}
+            />
+
             {/* Bottom Feedback Banner */}
             {status === 'correct' && (
-              <Group x={460} y={900}>
+              <Group x={460} y={890}>
                 <Rect
                   width={1000}
-                  height={110}
+                  height={120}
                   cornerRadius={24}
                   fill={CANDY_PALETTE.mintGreen}
                   stroke="#1B5E20"
@@ -361,7 +643,7 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
                   x={0}
                   y={22}
                   width={1000}
-                  text="🎉 XUẤT SẮC! BẠN ĐÃ TÍNH ĐÚNG 65 CON! 🌟"
+                  text="🎉 XUẤT SẮC! BÉ ĐÃ TRẢ LỜI ĐÚNG! 🌟"
                   align="center"
                   fontSize={36}
                   fontStyle="bold"
@@ -370,11 +652,11 @@ export const FarmQuizCanvas: FC<FarmQuizCanvasProps> = ({ data, onFpsUpdate }) =
                 />
                 <Text
                   x={0}
-                  y={68}
+                  y={72}
                   width={1000}
                   text={data.explanation}
                   align="center"
-                  fontSize={24}
+                  fontSize={22}
                   fill="#E8F5E9"
                   fontFamily={UI_SPECS.fontFamily}
                 />
