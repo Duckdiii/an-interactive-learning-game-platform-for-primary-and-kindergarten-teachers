@@ -10,20 +10,20 @@
 import { useState, useEffect, useRef, useMemo, type FC } from 'react'
 import { Stage, Layer, Rect, Text, Group, Image as KonvaImage } from 'react-konva'
 import useImage from 'use-image'
-import { soundBus } from '../../../experiments/pipeline/soundBus'
-import { CANDY_PALETTE, UI_SPECS } from '../../../experiments/pipeline/assetPalette'
+import { soundBus } from '../../../services/pipeline/soundBus'
+import { CANDY_PALETTE, UI_SPECS } from '../../../services/pipeline/assetPalette'
 import {
   findBestSprite,
   getDefaultThemeSprite,
   speakVietnamese,
   type AssetSprite,
-} from '../../../experiments/pipeline/assetBank'
+} from '../../../services/pipeline/assetBank'
 import {
   resolveGameTheme,
   type ThemeKey,
   type GameWorldTheme,
   type MascotConfig,
-} from '../../../experiments/pipeline/themeResolver'
+} from '../../../services/pipeline/themeResolver'
 import type { QuizQuestion } from '../../../types/game-dsl.types'
 
 export interface ThemedQuizCanvasProps {

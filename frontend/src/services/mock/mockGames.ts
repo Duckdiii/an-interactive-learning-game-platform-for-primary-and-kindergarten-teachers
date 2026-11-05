@@ -5,7 +5,8 @@ import type { PublishResult } from '../../types/publish.types'
 import type { GameFilters, GameSummary } from '../../types/game-summary.types'
 import { validateGame } from '../../utils/gameValidation'
 import { buildMockGameContents, mathMatching, mathMemory } from './gameFixtures'
-import { deduceThemeFromText, enrichGameWithAssets, findCatalogItemsInText } from '../../utils/assetResolver'
+import { enrichGameWithAssets, findCatalogItemsInText } from '../../utils/assetResolver'
+import { extractSemantics } from '../pipeline/semanticExtractor'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
 // Kho game trong bộ nhớ cho các nhóm mô phỏng `games` và `editor`: 10 game mẫu (đủ 10 loại) có nội dung DSL đầy đủ; danh
@@ -176,7 +177,8 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
     template = mathMemory
   }
   const content = structuredClone(template)
-  const deduced = deduceThemeFromText(idea || content.metadata.topic)
+  const semantics = extractSemantics(`${idea} ${content.metadata.topic}`)
+  const deduced = { theme: semantics.themeKey }
 
   content.metadata = {
     ...content.metadata,
@@ -187,22 +189,53 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
   } as GameDsl['metadata']
 
   const matchedItems = findCatalogItemsInText(idea)
-  if (!isMath && matchedItems.length >= 3 && content.questions[0]) {
+  if (!isMath && content.questions[0]) {
     if (info.gameType === 'MATCHING') {
-      const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
-        pairId: `p${idx + 1}`,
-        left: { text: item.name, imageUrl: item.url },
-        right: { text: item.name, imageUrl: item.url },
-      }))
-      ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
-      ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy nối các ${deduced.theme === 'ocean' ? 'sinh vật biển' : 'hình ảnh'} nhé`
+      if (matchedItems.length >= 3) {
+        const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
+          pairId: `p${idx + 1}`,
+          left: { text: item.name, imageUrl: item.url },
+          right: { text: item.name, imageUrl: item.url },
+        }))
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy nối các ${deduced.theme === 'ocean' ? 'sinh vật biển' : 'hình ảnh'} nhé`
+      } else if (semantics.visualEntities.filter((e) => e.mappedAssetUrl).length >= 3) {
+        const validEntities = semantics.visualEntities.filter((e) => e.mappedAssetUrl)
+        const pairs = validEntities.slice(0, 6).map((item, idx) => ({
+          pairId: `p${idx + 1}`,
+          left: { text: item.name, imageUrl: item.mappedAssetUrl },
+          right: { text: item.name, imageUrl: item.mappedAssetUrl },
+        }))
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy nối các ${deduced.theme === 'ocean' ? 'sinh vật biển' : 'hình ảnh'} nhé`
+      } else {
+        const phonicsPairs = [
+          { pairId: 'p1', left: { text: 'a', imageUrl: '/assets/fruits/apple.svg' }, right: { text: 'Quả táo', imageUrl: '/assets/fruits/apple.svg' } },
+          { pairId: 'p2', left: { text: 'c', imageUrl: '/assets/animals/fish.svg' }, right: { text: 'Con cá', imageUrl: '/assets/animals/fish.svg' } },
+          { pairId: 'p3', left: { text: 'm', imageUrl: '/assets/animals/cat.svg' }, right: { text: 'Con mèo', imageUrl: '/assets/animals/cat.svg' } },
+          { pairId: 'p4', left: { text: 'ch', imageUrl: '/assets/animals/dog.svg' }, right: { text: 'Con chó', imageUrl: '/assets/animals/dog.svg' } },
+        ]
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = phonicsPairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = 'Bé hãy nối chữ cái với hình ảnh tương ứng nhé'
+      }
     } else if (info.gameType === 'MEMORY_CARD') {
-      const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
-        pairId: `p${idx + 1}`,
-        content: { text: item.name, imageUrl: item.url },
-      }))
-      ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
-      ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy lật tìm các cặp thẻ ${deduced.theme === 'ocean' ? 'sinh vật biển' : ''} nhé`
+      if (matchedItems.length >= 3) {
+        const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
+          pairId: `p${idx + 1}`,
+          content: { text: item.name, imageUrl: item.url },
+        }))
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy lật tìm các cặp thẻ ${deduced.theme === 'ocean' ? 'sinh vật biển' : ''} nhé`
+      } else {
+        const defaultPairs = [
+          { pairId: 'p1', content: { text: 'Quả táo', imageUrl: '/assets/fruits/apple.svg' } },
+          { pairId: 'p2', content: { text: 'Con cá', imageUrl: '/assets/animals/fish.svg' } },
+          { pairId: 'p3', content: { text: 'Con mèo', imageUrl: '/assets/animals/cat.svg' } },
+          { pairId: 'p4', content: { text: 'Con chó', imageUrl: '/assets/animals/dog.svg' } },
+        ]
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = defaultPairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = 'Bé hãy lật tìm các cặp hình giống nhau nhé'
+      }
     }
   }
 

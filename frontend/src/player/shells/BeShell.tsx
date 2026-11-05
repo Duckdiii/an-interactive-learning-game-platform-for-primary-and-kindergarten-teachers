@@ -34,7 +34,11 @@ export default function BeShell({ title, progress, mascot, feedback, showHotkeyH
         </p>
         {mascot ? <div>{mascot}</div> : null}
       </header>
-      <main className="relative z-10 flex flex-1 flex-col play-safe-x [--play-pad-x:0px]">{children}</main>
+      <main className="relative z-10 flex flex-1 flex-col play-safe-x [--play-pad-x:0px]">
+        <div className="flex flex-1 flex-col w-full rounded-3xl border-4 border-play-outline bg-play-surface/90 shadow-xl backdrop-blur-xs overflow-hidden">
+          {children}
+        </div>
+      </main>
       <ShellFooter feedback={feedback} showHotkeyHint={showHotkeyHint} />
 
       {/* Linh vật Mascot đồng hành góc dưới màn hình có hiệu ứng thở nhẹ (Idle Breathing) */}

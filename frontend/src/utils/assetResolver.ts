@@ -98,6 +98,39 @@ const KEYWORD_MAP = ASSET_CATALOG.flatMap((item) =>
 ).sort((a, b) => b.kw.length - a.kw.length)
 
 /**
+ * Bản đồ liên tưởng chữ cái tiếng Việt sang hình ảnh minh họa vector OpenMoji (Chuẩn mỹ thuật K-5)
+ * Nguyên tắc: "Chữ gắn liền với hình" (Visual Association) giúp học sinh lớp 1 nhận biết chữ trực quan.
+ */
+export const LETTER_ASSOCIATION_MAP: Record<string, { name: string; url: string }> = {
+  a: { name: 'Quả táo', url: '/assets/fruits/apple.svg' },
+  ă: { name: 'Quả cam', url: '/assets/fruits/orange.svg' },
+  â: { name: 'Quả chuối', url: '/assets/fruits/banana.svg' },
+  b: { name: 'Quả bóng', url: '/assets/objects/ball.svg' },
+  c: { name: 'Con cá', url: '/assets/animals/fish.svg' },
+  ch: { name: 'Con chó', url: '/assets/animals/dog.svg' },
+  d: { name: 'Dưa hấu', url: '/assets/fruits/watermelon.svg' },
+  đ: { name: 'Bông hoa', url: '/assets/objects/flower.svg' },
+  e: { name: 'Con vịt', url: '/assets/animals/duck.svg' },
+  ê: { name: 'Con bò', url: '/assets/themes/farm/farm-cow.svg' },
+  g: { name: 'Con gà', url: '/assets/themes/farm/farm-chicken.svg' },
+  h: { name: 'Bông hoa', url: '/assets/objects/flower.svg' },
+  k: { name: 'Kẹo ngọt', url: '/assets/objects/candy.svg' },
+  l: { name: 'Con lợn', url: '/assets/themes/farm/farm-pig.svg' },
+  m: { name: 'Con mèo', url: '/assets/animals/cat.svg' },
+  n: { name: 'Ngôi sao', url: '/assets/objects/star.svg' },
+  o: { name: 'Con ong', url: '/assets/animals/rabbit.svg' },
+  ô: { name: 'Chiếc ô', url: '/assets/objects/star.svg' },
+  ơ: { name: 'Bông hoa', url: '/assets/objects/flower.svg' },
+  p: { name: 'Phi thuyền', url: '/assets/themes/space/space-rocket.svg' },
+  r: { name: 'Rùa biển', url: '/assets/themes/ocean/ocean-turtle.svg' },
+  s: { name: 'Ngôi sao', url: '/assets/objects/star.svg' },
+  t: { name: 'Chú thỏ', url: '/assets/animals/rabbit.svg' },
+  th: { name: 'Thuyền buồm', url: '/assets/themes/ocean/bg-ocean.svg' },
+  v: { name: 'Con vịt', url: '/assets/animals/duck.svg' },
+  x: { name: 'Xe hơi', url: '/assets/objects/car.svg' },
+}
+
+/**
  * Tự động tìm URL hình ảnh từ văn bản hoặc mô tả hình ảnh.
  * Ưu tiên tra cứu `visualPrompt`, nếu không có thì tra cứu `text`.
  */
@@ -114,6 +147,11 @@ export function resolveAssetUrl(text?: string, visualPrompt?: string): string | 
       if (regex.test(normalized) || normalized === kw) {
         return url
       }
+    }
+
+    // Nếu là chữ cái đơn lẻ hoặc cặp chữ cái (vd: "a", "c", "m", "ch")
+    if (LETTER_ASSOCIATION_MAP[normalized]) {
+      return LETTER_ASSOCIATION_MAP[normalized].url
     }
   }
 
@@ -276,11 +314,15 @@ export function enrichGameWithAssets<T extends { gameType: string; questions: un
       if (!Array.isArray(q.pairs)) continue
       q.pairs.forEach((pair, idx) => {
         if (!pair.left.imageUrl) {
-          const url = resolveAssetUrl(pair.left.text, pair.left.visualPrompt)
+          const normLeft = pair.left.text ? normalizeKeyword(pair.left.text) : ''
+          const letterAssoc = LETTER_ASSOCIATION_MAP[normLeft]
+          const url = letterAssoc?.url || resolveAssetUrl(pair.left.text, pair.left.visualPrompt)
           pair.left.imageUrl = url || pool[idx % pool.length]
         }
         if (!pair.right.imageUrl) {
-          const url = resolveAssetUrl(pair.right.text, pair.right.visualPrompt)
+          const normRight = pair.right.text ? normalizeKeyword(pair.right.text) : ''
+          const letterAssoc = LETTER_ASSOCIATION_MAP[normRight]
+          const url = letterAssoc?.url || resolveAssetUrl(pair.right.text, pair.right.visualPrompt)
           pair.right.imageUrl = url || pair.left.imageUrl
         }
       })

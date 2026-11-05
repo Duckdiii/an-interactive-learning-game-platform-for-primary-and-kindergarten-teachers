@@ -16,9 +16,9 @@ import { ThemeProvider } from '../theme/ThemeContext'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 import PlayController from '../play/PlayController'
 import { getPlayGameApi, type PlayGameDtoResponse } from '../../api/gamesApi'
-import { ArcheryCpfCanvas } from '../../experiments/pipeline/renderers/ArcheryCpfCanvas'
-import { FarmQuizCanvas } from '../../experiments/pipeline/renderers/FarmQuizCanvas'
-import type { PresetQuizData } from '../../experiments/pipeline/pipelineOrchestrator'
+import { ArcheryCpfCanvas } from '../../services/pipeline/renderers/ArcheryCpfCanvas'
+import { FarmQuizCanvas } from '../../services/pipeline/renderers/FarmQuizCanvas'
+import type { PresetQuizData } from '../../services/pipeline/pipelineOrchestrator'
 
 // Tải thông tin xuất bản, chọn khung theo profile, rồi giao lượt chơi cho PlayController.
 export default function PlayPage() {
