@@ -143,7 +143,13 @@ export default function AppLayout() {
         tabIndex={-1}
         className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-6 outline-none sm:px-6 sm:pt-8 lg:mx-0 lg:max-w-none lg:px-10 lg:pb-12"
       >
-        <div key={location.pathname} className="page-in mx-auto max-w-5xl">
+        <div
+          key={location.pathname}
+          className={[
+            'page-in mx-auto',
+            location.pathname.startsWith('/workspace/editor') ? 'max-w-7xl 2xl:max-w-[1480px]' : 'max-w-5xl',
+          ].join(' ')}
+        >
           <MockBanner />
           <Outlet />
         </div>

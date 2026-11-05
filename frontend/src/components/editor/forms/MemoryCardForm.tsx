@@ -67,18 +67,24 @@ export default function MemoryCardForm({ gameType, question: raw, issues, onUpda
           {countHint}
         </p>
 
-        <ol className="space-y-3">
+        <ol className="space-y-4">
           {question.pairs.map((pair, index) => (
             <li key={pair.pairId}>
-              <fieldset className="rounded-xl border-2 border-ink/10 p-3">
-                <legend className="px-1 text-base font-bold">
+              <fieldset className="rounded-2xl border-2 border-brand/20 bg-surface p-4 shadow-xs transition hover:border-brand/40">
+                <legend className="px-2 text-base font-extrabold text-ink">
                   {text.pairLabel} {index + 1}
                 </legend>
-                <div className="mb-2 flex justify-end">
+                <div className="mb-3 -mt-2 flex items-center justify-between border-b border-ink/5 pb-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-ink-soft">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-xs font-black text-brand-strong">
+                      {index + 1}
+                    </span>
+                    <span>Cặp thẻ nhớ #{index + 1}</span>
+                  </div>
                   <Button
                     type="button"
                     variant="secondary"
-                    className="shrink-0"
+                    className="shrink-0 h-8 w-8 !p-0 flex items-center justify-center rounded-lg hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300"
                     disabled={!canRemove}
                     aria-describedby={canRemove ? undefined : 'memory-pairs-limit'}
                     aria-label={`${text.removePair} ${index + 1}`}
@@ -140,34 +146,42 @@ function CardFields({ pair, index, issues, onCommit }: CardFieldsProps) {
   const prefix = idPrefix(pair.pairId)
 
   return (
-    <fieldset className="space-y-3 rounded-xl bg-paper p-3" aria-describedby={needError ? `${prefix}-need` : undefined}>
-      <legend className="px-1 text-sm font-bold">{text.cardFace}</legend>
+    <fieldset
+      className="space-y-3 rounded-xl border border-purple-200/70 bg-purple-50/25 p-3.5 transition"
+      aria-describedby={needError ? `${prefix}-need` : undefined}
+    >
+      <legend className="px-1 text-sm font-bold text-ink flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full bg-purple-500" />
+        <span>{text.cardFace}</span>
+      </legend>
       {needError ? (
         <p id={`${prefix}-need`} className="flex items-start gap-2 text-sm font-semibold text-rose-800">
           <Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{needError}</span>
         </p>
       ) : null}
-      <CheckedTextField
-        id={`${prefix}-text`}
-        label={`${text.cardTextLabel} (${text.pairLabel.toLowerCase()} ${index + 1})`}
-        required={false}
-        invalid={Boolean(needError)}
-        value={pair.content.text ?? ''}
-        limits={LIMITS.sideText}
-        error={fieldMessage(issues, `${base}.text`)}
-        onCommit={(next) => onCommit('text', next)}
-      />
-      <CheckedTextField
-        id={`${prefix}-image`}
-        label={`${text.cardImageLabel} (${text.pairLabel.toLowerCase()} ${index + 1})`}
-        required={false}
-        invalid={Boolean(needError)}
-        value={pair.content.visualPrompt ?? ''}
-        limits={QUESTION_LIMITS.visualPrompt}
-        error={fieldMessage(issues, `${base}.visualPrompt`)}
-        onCommit={(next) => onCommit('visualPrompt', next)}
-      />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <CheckedTextField
+          id={`${prefix}-text`}
+          label={`${text.cardTextLabel} (${text.pairLabel.toLowerCase()} ${index + 1})`}
+          required={false}
+          invalid={Boolean(needError)}
+          value={pair.content.text ?? ''}
+          limits={LIMITS.sideText}
+          error={fieldMessage(issues, `${base}.text`)}
+          onCommit={(next) => onCommit('text', next)}
+        />
+        <CheckedTextField
+          id={`${prefix}-image`}
+          label={`${text.cardImageLabel} (${text.pairLabel.toLowerCase()} ${index + 1})`}
+          required={false}
+          invalid={Boolean(needError)}
+          value={pair.content.visualPrompt ?? ''}
+          limits={QUESTION_LIMITS.visualPrompt}
+          error={fieldMessage(issues, `${base}.visualPrompt`)}
+          onCommit={(next) => onCommit('visualPrompt', next)}
+        />
+      </div>
     </fieldset>
   )
 }

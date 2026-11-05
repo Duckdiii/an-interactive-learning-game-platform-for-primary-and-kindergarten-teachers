@@ -177,6 +177,43 @@ export const mathMatching: MatchingGame = {
   ],
 }
 
+export const mathMemory: MemoryCardGame = {
+  schemaVersion: '1.0.0',
+  gameType: 'MEMORY_CARD',
+  metadata: { title: 'Lật thẻ tìm cặp số tương ứng', subject: 'MATH', gradeLevel: 'KINDERGARTEN', topic: 'Ghi nhớ và tìm cặp số từ 1 đến 10' },
+  gameplaySettings: settings(),
+  questions: [
+    {
+      ...q(1),
+      audioText: 'Bé hãy lật tìm hai thẻ số giống nhau nhé',
+      pairs: [
+        { pairId: 'p1', content: { text: 'Số 1' } },
+        { pairId: 'p2', content: { text: 'Số 2' } },
+        { pairId: 'p3', content: { text: 'Số 3' } },
+      ],
+    },
+    {
+      ...q(2),
+      audioText: 'Tìm hai thẻ số giống nhau nào',
+      pairs: [
+        { pairId: 'p1', content: { text: 'Số 4' } },
+        { pairId: 'p2', content: { text: 'Số 5' } },
+        { pairId: 'p3', content: { text: 'Số 6' } },
+        { pairId: 'p4', content: { text: 'Số 7' } },
+      ],
+    },
+    {
+      ...q(3),
+      audioText: 'Bé đếm và lật thẻ thật nhanh nhé',
+      pairs: [
+        { pairId: 'p1', content: { text: 'Số 8' } },
+        { pairId: 'p2', content: { text: 'Số 9' } },
+        { pairId: 'p3', content: { text: 'Số 10' } },
+      ],
+    },
+  ],
+}
+
 export function buildMockGameContents(): GameDsl[] {
   return structuredClone([quiz, matching, dragDrop, audioVisual, ordering, memory, spot, wordScramble, oddOneOut, cloze])
 }

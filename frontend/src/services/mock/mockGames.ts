@@ -4,7 +4,7 @@ import type { GameResponse } from '../../types/game-response.types'
 import type { PublishResult } from '../../types/publish.types'
 import type { GameFilters, GameSummary } from '../../types/game-summary.types'
 import { validateGame } from '../../utils/gameValidation'
-import { buildMockGameContents, mathMatching } from './gameFixtures'
+import { buildMockGameContents, mathMatching, mathMemory } from './gameFixtures'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
 // Kho game trong bộ nhớ cho các nhóm mô phỏng `games` và `editor`: 10 game mẫu (đủ 10 loại) có nội dung DSL đầy đủ; danh
@@ -171,6 +171,8 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
 
   if (info.gameType === 'MATCHING' && isMath) {
     template = mathMatching
+  } else if (info.gameType === 'MEMORY_CARD' && isMath) {
+    template = mathMemory
   }
   const content = structuredClone(template)
 
