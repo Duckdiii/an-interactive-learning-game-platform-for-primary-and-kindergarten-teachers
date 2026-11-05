@@ -51,6 +51,19 @@ describe('extractSemantics (Chặng 1: Semantic NLU/NER Extraction)', () => {
     expect(result.scores.OCEAN).toBeGreaterThan(0)
   })
 
+  it('nhận diện thực thể nước/biển phong phú (sông, hồ, biển, cá, san hô, rùa, bạch tuộc) -> tự động gán OCEAN', () => {
+    const result = extractSemantics('Bé làm quen các loài vật ở sông, hồ, biển: cá, san hô, rùa, bạch tuộc')
+
+    expect(result.theme).toBe('OCEAN')
+    expect(result.themeKey).toBe('ocean')
+    expect(result.backgroundUrl).toBe('/assets/themes/ocean/bg-ocean.svg')
+    expect(result.mascotUrl).toBe('/assets/mascots/sam.svg')
+    expect(result.scores.OCEAN).toBeGreaterThan(5)
+    expect(result.visualEntities.some((e) => e.name === 'san hô')).toBe(true)
+    expect(result.visualEntities.some((e) => e.name === 'bạch tuộc')).toBe(true)
+    expect(result.visualEntities.some((e) => e.name === 'rùa')).toBe(true)
+  })
+
   it('xác định không gian vũ trụ: Phi thuyền bay qua hành tinh và đĩa bay UFO -> SPACE', () => {
     const result = extractSemantics('Phi thuyền bay qua hành tinh và đĩa bay UFO')
 

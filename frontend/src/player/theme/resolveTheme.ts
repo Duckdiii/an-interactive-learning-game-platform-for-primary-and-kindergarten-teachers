@@ -1,4 +1,4 @@
-import { detectExplicitTheme } from '../../utils/assetResolver'
+import { extractSemantics } from '../../services/pipeline/semanticExtractor'
 import { DEFAULT_THEME, THEME_RULES, THEMES } from './themes'
 import type { ThemeRule } from './themes'
 import type { Theme } from './types'
@@ -23,11 +23,12 @@ export function resolveTheme(input: ThemeInput): Theme {
 
   if (chosen) return chosen
 
-  // Chỉ tự động suy luận theme khi bài học có từ khóa chủ đề rõ ràng (đại dương, nông trại, vũ trụ, rừng xanh)
+  // Tự động suy luận theme bằng bộ bóc tách ngữ nghĩa NLU/NER (Chặng 1) khi đề bài có thực thể bối cảnh
   if (input.topic) {
-    const explicit = detectExplicitTheme(input.topic)
-    if (explicit) {
-      const found = THEMES.get(explicit)
+    const semantics = extractSemantics(input.topic)
+    const maxScore = Math.max(semantics.scores.OCEAN, semantics.scores.FARM, semantics.scores.SPACE, semantics.scores.JUNGLE)
+    if (maxScore > 0) {
+      const found = THEMES.get(semantics.themeKey)
       if (found) return found
     }
   }
