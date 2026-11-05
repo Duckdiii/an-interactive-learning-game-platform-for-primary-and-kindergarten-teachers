@@ -113,7 +113,7 @@ export default function PlayPage() {
 
   if (!info.data) return <PlayerLoading />
 
-  const theme = resolveTheme({ themeId: info.data.themeId, gameType: info.data.gameType, subject: info.data.metadata.subject })
+  const theme = resolveTheme({ themeId: info.data.themeId, gameType: info.data.gameType, subject: info.data.metadata.subject, topic: info.data.metadata.topic })
 
   return (
     <UiProfileProvider profile={profile}>

@@ -5,7 +5,7 @@ import type { PublishResult } from '../../types/publish.types'
 import type { GameFilters, GameSummary } from '../../types/game-summary.types'
 import { validateGame } from '../../utils/gameValidation'
 import { buildMockGameContents, mathMatching, mathMemory } from './gameFixtures'
-import { enrichGameWithAssets } from '../../utils/assetResolver'
+import { deduceThemeFromText, enrichGameWithAssets, findCatalogItemsInText } from '../../utils/assetResolver'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
 // Kho game trong bộ nhớ cho các nhóm mô phỏng `games` và `editor`: 10 game mẫu (đủ 10 loại) có nội dung DSL đầy đủ; danh
@@ -49,7 +49,7 @@ function buildRecords(now: number): MockGameRecord[] {
 
   return SEEDS.map((seed, index) => ({
     gameId: `mock-game-${index + 1}`,
-    content: contents[index],
+    content: enrichGameWithAssets(contents[index]),
     status: seed.status,
     shareCode: seed.shareCode ?? null,
     updatedAt: new Date(now - seed.hoursAgo * HOUR).toISOString(),
@@ -176,6 +176,7 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
     template = mathMemory
   }
   const content = structuredClone(template)
+  const deduced = deduceThemeFromText(idea || content.metadata.topic)
 
   content.metadata = {
     ...content.metadata,
@@ -184,6 +185,27 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
     ...(info.subject ? { subject: info.subject } : {}),
     ...(info.gradeLevel ? { gradeLevel: info.gradeLevel } : {}),
   } as GameDsl['metadata']
+
+  const matchedItems = findCatalogItemsInText(idea)
+  if (!isMath && matchedItems.length >= 3 && content.questions[0]) {
+    if (info.gameType === 'MATCHING') {
+      const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
+        pairId: `p${idx + 1}`,
+        left: { text: item.name, imageUrl: item.url },
+        right: { text: item.name, imageUrl: item.url },
+      }))
+      ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+      ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy nối các ${deduced.theme === 'ocean' ? 'sinh vật biển' : 'hình ảnh'} nhé`
+    } else if (info.gameType === 'MEMORY_CARD') {
+      const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
+        pairId: `p${idx + 1}`,
+        content: { text: item.name, imageUrl: item.url },
+      }))
+      ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+      ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy lật tìm các cặp thẻ ${deduced.theme === 'ocean' ? 'sinh vật biển' : ''} nhé`
+    }
+  }
+
   enrichGameWithAssets(content)
 
   const record: MockGameRecord = {

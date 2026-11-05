@@ -59,6 +59,7 @@ export function buildGenerateRequest(
   if (form.gradeLevel) request.gradeLevel = form.gradeLevel
   if (gameType) request.gameType = gameType
   if (form.theme && form.theme !== 'AUTO') request.theme = form.theme
+
   if (mode === 'random') request.randomTopic = true
   else if (hasValidIdea(form.idea)) request.idea = form.idea.trim()
 

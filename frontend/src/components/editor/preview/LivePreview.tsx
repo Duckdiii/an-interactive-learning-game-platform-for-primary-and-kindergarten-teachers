@@ -7,6 +7,7 @@ import { getPlayableRenderer } from '../../../player/renderers'
 import { playerRootVars } from '../../../player/theme/playerRootVars'
 import { resolveTheme } from '../../../player/theme/resolveTheme'
 import { ThemeProvider } from '../../../player/theme/ThemeContext'
+import { deduceThemeFromText } from '../../../utils/assetResolver'
 import type { GameType, QuestionDsl, QuizQuestion } from '../../../types/game-dsl.types'
 import GameTypeCover from '../../ui/GameTypeCover'
 import PreviewBoundary from './PreviewBoundary'
@@ -24,6 +25,7 @@ interface LivePreviewProps {
   total: number
   gradeLevel: string
   subject: string
+  topic?: string
   /** Câu đang chọn còn lỗi kiểm tra: không dựng renderer vì dữ liệu dở có thể làm nó vỡ. */
   hasIssues: boolean
   /** Theme thế giới game (Stage 2.5). */
@@ -108,18 +110,20 @@ export default function LivePreview({
   total,
   gradeLevel,
   subject,
+  topic,
   hasIssues,
   themeId,
   onThemeChange,
 }: LivePreviewProps) {
+  const deduced = deduceThemeFromText(`${title} ${topic ?? ''}`)
   const [device, setDevice] = useState<PreviewDevice>(DEFAULT_PREVIEW_DEVICE)
-  const [localThemeId, setLocalThemeId] = useState<string>(() => themeId || 'farm')
+  const [localThemeId, setLocalThemeId] = useState<string>(() => themeId || deduced.theme || 'farm')
   const profile = resolveUiProfile({ gradeLevel })
   const Renderer = getPlayableRenderer(gameType)
   const size = previewDeviceSize(gameType, device)
 
   const activeThemeId = themeId || localThemeId
-  const resolvedTheme = resolveTheme({ themeId: activeThemeId, subject, gameType })
+  const resolvedTheme = resolveTheme({ themeId: activeThemeId, subject, gameType, topic })
 
   const isQuiz = gameType === 'QUIZ'
   const hasQuizTheme = isQuiz && (Boolean(themeId) || Boolean((question as QuizQuestion)?.imageUrl) || Boolean((question as QuizQuestion)?.visualPrompt))

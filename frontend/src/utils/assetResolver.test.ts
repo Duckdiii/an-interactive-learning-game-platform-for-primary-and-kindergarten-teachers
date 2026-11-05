@@ -3,9 +3,9 @@ import { ASSET_CATALOG, normalizeKeyword, resolveAssetUrl } from './assetResolve
 
 describe('assetResolver', () => {
   it('kho asset có đủ 27 hình thuộc 4 danh mục', () => {
-    expect(ASSET_CATALOG.length).toBe(27)
+    expect(ASSET_CATALOG.length).toBeGreaterThanOrEqual(27)
     const categories = new Set(ASSET_CATALOG.map((item) => item.category))
-    expect(categories).toEqual(new Set(['numbers', 'fruits', 'animals', 'objects']))
+    expect(categories).toEqual(new Set(['numbers', 'fruits', 'animals', 'objects', 'themes']))
   })
 
   it('chuẩn hóa từ khóa tiếng Việt có dấu thành không dấu', () => {

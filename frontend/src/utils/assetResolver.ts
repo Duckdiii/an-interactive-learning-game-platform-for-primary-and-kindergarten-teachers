@@ -7,7 +7,7 @@
 export interface AssetItem {
   id: string
   name: string
-  category: 'numbers' | 'fruits' | 'animals' | 'objects'
+  category: 'numbers' | 'fruits' | 'animals' | 'objects' | 'themes'
   url: string
   keywords: readonly string[]
 }
@@ -32,7 +32,7 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   { id: 'fruit-strawberry', name: 'Dâu tây', category: 'fruits', url: '/assets/fruits/strawberry.svg', keywords: ['dau tay', 'strawberry', 'qua dau', 'trai dau'] },
   { id: 'fruit-watermelon', name: 'Dưa hấu', category: 'fruits', url: '/assets/fruits/watermelon.svg', keywords: ['dua hau', 'watermelon', 'qua dua hau'] },
 
-  // Con vật
+  // Con vật nông trại & quen thuộc
   { id: 'anim-cat', name: 'Con mèo', category: 'animals', url: '/assets/animals/cat.svg', keywords: ['meo', 'cat', 'chu meo', 'con meo', 'kitten'] },
   { id: 'anim-dog', name: 'Con chó', category: 'animals', url: '/assets/animals/dog.svg', keywords: ['cho', 'dog', 'con cho', 'chu cho', 'puppy'] },
   { id: 'anim-fish', name: 'Con cá', category: 'animals', url: '/assets/animals/fish.svg', keywords: ['ca', 'fish', 'con ca', 'chu ca'] },
@@ -47,6 +47,36 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   { id: 'obj-candy', name: 'Cây kẹo', category: 'objects', url: '/assets/objects/candy.svg', keywords: ['keo', 'candy', 'vien keo', 'cay keo', 'sweet'] },
   { id: 'obj-heart', name: 'Trái tim', category: 'objects', url: '/assets/objects/heart.svg', keywords: ['tim', 'heart', 'trai tim', 'hinh tim'] },
   { id: 'obj-car', name: 'Xe ô tô', category: 'objects', url: '/assets/objects/car.svg', keywords: ['xe', 'oto', 'car', 'xe hoi', 'o to'] },
+
+  // Chủ đề Đại dương (Ocean Theme)
+  { id: 'ocean-clownfish', name: 'Cá hề', category: 'themes', url: '/assets/themes/ocean/clownfish.svg', keywords: ['ca he', 'clownfish', 'ca', 'sinh vat bien'] },
+  { id: 'ocean-turtle', name: 'Rùa biển', category: 'themes', url: '/assets/themes/ocean/turtle.svg', keywords: ['rua bien', 'rua', 'turtle', 'con rua'] },
+  { id: 'ocean-starfish', name: 'Sao biển', category: 'themes', url: '/assets/themes/ocean/starfish.svg', keywords: ['sao bien', 'starfish'] },
+  { id: 'ocean-octopus', name: 'Bạch tuộc', category: 'themes', url: '/assets/themes/ocean/octopus.svg', keywords: ['bach tuoc', 'octopus'] },
+  { id: 'ocean-dolphin', name: 'Cá heo', category: 'themes', url: '/assets/themes/ocean/dolphin.svg', keywords: ['ca heo', 'dolphin'] },
+  { id: 'ocean-coral', name: 'San hô', category: 'themes', url: '/assets/themes/ocean/coral.svg', keywords: ['san ho', 'coral'] },
+
+  // Chủ đề Nông trại (Farm Theme)
+  { id: 'farm-chicken', name: 'Con gà', category: 'themes', url: '/assets/themes/farm/chicken.svg', keywords: ['ga', 'con ga', 'chicken', 'chu ga'] },
+  { id: 'farm-cow', name: 'Con bò', category: 'themes', url: '/assets/themes/farm/cow.svg', keywords: ['bo', 'con bo', 'cow', 'bo sua'] },
+  { id: 'farm-sheep', name: 'Con cừu', category: 'themes', url: '/assets/themes/farm/sheep.svg', keywords: ['cuu', 'con cuu', 'sheep', 'chu cuu'] },
+  { id: 'farm-pig', name: 'Con lợn', category: 'themes', url: '/assets/themes/farm/pig.svg', keywords: ['lon', 'heo', 'con lon', 'con heo', 'pig'] },
+  { id: 'farm-carrot', name: 'Củ cà rốt', category: 'themes', url: '/assets/themes/farm/carrot.svg', keywords: ['ca rot', 'carrot', 'cu ca rot'] },
+  { id: 'farm-barn', name: 'Chuồng trại', category: 'themes', url: '/assets/themes/farm/barn.svg', keywords: ['chuong', 'chuong trai', 'nong trai', 'barn'] },
+
+  // Chủ đề Rừng xanh (Jungle Theme)
+  { id: 'jungle-monkey', name: 'Con khỉ', category: 'themes', url: '/assets/themes/jungle/monkey.svg', keywords: ['khi', 'con khi', 'monkey', 'chu khi'] },
+  { id: 'jungle-tiger', name: 'Con hổ', category: 'themes', url: '/assets/themes/jungle/tiger.svg', keywords: ['ho', 'con ho', 'tiger', 'chu ho', 'cop'] },
+  { id: 'jungle-elephant', name: 'Con voi', category: 'themes', url: '/assets/themes/jungle/elephant.svg', keywords: ['voi', 'con voi', 'elephant', 'chu voi'] },
+  { id: 'jungle-giraffe', name: 'Hươu cao cổ', category: 'themes', url: '/assets/themes/jungle/giraffe.svg', keywords: ['huou cao co', 'huou', 'giraffe'] },
+  { id: 'jungle-tree', name: 'Cây xanh', category: 'themes', url: '/assets/themes/jungle/tree.svg', keywords: ['cay xanh', 'cay coi', 'cay co thu', 'tree'] },
+
+  // Chủ đề Vũ trụ (Space Theme)
+  { id: 'space-rocket', name: 'Tên lửa', category: 'themes', url: '/assets/themes/space/rocket.svg', keywords: ['ten lua', 'rocket', 'phi thuyen', 'tau vu tru'] },
+  { id: 'space-planet', name: 'Hành tinh', category: 'themes', url: '/assets/themes/space/planet.svg', keywords: ['hanh tinh', 'planet', 'trai dat'] },
+  { id: 'space-ufo', name: 'Đĩa bay', category: 'themes', url: '/assets/themes/space/ufo.svg', keywords: ['dia bay', 'ufo'] },
+  { id: 'space-alien', name: 'Người ngoài hành tinh', category: 'themes', url: '/assets/themes/space/alien.svg', keywords: ['nguoi ngoai hanh tinh', 'alien'] },
+  { id: 'space-meteor', name: 'Sao băng', category: 'themes', url: '/assets/themes/space/meteor.svg', keywords: ['sao bang', 'meteor'] },
 ]
 
 /** Chuẩn hóa xâu chữ: bỏ dấu tiếng Việt, ký tự đặc biệt, chuyển chữ thường */
@@ -78,7 +108,7 @@ export function resolveAssetUrl(text?: string, visualPrompt?: string): string | 
     const normalized = normalizeKeyword(raw)
     if (!normalized) continue
 
-    // Khớp từ khóa dài nhất trước (vd: "bong hoa" khớp trước "bong")
+    // Khớp từ khóa dài nhất trước (vd: "ca he" khớp trước "ca")
     for (const { kw, url } of KEYWORD_MAP) {
       const regex = new RegExp(`(^|\\s)${kw}(\\s|$)`, 'i')
       if (regex.test(normalized) || normalized === kw) {
@@ -90,34 +120,180 @@ export function resolveAssetUrl(text?: string, visualPrompt?: string): string | 
   return null
 }
 
+/**
+ * Quét chuỗi văn bản để tìm tất cả các item trong kho asset được nhắc tới
+ */
+export function findCatalogItemsInText(text: string): AssetItem[] {
+  const norm = normalizeKeyword(text)
+  const matches: AssetItem[] = []
+  const seenUrls = new Set<string>()
+
+  for (const item of ASSET_CATALOG) {
+    if (seenUrls.has(item.url)) continue
+    for (const kw of item.keywords) {
+      const normKw = normalizeKeyword(kw)
+      const regex = new RegExp(`(^|\\s)${normKw}(\\s|$)`, 'i')
+      if (regex.test(norm)) {
+        matches.push(item)
+        seenUrls.add(item.url)
+        break
+      }
+    }
+  }
+
+  return matches
+}
+
+export type DeduceTheme = 'ocean' | 'farm' | 'space' | 'jungle'
+
+export interface DeducedThemeInfo {
+  theme: DeduceTheme
+  background: string
+  mascot: string
+}
+
+/**
+ * Tự động bóc tách ngữ nghĩa đề bài để suy ra Theme thế giới game
+ */
+/**
+ * Nhận diện từ khóa chủ đề rõ ràng (nếu không có từ khóa đặc thù thì trả về null để không ghi đè luật môn học)
+ */
+export function detectExplicitTheme(text: string): DeduceTheme | null {
+  const norm = normalizeKeyword(text)
+  if (!norm) return null
+
+  const oceanKeywords = [
+    'bien', 'ca', 'rua', 'san ho', 'nuoc', 'dai duong', 'thuy cung',
+    'bach tuoc', 'ca heo', 'sao bien', 'ocean', 'sea', 'fish', 'clownfish',
+  ]
+  const farmKeywords = [
+    'nong trai', 'ga', 'bo', 'cuu', 'lon', 'heo', 'hoa qua', 'tao',
+    'cam', 'chuoi', 'dua hau', 'ca rot', 'nong dan', 'dong co', 'farm',
+  ]
+  const spaceKeywords = [
+    'vu tru', 'hanh tinh', 'ten lua', 'sao', 'phi thuyen', 'ufo',
+    'alien', 'thien ha', 'ngan ha', 'space', 'planet', 'rocket', 'star',
+  ]
+  const jungleKeywords = [
+    'rung', 'rung xanh', 'khi', 'ho', 'voi', 'huou', 'muong thu',
+    'cay coi', 'cay', 'jungle', 'forest',
+  ]
+
+  const hasWord = (keywords: string[]) =>
+    keywords.some((kw) => {
+      const regex = new RegExp(`(^|\\s)${kw}(\\s|$)`, 'i')
+      return regex.test(norm)
+    })
+
+  if (hasWord(oceanKeywords)) return 'ocean'
+  if (hasWord(farmKeywords)) return 'farm'
+  if (hasWord(spaceKeywords)) return 'space'
+  if (hasWord(jungleKeywords)) return 'jungle'
+
+  return null
+}
+
+/**
+ * Tự động bóc tách ngữ nghĩa đề bài để suy ra Theme thế giới game (mặc định rừng xanh nếu không rõ)
+ */
+export function deduceThemeFromText(text: string): DeducedThemeInfo {
+  const detected = detectExplicitTheme(text) ?? 'jungle'
+  switch (detected) {
+    case 'ocean':
+      return {
+        theme: 'ocean',
+        background: '/assets/themes/ocean/bg-ocean.svg',
+        mascot: '/assets/mascots/sam.svg',
+      }
+    case 'farm':
+      return {
+        theme: 'farm',
+        background: '/assets/themes/farm/bg-farm.svg',
+        mascot: '/assets/mascots/pippy.svg',
+      }
+    case 'space':
+      return {
+        theme: 'space',
+        background: '/assets/themes/space/bg-space.svg',
+        mascot: '/assets/mascots/leo.svg',
+      }
+    case 'jungle':
+    default:
+      return {
+        theme: 'jungle',
+        background: '/assets/themes/jungle/bg-jungle.svg',
+        mascot: '/assets/mascots/mimi.svg',
+      }
+  }
+}
+
+const THEME_FALLBACK_SPRITES: Record<DeduceTheme, string[]> = {
+  ocean: [
+    '/assets/themes/ocean/clownfish.svg',
+    '/assets/themes/ocean/turtle.svg',
+    '/assets/themes/ocean/starfish.svg',
+    '/assets/themes/ocean/octopus.svg',
+    '/assets/themes/ocean/dolphin.svg',
+    '/assets/themes/ocean/coral.svg',
+  ],
+  farm: [
+    '/assets/themes/farm/apple.svg',
+    '/assets/themes/farm/chicken.svg',
+    '/assets/themes/farm/cow.svg',
+    '/assets/themes/farm/sheep.svg',
+    '/assets/themes/farm/carrot.svg',
+    '/assets/themes/farm/orange.svg',
+  ],
+  space: [
+    '/assets/themes/space/rocket.svg',
+    '/assets/themes/space/planet.svg',
+    '/assets/themes/space/ufo.svg',
+    '/assets/objects/star.svg',
+    '/assets/themes/space/alien.svg',
+    '/assets/themes/space/meteor.svg',
+  ],
+  jungle: [
+    '/assets/themes/jungle/monkey.svg',
+    '/assets/themes/jungle/tiger.svg',
+    '/assets/themes/jungle/elephant.svg',
+    '/assets/themes/jungle/giraffe.svg',
+    '/assets/themes/jungle/tree.svg',
+    '/assets/animals/bird.svg',
+  ],
+}
 
 /**
  * Tự động gán URL hình ảnh từ Kho Asset cho nội dung câu hỏi nếu chưa có ảnh.
+ * Với MATCHING và MEMORY_CARD, BẮT BUỘC mọi cặp đều có hình ảnh minh họa vector.
  */
-export function enrichGameWithAssets<T extends { gameType: string; questions: unknown[] }>(game: T): T {
+export function enrichGameWithAssets<T extends { gameType: string; questions: unknown[]; metadata?: { topic?: string; title?: string; theme?: string } }>(game: T): T {
+  const deduced = deduceThemeFromText(`${game.metadata?.topic ?? ''} ${game.metadata?.title ?? ''}`)
+  const themeKey: DeduceTheme = (game.metadata?.theme as DeduceTheme) || deduced.theme
+  const pool = THEME_FALLBACK_SPRITES[themeKey] || THEME_FALLBACK_SPRITES.jungle
+
   if (game.gameType === 'MATCHING') {
     for (const q of game.questions as Array<{ pairs?: Array<{ left: { text?: string; visualPrompt?: string; imageUrl?: string }; right: { text?: string; visualPrompt?: string; imageUrl?: string } }> }>) {
       if (!Array.isArray(q.pairs)) continue
-      for (const pair of q.pairs) {
+      q.pairs.forEach((pair, idx) => {
         if (!pair.left.imageUrl) {
           const url = resolveAssetUrl(pair.left.text, pair.left.visualPrompt)
-          if (url) pair.left.imageUrl = url
+          pair.left.imageUrl = url || pool[idx % pool.length]
         }
         if (!pair.right.imageUrl) {
           const url = resolveAssetUrl(pair.right.text, pair.right.visualPrompt)
-          if (url) pair.right.imageUrl = url
+          pair.right.imageUrl = url || pair.left.imageUrl
         }
-      }
+      })
     }
   } else if (game.gameType === 'MEMORY_CARD') {
     for (const q of game.questions as Array<{ pairs?: Array<{ content: { text?: string; visualPrompt?: string; imageUrl?: string } }> }>) {
       if (!Array.isArray(q.pairs)) continue
-      for (const pair of q.pairs) {
+      q.pairs.forEach((pair, idx) => {
         if (!pair.content.imageUrl) {
           const url = resolveAssetUrl(pair.content.text, pair.content.visualPrompt)
-          if (url) pair.content.imageUrl = url
+          pair.content.imageUrl = url || pool[idx % pool.length]
         }
-      }
+      })
     }
   } else if (game.gameType === 'QUIZ') {
     for (const q of game.questions as Array<{ questionText?: string; visualPrompt?: string; imageUrl?: string }>) {

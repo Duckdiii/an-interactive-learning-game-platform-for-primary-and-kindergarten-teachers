@@ -75,7 +75,11 @@ export default function MatchingCard({
         cornerRadius={20}
         fill={fillOf(palette)[state]}
         stroke={emphasised ? (accent ?? palette.outline) : palette.outline}
-        strokeWidth={emphasised ? 8 : 3}
+        strokeWidth={emphasised ? 8 : 4}
+        shadowColor={palette.outline}
+        shadowBlur={6}
+        shadowOffset={{ x: 0, y: 3 }}
+        shadowOpacity={0.12}
       />
       {hasImage && image && (
         <KonvaImage
@@ -99,6 +103,8 @@ export default function MatchingCard({
           height={height - 2 * CARD_PADDING}
           align={hasImage ? 'left' : 'center'}
           verticalAlign="middle"
+          fill={palette.ink}
+          wrap="word"
           listening={false}
         />
       )}

@@ -311,6 +311,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
         total={items.length}
         gradeLevel={draft.metadata.gradeLevel}
         subject={draft.metadata.subject}
+        topic={draft.metadata.topic}
         hasIssues={issuesByQuestion.has(index)}
         themeId={editorTheme}
         onThemeChange={(nextTheme) => {

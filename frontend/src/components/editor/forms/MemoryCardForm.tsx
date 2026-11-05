@@ -68,7 +68,7 @@ export default function MemoryCardForm({ gameType, question: raw, issues, onUpda
           {countHint}
         </p>
 
-        <ol className="space-y-4">
+        <ol className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {question.pairs.map((pair, index) => (
             <li key={pair.pairId}>
               <fieldset className="rounded-2xl border-2 border-brand/20 bg-surface p-4 shadow-xs transition hover:border-brand/40">

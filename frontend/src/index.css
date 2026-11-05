@@ -194,6 +194,27 @@
   padding-bottom: max(var(--play-pad-y, 0.75rem), env(safe-area-inset-bottom));
 }
 
+/* Stage 2.5: Hiệu ứng linh vật thở nhẹ nhàng & chuyển động kẹo ngọt */
+@keyframes mascot-breath {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.04, 0.98) translateY(-4px);
+  }
+}
+
+.animate-mascot-idle {
+  animation: mascot-breath 3.2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-mascot-idle {
+    animation: none;
+  }
+}
+
 /* In phiếu QR (hộp Xuất bản và chia sẻ): khi in chỉ hiện vùng [data-print-sheet]. */
 @media print {
   body * {
