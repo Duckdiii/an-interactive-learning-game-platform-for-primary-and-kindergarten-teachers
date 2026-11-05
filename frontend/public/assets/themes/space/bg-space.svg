@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="spcSky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="50%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#311042"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#spcSky)"/>
+  <!-- Stars -->
+  <g fill="#FFFFFF" opacity="0.8">
+    <circle cx="120" cy="180" r="3"/>
+    <circle cx="450" cy="90" r="2"/>
+    <circle cx="820" cy="240" r="3.5"/>
+    <circle cx="1200" cy="140" r="2"/>
+    <circle cx="1650" cy="280" r="3"/>
+    <circle cx="340" cy="720" r="2"/>
+    <circle cx="980" cy="850" r="3"/>
+    <circle cx="1450" cy="740" r="2.5"/>
+    <circle cx="1780" cy="620" r="3"/>
+  </g>
+  <!-- Moon / Giant Planet -->
+  <circle cx="1600" cy="240" r="120" fill="#8B5CF6" stroke="#581C87" stroke-width="4"/>
+  <ellipse cx="1600" cy="240" rx="180" ry="30" fill="none" stroke="#C4B5FD" stroke-width="8" opacity="0.7" transform="rotate(-15 1600 240)"/>
+</svg>

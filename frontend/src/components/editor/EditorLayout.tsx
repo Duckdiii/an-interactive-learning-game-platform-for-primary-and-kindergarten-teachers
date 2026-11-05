@@ -79,7 +79,7 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, see, q
         })}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[17rem_minmax(0,1fr)_22rem]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[18rem_minmax(0,1fr)_26rem] 2xl:grid-cols-[20rem_minmax(0,1fr)_30rem]">
         <section
           id="editor-pane-list"
           tabIndex={-1}

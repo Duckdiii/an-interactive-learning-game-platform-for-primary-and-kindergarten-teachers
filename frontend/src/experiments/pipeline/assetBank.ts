@@ -16,23 +16,47 @@ export interface AssetSprite {
 }
 
 export const K5_ASSET_SPRITES: readonly AssetSprite[] = [
-  // Hoa quả
-  { id: 'apple', name: 'Quả Táo Đỏ', category: 'fruits', url: '/assets/fruits/apple.svg', keywords: ['tao', 'apple', 'qua tao'] },
-  { id: 'banana', name: 'Quả Chuối Vàng', category: 'fruits', url: '/assets/fruits/banana.svg', keywords: ['chuoi', 'banana', 'qua chuoi'] },
-  { id: 'orange', name: 'Quả Cam Mọng', category: 'fruits', url: '/assets/fruits/orange.svg', keywords: ['cam', 'orange', 'qua cam'] },
+  // Chủ đề Nông Trại (Farm)
+  { id: 'apple', name: 'Quả Táo Đỏ', category: 'fruits', url: '/assets/themes/farm/apple.svg', keywords: ['tao', 'apple', 'qua tao'] },
+  { id: 'banana', name: 'Quả Chuối Vàng', category: 'fruits', url: '/assets/themes/farm/banana.svg', keywords: ['chuoi', 'banana', 'qua chuoi'] },
+  { id: 'orange', name: 'Quả Cam Mọng', category: 'fruits', url: '/assets/themes/farm/orange.svg', keywords: ['cam', 'orange', 'qua cam'] },
   { id: 'strawberry', name: 'Quả Dâu Tây', category: 'fruits', url: '/assets/fruits/strawberry.svg', keywords: ['dau tay', 'strawberry', 'dau'] },
-  { id: 'watermelon', name: 'Miếng Dưa Hấu', category: 'fruits', url: '/assets/fruits/watermelon.svg', keywords: ['dua hau', 'watermelon'] },
+  { id: 'watermelon', name: 'Miếng Dưa Hấu', category: 'fruits', url: '/assets/themes/farm/watermelon.svg', keywords: ['dua hau', 'watermelon'] },
+  { id: 'carrot', name: 'Củ Cà Rốt', category: 'fruits', url: '/assets/themes/farm/carrot.svg', keywords: ['ca rot', 'carrot', 'cu ca rot'] },
+  { id: 'chicken', name: 'Chú Gà Con', category: 'animals', url: '/assets/themes/farm/chicken.svg', keywords: ['ga', 'chu ga', 'con ga', 'chicken', 'gà'] },
+  { id: 'duck', name: 'Chú Vịt Vàng', category: 'animals', url: '/assets/themes/farm/duck.svg', keywords: ['vit', 'duck', 'chu vit', 'con vit'] },
+  { id: 'cow', name: 'Chú Bò Sữa', category: 'animals', url: '/assets/themes/farm/cow.svg', keywords: ['bo', 'cow', 'chu bo', 'con bo', 'bo sua'] },
+  { id: 'sheep', name: 'Chú Cừu Trắng', category: 'animals', url: '/assets/themes/farm/sheep.svg', keywords: ['cuu', 'sheep', 'chu cuu', 'con cuu'] },
+  { id: 'pig', name: 'Chú Lợn Hồng', category: 'animals', url: '/assets/themes/farm/pig.svg', keywords: ['lon', 'heo', 'pig', 'chu heo', 'chu lon'] },
+  { id: 'barn', name: 'Chuồng Trại Đỏ', category: 'objects', url: '/assets/themes/farm/barn.svg', keywords: ['chuong trai', 'nha kho', 'barn'] },
 
-  // Động vật
+  // Chủ đề Đại Dương (Ocean)
+  { id: 'fish', name: 'Chú Cá Biển', category: 'animals', url: '/assets/themes/ocean/clownfish.svg', keywords: ['ca', 'fish', 'chu ca', 'con ca', 'ca he'] },
+  { id: 'dolphin', name: 'Cá Heo Thông Minh', category: 'animals', url: '/assets/themes/ocean/dolphin.svg', keywords: ['ca heo', 'dolphin'] },
+  { id: 'turtle', name: 'Rùa Biển Nhỏ', category: 'animals', url: '/assets/themes/ocean/turtle.svg', keywords: ['rua', 'turtle', 'rua bien', 'con rua'] },
+  { id: 'octopus', name: 'Bạch Tuộc Tím', category: 'animals', url: '/assets/themes/ocean/octopus.svg', keywords: ['bach tuoc', 'octopus'] },
+  { id: 'starfish', name: 'Sao Biển Vàng', category: 'animals', url: '/assets/themes/ocean/starfish.svg', keywords: ['sao bien', 'starfish'] },
+  { id: 'coral', name: 'Rạn San Hô', category: 'objects', url: '/assets/themes/ocean/coral.svg', keywords: ['san ho', 'coral'] },
+
+  // Chủ đề Rừng Xanh (Jungle / Forest)
+  { id: 'monkey', name: 'Chú Khỉ Nhanh Nhẹn', category: 'animals', url: '/assets/themes/jungle/monkey.svg', keywords: ['khi', 'monkey', 'con khi', 'chu khi'] },
+  { id: 'tiger', name: 'Chú Hổ Con', category: 'animals', url: '/assets/themes/jungle/tiger.svg', keywords: ['ho', 'tiger', 'con ho', 'cop'] },
+  { id: 'giraffe', name: 'Hươu Cao Cổ', category: 'animals', url: '/assets/themes/jungle/giraffe.svg', keywords: ['huou', 'giraffe', 'huou cao co'] },
+  { id: 'elephant', name: 'Chú Voi Con', category: 'animals', url: '/assets/themes/jungle/elephant.svg', keywords: ['voi', 'elephant', 'chu voi', 'con voi'] },
+  { id: 'tree', name: 'Cây Cổ Thụ', category: 'objects', url: '/assets/themes/jungle/tree.svg', keywords: ['cay xanh', 'cay coi', 'cay co thu', 'tree'] },
+
+  // Chủ đề Vũ Trụ (Space)
+  { id: 'rocket', name: 'Tên Lửa Tốc Độ', category: 'objects', url: '/assets/themes/space/rocket.svg', keywords: ['ten lua', 'rocket', 'tau vu tru', 'phi thuyen'] },
+  { id: 'planet', name: 'Hành Tinh Vành Đai', category: 'objects', url: '/assets/themes/space/planet.svg', keywords: ['hanh tinh', 'planet', 'sao tho', 'trai dat'] },
+  { id: 'alien', name: 'Người Ngoài Hành Tinh', category: 'animals', url: '/assets/themes/space/alien.svg', keywords: ['alien', 'nguoi ngoai hanh tinh', 'quai vat vu tru'] },
+  { id: 'meteor', name: 'Thiên Thạch Bay', category: 'objects', url: '/assets/themes/space/meteor.svg', keywords: ['thien thach', 'meteor'] },
+  { id: 'ufo', name: 'Đĩa Bay UFO', category: 'objects', url: '/assets/themes/space/ufo.svg', keywords: ['ufo', 'dia bay'] },
+
+  // Đồ vật & Học liệu quen thuộc
   { id: 'cat', name: 'Chú Mèo Con', category: 'animals', url: '/assets/animals/cat.svg', keywords: ['meo', 'cat', 'chu meo', 'con meo'] },
   { id: 'dog', name: 'Chú Cún Con', category: 'animals', url: '/assets/animals/dog.svg', keywords: ['cho', 'dog', 'chu cho', 'cun'] },
-  { id: 'chicken', name: 'Chú Gà Con', category: 'animals', url: '/assets/animals/bird.svg', keywords: ['ga', 'chu ga', 'con ga', 'chicken', 'gà'] },
-  { id: 'duck', name: 'Chú Vịt Vàng', category: 'animals', url: '/assets/animals/duck.svg', keywords: ['vit', 'duck', 'chu vit', 'con vit'] },
-  { id: 'fish', name: 'Chú Cá Biển', category: 'animals', url: '/assets/animals/fish.svg', keywords: ['ca', 'fish', 'chu ca', 'con ca'] },
-  { id: 'rabbit', name: 'Chú Thỏ Trắng', category: 'animals', url: '/assets/animals/rabbit.svg', keywords: ['tho', 'rabbit', 'chu tho', 'con tho', 'ca rot'] },
+  { id: 'rabbit', name: 'Chú Thỏ Trắng', category: 'animals', url: '/assets/animals/rabbit.svg', keywords: ['tho', 'rabbit', 'chu tho', 'con tho'] },
   { id: 'bird', name: 'Chú Chim Sẻ', category: 'animals', url: '/assets/animals/bird.svg', keywords: ['chim', 'bird', 'chu chim'] },
-
-  // Khối học tập & Đồ vật
   { id: 'star', name: 'Ngôi Sao Vàng', category: 'objects', url: '/assets/objects/star.svg', keywords: ['sao', 'star', 'ngoi sao', 'ong sao'] },
   { id: 'flower', name: 'Bông Hoa', category: 'objects', url: '/assets/objects/flower.svg', keywords: ['hoa', 'flower', 'bong hoa', 'canh hoa'] },
   { id: 'ball', name: 'Quả Bóng', category: 'objects', url: '/assets/objects/ball.svg', keywords: ['bong', 'ball', 'qua bong'] },
@@ -78,9 +102,11 @@ export function getDefaultThemeSprite(themeKey: GameWorldTheme['key']): AssetSpr
     case 'OCEAN':
       return K5_ASSET_SPRITES.find((s) => s.id === 'fish') ?? K5_ASSET_SPRITES[0]
     case 'SPACE':
-      return K5_ASSET_SPRITES.find((s) => s.id === 'star') ?? K5_ASSET_SPRITES[0]
+      return K5_ASSET_SPRITES.find((s) => s.id === 'rocket') ?? K5_ASSET_SPRITES[0]
+    case 'JUNGLE':
+      return K5_ASSET_SPRITES.find((s) => s.id === 'monkey') ?? K5_ASSET_SPRITES[0]
     case 'FOREST':
-      return K5_ASSET_SPRITES.find((s) => s.id === 'flower') ?? K5_ASSET_SPRITES[0]
+      return K5_ASSET_SPRITES.find((s) => s.id === 'monkey') ?? K5_ASSET_SPRITES[0]
     case 'CANDY':
       return K5_ASSET_SPRITES.find((s) => s.id === 'candy') ?? K5_ASSET_SPRITES[0]
   }

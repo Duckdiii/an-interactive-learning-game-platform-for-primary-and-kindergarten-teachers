@@ -147,7 +147,7 @@ export default function AppLayout() {
           key={location.pathname}
           className={[
             'page-in mx-auto',
-            location.pathname.startsWith('/workspace/editor') ? 'max-w-7xl 2xl:max-w-[1480px]' : 'max-w-5xl',
+            location.pathname.startsWith('/workspace/editor') ? 'w-full max-w-[1780px]' : 'max-w-5xl',
           ].join(' ')}
         >
           <MockBanner />

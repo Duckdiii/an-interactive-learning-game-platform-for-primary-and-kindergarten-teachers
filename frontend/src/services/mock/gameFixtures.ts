@@ -85,7 +85,7 @@ const memory: MemoryCardGame = {
   metadata: { title: 'Lật thẻ tìm cặp con vật', subject: 'ENGLISH', gradeLevel: 'KINDERGARTEN', topic: 'Ghi nhớ tên con vật bằng tiếng Anh qua trò chơi lật thẻ' },
   gameplaySettings: settings(),
   questions: [
-    { ...q(1), audioText: 'Tìm hai thẻ giống nhau', pairs: [{ pairId: 'p1', content: { text: 'cat', imageUrl: '/assets/animals/cat.svg' } }, { pairId: 'p2', content: { text: 'dog', imageUrl: '/assets/animals/dog.svg' } }, { pairId: 'p3', content: { text: 'bird', imageUrl: '/assets/animals/bird.svg' } }] },
+    { ...q(1), audioText: 'Tìm hai thẻ giống nhau', pairs: [{ pairId: 'p1', content: { text: 'cat' } }, { pairId: 'p2', content: { text: 'dog' } }, { pairId: 'p3', content: { text: 'bird' } }] },
     { ...q(2), audioText: 'Tìm hai thẻ giống nhau', pairs: [{ pairId: 'p1', content: { text: 'fish', imageUrl: '/assets/animals/fish.svg' } }, { pairId: 'p2', content: { text: 'duck', imageUrl: '/assets/animals/duck.svg' } }, { pairId: 'p3', content: { text: 'cow' } }, { pairId: 'p4', content: { text: 'pig' } }] },
     { ...q(3), audioText: 'Tìm hai thẻ giống nhau', pairs: [{ pairId: 'p1', content: { text: 'red' } }, { pairId: 'p2', content: { text: 'blue' } }] },
   ],

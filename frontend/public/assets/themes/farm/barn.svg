@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Roof -->
+  <polygon points="64,22 18,52 110,52" fill="#DC2626" stroke="#7F1D1D" stroke-width="4"/>
+  <!-- Walls -->
+  <rect x="24" y="52" width="80" height="56" fill="#EF4444" stroke="#7F1D1D" stroke-width="4"/>
+  <!-- Door -->
+  <rect x="48" y="72" width="32" height="36" rx="4" fill="#FEF08A" stroke="#78350F" stroke-width="3"/>
+  <line x1="48" y1="72" x2="80" y2="108" stroke="#78350F" stroke-width="2"/>
+  <line x1="80" y1="72" x2="48" y2="108" stroke="#78350F" stroke-width="2"/>
+</svg>

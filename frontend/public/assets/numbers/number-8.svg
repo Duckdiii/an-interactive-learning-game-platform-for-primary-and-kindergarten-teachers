@@ -1,19 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <defs>
-    <linearGradient id="g8" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FCE7F3" />
-      <stop offset="100%" stop-color="#DB2777" />
-    </linearGradient>
-    <filter id="shadow8" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#BE185D" flood-opacity="0.25"/>
-    </filter>
-  </defs>
-  <circle cx="64" cy="64" r="54" fill="url(#g8)" stroke="#BE185D" stroke-width="5" filter="url(#shadow8)"/>
-  <circle cx="64" cy="64" r="46" fill="none" stroke="#FDF2F8" stroke-width="2" stroke-dasharray="6,4"/>
-  <ellipse cx="50" cy="30" rx="16" ry="6" fill="#FFF" opacity="0.45" transform="rotate(-20 50 30)"/>
-  <!-- Bold Number 8 -->
-  <circle cx="64" cy="50" r="14" fill="none" stroke="#831843" stroke-width="11"/>
-  <circle cx="64" cy="74" r="17" fill="none" stroke="#831843" stroke-width="11"/>
-  <circle cx="94" cy="40" r="4" fill="#F472B6"/>
-  <circle cx="34" cy="85" r="3" fill="#F472B6"/>
+<svg id="emoji" viewBox="0 0 72 72" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <g id="color">
+    <rect x="12" y="12" width="48" height="47.83" fill="#92d3f5"/>
+  </g>
+  <g id="line" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+    <path transform="matrix(2.394,0,0,2.394,31.19,40.2)" stroke-miterlimit="10" stroke-width="2" d="m0 0c0 0.969 0.785 1.754 1.754 1.754h0.254c0.969 0 1.755-0.785 1.755-1.754s-0.786-1.754-1.755-1.754h-0.254c-0.969 0-1.754 0.785-1.754 1.754z" clip-rule="evenodd"/>
+    <path transform="matrix(2.394,0,0,2.394,31.19,31.8)" stroke-miterlimit="10" stroke-width="2" d="m0 0c0 0.969 0.785 1.754 1.754 1.754h0.254c0.969 0 1.755-0.785 1.755-1.754s-0.786-1.754-1.755-1.754h-0.254c-0.969 0-1.754 0.785-1.754 1.754z" clip-rule="evenodd"/>
+    <rect x="12" y="12" width="48" height="48" stroke-width="2"/>
+  </g>
 </svg>

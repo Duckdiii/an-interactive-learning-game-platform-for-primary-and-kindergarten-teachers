@@ -127,4 +127,29 @@ describe('LivePreview', () => {
 
     expect(await screen.findByText(/Gần đúng rồi/)).toBeInTheDocument()
   })
+
+  it('gắn themeId hoặc imageUrl thì QUIZ dùng Themed Quiz Canvas với linh vật và nút chuyển chế độ', () => {
+    renderPreview({ themeId: 'farm' })
+
+    const canvasBtn = screen.getByRole('button', { name: '🎨 Đồ họa Canvas' })
+    const standardBtn = screen.getByRole('button', { name: '📄 Tiêu chuẩn' })
+    expect(canvasBtn).toHaveAttribute('aria-pressed', 'true')
+    expect(standardBtn).toHaveAttribute('aria-pressed', 'false')
+
+    fireEvent.click(standardBtn)
+    expect(standardBtn).toHaveAttribute('aria-pressed', 'true')
+    expect(canvasBtn).toHaveAttribute('aria-pressed', 'false')
+
+    fireEvent.click(canvasBtn)
+    expect(canvasBtn).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('1-click chuyển đổi theme cập nhật nút theme và gọi onThemeChange', () => {
+    const onThemeChange = vi.fn()
+    renderPreview({ themeId: 'farm', onThemeChange })
+
+    const oceanBtn = screen.getByRole('button', { name: '🌊 Đại Dương' })
+    fireEvent.click(oceanBtn)
+    expect(onThemeChange).toHaveBeenCalledWith('ocean')
+  })
 })

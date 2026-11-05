@@ -79,7 +79,11 @@ export default function PresentPage() {
   const navigate = useNavigate()
   const game = query.data
   const profile = resolveUiProfile({ gradeLevel: game?.metadata.gradeLevel })
-  const theme = resolveTheme({ themeId: null, gameType: game?.gameType, subject: game?.metadata.subject })
+  const theme = resolveTheme({
+    themeId: (game?.metadata as { theme?: string })?.theme || null,
+    gameType: game?.gameType,
+    subject: game?.metadata.subject,
+  })
 
   usePlayerRootStyle(profile)
 

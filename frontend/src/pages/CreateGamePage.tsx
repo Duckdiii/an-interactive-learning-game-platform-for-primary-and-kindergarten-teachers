@@ -7,6 +7,7 @@ import CreateProgressPanel from '../components/create/CreateProgressPanel'
 import GameTypeSuggestionStep from '../components/create/GameTypeSuggestionStep'
 import IdeaSuggestions from '../components/create/IdeaSuggestions'
 import LessonContextPicker from '../components/create/LessonContextPicker'
+import ThemeSelector, { type SelectedTheme } from '../components/create/ThemeSelector'
 import FileDropZone from '../components/ui/FileDropZone'
 import FormField from '../components/ui/FormField'
 import Icon from '../components/ui/Icon'
@@ -62,6 +63,7 @@ export default function CreateGamePage() {
   const [step, setStep] = useState<Step>('describe')
   const [mode, setMode] = useState<Mode>('idea')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [theme, setTheme] = useState<SelectedTheme>('AUTO')
   const navigate = useNavigate()
   const creation = useCreateGames()
   const progressRef = useRef<HTMLDivElement>(null)
@@ -185,6 +187,7 @@ export default function CreateGamePage() {
       voiceRegion: voice.voiceRegion,
       voiceGender: voice.voiceGender,
       hasFile: file !== null,
+      theme,
     }
     setCreatingInput({ idea: form.idea, gradeLevel: form.gradeLevel })
     const running = creation.create(types.map((type) => buildGenerateRequest(form, mode, type)))
@@ -343,6 +346,14 @@ export default function CreateGamePage() {
                   }}
                 />
               </FormField>
+
+              <ThemeSelector
+                value={theme}
+                onChange={(nextTheme) => {
+                  setTheme(nextTheme)
+                  touch()
+                }}
+              />
 
               <details className="group rounded-2xl border-2 border-ink/10 px-4 py-1">
                 <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 text-base font-bold">

@@ -101,11 +101,11 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
     <div className="flex h-full w-full flex-col items-center justify-center p-4">
       {/* Lời nhắc hoặc số cặp đã tìm thấy */}
       <div className="mb-4 flex items-center justify-between w-full max-w-2xl px-2">
-        <span className="text-sm font-bold text-ink-soft">
-          Đã tìm được: <strong className="text-brand-strong">{matchedPairIds.length}</strong> / {question.pairs.length} cặp
+        <span className="text-sm font-bold text-play-ink-soft">
+          Đã tìm được: <strong className="text-play-primary">{matchedPairIds.length}</strong> / {question.pairs.length} cặp
         </span>
-        <span className="text-sm font-semibold text-ink-soft">
-          Số lần lật: <strong className="text-ink">{flips}</strong>
+        <span className="text-sm font-semibold text-play-ink-soft">
+          Số lần lật: <strong className="text-play-ink">{flips}</strong>
         </span>
       </div>
 
@@ -132,7 +132,7 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
                   : `Thẻ chưa lật số ${index + 1}`
               }
               className={[
-                'group relative flex aspect-[4/5] w-20 sm:w-24 md:w-28 flex-col items-center justify-center rounded-2xl p-2 transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand shadow-sm select-none',
+                'group relative flex aspect-[4/5] w-20 sm:w-24 md:w-28 flex-col items-center justify-center rounded-2xl p-2 transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-play-primary shadow-sm select-none',
                 isFlipped
                   ? isMatched
                     ? 'border-3 border-emerald-400 bg-emerald-50/70 scale-95 shadow-none'
@@ -151,7 +151,7 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
                     />
                   ) : null}
                   {card.content.text ? (
-                    <span className="line-clamp-2 text-center text-xs sm:text-sm font-black text-ink leading-tight">
+                    <span className="line-clamp-2 text-center text-xs sm:text-sm font-black text-play-ink leading-tight">
                       {card.content.text}
                     </span>
                   ) : null}

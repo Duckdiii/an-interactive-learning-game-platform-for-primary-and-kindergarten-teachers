@@ -1,25 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <defs>
-    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FEF08A" />
-      <stop offset="100%" stop-color="#F59E0B" />
-    </linearGradient>
-    <filter id="starShadow" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#B45309" flood-opacity="0.25"/>
-    </filter>
-  </defs>
-  <!-- 5-Point Cute Star -->
-  <polygon points="64,14 78,48 116,48 85,71 97,106 64,84 31,106 43,71 12,48 50,48" 
-           fill="url(#starGrad)" stroke="#D97706" stroke-width="4" stroke-linejoin="round" filter="url(#starShadow)"/>
-  <!-- Eyes & Smile -->
-  <circle cx="54" cy="62" r="3.5" fill="#78350F"/>
-  <circle cx="74" cy="62" r="3.5" fill="#78350F"/>
-  <circle cx="53" cy="60" r="1.2" fill="#FFF"/>
-  <circle cx="73" cy="60" r="1.2" fill="#FFF"/>
-  <path d="M58 70 Q64 76 70 70" fill="none" stroke="#78350F" stroke-width="2.5" stroke-linecap="round"/>
-  <!-- Blush -->
-  <circle cx="48" cy="68" r="4" fill="#F43F5E" opacity="0.4"/>
-  <circle cx="80" cy="68" r="4" fill="#F43F5E" opacity="0.4"/>
-  <!-- Sparkles -->
-  <polygon points="106,20 110,26 116,26 111,30 113,36 106,32 100,36 102,30 96,26 102,26" fill="#FDE047"/>
+<svg id="emoji" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <g id="color">
+    <polygon fill="#FCEA2B" stroke="none" points="35.9928,10.7363 27.7913,27.3699 9.4394,30.0436 22.7245,42.9838 19.5962,61.2637 36.0084,52.6276 52.427,61.2515 49.2851,42.9739 62.5606,30.0239 44.2067,27.3638"/>
+  </g>
+  <g id="hair"/>
+  <g id="skin"/>
+  <g id="skin-shadow"/>
+  <g id="line">
+    <polygon fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" points="35.9928,10.7363 27.7913,27.3699 9.4394,30.0436 22.7245,42.9838 19.5962,61.2637 36.0084,52.6276 52.427,61.2515 49.2851,42.9739 62.5606,30.0239 44.2067,27.3638"/>
+  </g>
 </svg>
