@@ -4,7 +4,7 @@ import type { GameResponse } from '../../types/game-response.types'
 import type { PublishResult } from '../../types/publish.types'
 import type { GameFilters, GameSummary } from '../../types/game-summary.types'
 import { validateGame } from '../../utils/gameValidation'
-import { buildMockGameContents } from './gameFixtures'
+import { buildMockGameContents, mathMatching } from './gameFixtures'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
 // Kho game trong bộ nhớ cho các nhóm mô phỏng `games` và `editor`: 10 game mẫu (đủ 10 loại) có nội dung DSL đầy đủ; danh
@@ -165,8 +165,13 @@ export interface MockGeneratedInfo {
  * KHÔNG khớp mô tả của giáo viên; chỉ tên, chủ đề, môn và khối lớp theo yêu cầu. Giao diện luôn nhắc điều này (`isMockGenerated`).
  */
 export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()): GameResponse {
-  const template = buildMockGameContents().find((content) => content.gameType === info.gameType) ?? buildMockGameContents()[0]
+  let template = buildMockGameContents().find((content) => content.gameType === info.gameType) ?? buildMockGameContents()[0]
   const idea = info.idea?.trim() ?? ''
+  const isMath = info.subject === 'MATH' || idea.toLowerCase().includes('đếm') || idea.toLowerCase().includes('toán') || idea.toLowerCase().includes('số')
+
+  if (info.gameType === 'MATCHING' && isMath) {
+    template = mathMatching
+  }
   const content = structuredClone(template)
 
   content.metadata = {

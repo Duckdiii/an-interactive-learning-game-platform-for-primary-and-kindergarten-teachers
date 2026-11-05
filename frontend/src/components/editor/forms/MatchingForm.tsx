@@ -12,7 +12,7 @@ import { addPair, canAddPair, canRemovePair, firstUnusedPairNumber, removePairBy
 import type { Side } from './matchingEditing'
 
 const LIMITS = TYPE_LIMITS.MATCHING
-const SIDES: ReadonlyArray<Side> = ['left', 'right']
+
 
 const focusLater = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.focus())
 
@@ -69,15 +69,21 @@ export default function MatchingForm({ gameType, question: raw, issues, onUpdate
         <ol className="space-y-3">
           {question.pairs.map((pair, index) => (
             <li key={pair.pairId}>
-              <fieldset className="rounded-xl border-2 border-ink/10 p-3">
-                <legend className="px-1 text-base font-bold">
+              <fieldset className="rounded-2xl border-2 border-brand/20 bg-surface p-4 shadow-xs transition hover:border-brand/40">
+                <legend className="px-2 text-base font-extrabold text-ink">
                   {text.pairLabel} {index + 1}
                 </legend>
-                <div className="mb-2 flex justify-end">
+                <div className="mb-3 -mt-2 flex items-center justify-between border-b border-ink/5 pb-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-ink-soft">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-xs font-black text-brand-strong">
+                      {index + 1}
+                    </span>
+                    <span>Ghép cặp #{index + 1}</span>
+                  </div>
                   <Button
                     type="button"
                     variant="secondary"
-                    className="shrink-0"
+                    className="shrink-0 h-8 w-8 !p-0 flex items-center justify-center rounded-lg hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300"
                     disabled={!canRemove}
                     aria-describedby={canRemove ? undefined : 'matching-pairs-limit'}
                     aria-label={`${text.removePair} ${index + 1}`}
@@ -86,17 +92,28 @@ export default function MatchingForm({ gameType, question: raw, issues, onUpdate
                     <Icon name="close" className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {SIDES.map((side) => (
-                    <SideFields
-                      key={side}
-                      pair={pair}
-                      side={side}
-                      index={index}
-                      issues={issues}
-                      onCommit={(field, value) => onUpdate((current) => setSideFieldById(current as MatchingQuestion, pair.pairId, side, field, value))}
-                    />
-                  ))}
+                <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
+                  <SideFields
+                    key="left"
+                    pair={pair}
+                    side="left"
+                    index={index}
+                    issues={issues}
+                    onCommit={(field, value) => onUpdate((current) => setSideFieldById(current as MatchingQuestion, pair.pairId, 'left', field, value))}
+                  />
+                  <div className="hidden md:flex flex-col items-center justify-center text-brand" aria-hidden="true">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-soft border border-brand/20 text-sm shadow-xs" title="Nối với nhau">
+                      🔗
+                    </span>
+                  </div>
+                  <SideFields
+                    key="right"
+                    pair={pair}
+                    side="right"
+                    index={index}
+                    issues={issues}
+                    onCommit={(field, value) => onUpdate((current) => setSideFieldById(current as MatchingQuestion, pair.pairId, 'right', field, value))}
+                  />
                 </div>
               </fieldset>
             </li>
@@ -151,8 +168,17 @@ function SideFields({ pair, side, index, issues, onCommit }: SideFieldsProps) {
   const prefix = `${idPrefix(pair.pairId)}-${side}`
 
   return (
-    <fieldset className="space-y-3 rounded-xl bg-paper p-3" aria-describedby={needError ? `${prefix}-need` : undefined}>
-      <legend className="px-1 text-sm font-bold">{title}</legend>
+    <fieldset
+      className={[
+        'space-y-2.5 rounded-xl border p-3.5 transition',
+        side === 'left' ? 'border-amber-200/70 bg-amber-50/30' : 'border-emerald-200/70 bg-emerald-50/30',
+      ].join(' ')}
+      aria-describedby={needError ? `${prefix}-need` : undefined}
+    >
+      <legend className="px-1 text-sm font-bold text-ink flex items-center gap-1.5">
+        <span className={`h-2 w-2 rounded-full ${side === 'left' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+        <span>{title}</span>
+      </legend>
       {needError ? (
         <p id={`${prefix}-need`} className="flex items-start gap-2 text-sm font-semibold text-rose-800">
           <Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0" />

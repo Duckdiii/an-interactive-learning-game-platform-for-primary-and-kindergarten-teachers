@@ -84,7 +84,7 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, see, q
           id="editor-pane-list"
           tabIndex={-1}
           {...panelProps('list', text.questionsTab)}
-          className={pane === 'list' ? 'block min-w-0 focus:outline-none' : 'hidden min-w-0 focus:outline-none lg:block'}
+          className={pane === 'list' ? 'block min-w-0 focus:outline-none lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-2.5rem)] lg:overflow-y-auto' : 'hidden min-w-0 focus:outline-none lg:block lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-2.5rem)] lg:overflow-y-auto'}
         >
           {list}
         </section>
@@ -100,7 +100,7 @@ export default function EditorLayout({ pane, onPaneChange, list, preview, see, q
           id="editor-pane-see"
           tabIndex={-1}
           {...panelProps('see', text.seeTab)}
-          className={pane === 'see' ? 'block min-w-0 focus:outline-none lg:col-span-2 xl:col-span-1' : 'hidden min-w-0 focus:outline-none lg:col-span-2 lg:block xl:col-span-1'}
+          className={pane === 'see' ? 'block min-w-0 focus:outline-none lg:col-span-2 xl:col-span-1 xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-2.5rem)] xl:overflow-y-auto' : 'hidden min-w-0 focus:outline-none lg:col-span-2 lg:block xl:col-span-1 xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-2.5rem)] xl:overflow-y-auto'}
         >
           {see}
         </section>

@@ -350,9 +350,9 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
 
       {/* Game do AI mô phỏng tạo: nội dung là bản mẫu của loại game, không khớp mô tả của giáo viên. Nhắc ngay ở trình soạn thảo, không chỉ ở trang tạo. */}
       {isMockGenerated(game.gameId) ? (
-        <div role="note" className="flex flex-wrap items-start gap-3 rounded-2xl border-2 border-sun bg-sun-soft p-4">
+        <div role="note" className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-50/90 via-amber-50/60 to-orange-50/40 p-3.5 shadow-xs">
           <MockBadge />
-          <p className="min-w-0 flex-1 text-base text-ink">{text.simulatedGame}</p>
+          <p className="min-w-0 flex-1 text-sm font-medium text-ink-soft sm:text-base">{text.simulatedGame}</p>
         </div>
       ) : null}
 

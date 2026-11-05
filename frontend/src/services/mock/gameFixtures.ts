@@ -140,6 +140,43 @@ const cloze: VisualClozeGame = {
 }
 
 /** Nội dung 10 game mẫu, đúng thứ tự của `mockGames.ts`. */
+export const mathMatching: MatchingGame = {
+  schemaVersion: '1.0.0',
+  gameType: 'MATCHING',
+  metadata: { title: 'Đếm số lượng đồ vật quen thuộc', subject: 'MATH', gradeLevel: 'KINDERGARTEN', topic: 'Đếm số lượng đồ vật quen thuộc từ 1 đến 5' },
+  gameplaySettings: settings(),
+  questions: [
+    {
+      ...q(1),
+      audioText: 'Bé hãy nối số lượng đồ vật với chữ số tương ứng nhé',
+      pairs: [
+        { pairId: 'p1', left: { text: '1 quả táo' }, right: { text: 'Số 1' } },
+        { pairId: 'p2', left: { text: '2 bông hoa' }, right: { text: 'Số 2' } },
+        { pairId: 'p3', left: { text: '3 ngôi sao' }, right: { text: 'Số 3' } },
+      ],
+    },
+    {
+      ...q(2),
+      audioText: 'Bé hãy nối số lượng con vật với chữ số tương ứng',
+      pairs: [
+        { pairId: 'p1', left: { text: '4 con cá' }, right: { text: 'Số 4' } },
+        { pairId: 'p2', left: { text: '5 quả bóng' }, right: { text: 'Số 5' } },
+        { pairId: 'p3', left: { text: '3 chú mèo' }, right: { text: 'Số 3' } },
+      ],
+    },
+    {
+      ...q(3),
+      audioText: 'Bé đếm và nối thật nhanh nào',
+      pairs: [
+        { pairId: 'p1', left: { text: '1 chú thỏ' }, right: { text: 'Số 1' } },
+        { pairId: 'p2', left: { text: '2 chiếc lá' }, right: { text: 'Số 2' } },
+        { pairId: 'p3', left: { text: '4 cây kẹo' }, right: { text: 'Số 4' } },
+        { pairId: 'p4', left: { text: '5 cánh hoa' }, right: { text: 'Số 5' } },
+      ],
+    },
+  ],
+}
+
 export function buildMockGameContents(): GameDsl[] {
   return structuredClone([quiz, matching, dragDrop, audioVisual, ordering, memory, spot, wordScramble, oddOneOut, cloze])
 }

@@ -74,4 +74,14 @@ describe('createMockGame (giống kết quả POST /games/generate)', () => {
 
     expect(getMockGame(game.gameId).metadata.title).not.toBe('Bị sửa')
   })
+
+  it('BR-05: tạo game MATCHING cho môn Toán / đếm số: sinh nội dung đếm số đồ vật, không bị lẫn vần tiếng Việt', () => {
+    const game = createMockGame({ gameType: 'MATCHING', subject: 'MATH', gradeLevel: 'KINDERGARTEN', idea: 'Bé đếm số con vật từ 1 đến 5' })
+
+    expect(game.gameType).toBe('MATCHING')
+    expect(game.metadata.subject).toBe('MATH')
+    const firstQuestion = game.questions[0] as { pairs: Array<{ left: { text?: string }; right: { text?: string } }> }
+    expect(firstQuestion.pairs[0].left.text).toContain('quả táo')
+    expect(firstQuestion.pairs[0].right.text).toBe('Số 1')
+  })
 })
