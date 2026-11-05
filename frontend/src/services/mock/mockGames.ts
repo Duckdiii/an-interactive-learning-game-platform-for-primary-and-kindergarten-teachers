@@ -5,6 +5,7 @@ import type { PublishResult } from '../../types/publish.types'
 import type { GameFilters, GameSummary } from '../../types/game-summary.types'
 import { validateGame } from '../../utils/gameValidation'
 import { buildMockGameContents, mathMatching, mathMemory } from './gameFixtures'
+import { enrichGameWithAssets } from '../../utils/assetResolver'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
 // Kho game trong bộ nhớ cho các nhóm mô phỏng `games` và `editor`: 10 game mẫu (đủ 10 loại) có nội dung DSL đầy đủ; danh
@@ -183,6 +184,7 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
     ...(info.subject ? { subject: info.subject } : {}),
     ...(info.gradeLevel ? { gradeLevel: info.gradeLevel } : {}),
   } as GameDsl['metadata']
+  enrichGameWithAssets(content)
 
   const record: MockGameRecord = {
     gameId: `mock-game-${nextGameNumber}`,

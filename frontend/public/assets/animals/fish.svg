@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="fishShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#0E7490" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g filter="url(#fishShadow)">
+    <!-- Tail Fin -->
+    <path d="M48 54 L18 34 L18 94 L48 74 Z" fill="#38BDF8" stroke="#0284C7" stroke-width="4" stroke-linejoin="round"/>
+    <!-- Top & Bottom Fins -->
+    <path d="M68 44 L78 22 L94 44 Z" fill="#FBBF24" stroke="#D97706" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M68 84 L80 106 L92 84 Z" fill="#FBBF24" stroke="#D97706" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Body -->
+    <ellipse cx="76" cy="64" rx="38" ry="28" fill="#06B6D4" stroke="#0891B2" stroke-width="4"/>
+    <!-- Belly Shine -->
+    <path d="M56 64 Q66 84 94 76" fill="none" stroke="#67E8F9" stroke-width="4" stroke-linecap="round"/>
+    <!-- Eye -->
+    <circle cx="94" cy="58" r="7" fill="#FFF"/>
+    <circle cx="96" cy="58" r="4" fill="#083344"/>
+    <circle cx="95" cy="56" r="1.5" fill="#FFF"/>
+    <!-- Smile -->
+    <path d="M98 72 Q102 75 106 72" fill="none" stroke="#083344" stroke-width="3" stroke-linecap="round"/>
+    <!-- Air Bubbles -->
+    <circle cx="112" cy="48" r="4" fill="#E0F2FE" stroke="#38BDF8" stroke-width="2"/>
+    <circle cx="118" cy="36" r="2.5" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1.5"/>
+  </g>
+</svg>

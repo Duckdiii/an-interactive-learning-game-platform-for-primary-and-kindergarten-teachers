@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="ballShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#1E3A8A" flood-opacity="0.25"/>
+    </filter>
+    <clipPath id="ballClip">
+      <circle cx="64" cy="64" r="50"/>
+    </clipPath>
+  </defs>
+  <!-- Ball Outer Circle -->
+  <circle cx="64" cy="64" r="50" fill="#FFFFFF" stroke="#1E293B" stroke-width="4" filter="url(#ballShadow)"/>
+  <!-- Ball Segments clipped inside -->
+  <g clip-path="url(#ballClip)">
+    <!-- Red Segment -->
+    <path d="M64 14 C40 34 40 94 64 114 C48 114 14 88 14 64 C14 40 48 14 64 14 Z" fill="#EF4444"/>
+    <!-- Blue Segment -->
+    <path d="M64 14 C88 34 88 94 64 114 C80 114 114 88 114 64 C114 40 80 14 64 14 Z" fill="#3B82F6"/>
+    <!-- Center Yellow Stripe -->
+    <path d="M64 14 C40 34 40 94 64 114 C88 94 88 34 64 14 Z" fill="#FACC15"/>
+    <!-- Horizontal White Seam -->
+    <path d="M14 64 C34 60 94 60 114 64" fill="none" stroke="#1E293B" stroke-width="3"/>
+    <path d="M64 14 C40 34 40 94 64 114" fill="none" stroke="#1E293B" stroke-width="3"/>
+    <path d="M64 14 C88 34 88 94 64 114" fill="none" stroke="#1E293B" stroke-width="3"/>
+    <!-- Shine -->
+    <ellipse cx="46" cy="40" rx="14" ry="8" fill="#FFF" opacity="0.4" transform="rotate(-30 46 40)"/>
+  </g>
+  <circle cx="64" cy="64" r="50" fill="none" stroke="#1E293B" stroke-width="4"/>
+</svg>

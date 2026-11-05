@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { viText } from '../../../constants/viText'
 import type { MatchingPair, MatchingQuestion } from '../../../types/game-dsl.types'
 import { QUESTION_LIMITS, TYPE_LIMITS } from '../../../utils/questionSpecs'
+import { resolveAssetUrl } from '../../../utils/assetResolver'
 import Button from '../../Button'
 import Icon from '../../ui/Icon'
 import CheckedTextField from './CheckedTextField'
@@ -166,6 +167,7 @@ function SideFields({ pair, side, index, issues, onCommit }: SideFieldsProps) {
   const needError = fieldMessage(issues, base)
   const title = side === 'left' ? text.leftSide : text.rightSide
   const prefix = `${idPrefix(pair.pairId)}-${side}`
+  const assetUrl = value.imageUrl || resolveAssetUrl(value.text, value.visualPrompt)
 
   return (
     <fieldset
@@ -205,6 +207,15 @@ function SideFields({ pair, side, index, issues, onCommit }: SideFieldsProps) {
         error={fieldMessage(issues, `${base}.visualPrompt`)}
         onCommit={(next) => onCommit('visualPrompt', next)}
       />
+      {assetUrl ? (
+        <div className="flex items-center gap-2.5 rounded-xl border border-ink/10 bg-white/90 p-2 shadow-2xs">
+          <img src={assetUrl} alt="" className="h-8 w-8 shrink-0 rounded-lg bg-surface object-contain p-0.5 border border-ink/5" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <span className="block truncate text-xs font-bold text-ink">Hình minh họa</span>
+            <span className="block truncate text-2xs text-ink-soft">{value.imageUrl ? 'Đã gán vector' : 'Nhận diện từ khóa'}</span>
+          </div>
+        </div>
+      ) : null}
     </fieldset>
   )
 }

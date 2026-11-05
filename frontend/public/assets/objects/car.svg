@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="carShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#0369A1" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#carShadow)">
+    <!-- Car Body -->
+    <path d="M18 78 L26 56 C30 54 44 40 60 40 L80 40 C94 40 102 54 108 58 L114 70 C118 74 118 84 114 88 L18 88 Z" 
+          fill="#0EA5E9" stroke="#0284C7" stroke-width="4" stroke-linejoin="round"/>
+    <!-- Windows -->
+    <path d="M42 54 L60 44 L60 62 L38 62 Z" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
+    <path d="M66 44 L80 44 L92 58 L66 58 Z" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
+    <!-- Headlight -->
+    <circle cx="112" cy="74" r="4" fill="#FACC15"/>
+    <!-- Wheels -->
+    <circle cx="38" cy="90" r="14" fill="#1E293B" stroke="#0F172A" stroke-width="3"/>
+    <circle cx="38" cy="90" r="6" fill="#94A3B8"/>
+    <circle cx="92" cy="90" r="14" fill="#1E293B" stroke="#0F172A" stroke-width="3"/>
+    <circle cx="92" cy="90" r="6" fill="#94A3B8"/>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="birdShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#0284C7" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g filter="url(#birdShadow)">
+    <!-- Legs -->
+    <path d="M58 96 L58 110 M54 110 L64 110 M76 96 L76 110 M72 110 L82 110" fill="none" stroke="#D97706" stroke-width="3" stroke-linecap="round"/>
+    <!-- Tail -->
+    <path d="M38 72 L18 80 L22 66 Z" fill="#0284C7" stroke="#0369A1" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Body -->
+    <ellipse cx="64" cy="70" rx="36" ry="28" fill="#38BDF8" stroke="#0284C7" stroke-width="4"/>
+    <!-- Belly -->
+    <path d="M46 76 C54 94 76 94 84 76 Z" fill="#E0F2FE"/>
+    <!-- Wing -->
+    <path d="M52 68 C46 80 58 88 68 84 C76 80 72 68 62 66 Z" fill="#0284C7"/>
+    <!-- Cheeks Blush -->
+    <circle cx="78" cy="68" r="5" fill="#FECDD3" opacity="0.6"/>
+    <!-- Beak -->
+    <polygon points="98,62 112,66 98,70" fill="#F59E0B" stroke="#D97706" stroke-width="2"/>
+    <!-- Eye -->
+    <circle cx="86" cy="60" r="5" fill="#0C4A6E"/>
+    <circle cx="85" cy="58" r="1.5" fill="#FFF"/>
+  </g>
+</svg>

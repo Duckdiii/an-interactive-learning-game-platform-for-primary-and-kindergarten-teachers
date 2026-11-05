@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FED7AA" />
+      <stop offset="40%" stop-color="#FB923C" />
+      <stop offset="100%" stop-color="#EA580C" />
+    </linearGradient>
+    <filter id="orangeShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#9A3412" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Leaf -->
+  <path d="M64 26 C74 16 88 18 90 26 C88 34 76 34 64 26 Z" fill="#22C55E" stroke="#15803D" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Stem -->
+  <circle cx="64" cy="30" r="4" fill="#78350F"/>
+  <!-- Orange body -->
+  <circle cx="64" cy="70" r="46" fill="url(#orangeGrad)" stroke="#C2410C" stroke-width="4" filter="url(#orangeShadow)"/>
+  <!-- Subtle texture dots -->
+  <circle cx="48" cy="60" r="1.5" fill="#C2410C" opacity="0.6"/>
+  <circle cx="56" cy="72" r="1.5" fill="#C2410C" opacity="0.6"/>
+  <circle cx="76" cy="64" r="1.5" fill="#C2410C" opacity="0.6"/>
+  <circle cx="68" cy="80" r="1.5" fill="#C2410C" opacity="0.6"/>
+  <!-- Shine -->
+  <ellipse cx="46" cy="52" rx="8" ry="14" fill="#FFF" opacity="0.4" transform="rotate(-30 46 52)"/>
+</svg>

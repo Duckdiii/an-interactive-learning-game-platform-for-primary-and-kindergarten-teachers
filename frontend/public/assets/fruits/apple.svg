@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="appleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF4D6D" />
+      <stop offset="100%" stop-color="#C9184A" />
+    </linearGradient>
+    <filter id="appleShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#800F2F" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Stem -->
+  <path d="M64 42 C64 26 72 16 78 14" fill="none" stroke="#5C3D2E" stroke-width="6" stroke-linecap="round"/>
+  <!-- Leaf -->
+  <path d="M66 32 C78 22 96 26 98 34 C94 44 80 44 66 32 Z" fill="#4ade80" stroke="#15803d" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Apple Body -->
+  <path d="M64 48 C48 34 22 42 22 68 C22 98 46 114 64 114 C82 114 106 98 106 68 C106 42 80 34 64 48 Z" 
+        fill="url(#appleGrad)" stroke="#800F2F" stroke-width="4" stroke-linejoin="round" filter="url(#appleShadow)"/>
+  <!-- Highlight shine -->
+  <ellipse cx="44" cy="62" rx="10" ry="18" fill="#FFF" opacity="0.4" transform="rotate(-25 44 62)"/>
+  <circle cx="38" cy="84" r="4" fill="#FFF" opacity="0.3"/>
+</svg>

@@ -4,6 +4,7 @@ import type { AnswerPayload, AnswerResult, StudentQuestionByType } from '../../t
 import type { UiProfile } from '../profile/types'
 import DragDropPlayable from './DragDropPlayable'
 import MatchingPlayable from './MatchingPlayable'
+import MemoryCardPlayable from './MemoryCardPlayable'
 import OddOneOutPlayable from './OddOneOutPlayable'
 import QuizPlayable from './QuizPlayable'
 import type { PlayableRenderer } from './types'
@@ -27,6 +28,7 @@ const RENDERERS: ReadonlyMap<GameType, AnyPlayableRenderer> = new Map([
   ['QUIZ', define<'QUIZ'>(QuizPlayable)],
   ['ODD_ONE_OUT', define<'ODD_ONE_OUT'>(OddOneOutPlayable)],
   ['MATCHING', define<'MATCHING'>(MatchingPlayable)],
+  ['MEMORY_CARD', define<'MEMORY_CARD'>(MemoryCardPlayable)],
   ['VISUAL_CLOZE', define<'VISUAL_CLOZE'>(VisualClozePlayable)],
   ['DRAG_DROP', define<'DRAG_DROP'>(DragDropPlayable)],
   ['WORD_SCRAMBLE', define<'WORD_SCRAMBLE'>(WordScramblePlayable)],

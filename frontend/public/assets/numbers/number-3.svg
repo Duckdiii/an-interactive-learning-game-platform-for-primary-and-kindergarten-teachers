@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FECDD3" />
+      <stop offset="100%" stop-color="#F43F5E" />
+    </linearGradient>
+    <filter id="shadow3" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#BE123C" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="54" fill="url(#g3)" stroke="#E11D48" stroke-width="5" filter="url(#shadow3)"/>
+  <circle cx="64" cy="64" r="46" fill="none" stroke="#FFE4E6" stroke-width="2" stroke-dasharray="6,4"/>
+  <ellipse cx="50" cy="30" rx="16" ry="6" fill="#FFF" opacity="0.45" transform="rotate(-20 50 30)"/>
+  <!-- Bold Number 3 -->
+  <path d="M48 40 L78 40 L58 58 C74 56 82 66 82 76 C82 88 68 94 48 90" fill="none" stroke="#881337" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="94" cy="40" r="4" fill="#FB7185"/>
+  <circle cx="34" cy="85" r="3" fill="#FB7185"/>
+</svg>

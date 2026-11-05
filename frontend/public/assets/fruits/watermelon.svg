@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="wmShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#14532D" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Rind Outer Green -->
+  <path d="M16 48 C28 98 100 98 112 48 Z" fill="#15803D" stroke="#14532D" stroke-width="4" stroke-linejoin="round" filter="url(#wmShadow)"/>
+  <!-- Rind Inner Light Green -->
+  <path d="M22 48 C32 90 96 90 106 48 Z" fill="#BBF7D0"/>
+  <!-- Flesh Pink/Red -->
+  <path d="M26 48 C36 84 92 84 102 48 Z" fill="#F43F5E" stroke="#BE123C" stroke-width="2"/>
+  <!-- Black Seeds -->
+  <ellipse cx="42" cy="58" rx="2.5" ry="4" fill="#18181B" transform="rotate(-15 42 58)"/>
+  <ellipse cx="64" cy="64" rx="2.5" ry="4" fill="#18181B"/>
+  <ellipse cx="86" cy="58" rx="2.5" ry="4" fill="#18181B" transform="rotate(15 86 58)"/>
+  <ellipse cx="54" cy="54" rx="2" ry="3.5" fill="#18181B"/>
+  <ellipse cx="74" cy="54" rx="2" ry="3.5" fill="#18181B"/>
+</svg>

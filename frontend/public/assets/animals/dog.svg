@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="dogShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#78350F" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g filter="url(#dogShadow)">
+    <!-- Floppy Ears -->
+    <path d="M30 46 C20 46 14 66 18 86 C20 96 28 98 34 88 C38 80 40 60 38 48 Z" fill="#92400E" stroke="#78350F" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M98 46 C108 46 114 66 110 86 C108 96 100 98 94 88 C90 80 88 60 90 48 Z" fill="#92400E" stroke="#78350F" stroke-width="4" stroke-linejoin="round"/>
+    <!-- Head -->
+    <ellipse cx="64" cy="68" rx="42" ry="36" fill="#FDE68A" stroke="#B45309" stroke-width="4"/>
+    <!-- Brown Eye Patch -->
+    <circle cx="48" cy="62" r="14" fill="#F59E0B" opacity="0.4"/>
+    <!-- Cheeks Blush -->
+    <circle cx="36" cy="78" r="6" fill="#FBCFE8" opacity="0.6"/>
+    <circle cx="92" cy="78" r="6" fill="#FBCFE8" opacity="0.6"/>
+    <!-- Eyes -->
+    <circle cx="48" cy="62" r="5" fill="#451A03"/>
+    <circle cx="80" cy="62" r="5" fill="#451A03"/>
+    <circle cx="46" cy="60" r="1.5" fill="#FFF"/>
+    <circle cx="78" cy="60" r="1.5" fill="#FFF"/>
+    <!-- Snout & Nose -->
+    <ellipse cx="64" cy="78" rx="16" ry="12" fill="#FEF3C7"/>
+    <ellipse cx="64" cy="72" rx="7" ry="5" fill="#451A03"/>
+    <path d="M64 77 L64 84 M64 84 Q58 90 52 86 M64 84 Q70 90 76 86" fill="none" stroke="#451A03" stroke-width="3" stroke-linecap="round"/>
+    <!-- Tongue -->
+    <path d="M62 86 C62 94 66 94 66 86 Z" fill="#F43F5E"/>
+  </g>
+</svg>

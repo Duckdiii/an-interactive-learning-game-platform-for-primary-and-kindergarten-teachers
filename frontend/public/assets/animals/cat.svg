@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="catShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#854D0E" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g filter="url(#catShadow)">
+    <!-- Ears -->
+    <path d="M30 60 L24 24 L56 46 Z" fill="#FBBF24" stroke="#B45309" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M98 60 L104 24 L72 46 Z" fill="#FBBF24" stroke="#B45309" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M32 32 L36 46 L46 42 Z" fill="#F472B6"/>
+    <path d="M96 32 L92 46 L82 42 Z" fill="#F472B6"/>
+    <!-- Head -->
+    <ellipse cx="64" cy="74" rx="44" ry="34" fill="#FCD34D" stroke="#B45309" stroke-width="4"/>
+    <!-- Forehead Stripes -->
+    <path d="M58 46 L64 56 L70 46" fill="none" stroke="#D97706" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Cheeks Blush -->
+    <circle cx="36" cy="80" r="7" fill="#FBCFE8" opacity="0.6"/>
+    <circle cx="92" cy="80" r="7" fill="#FBCFE8" opacity="0.6"/>
+    <!-- Eyes -->
+    <circle cx="48" cy="70" r="5" fill="#451A03"/>
+    <circle cx="80" cy="70" r="5" fill="#451A03"/>
+    <circle cx="46" cy="68" r="1.5" fill="#FFF"/>
+    <circle cx="78" cy="68" r="1.5" fill="#FFF"/>
+    <!-- Nose -->
+    <polygon points="60,78 68,78 64,83" fill="#F43F5E"/>
+    <!-- Mouth -->
+    <path d="M64 83 Q58 92 52 86 M64 83 Q70 92 76 86" fill="none" stroke="#78350F" stroke-width="3" stroke-linecap="round"/>
+    <!-- Whiskers -->
+    <path d="M34 76 L18 72 M34 84 L18 86 M94 76 L110 72 M94 84 L110 86" fill="none" stroke="#B45309" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

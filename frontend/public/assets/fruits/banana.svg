@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bananaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="50%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#EAB308" />
+    </linearGradient>
+    <filter id="bananaShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#854D0E" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Banana body -->
+  <path d="M96 28 C90 28 80 34 72 44 C52 68 44 92 56 104 C64 112 86 106 102 78 C110 64 114 44 104 32 L96 28 Z" 
+        fill="url(#bananaGrad)" stroke="#A16207" stroke-width="4" stroke-linejoin="round" filter="url(#bananaShadow)"/>
+  <!-- Stem top -->
+  <path d="M96 28 L94 20 L102 18 L104 26 Z" fill="#65A30D" stroke="#365314" stroke-width="2"/>
+  <!-- Inner curve accent line -->
+  <path d="M72 44 C60 66 56 86 64 96" fill="none" stroke="#CA8A04" stroke-width="3" stroke-linecap="round"/>
+  <!-- Highlight shine -->
+  <path d="M84 48 C94 62 96 76 90 86" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+</svg>

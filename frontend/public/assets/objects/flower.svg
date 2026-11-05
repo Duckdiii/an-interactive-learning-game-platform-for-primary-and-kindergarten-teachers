@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="flwShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#BE185D" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g filter="url(#flwShadow)">
+    <!-- Stem & Leaves -->
+    <path d="M64 64 L64 116" stroke="#16A34A" stroke-width="6" stroke-linecap="round"/>
+    <path d="M64 96 C50 90 44 98 48 104 C54 110 64 104 64 96 Z" fill="#22C55E" stroke="#15803D" stroke-width="2"/>
+    <path d="M64 86 C78 80 84 88 80 94 C74 100 64 94 64 86 Z" fill="#22C55E" stroke="#15803D" stroke-width="2"/>
+    <!-- Petals -->
+    <circle cx="64" cy="34" r="18" fill="#F472B6" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="90" cy="50" r="18" fill="#F472B6" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="80" cy="80" r="18" fill="#F472B6" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="48" cy="80" r="18" fill="#F472B6" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="38" cy="50" r="18" fill="#F472B6" stroke="#DB2777" stroke-width="3"/>
+    <!-- Center -->
+    <circle cx="64" cy="58" r="18" fill="#FBBF24" stroke="#D97706" stroke-width="3"/>
+    <!-- Smile on center -->
+    <circle cx="58" cy="54" r="2.5" fill="#78350F"/>
+    <circle cx="70" cy="54" r="2.5" fill="#78350F"/>
+    <path d="M60 62 Q64 66 68 62" fill="none" stroke="#78350F" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

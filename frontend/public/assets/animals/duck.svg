@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <filter id="duckShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#CA8A04" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g filter="url(#duckShadow)">
+    <!-- Body -->
+    <path d="M34 84 C26 78 18 64 26 56 C34 48 42 60 52 68 C64 64 88 64 98 76 C108 88 96 104 68 104 C46 104 36 94 34 84 Z" 
+          fill="#FDE047" stroke="#CA8A04" stroke-width="4" stroke-linejoin="round"/>
+    <!-- Head -->
+    <circle cx="76" cy="50" r="24" fill="#FACC15" stroke="#CA8A04" stroke-width="4"/>
+    <!-- Wing -->
+    <path d="M50 78 C44 86 52 94 62 92 C72 90 74 80 64 76 Z" fill="#EAB308"/>
+    <!-- Cheeks Blush -->
+    <circle cx="70" cy="58" r="5" fill="#FECDD3" opacity="0.7"/>
+    <!-- Beak -->
+    <path d="M92 48 C106 48 114 54 110 60 C104 64 92 60 92 56 Z" fill="#FB923C" stroke="#EA580C" stroke-width="2" stroke-linejoin="round"/>
+    <!-- Eye -->
+    <circle cx="82" cy="46" r="4.5" fill="#451A03"/>
+    <circle cx="80" cy="44" r="1.5" fill="#FFF"/>
+  </g>
+</svg>
