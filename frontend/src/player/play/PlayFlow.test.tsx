@@ -712,6 +712,7 @@ describe('phím tắt (P2.6)', () => {
     openPlay('MOCK10')
     await startStudent()
     await screen.findByRole('timer')
+    await screen.findByRole('button', { name: 'Tạm dừng' })
 
     press('Escape')
     expect(await screen.findByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()

@@ -8,6 +8,18 @@ import { clearDraft, loadDraft, saveDraft } from '../utils/draftStorage'
 import { storeSession } from '../utils/authStorage'
 import { toContent } from '../utils/gameContent'
 import WorkspaceEditor from './WorkspaceEditor'
+
+vi.mock('react-konva', () => ({
+  Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => <div onClick={onClick}>{children}</div>,
+  Rect: () => null,
+  Text: ({ text }: { text?: string }) => <span>{text}</span>,
+  Image: () => null,
+}))
+vi.mock('use-image', () => ({
+  default: () => [undefined],
+}))
 import { AUTOSAVE_WAIT, autosaved } from '../test/autosave'
 
 // A1: sửa tên/chủ đề, "chưa lưu", Lưu bản nháp, kiểm tra trước khi lưu (UC-04 5a), lỗi lưu, 409, sao lưu và khôi phục.

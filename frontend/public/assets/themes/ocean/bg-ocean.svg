@@ -1,24 +1,167 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
   <defs>
-    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <!-- Layer 0: Water Gradients -->
+    <linearGradient id="oceanWater" x1="50%" y1="0%" x2="50%" y2="100%">
       <stop offset="0%" stop-color="#38BDF8"/>
-      <stop offset="60%" stop-color="#0284C7"/>
-      <stop offset="100%" stop-color="#0369A1"/>
+      <stop offset="35%" stop-color="#0284C7"/>
+      <stop offset="75%" stop-color="#0369A1"/>
+      <stop offset="100%" stop-color="#082F49"/>
     </linearGradient>
-    <linearGradient id="sandGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FDE047"/>
+
+    <!-- Sun rays & caustics -->
+    <linearGradient id="sunBeam" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="40%" stop-color="#BAE6FD" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Layer 1: Midground Reef Gradients -->
+    <linearGradient id="midReefGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#075985" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Layer 2: Sand & Corals Gradients -->
+    <linearGradient id="oceanSand" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="40%" stop-color="#FDE047"/>
       <stop offset="100%" stop-color="#CA8A04"/>
     </linearGradient>
+    <linearGradient id="coralPink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB7185"/>
+      <stop offset="100%" stop-color="#E11D48"/>
+    </linearGradient>
+    <linearGradient id="coralPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C084FC"/>
+      <stop offset="100%" stop-color="#7E22CE"/>
+    </linearGradient>
+    <linearGradient id="seaweedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
   </defs>
-  <!-- Water -->
-  <rect width="1920" height="1080" fill="url(#waterGrad)"/>
-  <!-- Light Rays -->
-  <polygon points="300,0 450,0 600,1080 350,1080" fill="#FFFFFF" opacity="0.08"/>
-  <polygon points="900,0 1100,0 1350,1080 1050,1080" fill="#FFFFFF" opacity="0.06"/>
-  <!-- Sea Floor -->
-  <path d="M-50 920 Q400 840 950 940 T2000 890 L2000 1080 L-50 1080 Z" fill="url(#sandGrad)" stroke="#854D0E" stroke-width="4"/>
-  <!-- Bubbles -->
-  <circle cx="280" cy="620" r="18" fill="#E0F2FE" opacity="0.6" stroke="#0284C7" stroke-width="2"/>
-  <circle cx="320" cy="540" r="10" fill="#E0F2FE" opacity="0.6" stroke="#0284C7" stroke-width="2"/>
-  <circle cx="1500" cy="450" r="24" fill="#E0F2FE" opacity="0.5" stroke="#0284C7" stroke-width="2"/>
+
+  <!-- ================= LAYER 0: SKY / SURFACE / LIGHT RAYS ================= -->
+  <g id="layer0-water-surface">
+    <!-- Deep Water Background -->
+    <rect width="1920" height="1080" fill="url(#oceanWater)"/>
+
+    <!-- Light Rays / Caustics shining from surface -->
+    <polygon points="250,0 480,0 720,1080 320,1080" fill="url(#sunBeam)"/>
+    <polygon points="750,0 950,0 1250,1080 920,1080" fill="url(#sunBeam)"/>
+    <polygon points="1350,0 1520,0 1820,1080 1560,1080" fill="url(#sunBeam)"/>
+    <polygon points="100,0 220,0 420,1080 260,1080" fill="url(#sunBeam)" opacity="0.6"/>
+
+    <!-- Surface Ripple Highlights -->
+    <path d="M0,20 Q300,45 600,20 T1200,20 T1800,20 T2100,20" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.3"/>
+    <path d="M-50,45 Q250,70 550,45 T1150,45 T1750,45 T2050,45" fill="none" stroke="#BAE6FD" stroke-width="3" opacity="0.2"/>
+  </g>
+
+  <!-- ================= LAYER 1: MIDGROUND SILHOUETTES & DISTANT OCEAN ================= -->
+  <g id="layer1-midground">
+    <!-- Distant Sea Trench & Coral Ridge Silhouettes -->
+    <path d="M-50,780 Q250,660 620,740 T1320,700 T1980,750 L1980,1080 L-50,1080 Z" fill="url(#midReefGrad)"/>
+
+    <!-- Distant Swimming Fish School -->
+    <g fill="#0284C7" opacity="0.4">
+      <path d="M500,420 Q515,412 530,420 Q515,428 500,420 M530,420 L538,414 L538,426 Z"/>
+      <path d="M540,395 Q555,387 570,395 Q555,403 540,395 M570,395 L578,389 L578,401 Z"/>
+      <path d="M560,430 Q575,422 590,430 Q575,438 560,430 M590,430 L598,424 L598,436 Z"/>
+      <path d="M600,405 Q615,397 630,405 Q615,413 600,405 M630,405 L638,399 L638,411 Z"/>
+      <path d="M635,425 Q650,417 665,425 Q650,433 635,425 M665,425 L673,419 L673,431 Z"/>
+    </g>
+
+    <!-- Distant Jellyfish -->
+    <g opacity="0.35" transform="translate(1380, 320)">
+      <path d="M0,40 C0,10 60,10 60,40 Z" fill="#E0F2FE"/>
+      <path d="M10,40 Q15,70 12,95 M25,40 Q20,75 26,100 M35,40 Q40,70 34,95 M50,40 Q45,72 48,92" stroke="#BAE6FD" stroke-width="2" fill="none"/>
+    </g>
+  </g>
+
+  <!-- ================= LAYER 2: FOREGROUND SAND, CORALS, SEAWEED, SHELLS ================= -->
+  <g id="layer2-foreground">
+    <!-- Back Dune -->
+    <path d="M-20,860 Q380,780 880,840 T1940,820 L1940,1080 L-20,1080 Z" fill="#EAB308" opacity="0.5"/>
+
+    <!-- Main Sandy Sea Floor with Candy Stroke -->
+    <path d="M-50,910 Q320,840 780,900 T1580,870 Q1780,880 1980,910 L1980,1080 L-50,1080 Z" fill="url(#oceanSand)" stroke="#A16207" stroke-width="4"/>
+
+    <!-- Left Coral Reef Cluster -->
+    <g transform="translate(60, 720)">
+      <!-- Tall Pink Branch Coral -->
+      <path d="M60,200 C50,140 30,120 40,80 C45,60 65,65 65,85 C65,105 85,90 90,60 C95,40 115,45 115,65 C115,95 100,120 110,150 C115,165 140,150 145,130 C150,110 170,115 170,135 C170,165 140,185 130,220 Z"
+            fill="url(#coralPink)" stroke="#9F1239" stroke-width="4" stroke-linejoin="round"/>
+      <!-- Candy highlight on coral -->
+      <path d="M55,90 Q58,75 62,75 Q65,75 65,90" stroke="#FFF1F2" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M102,70 Q108,55 112,55" stroke="#FFF1F2" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- Sea Anemone Cluster -->
+      <path d="M140,210 Q145,170 160,170 Q175,170 165,210" fill="url(#coralPurple)" stroke="#581C87" stroke-width="3"/>
+      <path d="M160,215 Q175,175 190,178 Q195,190 180,220" fill="url(#coralPurple)" stroke="#581C87" stroke-width="3"/>
+      <path d="M125,215 Q120,180 135,178 Q145,185 138,220" fill="url(#coralPurple)" stroke="#581C87" stroke-width="3"/>
+    </g>
+
+    <!-- Seaweed Swirling (Left) -->
+    <g transform="translate(240, 680)">
+      <path d="M20,260 Q-20,170 30,90 T0,0 Q60,80 10,170 T50,260 Z" fill="url(#seaweedGrad)" stroke="#064E3B" stroke-width="3"/>
+      <path d="M60,270 Q110,190 60,110 T90,20 Q40,100 80,180 T75,270 Z" fill="url(#seaweedGrad)" stroke="#064E3B" stroke-width="3" opacity="0.9"/>
+    </g>
+
+    <!-- Right Coral & Seaweed Cluster -->
+    <g transform="translate(1620, 710)">
+      <!-- Purple Tube Coral -->
+      <path d="M50,220 L60,110 C60,95 85,95 85,110 L90,220 Z" fill="url(#coralPurple)" stroke="#581C87" stroke-width="4"/>
+      <ellipse cx="72" cy="108" rx="13" ry="6" fill="#F3E8FF" stroke="#581C87" stroke-width="3"/>
+
+      <path d="M95,225 L110,130 C110,118 132,118 132,130 L135,225 Z" fill="url(#coralPurple)" stroke="#581C87" stroke-width="4"/>
+      <ellipse cx="121" cy="128" rx="11" ry="5" fill="#F3E8FF" stroke="#581C87" stroke-width="3"/>
+
+      <path d="M140,230 L150,150 C150,138 170,138 170,150 L172,230 Z" fill="url(#coralPurple)" stroke="#581C87" stroke-width="4"/>
+      <ellipse cx="160" cy="148" rx="10" ry="5" fill="#F3E8FF" stroke="#581C87" stroke-width="3"/>
+
+      <!-- Bushy Seaweed Behind -->
+      <path d="M-40,230 Q-70,150 -20,80 T-60,0 Q-10,70 -40,150 T-20,230 Z" fill="url(#seaweedGrad)" stroke="#064E3B" stroke-width="3"/>
+    </g>
+
+    <!-- Cute Starfish on Sand -->
+    <g transform="translate(820, 950) rotate(12)">
+      <polygon points="50,10 62,38 92,38 68,55 77,84 50,67 23,84 32,55 8,38 38,38" fill="#F59E0B" stroke="#B45309" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="50" cy="46" r="5" fill="#FEF3C7"/>
+      <circle cx="50" cy="22" r="3" fill="#FEF3C7"/>
+      <circle cx="72" cy="40" r="3" fill="#FEF3C7"/>
+      <circle cx="65" cy="65" r="3" fill="#FEF3C7"/>
+      <circle cx="35" cy="65" r="3" fill="#FEF3C7"/>
+      <circle cx="28" cy="40" r="3" fill="#FEF3C7"/>
+    </g>
+
+    <!-- Cute Seashell on Sand -->
+    <g transform="translate(1220, 940)">
+      <path d="M20,50 C10,20 60,10 70,35 C80,20 110,35 100,60 C80,75 35,70 20,50 Z" fill="#F472B6" stroke="#9D174D" stroke-width="4"/>
+      <path d="M60,65 L35,35 M60,65 L55,25 M60,65 L75,25 M60,65 L90,40" stroke="#FCE7F3" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Translucent Bubbles -->
+    <g fill="#E0F2FE" stroke="#0284C7" stroke-width="3">
+      <!-- Cluster Left -->
+      <circle cx="310" cy="660" r="22" opacity="0.65"/>
+      <circle cx="304" cy="654" r="6" fill="#FFFFFF" stroke="none" opacity="0.8"/>
+
+      <circle cx="350" cy="580" r="14" opacity="0.65"/>
+      <circle cx="346" cy="576" r="4" fill="#FFFFFF" stroke="none" opacity="0.8"/>
+
+      <circle cx="280" cy="510" r="18" opacity="0.6"/>
+      <circle cx="275" cy="505" r="5" fill="#FFFFFF" stroke="none" opacity="0.8"/>
+
+      <!-- Cluster Center-Right -->
+      <circle cx="1180" cy="720" r="16" opacity="0.6"/>
+      <circle cx="1240" cy="610" r="26" opacity="0.7"/>
+      <circle cx="1232" cy="602" r="8" fill="#FFFFFF" stroke="none" opacity="0.85"/>
+      <circle cx="1200" cy="490" r="15" opacity="0.55"/>
+
+      <!-- Cluster Far Right -->
+      <circle cx="1520" cy="540" r="20" opacity="0.6"/>
+      <circle cx="1514" cy="534" r="5" fill="#FFFFFF" stroke="none" opacity="0.8"/>
+      <circle cx="1560" cy="440" r="12" opacity="0.5"/>
+    </g>
+  </g>
 </svg>

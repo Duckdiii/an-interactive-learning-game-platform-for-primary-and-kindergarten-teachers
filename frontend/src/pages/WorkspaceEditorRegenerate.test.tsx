@@ -8,6 +8,18 @@ import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import { saveDraft } from '../utils/draftStorage'
 import { toContent } from '../utils/gameContent'
 import WorkspaceEditor from './WorkspaceEditor'
+
+vi.mock('react-konva', () => ({
+  Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => <div onClick={onClick}>{children}</div>,
+  Rect: () => null,
+  Text: ({ text }: { text?: string }) => <span>{text}</span>,
+  Image: () => null,
+}))
+vi.mock('use-image', () => ({
+  default: () => [undefined],
+}))
 import { autosaved } from '../test/autosave'
 import { timingBox } from '../test/editorTiming'
 

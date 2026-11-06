@@ -12,13 +12,17 @@ export default function StudentShell({ title, progress, score, remainingSeconds,
 
   return (
     <div data-band={band} className={`relative flex flex-col bg-play-page text-play-ink ${embedded ? 'h-full min-h-0 overflow-y-auto' : 'min-h-screen'}`}>
-      {/* Background layer thế giới game Stage 2.5 */}
+      {/* Background layer thế giới game đa tầng Stage 2.5 (Parallax / Subtle drift, 35% opacity) */}
       {theme.bgUrl ? (
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-25"
-          style={{ backgroundImage: `url(${theme.bgUrl})` }}
-        />
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        >
+          <div
+            className="h-full w-full bg-cover bg-center opacity-35 animate-subtle-drift"
+            style={{ backgroundImage: `url(${theme.bgUrl})` }}
+          />
+        </div>
       ) : null}
 
       <header className="relative z-10 flex items-center justify-between gap-4 pb-3 play-safe-x play-safe-t">

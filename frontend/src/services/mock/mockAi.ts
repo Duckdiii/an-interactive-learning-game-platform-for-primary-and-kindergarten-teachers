@@ -50,10 +50,23 @@ export function resetMockAi() {
 
 // Phần NỘI DUNG của câu (bỏ mã thẻ, thời gian, điểm do giáo viên đặt và ảnh, giọng đọc do AI tự gán sau khi làm lại): câu đang hiện đã được gán ảnh và giọng nên so cả hai thì
 // không bao giờ nhận ra nó trùng câu mẫu gốc.
+function stripMedia(val: unknown): unknown {
+  if (Array.isArray(val)) return val.map(stripMedia)
+  if (typeof val === 'object' && val !== null) {
+    const next: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(val)) {
+      if (k === 'imageUrl' || k === 'audioUrl') continue
+      next[k] = stripMedia(v)
+    }
+    return next
+  }
+  return val
+}
+
 const contentOf = (question: QuestionDsl) => {
   const { id: _id, timeLimitSeconds: _time, points: _points, imageUrl: _image, audioUrl: _audio, ...rest } = question
 
-  return rest
+  return stripMedia(rest)
 }
 
 function collectStrings(value: unknown): string[] {

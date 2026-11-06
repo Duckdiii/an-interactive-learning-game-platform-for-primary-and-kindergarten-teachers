@@ -1,20 +1,182 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
   <defs>
-    <linearGradient id="jgSky" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FEF9C3"/>
-      <stop offset="100%" stop-color="#BBF7D0"/>
+    <!-- Layer 0: Sky & Canopy Gradients -->
+    <linearGradient id="jungleSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#047857"/>
+      <stop offset="30%" stop-color="#10B981"/>
+      <stop offset="70%" stop-color="#A7F3D0"/>
+      <stop offset="100%" stop-color="#FEF08A"/>
     </linearGradient>
-    <linearGradient id="jgFloor" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#15803D"/>
-      <stop offset="100%" stop-color="#14532D"/>
+
+    <!-- Sunbeams through canopy -->
+    <linearGradient id="jungleBeam" x1="0%" y1="0%" x2="40%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#FEF3C7" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Layer 1: Midground Trunks & Vines -->
+    <linearGradient id="treeBark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#78350F"/>
+      <stop offset="60%" stop-color="#92400E"/>
+      <stop offset="100%" stop-color="#451A03"/>
+    </linearGradient>
+    <linearGradient id="palmGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Layer 2: Foreground Foliage -->
+    <linearGradient id="jungleFloor" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="40%" stop-color="#047857"/>
+      <stop offset="100%" stop-color="#064E3B"/>
+    </linearGradient>
+    <linearGradient id="monsteraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="exoticFlower" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB7185"/>
+      <stop offset="100%" stop-color="#E11D48"/>
     </linearGradient>
   </defs>
-  <rect width="1920" height="1080" fill="url(#jgSky)"/>
-  <!-- Background Foliage -->
-  <ellipse cx="200" cy="500" rx="300" ry="240" fill="#22C55E" opacity="0.6"/>
-  <ellipse cx="1700" cy="480" rx="320" ry="260" fill="#22C55E" opacity="0.6"/>
-  <!-- Jungle Vines & Hanging Canopy -->
-  <path d="M0 0 Q400 200 800 50 T1600 120 T2000 0 L2000 0 L0 0 Z" fill="#166534" stroke="#14532D" stroke-width="4"/>
-  <!-- Ground -->
-  <path d="M-50 820 Q480 720 1000 840 T2050 780 L2050 1080 L-50 1080 Z" fill="url(#jgFloor)" stroke="#052E16" stroke-width="4"/>
+
+  <!-- ================= LAYER 0: SKY, CANOPY & SUNBEAMS ================= -->
+  <g id="layer0-canopy">
+    <!-- Sky Background -->
+    <rect width="1920" height="1080" fill="url(#jungleSky)"/>
+
+    <!-- Golden Sunbeams filtering through foliage -->
+    <polygon points="350,0 520,0 820,1080 480,1080" fill="url(#jungleBeam)"/>
+    <polygon points="850,0 1020,0 1320,1080 1000,1080" fill="url(#jungleBeam)"/>
+    <polygon points="1420,0 1580,0 1850,1080 1600,1080" fill="url(#jungleBeam)"/>
+
+    <!-- High Overhanging Canopy (Top Edge Silhouettes) -->
+    <!-- Top-Left Foliage -->
+    <path d="M-20,-20 Q200,160 450,120 Q650,190 780,40 L780,-20 Z" fill="#064E3B" opacity="0.85"/>
+    <path d="M-20,-20 Q150,120 380,80 Q550,140 680,-20 Z" fill="#047857"/>
+
+    <!-- Top-Right Foliage -->
+    <path d="M1200,-20 Q1400,180 1680,140 Q1850,170 1940,60 L1940,-20 Z" fill="#064E3B" opacity="0.85"/>
+    <path d="M1350,-20 Q1520,130 1780,90 Q1880,110 1940,-20 Z" fill="#047857"/>
+  </g>
+
+  <!-- ================= LAYER 1: MIDGROUND ANCIENT TRUNKS, VINES & PALMS ================= -->
+  <g id="layer1-midground">
+    <!-- Distant Rainforest Ridge -->
+    <path d="M-50,680 Q320,580 840,660 T1980,620 L1980,1080 L-50,1080 Z" fill="#059669" opacity="0.6"/>
+
+    <!-- Ancient Tree Trunk (Left) -->
+    <path d="M-30,0 Q120,400 80,860 L160,880 Q210,420 70,0 Z" fill="url(#treeBark)" stroke="#451A03" stroke-width="4"/>
+
+    <!-- Hanging Vines with Leaflets -->
+    <g stroke="#065F46" stroke-width="4" fill="none">
+      <path d="M80,120 Q160,320 120,540 T150,780"/>
+      <path d="M130,80 Q220,280 190,480 T220,680"/>
+    </g>
+    <!-- Vine Leaves -->
+    <g fill="#34D399" stroke="#065F46" stroke-width="2">
+      <path d="M135,320 Q160,310 165,335 Q145,340 135,320 Z"/>
+      <path d="M125,440 Q150,430 155,455 Q135,460 125,440 Z"/>
+      <path d="M140,580 Q165,570 170,595 Q150,600 140,580 Z"/>
+      <path d="M205,280 Q230,270 235,295 Q215,300 205,280 Z"/>
+      <path d="M195,400 Q220,390 225,415 Q205,420 195,400 Z"/>
+    </g>
+
+    <!-- Palm Tree on Right Ridge -->
+    <g transform="translate(1550, 440)">
+      <!-- Palm Trunk -->
+      <path d="M80,320 Q70,180 90,80" stroke="#78350F" stroke-width="16" fill="none" stroke-linecap="round"/>
+      <!-- Palm Fronds (Starburst Fan) -->
+      <g fill="url(#palmGreen)" stroke="#065F46" stroke-width="3">
+        <path d="M90,80 Q30,40 -20,70 Q40,20 90,80 Z"/>
+        <path d="M90,80 Q60,-10 20,-30 Q70,0 90,80 Z"/>
+        <path d="M90,80 Q120,-30 160,-20 Q130,10 90,80 Z"/>
+        <path d="M90,80 Q160,20 210,60 Q150,40 90,80 Z"/>
+        <path d="M90,80 Q170,90 220,130 Q160,100 90,80 Z"/>
+      </g>
+      <!-- Coconuts -->
+      <circle cx="84" cy="85" r="9" fill="#78350F"/>
+      <circle cx="96" cy="87" r="8" fill="#78350F"/>
+    </g>
+  </g>
+
+  <!-- ================= LAYER 2: FOREGROUND FLOOR, MONSTERA, FERNS & BLOSSOMS ================= -->
+  <g id="layer2-foreground">
+    <!-- Rolling Jungle Floor with Candy Outline -->
+    <path d="M-50,830 Q360,770 820,830 T1980,800 L1980,1080 L-50,1080 Z" fill="url(#jungleFloor)" stroke="#064E3B" stroke-width="5"/>
+
+    <!-- Large Giant Monstera Leaves (Right Foreground) -->
+    <g transform="translate(1600, 720)">
+      <!-- Leaf 1 (Big) -->
+      <path d="M120,260 Q160,120 260,60 C240,90 210,100 230,125 C200,125 180,140 200,165 C170,170 150,190 170,215 C140,225 130,250 120,260 Z"
+            fill="url(#monsteraGrad)" stroke="#064E3B" stroke-width="4"/>
+      <!-- Monstera Leaf Slots/Perforations -->
+      <ellipse cx="195" cy="115" rx="16" ry="6" transform="rotate(-30, 195, 115)" fill="#047857"/>
+      <ellipse cx="170" cy="155" rx="18" ry="6" transform="rotate(-20, 170, 155)" fill="#047857"/>
+      <ellipse cx="150" cy="200" rx="16" ry="5" transform="rotate(-10, 150, 200)" fill="#047857"/>
+
+      <!-- Leaf 2 (Arching Left) -->
+      <path d="M100,270 Q40,160 -40,110 C-20,135 10,145 -10,170 C20,170 40,185 20,210 C50,215 70,235 50,260 Z"
+            fill="url(#monsteraGrad)" stroke="#064E3B" stroke-width="4"/>
+      <ellipse cx="10" cy="155" rx="16" ry="6" transform="rotate(25, 10, 155)" fill="#047857"/>
+      <ellipse cx="35" cy="195" rx="14" ry="5" transform="rotate(15, 35, 195)" fill="#047857"/>
+    </g>
+
+    <!-- Fern Bush (Left Foreground) -->
+    <g transform="translate(160, 780)">
+      <path d="M80,240 Q10,150 0,60 Q40,100 80,160" fill="none" stroke="#10B981" stroke-width="6" stroke-linecap="round"/>
+      <g fill="#34D399" stroke="#065F46" stroke-width="2">
+        <path d="M15,90 Q-10,75 -5,100 Z"/>
+        <path d="M25,120 Q0,105 5,130 Z"/>
+        <path d="M40,150 Q15,135 20,160 Z"/>
+        <path d="M55,180 Q30,165 35,190 Z"/>
+        <path d="M25,80 Q50,65 45,90 Z"/>
+        <path d="M35,110 Q60,95 55,120 Z"/>
+        <path d="M50,140 Q75,125 70,150 Z"/>
+      </g>
+    </g>
+
+    <!-- Exotic Tropical Flowers (Center-Left & Center-Right) -->
+    <!-- Flower 1 (Vibrant Pink Hibiscus) -->
+    <g transform="translate(680, 890)">
+      <!-- 5 Rounded Petals with Candy Stroke -->
+      <g fill="url(#exoticFlower)" stroke="#9F1239" stroke-width="4">
+        <circle cx="50" cy="20" r="24"/>
+        <circle cx="20" cy="45" r="24"/>
+        <circle cx="32" cy="80" r="24"/>
+        <circle cx="68" cy="80" r="24"/>
+        <circle cx="80" cy="45" r="24"/>
+      </g>
+      <!-- Golden Stamen Center -->
+      <circle cx="50" cy="54" r="16" fill="#FBBF24" stroke="#D97706" stroke-width="3"/>
+      <line x1="50" y1="54" x2="68" y2="28" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="70" cy="26" r="5" fill="#EF4444"/>
+    </g>
+
+    <!-- Flower 2 (Sunny Orange Blossom) -->
+    <g transform="translate(1240, 910) scale(0.85)">
+      <g fill="#F97316" stroke="#C2410C" stroke-width="4">
+        <circle cx="50" cy="22" r="22"/>
+        <circle cx="22" cy="48" r="22"/>
+        <circle cx="34" cy="80" r="22"/>
+        <circle cx="66" cy="80" r="22"/>
+        <circle cx="78" cy="48" r="22"/>
+      </g>
+      <circle cx="50" cy="54" r="15" fill="#FEF08A" stroke="#CA8A04" stroke-width="3"/>
+    </g>
+
+    <!-- Spotted Toadstool Mushrooms (Foreground Left) -->
+    <g transform="translate(360, 930)">
+      <!-- Mushroom Stem -->
+      <path d="M22,35 Q18,65 15,80 L35,80 Q32,65 28,35 Z" fill="#F8FAFC" stroke="#94A3B8" stroke-width="3"/>
+      <!-- Mushroom Cap -->
+      <path d="M0,45 C0,15 50,15 50,45 Z" fill="#EF4444" stroke="#991B1B" stroke-width="4"/>
+      <!-- White Spots with Candy Gloss -->
+      <circle cx="15" cy="30" r="5" fill="#FFFFFF"/>
+      <circle cx="35" cy="28" r="6" fill="#FFFFFF"/>
+      <circle cx="25" cy="40" r="4" fill="#FFFFFF"/>
+    </g>
+  </g>
 </svg>

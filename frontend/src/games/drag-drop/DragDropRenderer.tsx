@@ -17,6 +17,7 @@ import {
   computeDragDropLayout,
   isInsideZone,
 } from './dragDropLayout'
+import { resolveAssetUrl } from '../../utils/assetResolver'
 import { canSubmit, createDragDropState, dragDropReducer } from './dragDropReducer'
 import type { DragDropAnswerResult, DragDropDisplayItem, DragDropRendererProps, Point } from './dragDropTypes'
 
@@ -48,7 +49,7 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
       id: item.id,
       text: item.text,
       visualPrompt: item.visualPrompt,
-      imageUrl: item.imageUrl,
+      imageUrl: item.imageUrl || resolveAssetUrl(item.text, item.visualPrompt) || undefined,
       targetZoneId: 'targetZoneId' in item ? (item.targetZoneId as string) : undefined,
     }))
   }, [question.items])
@@ -286,6 +287,9 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
                 fill={zoneColor}
                 listening={false}
               />
+              {Boolean(resolveAssetUrl(zone.label)) && (
+                <ItemIllustration url={resolveAssetUrl(zone.label)!} x={12} y={6} size={28} />
+              )}
               <Text
                 text={zone.label}
                 fontSize={20}
@@ -381,7 +385,30 @@ export default function DragDropRenderer(props: DragDropRendererProps) {
                 shadowOffset={{ x: 0, y: 2 }}
               />
 
-              {item.imageUrl ? (
+              {item.imageUrl && item.text ? (
+                <>
+                  <ItemIllustration
+                    url={item.imageUrl}
+                    x={Math.round((layout.itemSize - Math.round(layout.itemSize * 0.52)) / 2)}
+                    y={6}
+                    size={Math.round(layout.itemSize * 0.52)}
+                  />
+                  <Text
+                    text={item.text}
+                    fontSize={Math.round(13 * Math.min(1.4, layout.itemSize / 76))}
+                    fontStyle="bold"
+                    fill={palette.ink}
+                    width={layout.itemSize - 8}
+                    height={Math.round(layout.itemSize * 0.38)}
+                    x={4}
+                    y={Math.round(layout.itemSize * 0.56)}
+                    align="center"
+                    verticalAlign="middle"
+                    wrap="word"
+                    listening={false}
+                  />
+                </>
+              ) : item.imageUrl ? (
                 <ItemIllustration url={item.imageUrl} x={6} y={6} size={layout.itemSize - 12} />
               ) : (
                 <Text

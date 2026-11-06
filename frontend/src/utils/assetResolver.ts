@@ -338,10 +338,18 @@ export function enrichGameWithAssets<T extends { gameType: string; questions: un
       })
     }
   } else if (game.gameType === 'QUIZ') {
-    for (const q of game.questions as Array<{ questionText?: string; visualPrompt?: string; imageUrl?: string }>) {
+    for (const q of game.questions as Array<{ questionText?: string; visualPrompt?: string; imageUrl?: string; options?: Array<{ text?: string; visualPrompt?: string; imageUrl?: string }> }>) {
       if (!q.imageUrl) {
         const url = resolveAssetUrl(q.questionText, q.visualPrompt)
         if (url) q.imageUrl = url
+      }
+      if (Array.isArray(q.options)) {
+        for (const opt of q.options) {
+          if (!opt.imageUrl && (opt.text || opt.visualPrompt)) {
+            const optUrl = resolveAssetUrl(opt.text, opt.visualPrompt)
+            if (optUrl) opt.imageUrl = optUrl
+          }
+        }
       }
     }
   } else if (game.gameType === 'DRAG_DROP') {

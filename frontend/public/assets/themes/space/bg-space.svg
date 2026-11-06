@@ -1,25 +1,188 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
   <defs>
-    <linearGradient id="spcSky" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A"/>
-      <stop offset="50%" stop-color="#1E1B4B"/>
-      <stop offset="100%" stop-color="#311042"/>
+    <!-- Layer 0: Cosmos Deep Space -->
+    <linearGradient id="deepCosmos" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="35%" stop-color="#0F172A"/>
+      <stop offset="70%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#2E1065"/>
+    </linearGradient>
+
+    <!-- Nebula Glow Gradients -->
+    <radialGradient id="nebulaMagenta" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E879F9" stop-opacity="0.45"/>
+      <stop offset="50%" stop-color="#C026D3" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#581C87" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebulaCyan" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#0284C7" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0C4A6E" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Layer 1: Planets -->
+    <linearGradient id="ringedPlanet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+    <linearGradient id="planetRing" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FCD34D" stop-opacity="0.85"/>
+      <stop offset="50%" stop-color="#FEF08A" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#D97706" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Layer 2: Moon Surface & Crystals -->
+    <linearGradient id="moonTerrain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#64748B"/>
+      <stop offset="35%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="craterInside" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <linearGradient id="spaceCrystal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#67E8F9"/>
+      <stop offset="50%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#0891B2"/>
     </linearGradient>
   </defs>
-  <rect width="1920" height="1080" fill="url(#spcSky)"/>
-  <!-- Stars -->
-  <g fill="#FFFFFF" opacity="0.8">
-    <circle cx="120" cy="180" r="3"/>
-    <circle cx="450" cy="90" r="2"/>
-    <circle cx="820" cy="240" r="3.5"/>
-    <circle cx="1200" cy="140" r="2"/>
-    <circle cx="1650" cy="280" r="3"/>
-    <circle cx="340" cy="720" r="2"/>
-    <circle cx="980" cy="850" r="3"/>
-    <circle cx="1450" cy="740" r="2.5"/>
-    <circle cx="1780" cy="620" r="3"/>
+
+  <!-- ================= LAYER 0: DEEP SKY & TWINKLING STARS ================= -->
+  <g id="layer0-space-sky">
+    <!-- Deep Space Background -->
+    <rect width="1920" height="1080" fill="url(#deepCosmos)"/>
+
+    <!-- Luminous Nebulae (Gas Clouds) -->
+    <ellipse cx="620" cy="380" rx="380" ry="240" fill="url(#nebulaMagenta)" transform="rotate(-15, 620, 380)"/>
+    <ellipse cx="1440" cy="420" rx="360" ry="220" fill="url(#nebulaCyan)" transform="rotate(20, 1440, 420)"/>
+
+    <!-- 4-Point Twinkle Stars -->
+    <g fill="#FFFFFF">
+      <!-- Star 1 -->
+      <path d="M220,160 Q220,180 200,180 Q220,180 220,200 Q220,180 240,180 Q220,180 220,160 Z" opacity="0.9"/>
+      <!-- Star 2 -->
+      <path d="M520,120 Q520,135 505,135 Q520,135 520,150 Q520,135 535,135 Q520,135 520,120 Z" opacity="0.8"/>
+      <!-- Star 3 -->
+      <path d="M840,240 Q840,260 820,260 Q840,260 840,280 Q840,260 860,260 Q840,260 840,240 Z" opacity="0.95"/>
+      <!-- Star 4 -->
+      <path d="M1280,140 Q1280,160 1260,160 Q1280,160 1280,180 Q1280,160 1300,160 Q1280,160 1280,140 Z" opacity="0.9"/>
+      <!-- Star 5 -->
+      <path d="M1720,210 Q1720,225 1705,225 Q1720,225 1720,240 Q1720,225 1735,225 Q1720,225 1720,210 Z" opacity="0.85"/>
+      <!-- Star 6 -->
+      <path d="M1020,440 Q1020,452 1008,452 Q1020,452 1020,464 Q1020,452 1032,452 Q1020,452 1020,440 Z" opacity="0.75"/>
+    </g>
+
+    <!-- Star Dots & Stardust -->
+    <g fill="#BAE6FD">
+      <circle cx="120" cy="90" r="3" opacity="0.8"/>
+      <circle cx="340" cy="260" r="2.5" opacity="0.7"/>
+      <circle cx="430" cy="70" r="2" opacity="0.9"/>
+      <circle cx="680" cy="180" r="3" opacity="0.8"/>
+      <circle cx="790" cy="90" r="2" opacity="0.6"/>
+      <circle cx="940" cy="150" r="3.5" opacity="0.9"/>
+      <circle cx="1120" cy="80" r="2" opacity="0.7"/>
+      <circle cx="1190" cy="260" r="2.5" opacity="0.8"/>
+      <circle cx="1400" cy="110" r="3" opacity="0.85"/>
+      <circle cx="1580" cy="70" r="2" opacity="0.7"/>
+      <circle cx="1660" cy="280" r="3" opacity="0.9"/>
+      <circle cx="1840" cy="130" r="2.5" opacity="0.8"/>
+      <circle cx="150" cy="420" r="2" opacity="0.6"/>
+      <circle cx="380" cy="510" r="2.5" opacity="0.7"/>
+    </g>
   </g>
-  <!-- Moon / Giant Planet -->
-  <circle cx="1600" cy="240" r="120" fill="#8B5CF6" stroke="#581C87" stroke-width="4"/>
-  <ellipse cx="1600" cy="240" rx="180" ry="30" fill="none" stroke="#C4B5FD" stroke-width="8" opacity="0.7" transform="rotate(-15 1600 240)"/>
+
+  <!-- ================= LAYER 1: PLANETS & CELESTIAL BODIES ================= -->
+  <g id="layer1-planets">
+    <!-- Giant Ringed Golden Planet (Upper Left) -->
+    <g transform="translate(320, 220)">
+      <!-- Back half of Planetary Ring -->
+      <path d="M-110,20 Q0,-45 130,-15" stroke="url(#planetRing)" stroke-width="16" fill="none" opacity="0.6"/>
+      <!-- Planet Sphere -->
+      <circle cx="10" cy="0" r="62" fill="url(#ringedPlanet)" stroke="#78350F" stroke-width="4"/>
+      <!-- Planet Surface Stripes -->
+      <path d="M-45,-15 Q10,5 65,-10" stroke="#D97706" stroke-width="6" fill="none" opacity="0.5"/>
+      <path d="M-48,15 Q10,35 68,20" stroke="#B45309" stroke-width="8" fill="none" opacity="0.5"/>
+      <!-- Candy Shine Highlight -->
+      <ellipse cx="-15" cy="-25" rx="14" ry="7" fill="#FEF08A" opacity="0.6" transform="rotate(-20, -15, -25)"/>
+      <!-- Front half of Planetary Ring -->
+      <path d="M-130,25 Q10,75 150,15" stroke="url(#planetRing)" stroke-width="18" fill="none"/>
+    </g>
+
+    <!-- Friendly Blue/Green Planet (Center-Right Distance) -->
+    <g transform="translate(1420, 260)">
+      <circle cx="0" cy="0" r="42" fill="#38BDF8" stroke="#0284C7" stroke-width="3"/>
+      <!-- Continents -->
+      <path d="M-20,-10 Q-5,-30 15,-20 Q20,-5 5,5 Q-15,10 -20,-10 Z" fill="#34D399"/>
+      <path d="M-15,18 Q5,12 18,25 Q0,35 -15,18 Z" fill="#34D399"/>
+      <!-- Candy highlight -->
+      <ellipse cx="-12" cy="-16" rx="9" ry="4" fill="#FFFFFF" opacity="0.5" transform="rotate(-30, -12, -16)"/>
+    </g>
+
+    <!-- Cute Distant Space Satellite -->
+    <g transform="translate(980, 290) rotate(15)">
+      <!-- Solar Panels -->
+      <rect x="-42" y="-12" width="26" height="24" rx="2" fill="#38BDF8" stroke="#0284C7" stroke-width="2"/>
+      <line x1="-29" y1="-12" x2="-29" y2="12" stroke="#0284C7" stroke-width="2"/>
+      <rect x="16" y="-12" width="26" height="24" rx="2" fill="#38BDF8" stroke="#0284C7" stroke-width="2"/>
+      <line x1="29" y1="-12" x2="29" y2="12" stroke="#0284C7" stroke-width="2"/>
+      <!-- Body -->
+      <rect x="-14" y="-14" width="28" height="28" rx="4" fill="#F1F5F9" stroke="#475569" stroke-width="3"/>
+      <circle cx="0" cy="0" r="5" fill="#EF4444"/>
+    </g>
+  </g>
+
+  <!-- ================= LAYER 2: MOON TERRAIN, CRATERS & SPACE CRYSTALS ================= -->
+  <g id="layer2-foreground">
+    <!-- Distant Moon Ridge -->
+    <path d="M-50,780 Q420,680 960,750 T1980,720 L1980,1080 L-50,1080 Z" fill="#334155" opacity="0.7"/>
+
+    <!-- Main Foreground Cratered Horizon with Candy Stroke -->
+    <path d="M-50,830 Q350,760 840,820 T1680,790 Q1860,810 1980,830 L1980,1080 L-50,1080 Z" fill="url(#moonTerrain)" stroke="#1E293B" stroke-width="5"/>
+
+    <!-- Soft Moon Craters with Candy Bevel -->
+    <!-- Crater 1 (Center) -->
+    <g transform="translate(620, 890)">
+      <ellipse cx="60" cy="25" rx="55" ry="20" fill="url(#craterInside)" stroke="#1E293B" stroke-width="4"/>
+      <ellipse cx="60" cy="27" rx="46" ry="14" fill="#0F172A"/>
+      <!-- Rim highlight -->
+      <path d="M12,28 Q60,46 108,28" stroke="#94A3B8" stroke-width="3" fill="none" opacity="0.6"/>
+    </g>
+
+    <!-- Crater 2 (Right) -->
+    <g transform="translate(1320, 860)">
+      <ellipse cx="45" cy="18" rx="40" ry="14" fill="url(#craterInside)" stroke="#1E293B" stroke-width="3"/>
+      <ellipse cx="45" cy="19" rx="32" ry="10" fill="#0F172A"/>
+      <path d="M10,20 Q45,33 80,20" stroke="#94A3B8" stroke-width="2.5" fill="none" opacity="0.6"/>
+    </g>
+
+    <!-- Crater 3 (Small Left) -->
+    <g transform="translate(240, 910)">
+      <ellipse cx="30" cy="12" rx="26" ry="10" fill="url(#craterInside)" stroke="#1E293B" stroke-width="3"/>
+      <ellipse cx="30" cy="13" rx="20" ry="7" fill="#0F172A"/>
+    </g>
+
+    <!-- Glowing Space Crystals (Left Foreground) -->
+    <g transform="translate(140, 780)">
+      <!-- Crystal 1 (Center Tall) -->
+      <polygon points="50,120 40,30 54,10 66,30 58,120" fill="url(#spaceCrystal)" stroke="#083344" stroke-width="3"/>
+      <polygon points="50,120 54,10 66,30 58,120" fill="#A5F3FC" opacity="0.6"/>
+      <!-- Crystal 2 (Left tilted) -->
+      <polygon points="36,125 18,60 26,45 38,62 38,125" fill="url(#spaceCrystal)" stroke="#083344" stroke-width="3"/>
+      <!-- Crystal 3 (Right small) -->
+      <polygon points="68,125 78,75 88,65 92,80 76,125" fill="url(#spaceCrystal)" stroke="#083344" stroke-width="3"/>
+    </g>
+
+    <!-- Space Mission Explorer Flag (Right Foreground) -->
+    <g transform="translate(1640, 750)">
+      <!-- Flagpole -->
+      <line x1="30" y1="140" x2="30" y2="10" stroke="#E2E8F0" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="30" cy="8" r="5" fill="#FBBF24"/>
+      <!-- Golden / Red Banner -->
+      <path d="M32,15 L95,15 Q85,32 95,50 L32,50 Z" fill="#EF4444" stroke="#B91C1C" stroke-width="3"/>
+      <!-- Star on Flag -->
+      <polygon points="58,25 61,32 68,32 63,37 65,44 58,40 51,44 53,37 48,32 55,32" fill="#FEF08A"/>
+    </g>
+  </g>
 </svg>

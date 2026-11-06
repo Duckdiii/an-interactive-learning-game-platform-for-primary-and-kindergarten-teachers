@@ -209,8 +209,26 @@
   transform-origin: bottom center;
 }
 
+/* Stage 2.5: Hiệu ứng trôi nhẹ tinh tế cho background thế giới đa tầng */
+@keyframes subtle-drift {
+  0%, 100% {
+    transform: scale(1.02) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.05) translate(-8px, -5px);
+  }
+}
+
+.animate-subtle-drift {
+  animation: subtle-drift 24s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-mascot-idle {
+    animation: none;
+  }
+  .animate-subtle-drift {
     animation: none;
   }
 }

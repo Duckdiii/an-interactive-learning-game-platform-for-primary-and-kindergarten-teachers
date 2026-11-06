@@ -52,4 +52,21 @@ describe('playSound', () => {
     expect(howlCtorMock).toHaveBeenCalledTimes(2)
     expect(howlPlayMock).toHaveBeenCalledTimes(3)
   })
+
+  it('phát đúng âm thanh tổng hợp từ soundBus khi gặp các từ khóa (correct, pop, wrong)', async () => {
+    const playSound = await loadPlaySound()
+    const { soundBus } = await import('../../services/pipeline/soundBus')
+    const correctSpy = vi.spyOn(soundBus, 'playCorrect')
+    const popSpy = vi.spyOn(soundBus, 'playPop')
+    const wrongSpy = vi.spyOn(soundBus, 'playWrong')
+
+    playSound('/sounds/correct.wav')
+    expect(correctSpy).toHaveBeenCalled()
+
+    playSound('/sounds/pair-matched.wav')
+    expect(popSpy).toHaveBeenCalled()
+
+    playSound('/sounds/try-again.wav')
+    expect(wrongSpy).toHaveBeenCalled()
+  })
 })
