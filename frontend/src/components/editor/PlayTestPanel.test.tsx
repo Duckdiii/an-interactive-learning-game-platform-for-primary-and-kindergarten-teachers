@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from '../../api/axiosInstance'
 import { buildMockGameContents } from '../../services/mock/gameFixtures'
-import type { GameDsl, GameType } from '../../types/game-dsl.types'
+import { GAME_TYPES, type GameDsl, type GameType } from '../../types/game-dsl.types'
+import { PLAY_TEST_RENDERERS } from './play/playTestRegistry'
 import PlayTestPanel from './PlayTestPanel'
 
 // react-konva vẽ lên <canvas> thật mà jsdom không có: mock thành DOM thường để test hành vi (chọn, nối, chấm, sang câu), không
@@ -209,27 +210,42 @@ describe('PlayTestPanel: MATCHING', () => {
   })
 })
 
-describe('PlayTestPanel: loại game chưa có renderer', () => {
-  const unsupported: GameType[] = ['AUDIO_VISUAL_MATCH', 'ODD_ONE_OUT', 'SPOT_THE_TARGET', 'WORD_SCRAMBLE', 'MEMORY_CARD', 'DRAG_DROP', 'ORDERING', 'VISUAL_CLOZE']
-
-  it.each(unsupported)('%s: hiện ảnh minh họa tĩnh, thông báo "chưa hỗ trợ chơi thử" và nội dung chữ, không giả lập', (type) => {
-    const onExit = vi.fn()
-    const { container } = render(<PlayTestPanel game={gameOf(type)} onExit={onExit} />)
-
-    expect(screen.getByRole('heading', { name: 'Loại game này chưa hỗ trợ chơi thử' })).toBeInTheDocument()
-    // Ảnh minh họa tĩnh của loại game (SVG), không để trống.
-    expect(container.querySelector('svg')).not.toBeNull()
-    expect(within(screen.getByRole('list', { name: 'Nội dung các câu hỏi' })).getAllByRole('listitem')).toHaveLength(3)
-    // Không có nút chơi, nút nộp hay thanh phản hồi.
-    expect(screen.queryByRole('button', { name: /Câu tiếp theo|Xem kết quả|Thử lại câu này/ })).not.toBeInTheDocument()
-
-    fireEvent.click(button('Quay lại chỉnh sửa'))
-    expect(onExit).toHaveBeenCalledTimes(1)
-    expectNoRequests()
+describe('PlayTestPanel: toàn bộ 10/10 loại game đều hỗ trợ chơi thử', () => {
+  it.each(GAME_TYPES)('%s: có renderer chơi thử trong PLAY_TEST_RENDERERS', (type) => {
+    expect(PLAY_TEST_RENDERERS[type]).toBeDefined()
   })
 
-  it('đủ 10 loại game: 2 loại chơi thử được và 8 loại còn lại hiện khung chưa hỗ trợ', () => {
-    expect(unsupported).toHaveLength(8)
-    expect(new Set([...unsupported, 'QUIZ', 'MATCHING']).size).toBe(10)
+  it.each(GAME_TYPES)('%s: mở được trong PlayTestPanel không bị lỗi "chưa hỗ trợ"', (type) => {
+    const onExit = vi.fn()
+    render(<PlayTestPanel game={gameOf(type)} onExit={onExit} />)
+
+    expect(screen.queryByRole('heading', { name: 'Loại game này chưa hỗ trợ chơi thử' })).not.toBeInTheDocument()
+    expect(screen.getByText('Câu 1 trên 3')).toBeInTheDocument()
+    expectNoRequests()
+  })
+})
+
+describe('PlayTestPanel: fallback khi loại game chưa có renderer', () => {
+  it('hiện ảnh minh họa tĩnh, thông báo "chưa hỗ trợ chơi thử" và nội dung chữ, không giả lập', () => {
+    const onExit = vi.fn()
+    const original = PLAY_TEST_RENDERERS.QUIZ
+    delete (PLAY_TEST_RENDERERS as any).QUIZ
+
+    try {
+      const { container } = render(<PlayTestPanel game={gameOf('QUIZ')} onExit={onExit} />)
+
+      expect(screen.getByRole('heading', { name: 'Loại game này chưa hỗ trợ chơi thử' })).toBeInTheDocument()
+      // Ảnh minh họa tĩnh của loại game (SVG), không để trống.
+      expect(container.querySelector('svg')).not.toBeNull()
+      expect(within(screen.getByRole('list', { name: 'Nội dung các câu hỏi' })).getAllByRole('listitem')).toHaveLength(3)
+      // Không có nút chơi, nút nộp hay thanh phản hồi.
+      expect(screen.queryByRole('button', { name: /Câu tiếp theo|Xem kết quả|Thử lại câu này/ })).not.toBeInTheDocument()
+
+      fireEvent.click(button('Quay lại chỉnh sửa'))
+      expect(onExit).toHaveBeenCalledTimes(1)
+      expectNoRequests()
+    } finally {
+      (PLAY_TEST_RENDERERS as Record<string, unknown>).QUIZ = original
+    }
   })
 })

@@ -60,7 +60,7 @@ describe('registry renderer', () => {
   it('chỉ các loại đã có renderer chơi được; loại khác khung hiện "chưa hỗ trợ"', () => {
     const playable = GAME_TYPES.filter((type) => getPlayableRenderer(type))
 
-    expect(playable).toEqual(['QUIZ', 'ODD_ONE_OUT', 'WORD_SCRAMBLE', 'MATCHING', 'MEMORY_CARD', 'DRAG_DROP', 'VISUAL_CLOZE'])
+    expect(playable).toEqual([...GAME_TYPES])
   })
 })
 
@@ -343,5 +343,57 @@ describe('WordScramblePlayable với MockPlayerApi', () => {
 
     await waitFor(() => expect(showFeedbackMock).toHaveBeenCalledWith(false))
     expect(onSubmit).toHaveBeenCalledWith({ word: 'ẹm' })
+  })
+})
+
+describe('OrderingPlayable với MockPlayerApi', () => {
+  it('bấm «Xong rồi!»: nộp order, máy chủ chấm kết quả', async () => {
+    const { api, sessionId, game } = await startSession('MOCK04')
+    const Ordering = getPlayableRenderer('ORDERING')!
+    const question = (game as Extract<StudentGame, { gameType: 'ORDERING' }>).questions[0]
+    const onSubmit = vi.fn((answer) => api.submitInteraction(sessionId, question.id, answer))
+
+    render(<Ordering question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Xong rồi!/ }))
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    expect(onSubmit.mock.calls[0][0]).toHaveProperty('order')
+  })
+})
+
+describe('AudioVisualMatchPlayable với MockPlayerApi', () => {
+  it('chọn hình ảnh: nộp selectedOptionId, máy chủ chấm kết quả', async () => {
+    const { api, sessionId, game } = await startSession('MOCK03')
+    const AudioVisual = getPlayableRenderer('AUDIO_VISUAL_MATCH')!
+    const question = (game as Extract<StudentGame, { gameType: 'AUDIO_VISUAL_MATCH' }>).questions[0]
+    const onSubmit = vi.fn((answer) => api.submitInteraction(sessionId, question.id, answer))
+
+    render(<AudioVisual question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+
+    const buttons = screen.getAllByRole('button').filter((b) => b.getAttribute('data-option-id'))
+    expect(buttons.length).toBeGreaterThan(0)
+    fireEvent.click(buttons[0])
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    expect(onSubmit.mock.calls[0][0]).toHaveProperty('selectedOptionId')
+  })
+})
+
+describe('SpotTheTargetPlayable với MockPlayerApi', () => {
+  it('chạm vào vùng tranh: nộp tọa độ x, y, máy chủ chấm kết quả', async () => {
+    const { api, sessionId, game } = await startSession('MOCK06')
+    const SpotTarget = getPlayableRenderer('SPOT_THE_TARGET')!
+    const question = (game as Extract<StudentGame, { gameType: 'SPOT_THE_TARGET' }>).questions[0]
+    const onSubmit = vi.fn((answer) => api.submitInteraction(sessionId, question.id, answer))
+
+    render(<SpotTarget question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
+
+    const board = screen.getByRole('button', { name: /Bức tranh tìm kiếm/ })
+    fireEvent.click(board, { clientX: 30, clientY: 55 })
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    expect(onSubmit.mock.calls[0][0]).toHaveProperty('x')
+    expect(onSubmit.mock.calls[0][0]).toHaveProperty('y')
   })
 })

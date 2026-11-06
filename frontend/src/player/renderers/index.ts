@@ -2,11 +2,14 @@ import type { ComponentType } from 'react'
 import type { GameType } from '../../types/game-dsl.types'
 import type { AnswerPayload, AnswerResult, StudentQuestionByType } from '../../types/game-student.types'
 import type { UiProfile } from '../profile/types'
+import AudioVisualMatchPlayable from './AudioVisualMatchPlayable'
 import DragDropPlayable from './DragDropPlayable'
 import MatchingPlayable from './MatchingPlayable'
 import MemoryCardPlayable from './MemoryCardPlayable'
 import OddOneOutPlayable from './OddOneOutPlayable'
+import OrderingPlayable from './OrderingPlayable'
 import QuizPlayable from './QuizPlayable'
+import SpotTheTargetPlayable from './SpotTheTargetPlayable'
 import type { PlayableRenderer } from './types'
 import VisualClozePlayable from './VisualClozePlayable'
 import WordScramblePlayable from './WordScramblePlayable'
@@ -23,7 +26,7 @@ export type AnyPlayableRenderer = ComponentType<{
 // Điểm xóa kiểu duy nhất: mỗi renderer được ràng buộc đúng với loại game của nó khi đăng ký.
 const define = <T extends GameType>(renderer: PlayableRenderer<T>) => renderer as unknown as AnyPlayableRenderer
 
-// Các loại còn lại thêm từng loại ở P2b. Loại chưa có thì khung hiện màn "chưa hỗ trợ" thay vì vỡ.
+// Đầy đủ 10/10 cơ chế game tương tác dành cho mầm non & K-5
 const RENDERERS: ReadonlyMap<GameType, AnyPlayableRenderer> = new Map([
   ['QUIZ', define<'QUIZ'>(QuizPlayable)],
   ['ODD_ONE_OUT', define<'ODD_ONE_OUT'>(OddOneOutPlayable)],
@@ -32,6 +35,9 @@ const RENDERERS: ReadonlyMap<GameType, AnyPlayableRenderer> = new Map([
   ['VISUAL_CLOZE', define<'VISUAL_CLOZE'>(VisualClozePlayable)],
   ['DRAG_DROP', define<'DRAG_DROP'>(DragDropPlayable)],
   ['WORD_SCRAMBLE', define<'WORD_SCRAMBLE'>(WordScramblePlayable)],
+  ['ORDERING', define<'ORDERING'>(OrderingPlayable)],
+  ['AUDIO_VISUAL_MATCH', define<'AUDIO_VISUAL_MATCH'>(AudioVisualMatchPlayable)],
+  ['SPOT_THE_TARGET', define<'SPOT_THE_TARGET'>(SpotTheTargetPlayable)],
 ])
 
 export const getPlayableRenderer = (gameType: GameType) => RENDERERS.get(gameType)

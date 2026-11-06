@@ -100,7 +100,7 @@ describe('LivePreview', () => {
   })
 
   it('loại chưa có renderer: hiện "sắp có", không dựng khung', () => {
-    renderPreview({ gameType: 'ORDERING' })
+    renderPreview({ gameType: 'UNSUPPORTED' as any })
 
     expect(screen.getByText(/sắp có/)).toBeInTheDocument()
     expect(screen.queryByTestId('preview-frame')).not.toBeInTheDocument()

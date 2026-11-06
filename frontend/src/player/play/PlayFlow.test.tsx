@@ -340,11 +340,18 @@ describe('trang chơi, các tình huống khác', () => {
     submit.mockRestore()
   })
 
-  it('loại game chưa có renderer (ORDERING): báo chưa chơi được, không có nút Bắt đầu', async () => {
-    openPlay('MOCK04')
+  it('loại game chưa có renderer: báo chưa chơi được, không có nút Bắt đầu', async () => {
+    const renderers = await import('../renderers')
+    const spy = vi.spyOn(renderers, 'getPlayableRenderer').mockReturnValue(undefined)
 
-    expect(await screen.findByText(/chưa chơi được/)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Bắt đầu' })).not.toBeInTheDocument()
+    try {
+      openPlay('MOCK04')
+
+      expect(await screen.findByText(/chưa chơi được/)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Bắt đầu' })).not.toBeInTheDocument()
+    } finally {
+      spy.mockRestore()
+    }
   })
 })
 

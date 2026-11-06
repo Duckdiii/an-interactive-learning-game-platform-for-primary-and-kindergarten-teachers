@@ -258,11 +258,11 @@ describe('form sửa câu MEMORY_CARD', () => {
     })
   })
 
-  it('chơi thử vẫn "chưa hỗ trợ" (chưa có renderer Canvas cho loại này)', async () => {
+  it('bấm Chơi thử: mở màn chơi thử thành công với đầy đủ renderer', async () => {
     await openLoaded()
     fireEvent.click(screen.getByRole('button', { name: 'Chơi thử' }))
 
-    expect(await screen.findByText(/chưa hỗ trợ chơi thử/, {}, { timeout: 10_000 })).toBeInTheDocument()
+    expect(await screen.findByText('Câu 1 trên 3', {}, { timeout: 10_000 })).toBeInTheDocument()
   })
 })
 

@@ -36,7 +36,8 @@ const replay = vi.fn()
 vi.mock('../../games/common/useQuestionAudio', () => ({ useQuestionAudio: () => replay }))
 
 // Đáp án đúng của 3 câu mẫu: '3', '5', '9'. Chọn đáp án khác là sai.
-const [quiz, , , unplayable] = buildMockGameContents()
+const [quiz] = buildMockGameContents()
+const unplayable = { ...quiz, gameType: 'UNSUPPORTED' as any }
 const asGame = (content: unknown) => ({ ...(content as object), gameId: 'g1', status: 'PUBLISHED', updatedAt: '' }) as GameResponse
 
 function renderPlay(game: GameResponse = asGame(quiz), onLeave = vi.fn()) {
