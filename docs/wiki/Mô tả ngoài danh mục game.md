@@ -7,7 +7,7 @@
 > - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 3 Máy ảo Điều phối Đa năng (Virtual Runtime Engine).pdf`  
 > - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 4 Tầng Kết xuất Phần cứng Canvas (Konva Driver).pdf`  
 > - `docs/Dinh_huong_de_tai.md`, `raw/Pipeline_Tao_Tro_Choi_AI.drawio`  
-> **Cập nhật**: 2026-11-04  
+> **Cập nhật**: 2026-11-07 (thêm mục 9 Hiện trạng cài đặt)  
 > **Liên kết liên quan**: [[Game JSON DSL]], [[24 Cơ chế game chuẩn hóa]], [[Tiêu chuẩn Đồ họa và Asset Pipeline]], [[Sơ đồ hệ thống]], [[Cơ sở khoa học và GamED-AI]]
 
 ---
@@ -274,25 +274,39 @@ sequenceDiagram
 
 1. **Tính Độc Lập Tuyệt Đối**: CPF là một Engine hoàn chỉnh, có Input (JSON DSL), cỗ máy xử lý riêng (Runtime), và Output (Canvas 60 FPS).
 2. **Không Phụ Thuộc Thể Loại Game**: Dù là Bắn cung, Đua xe, Câu cá hay Hái quả, Runtime chỉ nhìn thấy 4 khái niệm nền tảng: **Entities**, **Motion**, **Events**, và **Rules**.
-3. **Chuẩn Mực Kỹ Nghệ Phần Mềm Cao Cấp**: Phân tách rõ ràng giữa Validation (Compiler Frontend) $\to$ Assembly (Pre-compiler) $\to$ Virtual Runtime (Game Loop) $\to$ Hardware Driver (Rendering). Có giải thuật đồ thị DFS phát hiện Deadlock và cơ chế Zero-Trust AI loại bỏ $100\%$ ảo giác.
+3. **Chuẩn Mực Kỹ Nghệ Phần Mềm Cao Cấp**: Phân tách rõ ràng giữa Validation (Compiler Frontend) $\to$ Assembly (Pre-compiler) $\to$ Virtual Runtime (Game Loop) $\to$ Hardware Driver (Rendering). Có giải thuật đồ thị DFS phát hiện Deadlock và cơ chế Zero-Trust AI chặn mọi JSON không qua kiểm định trước khi nạp vào Engine (chặn được lỗi cấu trúc và lỗi kiểm được bằng máy; không bảo đảm nội dung đúng ý giáo viên).
 
 ---
 
-## 9. Danh mục 13 Tài liệu Nghiên cứu & Thiết kế Kỹ thuật CPF
+## 9. Hiện trạng cài đặt (đối chiếu nhánh `dev`, 2026-11-07)
+
+Mục 1–8 là thiết kế. Code trên `dev` (`frontend/src/services/pipeline/`) mới làm được một phần:
+
+| Thiết kế | Đã có trên `dev` |
+|---|---|
+| AI sinh Custom JSON DSL | Chưa; scene graph do code TypeScript dựng từ regex trên mô tả |
+| 20 khối nguyên tử | 3 kiểu tương tác gắn với 3 game: `SLING` (bắn cung), `CATCHER` (hứng quả), `DIRECT_TAP` (chạm bong bóng); nội dung luôn là số chẵn/lẻ |
+| Module 1 kiểm định, tự sửa | Có 3 hàm cổng trong `pipelineOrchestrator.ts` nhưng luồng giáo viên không gọi; không có vòng tự sửa |
+| Module 2 Assembler, Module 3 Runtime | `cpfRuntime.ts` chạy 3 cơ chế trên |
+| Module 4 Konva, asset SVG | `CpfUniversalCanvas.tsx` vẽ bằng hình học Konva, chưa nạp asset |
+
+Đề xuất đưa thiết kế mục 1–8 vào code: `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md` (đã duyệt hướng 2026-11-07).
+
+## 10. Danh mục 13 Tài liệu Nghiên cứu & Thiết kế Kỹ thuật CPF
 Toàn bộ hệ thống tài liệu nghiên cứu chuyên sâu về Composable Primitives Framework và bài toán OOD:
 
-### 9.1. Khung Giải pháp & Tổng quan
+### 10.1. Khung Giải pháp & Tổng quan
 - [[00. Tổng quan vấn đề giáo viên mô tả ngoài danh mục game|Báo cáo Đặt vấn đề Giáo viên mô tả ngoài danh mục]]
 - [[Giải pháp cho vấn đề nếu như giáo viên gửi mô tả nằm ngoài cơ chế game hiện có|Đề xuất Giải pháp Kỹ thuật chi tiết]]
 - [[Báo cáo kỹ thuật tổng quan OOD (Technical Spike)|Tài liệu Kỹ thuật Kiến trúc CPF]]
 
-### 9.2. Bốn Module Độc lập của CPF Engine
+### 10.2. Bốn Module Độc lập của CPF Engine
 - [[Module 1 Bộ Phân giải & Kiểm định Khối (Parser & Validator)|Module 1: Parser & Zero-Trust Validator]]
 - [[Module 2 Bộ Lắp ghép Đồ thị Trò chơi (Scene & Graph Assembler)|Module 2: Scene & Graph Assembler]]
 - [[Module 3 Máy ảo Điều phối Đa năng (Virtual Runtime Engine)|Module 3: Virtual Runtime Engine 60 FPS]]
 - [[Module 4 Tầng Kết xuất Phần cứng Canvas (Konva Driver)|Module 4: Konva Hardware Driver]]
 
-### 9.3. Sáu Luận điểm & Kỹ thuật Chi tiết
+### 10.3. Sáu Luận điểm & Kỹ thuật Chi tiết
 - [[Chuyên đề 1 - Thiết kế trước, viết code sau (GDD-First)|1. Thiết kế trước, viết code sau]]
 - [[Chuyên đề 2 - Ngân hàng mẫu cơ chế trò chơi (Pattern Bank & RAG)|2. Ngân hàng mẫu cơ chế (Pattern Bank)]]
 - [[Chuyên đề 3 - Hồ sơ độ tuổi kiểm tra được bằng máy (Age Profiles)|3. Hồ sơ đối tượng kiểm tra được bằng máy]]

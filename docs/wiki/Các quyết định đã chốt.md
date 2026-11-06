@@ -1,9 +1,19 @@
 # Các quyết định đã chốt
 
-Nguồn: `docs/decisions.md` (2026-10-14 đến 2026-10-16). Tóm tắt theo chủ đề; đủ chi tiết và lý do xem nguồn.
-Cập nhật: 2026-11-02
+Nguồn: `docs/decisions.md` (2026-10-14 đến 2026-11-07). Tóm tắt theo chủ đề; đủ chi tiết và lý do xem nguồn.
+Cập nhật: 2026-11-07 (thêm Pipeline v2)
 
 Các quyết định này ra đời trước đợt P1–P4, và thuộc giai đoạn giao diện cũ. Một phần có thể đã bị `docs/ui/SPEC.md` thay thế, ví dụ soạn thảo nay tự lưu. **Chưa đối chiếu từng mục với code.**
+
+## Pipeline tạo game v2 (2026-11-07)
+
+- AI ở backend lập kế hoạch và sinh JSON; code kiểm định, tự tính đáp án; runtime chỉ chạy JSON. Bỏ định tuyến regex trên frontend.
+- Lưu game CPF bằng loại `CUSTOM` với bảng riêng (mở rộng kiến trúc `QuestionGame` đã chốt; cách ánh xạ chốt ở Pha 0).
+- Mở contract CPF v2 cạnh DSL v1.0.0, viết trước code.
+- Nguồn asset CC0 do Claude đề xuất, người dùng duyệt trước khi tải.
+- Commit phần đang sửa trên `dev`, làm tiếp trên `dev`.
+
+Thiết kế: `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md`.
 
 ## Dữ liệu mô phỏng
 

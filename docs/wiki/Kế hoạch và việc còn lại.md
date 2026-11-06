@@ -1,7 +1,7 @@
 # Kế hoạch và việc còn lại
 
 Nguồn: `docs/ui/PLAN.md`, `docs/ui/SPEC.md` (2026-10-27), `docs/Dinh_huong_de_tai.md` mục 7.
-Cập nhật: 2026-11-02
+Cập nhật: 2026-11-07 (thêm Pipeline v2)
 
 Kế hoạch hiện hành là `docs/ui/PLAN.md` (P0–P5). Kế hoạch cũ đầu tháng 10 đã bỏ, các ý còn dùng được chép xuống dưới. Không tài liệu nào có phân công theo người hay hạn nộp.
 
@@ -32,6 +32,21 @@ Chưa đối chiếu từng mục với code, một số mục có thể đã xo
 
 - Phân loại mô tả A–D, phản hồi nhóm C, D. Xem [[Mô tả ngoài danh mục game]].
 - Bổ sung tựa game mới cho nhóm C.
+
+## Pipeline tạo game v2 (duyệt hướng 2026-11-07)
+
+Thiết kế ở `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md`. Sáu pha, mỗi pha dừng chờ duyệt:
+
+| Pha | Nội dung |
+|---|---|
+| 0 | Chốt schema CPF v2, bộ 40 mô tả kỳ vọng |
+| 1 | Runtime CPF tổng quát + manifest asset |
+| 2 | Validator CPF ở backend |
+| 3 | AI sinh GamePlan + CPF, vòng tự sửa |
+| 4 | Nối giao diện, lưu bản chụp, bỏ regex router |
+| 5 | Làm đẹp đồ họa |
+
+Bốn quyết định đã chốt (xem [[Các quyết định đã chốt]]); việc còn chờ ở mục Pipeline v2 của [[Điểm lệch và việc cần chốt]]. Trước Pha 0: commit phần đang sửa trên `dev`.
 
 ## Nợ và rủi ro đã ghi
 

@@ -87,6 +87,16 @@ Cập nhật: 2026-10-31
 - **AI dự phòng:** nhiều chỗ nhắc nhưng chưa nêu nhà cung cấp nào; bảng công nghệ chỉ có Gemini.
 - **Mô tả ngoài danh mục:** chưa có trong UC-02, xem [[Mô tả ngoài danh mục game]].
 
+## Pipeline v2 (2026-11-07)
+
+Bốn quyết định đã chốt, ghi ở `docs/decisions.md` và `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md` mục 5: lưu CPF bằng loại `CUSTOM` bảng riêng, mở contract CPF v2, Claude đề xuất nguồn asset CC0, làm tiếp trên `dev` sau khi commit.
+
+Còn chờ:
+- Duyệt nguồn asset đề xuất (Kenney.nl, Glitch Public Domain Archive) ở mục 5.1 của spec.
+- Cách ánh xạ `CUSTOM` vào cây `QuestionGame` (JOINED): chốt ở Pha 0. Đây là điểm mở rộng kiến trúc đã chốt trong `CLAUDE.md`, nên nhóm cần biết.
+
+Lệch giữa thiết kế và code `dev` ghi ở [[Trạng thái thực tế]].
+
 ## Giới hạn của trang này
 
 - Đã xem 5 sơ đồ; các sơ đồ tuần tự còn lại chưa đối chiếu.

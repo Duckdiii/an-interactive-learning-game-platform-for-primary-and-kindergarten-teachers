@@ -6,7 +6,7 @@ Cửa vào duy nhất của kho: cần tài liệu gì thì bắt đầu từ đ
 
 - [[Tổng quan đề tài]]: đề tài giải quyết gì, cho ai, phạm vi, rủi ro.
 - [[Góp ý Thầy Thanh và 8 vấn đề]]: nhận xét chỉ đạo từ Thầy Thanh (buổi họp 13/10) và giải pháp cho 8 vấn đề cốt lõi.
-- [[Cơ sở khoa học và GamED-AI]]: căn cứ học thuật quốc tế GamED.AI (arXiv 2024), chống ảo giác 100% bằng Quality Gates.
+- [[Cơ sở khoa học và GamED-AI]]: căn cứ học thuật quốc tế GamED.AI (arXiv 2024), chống ảo giác bằng Quality Gates (thiết kế; chưa nằm trên luồng chạy thật, xem [[Trạng thái thực tế]]).
 - [[Trạng thái thực tế]]: đã làm tới đâu, đối chiếu từ code.
 - [[Điểm lệch và việc cần chốt]]: các điểm lệch giữa tài liệu và khoảng trống đặc tả. Đọc trước khi sửa SRS hoặc viết báo cáo.
 - [[Kế hoạch và việc còn lại]]: P0–P5, nợ, rủi ro, thứ tự nên ưu tiên.
@@ -74,6 +74,7 @@ Khi viết code hay test, đọc ở đây, không đọc bản tóm tắt.
 | Wireframe | `docs/ui/wireframes/` (không xem được trong Obsidian) |
 | Quyết định | [[decisions]] |
 | Số đo thí nghiệm sinh game | `docs/task-1-results/` |
+| Thiết kế Pipeline tạo game v2 (đã duyệt hướng) | [[2026-11-07-pipeline-v2-design]] |
 
 ## Nằm ngoài vault
 

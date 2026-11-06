@@ -1,7 +1,7 @@
 # Trạng thái thực tế
 
 Nguồn: đối chiếu code và lịch sử git trên nhánh `everyone/UI` ngày 2026-10-31, `docs/ui/PLAN.md`, `docs/openapi/openapi.yaml`.
-Cập nhật: 2026-11-02
+Cập nhật: 2026-11-07 (thêm mục nhánh `dev`)
 
 Trang này trả lời "đã làm tới đâu". Đã kiểm sự tồn tại của file, route và commit; **chưa chạy thử ứng dụng** nên chưa biết từng màn hoàn thiện đến đâu. Số phần trăm trong tài liệu định hướng không dùng được.
 
@@ -38,6 +38,20 @@ Có 178 file test trên `everyone/UI`.
 - Tầng sinh game có `GameGenerationService`, `GameContentGenerator`; chưa có `POST /games/generate`.
 - OpenAPI: 49 operation; 2 `implemented`, 2 `extended-pending`, 45 `planned`. Xem [[Bản đồ API]].
 - Diff backend giữa `main` và `everyone/UI` chỉ là một dòng `pom.xml`.
+
+## Nhánh `dev`: pipeline tạo game thử nghiệm (đối chiếu 2026-11-07)
+
+Các mục trên là của `everyone/UI`. Nhánh `dev` (commit `6c71f36` cùng 18 file sửa chưa commit) thử pipeline tạo game ở `frontend/src/services/pipeline/`:
+
+- Định tuyến Preset/CPF và chọn cơ chế bằng regex từ khóa, không gọi AI. Regex khớp nhầm chuỗi con (ví dụ "trò chơi" chứa "ro" nên ra game hứng quả).
+- CPF có 3 cơ chế viết sẵn (bắn cung, hứng quả, chạm bong bóng), nội dung luôn là số chẵn/lẻ. Preset chỉ sinh Quiz cộng/trừ. Bộ gợi ý Bloom trả danh sách cố định.
+- 3 cổng kiểm định nằm trong `runGamePipeline`, nhưng giao diện gọi thẳng `generateDynamicCpfSceneGraph` nên không đi qua cổng.
+- Màn chơi và trình chiếu sinh lại scene graph mỗi lần mở (số ngẫu nhiên), không dùng bản giáo viên đã xem.
+- Canvas CPF vẽ bằng hình học Konva, chưa dùng kho SVG.
+- 64 test trong `services/pipeline` đều qua (chạy 2026-11-07), nhưng chỉ dùng câu mẫu.
+- Backend có `GameGenerationController` và đường sinh DSL bằng Gemini, nhưng đường CPF không đi qua backend.
+
+Đề xuất sửa: `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md` (đã duyệt hướng 2026-11-07).
 
 ## Việc lớn còn lại
 
