@@ -7,6 +7,11 @@ import CreateProgressPanel from '../components/create/CreateProgressPanel'
 import GameTypeSuggestionStep from '../components/create/GameTypeSuggestionStep'
 import IdeaSuggestions from '../components/create/IdeaSuggestions'
 import LessonContextPicker from '../components/create/LessonContextPicker'
+import ClarificationDialog from '../components/create/ClarificationDialog'
+import {
+  assessPromptCompleteness,
+  type CompletenessAssessment,
+} from '../services/pipeline/promptCompletenessAssessor'
 import { deduceThemeFromText } from '../utils/assetResolver'
 import FileDropZone from '../components/ui/FileDropZone'
 import FormField from '../components/ui/FormField'
@@ -70,6 +75,8 @@ export default function CreateGamePage() {
   const wasCreating = useRef(false)
   // Mô tả và khối của lần tạo đang chạy, để màn tiến trình hiện (không đọc ref lúc vẽ).
   const [creatingInput, setCreatingInput] = useState({ idea: '', gradeLevel: '' })
+  const [clarificationOpen, setClarificationOpen] = useState(false)
+  const [assessment, setAssessment] = useState<CompletenessAssessment | null>(null)
 
   // Vừa tạo xong mà còn ở trang (lỗi một phần hoặc đã hủy): khối kết quả mới được vẽ lại sau màn tiến trình,
   // nên chờ nó có trong DOM rồi mới đưa tiêu điểm tới để người dùng bàn phím và trình đọc màn hình biết ngay.
@@ -141,6 +148,22 @@ export default function CreateGamePage() {
     suggestionsMutation.mutate(lastInput.current)
   }
 
+  const proceedToSuggest = (finalIdea: string, nextMode: Mode) => {
+    setMode(nextMode)
+    setSelectedTypes([])
+    lastInput.current = {
+      idea: nextMode === 'random' ? '' : finalIdea.trim(),
+      gradeLevel: lesson.gradeLevel,
+      subject: lesson.subject,
+    }
+    setStep('suggest')
+    requestSuggestions()
+    setTimeout(() => {
+      window.scrollTo({ top: 0 })
+      stepHeadingRef.current?.focus({ preventScroll: true })
+    }, 0)
+  }
+
   const submit = (nextMode: Mode) => {
     const problem = checkGenerate({ idea, hasFile: file !== null }, nextMode)
 
@@ -148,25 +171,35 @@ export default function CreateGamePage() {
     touch()
 
     if (problem) {
-      // Chuyển tiêu điểm tới ô lỗi (sau khi React đã vẽ aria-invalid).
       setTimeout(() => document.getElementById('create-idea')?.focus(), 0)
       return
     }
 
-    setMode(nextMode)
-    setSelectedTypes([])
-    lastInput.current = {
-      idea: nextMode === 'random' ? '' : idea.trim(),
-      gradeLevel: lesson.gradeLevel,
-      subject: lesson.subject,
+    if (nextMode === 'random' || file !== null) {
+      proceedToSuggest('', nextMode)
+      return
     }
-    setStep('suggest')
-    requestSuggestions()
-    // Về đầu trang để thấy cả thanh các bước, rồi mới chuyển tiêu điểm (không để trình duyệt tự cuộn tới tiêu đề).
-    setTimeout(() => {
-      window.scrollTo({ top: 0 })
-      stepHeadingRef.current?.focus({ preventScroll: true })
-    }, 0)
+
+    // Đánh giá độ đầy đủ sư phạm (CoT Reasoning & Interactive Clarification)
+    const assess = assessPromptCompleteness(idea, lesson.gradeLevel, lesson.subject)
+    if (!assess.isComplete) {
+      setAssessment(assess)
+      setClarificationOpen(true)
+      return
+    }
+
+    proceedToSuggest(idea, nextMode)
+  }
+
+  const handleApplyClarification = (enrichedPrompt: string) => {
+    setClarificationOpen(false)
+    setIdea(enrichedPrompt)
+    proceedToSuggest(enrichedPrompt, 'idea')
+  }
+
+  const handleSkipClarification = () => {
+    setClarificationOpen(false)
+    proceedToSuggest(idea, 'idea')
   }
 
   const backToDescribe = () => {
@@ -451,6 +484,13 @@ export default function CreateGamePage() {
         {step === 'describe' ? (
           <IdeaSuggestions subject={lesson.subject} group={group} onPick={pickIdea} />
         ) : null}
+        <ClarificationDialog
+          isOpen={clarificationOpen}
+          assessment={assessment}
+          originalPrompt={idea}
+          onApply={handleApplyClarification}
+          onSkip={handleSkipClarification}
+        />
       </div>
     </div>
   )

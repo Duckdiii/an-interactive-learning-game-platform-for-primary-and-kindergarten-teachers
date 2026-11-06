@@ -510,3 +510,47 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
     )
   })
 })
+
+describe('Làm rõ mục tiêu sư phạm (Interactive Clarification - Giai đoạn B)', () => {
+  it('prompt ngắn/mơ hồ ("toán lớp 2"): mở hộp thoại làm rõ, bấm Áp dụng thì làm giàu prompt và chuyển sang bước đề xuất', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    fireEvent.change(ideaBox(), { target: { value: 'toán lớp 2' } })
+    await user.click(submit())
+
+    // Hộp thoại làm rõ xuất hiện
+    expect(await screen.findByRole('dialog', { name: /Trợ lý AI đồng hành: Làm rõ mục tiêu tiết dạy/i })).toBeInTheDocument()
+    expect(screen.getByText(/Em thấy Thầy\/Cô muốn chuẩn bị bài học cho học sinh/i)).toBeInTheDocument()
+
+    // Bấm áp dụng
+    await user.click(screen.getByRole('button', { name: /Áp dụng & Gợi ý trò chơi/i }))
+
+    // Chuyển sang bước đề xuất
+    expect(await screen.findByRole('heading', { name: 'AI đề xuất kiểu chơi cho bài này' })).toBeInTheDocument()
+    expect(mockedSuggest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        idea: expect.stringContaining('toán lớp 2 ('),
+      })
+    )
+  })
+
+  it('prompt ngắn/mơ hồ: bấm "Bỏ qua & Dùng mặc định" thì giữ nguyên prompt và sang bước đề xuất', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    fireEvent.change(ideaBox(), { target: { value: 'toán lớp 2' } })
+    await user.click(submit())
+
+    expect(await screen.findByRole('dialog', { name: /Trợ lý AI đồng hành: Làm rõ mục tiêu tiết dạy/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Bỏ qua & Dùng mặc định/i }))
+
+    expect(await screen.findByRole('heading', { name: 'AI đề xuất kiểu chơi cho bài này' })).toBeInTheDocument()
+    expect(mockedSuggest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        idea: 'toán lớp 2',
+      })
+    )
+  })
+})
