@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "2.0.0",
+  "kind": "CPF",
+  "metadata": { "title": "Đua xe bảng nhân 2", "subject": "MATH", "gradeLevel": "GRADE_2", "topic": "Bảng nhân 2" },
+  "world": { "backgroundId": "bg.road", "mascotId": "mascot.leo" },
+  "content": {
+    "instruction": "Chạm vào biển có kết quả đúng để xe chạy về đích!",
+    "rounds": [
+      { "id": "r1", "task": "PICK_ONE", "prompt": "2 x 3 = ?", "choices": [ { "id": "c1", "label": "5" }, { "id": "c2", "label": "6" }, { "id": "c3", "label": "8" } ] },
+      { "id": "r2", "task": "PICK_ONE", "prompt": "2 x 5 = ?", "choices": [ { "id": "c1", "label": "10" }, { "id": "c2", "label": "7" }, { "id": "c3", "label": "12" } ] },
+      { "id": "r3", "task": "PICK_ONE", "prompt": "2 x 4 = ?", "choices": [ { "id": "c1", "label": "6" }, { "id": "c2", "label": "9" }, { "id": "c3", "label": "8" } ] }
+    ]
+  },
+  "answerKey": {
+    "rounds": [
+      { "roundId": "r1", "correctChoiceIds": ["c2"] },
+      { "roundId": "r2", "correctChoiceIds": ["c1"] },
+      { "roundId": "r3", "correctChoiceIds": ["c3"] }
+    ]
+  },
+  "entities": [
+    {
+      "id": "car",
+      "assetId": "object.car",
+      "placement": { "region": "BOTTOM", "arrangement": "SINGLE" },
+      "role": "PROGRESS"
+    },
+    {
+      "id": "signs",
+      "assetId": "object.sign",
+      "bindTo": "choices",
+      "placement": { "region": "MIDDLE", "arrangement": "ROW" },
+      "motion": { "type": "BOB", "speed": "SLOW" }
+    }
+  ],
+  "rules": [
+    {
+      "on": { "type": "TAP", "target": "signs" },
+      "do": [
+        {
+          "type": "CHECK",
+          "onCorrect": [
+            { "type": "ADVANCE", "subject": "car" },
+            { "type": "EFFECT", "name": "STARS", "at": "car" },
+            { "type": "SOUND", "name": "WHOOSH" },
+            { "type": "SCORE", "add": 1 }
+          ],
+          "onWrong": [
+            { "type": "EFFECT", "name": "WIGGLE", "at": "$subject" },
+            { "type": "SOUND", "name": "GENTLE_WRONG" }
+          ]
+        }
+      ]
+    }
+  ]
+}

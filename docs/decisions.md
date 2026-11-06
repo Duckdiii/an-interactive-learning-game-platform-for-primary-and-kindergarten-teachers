@@ -64,6 +64,7 @@ Mỗi dòng: **quyết định**, lý do. Tất cả mục dưới đây đã đ
 | 2026-11-07 | **Mở contract CPF v2** đứng cạnh DSL v1.0.0 (không sửa DSL): tài liệu, JSON Schema và endpoint trong `openapi.yaml` viết trước, code theo sau | Bạn quyết; theo quy tắc "thiết kế trước, code sau" của contract |
 | 2026-11-07 | **Nguồn asset:** Claude đề xuất bộ CC0 cụ thể, bạn duyệt trước khi tải; chỉ nhận asset có giấy phép ghi rõ | Bạn quyết |
 | 2026-11-07 | **Nhánh:** commit phần đang sửa trên `dev` trước, rồi làm pipeline v2 tiếp trên `dev` | Bạn quyết |
+| 2026-11-07 | **Ánh xạ `CUSTOM` (phương án B):** thêm `CUSTOM` vào `GameType`; mỗi game CPF có đúng một `CpfQuestion` (subclass thứ 11 của `QuestionGame`, JOINED) giữ toàn bộ JSON CPF đã duyệt trong cột `jsonb` của bảng riêng. Phải sửa kèm các chỗ duyệt mọi `GameType` (`GameDslSchemaRegistry`, `GameContentStrategyRegistry`, `GameDslSchemaTest`) để app vẫn khởi động; kết quả từng màn ghi qua `PlayInteractionDetail` (subclass cho CPF chốt khi làm endpoint chơi). Không chọn A (tách mỗi màn một entity, sửa nhiều nhất, đáp án/luật cấp game bị chia nhỏ) và C (bảng ngoài cây kế thừa, phải xây đường chơi/chấm song song) | Bạn chọn sau khi xem 3 phương án của `backend-architect-reviewer` |
 
 ## Backlog
 

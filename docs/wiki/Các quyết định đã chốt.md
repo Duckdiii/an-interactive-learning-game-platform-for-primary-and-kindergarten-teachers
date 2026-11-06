@@ -8,7 +8,7 @@ Các quyết định này ra đời trước đợt P1–P4, và thuộc giai đ
 ## Pipeline tạo game v2 (2026-11-07)
 
 - AI ở backend lập kế hoạch và sinh JSON; code kiểm định, tự tính đáp án; runtime chỉ chạy JSON. Bỏ định tuyến regex trên frontend.
-- Lưu game CPF bằng loại `CUSTOM` với bảng riêng (mở rộng kiến trúc `QuestionGame` đã chốt; cách ánh xạ chốt ở Pha 0).
+- Lưu game CPF bằng loại `CUSTOM`: mỗi game một `CpfQuestion` (subclass thứ 11 của `QuestionGame`) giữ toàn bộ JSON trong cột `jsonb` của bảng riêng (phương án B).
 - Mở contract CPF v2 cạnh DSL v1.0.0, viết trước code.
 - Nguồn asset CC0 do Claude đề xuất, người dùng duyệt trước khi tải.
 - Commit phần đang sửa trên `dev`, làm tiếp trên `dev`.

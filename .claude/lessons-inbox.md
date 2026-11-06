@@ -17,6 +17,20 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-07 — Test schema "chặn biến thể sai" xanh vì lý do khác lý do muốn kiểm
+- Lỗi: trong `CpfGameSchemaTest`, các biến thể sai chỉ assert `isNotEmpty()`; ba biến thể bị chặn nhờ ràng buộc khác (thêm 1 zone vấp `minItems: 2` thay vì luật "không có zones ở màn PICK"; CHECK lồng thiếu `onWrong` nên vấp `required`). Xóa đúng ràng buộc cần bảo vệ thì test vẫn xanh. Lặp lại mẫu lỗi của mục 2026-10-14 "Test hồi quy qua cả khi chưa có bản sửa".
+- Phát hiện nhờ: `reviewer` (2 lượt), `backend-architect-reviewer`.
+- Nguyên nhân gốc: viết biến thể sai mà không kiểm biến thể đó chỉ sai đúng một chỗ.
+- Cách chặn: mỗi test biến thể sai phải assert vị trí lỗi (`getInstanceLocation`) hoặc từ khóa, và biến thể phải hợp lệ ở mọi chỗ khác (đủ số phần tử tối thiểu, đủ trường bắt buộc). Có thể đưa thành mục kiểm của `reviewer` cho mọi test schema.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-07 — Thiết kế luật kết thúc game không xét trường hợp trẻ trả lời sai
+- Lỗi: bản nháp CPF v2 đầu tiên có `finish: PROGRESS_REACHED_GOAL` (đích = số màn) trong khi màn PICK_ONE kết thúc sau một lần chọn; trẻ sai một màn thì xe không bao giờ tới đích, game treo. Màn PICK_ALL dạng hứng quả cũng không nói vật rơi mất có sinh lại không.
+- Phát hiện nhờ: `reviewer`.
+- Nguyên nhân gốc: chỉ kiểm ví dụ theo đường chơi đúng, không lần theo đường trẻ chọn sai.
+- Cách chặn: khi thiết kế luật chơi/runtime, liệt kê cả đường sai cho từng loại màn và chứng minh game luôn đi tới cuối; ở Pha 1 có test runtime giả lập trẻ chọn sai mọi lần.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-01 — Chỉ chạy test thư mục đang sửa nên sót luật kiểm toàn repo
 - Lỗi: ba bước P5 chỉ chạy `src/player/room`, nên không thấy `tokens.test.tsx` cấm mã màu hex trong `src/player`; màu viết cứng trong 5 file tới bước thứ tư mới lộ.
 - Phát hiện nhờ: `test-verifier` chạy toàn bộ test.

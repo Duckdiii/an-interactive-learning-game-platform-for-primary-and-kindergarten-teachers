@@ -93,7 +93,10 @@ Bốn quyết định đã chốt, ghi ở `docs/decisions.md` và `docs/superpo
 
 Còn chờ:
 - Duyệt nguồn asset đề xuất (Kenney.nl, Glitch Public Domain Archive) ở mục 5.1 của spec.
-- Cách ánh xạ `CUSTOM` vào cây `QuestionGame` (JOINED): chốt ở Pha 0. Đây là điểm mở rộng kiến trúc đã chốt trong `CLAUDE.md`, nên nhóm cần biết.
+- Schema CPF v2 đã duyệt 2026-11-07; đóng băng sau khi cài đặt Pha 1–3 không cần đổi thêm.
+- Cách chấm khi học sinh chơi CPF (chấm từng lần chọn, khác quy ước "nộp một lần" của renderer nhiều phần tử): chốt ở Pha 3.
+
+Đã chốt 2026-11-07: ánh xạ `CUSTOM` theo phương án B (một `CpfQuestion` giữ JSON, subclass thứ 11 của `QuestionGame`). Đây là mở rộng kiến trúc 10 subclass ghi trong `CLAUDE.md`, nhóm cần biết.
 
 Lệch giữa thiết kế và code `dev` ghi ở [[Trạng thái thực tế]].
 

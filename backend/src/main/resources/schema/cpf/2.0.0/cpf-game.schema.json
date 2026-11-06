@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CPF Game v2.0.0",
+  "description": "Game ngoài danh mục (Composable Primitives Framework). Đặc tả: docs/cpf-game-v2.0.0.md",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "metadata", "world", "content", "answerKey", "entities", "rules"],
+  "properties": {
+    "schemaVersion": { "const": "2.0.0" },
+    "kind": { "const": "CPF" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "subject", "gradeLevel", "topic"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "subject": { "enum": ["MATH", "VIETNAMESE", "ENGLISH"] },
+        "gradeLevel": { "enum": ["KINDERGARTEN", "GRADE_1", "GRADE_2", "GRADE_3", "GRADE_4", "GRADE_5"] },
+        "topic": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["backgroundId"],
+      "properties": {
+        "backgroundId": { "type": "string", "pattern": "^bg\\.[a-z0-9_]+$", "maxLength": 60 },
+        "mascotId": { "type": "string", "pattern": "^mascot\\.[a-z0-9_]+$", "maxLength": 60 },
+        "musicId": { "type": "string", "pattern": "^music\\.[a-z0-9_]+$", "maxLength": 60 }
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instruction", "rounds"],
+      "properties": {
+        "instruction": { "$ref": "#/$defs/text120" },
+        "rounds": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/round" } }
+      }
+    },
+    "answerKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rounds"],
+      "properties": {
+        "rounds": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/roundAnswer" } }
+      }
+    },
+    "entities": { "type": "array", "minItems": 1, "maxItems": 10, "items": { "$ref": "#/$defs/entity" } },
+    "rules": { "type": "array", "minItems": 1, "maxItems": 8, "items": { "$ref": "#/$defs/rule" } }
+  },
+  "$defs": {
+    "text120": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "label": { "type": "string", "minLength": 1, "maxLength": 30 },
+    "assetId": {
+      "type": "string",
+      "pattern": "^(animal|fruit|object|vehicle|sea|space|jungle|farm|ui)\\.[a-z0-9_]+$",
+      "maxLength": 60
+    },
+    "entityId": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,29}$" },
+    "subjectRef": { "type": "string", "pattern": "^([a-z][a-z0-9_]{0,29}|\\$subject)$" },
+    "roundId": { "type": "string", "pattern": "^r[1-9][0-9]?$" },
+    "choiceId": { "type": "string", "pattern": "^c[1-8]$" },
+    "zoneId": { "type": "string", "pattern": "^z[1-4]$" },
+    "round": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "task", "prompt", "choices"],
+      "properties": {
+        "id": { "$ref": "#/$defs/roundId" },
+        "task": { "enum": ["PICK_ONE", "PICK_ALL", "SORT"] },
+        "prompt": { "$ref": "#/$defs/text120" },
+        "choices": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label"],
+            "properties": {
+              "id": { "$ref": "#/$defs/choiceId" },
+              "label": { "$ref": "#/$defs/label" },
+              "assetId": { "$ref": "#/$defs/assetId" }
+            }
+          }
+        },
+        "zones": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label"],
+            "properties": {
+              "id": { "$ref": "#/$defs/zoneId" },
+              "label": { "$ref": "#/$defs/label" }
+            }
+          }
+        }
+      },
+      "if": { "properties": { "task": { "const": "SORT" } } },
+      "then": { "required": ["zones"] },
+      "else": { "not": { "required": ["zones"] } }
+    },
+    "roundAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roundId"],
+      "properties": {
+        "roundId": { "$ref": "#/$defs/roundId" },
+        "correctChoiceIds": { "type": "array", "minItems": 1, "maxItems": 7, "uniqueItems": true, "items": { "$ref": "#/$defs/choiceId" } },
+        "placements": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["choiceId", "zoneId"],
+            "properties": {
+              "choiceId": { "$ref": "#/$defs/choiceId" },
+              "zoneId": { "$ref": "#/$defs/zoneId" }
+            }
+          }
+        }
+      },
+      "oneOf": [
+        { "required": ["correctChoiceIds"], "not": { "required": ["placements"] } },
+        { "required": ["placements"], "not": { "required": ["correctChoiceIds"] } }
+      ]
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "assetId", "placement"],
+      "properties": {
+        "id": { "$ref": "#/$defs/entityId" },
+        "assetId": { "$ref": "#/$defs/assetId" },
+        "bindTo": { "enum": ["choices", "zones"] },
+        "placement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["region", "arrangement"],
+          "properties": {
+            "region": { "enum": ["TOP", "MIDDLE", "BOTTOM", "LEFT", "RIGHT", "CENTER"] },
+            "arrangement": { "enum": ["SINGLE", "ROW", "GRID", "SCATTER"] }
+          }
+        },
+        "motion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "enum": ["STATIC", "FALL", "FLOAT_UP", "PATROL_X", "BOB"] },
+            "speed": { "enum": ["SLOW", "MEDIUM", "FAST"] },
+            "spawn": { "enum": ["ALL_AT_ONCE", "STREAM"] }
+          }
+        },
+        "control": { "enum": ["DRAG_X", "DRAG_FREE", "AIM_SHOOT"] },
+        "role": { "enum": ["PROGRESS"] }
+      },
+      "if": { "required": ["motion"], "properties": { "motion": { "required": ["spawn"] } } },
+      "then": { "required": ["bindTo"] }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["on", "do"],
+      "properties": {
+        "on": { "$ref": "#/$defs/trigger" },
+        "do": { "type": "array", "minItems": 1, "maxItems": 6, "items": { "$ref": "#/$defs/action" } }
+      }
+    },
+    "trigger": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "target"],
+          "properties": { "type": { "const": "TAP" }, "target": { "$ref": "#/$defs/entityId" } }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "a", "b"],
+          "properties": { "type": { "const": "COLLIDE" }, "a": { "$ref": "#/$defs/entityId" }, "b": { "$ref": "#/$defs/entityId" } }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "item", "zone"],
+          "properties": { "type": { "const": "DROP" }, "item": { "$ref": "#/$defs/entityId" }, "zone": { "$ref": "#/$defs/entityId" } }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type"],
+          "properties": { "type": { "const": "ROUND_START" } }
+        }
+      ]
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "onCorrect", "onWrong"],
+          "properties": {
+            "type": { "const": "CHECK" },
+            "onCorrect": { "type": "array", "maxItems": 4, "items": { "$ref": "#/$defs/simpleAction" } },
+            "onWrong": { "type": "array", "maxItems": 4, "items": { "$ref": "#/$defs/simpleAction" } }
+          }
+        },
+        { "$ref": "#/$defs/simpleAction" }
+      ]
+    },
+    "simpleAction": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "subject", "to"],
+          "properties": { "type": { "const": "MOVE_TO" }, "subject": { "$ref": "#/$defs/subjectRef" }, "to": { "$ref": "#/$defs/entityId" } }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "subject"],
+          "properties": { "type": { "enum": ["ADVANCE", "REMOVE"] }, "subject": { "$ref": "#/$defs/subjectRef" } }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "name", "at"],
+          "properties": {
+            "type": { "const": "EFFECT" },
+            "name": { "enum": ["STARS", "CONFETTI", "POP", "GLOW", "WIGGLE"] },
+            "at": { "$ref": "#/$defs/subjectRef" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "name"],
+          "properties": { "type": { "const": "SOUND" }, "name": { "enum": ["CORRECT", "GENTLE_WRONG", "POP", "WHOOSH"] } }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "add"],
+          "properties": { "type": { "const": "SCORE" }, "add": { "type": "integer", "minimum": 1, "maximum": 10 } }
+        }
+      ]
+    }
+  }
+}

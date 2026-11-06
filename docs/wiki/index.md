@@ -75,6 +75,7 @@ Khi viết code hay test, đọc ở đây, không đọc bản tóm tắt.
 | Quyết định | [[decisions]] |
 | Số đo thí nghiệm sinh game | `docs/task-1-results/` |
 | Thiết kế Pipeline tạo game v2 (đã duyệt hướng) | [[2026-11-07-pipeline-v2-design]] |
+| CPF Game v2.0.0, contract game ngoài danh mục (đã duyệt) | [[cpf-game-v2.0.0]] |
 
 ## Nằm ngoài vault
 

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "2.0.0",
+  "kind": "CPF",
+  "metadata": { "title": "Câu cá từ ghép", "subject": "VIETNAMESE", "gradeLevel": "GRADE_2", "topic": "Nhận biết từ ghép" },
+  "world": { "backgroundId": "bg.ocean", "mascotId": "mascot.mimi" },
+  "content": {
+    "instruction": "Chạm vào chú cá mang từ ghép để câu lên thuyền nhé!",
+    "rounds": [
+      { "id": "r1", "task": "PICK_ONE", "prompt": "Từ nào là từ ghép?", "choices": [ { "id": "c1", "label": "xe đạp" }, { "id": "c2", "label": "lung linh" }, { "id": "c3", "label": "lấp lánh" } ] },
+      { "id": "r2", "task": "PICK_ONE", "prompt": "Từ nào là từ ghép?", "choices": [ { "id": "c1", "label": "rì rào" }, { "id": "c2", "label": "bàn ghế" }, { "id": "c3", "label": "xinh xắn" } ] }
+    ]
+  },
+  "answerKey": {
+    "rounds": [
+      { "roundId": "r1", "correctChoiceIds": ["c1"] },
+      { "roundId": "r2", "correctChoiceIds": ["c2"] }
+    ]
+  },
+  "entities": [
+    {
+      "id": "fish",
+      "assetId": "sea.clownfish",
+      "bindTo": "choices",
+      "placement": { "region": "MIDDLE", "arrangement": "SCATTER" },
+      "motion": { "type": "PATROL_X", "speed": "SLOW" }
+    },
+    {
+      "id": "boat",
+      "assetId": "object.boat",
+      "placement": { "region": "TOP", "arrangement": "SINGLE" }
+    }
+  ],
+  "rules": [
+    {
+      "on": { "type": "TAP", "target": "fish" },
+      "do": [
+        {
+          "type": "CHECK",
+          "onCorrect": [
+            { "type": "MOVE_TO", "subject": "$subject", "to": "boat" },
+            { "type": "EFFECT", "name": "CONFETTI", "at": "boat" },
+            { "type": "SOUND", "name": "CORRECT" },
+            { "type": "SCORE", "add": 1 }
+          ],
+          "onWrong": [
+            { "type": "EFFECT", "name": "WIGGLE", "at": "$subject" },
+            { "type": "SOUND", "name": "GENTLE_WRONG" }
+          ]
+        }
+      ]
+    }
+  ]
+}

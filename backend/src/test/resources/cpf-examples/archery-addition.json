@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "2.0.0",
+  "kind": "CPF",
+  "metadata": { "title": "Bắn cung phép cộng", "subject": "MATH", "gradeLevel": "GRADE_1", "topic": "Phép cộng trong phạm vi 10" },
+  "world": { "backgroundId": "bg.jungle", "mascotId": "mascot.sam" },
+  "content": {
+    "instruction": "Kéo căng dây cung rồi thả để bắn vào bia có kết quả đúng!",
+    "rounds": [
+      { "id": "r1", "task": "PICK_ONE", "prompt": "3 + 4 = ?", "choices": [ { "id": "c1", "label": "6" }, { "id": "c2", "label": "7" }, { "id": "c3", "label": "8" } ] },
+      { "id": "r2", "task": "PICK_ONE", "prompt": "5 + 2 = ?", "choices": [ { "id": "c1", "label": "7" }, { "id": "c2", "label": "3" }, { "id": "c3", "label": "9" } ] }
+    ]
+  },
+  "answerKey": {
+    "rounds": [
+      { "roundId": "r1", "correctChoiceIds": ["c2"] },
+      { "roundId": "r2", "correctChoiceIds": ["c1"] }
+    ]
+  },
+  "entities": [
+    {
+      "id": "bow",
+      "assetId": "object.bow",
+      "placement": { "region": "LEFT", "arrangement": "SINGLE" },
+      "control": "AIM_SHOOT"
+    },
+    {
+      "id": "targets",
+      "assetId": "object.target",
+      "bindTo": "choices",
+      "placement": { "region": "RIGHT", "arrangement": "ROW" },
+      "motion": { "type": "BOB", "speed": "SLOW" }
+    }
+  ],
+  "rules": [
+    {
+      "on": { "type": "COLLIDE", "a": "bow", "b": "targets" },
+      "do": [
+        {
+          "type": "CHECK",
+          "onCorrect": [
+            { "type": "EFFECT", "name": "POP", "at": "$subject" },
+            { "type": "EFFECT", "name": "STARS", "at": "$subject" },
+            { "type": "SOUND", "name": "CORRECT" },
+            { "type": "SCORE", "add": 1 }
+          ],
+          "onWrong": [
+            { "type": "EFFECT", "name": "WIGGLE", "at": "$subject" },
+            { "type": "SOUND", "name": "GENTLE_WRONG" }
+          ]
+        }
+      ]
+    }
+  ]
+}

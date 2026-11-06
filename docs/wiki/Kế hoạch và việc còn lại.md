@@ -39,7 +39,7 @@ Thiết kế ở `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md`. Sáu
 
 | Pha | Nội dung |
 |---|---|
-| 0 | Chốt schema CPF v2, bộ 40 mô tả kỳ vọng |
+| 0 | Chốt schema CPF v2, bộ 40 mô tả kỳ vọng. Xong, đã duyệt 2026-11-07 ([[cpf-game-v2.0.0]]) |
 | 1 | Runtime CPF tổng quát + manifest asset |
 | 2 | Validator CPF ở backend |
 | 3 | AI sinh GamePlan + CPF, vòng tự sửa |

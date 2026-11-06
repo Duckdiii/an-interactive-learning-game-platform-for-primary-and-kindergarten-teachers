@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "2.0.0",
+  "kind": "CPF",
+  "metadata": { "title": "Con vật ở đâu?", "subject": "VIETNAMESE", "gradeLevel": "KINDERGARTEN", "topic": "Con vật sống trên cạn và dưới nước" },
+  "world": { "backgroundId": "bg.farm", "mascotId": "mascot.pippy" },
+  "content": {
+    "instruction": "Kéo mỗi con vật về đúng nhà của nó nhé!",
+    "rounds": [
+      {
+        "id": "r1",
+        "task": "SORT",
+        "prompt": "Con nào sống trên cạn, con nào sống dưới nước?",
+        "choices": [
+          { "id": "c1", "label": "con mèo", "assetId": "animal.cat" },
+          { "id": "c2", "label": "con cá", "assetId": "animal.fish" },
+          { "id": "c3", "label": "con chó", "assetId": "animal.dog" },
+          { "id": "c4", "label": "con rùa biển", "assetId": "sea.turtle" }
+        ],
+        "zones": [
+          { "id": "z1", "label": "Trên cạn" },
+          { "id": "z2", "label": "Dưới nước" }
+        ]
+      }
+    ]
+  },
+  "answerKey": {
+    "rounds": [
+      {
+        "roundId": "r1",
+        "placements": [
+          { "choiceId": "c1", "zoneId": "z1" },
+          { "choiceId": "c2", "zoneId": "z2" },
+          { "choiceId": "c3", "zoneId": "z1" },
+          { "choiceId": "c4", "zoneId": "z2" }
+        ]
+      }
+    ]
+  },
+  "entities": [
+    {
+      "id": "animals",
+      "assetId": "animal.rabbit",
+      "bindTo": "choices",
+      "placement": { "region": "TOP", "arrangement": "ROW" },
+      "control": "DRAG_FREE"
+    },
+    {
+      "id": "homes",
+      "assetId": "object.box",
+      "bindTo": "zones",
+      "placement": { "region": "BOTTOM", "arrangement": "ROW" }
+    }
+  ],
+  "rules": [
+    {
+      "on": { "type": "DROP", "item": "animals", "zone": "homes" },
+      "do": [
+        {
+          "type": "CHECK",
+          "onCorrect": [
+            { "type": "EFFECT", "name": "GLOW", "at": "$subject" },
+            { "type": "SOUND", "name": "CORRECT" },
+            { "type": "SCORE", "add": 1 }
+          ],
+          "onWrong": [
+            { "type": "EFFECT", "name": "WIGGLE", "at": "$subject" },
+            { "type": "SOUND", "name": "GENTLE_WRONG" }
+          ]
+        }
+      ]
+    }
+  ]
+}

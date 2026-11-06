@@ -1,6 +1,6 @@
 # Thiết kế Pipeline tạo game v2 (AI lập kế hoạch, code kiểm định và chạy)
 
-Trạng thái: **Đã duyệt hướng và 4 quyết định** (2026-11-07, mục 5); nguồn asset và schema CPF v2 còn chờ duyệt ở Pha 0. Chưa có code theo tài liệu này.
+Trạng thái: **Đã duyệt hướng, 4 quyết định và Pha 0** (2026-11-07, mục 5; schema ở `docs/cpf-game-v2.0.0.md`); nguồn asset còn chờ duyệt. Chưa có code theo tài liệu này.
 Liên quan: [[Sơ đồ hệ thống]], [[Mô tả ngoài danh mục game]], [[Tiêu chuẩn Đồ họa và Asset Pipeline]], [[Trạng thái thực tế]], `docs/game-json-dsl-v1.0.0.md`, `docs/openapi/openapi.yaml`.
 
 ## 1. Vì sao cần v2
@@ -42,38 +42,24 @@ flowchart TD
     U --> D["2. Giáo viên duyệt kế hoạch<br/>2–3 phương án, luật chơi bằng lời thường"]
     D -->|"Khớp 1 trong 10 loại preset"| G1["3a. Sinh DSL v1.0.0 (đường hiện có)"]
     D -->|"Ngoài danh mục"| G2["3b. Sinh CPF v2 JSON"]
-    G1 --> V["4. Kiểm định: Schema → Tham chiếu/Đồ thị → Đáp án → Lứa tuổi → An toàn"]
+    G1 --> V["4. Kiểm định 3 lớp: Cú pháp → Logic (tham chiếu, đáp án, chơi được) → An toàn"]
     G2 --> V
-    V -->|"Lỗi, ≤ 2 lần"| R["Gửi lỗi cụ thể cho AI sửa"]
+    V -->|"Lớp 1–2 lỗi, ≤ 2 lần"| R["Gửi lỗi cụ thể cho AI sửa"]
     R --> G2
-    V -->|"Vẫn lỗi"| F["Rơi về preset gần nhất, báo giáo viên"]
+    V -->|"Vẫn lỗi / Lớp 3 lỗi"| F["Báo giáo viên (504 / 422), không nạp game mẫu;<br/>giáo viên chọn phương án khác ở bước 2"]
+    F -.-> D
     V -->|"Đạt"| S["5. Lưu bản chụp JSON đã duyệt"]
-    F --> S
     S --> RT["6. Runtime CPF tổng quát + kho asset → Konva"]
 ```
 
 ### 3.1 Hiểu yêu cầu (GamePlan)
 Đầu ra AI có cấu trúc (Structured Outputs), gồm: môn, lớp, kỹ năng (có căn cứ RAG), cơ chế đề xuất, thế giới/nhân vật, độ khó, danh sách câu hỏi làm rõ nếu thiếu. Thay `parseIntent`, `recommendGames` và phần luật của `promptCompletenessAssessor`.
 
-### 3.2 CPF v2 (phác thảo, chốt ở Pha 0)
-Một game CPF gồm 5 phần:
-
-- `world`: `backgroundId`, `mascotId`, nhạc nền.
-- `entities`: vật thể, mỗi vật có `assetId` trong danh mục, vị trí theo %, nhãn, `slot` nối với nội dung.
-- `behaviors`: `MOVE`, `PATROL`, `FALL`, `FLOAT`, `ADVANCE`, `MORPH`, `SPAWN`.
-- `rules`: trigger (`TAP`, `DRAG_DROP`, `COLLIDE`, `TIMER`) → action (`CHECK`, `SCORE`, `EFFECT`, `MOVE`, `NEXT`, `END`).
-- `content`: câu hỏi và đáp án, tách khỏi cơ chế.
-
-Đây là cách hiện thực bộ 20 khối của [[Mô tả ngoài danh mục game]]. Giữ schema nông vì Gemini dễ vướng giới hạn với JSON lồng sâu (backend đã gặp, xem `decoderSchema` trong `GeminiGameContentGenerator`).
+### 3.2 CPF v2
+Đặc tả: `docs/cpf-game-v2.0.0.md` (đã duyệt, Pha 0). Một game CPF gồm `world`, `content` (màn chơi `PICK_ONE`/`PICK_ALL`/`SORT`), `answerKey` (tách để không lộ ở chế độ chơi), `entities` (vật, vị trí bằng vùng có tên, chuyển động, cách điều khiển) và `rules` (sự kiện → hành động). Đây là cách hiện thực bộ 20 khối của [[Mô tả ngoài danh mục game]]. Runtime tự kết thúc màn và game, nên không cần khối `END` hay kiểm đồ thị chu trình.
 
 ### 3.3 Kiểm định và tự sửa
-Thêm validator CPF vào chuỗi `AbstractGameValidator` hiện có (không bỏ qua lớp nào):
-- Schema: chỉ khối có trong danh mục; `assetId` tồn tại.
-- Tham chiếu: ID trong `rules` phải có trong `entities`.
-- Đồ thị luật: có đường thắng, có `END`, không có chu trình vô tận.
-- Đáp án: code tự tính lại; mỗi câu đúng một đáp án; không trùng.
-- Lứa tuổi: vùng chạm ≥ 64px, ≤ 15 vật cùng lúc, độ dài chữ.
-- An toàn: Layer 3 như hiện tại.
+Thêm validator CPF vào chuỗi `AbstractGameValidator` hiện có (không bỏ qua lớp nào); danh sách luật ở `docs/cpf-game-v2.0.0.md` mục 4.
 
 Vòng tự sửa dùng mẫu `retryPrompt` đã có. Thông báo của cổng chỉ nói điều đã kiểm, không ghi "đạt 100%" chung chung.
 
@@ -107,7 +93,7 @@ Mỗi pha dừng chờ duyệt.
 
 ## 5. Quyết định đã chốt (2026-11-07, ghi ở `docs/decisions.md`)
 
-1. **Lưu game CPF:** loại `CUSTOM` với bảng riêng giữ JSON CPF đã duyệt, migration Flyway mới. Mở rộng có chủ đích kiến trúc 10 subclass `QuestionGame`; cách ánh xạ cụ thể chốt ở Pha 0.
+1. **Lưu game CPF:** loại `CUSTOM` với bảng riêng giữ JSON CPF đã duyệt, migration Flyway mới. Mở rộng có chủ đích kiến trúc 10 subclass `QuestionGame`. Ánh xạ chốt ở Pha 0 (phương án B): một `CpfQuestion` mỗi game giữ toàn bộ JSON (`docs/cpf-game-v2.0.0.md` mục 7).
 2. **Contract:** mở contract CPF v2 cạnh DSL v1.0.0, không sửa DSL; tài liệu, JSON Schema, endpoint trong `openapi.yaml` viết trước khi code.
 3. **Nguồn asset:** Claude đề xuất bộ CC0 cụ thể, người dùng duyệt trước khi tải. Đề xuất hiện tại: mục 5.1.
 4. **Nhánh:** commit phần đang sửa trên `dev`, rồi làm tiếp trên `dev`.
