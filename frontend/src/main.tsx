@@ -9,6 +9,19 @@ import { installMockDevTools } from './services/mock/mockRuntime.ts'
 warnMockMode()
 installMockDevTools()
 
+if (import.meta.env.DEV && !localStorage.getItem('auth_user')) {
+  localStorage.setItem(
+    'auth_user',
+    JSON.stringify({
+      teacherId: 'teacher-1',
+      fullName: 'Cô Nguyễn Mai Hương',
+      email: 'huong.nguyen@primary.edu.vn',
+    }),
+  )
+  localStorage.setItem('accessToken', 'mock-access-token-dev')
+  localStorage.setItem('refreshToken', 'mock-refresh-token-dev')
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppProviders>

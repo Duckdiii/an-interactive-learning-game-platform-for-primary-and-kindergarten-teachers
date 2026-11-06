@@ -19,6 +19,8 @@ vi.mock('react-konva', () => ({
   Rect: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
   Image: () => null,
+  Circle: () => null,
+  Shape: () => null,
   Line: ({ dash }: { dash?: number[] }) => <i data-testid="line" data-dashed={dash ? 'yes' : 'no'} />,
 }))
 vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
@@ -247,5 +249,28 @@ describe('PlayTestPanel: fallback khi loại game chưa có renderer', () => {
     } finally {
       (PLAY_TEST_RENDERERS as Record<string, unknown>).QUIZ = original
     }
+  })
+})
+
+describe('PlayTestPanel: hỗ trợ CPF Engine', () => {
+  it('render CPF Universal Canvas khi game có cờ track: CPF', () => {
+    const onExit = vi.fn()
+    const cpfGame = {
+      ...gameOf('SPOT_THE_TARGET'),
+      metadata: {
+        ...gameOf('SPOT_THE_TARGET').metadata,
+        track: 'CPF',
+        cpfMechanic: 'FALLING_CATCHER',
+      },
+    }
+
+    render(<PlayTestPanel game={cpfGame as any} onExit={onExit} />)
+
+    expect(screen.getByText(/Trò chơi Vận động/)).toBeInTheDocument()
+    expect(screen.getByText(/Điểm số:/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Thoát' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Thoát' }))
+    expect(onExit).toHaveBeenCalledTimes(1)
   })
 })

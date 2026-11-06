@@ -7,6 +7,7 @@ import {
   SUGGESTION_MAX,
   TOP_FIT_SCORE,
   detectGoals,
+  inferPedagogicalGamePlan,
   rankGameTypes,
   selectSuggestions,
   suggestGameTypes,
@@ -227,3 +228,49 @@ describe('suggestGameTypes (mock có độ trễ)', () => {
     vi.useRealTimers()
   })
 })
+
+describe('inferPedagogicalGamePlan & Không chứa thuật ngữ CPF', () => {
+  it('suy luận đúng tựa game sư phạm cho hành vi hứng táo rơi', () => {
+    const plan = inferPedagogicalGamePlan('Bé di chuyển giỏ để hứng các quả táo mang số chẵn rơi từ trên cây ở nông trại')
+    expect(plan.title).toBe('Hứng Táo Nông Trại')
+    expect(plan.description).toContain('giỏ hứng')
+    expect(plan.reason).toContain('vận động tương tác')
+    expect(plan.title).not.toMatch(/CPF/i)
+    expect(plan.description).not.toMatch(/CPF/i)
+    expect(plan.reason).not.toMatch(/CPF/i)
+  })
+
+  it('suy luận đúng tựa game sư phạm cho hành vi bắn ná / cung tên', () => {
+    const plan = inferPedagogicalGamePlan('Bé kéo ná bắn trúng bóng bay số chẵn')
+    expect(plan.title).toBe('Bắn Ná Mục Tiêu')
+    expect(plan.description).toContain('canh góc bắn')
+    expect(plan.title).not.toMatch(/CPF/i)
+    expect(plan.description).not.toMatch(/CPF/i)
+  })
+
+  it('suy luận đúng tựa game sư phạm cho hành vi chạm / đập bóng', () => {
+    const plan = inferPedagogicalGamePlan('Bé nhanh tay chạm bong bóng mang kết quả đúng')
+    expect(plan.title).toBe('Bong Bóng Số Học')
+    expect(plan.description).toContain('chạm vỡ')
+    expect(plan.title).not.toMatch(/CPF/i)
+  })
+
+  it('toàn bộ danh sách gợi ý cho prompt vật lý tuyệt đối KHÔNG chứa từ "CPF" hay "CPF Engine" trong text hiển thị', () => {
+    const prompts = [
+      'Bé di chuyển giỏ để hứng các quả táo mang số chẵn rơi từ trên cây ở nông trại',
+      'Kéo ná bắn mục tiêu phép trừ có nhớ',
+      'Đập bóng bay chạm bong bóng từ vựng',
+      'Trò chơi vận động tương tác vật lý lớp 1',
+    ]
+
+    for (const prompt of prompts) {
+      const suggestions = rankGameTypes(input(prompt, 'GRADE_1', 'MATH'))
+      for (const s of suggestions) {
+        expect(s.title || '').not.toMatch(/CPF/i)
+        expect(s.description || '').not.toMatch(/CPF/i)
+        expect(s.reason || '').not.toMatch(/CPF/i)
+        expect(s.description || '').not.toContain('Engine')
+      }
+    }
+  })
+  })

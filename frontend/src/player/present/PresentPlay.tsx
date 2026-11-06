@@ -1,4 +1,4 @@
-import { useReducer } from 'react'
+import { useReducer, useMemo, useState } from 'react'
 import type { ComponentProps } from 'react'
 import { viText } from '../../constants/viText'
 import { gradePreviewAnswer, toPreviewStudentQuestion } from '../../components/editor/preview/previewModel'
@@ -19,6 +19,9 @@ import { usePresentKeys } from './usePresentKeys'
 import FitToHeight from './FitToHeight'
 import PresentResult from './PresentResult'
 import { barButton, primaryButton, quietButton } from './presentStyles'
+import { CpfUniversalCanvas } from '../../services/pipeline/renderers/CpfUniversalCanvas'
+import { generateDynamicCpfSceneGraph } from '../../services/pipeline/dynamicCpfGenerator'
+import { ConfettiEffect } from '../../games/common/ConfettiEffect'
 
 const text = viText.present.play
 
@@ -47,7 +50,33 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
   const record = recordOf(state, currentId(state))
   const result = record.answered ? verdict(record.lastCorrect) : null
   const last = isLastQuestion(state)
-  const canAct = Renderer !== undefined && !state.paused
+  const isCpf =
+    ((game as any).content?.metadata as any)?.track === 'CPF' ||
+    (game.metadata as any)?.track === 'CPF' ||
+    (game.metadata as any)?.isCpf === true ||
+    game.gameType === ('PHYSICS_SLING_ARCHERY' as any) ||
+    game.gameType === ('FALLING_CATCHER' as any) ||
+    game.gameType === ('POP_TAPPER' as any) ||
+    Boolean((game as any).sceneGraph) ||
+    Boolean(((game as any).content as any)?.sceneGraph)
+
+  const [cpfScore, setCpfScore] = useState(0)
+  const [cpfCompleted, setCpfCompleted] = useState(false)
+
+  const cpfSceneGraph = useMemo(() => {
+    if (!isCpf) return null
+    return (
+      (game as any).sceneGraph ||
+      ((game as any).content as any)?.sceneGraph ||
+      generateDynamicCpfSceneGraph(
+        game.metadata.topic || game.metadata.title,
+        game.metadata.gradeLevel,
+        game.metadata.subject
+      )
+    )
+  }, [isCpf, game])
+
+  const canAct = (Renderer !== undefined || isCpf) && !state.paused
   const retryBlocked = !canAct || !record.answered
   // Phím chạy khi không tạm dừng. Space cố ý không làm gì ở pha chơi: tránh bấm nhầm khi đang chỉ bảng.
   const whenPlaying = (action: () => void) => () => {
@@ -66,7 +95,7 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
   })
 
   if (state.phase === 'result') {
-    return <PresentResult game={game} state={state} supported={Renderer !== undefined} onReplay={() => dispatch({ type: 'restart' })} onLeave={onLeave} />
+    return <PresentResult game={game} state={state} supported={Renderer !== undefined || isCpf} onReplay={() => { setCpfCompleted(false); setCpfScore(0); dispatch({ type: 'restart' }); }} onLeave={onLeave} />
   }
 
   const onSubmit = async (answer: AnswerPayload) => {
@@ -157,6 +186,47 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
               <div className="grid h-full place-items-center text-center">
                 <p className="text-3xl font-extrabold">{text.answeredBefore}</p>
               </div>
+            ) : isCpf && cpfSceneGraph ? (
+              cpfCompleted ? (
+                <div className="flex flex-col items-center justify-center p-8 bg-play-surface rounded-3xl border-4 border-amber-400 shadow-2xl text-center max-w-xl mx-auto space-y-6">
+                  <ConfettiEffect active={true} />
+                  <div className="text-6xl animate-bounce">🏆</div>
+                  <h2 className="text-3xl sm:text-4xl font-black text-amber-500">
+                    Xuất Sắc Hoàn Thành!
+                  </h2>
+                  <p className="text-xl text-play-ink">
+                    Điểm số đạt được: <strong className="text-amber-500 text-3xl">{cpfScore}</strong> điểm
+                  </p>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => { setCpfCompleted(false); setCpfScore(0); }}
+                      className="px-6 py-3 rounded-2xl bg-play-primary text-play-primary-ink font-extrabold text-lg shadow-lg hover:opacity-90 transition-transform active:scale-95"
+                    >
+                      🔄 Chơi lại
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => dispatch({ type: 'end' })}
+                      className="px-6 py-3 rounded-2xl bg-play-surface text-play-ink ring-2 ring-play-outline font-bold text-lg shadow-lg"
+                    >
+                      📊 Xem tổng kết
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-slate-900">
+                  <CpfUniversalCanvas
+                    sceneGraph={cpfSceneGraph}
+                    onScoreUpdate={setCpfScore}
+                    onComplete={(score) => {
+                      setCpfScore(score)
+                      setCpfCompleted(true)
+                      dispatch({ type: 'answered', isCorrect: true })
+                    }}
+                  />
+                </div>
+              )
             ) : Renderer && question ? (
               <FitToHeight key={`${question.id}-${state.attempt}`}>
                 <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile} onSubmit={onSubmit} />

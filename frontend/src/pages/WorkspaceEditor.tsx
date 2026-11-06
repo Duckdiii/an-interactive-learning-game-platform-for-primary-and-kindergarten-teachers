@@ -33,6 +33,9 @@ import { unmarkNewGame } from '../utils/newGames'
 import { useGame } from '../hooks/useGame'
 import { useGameEditor } from '../hooks/useGameEditor'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { CpfUniversalCanvas } from '../services/pipeline/renderers/CpfUniversalCanvas'
+import { generateDynamicCpfSceneGraph } from '../services/pipeline/dynamicCpfGenerator'
+import type { CpfSceneGraph } from '../services/pipeline/cpfTypes'
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChangesGuard'
 import { ROUTES } from '../routes/paths'
 import type { GameResponse } from '../types/game-response.types'
@@ -96,7 +99,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   useEffect(() => unmarkNewGame(game.gameId), [game.gameId])
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
-  const [playing, setPlaying] = useState(false)
+  const [playing, setPlaying] = useState(() => new URLSearchParams(window.location.search).get('play') === '1')
   // Vừa nhờ AI làm lại (hoặc vừa hoàn tác) câu nào: để hiện thông báo kèm nút Hoàn tác. Nằm ở đây vì thẻ sửa câu được dựng lại sau khi áp câu mới.
   const [regenNotice, setRegenNotice] = useState<{ kind: 'applied' | 'undone'; questionId: string } | null>(null)
   const beginEdit = useCallback(() => {
@@ -301,9 +304,76 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
     </div>
   )
 
+  const isCpfGame = useMemo(() => {
+    const meta = (draft.metadata as Record<string, any>) || {}
+    const gameContent = (game as any)?.content || {}
+    return (
+      meta.track === 'CPF' ||
+      meta.isCpf === true ||
+      Boolean((draft as any).sceneGraph) ||
+      Boolean((game as any).sceneGraph) ||
+      Boolean(gameContent.sceneGraph) ||
+      gameContent.metadata?.track === 'CPF'
+    )
+  }, [draft, game])
+
+  const [cpfPreviewMode, setCpfPreviewMode] = useState<'standard' | 'cpf'>('cpf')
+
+  const cpfSceneGraph = useMemo(() => {
+    if (!isCpfGame) return null
+    const existing =
+      (draft as any).sceneGraph ||
+      (game as any).sceneGraph ||
+      (game as any)?.content?.sceneGraph
+    if (existing) return existing as CpfSceneGraph
+    const prompt = draft.metadata?.topic || draft.metadata?.title || 'toán vui nhộn'
+    return generateDynamicCpfSceneGraph(prompt, draft.metadata?.gradeLevel, draft.metadata?.subject)
+  }, [isCpfGame, draft, game])
+
+  const mechanicLabel = useMemo(() => {
+    const mechanic =
+      (draft.metadata as any)?.cpfMechanic ||
+      cpfSceneGraph?.mechanicType ||
+      'FALLING_CATCHER'
+    switch (mechanic) {
+      case 'PHYSICS_SLING_ARCHERY':
+        return 'Ná Bắn Bong Bóng'
+      case 'POP_TAPPER':
+        return 'Chạm Bong Bóng'
+      case 'FALLING_CATCHER':
+      default:
+        return 'Hứng Táo Rơi'
+    }
+  }, [draft.metadata, cpfSceneGraph])
+
   const see = (
     <div className="space-y-6">
-      <LivePreview
+      {isCpfGame && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-purple-200 bg-purple-50/80 p-3 shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="rounded-xl bg-purple-600 px-3 py-1 text-xs font-black text-white shadow-xs">
+              🎮 Trò chơi Vận động
+            </span>
+            <span className="text-sm font-bold text-purple-900">
+              {mechanicLabel}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCpfPreviewMode((prev) => (prev === 'cpf' ? 'standard' : 'cpf'))}
+            className="rounded-xl border border-purple-300 bg-white px-3 py-1.5 text-xs font-bold text-purple-700 hover:bg-purple-100 transition-colors shadow-xs"
+          >
+            {cpfPreviewMode === 'cpf' ? 'Chuyển sang Tiêu chuẩn' : 'Chuyển sang Tương tác Vận động'}
+          </button>
+        </div>
+      )}
+
+      {isCpfGame && cpfPreviewMode === 'cpf' && cpfSceneGraph ? (
+        <div className="relative w-full overflow-hidden rounded-3xl border-4 border-purple-300/40 bg-slate-900 p-2 sm:p-4 shadow-xl">
+          <CpfUniversalCanvas sceneGraph={cpfSceneGraph} />
+        </div>
+      ) : (
+        <LivePreview
         gameType={draft.gameType}
         question={draft.questions[index]}
         title={title}
@@ -319,6 +389,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           ;(draft.metadata as { theme?: string }).theme = nextTheme
         }}
       />
+      )}
       <PublishReadiness
         issues={editor.readinessIssues}
         questionCount={items.length}

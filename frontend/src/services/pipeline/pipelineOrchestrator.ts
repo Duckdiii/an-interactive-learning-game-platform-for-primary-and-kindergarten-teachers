@@ -950,7 +950,7 @@ export function recommendGames(intent: ParsedIntent): BloomRecommendation[] {
       gameType: 'PHYSICS_SLING_ARCHERY',
       bloomLevel: 'Vận dụng',
       bloomIndex: 3,
-      description: 'Cơ chế vật lý tương tác mở rộng (CPF VRE): Kéo căng dây ná ngắm bắn bóng bay số chẵn.',
+      description: 'Trò chơi tương tác vận động: Kéo căng dây ná ngắm bắn bóng bay số chẵn để rèn luyện phản xạ và tư duy toán học.',
       estimatedDuration: '5 - 10 phút',
       track: 'CPF',
       icon: '🏹',

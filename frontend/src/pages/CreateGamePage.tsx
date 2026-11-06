@@ -91,6 +91,16 @@ export default function CreateGamePage() {
   // "Tạo ngẫu nhiên" ở Trang chủ dẫn tới đây: đưa tiêu điểm vào ô khối lớp, ô đầu tiên của luồng này.
   useEffect(() => {
     if (params.get('random')) document.getElementById('create-grade')?.focus()
+    if (params.get('step') === 'suggest' && initialIdea) {
+      setMode('idea')
+      lastInput.current = {
+        idea: initialIdea.trim(),
+        gradeLevel: known(params.get('grade'), GRADE_LEVEL_VALUES) ?? '',
+        subject: known(params.get('subject'), SUBJECT_VALUES) ?? '',
+      }
+      setStep('suggest')
+      suggestionsMutation.mutate(lastInput.current)
+    }
   }, [params])
 
   // Đổi ý tưởng hoặc lựa chọn thì kết quả tạo trước đó không còn đúng nữa (game đã tạo vẫn còn trong danh sách, chỉ không dùng lại cho lần tạo mới).

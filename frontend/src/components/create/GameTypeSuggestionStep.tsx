@@ -72,7 +72,7 @@ export default function GameTypeSuggestionStep({
         <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {shown.map((suggestion) => {
             const best = suggestion === suggestions[0] && suggestion.fitScore >= TOP_FIT_SCORE
-            const label = gameTypeLabel(suggestion.type)
+            const label = suggestion.title || gameTypeLabel(suggestion.type)
 
             return (
               <li
@@ -88,9 +88,21 @@ export default function GameTypeSuggestionStep({
                   >
                     {best ? text.suggestTopPick : text.suggestOther}
                   </span>
+                  {suggestion.track === 'CPF' && (
+                    <span className="absolute right-3 top-3 rounded-xl bg-purple-600 px-2.5 py-1 text-xs font-black text-white shadow-xs">
+                      🎮 Tương tác Vận động
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-1 flex-col gap-3 p-5">
-                  <h2 className="font-display text-2xl font-extrabold">{label}</h2>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-display text-2xl font-extrabold">{label}</h2>
+                    {suggestion.track === 'CPF' && (
+                      <span className="rounded-lg bg-purple-100 px-2.5 py-0.5 text-xs font-black text-purple-700 border border-purple-200">
+                        Phản xạ & Vận động
+                      </span>
+                    )}
+                  </div>
                   <p className="text-base font-semibold leading-7 text-ink">{suggestion.reason}</p>
                   <p className="self-start rounded-xl bg-paper px-3 py-1.5 text-sm font-bold text-ink-soft">
                     {text.suggestHowToPlay}: {suggestion.description}

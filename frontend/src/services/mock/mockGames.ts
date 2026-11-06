@@ -1,3 +1,6 @@
+import { generateDynamicCpfSceneGraph } from '../pipeline/dynamicCpfGenerator'
+import type { CpfSceneGraph } from '../pipeline/cpfTypes'
+import { toMatchText } from '../../utils/phraseMatch'
 import { resolveShareUrl } from '../../config/studentApp'
 import type { GameDsl } from '../../types/game-dsl.types'
 import type { GameResponse } from '../../types/game-response.types'
@@ -161,8 +164,8 @@ export interface MockGeneratedInfo {
   gameType: string
   subject?: string
   gradeLevel?: string
-  // Ý tưởng giáo viên nhập; trống khi tạo ngẫu nhiên.
   idea?: string
+  track?: string
 }
 
 /**
@@ -277,6 +280,18 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
         ;(content.questions[0] as unknown as { audioText?: string }).audioText = 'Bé hãy lật tìm các cặp hình giống nhau nhé'
       }
     }
+  }
+
+    const isCpfIdea = info.track === 'CPF' || Boolean(idea && (/(hứng|bắt|nhặt|rơi|bắn|kéo ná|cung|bong bóng|vật lý|tương tác động|cpf)/i.test(idea) || /(hung|nhat|roi|ban|keo na|cung|bong bong|vat ly|tuong tac dong|cpf)/i.test(toMatchText(idea))))
+  if (isCpfIdea) {
+    const gradeNum = info.gradeLevel ? Number(info.gradeLevel.replace('GRADE_', '')) || 2 : 2
+    const sceneGraph = generateDynamicCpfSceneGraph(idea || content.metadata.topic, gradeNum, info.subject)
+    ;(content.metadata as Record<string, any>).track = 'CPF'
+    ;(content.metadata as Record<string, any>).cpfMechanic = sceneGraph.mechanicType
+
+    ;(content as unknown as { sceneGraph: CpfSceneGraph }).sceneGraph = sceneGraph
+    content.metadata.title = sceneGraph.title
+    content.metadata.topic = sceneGraph.description
   }
 
   enrichGameWithAssets(content)

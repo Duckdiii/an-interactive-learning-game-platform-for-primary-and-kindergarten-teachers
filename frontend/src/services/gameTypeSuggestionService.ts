@@ -143,6 +143,92 @@ function contextBonus(type: string, input: SuggestGameTypesInput) {
 
 const round = (value: number) => Math.round(Math.min(1, value) * 100) / 100
 
+export interface PedagogicalGamePlan {
+  title: string
+  description: string
+  reason: string
+}
+
+/**
+ * Agent Planner: Suy luận Tựa game sư phạm và Mô tả cách chơi từ prompt tự do của giáo viên.
+ * Hoàn toàn loại bỏ thuật ngữ kỹ thuật, tập trung vào luật chơi, phản xạ và mục tiêu học tập.
+ */
+export function inferPedagogicalGamePlan(idea: string): PedagogicalGamePlan {
+  if (!idea || !idea.trim()) {
+    return {
+      title: 'Trò Chơi Tương Tác Vận Động',
+      description: 'Bé tương tác trực tiếp với các vật thể chuyển động trên màn hình để tìm đáp án đúng.',
+      reason: 'Trò chơi vận động tương tác kích thích sự hào hứng và rèn luyện phản xạ cho bé.',
+    }
+  }
+
+  const text = toMatchText(idea)
+  const nonResultText = text.replace(/ket qua/g, '')
+  const nonResultIdea = idea.replace(/kết quả/gi, '')
+
+  // 1. Nhóm Hứng / Rơi quả / Vật phẩm (hứng, rơi, táo, quả, nhặt...) - loại trừ "kết quả"
+  const isCatcher =
+    /(hứng|rơi|táo|nhặt|trái cây|hoa quả)/i.test(nonResultIdea) ||
+    /(quả)/i.test(nonResultIdea) ||
+    ['hung', 'roi', 'tao', 'nhat', 'trai cay', 'hoa qua', 'qua'].some((kw) => hasPhrase(nonResultText, kw))
+
+  // 2. Nhóm Bắn ná / Cung tên / Mục tiêu (bắn, ná, cung, mục tiêu...)
+  const isArchery =
+    /(bắn|ná|cung|mục tiêu)/i.test(idea) ||
+    ['ban', 'keo na', 'na', 'cung', 'muc tieu'].some((kw) => hasPhrase(text, kw))
+
+  // 3. Nhóm Đập / Chạm bóng / Bóng bay (bong bóng, chạm, bấm bóng, đập...)
+  const isTapper =
+    /(bong bóng|bóng bay|đập|chạm|bấm bóng)/i.test(idea) ||
+    ['bong bong', 'bong bay', 'dap', 'cham', 'bam bong'].some((kw) => hasPhrase(text, kw))
+
+  if (isCatcher) {
+    const isFarmOrApple =
+      /(táo|nông trại|vườn|trái cây)/i.test(idea) ||
+      ['tao', 'nong trai', 'vuon', 'trai cay'].some((kw) => hasPhrase(text, kw))
+
+    return {
+      title: isFarmOrApple ? 'Hứng Táo Nông Trại' : 'Hứng Vật Phẩm',
+      description: 'Bé di chuyển giỏ hứng sang trái/phải để đón các quả táo mang đáp án đúng, rèn luyện phản xạ và tư duy số học.',
+      reason: 'Trò chơi vận động tương tác giúp bé vừa rèn phản xạ vừa nhận biết số học một cách trực quan.',
+    }
+  }
+
+  if (isArchery) {
+    return {
+      title: 'Bắn Ná Mục Tiêu',
+      description: 'Bé kéo và canh góc bắn trúng các mục tiêu mang đáp án chính xác để ghi điểm.',
+      reason: 'Cơ chế kéo thả và canh góc giúp tăng sự tập trung và kích thích hứng thú giải toán.',
+    }
+  }
+
+  if (isTapper) {
+    return {
+      title: 'Bong Bóng Số Học',
+      description: 'Bé nhanh tay chạm vỡ các quả bóng bay mang đáp án đúng trước khi bóng bay mất.',
+      reason: 'Luyện phản xạ nhanh tay lẹ mắt kết hợp ôn tập kiến thức.',
+    }
+  }
+
+  return {
+    title: 'Trò Chơi Tương Tác Vận Động',
+    description: 'Bé tương tác trực tiếp với các vật thể chuyển động trên màn hình để tìm đáp án đúng.',
+    reason: 'Trò chơi vận động tương tác kích thích sự hào hứng và rèn luyện phản xạ cho bé.',
+  }
+}
+
+/**
+ * Nhận diện từ khóa tương tác vật lý / vận động (CPF).
+ */
+export function isPhysicsCpfIdea(idea: string): boolean {
+  if (!idea || !idea.trim()) return false
+  const text = toMatchText(idea)
+  const keywords = ['hung', 'nhat', 'roi', 'ban', 'keo na', 'na', 'cung', 'bong bong', 'vat ly', 'tuong tac dong', 'cpf']
+  if (keywords.some((kw) => hasPhrase(text, kw))) return true
+
+  return /(hứng|nhặt|rơi|bắn|kéo ná|cung|bong bóng|vật lý|tương tác động)/i.test(idea)
+}
+
 /**
  * Xếp hạng loại game cho ý tưởng này (thuần, dễ test): điểm cao đứng trước, hòa thì giữ thứ tự khai báo.
  * Mục tiêu nào cho điểm cao nhất với loại game đó thì lấy điểm và câu lý do của mục tiêu ấy. Loại dưới MIN_FIT_SCORE bị
@@ -159,22 +245,46 @@ export function rankGameTypes(input: SuggestGameTypesInput): GameTypeSuggestion[
     }
   }
 
+  // Ưu tiên tương tác vật lý Composable Primitives Framework (CPF)
+  if (isPhysicsCpfIdea(input.idea)) {
+    const plan = inferPedagogicalGamePlan(input.idea)
+    best.set('SPOT_THE_TARGET', {
+      score: 0.99,
+      reason: plan.reason,
+    })
+  }
+
   return selectSuggestions(best, input)
 }
 
 /** Bước lọc, sắp xếp và cắt (tách riêng để test với bảng điểm tùy ý). */
 export function selectSuggestions(best: ReadonlyMap<string, Fit>, input: SuggestGameTypesInput): GameTypeSuggestion[] {
+  const isCpf = isPhysicsCpfIdea(input.idea)
+  const pedagogicalPlan = isCpf ? inferPedagogicalGamePlan(input.idea) : null
+
   return [...best.entries()]
     .map(([type, fit], index) => ({ type, fit, index, score: round(fit.score + contextBonus(type, input)) }))
     .filter((item) => item.score >= MIN_FIT_SCORE)
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, SUGGESTION_MAX)
-    .map(({ type, fit, score }) => ({
-      type,
-      reason: fit.reason,
-      description: DESCRIPTIONS[type] ?? '',
-      fitScore: score,
-    }))
+    .map(({ type, fit, score }) => {
+      if (type === 'SPOT_THE_TARGET' && isCpf && pedagogicalPlan) {
+        return {
+          type,
+          title: pedagogicalPlan.title,
+          track: 'CPF',
+          reason: pedagogicalPlan.reason,
+          description: pedagogicalPlan.description,
+          fitScore: score,
+        }
+      }
+      return {
+        type,
+        reason: fit.reason,
+        description: DESCRIPTIONS[type] ?? '',
+        fitScore: score,
+      }
+    })
 }
 
 /** MOCK: giả lập độ trễ của lời gọi AI. `latencyMs` để test chạy nhanh. */

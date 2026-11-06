@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useReducer, useRef } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { CpfUniversalCanvas } from '../../services/pipeline/renderers/CpfUniversalCanvas'
+import { generateDynamicCpfSceneGraph } from '../../services/pipeline/dynamicCpfGenerator'
+import type { CpfSceneGraph } from '../../services/pipeline/cpfTypes'
 import { viText } from '../../constants/viText'
 import type { GameDsl } from '../../types/game-dsl.types'
 import { summarizeQuestions } from '../../utils/questionSummary'
@@ -54,6 +57,64 @@ export default function PlayTestPanel({ game, onExit }: PlayTestPanelProps) {
     bar.focus({ preventScroll: true })
     bar.scrollIntoView?.({ block: 'nearest' })
   }, [state.answered])
+
+  
+  const isCpf = Boolean(
+    (game as unknown as { sceneGraph?: CpfSceneGraph }).sceneGraph ||
+    (game.metadata as { track?: string }).track === 'CPF' ||
+    (game.metadata as { cpfMechanic?: string }).cpfMechanic
+  )
+
+  const [cpfScore, setCpfScore] = useState(0)
+  const [cpfFps, setCpfFps] = useState(60)
+
+  const cpfSceneGraph = useMemo(() => {
+    if (!isCpf) return undefined
+    const attached = (game as unknown as { sceneGraph?: CpfSceneGraph }).sceneGraph
+    if (attached) return attached
+    const gradeNum = game.metadata.gradeLevel ? Number(game.metadata.gradeLevel.replace('GRADE_', '')) || 2 : 2
+    return generateDynamicCpfSceneGraph(
+      game.metadata.topic || game.metadata.title,
+      gradeNum,
+      game.metadata.subject
+    )
+  }, [isCpf, game])
+
+  if (isCpf && cpfSceneGraph) {
+    return (
+      <UiProfileProvider profile={profile}>
+        <ThemeProvider theme={theme}>
+          <section ref={panelRef} tabIndex={-1} aria-label={text.panelLabel} className="space-y-4 focus:outline-none">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-ink/10 bg-white p-3 sm:p-4">
+              <div className="flex items-center gap-3">
+                <span className="rounded-xl bg-purple-100 px-3 py-1 text-sm font-black text-purple-700 border border-purple-200">
+                  🎮 Trò chơi Vận động · {cpfSceneGraph.title || 'Phản xạ tương tác'}
+                </span>
+                <span className="text-base font-bold text-ink" aria-live="polite">
+                  Điểm số: <strong className="text-brand text-lg">{cpfScore}</strong>
+                </span>
+                <span className="text-xs font-semibold text-ink-soft hidden sm:inline">
+                  ({cpfFps} FPS)
+                </span>
+              </div>
+              <Button type="button" variant="secondary" onClick={onExit}>
+                {text.exit}
+              </Button>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-4xl overflow-hidden rounded-3xl border-4 border-amber-900/15 bg-slate-900 p-2 sm:p-4 shadow-xl">
+              <CpfUniversalCanvas
+                sceneGraph={cpfSceneGraph}
+                onFpsUpdate={setCpfFps}
+                onScoreUpdate={setCpfScore}
+                onComplete={(score) => setCpfScore(score)}
+              />
+            </div>
+          </section>
+        </ThemeProvider>
+      </UiProfileProvider>
+    )
+  }
 
   if (!Player) return <UnsupportedPlayTest game={game} onExit={onExit} />
 

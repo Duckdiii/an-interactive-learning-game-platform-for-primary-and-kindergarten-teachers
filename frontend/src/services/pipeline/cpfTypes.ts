@@ -249,4 +249,5 @@ export interface CpfSceneGraph {
     combo: number
     inputLocked: boolean
   }
+  metadata?: Record<string, unknown>
 }
