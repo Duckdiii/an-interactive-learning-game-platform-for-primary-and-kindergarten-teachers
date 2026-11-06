@@ -310,6 +310,13 @@ paths:
 
         Xử lý có thể mất vài giây đến vài chục giây; Frontend đặt timeout riêng lớn hơn mặc định.
         Giới hạn 10 yêu cầu mỗi phút mỗi người dùng (NFR-04).
+
+        **Game ngoài danh mục (`gameType: CUSTOM`):** AI đọc `idea`, tự lập kế hoạch cách chơi và sinh
+        game CPF Game v2.0.0 (`docs/cpf-game-v2.0.0.md`) thay cho DSL v1.0.0; kiểm duyệt 3 lớp theo mục 4
+        của tài liệu đó. Kết quả là nhánh CPF của `GameResponse`. `CUSTOM` do hệ thống đề xuất khi mô tả
+        nằm ngoài 10 loại (`suggest-game-types` trả `CUSTOM`); client gửi `gameType: CUSTOM` khi giáo viên
+        chấp nhận đề xuất đó, giao diện không có `CUSTOM` trong danh sách chọn tay. Backend không phân
+        biệt hai đường này. Với `CUSTOM`, `idea` là bắt buộc (thiếu thì 400).
       x-status: planned
       security:
         - bearerAuth: []
@@ -434,6 +441,9 @@ paths:
 
         Game đang `PUBLISHED` vẫn giữ `PUBLISHED`. **Nếu game đang có phiên chưa kết thúc**
         (`WAITING`, `ACTIVE` hoặc `PAUSED`) thì bị từ chối 409 `CONFLICT`.
+
+        Game `CUSTOM`: body là nguyên game CPF Game v2.0.0 (`CpfGameEnvelope`), kiểm duyệt theo
+        `docs/cpf-game-v2.0.0.md` mục 4. Gửi envelope DSL cho game `CUSTOM` (hoặc ngược lại) thì 400.
       x-status: planned
       security:
         - bearerAuth: []
@@ -442,7 +452,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameEnvelope'
+              oneOf:
+                - $ref: '#/components/schemas/GameEnvelope'
+                - $ref: '#/components/schemas/CpfGameEnvelope'
       responses:
         '200':
           $ref: '#/components/responses/GameSuccess'
@@ -499,6 +511,10 @@ paths:
         400 khi dữ liệu chưa hợp lệ (câu chưa có đáp án đúng, cấu trúc chưa hoàn chỉnh) hoặc game
         SPOT_THE_TARGET còn câu chưa có `hitRegion` (UC-07 2c). 500 khi không lưu được hoặc không tạo
         được mã chia sẻ (UC-07 2a, 2b): game không chuyển sang `PUBLISHED`.
+
+        Game `CUSTOM`: chưa có dạng dành cho học sinh và phiên chơi cho CPF, nên xuất bản game `CUSTOM`
+        trả 400 `VALIDATION_ERROR` cho tới khi các phần đó được đặc tả. Body `CpfGameEnvelope` đã nhận
+        sẵn (như `PUT`) để không phải đổi contract khi cài.
       x-status: planned
       security:
         - bearerAuth: []
@@ -507,7 +523,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameEnvelope'
+              oneOf:
+                - $ref: '#/components/schemas/GameEnvelope'
+                - $ref: '#/components/schemas/CpfGameEnvelope'
       responses:
         '200':
           description: Đã xuất bản.
@@ -542,6 +560,9 @@ paths:
         Giữ nguyên `gameId`, **thay toàn bộ `questions[]` và lưu**, `status` đặt về `DRAFT`. Giáo viên
         chọn chức năng này là chủ ý bỏ nội dung đang có. Bị từ chối 409 `CONFLICT` nếu game đang có phiên
         chưa kết thúc. Hỗ trợ `Accept: text/event-stream` như `generate`. Giới hạn 10 yêu cầu mỗi phút.
+
+        Game `CUSTOM`: thay toàn bộ `cpf` (AI lập lại kế hoạch và sinh game CPF mới), kiểm duyệt như
+        `generate`.
       x-status: planned
       security:
         - bearerAuth: []
@@ -595,6 +616,8 @@ paths:
         **Endpoint không tự lưu**: Frontend ghép câu mới vào bản đang soạn rồi lưu bằng `PUT` khi giáo
         viên bấm "Lưu bản nháp". Cách này bảo toàn chỉnh sửa tay chưa lưu ở các thẻ khác.
         Giới hạn 10 yêu cầu mỗi phút.
+
+        Game `CUSTOM` không có thẻ câu hỏi DSL: trả 400 `VALIDATION_ERROR` (dùng `regenerate` toàn game).
       x-status: planned
       security:
         - bearerAuth: []
@@ -626,7 +649,12 @@ paths:
                       question:
                         $ref: '#/components/schemas/Question'
                       gameType:
-                        $ref: '#/components/schemas/GameType'
+                        allOf:
+                          - $ref: '#/components/schemas/GameType'
+                          - not:
+                              const: CUSTOM
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -712,7 +740,7 @@ paths:
       summary: Giáo viên tạo phiên Live Arena (SOLO hoặc TEAM)
       description: |
         Chỉ tạo được từ game `PUBLISHED`. `SELF` không tạo qua endpoint này (xem
-        `POST /games/shared/{shareCode}/play`).
+        `POST /games/shared/{shareCode}/play`). Game `CUSTOM` chưa hỗ trợ phiên chơi (chưa xuất bản được).
 
         - `maxParticipants`: số nguyên từ 1 trở lên; bỏ qua nghĩa là không giới hạn.
         - Chỉ với `TEAM`: `groupingStrategy` (mặc định `RANDOM`, giáo viên không phải xếp đội, phù hợp
@@ -2443,6 +2471,10 @@ components:
         - DRAG_DROP
         - ORDERING
         - VISUAL_CLOZE
+        - CUSTOM
+      description: |
+        10 loại preset theo DSL v1.0.0, cộng `CUSTOM` là game ngoài danh mục theo CPF Game v2.0.0
+        (`docs/cpf-game-v2.0.0.md`). `CUSTOM` do hệ thống đề xuất, giáo viên không chọn tay.
 
     GameStatus:
       type: string
@@ -2507,6 +2539,13 @@ components:
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/ordering.schema.json'
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/visual-cloze.schema.json'
 
+    CpfGameEnvelope:
+      description: |
+        Game ngoài danh mục theo CPF Game v2.0.0 (dạng hoàn chỉnh, có `answerKey`). Tham chiếu thẳng
+        JSON Schema của Backend để không viết hai lần. Luật không diễn tả được bằng schema ở
+        `docs/cpf-game-v2.0.0.md` mục 4.2.
+      $ref: '../../backend/src/main/resources/schema/cpf/2.0.0/cpf-game.schema.json'
+
     Question:
       description: Một câu hỏi theo DSL v1.0.0, cấu trúc phụ thuộc `gameType` (dạng đầy đủ cho giáo viên).
       oneOf:
@@ -2522,6 +2561,35 @@ components:
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/visual-cloze.schema.json#/$defs/question'
 
     GameResponse:
+      description: |
+        Game đầy đủ cho giáo viên. Phân biệt theo `gameType`: 10 loại preset là nhánh DSL v1.0.0 phẳng
+        (`DslGameResponse`); `CUSTOM` là nhánh CPF (`CpfGameResponse`), nội dung nằm trong `cpf`.
+      oneOf:
+        - $ref: '#/components/schemas/DslGameResponse'
+        - $ref: '#/components/schemas/CpfGameResponse'
+
+    CpfGameResponse:
+      type: object
+      description: |
+        Game `CUSTOM` cho giáo viên. Body của `PUT /games/{gameId}` là đúng giá trị của trường `cpf`
+        (lồng riêng vì schema CPF không cho thêm trường ở gốc).
+      additionalProperties: false
+      required: [gameId, status, updatedAt, gameType, cpf]
+      properties:
+        gameId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/GameStatus'
+        updatedAt:
+          type: string
+          format: date-time
+        gameType:
+          const: CUSTOM
+        cpf:
+          $ref: '#/components/schemas/CpfGameEnvelope'
+
+    DslGameResponse:
       type: object
       required:
         - gameId
@@ -2548,7 +2616,10 @@ components:
         schemaVersion:
           const: '1.0.0'
         gameType:
-          $ref: '#/components/schemas/GameType'
+          allOf:
+            - $ref: '#/components/schemas/GameType'
+            - not:
+                const: CUSTOM
         metadata:
           type: object
           required: [title, subject, gradeLevel, topic]
@@ -2591,7 +2662,9 @@ components:
 
     GameSummary:
       type: object
-      description: Rút gọn, KHÔNG kèm `questions[]`.
+      description: |
+        Rút gọn, KHÔNG kèm `questions[]`. Game `CUSTOM` lấy `title`, `subject`, `gradeLevel` từ
+        `cpf.metadata`.
       required: [gameId, title, gameType, subject, gradeLevel, status, updatedAt]
       properties:
         gameId:
@@ -2816,7 +2889,8 @@ components:
       required: [schemaVersion, gameType, metadata, gameplaySettings, questions, answeredQuestionIds]
       description: |
         Dạng dành cho học sinh của `GameResponse`: bỏ `gameId, status, updatedAt`, bỏ trường đáp án, các
-        phần tử đã xáo. Biến đổi theo từng loại game xem mô tả của `GET /sessions/{sessionId}/questions`.
+        phần tử đã xáo. Chưa có dạng học sinh cho game `CUSTOM` (CPF): game `CUSTOM` chưa xuất bản và
+        chưa tạo phiên được. Biến đổi theo từng loại game xem mô tả của `GET /sessions/{sessionId}/questions`.
         Cấu trúc câu hỏi chưa có schema máy đọc cho hầu hết loại game (DSL chưa mô tả dạng học sinh; đây là
         cam kết ở cấp hợp đồng). Đã có schema cho MATCHING: `MatchingStudentQuestion`.
       properties:

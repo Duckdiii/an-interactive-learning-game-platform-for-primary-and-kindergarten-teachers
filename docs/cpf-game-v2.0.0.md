@@ -12,7 +12,9 @@ Liên quan: `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md` (thiết k
 | Test schema | `backend/src/test/java/com/aigameplatform/backend/dto/cpf/CpfGameSchemaTest.java` |
 | Bộ 40 mô tả kỳ vọng | `backend/src/test/resources/generation/pipeline-v2/eval-prompts.jsonl` |
 
-Sửa định dạng phải sửa đồng bộ cả bốn chỗ đầu và tài liệu này. `metadata` lặp lại enum của DSL v1.0.0 (schema tự chứa): sửa enum DSL thì sửa cả CPF.
+REST: game CPF có `gameType: CUSTOM`; `GameResponse` nhánh `CpfGameResponse` đặt game trong trường `cpf`, `PUT /games/{gameId}` nhận nguyên game (`CpfGameEnvelope`), xem `docs/openapi/openapi.yaml`. Kiểu frontend tương ứng ở `frontend/src/types/game-response.types.ts`.
+
+Sửa định dạng phải sửa đồng bộ cả bốn chỗ đầu ở bảng trên, phần CPF trong `openapi.yaml` và tài liệu này. `metadata` lặp lại enum của DSL v1.0.0 (schema tự chứa): sửa enum DSL thì sửa cả CPF.
 
 ## 1. Nguyên tắc
 
