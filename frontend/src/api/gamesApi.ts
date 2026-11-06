@@ -6,6 +6,8 @@ import type { RegeneratedQuestion } from '../types/regenerate.types'
 import type { GenerateGameRequest } from '../utils/generateRequest'
 import type { GameEnvelopeBody, GameResponse } from '../types/game-response.types'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
+import { parsePedagogicalConstraints } from '../services/pipeline/constraintParser'
+import { generateMathQuestions } from '../services/pipeline/dynamicMathGenerator'
 
 // Chỉ áp cho lệnh đọc danh sách: nếu máy chủ treo thì báo lỗi sau 10 giây thay vì quay vô hạn.
 // Không đặt timeout chung trên axiosInstance vì các lệnh khác (ví dụ sinh game bằng AI) có thể chạy lâu hơn.
@@ -173,6 +175,29 @@ export interface PlayGameDtoResponse {
   dsl: unknown
 }
 
+function createInitialMockQuizDsl() {
+  const constraints = parsePedagogicalConstraints('Phép cộng có nhớ phạm vi 100 nông trại')
+  const [q] = generateMathQuestions(constraints, 1)
+  const optionsList = [
+    { text: `${q.correctAnswer} ${q.unit}`.trim(), isCorrect: true },
+    ...q.distractors.map((d) => ({ text: `${d} ${q.unit}`.trim(), isCorrect: false })),
+  ]
+  const shuffled = optionsList.sort(() => Math.random() - 0.5)
+  const correctIndex = shuffled.findIndex((o) => o.isCorrect)
+  return {
+    gameType: 'QUIZ',
+    title: 'Nông Trại Toán Học Lớp 2',
+    gradeLevel: 2,
+    questionText: q.questionText,
+    numA: q.numA,
+    numB: q.numB,
+    options: shuffled.map((o, idx) => ({ id: String(idx + 1), text: o.text, isCorrect: o.isCorrect })),
+    correctIndex,
+    explanation: q.explanation,
+    imageUrl: q.spriteUrl,
+  }
+}
+
 // Bộ nhớ client dự phòng khi Backend chưa bật hoặc mất kết nối
 const clientPublishedStore = new Map<string, PlayGameDtoResponse>([
   [
@@ -182,22 +207,7 @@ const clientPublishedStore = new Map<string, PlayGameDtoResponse>([
       title: 'Nông Trại Toán Học Lớp 2',
       gameType: 'QUIZ',
       shareCode: 'MOCK02',
-      dsl: {
-        gameType: 'QUIZ',
-        title: 'Nông Trại Toán Học Lớp 2',
-        gradeLevel: 2,
-        questionText: 'Bác nông dân nuôi 38 chú gà và 27 chú vịt. Hỏi cả trang trại có tất cả bao nhiêu con?',
-        numA: 38,
-        numB: 27,
-        options: [
-          { id: '1', text: '55 con', isCorrect: false },
-          { id: '2', text: '65 con', isCorrect: true },
-          { id: '3', text: '63 con', isCorrect: false },
-          { id: '4', text: '75 con', isCorrect: false },
-        ],
-        correctIndex: 1,
-        explanation: 'Phép tính: 38 + 27 = 65 con.',
-      },
+      dsl: createInitialMockQuizDsl(),
     },
   ],
   [

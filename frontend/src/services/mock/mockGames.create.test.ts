@@ -118,4 +118,26 @@ describe('createMockGame (giống kết quả POST /games/generate)', () => {
       expect(pair.right.imageUrl).toContain('/assets/')
     }
   })
-})
+
+  it('BR-08: tạo game QUIZ phép cộng có nhớ phạm vi 50 trong nông trại: sinh câu hỏi toán động chính xác', () => {
+    const game = createMockGame({ gameType: 'QUIZ', subject: 'MATH', gradeLevel: 'GRADE_2', idea: 'Phép cộng có nhớ trong phạm vi 50 ở nông trại' })
+
+    expect(game.gameType).toBe('QUIZ')
+    expect(game.questions).toHaveLength(3)
+    for (const q of game.questions as any[]) {
+      expect(q.options.length).toBeGreaterThanOrEqual(2)
+      expect(q.correctOptionId).toBeTruthy()
+      expect(q.imageUrl).toContain('/assets/themes/farm/')
+    }
+  })
+
+  it('BR-09: tạo game MATCHING phân biệt âm l và n: sinh các cặp ngữ âm động', () => {
+    const game = createMockGame({ gameType: 'MATCHING', subject: 'VIETNAMESE', gradeLevel: 'GRADE_1', idea: 'Phân biệt âm l và n' })
+
+    expect(game.gameType).toBe('MATCHING')
+    const firstQuestion = game.questions[0] as any
+    expect(firstQuestion.pairs.length).toBeGreaterThanOrEqual(2)
+    const hasLOrN = firstQuestion.pairs.some((p: any) => p.left.text.includes('l') || p.left.text.includes('n'))
+    expect(hasLOrN).toBe(true)
+  })
+});

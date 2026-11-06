@@ -18,7 +18,7 @@ import PlayController from '../play/PlayController'
 import { getPlayGameApi, type PlayGameDtoResponse } from '../../api/gamesApi'
 import { ArcheryCpfCanvas } from '../../services/pipeline/renderers/ArcheryCpfCanvas'
 import { FarmQuizCanvas } from '../../services/pipeline/renderers/FarmQuizCanvas'
-import type { PresetQuizData } from '../../services/pipeline/pipelineOrchestrator'
+import { generatePresetGame, type PresetQuizData } from '../../services/pipeline/pipelineOrchestrator'
 
 // Tải thông tin xuất bản, chọn khung theo profile, rồi giao lượt chơi cho PlayController.
 export default function PlayPage() {
@@ -54,25 +54,17 @@ export default function PlayPage() {
   if (pipelineGame) {
     const isArchery = pipelineGame.gameType === 'PHYSICS_SLING_ARCHERY' || shareCode.toUpperCase().includes('CPF') || shareCode.toUpperCase().includes('ARCHERY')
 
-    const defaultQuizData: PresetQuizData = {
-      gameType: 'QUIZ',
-      id: pipelineGame.id,
-      title: pipelineGame.title,
-      gradeLevel: 2,
-      theme: 'Động vật nông trại',
-      questionText: 'Bác nông dân nuôi 38 chú gà và 27 chú vịt. Hỏi cả trang trại có tất cả bao nhiêu con?',
-      numA: 38,
-      numB: 27,
-      operation: '+',
-      options: [
-        { id: '1', text: '55 con', isCorrect: false },
-        { id: '2', text: '65 con', isCorrect: true },
-        { id: '3', text: '63 con', isCorrect: false },
-        { id: '4', text: '75 con', isCorrect: false },
-      ],
-      correctIndex: 1,
-      explanation: 'Phép tính: 38 + 27 = 65 con.',
-    }
+    const defaultQuizData: PresetQuizData = (pipelineGame.dsl && typeof pipelineGame.dsl === 'object' && 'options' in (pipelineGame.dsl as object))
+      ? (pipelineGame.dsl as PresetQuizData)
+      : generatePresetGame({
+          rawPrompt: 'Phép cộng có nhớ phạm vi 100 nông trại',
+          subject: 'Math',
+          gradeLevel: 2,
+          topic: 'Nông trại toán học',
+          theme: 'farm',
+          track: 'PRESET',
+          mechanic: 'PRESET_QUIZ',
+        })
 
     return (
       <main className="min-h-screen bg-slate-900 text-white flex flex-col p-4 sm:p-6 items-center">

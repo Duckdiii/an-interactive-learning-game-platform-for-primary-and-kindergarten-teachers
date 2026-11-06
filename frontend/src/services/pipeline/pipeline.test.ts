@@ -133,8 +133,8 @@ describe('Dual-Track AI Game Creation Pipeline Tests', () => {
     it('Gate 2 (CPF): phát hiện bong bóng bị gán sai cờ tính chẵn/lẻ', () => {
       const intent = parseIntent('Bắn cung toán lớp 2')
       const cpf = generateCpfGame(intent)
-      // Modify balloon 17 (odd) to claim isEven = true
-      const oddBalloon = cpf.nodes.find((n) => n.metadata?.numberValue === 17)
+      // Modify an odd balloon to claim isEven = true
+      const oddBalloon = cpf.nodes.find((n) => n.role === 'target' && Number(n.metadata?.numberValue) % 2 !== 0)
       expect(oddBalloon).toBeDefined()
       if (oddBalloon && oddBalloon.metadata) {
         oddBalloon.metadata.isEven = true
@@ -161,8 +161,8 @@ describe('Dual-Track AI Game Creation Pipeline Tests', () => {
       const preset = generatePresetGame(intent)
 
       expect(preset.gameType).toBe('QUIZ')
-      expect(preset.numA + preset.numB).toBe(65)
-      expect(preset.options[preset.correctIndex].text).toContain('65')
+      const expectedAnswer = preset.operation === '+' ? preset.numA + preset.numB : preset.numA - preset.numB
+      expect(preset.options[preset.correctIndex].text).toContain(String(expectedAnswer))
       expect(preset.options.length).toBe(4)
     })
 

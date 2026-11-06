@@ -86,6 +86,18 @@ describe('mockRegenerateQuestion: câu mới', () => {
     expect(JSON.stringify(result.question)).not.toContain('blob:')
   })
 
+  it('tạo lại câu hỏi QUIZ với gợi ý sư phạm: sinh bài toán động theo đúng yêu cầu', async () => {
+    const request = requestFor('QUIZ', { feedback: 'Đổi sang bài toán trừ có nhớ trong phạm vi 50 ở nông trại' })
+    const result = await mockRegenerateQuestion(request)
+
+    expect(result.gameType).toBe('QUIZ')
+    const q = result.question as any
+    expect(q.options.length).toBeGreaterThanOrEqual(2)
+    expect(q.questionText).toBeTruthy()
+    expect(q.correctOptionId).toBeTruthy()
+    expect(q.imageUrl).toContain('/assets/themes/farm/')
+  })
+
   it('gợi ý "dễ hơn" thêm thời gian, "khó hơn" bớt đi, đều trong khoảng 10 đến 120 giây; gợi ý khác thì giữ nguyên', async () => {
     const at = (seconds: number) => ({ ...firstQuestion('QUIZ'), timeLimitSeconds: seconds }) as QuestionDsl
     const time = async (seconds: number, feedback: string) =>

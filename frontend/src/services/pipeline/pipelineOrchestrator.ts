@@ -12,6 +12,8 @@ import { CANDY_PALETTE, UI_SPECS } from './assetPalette'
 import { resolveGameTheme, type GameWorldTheme } from './themeResolver'
 import { bindAssetsToPreset } from './assetBank'
 import type { CpfSceneGraph, CpfSceneNode, CpfActionRule } from './cpfTypes'
+import { parsePedagogicalConstraints } from './constraintParser'
+import { generateMathQuestions } from './dynamicMathGenerator'
 
 export type TrackType = 'PRESET' | 'CPF'
 
@@ -101,22 +103,8 @@ export interface PipelineExecutionResult {
 // -----------------------------------------------------------------------------
 
 export function parseIntent(prompt: string): ParsedIntent {
+  const constraints = parsePedagogicalConstraints(prompt)
   const lower = prompt.toLowerCase()
-
-  // Detect Grade Level
-  let gradeLevel: 1 | 2 | 3 | 4 | 5 = 2
-  if (lower.includes('lớp 1') || lower.includes('grade 1')) gradeLevel = 1
-  else if (lower.includes('lớp 3') || lower.includes('grade 3')) gradeLevel = 3
-  else if (lower.includes('lớp 4') || lower.includes('grade 4')) gradeLevel = 4
-  else if (lower.includes('lớp 5') || lower.includes('grade 5')) gradeLevel = 5
-
-  // Detect Subject
-  let subject: 'Math' | 'Vietnamese' | 'Science' = 'Math'
-  if (lower.includes('tiếng việt') || lower.includes('từ') || lower.includes('vần')) {
-    subject = 'Vietnamese'
-  } else if (lower.includes('khoa học') || lower.includes('tự nhiên')) {
-    subject = 'Science'
-  }
 
   // Detect OOD CPF Keywords (Archery, Sling, Physics, Projectile, Floating Targets)
   const oodKeywords = [
@@ -133,12 +121,28 @@ export function parseIntent(prompt: string): ParsedIntent {
   ]
   const isOod = oodKeywords.some((kw) => lower.includes(kw))
 
+  const subjectMap: Record<string, 'Math' | 'Vietnamese' | 'Science'> = {
+    MATH: 'Math',
+    VIETNAMESE: 'Vietnamese',
+    SCIENCE: 'Science',
+    ENGLISH: 'Math',
+  }
+  const subject = subjectMap[constraints.subject] || 'Math'
+
+  const themeTitles: Record<string, string> = {
+    farm: 'Động vật nông trại vui vẻ',
+    ocean: 'Thế giới đại dương kì thú',
+    jungle: 'Rừng xanh nhiệt đới',
+    space: 'Khám phá vũ trụ bao la',
+  }
+  const theme = themeTitles[constraints.themeKey] || 'Động vật nông trại vui vẻ'
+
   if (isOod) {
     return {
       rawPrompt: prompt,
       subject,
-      gradeLevel,
-      topic: 'Số chẵn và số lẻ trong phạm vi 100',
+      gradeLevel: constraints.gradeLevel,
+      topic: `${constraints.mathType === 'PARITY' ? 'Số chẵn và số lẻ' : 'Phép tính toán học'} trong phạm vi ${constraints.rangeMax}`,
       theme: 'Bắn cung bóng bay cầu vồng',
       track: 'CPF',
       mechanic: 'PHYSICS_SLING_ARCHERY',
@@ -146,12 +150,17 @@ export function parseIntent(prompt: string): ParsedIntent {
   }
 
   // In-Distribution Preset (Quiz, Matching, DragDrop)
+  let topic = `${constraints.mathType === 'SUB' ? 'Phép trừ' : constraints.mathType === 'MUL' ? 'Phép nhân' : constraints.mathType === 'DIV' ? 'Phép chia' : constraints.mathType === 'PARITY' ? 'Số chẵn và số lẻ' : constraints.mathType === 'COMPARE' ? 'So sánh số' : 'Phép cộng'}${constraints.hasRegrouping ? ' có nhớ' : ' không nhớ'} trong phạm vi ${constraints.rangeMax}`
+  if (constraints.subject === 'VIETNAMESE') {
+    topic = constraints.languageConcept ? `Phân biệt ${constraints.languageConcept.targets.join(', ')}` : 'Luyện tập Tiếng Việt'
+  }
+
   return {
     rawPrompt: prompt,
     subject,
-    gradeLevel,
-    topic: 'Phép cộng có nhớ trong phạm vi 100',
-    theme: 'Động vật nông trại vui vẻ',
+    gradeLevel: constraints.gradeLevel,
+    topic,
+    theme,
     track: 'PRESET',
     mechanic: 'PRESET_QUIZ',
   }
@@ -376,33 +385,76 @@ export function verifyGate3Playability(
 // -----------------------------------------------------------------------------
 
 export function generatePresetGame(intent: ParsedIntent): PresetQuizData {
-  const numA = 38
-  const numB = 27
-  const sum = numA + numB // 65 (Phép cộng có nhớ trong phạm vi 100)
+  const constraints = parsePedagogicalConstraints(intent.rawPrompt)
+  const [q] = generateMathQuestions(constraints, 1)
+
+  const numA = q.numA
+  const numB = q.numB
+  const correctVal = q.correctAnswer
+  const unit = q.unit || 'con'
+
+  const correctOption = { id: 'opt-correct', text: `${correctVal} ${unit}`.trim(), isCorrect: true }
+  const distractorOptions = q.distractors.map((d, i) => ({
+    id: `opt-dist-${i + 1}`,
+    text: `${d} ${unit}`.trim(),
+    isCorrect: false,
+  }))
+
+  const allOptions = [correctOption, ...distractorOptions].sort(() => Math.random() - 0.5)
+  const correctIndex = allOptions.findIndex((o) => o.isCorrect)
+
+  const themeTitles: Record<string, string> = {
+    farm: 'Nông Trại Toán Học',
+    ocean: 'Đại Dương Kì Thú',
+    jungle: 'Rừng Xanh Nhiệt Đới',
+    space: 'Vũ Trụ Toán Học',
+  }
+  const title = `${themeTitles[constraints.themeKey] || 'Nông Trại Toán Học'} Lớp ${intent.gradeLevel}`
 
   return {
     gameType: 'QUIZ',
-    id: 'quiz-farm-math-01',
-    title: 'Nông Trại Toán Học Lớp 2',
+    id: `quiz-${constraints.themeKey}-math-${Date.now().toString().slice(-4)}`,
+    title,
     gradeLevel: intent.gradeLevel,
-    theme: 'Động vật nông trại',
-    questionText: `Bác nông dân nuôi ${numA} chú gà và ${numB} chú vịt. Hỏi cả trang trại có tất cả bao nhiêu con?`,
+    theme: themeTitles[constraints.themeKey] || 'Động vật nông trại',
+    questionText: q.questionText,
     numA,
     numB,
-    operation: '+',
-    options: [
-      { id: 'opt-1', text: '55 con', isCorrect: false },
-      { id: 'opt-2', text: `${sum} con`, isCorrect: true },
-      { id: 'opt-3', text: '63 con', isCorrect: false },
-      { id: 'opt-4', text: '75 con', isCorrect: false },
-    ],
-    correctIndex: 1,
-    explanation: `Phép tính: ${numA} + ${numB} = ${sum} con (8 + 7 = 15 viết 5 nhớ 1; 3 + 2 + 1 = 6).`,
+    operation: q.operation === '-' ? '-' : '+',
+    options: allOptions.map((o, idx) => ({ id: `opt-${idx + 1}`, text: o.text, isCorrect: o.isCorrect })),
+    correctIndex,
+    explanation: q.explanation,
+    imageUrl: q.spriteUrl,
   }
 }
 
 export function generateCpfGame(intent: ParsedIntent): CpfSceneGraph {
-  const numbers = [24, 17, 48, 35, 82]
+  const constraints = parsePedagogicalConstraints(intent.rawPrompt)
+  const rangeMax = Math.max(20, constraints.rangeMax || 100)
+  const evens: number[] = []
+  const odds: number[] = []
+
+  let attempt = 0
+  while (evens.length < 3 && attempt < 200) {
+    attempt++
+    const candidate = (Math.floor(Math.random() * Math.floor(rangeMax / 2)) + 1) * 2
+    if (!evens.includes(candidate) && candidate <= rangeMax) {
+      evens.push(candidate)
+    }
+  }
+  if (evens.length < 3) evens.push(24, 48, 82)
+
+  attempt = 0
+  while (odds.length < 2 && attempt < 200) {
+    attempt++
+    const candidate = Math.floor(Math.random() * Math.floor(rangeMax / 2)) * 2 + 1
+    if (!odds.includes(candidate) && candidate <= rangeMax) {
+      odds.push(candidate)
+    }
+  }
+  if (odds.length < 2) odds.push(17, 35)
+
+  const numbers = [evens[0], odds[0], evens[1], odds[1], evens[2]].sort(() => Math.random() - 0.5)
   const colors = CANDY_PALETTE.balloonColors
 
   const nodes: CpfSceneNode[] = [

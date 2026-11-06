@@ -7,6 +7,9 @@ import { validateGame } from '../../utils/gameValidation'
 import { buildMockGameContents, mathMatching, mathMemory } from './gameFixtures'
 import { enrichGameWithAssets, findCatalogItemsInText } from '../../utils/assetResolver'
 import { extractSemantics } from '../pipeline/semanticExtractor'
+import { parsePedagogicalConstraints } from '../pipeline/constraintParser'
+import { generateMathQuestions } from '../pipeline/dynamicMathGenerator'
+import { generateLanguagePairs } from '../pipeline/dynamicLanguageGenerator'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
 // Kho game trong bộ nhớ cho các nhóm mô phỏng `games` và `editor`: 10 game mẫu (đủ 10 loại) có nội dung DSL đầy đủ; danh
@@ -188,10 +191,47 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
     ...(info.gradeLevel ? { gradeLevel: info.gradeLevel } : {}),
   } as GameDsl['metadata']
 
+  const constraints = parsePedagogicalConstraints(`${idea} ${info.subject ?? ''} ${info.gradeLevel ?? ''}`)
+
+  if (info.gameType === 'QUIZ' && idea) {
+    if (isMath || constraints.subject === 'MATH') {
+      const mathQuestions = generateMathQuestions(constraints, 3)
+      content.questions = mathQuestions.map((mq, idx) => {
+        const optionsList = [mq.correctAnswer, ...mq.distractors]
+        const shuffled = optionsList.map((val) => String(val)).sort(() => Math.random() - 0.5)
+        const unique = Array.from(new Set(shuffled))
+        while (unique.length < 2) unique.push(String(Number(unique[0]) + 1))
+        const letters = ['a', 'b', 'c', 'd']
+        const options = unique.slice(0, 4).map((text, i) => ({ id: letters[i], text }))
+        const correctOption = options.find((opt) => opt.text === String(mq.correctAnswer)) ?? options[0]
+
+        return {
+          id: `q${idx + 1}`,
+          timeLimitSeconds: 30,
+          points: 10,
+          questionText: mq.questionText,
+          options,
+          correctOptionId: correctOption.id,
+          audioText: mq.questionText,
+          imageUrl: mq.spriteUrl,
+        }
+      })
+    }
+  }
+
   const matchedItems = findCatalogItemsInText(idea)
   if (!isMath && content.questions[0]) {
     if (info.gameType === 'MATCHING') {
-      if (matchedItems.length >= 3) {
+      if (constraints.languageConcept && constraints.languageConcept.type !== 'LETTER') {
+        const langPairs = generateLanguagePairs(constraints, 4)
+        const pairs = langPairs.map((p) => ({
+          pairId: p.pairId,
+          left: { text: p.left.text, imageUrl: p.right.imageUrl },
+          right: { text: p.right.text, imageUrl: p.right.imageUrl },
+        }))
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = 'Bé hãy nối các thẻ tương ứng nhé'
+      } else if (matchedItems.length >= 3) {
         const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
           pairId: `p${idx + 1}`,
           left: { text: item.name, imageUrl: item.url },
