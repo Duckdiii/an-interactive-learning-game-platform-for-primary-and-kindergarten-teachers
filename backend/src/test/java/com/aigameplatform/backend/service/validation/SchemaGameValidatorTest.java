@@ -40,7 +40,7 @@ class SchemaGameValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void acceptsEveryValidExampleAndExposesTheTypedGame(GameType type) throws IOException {
         GameValidationContext context = new GameValidationContext(example(type));
 
@@ -65,7 +65,7 @@ class SchemaGameValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void frozenVersionRejectsTeacherCurriculumReviewInsideGameMetadata(GameType type) throws IOException {
         ObjectNode json = example(type);
         ((ObjectNode) json.get("metadata")).set("curriculumReview",

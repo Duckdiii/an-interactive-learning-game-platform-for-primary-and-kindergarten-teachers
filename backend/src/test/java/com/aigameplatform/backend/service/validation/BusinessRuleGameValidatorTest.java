@@ -67,7 +67,7 @@ class BusinessRuleGameValidatorTest {
     // ---- ví dụ hợp lệ ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExamplePassesBothLayers(GameType type) throws IOException {
         ValidationReport report = service.validate(example(type));
 

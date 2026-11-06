@@ -63,7 +63,7 @@ class AiOutputValidatorTest {
     // ---- ví dụ hợp lệ ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExampleIsValidAndReadIntoTheRightRecord(GameType type) throws IOException {
         AiOutputReport report = validator.validate(type, exampleText(type));
 
@@ -73,9 +73,9 @@ class AiOutputValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void anExampleIsRejectedByTheSchemaOfAnotherGameType(GameType type) throws IOException {
-        GameType other = GameType.values()[(type.ordinal() + 1) % GameType.values().length];
+        GameType other = GameType.dslTypes()[(type.ordinal() + 1) % GameType.dslTypes().length];
 
         assertThat(validator.validate(other, exampleText(type)).valid()).isFalse();
     }

@@ -20,7 +20,7 @@ public class GameDslFactoryRegistry {
                 throw new IllegalStateException("Có hơn một factory cho loại game " + factory.supportedType());
             }
         }
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             if (!factories.containsKey(type)) {
                 throw new IllegalStateException("Chưa có factory cho loại game " + type);
             }

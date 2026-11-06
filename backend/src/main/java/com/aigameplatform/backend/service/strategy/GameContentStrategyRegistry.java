@@ -18,7 +18,7 @@ public class GameContentStrategyRegistry {
                 throw new IllegalStateException("Có hơn một strategy cho loại game " + strategy.getSupportedType());
             }
         }
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             if (!strategies.containsKey(type)) {
                 throw new IllegalStateException("Chưa có strategy cho loại game " + type);
             }

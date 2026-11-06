@@ -28,7 +28,7 @@ public class GameDslSchemaRegistry {
         SchemaRegistry registry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12,
                 builder -> builder.schemaRegistryConfig(
                         SchemaRegistryConfig.builder().pathType(PathType.JSON_PATH).build()));
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             schemas.put(type, load(registry, type));
         }
     }

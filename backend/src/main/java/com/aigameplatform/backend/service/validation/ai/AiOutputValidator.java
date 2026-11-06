@@ -57,7 +57,7 @@ public class AiOutputValidator {
         SchemaRegistry registry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12,
                 builder -> builder.schemaRegistryConfig(
                         SchemaRegistryConfig.builder().pathType(PathType.JSON_PATH).build()));
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             schemas.put(type, registry.getSchema(AiOutputSchemas.rawJson(type), InputFormat.JSON));
         }
     }
@@ -73,7 +73,11 @@ public class AiOutputValidator {
             return failed("Không phải JSON hợp lệ: " + e.getOriginalMessage());
         }
 
-        List<Error> schemaErrors = schemas.get(type).validate(json);
+        Schema schema = schemas.get(type);
+        if (schema == null) {
+            return failed("Loại game " + type + " không có dạng đầu ra AI theo DSL v1.0.0");
+        }
+        List<Error> schemaErrors = schema.validate(json);
         if (!schemaErrors.isEmpty()) {
             return new AiOutputReport(schemaErrors.stream()
                     .map(e -> new ValidationError(e.getInstanceLocation().toString(), e.getMessage()))

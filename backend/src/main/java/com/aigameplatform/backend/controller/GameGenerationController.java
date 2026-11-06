@@ -86,6 +86,7 @@ public class GameGenerationController {
         long startTime = System.currentTimeMillis();
 
         GameType type = request.gameType() != null ? request.gameType() : GameType.QUIZ;
+        rejectCustom(type);
         Subject subject = request.subject() != null ? request.subject() : Subject.MATH;
         GradeLevel grade = request.gradeLevel() != null ? request.gradeLevel() : GradeLevel.GRADE_2;
         String topic = request.topic() != null && !request.topic().isBlank()
@@ -147,6 +148,7 @@ public class GameGenerationController {
      */
     @PostMapping
     public ResponseEntity<ApiResponse<PublishGameResponse>> publishGame(@RequestBody PublishGameRequest request) {
+        rejectCustom(request.gameType());
         String id = "game-" + UUID.randomUUID().toString().substring(0, 8);
         String prefix = request.subject() == Subject.VIETNAMESE ? "VIET" : "MATH";
         String shareCode = prefix + String.format("%02d", random.nextInt(100));
@@ -223,6 +225,14 @@ public class GameGenerationController {
                     );
                     return ResponseEntity.ok(ApiResponse.ok(fallback));
                 });
+    }
+
+    // shortcut: endpoint thử nghiệm cũ chưa biết game CPF; gỡ khi GamesController theo openapi.yaml thay thế (bước backend 4).
+    private static void rejectCustom(GameType type) {
+        if (type == GameType.CUSTOM) {
+            throw new com.aigameplatform.backend.exception.ApiException(
+                    com.aigameplatform.backend.exception.ErrorCode.VALIDATION_ERROR, "Game CUSTOM chưa hỗ trợ ở endpoint này");
+        }
     }
 
     @ExceptionHandler(UnsafeContentException.class)

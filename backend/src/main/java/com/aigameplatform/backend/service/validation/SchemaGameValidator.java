@@ -40,11 +40,12 @@ public class SchemaGameValidator extends AbstractGameValidator {
         }
 
         GameType type = gameTypeOf(json);
-        if (type == null) {
+        // CUSTOM là game CPF, không có schema DSL: coi như loại không hỗ trợ ở chuỗi DSL.
+        Schema schema = type == null ? null : schemaRegistry.schemaFor(type);
+        if (schema == null) {
             return List.of(new ValidationError("$.gameType", "gameType thiếu hoặc không thuộc các loại game được hỗ trợ"));
         }
 
-        Schema schema = schemaRegistry.schemaFor(type);
         List<Error> schemaErrors = schema.validate(json);
         if (!schemaErrors.isEmpty()) {
             return schemaErrors.stream()

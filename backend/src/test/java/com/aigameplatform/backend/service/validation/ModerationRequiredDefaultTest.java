@@ -21,7 +21,7 @@ class ModerationRequiredDefaultTest {
     private static final String REQUIRED_KEY = "app.moderation.required";
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withUserConfiguration(SafetyGameValidator.class, BlockedWordList.class, OpenAiModerationClient.class)
+            .withUserConfiguration(SafetyGameValidator.class, com.aigameplatform.backend.service.validation.ContentSafetyCheck.class, BlockedWordList.class, OpenAiModerationClient.class)
             .withPropertyValues(
                     "app.moderation.blocked-words-location=classpath:moderation/blocked-words-vi.txt",
                     "app.moderation.openai.base-url=https://api.openai.com",

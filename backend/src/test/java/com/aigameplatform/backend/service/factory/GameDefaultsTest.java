@@ -36,7 +36,7 @@ class GameDefaultsTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyCombinationStaysWithinTheDslLimits(GameType type) {
         for (GradeLevel grade : GradeLevel.values()) {
             assertThat(GameDefaults.timeLimitSeconds(type, grade)).isBetween(5, 600);

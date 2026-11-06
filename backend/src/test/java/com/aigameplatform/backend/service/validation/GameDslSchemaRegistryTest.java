@@ -11,7 +11,7 @@ class GameDslSchemaRegistryTest {
     void loadsASchemaForEveryGameType() {
         GameDslSchemaRegistry registry = new GameDslSchemaRegistry();
 
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             assertThat(registry.schemaFor(type)).as("schema of %s", type).isNotNull();
         }
     }

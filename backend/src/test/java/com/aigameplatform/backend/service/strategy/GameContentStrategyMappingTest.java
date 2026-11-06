@@ -93,7 +93,7 @@ class GameContentStrategyMappingTest {
     // ---- DSL -> entity ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExampleBecomesEntitiesOfTheRightType(GameType type) throws IOException {
         List<QuestionGame> questions = STRATEGIES.get(type).parseToQuestions(resource("/dsl-examples/", type));
 
@@ -175,7 +175,7 @@ class GameContentStrategyMappingTest {
     // ---- entity -> DSL ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void examplesSurviveTheRoundTripThroughEntities(GameType type) throws IOException {
         String raw = resource("/dsl-examples/", type);
         GameContentStrategy<?, ?> strategy = STRATEGIES.get(type);
@@ -186,7 +186,7 @@ class GameContentStrategyMappingTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void gamesBuiltByTheFactoriesSurviveTheRoundTripAndStayValid(GameType type) throws IOException {
         AiGameOutput output = new AiOutputValidator(MAPPER).validate(type, resource("/ai-output-examples/", type)).output();
         GameContentStrategy<?, ?> strategy = STRATEGIES.get(type);
@@ -217,7 +217,7 @@ class GameContentStrategyMappingTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void savedEntitiesWithDatabaseIdsStillGiveAValidDslWithPositionalIds(GameType type) throws IOException {
         GameContentStrategy<?, ?> strategy = STRATEGIES.get(type);
         List<QuestionGame> questions = strategy.parseToQuestions(resource("/dsl-examples/", type));

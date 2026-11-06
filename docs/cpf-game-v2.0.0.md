@@ -1,6 +1,6 @@
 # CPF Game v2.0.0 (game ngoài danh mục)
 
-Trạng thái: **đặc tả đã duyệt, chờ đóng băng** (2026-11-07, kết thúc Pha 0). Chưa có code đọc định dạng này; điều chỉnh khi cài đặt Pha 1–3 phải sửa đồng bộ các nơi ở bảng dưới.
+Trạng thái: **đặc tả đã duyệt, chờ đóng băng** (2026-11-07, kết thúc Pha 0). Backend đã có kiểm duyệt 3 lớp (`service/validation/cpf`); điều chỉnh khi cài đặt Pha 1–3 phải sửa đồng bộ các nơi ở bảng dưới.
 
 Liên quan: `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md` (thiết kế pipeline v2), `docs/game-json-dsl-v1.0.0.md` (10 loại preset, không đổi), [[Mô tả ngoài danh mục game]] (20 khối nguyên tử).
 
@@ -21,7 +21,7 @@ Sửa định dạng phải sửa đồng bộ cả bốn chỗ đầu ở bản
 1. **Giống DSL v1.0.0, AI không sinh tọa độ, kích thước, màu, URL.** Vị trí ghi bằng vùng có tên (`region`) và cách xếp (`arrangement`); tốc độ ghi bằng mức (`SLOW`, `MEDIUM`, `FAST`). Runtime tự tính pixel, bảo đảm vùng chạm ≥ 64px và không đè nhau. `hitboxScale` không nằm trong JSON: runtime lấy theo `gradeLevel` như mặc định của DSL v1.0.0.
 2. **Cơ chế tách khỏi nội dung.** `content` chứa câu hỏi; `entities` và `rules` mô tả cách chơi. Cùng một `content` chạy được trên nhiều cơ chế.
 3. **Đáp án tách riêng** trong `answerKey`. Backend bỏ `answerKey` khi gửi cho học sinh (chế độ `play`) và chấm ở máy chủ.
-4. **Chỉ dùng khối trong danh mục.** Mọi `type` là enum đóng; nhóm `assetId` là danh sách đóng; `assetId` phải có trong manifest asset (Lớp 2, manifest làm ở Pha 1).
+4. **Chỉ dùng khối trong danh mục.** Mọi `type` là enum đóng; nhóm `assetId` là danh sách đóng; `assetId` phải có trong danh mục asset (Lớp 2, mục 5).
 5. **Id:** `id` của màn, lựa chọn, nhóm theo vị trí (`r1`, `c1`, `z1`), Backend gán như DSL v1.0.0. Ngoại lệ có chủ đích: `id` của vật (`entities[].id`) do AI đặt, vì `rules` tham chiếu vật bằng tên; đây là tên cục bộ trong một game, không phải id lưu trữ.
 
 ## 2. Hai dạng dữ liệu
@@ -126,13 +126,13 @@ Game kết thúc khi hết màn. Vật `PROGRESS` dừng ở nấc đạt đư�
 
 ## 4. Kiểm duyệt
 
-Theo chuỗi `AbstractGameValidator` (Chain of Responsibility) như DSL v1.0.0, không bỏ qua lớp nào: CPF có validator riêng cho từng lớp, nối vào chuỗi bằng đa hình theo `kind`/`schemaVersion` (không rẽ nhánh `if`). Cách nối cụ thể làm ở Pha 2.
+Theo chuỗi `AbstractGameValidator` (Chain of Responsibility) như DSL v1.0.0, không bỏ qua lớp nào: CPF có validator riêng cho từng lớp, là chuỗi riêng `CpfSchemaValidator` → `CpfRuleValidator` → `CpfSafetyValidator` do `CpfValidationService` tự lắp (các lớp này không là bean để không lọt vào chuỗi DSL); phần kiểm an toàn dùng chung bean `ContentSafetyCheck` với chuỗi DSL.
 
 ### 4.1 Lớp 1: cú pháp
 JSON khớp schema ở trên.
 
 ### 4.2 Lớp 2: logic (không diễn tả được bằng JSON Schema)
-1. Luật chung như DSL v1.0.0 mục 7: không chuỗi nào rỗng hoặc chỉ khoảng trắng; nhãn trong cùng một màn không trùng (so không phân biệt hoa thường và khoảng trắng thừa, giữ nguyên dấu tiếng Việt).
+1. Luật chung như DSL v1.0.0 mục 7: không chuỗi nào rỗng hoặc chỉ khoảng trắng; nhãn trong cùng danh sách của một màn (`choices` hoặc `zones`) không trùng (so không phân biệt hoa thường và khoảng trắng thừa, giữ nguyên dấu tiếng Việt).
 2. `id` vật không trùng; `answerKey.rounds` khớp `content.rounds` theo thứ tự và `roundId`; mọi `choiceId`, `zoneId` trong `answerKey` có trong màn tương ứng.
 3. Đáp án đúng số lượng theo mục 3.4 (`PICK_ONE` đúng 1; `PICK_ALL` ít hơn số lựa chọn; `SORT` đủ và không thừa).
 4. Mọi tham chiếu trong `rules` (`target`, `a`, `b`, `item`, `zone`, `subject`, `to`, `at`) là `id` vật đã khai báo; `$subject` chỉ ở `do`.
@@ -144,8 +144,8 @@ JSON khớp schema ở trên.
    - `AIM_SHOOT` cần một `COLLIDE` dùng `id` của nó.
    - `PROGRESS`: có vật `role: PROGRESS` thì mọi màn là `PICK_ONE`, có ít nhất một `ADVANCE`, `ADVANCE` chỉ nằm trong `onCorrect` và `subject` của nó là vật `role: PROGRESS` (để mỗi màn tiến tối đa một nấc).
    - Vật `bindTo` không dùng `arrangement: SINGLE` (nhiều vật không được chồng một chỗ).
-6. Toán: code tự tính lại đáp án từ `prompt`/`label` khi phân tích được, tái dùng `QuizArithmeticAnswerVerifier` (`service/validation/rule`).
-7. Ngân sách: số vật hiển thị cùng lúc (sau khi nhân `bindTo`) ≤ 15; `assetId` có trong manifest.
+6. Toán: với môn `MATH`, màn `PICK_ONE` hỏi kết quả một phép tính (câu kết thúc bằng `= ?`) và mọi nhãn là số nguyên, code tự tính lại và đối chiếu đáp án bằng `QuizArithmeticAnswerVerifier` (`service/validation/rule`). Câu đúng/sai, so sánh, nhãn kèm đơn vị không kiểm được bằng máy nên bỏ qua (không chặn nhầm).
+7. Ngân sách: số vật hiển thị cùng lúc (sau khi nhân `bindTo`) ≤ 15; `assetId` có trong danh mục asset.
 
 ### 4.3 Lớp 3: an toàn
 Như DSL v1.0.0: gom `title`, `topic`, `instruction`, `prompt`, `label` (không gom `assetId`, `id`), đối chiếu danh sách từ cấm rồi OpenAI Moderation.
@@ -155,7 +155,9 @@ Như DSL v1.0.0 mục 7: Lớp 1, 2 lỗi thì gọi lại AI tối đa 2 lần 
 
 ## 5. `assetId`
 
-Dạng `nhóm.tên`. Nhóm của vật: `animal`, `fruit`, `object`, `vehicle`, `sea`, `space`, `jungle`, `farm`, `ui`; nền `bg`; mascot `mascot`; nhạc `music`. Manifest (Pha 1) ánh xạ id sang file, kèm nguồn và giấy phép.
+Dạng `nhóm.tên`. Nhóm của vật: `animal`, `fruit`, `object`, `vehicle`, `sea`, `space`, `jungle`, `farm`, `ui`; nền `bg`; mascot `mascot`; nhạc `music`.
+
+Danh mục id hợp lệ (nguồn duy nhất, Lớp 2 kiểm và prompt AI liệt kê): `backend/src/main/resources/cpf/asset-catalog.json`. Frontend `frontend/src/games/cpf/cpfAssets.ts` ánh xạ id sang file; id có trong danh mục mà chưa có file thì runtime vẽ hình thay thế có nhãn. Chưa có id nhóm `music` nên `musicId` hiện luôn bị Lớp 2 từ chối.
 
 Đã có file trong `frontend/public/assets/` (đặt id ở Pha 1): nền `bg.farm`, `bg.ocean`, `bg.jungle`, `bg.space`; mascot `leo`, `mimi`, `pippy`, `sam`; con vật, hoa quả, `object.car`, `object.star`, `sea.clownfish`, `sea.turtle`... Chưa có, 5 ví dụ đang dùng, cần thêm ở Pha 1: `object.basket`, `object.boat`, `object.bow`, `object.target`, `object.sign`, `object.box`, `bg.road`.
 

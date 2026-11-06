@@ -44,7 +44,7 @@ class SafetyGameValidatorTest {
 
     private SafetyGameValidator validator(boolean configured) {
         when(client.isConfigured()).thenReturn(configured);
-        return new SafetyGameValidator(blockedWords, client, false);
+        return new SafetyGameValidator(new ContentSafetyCheck(blockedWords, client, false));
     }
 
     private static List<ModerationResult> allClean(int count) {
@@ -150,7 +150,7 @@ class SafetyGameValidatorTest {
     void refusesToStartWhenModerationIsRequiredButNotConfigured() {
         when(client.isConfigured()).thenReturn(false);
 
-        assertThatThrownBy(() -> new SafetyGameValidator(blockedWords, client, true))
+        assertThatThrownBy(() -> new ContentSafetyCheck(blockedWords, client, true))
                 .isInstanceOf(IllegalStateException.class);
     }
 

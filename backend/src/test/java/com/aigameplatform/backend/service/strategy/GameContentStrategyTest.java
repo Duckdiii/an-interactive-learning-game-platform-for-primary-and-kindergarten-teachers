@@ -21,7 +21,7 @@ class GameContentStrategyTest {
     @Test
     void thereIsExactlyOneStrategyPerGameType() {
         assertThat(STRATEGIES).extracting(GameContentStrategy::getSupportedType)
-                .containsExactlyInAnyOrder(GameType.values());
+                .containsExactlyInAnyOrder(GameType.dslTypes());
     }
 
     @Test

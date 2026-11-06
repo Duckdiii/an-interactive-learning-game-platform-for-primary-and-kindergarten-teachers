@@ -34,12 +34,21 @@ class CurriculumRagConfigurationTest {
     @Test void runtimeCatalogAllowsEveryExistingGameTypeForPublishedCurriculumScopes() throws Exception {
         var catalog = new CurriculumRagConfiguration().curriculumCatalog();
 
-        for (var gameType : com.aigameplatform.backend.entity.enums.GameType.values()) {
+        for (var gameType : com.aigameplatform.backend.entity.enums.GameType.dslTypes()) {
             assertThatCode(() -> catalog.requireSupported(gameType,
                     com.aigameplatform.backend.entity.enums.Subject.MATH,
                     com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_1))
                     .as(gameType.name()).doesNotThrowAnyException();
         }
+    }
+
+    @Test void runtimeCatalogDoesNotOfferDslGenerationForCustomGames() throws Exception {
+        var catalog = new CurriculumRagConfiguration().curriculumCatalog();
+
+        assertThatThrownBy(() -> catalog.requireSupported(com.aigameplatform.backend.entity.enums.GameType.CUSTOM,
+                com.aigameplatform.backend.entity.enums.Subject.MATH,
+                com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_1))
+                .isInstanceOf(com.aigameplatform.backend.exception.GenerationScopeUnsupportedException.class);
     }
 
     @Test void generatorAndSemanticModelsCanBeEnabledTogetherWithoutAmbiguousInjection() {

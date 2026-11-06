@@ -197,7 +197,7 @@ class GameGenerationServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void ragContextAndTypeSchemaReachTheExistingGameOutputPipeline(GameType type) throws Exception {
         var datasets = com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadPackaged();
         var dataset = datasets.stream().filter(candidate -> candidate.chunks().stream()
@@ -384,7 +384,7 @@ class GameGenerationServiceTest {
             List<com.aigameplatform.backend.service.curriculum.CurriculumDataset> catalogDatasets) {
         DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
         beans.registerSingleton("catalog", new com.aigameplatform.backend.service.curriculum.CurriculumCatalog(
-                catalogDatasets, java.util.EnumSet.allOf(GameType.class)));
+                catalogDatasets, java.util.EnumSet.copyOf(java.util.List.of(GameType.dslTypes()))));
         if (generator != null) {
             beans.registerSingleton("generator", generator);
         }
@@ -398,8 +398,8 @@ class GameGenerationServiceTest {
                     new PilotQuizContentVerifier(constraints, constraints.sha256()));
         } catch (IOException e) { throw new java.io.UncheckedIOException(e); }
         List<AbstractGameValidator> validators = new ArrayList<>(GameTestFixtures.schemaAndBusinessRuleValidators(MAPPER));
-        validators.add(new SafetyGameValidator(
-                new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")), moderation, false));
+        validators.add(new SafetyGameValidator(new com.aigameplatform.backend.service.validation.ContentSafetyCheck(
+                new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")), moderation, false)));
         GameValidationService validation = new GameValidationService(validators, MAPPER);
         Random random = new Random(7);
         return new GameGenerationService(beans.getBeanProvider(GameContentGenerator.class),
@@ -448,7 +448,7 @@ class GameGenerationServiceTest {
     // ---- thành công ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void aValidAnswerOnTheFirstTryBecomesAFullGame(GameType type) throws IOException {
         ScriptedGenerator generator = new ScriptedGenerator(validOutput(type));
 

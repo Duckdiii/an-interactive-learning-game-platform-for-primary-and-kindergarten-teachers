@@ -56,11 +56,18 @@ public final class GameDefaults {
     }
 
     public static int timeLimitSeconds(GameType type, GradeLevel grade) {
-        return (int) Math.ceil(BASE_TIME_SECONDS.get(type) * TIME_MULTIPLIER.get(grade));
+        return (int) Math.ceil(dslDefault(BASE_TIME_SECONDS, type) * TIME_MULTIPLIER.get(grade));
     }
 
     public static int points(GameType type) {
-        return POINTS.get(type);
+        return dslDefault(POINTS, type);
+    }
+
+    /** Mặc định chỉ có cho 10 loại DSL; CUSTOM (CPF) không có thời gian/điểm theo câu. */
+    private static int dslDefault(Map<GameType, Integer> table, GameType type) {
+        Integer value = table.get(type);
+        if (value == null) throw new IllegalArgumentException("Không có mặc định DSL cho loại game " + type);
+        return value;
     }
 
     public static double hitboxScale(GradeLevel grade) {

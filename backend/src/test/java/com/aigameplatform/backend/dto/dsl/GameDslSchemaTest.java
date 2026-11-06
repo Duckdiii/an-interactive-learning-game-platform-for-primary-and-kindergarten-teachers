@@ -73,13 +73,13 @@ class GameDslSchemaTest {
     // ---- ví dụ hợp lệ ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExampleIsValidAgainstItsSchema(GameType type) throws IOException {
         assertThat(errorsOf(type, exampleOf(type))).isEmpty();
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExampleRoundTripsThroughTheJavaRecords(GameType type) throws IOException {
         JsonNode example = exampleOf(type);
 
@@ -91,9 +91,9 @@ class GameDslSchemaTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void anExampleIsRejectedByTheSchemaOfAnotherGameType(GameType type) throws IOException {
-        GameType other = GameType.values()[(type.ordinal() + 1) % GameType.values().length];
+        GameType other = GameType.dslTypes()[(type.ordinal() + 1) % GameType.dslTypes().length];
 
         assertThat(errorsOf(other, exampleOf(type))).isNotEmpty();
     }

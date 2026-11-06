@@ -285,7 +285,7 @@ class GeminiGameContentGeneratorTest {
         var generator = new GeminiGameContentGenerator(modelCapturing(sent), registry);
         String englishCurriculum = "[eng-g3-001] English outcome with source page provenance.";
 
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             var strategy = registry.get(type);
             var attempt = new GenerationAttempt(type, "teacher topic", Subject.ENGLISH, GradeLevel.GRADE_3,
                     strategy.getStructuredSchema(), englishCurriculum, 1, null, List.of());

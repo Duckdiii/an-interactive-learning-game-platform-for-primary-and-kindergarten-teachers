@@ -76,7 +76,7 @@ class GameDslFactoryTest {
     // ---- kết quả luôn hợp lệ ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExampleBecomesAValidGameForManyRandomShuffles(GameType type) throws IOException {
         AiGameOutput output = aiOutput(type);
         for (long seed = 0; seed < SEEDS; seed++) {
@@ -108,7 +108,7 @@ class GameDslFactoryTest {
 
     @Test
     void doesNotInventMediaUrls() throws IOException {
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             if (type == GameType.QUIZ) {
                 // Chặng 2.5: QuizGameDslFactory tự động gắn asset SVG chuẩn K-5 khi có visualPrompt
                 continue;
