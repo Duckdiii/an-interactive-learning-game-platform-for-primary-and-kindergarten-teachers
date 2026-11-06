@@ -17,6 +17,8 @@ import { useCountdown } from './useCountdown'
 import { usePlayerHotkeys } from './usePlayerHotkeys'
 import { submitWithRetry } from './submitWithRetry'
 import { useHint } from './useHint'
+import { ConfettiEffect } from '../../games/common/ConfettiEffect'
+import { soundBus } from '../../games/common/sound'
 
 interface QuestionStageProps {
   api: PlayerApi
@@ -145,6 +147,16 @@ export default function QuestionStage({ api, sessionId, title, question, Rendere
     // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ phản ứng khi đồng hồ về 0
   }, [remaining])
 
+  useEffect(() => {
+    if (result?.isCorrect) {
+      try {
+        soundBus.playCorrect()
+      } catch {
+        // Suppressed safely
+      }
+    }
+  }, [result])
+
   const feedback = result ? (
     <div className="flex flex-col items-center gap-3">
       <p>{rules.message(result, streak)}</p>
@@ -171,6 +183,7 @@ export default function QuestionStage({ api, sessionId, title, question, Rendere
 
   return (
     <>
+      <ConfettiEffect active={Boolean(result?.isCorrect)} />
       {/* inert khi bị che: Tab không ra nền, renderer không nhận chạm hay phím. */}
       <div inert={halted}>
       <PlayerShell title={title} progress={progress} score={rules.showScore ? score : undefined} remainingSeconds={remaining} feedback={feedback}

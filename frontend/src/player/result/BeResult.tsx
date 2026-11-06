@@ -5,6 +5,7 @@ import Mascot from '../theme/Mascot'
 import { useTheme } from '../theme/useTheme'
 import ParentGate from './ParentGate'
 import { beHeadline, buildParentMessage, starCount } from './resultText'
+import { ConfettiEffect } from '../../games/common/ConfettiEffect'
 import type { ResultProps } from './types'
 
 const STARS = 5
@@ -19,6 +20,7 @@ export default function BeResult({ info, correctCount, total, onReplay }: Result
 
   return (
     <main data-band="be" className="grid min-h-screen place-items-center bg-play-page play-safe-x play-safe-y [--play-pad-y:1.5rem] text-center [@media(max-height:500px)]:[--play-pad-y:0.75rem] text-play-ink">
+      <ConfettiEffect active={correctCount > 0} />
       <div className="flex w-full max-w-2xl flex-col items-center gap-5 [@media(max-height:500px)]:max-w-4xl [@media(max-height:500px)]:flex-row [@media(max-height:500px)]:gap-8 [@media(max-height:500px)]:text-left">
         {tokens.decoration ? (
           <div className="text-6xl [@media(max-height:500px)]:shrink-0">

@@ -87,6 +87,17 @@ export const DEFAULT_PALETTE: Palette = {
   streakInk: '#14532D',
 }
 
+/** Màu sắc hoạt hình ngọt ngào dùng cho hiệu ứng pháo hoa giấy Confetti & Star Burst */
+export const CELEBRATION_CONFETTI_COLORS: readonly string[] = [
+  DEFAULT_PALETTE.dotYellow,
+  DEFAULT_PALETTE.dotPink,
+  DEFAULT_PALETTE.dotBlue,
+  DEFAULT_PALETTE.dotGreen,
+  DEFAULT_PALETTE.dotOrange,
+  DEFAULT_PALETTE.dotPurple,
+  DEFAULT_PALETTE.accent,
+]
+
 /** `fooBar` -> `foo-bar`, cho tên biến CSS. */
 const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
 

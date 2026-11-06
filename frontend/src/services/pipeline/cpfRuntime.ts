@@ -6,7 +6,29 @@
 
 import { soundBus } from './soundBus'
 import { CANDY_PALETTE, UI_SPECS } from './assetPalette'
-import type { CpfSceneGraph } from './cpfTypes'
+import type { CpfSceneGraph, CpfMechanicType } from './cpfTypes'
+
+export interface FallingItemEntity {
+  id: string
+  numberValue: number
+  isEven: boolean
+  x: number
+  y: number
+  speed: number
+  color: string
+  highlight: string
+  isCaught: boolean
+  width: number
+  height: number
+  shape: string
+}
+
+export interface BasketEntity {
+  x: number
+  y: number
+  width: number
+  height: number
+}
 
 export interface BalloonEntity {
   id: string
@@ -62,6 +84,11 @@ export class CpfRuntimeEngine {
   public shakeOffset = { x: 0, y: 0 }
   private shakeFrames = 0
   private shakeIntensity = 0
+
+  // Mechanic mode & Dynamic primitives
+  public mechanicType: CpfMechanicType = 'PHYSICS_SLING_ARCHERY'
+  public basket: BasketEntity = { x: 960, y: 880, width: 180, height: 90 }
+  public fallingItems: FallingItemEntity[] = []
 
   // Gameplay state
   public score = 0
@@ -164,11 +191,59 @@ export class CpfRuntimeEngine {
       return
     }
 
-    const targetNodes = graph.nodes.filter((n) => n.role === 'target')
+    // Detect mechanic mode
+    if (graph.mechanicType) {
+      this.mechanicType = graph.mechanicType
+    } else if (graph.nodes.some((n) => n.role === 'catcher' || n.interaction?.type === 'CATCHER')) {
+      this.mechanicType = 'FALLING_CATCHER'
+    } else if (graph.nodes.some((n) => n.interaction?.type === 'DIRECT_TAP' || n.motion?.type === 'BUBBLE_FLOAT')) {
+      this.mechanicType = 'POP_TAPPER'
+    } else {
+      this.mechanicType = 'PHYSICS_SLING_ARCHERY'
+    }
+
+    if (this.mechanicType === 'FALLING_CATCHER') {
+      const catcherNode = graph.nodes.find((n) => n.role === 'catcher')
+      if (catcherNode) {
+        const sprite = catcherNode.visual.type === 'SPRITE' ? catcherNode.visual : null
+        this.basket = {
+          x: catcherNode.x,
+          y: catcherNode.y,
+          width: sprite?.width ?? 180,
+          height: sprite?.height ?? 90,
+        }
+      }
+
+      const targetNodes = graph.nodes.filter((n) => n.role === 'target' || n.role === 'falling_item')
+      this.fallingItems = targetNodes.map((n, idx) => {
+        const num = Number(n.metadata?.numberValue ?? (idx + 1) * 10)
+        const color = CANDY_PALETTE.balloonColors[idx % CANDY_PALETTE.balloonColors.length]
+        const sprite = n.visual.type === 'SPRITE' ? n.visual : null
+        const speed = n.motion?.type === 'ITEM_FALL' ? n.motion.speed : 3
+        return {
+          id: n.id,
+          numberValue: num,
+          isEven: num % 2 === 0,
+          x: n.x,
+          y: n.y,
+          speed,
+          color: sprite?.fill ?? color.fill,
+          highlight: sprite?.highlightFill ?? color.highlight,
+          isCaught: false,
+          width: sprite?.width ?? 88,
+          height: sprite?.height ?? 88,
+          shape: sprite?.shapeKind ?? 'apple',
+        }
+      })
+      this.balloons = []
+      return
+    }
+
+    const targetNodes = graph.nodes.filter((n) => n.role === 'target' || n.role === 'bubble')
     this.balloons = targetNodes.map((n, idx) => {
       const num = Number(n.metadata?.numberValue ?? (idx + 1) * 10)
       const color = CANDY_PALETTE.balloonColors[idx % CANDY_PALETTE.balloonColors.length]
-      const motion = n.motion?.type === 'FLOAT' ? n.motion : { amplitude: 35, frequency: 1.8 }
+      const motion = n.motion?.type === 'FLOAT' ? n.motion : n.motion?.type === 'BUBBLE_FLOAT' ? n.motion : { amplitude: 35, frequency: 1.8 }
       return {
         id: n.id,
         numberValue: num,
@@ -179,11 +254,12 @@ export class CpfRuntimeEngine {
         color: n.visual.type === 'SPRITE' ? n.visual.fill : color.fill,
         highlight: color.highlight,
         isPopped: false,
-        speed: motion.frequency,
-        amplitude: motion.amplitude,
+        speed: motion.frequency ?? 1.8,
+        amplitude: motion.amplitude ?? 35,
         phase: (idx * Math.PI) / 3,
       }
     })
+    this.fallingItems = []
   }
 
   // ---------------------------------------------------------------------------
@@ -276,13 +352,116 @@ export class CpfRuntimeEngine {
   }
 
   // ---------------------------------------------------------------------------
+  // UNIVERSAL INTERACTORS (CATCHER & DIRECT TAP)
+  // ---------------------------------------------------------------------------
+
+  public handleBasketMove(targetX: number): void {
+    const halfW = this.basket.width / 2
+    this.basket.x = Math.max(halfW + 40, Math.min(UI_SPECS.stageWidth - halfW - 40, targetX))
+  }
+
+  public handleTap(x: number, y: number): boolean {
+    if (this.inputLocked) return false
+
+    for (const b of this.balloons) {
+      if (b.isPopped) continue
+      const dist = Math.hypot(b.x - x, b.currentY - y)
+      if (dist <= 65) {
+        b.isPopped = true
+        if (b.isEven) {
+          this.score += 1
+          this.combo += 1
+          soundBus.playCorrect()
+          soundBus.playPop()
+          this.spawnConfetti(b.x, b.currentY, [
+            CANDY_PALETTE.sunnyYellow,
+            CANDY_PALETTE.mintGreen,
+            '#FFFFFF',
+          ])
+          this.messageBanner = {
+            text: `CHÍNH XÁC! ${b.numberValue} là số chẵn! (+1 Điểm)`,
+            color: CANDY_PALETTE.mintGreen,
+            duration: 2.0,
+          }
+        } else {
+          this.combo = 0
+          soundBus.playWrong()
+          this.triggerShake(14, 16)
+          this.messageBanner = {
+            text: `Ối! ${b.numberValue} là số lẻ rồi! Hãy tìm số chẵn nhé!`,
+            color: '#FF5252',
+            duration: 2.0,
+          }
+        }
+        setTimeout(() => this.checkRespawnBalloons(), 500)
+        return true
+      }
+    }
+    return false
+  }
+
+  // ---------------------------------------------------------------------------
   // 60 FPS SIMULATION TICK
   // ---------------------------------------------------------------------------
 
   public tick(dtSec: number): void {
     this.timeSec += dtSec
 
-    // 1. Update floating balloons
+    // 1. Update falling items for FALLING_CATCHER
+    if (this.mechanicType === 'FALLING_CATCHER') {
+      for (const item of this.fallingItems) {
+        item.y += item.speed * dtSec * 60
+
+        if (!item.isCaught) {
+          // AABB Collision with Basket
+          const inX = Math.abs(item.x - this.basket.x) <= this.basket.width / 2 + 10
+          const inY = item.y >= this.basket.y - 35 && item.y <= this.basket.y + 40
+
+          if (inX && inY) {
+            item.isCaught = true
+            if (item.isEven) {
+              this.score += 1
+              this.combo += 1
+              soundBus.playCorrect()
+              this.spawnConfetti(item.x, item.y, [
+                CANDY_PALETTE.sunnyYellow,
+                CANDY_PALETTE.mintGreen,
+                '#FFFFFF',
+              ])
+              this.messageBanner = {
+                text: `CHÍNH XÁC! ${item.numberValue} là số chẵn! (+1 Điểm)`,
+                color: CANDY_PALETTE.mintGreen,
+                duration: 2.0,
+              }
+            } else {
+              this.combo = 0
+              soundBus.playWrong()
+              this.triggerShake(16, 18)
+              this.messageBanner = {
+                text: `Ối! ${item.numberValue} là số lẻ rồi! Hãy hứng số chẵn nhé!`,
+                color: '#FF5252',
+                duration: 2.0,
+              }
+            }
+
+            // Reset after short delay
+            setTimeout(() => {
+              item.y = -60 - Math.random() * 150
+              item.x = 250 + Math.random() * (UI_SPECS.stageWidth - 500)
+              item.isCaught = false
+            }, 300)
+          }
+
+          // Off bottom screen
+          if (item.y > UI_SPECS.stageHeight + 80) {
+            item.y = -60 - Math.random() * 150
+            item.x = 250 + Math.random() * (UI_SPECS.stageWidth - 500)
+          }
+        }
+      }
+    }
+
+    // 2. Update floating balloons / bubbles
     for (const b of this.balloons) {
       if (!b.isPopped) {
         b.currentY = b.baseY + Math.sin(this.timeSec * b.speed + b.phase) * b.amplitude

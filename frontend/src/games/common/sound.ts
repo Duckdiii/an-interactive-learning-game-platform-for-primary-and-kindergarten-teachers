@@ -1,6 +1,8 @@
 import { Howl } from 'howler'
 import { soundBus } from '../../services/pipeline/soundBus'
 
+export { soundBus }
+
 // Mỗi file âm thanh chỉ tạo `Howl` một lần rồi phát lại (tạo mới mỗi lần phát sẽ để lại một audio node và
 // một buffer đã giải mã, bộ nhớ tăng dần trong phiên chơi dài). Tạo lười để import module không sinh `Howl`.
 // Các âm phản hồi ngắn dùng suốt vòng đời ứng dụng nên không gọi `unload()`.

@@ -4,7 +4,18 @@
  */
 
 // Visual Primitives
-export type CpfShapeKind = 'circle' | 'rect' | 'line' | 'balloon' | 'bow' | 'arrow' | 'star'
+export type CpfShapeKind =
+  | 'circle'
+  | 'rect'
+  | 'line'
+  | 'balloon'
+  | 'bow'
+  | 'arrow'
+  | 'star'
+  | 'basket'
+  | 'apple'
+  | 'bubble'
+  | 'fruit'
 
 export interface CpfVisualSprite {
   type: 'SPRITE'
@@ -64,7 +75,35 @@ export interface CpfMotionProjectile {
   gravity: number
 }
 
-export type CpfMotionPrimitive = CpfMotionPatrol | CpfMotionFloat | CpfMotionProjectile
+export interface CpfMotionItemFall {
+  type: 'ITEM_FALL'
+  speed: number
+  gravity: number
+  resetY?: number
+}
+
+export interface CpfMotionBubbleFloat {
+  type: 'BUBBLE_FLOAT'
+  speed: number
+  amplitude: number
+  frequency: number
+  resetY?: number
+}
+
+export interface CpfMotionHorizontalPatrol {
+  type: 'HORIZONTAL_PATROL'
+  minX: number
+  maxX: number
+  speed: number
+}
+
+export type CpfMotionPrimitive =
+  | CpfMotionPatrol
+  | CpfMotionFloat
+  | CpfMotionProjectile
+  | CpfMotionItemFall
+  | CpfMotionBubbleFloat
+  | CpfMotionHorizontalPatrol
 
 // Interaction Primitives
 export interface CpfInteractionTap {
@@ -86,7 +125,24 @@ export interface CpfInteractionSling {
   releaseVelocityMultiplier: number
 }
 
-export type CpfInteractionPrimitive = CpfInteractionTap | CpfInteractionDrag | CpfInteractionSling
+export interface CpfInteractionCatcher {
+  type: 'CATCHER'
+  width: number
+  height: number
+  speed?: number
+}
+
+export interface CpfInteractionDirectTap {
+  type: 'DIRECT_TAP'
+  actionId?: string
+}
+
+export type CpfInteractionPrimitive =
+  | CpfInteractionTap
+  | CpfInteractionDrag
+  | CpfInteractionSling
+  | CpfInteractionCatcher
+  | CpfInteractionDirectTap
 
 // Logic & Feedback Primitives
 export interface CpfParticleEffect {
@@ -110,7 +166,20 @@ export interface CpfCheckAnswerLogic {
 }
 
 // Scene Graph Node
-export type SceneNodeRole = 'bow' | 'arrow' | 'target' | 'background' | 'ui' | 'particle' | 'bowstring'
+export type SceneNodeRole =
+  | 'bow'
+  | 'arrow'
+  | 'target'
+  | 'background'
+  | 'ui'
+  | 'particle'
+  | 'bowstring'
+  | 'catcher'
+  | 'falling_item'
+  | 'bubble'
+  | 'fruit'
+
+export type CpfMechanicType = 'PHYSICS_SLING_ARCHERY' | 'FALLING_CATCHER' | 'POP_TAPPER'
 
 export interface CpfCollider {
   type: 'circle' | 'aabb'
@@ -161,6 +230,7 @@ export interface CpfActionRule {
 // Full Scene Graph Definition
 export interface CpfSceneGraph {
   schemaVersion: 'cpf.v1.0.0'
+  mechanicType?: CpfMechanicType
   title: string
   pedagogicalSubject: 'Math' | 'Vietnamese' | 'Science'
   gradeLevel: 1 | 2 | 3 | 4 | 5

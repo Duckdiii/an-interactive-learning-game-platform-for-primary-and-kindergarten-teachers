@@ -16,7 +16,8 @@ import { ThemeProvider } from '../theme/ThemeContext'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 import PlayController from '../play/PlayController'
 import { getPlayGameApi, type PlayGameDtoResponse } from '../../api/gamesApi'
-import { ArcheryCpfCanvas } from '../../services/pipeline/renderers/ArcheryCpfCanvas'
+import { CpfUniversalCanvas } from '../../services/pipeline/renderers/CpfUniversalCanvas'
+import type { CpfSceneGraph } from '../../services/pipeline/cpfTypes'
 import { FarmQuizCanvas } from '../../services/pipeline/renderers/FarmQuizCanvas'
 import { generatePresetGame, type PresetQuizData } from '../../services/pipeline/pipelineOrchestrator'
 
@@ -52,7 +53,7 @@ export default function PlayPage() {
 
   // Render Dual-Track Games từ Pipeline (CPF Archery hoặc Farm Quiz)
   if (pipelineGame) {
-    const isArchery = pipelineGame.gameType === 'PHYSICS_SLING_ARCHERY' || shareCode.toUpperCase().includes('CPF') || shareCode.toUpperCase().includes('ARCHERY')
+    const isCpf = pipelineGame.gameType === 'PHYSICS_SLING_ARCHERY' || pipelineGame.gameType === 'FALLING_CATCHER' || pipelineGame.gameType === 'POP_TAPPER' || (pipelineGame as unknown as { track?: string }).track === 'CPF' || shareCode.toUpperCase().includes('CPF') || shareCode.toUpperCase().includes('ARCHERY')
 
     const defaultQuizData: PresetQuizData = (pipelineGame.dsl && typeof pipelineGame.dsl === 'object' && 'options' in (pipelineGame.dsl as object))
       ? (pipelineGame.dsl as PresetQuizData)
@@ -83,8 +84,8 @@ export default function PlayPage() {
         </header>
 
         <section className="w-full max-w-5xl flex-1 flex flex-col justify-center">
-          {isArchery ? (
-            <ArcheryCpfCanvas />
+          {isCpf ? (
+            <CpfUniversalCanvas sceneGraph={pipelineGame.dsl as CpfSceneGraph} />
           ) : (
             <FarmQuizCanvas data={(pipelineGame.dsl as PresetQuizData) ?? defaultQuizData} />
           )}

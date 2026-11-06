@@ -56,6 +56,26 @@ describe('Dual-Track AI Game Creation Pipeline Tests', () => {
       expect(intent.mechanic).toBe('PHYSICS_SLING_ARCHERY')
     })
 
+    it('chuyển hướng prompt hứng hoa quả/giỏ vào Track 2 CPF FALLING_CATCHER', () => {
+      const prompt = 'Tạo game hứng táo rơi vào giỏ số chẵn toán lớp 2'
+      const intent = parseIntent(prompt)
+
+      expect(intent.track).toBe('CPF')
+      expect(intent.gradeLevel).toBe(2)
+      expect(intent.mechanic).toBe('FALLING_CATCHER')
+      expect(intent.theme).toContain('Hứng táo')
+    })
+
+    it('chuyển hướng prompt chạm nổ bong bóng vào Track 2 CPF POP_TAPPER', () => {
+      const prompt = 'Tạo game chạm nổ bong bóng số chẵn toán lớp 2'
+      const intent = parseIntent(prompt)
+
+      expect(intent.track).toBe('CPF')
+      expect(intent.gradeLevel).toBe(2)
+      expect(intent.mechanic).toBe('POP_TAPPER')
+      expect(intent.theme).toContain('Bong bóng')
+    })
+
     it('nhận diện chính xác môn học Tiếng Việt và các lớp khác nhau', () => {
       const prompt = 'Tạo game nối từ Tiếng Việt lớp 3 với chủ đề cây cối'
       const intent = parseIntent(prompt)
@@ -220,6 +240,52 @@ describe('Dual-Track AI Game Creation Pipeline Tests', () => {
   })
 
   describe('Virtual Runtime Engine (VRE) Physics Simulation', () => {
+    it('mô phỏng chính xác cơ chế hứng táo rơi (FALLING_CATCHER) và va chạm giỏ', () => {
+      const intent = parseIntent('Tạo game hứng quả táo vào giỏ toán lớp 2')
+      const graph = generateCpfGame(intent)
+      expect(graph.mechanicType).toBe('FALLING_CATCHER')
+
+      const engine = new CpfRuntimeEngine(graph)
+      expect(engine.mechanicType).toBe('FALLING_CATCHER')
+      expect(engine.fallingItems.length).toBe(5)
+
+      // Test basket horizontal move
+      engine.handleBasketMove(500)
+      expect(engine.basket.x).toBe(500)
+
+      // Simulate item falling and hitting basket
+      const item = engine.fallingItems[0]
+      item.x = 500
+      item.y = engine.basket.y - 10
+      item.isEven = true
+      const initialScore = engine.score
+
+      engine.tick(0.0166)
+      expect(engine.score).toBe(initialScore + 1)
+      expect(item.isCaught).toBe(true)
+      expect(engine.messageBanner?.text).toContain('CHÍNH XÁC')
+    })
+
+    it('mô phỏng chính xác cơ chế chạm nổ trực tiếp (POP_TAPPER)', () => {
+      const intent = parseIntent('Tạo game chạm nổ bong bóng số chẵn toán lớp 2')
+      const graph = generateCpfGame(intent)
+      expect(graph.mechanicType).toBe('POP_TAPPER')
+
+      const engine = new CpfRuntimeEngine(graph)
+      expect(engine.mechanicType).toBe('POP_TAPPER')
+      expect(engine.balloons.length).toBe(5)
+
+      const bubble = engine.balloons[0]
+      bubble.isEven = true
+      const initialScore = engine.score
+
+      // Tap directly on bubble coordinate
+      const tapped = engine.handleTap(bubble.x, bubble.currentY)
+      expect(tapped).toBe(true)
+      expect(bubble.isPopped).toBe(true)
+      expect(engine.score).toBe(initialScore + 1)
+    })
+
     it('tính toán chính xác cơ chế kéo ná (Sling tension) và khóa input khi mũi tên bay', () => {
       const engine = new CpfRuntimeEngine()
 

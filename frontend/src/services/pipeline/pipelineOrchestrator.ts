@@ -106,8 +106,8 @@ export function parseIntent(prompt: string): ParsedIntent {
   const constraints = parsePedagogicalConstraints(prompt)
   const lower = prompt.toLowerCase()
 
-  // Detect OOD CPF Keywords (Archery, Sling, Physics, Projectile, Floating Targets)
-  const oodKeywords = [
+  // Detect OOD CPF Mechanics:
+  const archeryKeywords = [
     'bắn cung',
     'kéo ná',
     'ná cao su',
@@ -116,10 +116,40 @@ export function parseIntent(prompt: string): ParsedIntent {
     'archery',
     'vật lý',
     'phóng tên',
-    'bong bóng bay',
-    'bóng bay',
   ]
-  const isOod = oodKeywords.some((kw) => lower.includes(kw))
+  const catcherKeywords = [
+    'hứng',
+    'rơi',
+    'giỏ',
+    'vợt',
+    'bắt táo',
+    'hứng táo',
+    'hứng quả',
+    'catcher',
+    'rơi quả',
+    'hứng hoa quả',
+  ]
+  const tapperKeywords = [
+    'chạm nổ',
+    'chạm bóng',
+    'bấm bóng',
+    'bóp bóng',
+    'bong bóng bay',
+    'bong bóng nổ',
+    'bong bóng',
+    'bóng bay',
+    'pop tapper',
+    'nổ bóng',
+  ]
+
+  let cpfMechanic: 'PHYSICS_SLING_ARCHERY' | 'FALLING_CATCHER' | 'POP_TAPPER' | null = null
+  if (archeryKeywords.some((kw) => lower.includes(kw))) {
+    cpfMechanic = 'PHYSICS_SLING_ARCHERY'
+  } else if (catcherKeywords.some((kw) => lower.includes(kw))) {
+    cpfMechanic = 'FALLING_CATCHER'
+  } else if (tapperKeywords.some((kw) => lower.includes(kw))) {
+    cpfMechanic = 'POP_TAPPER'
+  }
 
   const subjectMap: Record<string, 'Math' | 'Vietnamese' | 'Science'> = {
     MATH: 'Math',
@@ -137,15 +167,21 @@ export function parseIntent(prompt: string): ParsedIntent {
   }
   const theme = themeTitles[constraints.themeKey] || 'Động vật nông trại vui vẻ'
 
-  if (isOod) {
+  if (cpfMechanic) {
+    let mechanicTheme = 'Bắn cung bóng bay cầu vồng'
+    if (cpfMechanic === 'FALLING_CATCHER') {
+      mechanicTheme = 'Hứng táo nông trại vui vẻ'
+    } else if (cpfMechanic === 'POP_TAPPER') {
+      mechanicTheme = 'Bong bóng biển xanh kì thú'
+    }
     return {
       rawPrompt: prompt,
       subject,
       gradeLevel: constraints.gradeLevel,
       topic: `${constraints.mathType === 'PARITY' ? 'Số chẵn và số lẻ' : 'Phép tính toán học'} trong phạm vi ${constraints.rangeMax}`,
-      theme: 'Bắn cung bóng bay cầu vồng',
+      theme: mechanicTheme,
       track: 'CPF',
-      mechanic: 'PHYSICS_SLING_ARCHERY',
+      mechanic: cpfMechanic,
     }
   }
 
@@ -356,6 +392,24 @@ export function verifyGate3Playability(
           }
         }
       }
+      if (node.interaction?.type === 'CATCHER') {
+        if (node.interaction.width < UI_SPECS.minTouchTarget) {
+          return {
+            passed: false,
+            code: 'G3_TOUCH_TARGET_TOO_SMALL',
+            message: `Kích thước giỏ hứng quá nhỏ (${node.interaction.width}px) cho tay trẻ em.`,
+          }
+        }
+      }
+      if (node.interaction?.type === 'DIRECT_TAP') {
+        if (node.visual.type === 'SPRITE' && (node.visual.width < UI_SPECS.minTouchTarget || node.visual.height < UI_SPECS.minTouchTarget)) {
+          return {
+            passed: false,
+            code: 'G3_TOUCH_TARGET_TOO_SMALL',
+            message: 'Kích thước mục tiêu chạm quá nhỏ cho tay trẻ em.',
+          }
+        }
+      }
     }
 
     // Verify at least 2 even balloons for achievable win condition
@@ -457,6 +511,241 @@ export function generateCpfGame(intent: ParsedIntent): CpfSceneGraph {
   const numbers = [evens[0], odds[0], evens[1], odds[1], evens[2]].sort(() => Math.random() - 0.5)
   const colors = CANDY_PALETTE.balloonColors
 
+  if (intent.mechanic === 'FALLING_CATCHER') {
+    const nodes: CpfSceneNode[] = [
+      {
+        id: 'catcher_basket',
+        role: 'catcher',
+        x: 960,
+        y: 880,
+        visual: {
+          type: 'SPRITE',
+          shapeKind: 'basket',
+          width: 180,
+          height: 90,
+          fill: '#8D6E63',
+          stroke: CANDY_PALETTE.inkBorder,
+          strokeWidth: UI_SPECS.borderWidth,
+        },
+        interaction: {
+          type: 'CATCHER',
+          width: 180,
+          height: 90,
+          speed: 10,
+        },
+        collider: {
+          type: 'aabb',
+          width: 180,
+          height: 90,
+          tag: 'catcher',
+        },
+      },
+    ]
+
+    const fruitPositions = [280, 620, 960, 1300, 1640]
+    numbers.forEach((num, index) => {
+      const color = colors[index % colors.length]
+      const isEven = num % 2 === 0
+      nodes.push({
+        id: `fruit_${index + 1}`,
+        role: 'target',
+        x: fruitPositions[index],
+        y: 120 + (index % 3) * 60,
+        visual: {
+          type: 'SPRITE',
+          shapeKind: 'apple',
+          width: 88,
+          height: 88,
+          fill: color.fill,
+          stroke: CANDY_PALETTE.inkBorder,
+          strokeWidth: UI_SPECS.borderWidth,
+          highlightFill: color.highlight,
+        },
+        motion: {
+          type: 'ITEM_FALL',
+          speed: 2.8 + index * 0.3,
+          gravity: 0.15,
+          resetY: 100,
+        },
+        collider: {
+          type: 'circle',
+          radius: 44,
+          tag: 'falling_fruit',
+        },
+        metadata: {
+          numberValue: num,
+          isEven,
+        },
+      })
+    })
+
+    const rules: CpfActionRule[] = [
+      {
+        id: 'rule_catch_fruit',
+        trigger: 'ON_COLLIDE',
+        sourceTag: 'falling_fruit',
+        targetTag: 'catcher',
+        logicCheck: {
+          type: 'CHECK_ANSWER',
+          rule: 'is_even',
+        },
+        onSuccess: {
+          scoreDelta: 1,
+          particles: {
+            type: 'PARTICLE',
+            count: 24,
+            colors: [CANDY_PALETTE.sunnyYellow, '#FFF', CANDY_PALETTE.mintGreen],
+            spread: 80,
+            lifetimeMs: 600,
+          },
+          sound: 'SFX_CORRECT',
+          lockInputMs: 200,
+        },
+        onFailure: {
+          scoreDelta: 0,
+          shake: {
+            type: 'SHAKE',
+            intensity: 14,
+            durationMs: 250,
+          },
+          sound: 'SFX_WRONG',
+          lockInputMs: 300,
+        },
+      },
+    ]
+
+    return {
+      schemaVersion: 'cpf.v1.0.0',
+      mechanicType: 'FALLING_CATCHER',
+      title: 'Hứng Táo Toán Học: Giỏ Đựng Số Chẵn',
+      pedagogicalSubject: intent.subject,
+      gradeLevel: intent.gradeLevel,
+      description: 'Di chuyển giỏ để hứng các quả táo mang số chẵn đang rơi xuống!',
+      stage: {
+        width: UI_SPECS.stageWidth,
+        height: UI_SPECS.stageHeight,
+        backgroundColor: '#FFF8E1',
+      },
+      nodes,
+      rules,
+      dynamicVariables: {
+        pulledForce: 0,
+        arrowVector: { x: 0, y: 0 },
+        score: 0,
+        combo: 0,
+        inputLocked: false,
+      },
+    }
+  }
+
+  if (intent.mechanic === 'POP_TAPPER') {
+    const nodes: CpfSceneNode[] = []
+    const bubblePositions = [
+      { x: 380, y: 340, speed: 1.6, amplitude: 35 },
+      { x: 720, y: 550, speed: 2.0, amplitude: 40 },
+      { x: 1060, y: 320, speed: 1.8, amplitude: 30 },
+      { x: 1400, y: 580, speed: 2.2, amplitude: 45 },
+      { x: 1680, y: 360, speed: 1.7, amplitude: 35 },
+    ]
+
+    numbers.forEach((num, index) => {
+      const pos = bubblePositions[index]
+      const color = colors[index % colors.length]
+      const isEven = num % 2 === 0
+      nodes.push({
+        id: `bubble_${index + 1}`,
+        role: 'target',
+        x: pos.x,
+        y: pos.y,
+        visual: {
+          type: 'SPRITE',
+          shapeKind: 'bubble',
+          width: 110,
+          height: 110,
+          fill: color.fill,
+          stroke: CANDY_PALETTE.inkBorder,
+          strokeWidth: UI_SPECS.borderWidth,
+          highlightFill: color.highlight,
+        },
+        motion: {
+          type: 'BUBBLE_FLOAT',
+          speed: pos.speed,
+          amplitude: pos.amplitude,
+          frequency: pos.speed,
+        },
+        interaction: {
+          type: 'DIRECT_TAP',
+          actionId: `tap_bubble_${index + 1}`,
+        },
+        collider: {
+          type: 'circle',
+          radius: 55,
+          tag: 'bubble',
+        },
+        metadata: {
+          numberValue: num,
+          isEven,
+        },
+      })
+    })
+
+    const rules: CpfActionRule[] = [
+      {
+        id: 'rule_tap_bubble',
+        trigger: 'ON_TAP',
+        sourceTag: 'bubble',
+        logicCheck: {
+          type: 'CHECK_ANSWER',
+          rule: 'is_even',
+        },
+        onSuccess: {
+          scoreDelta: 1,
+          particles: {
+            type: 'PARTICLE',
+            count: 20,
+            colors: [CANDY_PALETTE.sunnyYellow, '#FFF', CANDY_PALETTE.mintGreen],
+            spread: 70,
+            lifetimeMs: 500,
+          },
+          sound: 'SFX_CORRECT',
+        },
+        onFailure: {
+          scoreDelta: 0,
+          shake: {
+            type: 'SHAKE',
+            intensity: 12,
+            durationMs: 200,
+          },
+          sound: 'SFX_WRONG',
+        },
+      },
+    ]
+
+    return {
+      schemaVersion: 'cpf.v1.0.0',
+      mechanicType: 'POP_TAPPER',
+      title: 'Bong Bóng Toán Học: Chạm Nổ Số Chẵn',
+      pedagogicalSubject: intent.subject,
+      gradeLevel: intent.gradeLevel,
+      description: 'Chạm thật nhanh vào các bong bóng mang số chẵn để làm nổ chúng!',
+      stage: {
+        width: UI_SPECS.stageWidth,
+        height: UI_SPECS.stageHeight,
+        backgroundColor: '#E0F7FA',
+      },
+      nodes,
+      rules,
+      dynamicVariables: {
+        pulledForce: 0,
+        arrowVector: { x: 0, y: 0 },
+        score: 0,
+        combo: 0,
+        inputLocked: false,
+      },
+    }
+  }
+
+  // Default: PHYSICS_SLING_ARCHERY
   const nodes: CpfSceneNode[] = [
     // Bow Node at (250, 540)
     {
@@ -605,6 +894,7 @@ export function generateCpfGame(intent: ParsedIntent): CpfSceneGraph {
 
   return {
     schemaVersion: 'cpf.v1.0.0',
+    mechanicType: 'PHYSICS_SLING_ARCHERY',
     title: 'Bắn Cung Toán Học: Thợ Săn Số Chẵn',
     pedagogicalSubject: intent.subject,
     gradeLevel: intent.gradeLevel,

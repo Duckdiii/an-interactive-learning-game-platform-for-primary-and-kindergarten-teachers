@@ -4,6 +4,7 @@ import { previewCorrectAnswer, toPreviewStudentQuestion } from '../../components
 import type { GameResponse } from '../../types/game-response.types'
 import { REVIEW_DESCRIBERS } from '../review/describers'
 import PresentShell from '../shells/PresentShell'
+import { ConfettiEffect } from '../../games/common/ConfettiEffect'
 import Mascot from '../theme/Mascot'
 import { useTheme } from '../theme/useTheme'
 import { classSummary, outcomeOf, recordOf } from './presentReducer'
@@ -92,7 +93,9 @@ export default function PresentResult({ game, state, supported, onReplay, onLeav
   }
 
   return (
-    <PresentShell
+    <>
+      <ConfettiEffect active={summary.correct > 0} />
+      <PresentShell
       controls={
         <>
           <button type="button" onClick={onReplay} className={primaryButton}>
@@ -128,5 +131,6 @@ export default function PresentResult({ game, state, supported, onReplay, onLeav
         <Mascot state="celebrate" className="text-8xl" />
       </div>
     </PresentShell>
+    </>
   )
 }
