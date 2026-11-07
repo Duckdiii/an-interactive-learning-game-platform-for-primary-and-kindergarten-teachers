@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams, Link } from 'react-router-dom'
 import PlayerLoading from '../components/PlayerLoading'
@@ -15,11 +15,7 @@ import { resolveTheme } from '../theme/resolveTheme'
 import { ThemeProvider } from '../theme/ThemeContext'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 import PlayController from '../play/PlayController'
-import { getPlayGameApi, type PlayGameDtoResponse } from '../../api/gamesApi'
 import { CpfUniversalCanvas } from '../../services/pipeline/renderers/CpfUniversalCanvas'
-import type { CpfSceneGraph } from '../../services/pipeline/cpfTypes'
-import { FarmQuizCanvas } from '../../services/pipeline/renderers/FarmQuizCanvas'
-import { generatePresetGame, type PresetQuizData } from '../../services/pipeline/pipelineOrchestrator'
 import { generateDynamicCpfSceneGraph } from '../../services/pipeline/dynamicCpfGenerator'
 import { ConfettiEffect } from '../../games/common/ConfettiEffect'
 
@@ -28,114 +24,18 @@ export default function PlayPage() {
   const { shareCode = '' } = useParams()
   const info = useQuery(publishInfoQuery(shareCode))
 
-  const [pipelineGame, setPipelineGame] = useState<PlayGameDtoResponse | null>(null)
-  const [checkedFallback, setCheckedFallback] = useState(false)
   const [cpfScore, setCpfScore] = useState(0)
   const [cpfCompleted, setCpfCompleted] = useState(false)
 
-  // Kiểm tra dự phòng qua Pipeline API nếu query phiên của Backend chuẩn chưa thấy
-  useEffect(() => {
-    if (info.isError && shareCode) {
-      getPlayGameApi(shareCode)
-        .then((res) => {
-          if (res) {
-            setPipelineGame(res)
-          }
-        })
-        .catch(() => {})
-        .finally(() => setCheckedFallback(true))
-    }
-  }, [info.isError, shareCode])
-
-  usePageTitle(info.data?.gameTitle ?? pipelineGame?.title ?? viText.player.pageTitle)
+  usePageTitle(info.data?.gameTitle ?? viText.player.pageTitle)
 
   // Chưa biết khung (đang tải hoặc lỗi) thì dùng token của khung Bé: chữ lớn, nút to, phù hợp nhất cho trẻ nhỏ.
   const profile = info.data ? resolveUiProfile({ uiOverride: info.data.uiOverride, gradeLevel: info.data.metadata.gradeLevel }) : PROFILES.be
   usePlayerRootStyle(profile)
 
-  if (info.isPending && !pipelineGame) return <PlayerLoading />
-
-  // Render Dual-Track Games từ Pipeline (CPF Archery hoặc Farm Quiz)
-  if (pipelineGame) {
-    const isCpf = pipelineGame.gameType === 'PHYSICS_SLING_ARCHERY' || pipelineGame.gameType === 'FALLING_CATCHER' || pipelineGame.gameType === 'POP_TAPPER' || (pipelineGame as unknown as { track?: string }).track === 'CPF' || shareCode.toUpperCase().includes('CPF') || shareCode.toUpperCase().includes('ARCHERY')
-
-    const defaultQuizData: PresetQuizData = (pipelineGame.dsl && typeof pipelineGame.dsl === 'object' && 'options' in (pipelineGame.dsl as object))
-      ? (pipelineGame.dsl as PresetQuizData)
-      : generatePresetGame({
-          rawPrompt: 'Phép cộng có nhớ phạm vi 100 nông trại',
-          subject: 'Math',
-          gradeLevel: 2,
-          topic: 'Nông trại toán học',
-          theme: 'farm',
-          track: 'PRESET',
-          mechanic: 'PRESET_QUIZ',
-        })
-
-    return (
-      <main className="min-h-screen bg-slate-900 text-white flex flex-col p-4 sm:p-6 items-center">
-        <header className="w-full max-w-5xl flex items-center justify-between mb-4">
-          <Link
-            to="/join"
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm border border-slate-700 flex items-center gap-2"
-          >
-            <span>⬅️</span> Đổi mã phòng khác
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              Phòng chơi: {shareCode.toUpperCase()}
-            </span>
-          </div>
-        </header>
-
-        <section className="w-full max-w-5xl flex-1 flex flex-col justify-center">
-          {isCpf ? (
-            cpfCompleted ? (
-              <div className="flex flex-col items-center justify-center p-8 bg-slate-800/95 rounded-3xl border-4 border-amber-400 shadow-2xl text-center max-w-xl mx-auto space-y-6">
-                <ConfettiEffect active={true} />
-                <div className="text-6xl animate-bounce">🏆</div>
-                <h2 className="text-3xl sm:text-4xl font-black text-amber-300">
-                  Chúc Mừng Bé Đã Hoàn Thành!
-                </h2>
-                <p className="text-xl text-slate-200">
-                  Tổng điểm đạt được: <strong className="text-amber-400 text-3xl">{cpfScore}</strong> điểm
-                </p>
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    onClick={() => { setCpfCompleted(false); setCpfScore(0); }}
-                    className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-900 font-extrabold text-lg shadow-lg transition-transform active:scale-95"
-                  >
-                    🔄 Chơi lại
-                  </button>
-                  <Link
-                    to="/join"
-                    className="px-6 py-3 rounded-2xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg shadow-lg"
-                  >
-                    🚪 Về trang chủ
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <CpfUniversalCanvas
-                sceneGraph={pipelineGame.dsl as CpfSceneGraph}
-                onScoreUpdate={setCpfScore}
-                onComplete={(score) => {
-                  setCpfScore(score)
-                  setCpfCompleted(true)
-                }}
-              />
-            )
-          ) : (
-            <FarmQuizCanvas data={(pipelineGame.dsl as PresetQuizData) ?? defaultQuizData} />
-          )}
-        </section>
-      </main>
-    )
-  }
+  if (info.isPending) return <PlayerLoading />
 
   if (info.isError) {
-    if (!checkedFallback) return <PlayerLoading />
-
     const ErrorScreen = ERROR_SCREENS[profile.band]
     const kind = publishErrorKind(info.error)
 

@@ -12,21 +12,8 @@ import {
 } from './pipelineOrchestrator'
 import { CpfRuntimeEngine } from './cpfRuntime'
 import { UI_SPECS } from './assetPalette'
-import axiosInstance from '../../api/axiosInstance'
-import { publishGameApi, getPlayGameApi } from '../../api/gamesApi'
 import { resolveGameTheme, GAME_WORLD_THEMES } from './themeResolver'
 import { findBestSprite, bindAssetsToPreset } from './assetBank'
-
-vi.mock('../../api/axiosInstance', () => ({
-  default: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-  },
-}))
-
-const mockedPost = vi.mocked(axiosInstance.post)
-const mockedGet = vi.mocked(axiosInstance.get)
 
 describe('Dual-Track AI Game Creation Pipeline Tests', () => {
   beforeEach(() => {
@@ -356,55 +343,6 @@ describe('Dual-Track AI Game Creation Pipeline Tests', () => {
       expect(recs[2].bloomLevel).toBe('Vận dụng')
       expect(recs[2].bloomIndex).toBe(3)
       expect(recs[2].track).toBe('CPF')
-    })
-
-    it('publishGameApi gọi backend hoặc fallback sinh mã shareCode 6 ký tự', async () => {
-      // Mock Backend thành công
-      mockedPost.mockResolvedValueOnce({
-        data: {
-          success: true,
-          data: {
-            id: 'game-1234',
-            shareCode: 'MATH88',
-            status: 'PUBLISHED',
-          },
-        },
-      })
-
-      const payload = {
-        title: 'Nông Trại Toán Học Lớp 2',
-        gameType: 'QUIZ',
-        grade: 'GRADE_2',
-        subject: 'MATH',
-        dsl: { title: 'Test' },
-      }
-
-      const res = await publishGameApi(payload)
-      expect(res.shareCode).toBe('MATH88')
-      expect(res.status).toBe('PUBLISHED')
-      expect(res.id).toBe('game-1234')
-
-      // Mock Backend lỗi -> fallback client
-      mockedPost.mockRejectedValueOnce(new Error('Network Error'))
-      const fallbackRes = await publishGameApi(payload)
-      expect(fallbackRes.shareCode).toMatch(/^MATH\d{2}$/)
-      expect(fallbackRes.status).toBe('PUBLISHED')
-    })
-
-    it('getPlayGameApi cung cấp cơ chế dự phòng linh hoạt khi ngoại tuyến', async () => {
-      mockedGet.mockRejectedValue(new Error('Offline'))
-
-      // Test truy cập mã phòng MOCK02
-      const game = await getPlayGameApi('MOCK02')
-      expect(game).toBeDefined()
-      expect(game.shareCode).toBe('MOCK02')
-      expect(game.gameType).toBe('QUIZ')
-
-      // Test truy cập mã phòng MATH02 (CPF)
-      const cpfGame = await getPlayGameApi('MATH02')
-      expect(cpfGame).toBeDefined()
-      expect(cpfGame.shareCode).toBe('MATH02')
-      expect(cpfGame.gameType).toBe('PHYSICS_SLING_ARCHERY')
     })
   })
   describe('Stage 2.5: Asset & Theme Dressing Pipeline', () => {

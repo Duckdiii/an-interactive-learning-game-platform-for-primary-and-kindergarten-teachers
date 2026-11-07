@@ -46,10 +46,6 @@ public class SecurityConfig {
                 // Logout không nằm trong danh sách này: phải có access token hợp lệ.
                 .requestMatchers(HttpMethod.POST,
                         "/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
-                // Học sinh vào chơi qua mã shareCode: không cần đăng nhập (UC-08)
-                .requestMatchers(HttpMethod.GET, "/api/games/play/**").permitAll()
-                // Mở quyền cho các API sinh game, đề xuất Bloom và xuất bản
-                .requestMatchers(HttpMethod.POST, "/api/games/generate", "/api/games/recommend", "/api/games").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)

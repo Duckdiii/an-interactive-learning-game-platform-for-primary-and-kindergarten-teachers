@@ -51,6 +51,11 @@ public class Game {
     @Column(nullable = false)
     private GameStatus status = GameStatus.DRAFT;
 
+    // Hibernate tự đặt khi thêm và mỗi lần sửa; trả ra API là updatedAt.
+    @org.hibernate.annotations.UpdateTimestamp
+    @Column(nullable = false)
+    private java.time.Instant updatedAt;
+
     // Composition: Game ◆ 1..* QuestionGame. Câu hỏi chết theo Game.
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "game_id", nullable = false)

@@ -317,7 +317,7 @@ paths:
         nằm ngoài 10 loại (`suggest-game-types` trả `CUSTOM`); client gửi `gameType: CUSTOM` khi giáo viên
         chấp nhận đề xuất đó, giao diện không có `CUSTOM` trong danh sách chọn tay. Backend không phân
         biệt hai đường này. Với `CUSTOM`, `idea` là bắt buộc (thiếu thì 400).
-      x-status: planned
+      x-status: extended-pending  # đã cài bản JSON đồng bộ (cả CUSTOM); chưa: SSE, tệp giáo án, giọng đọc, giới hạn 429
       security:
         - bearerAuth: []
       requestBody:
@@ -370,7 +370,7 @@ paths:
       operationId: listGames
       summary: Dashboard, danh sách game của giáo viên đang đăng nhập
       description: Sắp xếp `updatedAt` giảm dần. Chưa phân trang.
-      x-status: planned
+      x-status: extended-pending  # đã cài danh sách và bộ lọc; chưa: shareUrl, thumbnailUrl (cần xuất bản, ảnh)
       security:
         - bearerAuth: []
       parameters:
@@ -412,7 +412,7 @@ paths:
       tags: [Games]
       operationId: getGame
       summary: Mở Workspace Editor
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -444,7 +444,7 @@ paths:
 
         Game `CUSTOM`: body là nguyên game CPF Game v2.0.0 (`CpfGameEnvelope`), kiểm duyệt theo
         `docs/cpf-game-v2.0.0.md` mục 4. Gửi envelope DSL cho game `CUSTOM` (hoặc ngược lại) thì 400.
-      x-status: planned
+      x-status: extended-pending  # đã cài kiểm duyệt lại và lưu; chưa: 409 khi có phiên chơi, EditLog
       security:
         - bearerAuth: []
       requestBody:
@@ -477,7 +477,7 @@ paths:
       operationId: deleteGame
       summary: Xoá game
       description: Bị từ chối 409 `CONFLICT` nếu game đang có phiên chưa kết thúc.
-      x-status: planned
+      x-status: extended-pending  # đã cài xóa; 409 hiện báo khi game còn phiên chơi bất kỳ (chưa phân biệt phiên đã kết thúc)
       security:
         - bearerAuth: []
       responses:
