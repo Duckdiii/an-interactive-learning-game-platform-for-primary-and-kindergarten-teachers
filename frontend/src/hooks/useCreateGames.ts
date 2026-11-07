@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createGames } from '../services/gamesService'
-import type { GameResponse } from '../types/game-response.types'
+import type { AnyGameResponse } from '../types/game-response.types'
 import { describeGenerateError } from '../utils/generateErrors'
 import type { GenerateFailure } from '../utils/generateErrors'
 import type { GenerateGameRequest } from '../utils/generateRequest'
@@ -10,7 +10,7 @@ import { gamesQueryKey } from './useGames'
 import { useTeacherIdentity } from './useTeacherIdentity'
 
 // Kết quả của một lần bấm "Tạo": done (đủ mọi loại), partial (còn loại lỗi), canceled (giáo viên hủy), busy (đang có lần tạo khác).
-export type CreateOutcome = { status: 'done'; games: GameResponse[] } | { status: 'partial' } | { status: 'canceled' } | { status: 'busy' }
+export type CreateOutcome = { status: 'done'; games: AnyGameResponse[] } | { status: 'partial' } | { status: 'canceled' } | { status: 'busy' }
 
 /**
  * Tạo game bằng AI cho nhiều loại một lúc (UC-02) và NHỚ kết quả từng loại: loại đã tạo xong không bao giờ bị tạo lại khi giáo viên bấm "Thử lại" cho phần còn thiếu
@@ -20,11 +20,11 @@ export function useCreateGames() {
   const queryClient = useQueryClient()
   const { cacheOwner } = useTeacherIdentity()
   const [creating, setCreating] = useState(false)
-  const [created, setCreated] = useState<Readonly<Record<string, GameResponse>>>({})
+  const [created, setCreated] = useState<Readonly<Record<string, AnyGameResponse>>>({})
   const [failures, setFailures] = useState<Readonly<Record<string, GenerateFailure>>>({})
   const [canceled, setCanceled] = useState(false)
   const controllerRef = useRef<AbortController | null>(null)
-  const createdRef = useRef<Record<string, GameResponse>>({})
+  const createdRef = useRef<Record<string, AnyGameResponse>>({})
   // Loại đã lỗi mà thử lại y nguyên vô ích (không an toàn, thiếu khối lớp/môn): không gửi lại cho tới khi giáo viên đổi dữ liệu (reset).
   const hopelessRef = useRef<Set<string>>(new Set())
   const failuresRef = useRef<Record<string, GenerateFailure>>({})

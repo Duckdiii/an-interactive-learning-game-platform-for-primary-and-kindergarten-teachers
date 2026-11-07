@@ -9,6 +9,8 @@ import com.aigameplatform.backend.service.validation.ValidationError;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationReport;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationService;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,9 +64,11 @@ public class CpfGenerationService {
             if (report.unavailable()) {
                 throw new AiGenerationTimeoutException("Không kiểm tra được độ an toàn của nội dung, vui lòng thử lại sau");
             }
-            log.info("Lần thử {} sinh game CPF chưa hợp lệ: {} lỗi", attempt, report.errors().size());
             previousOutput = raw;
             previousErrors = report.errors().stream().limit(MAX_FEEDBACK_ERRORS).toList();
+            // Chỉ ghi đường dẫn lỗi: thông báo của validator có thể chứa giá trị (chữ AI sinh từ ý tưởng giáo viên).
+            log.info("Lần thử {} sinh game CPF chưa hợp lệ: {} lỗi, tại {}", attempt, report.errors().size(),
+                    previousErrors.stream().map(ValidationError::path).toList());
         }
         throw new AiGenerationTimeoutException("AI chưa sinh được game hợp lệ sau " + (maxRetries + 1) + " lần thử");
     }
@@ -101,6 +105,39 @@ public class CpfGenerationService {
             metadata.put("subject", subject.name());
             metadata.put("gradeLevel", gradeLevel.name());
         }
+        for (JsonNode rule : game.path("rules")) {
+            // ROUND_START không có vật được tương tác nên không có $subject để đặt EFFECT vào (docs mục 4, Lớp 2).
+            boolean hasSubject = !"ROUND_START".equals(rule.path("on").path("type").asString(""));
+            for (JsonNode action : rule.path("do")) {
+                keepFieldsOfType(action, hasSubject);
+                action.path("onCorrect").forEach(child -> keepFieldsOfType(child, hasSubject));
+                action.path("onWrong").forEach(child -> keepFieldsOfType(child, hasSubject));
+            }
+        }
+    }
+
+    /** Trường mà mỗi loại hành động được có; test CpfGenerationServiceTest đối chiếu với các nhánh oneOf của cpf-game.schema.json. */
+    static final Map<String, Set<String>> ACTION_FIELDS = Map.of(
+            "CHECK", Set.of("type", "onCorrect", "onWrong"),
+            "MOVE_TO", Set.of("type", "subject", "to"),
+            "ADVANCE", Set.of("type", "subject"),
+            "REMOVE", Set.of("type", "subject"),
+            "EFFECT", Set.of("type", "name", "at"),
+            "SOUND", Set.of("type", "name"),
+            "SCORE", Set.of("type", "add"));
+
+    /**
+     * Decoder là một object phẳng chứa trường của mọi loại hành động, nên Gemini hay điền thừa (ví dụ {@code add} cho
+     * EFFECT) và hay bỏ {@code at} của EFFECT, tự sửa không được qua phản hồi lỗi (chạy thật: sai cả 3 lần thử). Bỏ trường
+     * không thuộc loại; EFFECT thiếu {@code at} thì đặt ở vật vừa tương tác ({@code $subject}). Trường thiếu khác để schema báo.
+     */
+    private static void keepFieldsOfType(JsonNode node, boolean hasSubject) {
+        if (!(node instanceof ObjectNode action)) return;
+        String type = action.path("type").asString("");
+        Set<String> allowed = ACTION_FIELDS.get(type);
+        if (allowed == null) return;
+        action.remove(action.propertyNames().stream().filter(name -> !allowed.contains(name)).toList());
+        if ("EFFECT".equals(type) && hasSubject && !action.has("at")) action.put("at", "$subject");
     }
 
     private static void removeNulls(JsonNode node) {

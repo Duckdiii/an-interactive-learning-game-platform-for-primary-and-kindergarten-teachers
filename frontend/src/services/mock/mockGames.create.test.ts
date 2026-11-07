@@ -141,34 +141,4 @@ describe('createMockGame (giống kết quả POST /games/generate)', () => {
     expect(hasLOrN).toBe(true)
   })
 
-  it('tạo game CPF khi idea chứa từ khóa hứng/bắt/nhặt: sinh sceneGraph FALLING_CATCHER và cờ track CPF', () => {
-    const game = createMockGame({
-      gameType: 'SPOT_THE_TARGET',
-      subject: 'MATH',
-      gradeLevel: 'GRADE_2',
-      idea: 'Bé hứng các quả táo mang số chẵn rơi từ trên cây ở nông trại',
-    })
-
-    expect((game.metadata as any).track).toBe('CPF')
-    expect((game.metadata as any).cpfMechanic).toBe('FALLING_CATCHER')
-    const sceneGraph = (game as any).sceneGraph
-    expect(sceneGraph).toBeDefined()
-    expect(sceneGraph.schemaVersion).toBe('cpf.v1.0.0')
-    expect(sceneGraph.mechanicType).toBe('FALLING_CATCHER')
-  })
-
-  it('tạo game CPF khi idea chứa từ khóa bắn cung / bong bóng vũ trụ: sinh sceneGraph PHYSICS_SLING_ARCHERY', () => {
-    const game = createMockGame({
-      gameType: 'SPOT_THE_TARGET',
-      subject: 'MATH',
-      gradeLevel: 'GRADE_3',
-      idea: 'Lái phi thuyền bắn vỡ bong bóng năng lượng mang số lẻ ngoài vũ trụ',
-    })
-
-    expect((game.metadata as any).track).toBe('CPF')
-    expect((game.metadata as any).cpfMechanic).toBe('PHYSICS_SLING_ARCHERY')
-    const sceneGraph = (game as any).sceneGraph
-    expect(sceneGraph).toBeDefined()
-    expect(sceneGraph.rules[0].logicCheck?.rule).toBe('is_odd')
-  })
 })

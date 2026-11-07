@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import tools.jackson.databind.JsonNode;
@@ -121,6 +122,47 @@ class CpfGenerationServiceTest {
 
         assertThat(game.path("world").has("mascotId")).isFalse();
         assertThat(ai.attempts).hasSize(1);
+    }
+
+    @Test
+    void fieldsOfOtherActionTypesFromTheDecoderAreDropped() throws IOException {
+        // Lỗi gặp khi chạy thật với Gemini: EFFECT/SOUND kèm `add` của SCORE, sai cả 3 lần thử.
+        ObjectNode answer = (ObjectNode) MAPPER.readTree(example("race-multiplication"));
+        ObjectNode check = (ObjectNode) answer.get("rules").get(0).get("do").get(0);
+        ((ObjectNode) check.get("onCorrect").get(1)).put("add", 0); // EFFECT STARS
+        ((ObjectNode) check.get("onWrong").get(1)).put("add", 0).put("to", ""); // SOUND GENTLE_WRONG
+        ((ObjectNode) check.get("onWrong").get(0)).remove("at"); // EFFECT WIGGLE thiếu at
+        var ai = new ScriptedGenerator(MAPPER.writeValueAsString(answer));
+
+        JsonNode game = service(ai).generate(IDEA, Subject.MATH, GradeLevel.GRADE_1);
+
+        JsonNode saved = game.path("rules").get(0).path("do").get(0);
+        assertThat(saved.path("onCorrect").get(1).propertyNames()).containsExactlyInAnyOrder("type", "name", "at");
+        assertThat(saved.path("onCorrect").get(1).path("at").asString()).isEqualTo("car");
+        assertThat(saved.path("onWrong").get(1).propertyNames()).containsExactlyInAnyOrder("type", "name");
+        assertThat(saved.path("onWrong").get(0).path("at").asString()).isEqualTo("$subject");
+        assertThat(ai.attempts).hasSize(1);
+    }
+
+    @Test
+    void actionFieldTableMatchesTheSchemaBranches() throws IOException {
+        // ACTION_FIELDS chép tay các nhánh oneOf của action/simpleAction: lệch schema thì test này báo.
+        JsonNode defs;
+        try (var in = getClass().getResourceAsStream("/schema/cpf/2.0.0/cpf-game.schema.json")) {
+            defs = MAPPER.readTree(in).path("$defs");
+        }
+        Map<String, Set<String>> fromSchema = new java.util.HashMap<>();
+        for (String def : List.of("action", "simpleAction")) {
+            for (JsonNode branch : defs.path(def).path("oneOf")) {
+                if (branch.has("$ref")) continue;
+                Set<String> fields = new java.util.HashSet<>(branch.path("properties").propertyNames());
+                JsonNode type = branch.path("properties").path("type");
+                List<JsonNode> types = type.has("const") ? List.of(type.get("const")) : type.path("enum").valueStream().toList();
+                types.forEach(t -> fromSchema.put(t.asString(), fields));
+            }
+        }
+
+        assertThat(CpfGenerationService.ACTION_FIELDS).isEqualTo(fromSchema);
     }
 
     @Test

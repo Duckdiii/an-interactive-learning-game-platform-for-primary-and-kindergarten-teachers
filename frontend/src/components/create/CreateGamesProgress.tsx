@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { gameTypeLabel } from '../../constants/labels'
 import { viText } from '../../constants/viText'
 import { ROUTES } from '../../routes/paths'
-import type { GameResponse } from '../../types/game-response.types'
+import type { AnyGameResponse } from '../../types/game-response.types'
 import type { GenerateFailure } from '../../utils/generateErrors'
 import Button from '../Button'
 import { buttonClass } from '../buttonStyles'
@@ -15,7 +15,7 @@ interface CreateGamesProgressProps {
   types: ReadonlyArray<string>
   creating: boolean
   canceled: boolean
-  created: Readonly<Record<string, GameResponse>>
+  created: Readonly<Record<string, AnyGameResponse>>
   failures: Readonly<Record<string, GenerateFailure>>
   // Kết quả do AI mô phỏng: nhắc rõ nội dung chỉ là bản mẫu.
   mock: boolean

@@ -4,7 +4,7 @@ import GameTypeSuggestionStep from './GameTypeSuggestionStep'
 import type { GameTypeSuggestion } from '../../types/game-suggestion.types'
 
 const mockCpfSuggestion: GameTypeSuggestion = {
-  type: 'SPOT_THE_TARGET',
+  type: 'CUSTOM',
   title: 'Hứng Táo Nông Trại',
   track: 'CPF',
   fitScore: 0.99,
@@ -79,6 +79,6 @@ describe('GameTypeSuggestionStep', () => {
     expect(buttons.length).toBeGreaterThanOrEqual(1)
 
     fireEvent.click(buttons[0])
-    expect(onUseMock).toHaveBeenCalledWith('SPOT_THE_TARGET')
+    expect(onUseMock).toHaveBeenCalledWith('CUSTOM')
   })
 })

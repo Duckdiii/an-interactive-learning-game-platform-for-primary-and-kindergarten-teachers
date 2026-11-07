@@ -3,10 +3,14 @@ import { fetchGame, saveGame } from '../api/gamesApi'
 import { GAME_TYPE_VALUES } from '../constants/labels'
 import type { QuizGame } from '../types/game-dsl.types'
 import { parseApiError } from '../utils/apiError'
-import { getGame, updateGame } from './gameService'
+import type { GameResponse } from '../types/game-response.types'
+import { getGame as getAnyGame, updateGame } from './gameService'
 import { listGames } from './gamesService'
 import { resetMockGames, setMockGameLocked } from './mock/mockGames'
 import { setMockScenario } from './mock/mockRuntime'
+
+// Kho mô phỏng chỉ có game DSL.
+const getGame = async (gameId: string) => (await getAnyGame(gameId)) as GameResponse
 
 vi.mock('../api/gamesApi', () => ({ getGames: vi.fn(), fetchGame: vi.fn(), saveGame: vi.fn() }))
 
@@ -24,7 +28,7 @@ afterEach(() => {
 describe('getGame và updateGame khi nhóm "editor" KHÔNG mô phỏng', () => {
   it('gọi API thật, không đụng kho mô phỏng', async () => {
     vi.stubEnv('VITE_USE_MOCK', 'games,ai')
-    const real = { gameId: 'real-1' } as Awaited<ReturnType<typeof fetchGame>>
+    const real = { gameId: 'real-1' } as Awaited<ReturnType<typeof saveGame>>
     mockedFetch.mockResolvedValue(real)
     mockedSave.mockResolvedValue(real)
 

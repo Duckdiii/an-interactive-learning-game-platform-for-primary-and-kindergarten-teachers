@@ -71,5 +71,6 @@ export const gradeLevelLabel = (value: string) =>
 export const gameStatusLabel = (value: string) =>
   GAME_STATUS_LABELS.get(value) ?? fallbackLabel(value)
 
+// CUSTOM (game ngoài danh mục, CPF) không nằm trong GAME_TYPE_LABELS vì danh sách đó dùng cho ô lọc và bộ mẫu DSL.
 export const gameTypeLabel = (value: string) =>
-  GAME_TYPE_LABELS.get(value) ?? fallbackLabel(value)
+  value === 'CUSTOM' ? 'Trò chơi tự do' : (GAME_TYPE_LABELS.get(value) ?? fallbackLabel(value))

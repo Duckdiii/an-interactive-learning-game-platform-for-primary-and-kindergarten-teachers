@@ -270,7 +270,7 @@ export function selectSuggestions(best: ReadonlyMap<string, Fit>, input: Suggest
     .map(({ type, fit, score }) => {
       if (type === 'SPOT_THE_TARGET' && isCpf && pedagogicalPlan) {
         return {
-          type,
+          type: 'CUSTOM',
           title: pedagogicalPlan.title,
           track: 'CPF',
           reason: pedagogicalPlan.reason,

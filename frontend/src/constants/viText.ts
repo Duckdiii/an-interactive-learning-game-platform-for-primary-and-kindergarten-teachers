@@ -791,6 +791,7 @@ export const viText = {
     notFound: 'Không mở được trò chơi này',
     backToShelf: 'Về kệ trò chơi',
     loadFailed: 'Chưa tải được trò chơi. Kiểm tra mạng rồi thử lại.',
+    cpfUnsupported: 'Trò chơi tự do chưa trình chiếu được trên tivi. Cô mở trò chơi trong Không gian làm việc để chơi thử.',
     retry: 'Thử lại',
     start: 'Bắt đầu',
     fullscreen: 'Toàn màn hình',

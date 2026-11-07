@@ -31,6 +31,13 @@ Mẫu một mục:
 - Cách chặn: khi thiết kế luật chơi/runtime, liệt kê cả đường sai cho từng loại màn và chứng minh game luôn đi tới cuối; ở Pha 1 có test runtime giả lập trẻ chọn sai mọi lần.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-07 — Decoder phẳng cho hành động CPF làm Gemini sai cả 3 lần thử
+- Lỗi: schema decoder `cpf-game.ai-decoder.schema.json` gộp mọi loại hành động thành một object phẳng (bỏ `oneOf`). Chạy thật, Gemini điền `add` cho EFFECT/SOUND và bỏ `at` của EFFECT ở mọi lần thử; vòng tự sửa không sửa được, có lần còn sinh 98 luật. Test offline không phát hiện vì chỉ dùng ví dụ viết tay đúng hình dạng.
+- Phát hiện nhờ: chạy thật trên trình duyệt với Gemini (log lỗi chi tiết).
+- Nguyên nhân gốc: thiết kế decoder chỉ kiểm "schema chặt vẫn bắt lỗi", không lường hình dạng đầu ra thực tế của decoder phẳng; log retry chỉ ghi số lỗi nên khó chẩn đoán.
+- Cách chặn: khi nới schema cho decoder, liệt kê trường nào decoder sẽ cho phép mà schema chặt cấm và chuẩn hóa sẵn ở lớp sinh (đã làm: `keepFieldsOfType`, có test đối chiếu với schema); chạy thử thật một lần trước khi coi pipeline sinh là xong; log retry kèm vài lỗi đầu.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-01 — Chỉ chạy test thư mục đang sửa nên sót luật kiểm toàn repo
 - Lỗi: ba bước P5 chỉ chạy `src/player/room`, nên không thấy `tokens.test.tsx` cấm mã màu hex trong `src/player`; màu viết cứng trong 5 file tới bước thứ tư mới lộ.
 - Phát hiện nhờ: `test-verifier` chạy toàn bộ test.
