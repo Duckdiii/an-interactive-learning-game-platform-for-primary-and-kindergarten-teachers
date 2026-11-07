@@ -32,7 +32,7 @@ Ngoài phạm vi đợt này (giữ mô phỏng, ghi rõ): xuất bản và mã 
    - `GameType` thêm `CUSTOM`.
    - `GameResponse` thành `oneOf`: nhánh DSL hiện có, và nhánh CPF = `gameId, status, updatedAt` + CPF Game v2.0.0 (`$ref` tới `schema/cpf/2.0.0/cpf-game.schema.json`). `GameSummary.gameType` nhận `CUSTOM`.
    - `PUT /games/{gameId}` body: `oneOf` envelope DSL hoặc CPF.
-   - `x-status` của 5 endpoint chuyển sang `implemented` khi xong.
+   - `x-status` của 5 endpoint chuyển sang `implemented` khi xong. Kết quả: `GET /games/{gameId}` là `implemented`; 4 endpoint còn lại giữ `extended-pending` theo đúng quy ước của spec, vì phần mở rộng trong mô tả chưa cài (SSE, `shareUrl`/`thumbnailUrl`, EditLog, phân biệt phiên đã kết thúc khi 409); ghi chú ngay cạnh từng `x-status`.
    - Ghi rõ `idea` là đầu vào để AI lập kế hoạch CPF; `gameType: CUSTOM` không bắt buộc người dùng chọn cơ chế.
 2. Frontend `types`: `GameType` thêm `CUSTOM`, `GameResponse` có nhánh CPF (dùng `cpf-game.types.ts`). DSL v1.0.0 không đổi.
 3. Kiểm: `npx @redocly/cli lint docs/openapi/openapi.yaml`, `contract-guardian`.
@@ -65,6 +65,17 @@ Phần 1, 2 có spec đủ (contract + tài liệu CPF) nên có thể giao `bac
 - Chạy thật trên trình duyệt với Gemini; ghi lại mô tả đã thử và kết quả.
 
 Mỗi bước lớn (contract; backend 1–2; backend 3–4; frontend 1; frontend 2–4) một commit, dừng báo người dùng sau mỗi bước.
+
+### Kết quả chạy thật với Gemini (2026-11-07, `gemini-3-flash-preview`, `gameType: CUSTOM`)
+
+| Mô tả | Môn/Lớp | Kết quả | Số lần thử | Cơ chế AI chọn |
+|---|---|---|---|---|
+| Bé kéo giỏ hứng những quả táo rơi mang số chẵn trong phạm vi 10 | Toán / Lớp 1 | Hợp lệ, chơi hết trên trình duyệt | 3 (trước khi sửa prompt) | Hứng: giỏ DRAG_X + PROGRESS, táo FALL STREAM, COLLIDE, 4 màn PICK_ONE |
+| Fishing game: catch the fish with the right colour word | Tiếng Anh / Mầm non | Hợp lệ | 1 | Hứng: thuyền DRAG_X + PROGRESS, cá FALL, COLLIDE, 4 màn PICK_ONE |
+| Kéo thả các con vật vào đúng nơi sống: trên cạn hay dưới nước | Tiếng Việt / Lớp 2 | Hợp lệ | 1 | Phân loại: con vật DRAG_FREE, nhóm bindTo zones, DROP, 2 màn SORT |
+| Bé chạm vào những quả bóng bay mang kết quả đúng của phép cộng trong phạm vi 10 | Toán / Lớp 1 | Hợp lệ | 1 (lần gọi đầu Gemini lỗi tạm thời, gọi lại) | Chạm: bóng BOB, chim PROGRESS, TAP, 5 màn PICK_ONE |
+
+Lỗi gặp và cách xử lý: decoder phẳng làm Gemini điền trường thừa (`add` cho EFFECT/SOUND) và bỏ `at` của EFFECT, đã chuẩn hóa ở `CpfGenerationService`; vi phạm giới hạn số lượng (`onCorrect` 5 phần tử, luật PROGRESS) đã thêm luật gộp và danh sách kiểm cuối prompt trong `CpfPromptBuilder`. Sau hai sửa này, 3/3 mô tả mới hợp lệ ngay lần đầu (mẫu nhỏ, chưa phải tỉ lệ thống kê). Mỗi lần sinh mất khoảng 20 giây.
 
 ## 7. Rủi ro
 

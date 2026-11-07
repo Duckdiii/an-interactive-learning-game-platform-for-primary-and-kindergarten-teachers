@@ -8,13 +8,14 @@ import { buildInstances } from './cpfScene'
 
 // jsdom không có Canvas: mock react-konva thành DOM; Layer giữ lại handler con trỏ để test bấm theo tọa độ sân khấu.
 type Handler = (e: unknown) => void
-const layer: { down?: Handler; up?: Handler } = {}
+const layer: { down?: Handler; move?: Handler; up?: Handler } = {}
 vi.mock('react-konva', () => {
   const Box = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>
   return {
     Stage: Box,
-    Layer: ({ children, onPointerDown, onPointerUp }: { children?: React.ReactNode; onPointerDown?: Handler; onPointerUp?: Handler }) => {
+    Layer: ({ children, onPointerDown, onPointerMove, onPointerUp }: { children?: React.ReactNode; onPointerDown?: Handler; onPointerMove?: Handler; onPointerUp?: Handler }) => {
       layer.down = onPointerDown
+      layer.move = onPointerMove
       layer.up = onPointerUp
       return <div>{children}</div>
     },
@@ -44,6 +45,18 @@ async function tapChoice(game: CpfGame, choiceId: string) {
   await act(async () => {
     layer.down?.(pointerAt(inst.x + inst.w / 2, inst.y + inst.h / 2))
     layer.up?.(pointerAt(inst.x + inst.w / 2, inst.y + inst.h / 2))
+  })
+}
+
+/** Kéo lựa chọn `choiceId` của màn đầu thả vào giữa nhóm `zoneId`. */
+async function dragTo(game: CpfGame, choiceId: string, zoneId: string) {
+  const insts = buildInstances(game, 0)
+  const item = insts.find((i) => i.choiceId === choiceId)!
+  const zone = insts.find((i) => i.zoneId === zoneId)!
+  await act(async () => {
+    layer.down?.(pointerAt(item.x + item.w / 2, item.y + item.h / 2))
+    layer.move?.(pointerAt(zone.x + zone.w / 2, zone.y + zone.h / 2))
+    layer.up?.(pointerAt(zone.x + zone.w / 2, zone.y + zone.h / 2))
   })
 }
 
@@ -130,6 +143,18 @@ describe('CpfRenderer', () => {
 
     expect(onAnswered).not.toHaveBeenCalled()
     expect(speak).not.toHaveBeenCalled()
+  })
+
+  it('preview SORT: thả sai nhóm không xong màn; thả đúng hết các vật thì hoàn thành', async () => {
+    const game = load('sort-land-water-animals')
+    render(<CpfRenderer mode="preview" game={game} />)
+
+    await dragTo(game, 'c1', 'z2')
+    expect(screen.queryByText('Hoàn thành! Bé giỏi quá!')).not.toBeInTheDocument()
+
+    for (const [choice, zone] of [['c1', 'z1'], ['c2', 'z2'], ['c3', 'z1'], ['c4', 'z2']]) await dragTo(game, choice, zone)
+
+    expect(screen.getByText('Hoàn thành! Bé giỏi quá!')).toBeInTheDocument()
   })
 
   it('review: mở đúng màn được chỉ định và vẫn nghe lại được câu hỏi dù đang khóa', async () => {
