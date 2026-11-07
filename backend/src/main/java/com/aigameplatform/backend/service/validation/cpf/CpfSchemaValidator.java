@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.validation.cpf;
 import com.aigameplatform.backend.service.validation.AbstractGameValidator;
 import com.aigameplatform.backend.service.validation.GameValidationContext;
 import com.aigameplatform.backend.service.validation.ValidationError;
+import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
 import com.networknt.schema.SchemaRegistryConfig;
@@ -39,8 +40,43 @@ final class CpfSchemaValidator extends AbstractGameValidator {
         if (json == null || !json.isObject()) {
             return List.of(new ValidationError("$", "JSON của game phải là một object"));
         }
-        return schema.validate(json).stream()
+        return withoutOtherBranches(schema.validate(json)).stream()
                 .map(e -> new ValidationError(e.getInstanceLocation().toString(), e.getMessage()))
+                .distinct()
                 .toList();
+    }
+
+    /**
+     * Sự kiện và hành động là {@code oneOf} theo {@code type}: khi sai, thư viện báo lỗi của MỌI nhánh (thiếu target, thiếu
+     * a, b...), làm lỗi thật bị đẩy khỏi số lỗi gửi lại AI. Bỏ lỗi của nhánh có {@code type} không khớp, và bỏ câu chung
+     * "chỉ một nhánh hợp lệ" khi đã còn lỗi cụ thể ở cùng chỗ.
+     */
+    static List<Error> withoutOtherBranches(List<Error> errors) {
+        List<String> wrongBranches = errors.stream()
+                .map(e -> slashPath(e.getEvaluationPath()))
+                .filter(path -> path.endsWith("/properties/type/const") || path.endsWith("/properties/type/enum"))
+                .map(path -> path.substring(0, path.lastIndexOf("/properties/type/")))
+                .filter(branch -> branch.matches(".*/oneOf/\\d+$"))
+                .toList();
+        List<Error> kept = errors.stream()
+                .filter(e -> wrongBranches.stream().noneMatch(branch -> isWithin(slashPath(e.getEvaluationPath()), branch)))
+                .toList();
+        return kept.stream()
+                .filter(e -> !"oneOf".equals(e.getKeyword()) || kept.stream().noneMatch(other ->
+                        !"oneOf".equals(other.getKeyword())
+                                && isWithin(slashPath(other.getInstanceLocation()), slashPath(e.getInstanceLocation()))))
+                .toList();
+    }
+
+    /** Đường dẫn dạng /a/0/b dựng từ từng phần tử, không phụ thuộc kiểu in của thư viện (JSON_PATH hay JSON_POINTER). */
+    private static String slashPath(com.networknt.schema.path.NodePath path) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < path.getNameCount(); i++) out.append('/').append(path.getElement(i));
+        return out.toString();
+    }
+
+    /** {@code path} là {@code base} hoặc nằm bên trong nó (/a/b nằm trong /a; /a1 thì không). */
+    private static boolean isWithin(String path, String base) {
+        return path.equals(base) || path.startsWith(base + "/");
     }
 }

@@ -1,0 +1,513 @@
+{
+  "description": "Schema nới lỏng cho Gemini Structured Outputs: bỏ các từ khóa decoder không nhận (lựa chọn nhánh, điều kiện, giới hạn số phần tử) và ghi giới hạn vào mô tả. Cùng hình dạng với cpf-game.schema.json; kết quả luôn được kiểm lại bằng schema chặt và luật Lớp 2.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "metadata",
+    "world",
+    "content",
+    "answerKey",
+    "entities",
+    "rules"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "2.0.0"
+      ]
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "CPF"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "title",
+        "subject",
+        "gradeLevel",
+        "topic"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Tên trò chơi, tối đa 100 ký tự."
+        },
+        "subject": {
+          "type": "string",
+          "enum": [
+            "MATH",
+            "VIETNAMESE",
+            "ENGLISH"
+          ]
+        },
+        "gradeLevel": {
+          "type": "string",
+          "enum": [
+            "KINDERGARTEN",
+            "GRADE_1",
+            "GRADE_2",
+            "GRADE_3",
+            "GRADE_4",
+            "GRADE_5"
+          ]
+        },
+        "topic": {
+          "type": "string",
+          "description": "Chủ đề bài học, tối đa 200 ký tự."
+        }
+      }
+    },
+    "world": {
+      "type": "object",
+      "required": [
+        "backgroundId"
+      ],
+      "properties": {
+        "backgroundId": {
+          "type": "string",
+          "description": "Một id nhóm bg trong danh mục asset."
+        },
+        "mascotId": {
+          "type": "string",
+          "description": "Một id nhóm mascot trong danh mục asset."
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "required": [
+        "instruction",
+        "rounds"
+      ],
+      "properties": {
+        "instruction": {
+          "type": "string",
+          "description": "Lời dặn chung, tối đa 120 ký tự."
+        },
+        "rounds": {
+          "type": "array",
+          "description": "Từ 1 đến 20 màn; nên 3 đến 6 màn.",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "task",
+              "prompt",
+              "choices"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "r1, r2... theo thứ tự."
+              },
+              "task": {
+                "type": "string",
+                "enum": [
+                  "PICK_ONE",
+                  "PICK_ALL",
+                  "SORT"
+                ]
+              },
+              "prompt": {
+                "type": "string",
+                "description": "Câu hỏi của màn, tối đa 120 ký tự."
+              },
+              "choices": {
+                "type": "array",
+                "description": "Từ 2 đến 8 lựa chọn; id c1, c2... theo thứ tự.",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "label"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "Tối đa 30 ký tự."
+                    },
+                    "assetId": {
+                      "type": "string",
+                      "description": "Tùy chọn, id trong danh mục asset."
+                    }
+                  }
+                }
+              },
+              "zones": {
+                "type": "array",
+                "description": "Chỉ có khi task là SORT: 2 đến 4 nhóm, id z1, z2...",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "label"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "Tối đa 30 ký tự."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "answerKey": {
+      "type": "object",
+      "required": [
+        "rounds"
+      ],
+      "properties": {
+        "rounds": {
+          "type": "array",
+          "description": "Cùng số phần tử và thứ tự với content.rounds.",
+          "items": {
+            "type": "object",
+            "required": [
+              "roundId"
+            ],
+            "properties": {
+              "roundId": {
+                "type": "string"
+              },
+              "correctChoiceIds": {
+                "type": "array",
+                "description": "Cho PICK_ONE (đúng 1) và PICK_ALL (ít hơn số lựa chọn). Không dùng cho SORT.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "placements": {
+                "type": "array",
+                "description": "Chỉ cho SORT: mỗi lựa chọn đúng một lần.",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "choiceId",
+                    "zoneId"
+                  ],
+                  "properties": {
+                    "choiceId": {
+                      "type": "string"
+                    },
+                    "zoneId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "description": "Từ 1 đến 10 vật.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "assetId",
+          "placement"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Chữ thường, số, gạch dưới; bắt đầu bằng chữ."
+          },
+          "assetId": {
+            "type": "string"
+          },
+          "bindTo": {
+            "type": "string",
+            "enum": [
+              "choices",
+              "zones"
+            ]
+          },
+          "placement": {
+            "type": "object",
+            "required": [
+              "region",
+              "arrangement"
+            ],
+            "properties": {
+              "region": {
+                "type": "string",
+                "enum": [
+                  "TOP",
+                  "MIDDLE",
+                  "BOTTOM",
+                  "LEFT",
+                  "RIGHT",
+                  "CENTER"
+                ]
+              },
+              "arrangement": {
+                "type": "string",
+                "enum": [
+                  "SINGLE",
+                  "ROW",
+                  "GRID",
+                  "SCATTER"
+                ]
+              }
+            }
+          },
+          "motion": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "STATIC",
+                  "FALL",
+                  "FLOAT_UP",
+                  "PATROL_X",
+                  "BOB"
+                ]
+              },
+              "speed": {
+                "type": "string",
+                "enum": [
+                  "SLOW",
+                  "MEDIUM",
+                  "FAST"
+                ]
+              },
+              "spawn": {
+                "type": "string",
+                "enum": [
+                  "ALL_AT_ONCE",
+                  "STREAM"
+                ]
+              }
+            }
+          },
+          "control": {
+            "type": "string",
+            "enum": [
+              "DRAG_X",
+              "DRAG_FREE",
+              "AIM_SHOOT"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "PROGRESS"
+            ]
+          }
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "description": "Từ 1 đến 8 luật.",
+      "items": {
+        "type": "object",
+        "required": [
+          "on",
+          "do"
+        ],
+        "properties": {
+          "on": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "description": "TAP dùng target; COLLIDE dùng a và b; DROP dùng item và zone; ROUND_START không có trường nào khác.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "TAP",
+                  "COLLIDE",
+                  "DROP",
+                  "ROUND_START"
+                ]
+              },
+              "target": {
+                "type": "string"
+              },
+              "a": {
+                "type": "string"
+              },
+              "b": {
+                "type": "string"
+              },
+              "item": {
+                "type": "string"
+              },
+              "zone": {
+                "type": "string"
+              }
+            }
+          },
+          "do": {
+            "type": "array",
+            "description": "Từ 1 đến 6 hành động.",
+            "items": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "description": "CHECK dùng onCorrect và onWrong (0 đến 4 hành động, không CHECK lồng); MOVE_TO dùng subject, to; ADVANCE/REMOVE dùng subject; EFFECT dùng name, at; SOUND dùng name; SCORE dùng add (1 đến 10).",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "CHECK",
+                    "MOVE_TO",
+                    "ADVANCE",
+                    "REMOVE",
+                    "EFFECT",
+                    "SOUND",
+                    "SCORE"
+                  ]
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                },
+                "at": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "STARS",
+                    "CONFETTI",
+                    "POP",
+                    "GLOW",
+                    "WIGGLE",
+                    "CORRECT",
+                    "GENTLE_WRONG",
+                    "WHOOSH"
+                  ]
+                },
+                "add": {
+                  "type": "integer"
+                },
+                "onCorrect": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "type"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "MOVE_TO",
+                          "ADVANCE",
+                          "REMOVE",
+                          "EFFECT",
+                          "SOUND",
+                          "SCORE"
+                        ]
+                      },
+                      "subject": {
+                        "type": "string"
+                      },
+                      "to": {
+                        "type": "string"
+                      },
+                      "at": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "enum": [
+                          "STARS",
+                          "CONFETTI",
+                          "POP",
+                          "GLOW",
+                          "WIGGLE",
+                          "CORRECT",
+                          "GENTLE_WRONG",
+                          "WHOOSH"
+                        ]
+                      },
+                      "add": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "onWrong": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "type"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "MOVE_TO",
+                          "ADVANCE",
+                          "REMOVE",
+                          "EFFECT",
+                          "SOUND",
+                          "SCORE"
+                        ]
+                      },
+                      "subject": {
+                        "type": "string"
+                      },
+                      "to": {
+                        "type": "string"
+                      },
+                      "at": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "enum": [
+                          "STARS",
+                          "CONFETTI",
+                          "POP",
+                          "GLOW",
+                          "WIGGLE",
+                          "CORRECT",
+                          "GENTLE_WRONG",
+                          "WHOOSH"
+                        ]
+                      },
+                      "add": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

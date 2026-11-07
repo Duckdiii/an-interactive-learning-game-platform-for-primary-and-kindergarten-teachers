@@ -26,7 +26,9 @@ Sửa định dạng phải sửa đồng bộ cả bốn chỗ đầu ở bản
 
 ## 2. Hai dạng dữ liệu
 
-Như DSL v1.0.0: **dạng đầu ra của AI** và **dạng hoàn chỉnh** (tài liệu này). Dạng đầu ra của AI viết ở Pha 3 cạnh `schema/game-ai-output/`: không có `id` màn/lựa chọn/nhóm, đáp án theo chỉ số, và giữ nông (tối đa 4 tầng lồng, ít `oneOf`) để Gemini Structured Outputs chấp nhận (xem `decoderSchema` trong `GeminiGameContentGenerator`). Dạng hoàn chỉnh ở đây không bị giới hạn độ sâu đó.
+Khác DSL v1.0.0, CPF **không có dạng đầu ra AI riêng**: AI sinh thẳng dạng hoàn chỉnh (id màn, lựa chọn, nhóm theo vị trí và `answerKey`), nên vị trí lỗi gửi lại khi tự sửa khớp đúng JSON AI đã sinh và không cần bộ chuyển đổi. Gemini Structured Outputs dùng bản nới lỏng `backend/src/main/resources/schema/cpf/2.0.0/cpf-game.ai-decoder.schema.json` (cùng hình dạng, bỏ các từ khóa decoder không nhận như lựa chọn nhánh, điều kiện, giới hạn số phần tử; giới hạn ghi trong mô tả). Kết quả luôn qua lại đủ 3 lớp với schema chặt. Backend ghi đè `metadata.subject`, `metadata.gradeLevel` theo yêu cầu giáo viên và bỏ các trường `null` decoder có thể trả.
+
+Code: `backend/src/main/java/com/aigameplatform/backend/service/generation/cpf/` (`CpfGenerationService` điều phối và tự sửa, `CpfPromptBuilder` dựng prompt, cổng `CpfContentGenerator`, bản Gemini `GeminiCpfContentGenerator`).
 
 ## 3. Cấu trúc
 

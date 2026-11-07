@@ -429,7 +429,8 @@ final class CpfRuleValidator extends AbstractGameValidator {
         }
         if (visible > MAX_VISIBLE_ENTITIES) {
             errors.add(new ValidationError("$.entities",
-                    "Quá nhiều vật cùng lúc (" + visible + " > " + MAX_VISIBLE_ENTITIES + ") cho máy tính bảng của trẻ"));
+                    "Quá nhiều vật cùng lúc (" + visible + " > " + MAX_VISIBLE_ENTITIES + "): mỗi khai báo bindTo choices tính "
+                            + maxChoices + ", bindTo zones tính " + maxZones + ", vật thường tính 1; bớt khai báo hoặc bớt lựa chọn"));
         }
     }
 }
