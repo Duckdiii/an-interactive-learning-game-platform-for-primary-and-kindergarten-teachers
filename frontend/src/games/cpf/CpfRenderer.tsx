@@ -437,7 +437,8 @@ function Sprite({ inst, isChoice, glow, done, wiggle, now }: {
 function LabelBadge({ label, itemWidth, itemHeight }: { label: string; itemWidth: number; itemHeight: number }) {
   const short = label.length <= 3
   const fontSize = label.length > 6 ? 26 : 36
-  const width = short ? 64 : itemWidth + 40
+  // Ước lượng bề rộng chữ (~0,62 cỡ chữ mỗi ký tự, chữ đậm): ô 64 cố định cắt mất "bàn" thành "b…" khi chạy thật.
+  const width = Math.max(short ? 64 : itemWidth + 40, Math.ceil(label.length * fontSize * 0.62) + 28)
   const height = short ? 56 : 48
   return (
     <Group x={(itemWidth - width) / 2} y={(itemHeight - height) / 2} listening={false}>

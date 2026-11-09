@@ -98,6 +98,31 @@ export const CELEBRATION_CONFETTI_COLORS: readonly string[] = [
   DEFAULT_PALETTE.accent,
 ]
 
+/** Màu nội dung khi đáp án là tên màu (vẽ vật đúng màu đó). Là nội dung bài học, không phải phản hồi đúng/sai, nên có cả đỏ. */
+export type ColorWord = 'red' | 'blue' | 'green' | 'yellow' | 'orange' | 'purple' | 'pink' | 'brown' | 'black' | 'white'
+export const COLOR_WORD_FILLS: Readonly<Record<ColorWord, string>> = {
+  red: '#EF4444',
+  blue: '#3B82F6',
+  green: '#22C55E',
+  yellow: '#FACC15',
+  orange: '#FB923C',
+  purple: '#A855F7',
+  pink: '#F472B6',
+  brown: '#A16207',
+  black: '#1F2937',
+  white: '#FFFFFF',
+}
+
+/** Màu vật lựa chọn khi không phải câu về màu: xoay vòng các màu kẹo, không có đỏ (đỏ dễ gợi "sai"). */
+export const OPTION_OBJECT_FILLS: readonly string[] = [
+  DEFAULT_PALETTE.dotPink,
+  DEFAULT_PALETTE.dotBlue,
+  DEFAULT_PALETTE.dotYellow,
+  DEFAULT_PALETTE.dotGreen,
+  DEFAULT_PALETTE.dotOrange,
+  DEFAULT_PALETTE.dotPurple,
+]
+
 /** `fooBar` -> `foo-bar`, cho tên biến CSS. */
 const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
 

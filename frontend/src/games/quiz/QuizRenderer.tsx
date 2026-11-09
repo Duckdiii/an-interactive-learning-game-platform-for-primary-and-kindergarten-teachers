@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Layer, Text } from 'react-konva'
+import { Image as KonvaImage, Layer, Rect, Text } from 'react-konva'
+import useImage from 'use-image'
 import type { QuizQuestion } from '../../types/game-dsl.types'
 import type { StudentQuizQuestion } from '../../types/game-student.types'
 import type { AnswerResult } from '../common/answerResult'
@@ -13,6 +14,10 @@ import ResponsiveStage from '../common/ResponsiveStage'
 import { useFeedback } from '../common/useFeedback'
 import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
+import { useAnimationTime } from '../common/useAnimationTime'
+import { objectKindForTheme } from '../common/optionVisual'
+import { useGamePalette } from '../common/useGamePalette'
+import { useTheme } from '../../player/theme/useTheme'
 import { QUESTION_FONT_SIZE, QUESTION_TEXT_WIDTH, computeQuizLayout } from './quizLayout'
 
 /**
@@ -58,6 +63,16 @@ export default function QuizRenderer(props: QuizRendererProps) {
   const { showFeedback } = useFeedback()
   const { image: illustration, reserveSpace: hasIllustration } = useIllustration(question.imageUrl)
   const playAudio = useQuestionAudio(question.audioUrl)
+  const theme = useTheme()
+  const palette = useGamePalette()
+  const [background] = useImage(theme.bgUrl ?? '')
+  const time = useAnimationTime(mode !== 'review')
+  // Lúc bắt đầu phản hồi đúng/sai (theo đồng hồ hoạt ảnh) để vật nảy lên hoặc lắc nhẹ đúng một lần.
+  const [reactedAt, setReactedAt] = useState<number | null>(null)
+  const timeRef = useRef(time)
+  useEffect(() => {
+    timeRef.current = time
+  }, [time])
 
   // Đo chiều cao thật của câu hỏi (Konva wrap theo từ nên số dòng khó ước lượng). Đo bằng useMemo,
   // không dùng setState trong effect; đo không được thì layout tự quay về phép ước lượng.
@@ -92,6 +107,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
     setLocked(next.locked)
     setRevealCorrect(next.revealCorrect)
     setRevealedCorrectId(null)
+    setReactedAt(null)
   }
 
   // Đếm số lần "thế hệ" (tăng mỗi lần đổi câu/mode) để huỷ kết quả `onAnswered` cũ nếu nó resolve
@@ -111,6 +127,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
     if (props.mode === 'preview') {
       const isCorrect = optionId === props.question.correctOptionId
       setRevealCorrect(true)
+      setReactedAt(timeRef.current)
       showFeedback(isCorrect)
       // Kiểu `void` không chặn được cha truyền hàm async; bọc lại để Promise bị reject không thành
       // unhandled rejection.
@@ -130,6 +147,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
       if (typeof verdict?.isCorrect === 'boolean') {
         setRevealedCorrectId(verdict.correctAnswer?.selectedOptionId ?? null)
         setRevealCorrect(true)
+        setReactedAt(timeRef.current)
         showFeedback(verdict.isCorrect)
       }
     } catch (error) {
@@ -168,10 +186,21 @@ export default function QuizRenderer(props: QuizRendererProps) {
   return (
     <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
       <Layer>
+        <SceneBackground image={background} height={layout.stageHeight} time={time} cloud={palette.surface} />
         {layout.illustrationY !== null && (
           <QuestionIllustration image={illustration} y={layout.illustrationY} />
         )}
 
+        <Rect
+          x={24}
+          y={layout.questionY - 8}
+          width={STAGE_WIDTH - 48}
+          height={layout.questionHeight + 16}
+          cornerRadius={20}
+          fill={palette.surface}
+          opacity={0.92}
+          listening={false}
+        />
         <Text
           text={question.questionText}
           fontSize={QUESTION_FONT_SIZE}
@@ -198,9 +227,34 @@ export default function QuizRenderer(props: QuizRendererProps) {
             isCorrect={revealCorrect && option.id === correctId}
             locked={locked}
             onClick={() => handleSelect(option.id)}
+            kind={objectKindForTheme(theme.id)}
+            time={time}
+            reactedAt={reactedAt}
           />
         ))}
       </Layer>
     </ResponsiveStage>
+  )
+}
+
+/** Nền thế giới game (ảnh theo theme, phủ kín sân khấu) và hai đám mây trôi chậm cho cảnh có sức sống. */
+function SceneBackground({ image, height, time, cloud }: { image?: HTMLImageElement; height: number; time: number; cloud: string }) {
+  const cover = image ? Math.max(STAGE_WIDTH / image.width, height / image.height) : 1
+  const drift = (speed: number, offset: number) => ((time * speed + offset) % (STAGE_WIDTH + 240)) - 160
+  return (
+    <>
+      {image ? (
+        <KonvaImage
+          image={image}
+          width={image.width * cover}
+          height={image.height * cover}
+          x={(STAGE_WIDTH - image.width * cover) / 2}
+          y={(height - image.height * cover) / 2}
+          listening={false}
+        />
+      ) : null}
+      <Rect x={drift(14, 80)} y={18} width={150} height={44} cornerRadius={22} fill={cloud} opacity={0.8} listening={false} />
+      <Rect x={drift(9, 520)} y={56} width={110} height={34} cornerRadius={17} fill={cloud} opacity={0.7} listening={false} />
+    </>
   )
 }

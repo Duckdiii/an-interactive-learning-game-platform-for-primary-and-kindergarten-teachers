@@ -1,7 +1,9 @@
 import { Group, Image as KonvaImage, Rect, Text } from 'react-konva'
 import useImage from 'use-image'
 import type { TextChoice } from '../../types/game-dsl.types'
-import { resolveAssetUrl } from '../../utils/assetResolver'
+import { bob, breathe, burstParticle, easeOutBack, progress, wiggle } from './motion'
+import { colorWordOf, quantityPicture, singlePicture, type OptionObjectKind } from './optionVisual'
+import { COLOR_WORD_FILLS, OPTION_OBJECT_FILLS } from './palette'
 import { useGamePalette } from './useGamePalette'
 import { OPTION_BUTTON_HEIGHT, OPTION_BUTTON_WIDTH, optionPosition } from './optionGrid'
 
@@ -15,11 +17,21 @@ interface OptionButtonProps {
   isCorrect: boolean
   locked: boolean
   onClick: () => void
+  /** Vật đại diện theo thế giới game. */
+  kind?: OptionObjectKind
+  /** Đồng hồ hoạt ảnh (giây) và lúc bắt đầu phản hồi đúng/sai; 0 và null thì vẽ tĩnh. */
+  time?: number
+  reactedAt?: number | null
 }
 
+const CX = OPTION_BUTTON_WIDTH / 2
+const CY = OPTION_BUTTON_HEIGHT / 2
+const BURST = 8
+
 /**
- * Ô đáp án dạng chữ và/hoặc hình ảnh minh họa vector OpenMoji, vẽ bằng Konva. Kích thước 340x200px.
- * Tự động gắn Visual Association vector từ Asset Bank nếu có tương ứng với chữ đáp án.
+ * Lựa chọn vẽ thành một vật trong cảnh (bóng bay, bong bóng nước, hành tinh) thay cho ô chữ, chữ đáp án nằm trên nhãn trắng viền đậm.
+ * Đáp án là tên màu thì vật mang đúng màu đó; "3 con vịt" thì vẽ 3 con vịt. Giữ nguyên ô 340x200 và vị trí lưới nên bố cục không đổi.
+ * Chỉ dùng Group/Rect/Text/Image (các test giả lập react-konva chỉ có những phần này).
  */
 export default function OptionButton({
   option,
@@ -29,57 +41,144 @@ export default function OptionButton({
   isCorrect,
   locked,
   onClick,
+  kind = 'balloon',
+  time = 0,
+  reactedAt = null,
 }: OptionButtonProps) {
   const palette = useGamePalette()
   const { x, y } = optionPosition(index, originY)
+  const extra = option as unknown as { imageUrl?: string }
 
-  // Tự động tìm hình ảnh minh họa vector liên tưởng (Visual Association)
-  const optionImageUrl = (option as unknown as { imageUrl?: string }).imageUrl || resolveAssetUrl(option.text)
-  const [image] = useImage(optionImageUrl ?? '')
-  const hasImage = Boolean(optionImageUrl && image)
+  const color = colorWordOf(option.text)
+  const fill = color ? COLOR_WORD_FILLS[color] : OPTION_OBJECT_FILLS[index % OPTION_OBJECT_FILLS.length]
+  const quantity = extra.imageUrl ? null : quantityPicture(option.text)
+  const pictureUrl = extra.imageUrl || (quantity ? quantity.imageUrl : singlePicture(option.text))
+  const [picture] = useImage(pictureUrl ?? '')
 
-  // Sai: KHÔNG dùng đỏ gắt — chỉ tô vàng nhẹ để biết đã chọn. Đúng: luôn tô xanh để trẻ học được.
-  const fill = locked && isCorrect ? palette.correctFill : locked && isSelected ? palette.wrongFill : palette.surface
+  const elapsed = reactedAt === null ? -1 : time - reactedAt
+  const showCorrect = locked && isCorrect
+  const showWrong = locked && isSelected && !isCorrect
+  const pop = showCorrect ? easeOutBack(progress(elapsed, 0.5)) : 0
+  const scale = breathe(time, index * 1.3) * (1 + 0.05 * pop)
+  const offsetY = bob(time, index * 1.1) - 8 * pop
+  const offsetX = showWrong ? wiggle(elapsed) : 0
+  // Sai thì vật mờ đi một chút (không đỏ), đáp án đúng sáng viền vàng để trẻ học được.
+  const opacity = locked && !isCorrect ? (showWrong ? 0.75 : 0.55) : 1
 
-  const ICON_SIZE = 48
-  const ICON_PAD = 16
-  const textX = hasImage ? ICON_PAD + ICON_SIZE + 12 : 0
-  const textWidth = hasImage ? OPTION_BUTTON_WIDTH - textX - ICON_PAD : OPTION_BUTTON_WIDTH
+  const labelLong = option.text.length > 14
+  const labelWidth = Math.min(OPTION_BUTTON_WIDTH - 20, Math.max(96, Math.ceil(option.text.length * (labelLong ? 13 : 18)) + 36))
+  const labelHeight = labelLong ? 72 : 52
+  const pictures = quantity ? Math.min(quantity.count, 10) : picture && pictureUrl ? 1 : 0
+  const pictureSize = pictures > 4 ? 32 : pictures > 1 ? 36 : 56
+  // Tối đa 4 hình mỗi hàng (4 x 36px) để nằm gọn trong thân vật rộng khoảng 150px.
+  const perRow = Math.min(pictures, 4)
+  const labelY = pictures > 0 ? 72 - labelHeight : -labelHeight / 2
+  // Vòng vàng trên vật màu vàng khó thấy: đổi sang màu chính.
+  const ringColor = color === 'yellow' ? palette.primary : palette.dotYellow
+  // Hạt mừng chỉ vẽ trong lúc hiệu ứng chạy (giảm chuyển động: đồng hồ đứng ở 0 nên không vẽ, tránh hạt kẹt che chữ).
+  const bursting = showCorrect && elapsed > 0 && elapsed < 0.9
 
   return (
-    <Group x={x} y={y} onClick={onClick} onTap={onClick}>
-      <Rect
-        width={OPTION_BUTTON_WIDTH}
-        height={OPTION_BUTTON_HEIGHT}
-        cornerRadius={20}
-        fill={fill}
-        stroke={palette.outline}
-        strokeWidth={3}
-      />
-      {hasImage && image ? (
-        <KonvaImage
-          image={image}
-          x={ICON_PAD}
-          y={(OPTION_BUTTON_HEIGHT - ICON_SIZE) / 2}
-          width={ICON_SIZE}
-          height={ICON_SIZE}
-          cornerRadius={10}
+    <Group x={x + CX + offsetX} y={y + CY + offsetY} onClick={onClick} onTap={onClick} opacity={opacity}>
+      <Group scaleX={scale} scaleY={scale}>
+        {showCorrect ? (
+          <Rect x={-96} y={-96} width={192} height={184} cornerRadius={92} stroke={ringColor} strokeWidth={8} listening={false} />
+        ) : null}
+        {/* Câu về màu: bong bóng gần như đặc, không để nền xuyên qua làm sai màu (đỏ trên cát hóa cam). */}
+        <ObjectShape kind={kind} fill={fill} outline={palette.outline} highlight={palette.surface} solid={color !== null} />
+        {pictures > 0 && picture
+          ? Array.from({ length: pictures }, (_, i) => {
+              const row = Math.floor(i / perRow)
+              const inRow = Math.min(perRow, pictures - row * perRow)
+              const col = i % perRow
+              return (
+                <KonvaImage
+                  key={i}
+                  image={picture}
+                  x={(col - (inRow - 1) / 2) * (pictureSize + 4) - pictureSize / 2}
+                  y={-70 + row * (pictureSize + 4)}
+                  width={pictureSize}
+                  height={pictureSize}
+                  listening={false}
+                />
+              )
+            })
+          : null}
+        <Rect
+          x={-labelWidth / 2}
+          y={labelY}
+          width={labelWidth}
+          height={labelHeight}
+          cornerRadius={labelHeight / 2}
+          fill={palette.surface}
+          stroke={palette.ink}
+          strokeWidth={3}
           listening={false}
         />
-      ) : null}
-      <Text
-        text={option.text}
-        fontSize={28}
-        fontStyle="bold"
-        x={textX}
-        width={textWidth}
-        height={OPTION_BUTTON_HEIGHT}
-        align={hasImage ? 'left' : 'center'}
-        verticalAlign="middle"
-        padding={hasImage ? 4 : 16}
-        fill={palette.ink}
-        listening={false}
-      />
+        <Text
+          text={option.text}
+          x={-labelWidth / 2}
+          y={labelY}
+          width={labelWidth}
+          height={labelHeight}
+          align="center"
+          verticalAlign="middle"
+          fontSize={labelLong ? 20 : 26}
+          fontStyle="bold"
+          padding={8}
+          fill={palette.ink}
+          listening={false}
+        />
+      </Group>
+      {bursting
+        ? Array.from({ length: BURST }, (_, i) => {
+            const p = burstParticle(i, BURST, elapsed, 0.9, 96)
+            return (
+              <Rect
+                key={`burst-${i}`}
+                x={p.x}
+                y={p.y}
+                width={14}
+                height={14}
+                cornerRadius={3}
+                rotation={p.rotation}
+                fill={OPTION_OBJECT_FILLS[i % OPTION_OBJECT_FILLS.length]}
+                opacity={p.opacity}
+                listening={false}
+              />
+            )
+          })
+        : null}
+    </Group>
+  )
+}
+
+/** Thân vật, tâm ở (0, 0), cao khoảng 190px (vừa ô 200px kể cả lúc nhấp nhô). */
+function ObjectShape({ kind, fill, outline, highlight, solid }: { kind: OptionObjectKind; fill: string; outline: string; highlight: string; solid: boolean }) {
+  if (kind === 'bubble') {
+    return (
+      <Group>
+        <Rect x={-84} y={-84} width={168} height={168} cornerRadius={84} fill={fill} opacity={solid ? 0.95 : 0.45} stroke={fill} strokeWidth={5} />
+        <Rect x={-56} y={-66} width={40} height={22} cornerRadius={11} fill={highlight} opacity={0.75} rotation={-25} />
+      </Group>
+    )
+  }
+  if (kind === 'planet') {
+    return (
+      <Group>
+        <Rect x={-82} y={-82} width={164} height={164} cornerRadius={82} fill={fill} stroke={outline} strokeWidth={3} />
+        <Rect x={-112} y={-14} width={224} height={28} cornerRadius={14} stroke={outline} strokeWidth={4} rotation={-12} opacity={0.6} />
+        <Rect x={-50} y={-60} width={30} height={18} cornerRadius={9} fill={highlight} opacity={0.5} />
+      </Group>
+    )
+  }
+  // Bóng bay: thân bầu dục, nút thắt và sợi dây.
+  return (
+    <Group>
+      <Rect x={-1} y={78} width={2} height={20} fill={outline} opacity={0.7} />
+      <Rect x={-7} y={68} width={14} height={14} rotation={45} fill={fill} stroke={outline} strokeWidth={2} />
+      <Rect x={-76} y={-88} width={152} height={160} cornerRadius={76} fill={fill} stroke={outline} strokeWidth={3} />
+      <Rect x={-52} y={-70} width={26} height={40} cornerRadius={13} fill={highlight} opacity={0.5} rotation={18} />
     </Group>
   )
 }

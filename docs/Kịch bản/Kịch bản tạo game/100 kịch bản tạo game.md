@@ -28,43 +28,43 @@ Thang đánh giá gợi ý cho cột kết quả: **Đ** đúng ý, **G** tạo 
 
 ## A. Yêu cầu bình thường, nội dung đa dạng
 
-| STT | Môn · Lớp            | Giáo viên nhập (nguyên văn)                                                                                  | Thử điều gì                      | Kỳ vọng hợp lý                                    | Kết quả |
-| --- | -------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------- | ------- |
-| 1   | Toán · Mầm non       | Cho các bé đếm số con vịt đang bơi dưới ao, từ 1 đến 5 con thôi nhé                                          | Đếm số lượng nhỏ, đúng tuổi      | Game đếm 1–5, hình vịt, câu hỏi ngắn              |         |
-| 2   | Toán · Lớp 1         | Hôm nay lớp học bài "Lớn hơn, bé hơn, bằng nhau". Cô muốn một trò để các con so sánh hai số trong phạm vi 10 | So sánh số, dấu > < =            | Có lựa chọn dấu hoặc chọn số lớn hơn, đáp án đúng |         |
-| 3   | Tiếng Việt · Lớp 1   | Ôn vần an, ăn, ân. Bé nghe và chọn tiếng có vần đúng                                                         | Nhận biết vần, có âm thanh       | Tiếng có vần đúng, nút nghe lại đọc rõ            |         |
-| 4   | Tiếng Anh · Lớp 2    | Unit 3 my body: head, shoulders, knees, toes, eyes, nose. Kids match the word with the body part             | Từ vựng tiếng Anh theo chủ đề    | Nhãn tiếng Anh, hình hoặc chữ khớp nhau           |         |
-| 5   | Toán · Lớp 3         | Bảng nhân 7, các em bắn trúng kết quả đúng                                                                   | Bảng nhân, cơ chế bắn            | Phép nhân 7 đúng tuyệt đối, cơ chế bắn chạy được  |         |
-| 6   | Tiếng Việt · Lớp 2   | Tìm từ chỉ hoạt động trong các từ: chạy, bàn, nhảy, quả bóng, hát, cái ghế                                   | Phân loại từ loại đơn giản       | Chọn đủ các từ chỉ hoạt động, không lẫn danh từ   |         |
-| 7   | Toán · Lớp 2         | Bé giúp bạn thỏ hứng cà rốt, cà rốt nào có phép cộng bằng 12 thì hứng                                        | Hứng có điều kiện tính toán      | Nhãn là phép tính, chỉ phép bằng 12 là đúng       |         |
-| 8   | Tiếng Anh · Mầm non  | colors song: red, blue, yellow, green. let the kids pop the balloon with the color I say                     | Màu sắc, chạm bóng, có đọc       | Bóng mang tên màu, đọc màu cần chọn               |         |
-| 9   | Tiếng Việt · Lớp 3   | Ghép các tiếng thành từ ghép: hoa + hồng, xe + đạp, bàn + tay, mặt + trời                                    | Từ ghép                          | Trò ghép cặp hoặc câu cá từ ghép đúng             |         |
-| 10  | Toán · Lớp 4         | Ôn đổi đơn vị đo độ dài: km, m, dm, cm. Em chọn kết quả đổi đúng                                             | Đơn vị đo, số lớn hơn            | Phép đổi đúng, nhãn rõ đơn vị                     |         |
-| 11  | Toán · Lớp 5         | Luyện tìm số thập phân lớn nhất trong một nhóm số, ví dụ 3,45; 3,5; 3,405                                    | Số thập phân, dấu phẩy kiểu Việt | Dùng dấu phẩy thập phân, đáp án đúng              |         |
-| 12  | Tiếng Việt · Mầm non | Nhận biết chữ cái a, ă, â qua hình ảnh con vật quen thuộc                                                    | Chữ cái có dấu, mầm non          | Chữ hiển thị đúng dấu, hình hợp lý                |         |
+| STT | Môn · Lớp            | Giáo viên nhập (nguyên văn)                                                                                  | Thử điều gì                      | Kỳ vọng hợp lý                                    | Kết quả                                                                                 |
+| --- | -------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 1   | Toán · Mầm non       | Cho các bé đếm số con vịt đang bơi dưới ao, từ 1 đến 5 con thôi nhé                                          | Đếm số lượng nhỏ, đúng tuổi      | Game đếm 1–5, hình vịt, câu hỏi ngắn              | G · Nối cặp 1 câu, chỉ có chữ "3 con vịt", không có hình để đếm                         |
+| 2   | Toán · Lớp 1         | Hôm nay lớp học bài "Lớn hơn, bé hơn, bằng nhau". Cô muốn một trò để các con so sánh hai số trong phạm vi 10 | So sánh số, dấu > < =            | Có lựa chọn dấu hoặc chọn số lớn hơn, đáp án đúng | Đ · Trắc nghiệm 10 câu chọn dấu <, =, >; tên game bị cắt giữa chữ                       |
+| 3   | Tiếng Việt · Lớp 1   | Ôn vần an, ăn, ân. Bé nghe và chọn tiếng có vần đúng                                                         | Nhận biết vần, có âm thanh       | Tiếng có vần đúng, nút nghe lại đọc rõ            | S · Câu 8 sai đáp án ("đặn dùng"), câu 7–9 lộ đáp án trong đề                           |
+| 4   | Tiếng Anh · Lớp 2    | Unit 3 my body: head, shoulders, knees, toes, eyes, nose. Kids match the word with the body part             | Từ vựng tiếng Anh theo chủ đề    | Nhãn tiếng Anh, hình hoặc chữ khớp nhau           | S · Nối "head" với "Head" (cùng một từ), không có hình bộ phận                          |
+| 5   | Toán · Lớp 3         | Bảng nhân 7, các em bắn trúng kết quả đúng                                                                   | Bảng nhân, cơ chế bắn            | Phép nhân 7 đúng tuyệt đối, cơ chế bắn chạy được  | L · Lớp 3 an toàn từ chối nhầm game bắn ná; không cho thử lại                           |
+| 6   | Tiếng Việt · Lớp 2   | Tìm từ chỉ hoạt động trong các từ: chạy, bàn, nhảy, quả bóng, hát, cái ghế                                   | Phân loại từ loại đơn giản       | Chọn đủ các từ chỉ hoạt động, không lẫn danh từ   | Đ · Chạm chim 3 màn, đáp án đúng; thẻ gợi ý ghi sai môn; đã sửa lỗi cắt nhãn            |
+| 7   | Toán · Lớp 2         | Bé giúp bạn thỏ hứng cà rốt, cà rốt nào có phép cộng bằng 12 thì hứng                                        | Hứng có điều kiện tính toán      | Nhãn là phép tính, chỉ phép bằng 12 là đúng       | G · Hứng cà rốt đẹp, nhưng đảo ý và cả 4 màn đáp án đều là 12                           |
+| 8   | Tiếng Anh · Mầm non  | colors song: red, blue, yellow, green. let the kids pop the balloon with the color I say                     | Màu sắc, chạm bóng, có đọc       | Bóng mang tên màu, đọc màu cần chọn               | S · Ảnh bóng đá thay bóng bay, lựa chọn là chữ; không gợi ý game vận động               |
+| 9   | Tiếng Việt · Lớp 3   | Ghép các tiếng thành từ ghép: hoa + hồng, xe + đạp, bàn + tay, mặt + trời                                    | Từ ghép                          | Trò ghép cặp hoặc câu cá từ ghép đúng             | Đ · Nối 6 cặp từ ghép; hộp thoại trợ lý chọn sẵn mục tiêu sai; gợi ý "bắn" do chữ "bàn" |
+| 10  | Toán · Lớp 4         | Ôn đổi đơn vị đo độ dài: km, m, dm, cm. Em chọn kết quả đổi đúng                                             | Đơn vị đo, số lớn hơn            | Phép đổi đúng, nhãn rõ đơn vị                     | Đ · 10 câu đổi đơn vị, đáp án đúng, nhiễu tốt                                           |
+| 11  | Toán · Lớp 5         | Luyện tìm số thập phân lớn nhất trong một nhóm số, ví dụ 3,45; 3,5; 3,405                                    | Số thập phân, dấu phẩy kiểu Việt | Dùng dấu phẩy thập phân, đáp án đúng              | Đ · 4 màn số thập phân đúng; gợi ý "hứng" do chữ "nhất"; lần đầu AI chậm, hết phiên     |
+| 12  | Tiếng Việt · Mầm non | Nhận biết chữ cái a, ă, â qua hình ảnh con vật quen thuộc                                                    | Chữ cái có dấu, mầm non          | Chữ hiển thị đúng dấu, hình hợp lý                | G · Nối chữ cái với con vật đúng nhưng không có hình, nhãn dài                          |
 
 ## B. Cơ chế chơi ngoài danh mục
 
-| STT | Môn · Lớp | Giáo viên nhập (nguyên văn) | Thử điều gì | Kỳ vọng hợp lý | Kết quả |
-|---|---|---|---|---|---|
-| 13 | Toán · Lớp 1 | Các bé xếp các toa tàu theo thứ tự số từ bé đến lớn để đoàn tàu chạy được | Xếp thứ tự (ORDERING) bằng game tự do | Đề xuất kiểu Sắp xếp thứ tự, hoặc game tự do gần nhất, nói rõ khác ý | |
-| 14 | Toán · Lớp 2 | Làm một mê cung, bé điều khiển chú chuột đi qua các ô có kết quả đúng để tới miếng phô mai | Mê cung, điều khiển nhân vật | Không có cơ chế mê cung: xem hệ thống đổi sang gì, có báo không | |
-| 15 | Tiếng Việt · Lớp 1 | Bé dùng ngón tay tô theo nét chữ b cho đúng thứ tự nét | Tô chữ, vẽ theo nét | Ngoài khả năng: xem có từ chối khéo hay sinh game không liên quan | |
-| 16 | Tiếng Anh · Lớp 3 | Memory game: flip two cards, if the English word and the picture match they disappear | Lật thẻ ghi nhớ | Đề xuất Lật thẻ ghi nhớ (preset), không ép vào game tự do | |
-| 17 | Toán · Lớp 3 | Đua xe hai đội trên bảng tương tác, đội nào trả lời đúng nhiều hơn thì xe chạy trước | Nhiều người chơi cùng màn hình | Ngoài khả năng: xem có thành game một người tiến về đích không | |
-| 18 | Tiếng Việt · Lớp 2 | Trò chơi ô chữ hàng ngang, hàng dọc có từ khóa là TRƯỜNG HỌC | Ô chữ | Ngoài khả năng: quan sát cách hệ thống xử lý | |
-| 19 | Toán · Mầm non | Gõ trống theo nhịp, cô đọc số mấy thì bé gõ bấy nhiêu cái | Nhịp điệu, đếm số lần chạm | Không có đếm số lần chạm: xem có đổi sang chọn số không | |
-| 20 | Tiếng Anh · Lớp 4 | Kids record their voice saying the word and the game checks pronunciation | Ghi âm, chấm phát âm | Ngoài khả năng: nên báo không làm được thay vì giả vờ | |
-| 21 | Toán · Lớp 4 | Ghép các mảnh ghép tranh, mỗi mảnh đúng là một phép chia đúng, ghép xong hiện bức tranh con voi | Ghép tranh (jigsaw) | Ngoài khả năng: quan sát | |
-| 22 | Tiếng Việt · Lớp 3 | Bé kéo các từ để sắp xếp thành câu hoàn chỉnh: "Em / đi / học / bằng / xe đạp" | Sắp xếp từ thành câu | Đề xuất Sắp xếp thứ tự hoặc Sắp xếp chữ, đúng thứ tự | |
-| 23 | Toán · Lớp 2 | Đếm ngược 30 giây, trả lời càng nhanh càng nhiều điểm, hết giờ thì thua | Hẹn giờ, áp lực thời gian | Không có hẹn giờ trong game tự do: xem có bỏ qua yêu cầu này không | |
-| 24 | Toán · Lớp 1 | Bé ném bóng vào rổ, rổ nào có số chẵn thì ném vào | Ném theo đường cong | Có thể thành cơ chế bắn; quan sát | |
-| 25 | Tiếng Anh · Lớp 1 | Simon says: the game tells the child to touch nose, clap hands, jump, and they act it out in front of the camera | Dùng camera, vận động thật | Ngoài khả năng: quan sát có lời giải thích không | |
-| 26 | Toán · Lớp 5 | Trò chơi cờ cá ngựa, đổ xúc xắc, đi đến ô nào thì giải bài toán ở ô đó | Trò chơi bàn cờ, xúc xắc | Ngoài khả năng: quan sát | |
-| 27 | Tiếng Việt · Lớp 2 | Kể chuyện tương tác, bé chọn hướng đi cho nhân vật Thỏ, mỗi lựa chọn dẫn đến đoạn truyện khác | Truyện rẽ nhánh | Ngoài khả năng: quan sát | |
-| 28 | Toán · Lớp 3 | Bé cân hai đĩa cân, kéo quả nặng vào cho cân thăng bằng | Mô phỏng vật lý cân | Có thể thành kéo thả phân loại; quan sát có đúng toán không | |
-| 29 | Tiếng Anh · Lớp 5 | Hangman game with words about weather | Đoán chữ từng ký tự | Có thể gần với Sắp xếp chữ cái; quan sát | |
-| 30 | Toán · Mầm non | Bé xếp chồng các khối gỗ lên cao, khối nào có số lớn thì nằm dưới | Xếp chồng, thứ tự | Quan sát cơ chế được chọn | |
+| STT | Môn · Lớp          | Giáo viên nhập (nguyên văn)                                                                                      | Thử điều gì                           | Kỳ vọng hợp lý                                                       | Kết quả |
+| --- | ------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------- | ------- |
+| 13  | Toán · Lớp 1       | Các bé xếp các toa tàu theo thứ tự số từ bé đến lớn để đoàn tàu chạy được                                        | Xếp thứ tự (ORDERING) bằng game tự do | Đề xuất kiểu Sắp xếp thứ tự, hoặc game tự do gần nhất, nói rõ khác ý |         |
+| 14  | Toán · Lớp 2       | Làm một mê cung, bé điều khiển chú chuột đi qua các ô có kết quả đúng để tới miếng phô mai                       | Mê cung, điều khiển nhân vật          | Không có cơ chế mê cung: xem hệ thống đổi sang gì, có báo không      |         |
+| 15  | Tiếng Việt · Lớp 1 | Bé dùng ngón tay tô theo nét chữ b cho đúng thứ tự nét                                                           | Tô chữ, vẽ theo nét                   | Ngoài khả năng: xem có từ chối khéo hay sinh game không liên quan    |         |
+| 16  | Tiếng Anh · Lớp 3  | Memory game: flip two cards, if the English word and the picture match they disappear                            | Lật thẻ ghi nhớ                       | Đề xuất Lật thẻ ghi nhớ (preset), không ép vào game tự do            |         |
+| 17  | Toán · Lớp 3       | Đua xe hai đội trên bảng tương tác, đội nào trả lời đúng nhiều hơn thì xe chạy trước                             | Nhiều người chơi cùng màn hình        | Ngoài khả năng: xem có thành game một người tiến về đích không       |         |
+| 18  | Tiếng Việt · Lớp 2 | Trò chơi ô chữ hàng ngang, hàng dọc có từ khóa là TRƯỜNG HỌC                                                     | Ô chữ                                 | Ngoài khả năng: quan sát cách hệ thống xử lý                         |         |
+| 19  | Toán · Mầm non     | Gõ trống theo nhịp, cô đọc số mấy thì bé gõ bấy nhiêu cái                                                        | Nhịp điệu, đếm số lần chạm            | Không có đếm số lần chạm: xem có đổi sang chọn số không              |         |
+| 20  | Tiếng Anh · Lớp 4  | Kids record their voice saying the word and the game checks pronunciation                                        | Ghi âm, chấm phát âm                  | Ngoài khả năng: nên báo không làm được thay vì giả vờ                |         |
+| 21  | Toán · Lớp 4       | Ghép các mảnh ghép tranh, mỗi mảnh đúng là một phép chia đúng, ghép xong hiện bức tranh con voi                  | Ghép tranh (jigsaw)                   | Ngoài khả năng: quan sát                                             |         |
+| 22  | Tiếng Việt · Lớp 3 | Bé kéo các từ để sắp xếp thành câu hoàn chỉnh: "Em / đi / học / bằng / xe đạp"                                   | Sắp xếp từ thành câu                  | Đề xuất Sắp xếp thứ tự hoặc Sắp xếp chữ, đúng thứ tự                 |         |
+| 23  | Toán · Lớp 2       | Đếm ngược 30 giây, trả lời càng nhanh càng nhiều điểm, hết giờ thì thua                                          | Hẹn giờ, áp lực thời gian             | Không có hẹn giờ trong game tự do: xem có bỏ qua yêu cầu này không   |         |
+| 24  | Toán · Lớp 1       | Bé ném bóng vào rổ, rổ nào có số chẵn thì ném vào                                                                | Ném theo đường cong                   | Có thể thành cơ chế bắn; quan sát                                    |         |
+| 25  | Tiếng Anh · Lớp 1  | Simon says: the game tells the child to touch nose, clap hands, jump, and they act it out in front of the camera | Dùng camera, vận động thật            | Ngoài khả năng: quan sát có lời giải thích không                     |         |
+| 26  | Toán · Lớp 5       | Trò chơi cờ cá ngựa, đổ xúc xắc, đi đến ô nào thì giải bài toán ở ô đó                                           | Trò chơi bàn cờ, xúc xắc              | Ngoài khả năng: quan sát                                             |         |
+| 27  | Tiếng Việt · Lớp 2 | Kể chuyện tương tác, bé chọn hướng đi cho nhân vật Thỏ, mỗi lựa chọn dẫn đến đoạn truyện khác                    | Truyện rẽ nhánh                       | Ngoài khả năng: quan sát                                             |         |
+| 28  | Toán · Lớp 3       | Bé cân hai đĩa cân, kéo quả nặng vào cho cân thăng bằng                                                          | Mô phỏng vật lý cân                   | Có thể thành kéo thả phân loại; quan sát có đúng toán không          |         |
+| 29  | Tiếng Anh · Lớp 5  | Hangman game with words about weather                                                                            | Đoán chữ từng ký tự                   | Có thể gần với Sắp xếp chữ cái; quan sát                             |         |
+| 30  | Toán · Mầm non     | Bé xếp chồng các khối gỗ lên cao, khối nào có số lớn thì nằm dưới                                                | Xếp chồng, thứ tự                     | Quan sát cơ chế được chọn                                            |         |
 
 ## C. Môn học và chủ đề ngoài 3 môn
 
@@ -177,6 +177,29 @@ Sau khi chạy xong, tổng hợp ở đây để đưa ra giải pháp cải th
 
 | Hạng mục | Số kịch bản | Ghi chú |
 |---|---|---|
+### Nhóm A (chạy 2026-11-08, backend thật, ảnh và ghi chú trong từng thư mục 001–012)
+
+| Hạng mục | Số kịch bản | Kịch bản |
+|---|---|---|
+| Đúng ý (Đ) | 5 | 2, 6, 9, 10, 11 |
+| Gần đúng hoặc đổi ý (G) | 3 | 1, 7, 12 |
+| Sai kiến thức hoặc không chơi được (S) | 3 | 3, 4, 8 |
+| Báo lỗi (L) | 1 | 5 |
+| Từ chối hợp lý (T) | 0 | |
+
+Vấn đề lặp lại ở nhóm A:
+
+- **Thiếu hình ảnh**: game DSL (nối cặp, trắc nghiệm) chỉ hiện chữ dù đề nói "hình", "đếm", "màu" (1, 4, 8, 12). Với mầm non, game chữ không chơi được.
+- **Gợi ý kiểu chơi kém**: bộ nhận diện "vận động" bỏ dấu nên bắt nhầm "bàn"→bắn, "nhất"→nhặt (9, 11), không hiểu tiếng Anh "pop the balloon" (8); mô tả thẻ "Hứng Vật Phẩm" luôn nói "số học" kể cả bài Tiếng Việt (6); nhiều bài rõ ràng không có thẻ nào "Phù hợp nhất".
+- **Lỗi nội dung không bị chặn**: đáp án sai và từ vô nghĩa (3), đáp án lộ trong đề (3), mọi màn cùng đáp án (7), cặp nối giống hệt nhau (4); bảng "Sẵn sàng xuất bản" vẫn báo sẵn sàng.
+- **Kiểm duyệt an toàn quá chặt với cơ chế bắn** (5): chính hệ thống gợi ý "Bắn Ná" rồi tự từ chối, và frontend chặn thử lại.
+- **Tên trò chơi là nguyên văn câu giáo viên** ở mọi game DSL, có khi bị cắt giữa chữ (2); game tự do thì có tên riêng đẹp.
+- **Phiên đăng nhập hết hạn khoảng 15 phút** và không tự làm mới, đẩy giáo viên về trang đăng nhập giữa lúc tạo game (11).
+- **Hộp thoại "Trợ lý AI đồng hành"** chọn sẵn mục tiêu không liên quan (9).
+- Lỗi hiển thị nhãn bị cắt ("b…") trong game tự do đã sửa trong lúc chạy (6).
+
+### Tổng hợp chung
+
 | Đúng ý (Đ) | | |
 | Gần đúng hoặc đổi ý (G) | | |
 | Sai kiến thức hoặc không chơi được (S) | | |

@@ -177,3 +177,10 @@ Mẫu một mục:
 - Nguyên nhân gốc: agent chỉ được nạp lúc bắt đầu phiên.
 - Cách chặn: trong phiên vừa tạo agent, thử bằng `general-purpose` kèm thân file agent; chỉ kết luận "gọi được theo tên" ở phiên mới.
 - Trạng thái: ĐÃ ÁP DỤNG (ghi chú trong CLAUDE.md).
+
+### 2026-11-08 — Ô nhãn game tự do cố định 64px cắt mất chữ
+- Lỗi: `LabelBadge` trong `CpfRenderer.tsx` dùng bề rộng cố định 64px cho nhãn ≤3 ký tự; chữ đậm cỡ 36 của "bàn" rộng hơn nên hiện thành "b…".
+- Phát hiện nhờ: chạy thật kịch bản 006 (nhóm A) trên trình duyệt.
+- Nguyên nhân gốc: chọn kích thước theo số ký tự mà không đo/ước lượng bề rộng chữ, chỉ kiểm bằng mắt với nhãn số ("6").
+- Cách chặn: kích thước khung chữ trên canvas phải tính từ độ dài chữ và cỡ chữ (hoặc đo bằng Konva), kiểm với nhãn có dấu và chữ rộng; có thể thêm test hàm thuần cho bề rộng nhãn.
+- Trạng thái: CHỜ DUYỆT
