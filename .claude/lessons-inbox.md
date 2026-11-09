@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-09 — Thêm `description` vào schema đầu ra AI, không chạy test kiểm từ khóa của schema
+- Lỗi: khi thêm trường `title` vào 10 schema `game-ai-output`, có kèm `"description"`; `AiOutputSchemasTest.llmSchemaUsesOnlyKeywordsAnLlmAccepts` chỉ cho từ khóa LLM chấp nhận nên 10 test đỏ. Bộ test con mình chọn chạy không có `AiOutputSchemasTest`. Cùng lượt, các luật Lớp 2 mới bản đầu chặn nhầm bài hợp lệ ("A" ↔ "a", điền khuyết đáp án 1 chữ cái, Đúng/Sai cùng đáp án, "lớn hơn hoặc bằng 10").
+- Phát hiện nhờ: `test-verifier` (chạy toàn bộ), `ai-prompt-evaluator`, `reviewer`.
+- Nguyên nhân gốc: chọn test theo tên lớp mình nhớ thay vì theo thư mục/gói bị đổi; viết luật chặn từ một ca lỗi mà không liệt kê ca hợp lệ gần giống.
+- Cách chặn: sửa file trong `schema/` thì chạy cả gói `service/validation/ai`; mỗi luật Lớp 2 mới phải có ít nhất một test ca hợp lệ gần giống không bị chặn (có thể thành mục kiểm của `reviewer`).
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-07 — Test schema "chặn biến thể sai" xanh vì lý do khác lý do muốn kiểm
 - Lỗi: trong `CpfGameSchemaTest`, các biến thể sai chỉ assert `isNotEmpty()`; ba biến thể bị chặn nhờ ràng buộc khác (thêm 1 zone vấp `minItems: 2` thay vì luật "không có zones ở màn PICK"; CHECK lồng thiếu `onWrong` nên vấp `required`). Xóa đúng ràng buộc cần bảo vệ thì test vẫn xanh. Lặp lại mẫu lỗi của mục 2026-10-14 "Test hồi quy qua cả khi chưa có bản sửa".
 - Phát hiện nhờ: `reviewer` (2 lượt), `backend-architect-reviewer`.

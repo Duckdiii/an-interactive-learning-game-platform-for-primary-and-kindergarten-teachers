@@ -56,7 +56,7 @@ public abstract class AbstractGameDslFactory<O extends AiGameOutput, A extends A
             questions.add(createQuestion(aiQuestions.get(i), new QuestionBase(Ids.numbered("q", i), timeLimit, points)));
         }
         GameMetadata metadata = new GameMetadata(
-                truncate(request.topic().strip(), MAX_TITLE_LENGTH), request.subject(), request.gradeLevel(),
+                titleOf(output.title(), request.topic()), request.subject(), request.gradeLevel(),
                 truncate(request.topic().strip(), MAX_TOPIC_LENGTH));
         return assemble(metadata, new GameplaySettings(GameDefaults.hitboxScale(request.gradeLevel())), questions);
     }
@@ -69,6 +69,23 @@ public abstract class AbstractGameDslFactory<O extends AiGameOutput, A extends A
 
     protected final String schemaVersion() {
         return GameDslSchemaRegistry.SUPPORTED_VERSION;
+    }
+
+    /** Tên AI đặt nếu có; không có thì lấy chủ đề, cắt ở ranh giới từ (không cắt giữa chữ) và thêm "…". */
+    static String titleOf(String aiTitle, String topic) {
+        if (aiTitle != null && !aiTitle.isBlank()) return truncate(nfc(aiTitle), MAX_TITLE_LENGTH);
+        String text = nfc(topic);
+        if (text.codePointCount(0, text.length()) <= MAX_TITLE_LENGTH) return text;
+        String cut = text.substring(0, text.offsetByCodePoints(0, MAX_TITLE_LENGTH - 1));
+        // Chỉ bỏ từ cuối khi bị cắt giữa chữ; bỏ dấu câu thừa trước "…".
+        if (!Character.isWhitespace(text.codePointAt(cut.length())) && cut.lastIndexOf(' ') > 0) {
+            cut = cut.substring(0, cut.lastIndexOf(' '));
+        }
+        return cut.replaceAll("[\\p{Punct}\\s]+$", "") + "…";
+    }
+
+    private static String nfc(String text) {
+        return java.text.Normalizer.normalize(text.strip(), java.text.Normalizer.Form.NFC);
     }
 
     /** Cắt theo ký tự Unicode để không làm hỏng chữ có dấu. */

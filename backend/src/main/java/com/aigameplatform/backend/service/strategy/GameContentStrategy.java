@@ -31,6 +31,20 @@ import tools.jackson.databind.json.JsonMapper;
 @Setter
 public abstract class GameContentStrategy<D extends QuestionDsl, E extends QuestionGame> {
 
+    // Rút từ lỗi thật khi chạy 12 kịch bản đầu (docs/Kịch bản/Kịch bản tạo game): tên game chép nguyên câu, câu lặp,
+    // mọi màn cùng đáp án, lộ đáp án trong lời dẫn. Luật Lớp 2 (RuleSupport) bắt lại các lỗi kiểm được bằng máy.
+    static final String COMMON_CONTENT_RULES = """
+            Quy tắc chung:
+            - title: tên game ngắn 2-8 từ, hấp dẫn với trẻ, đặt lại từ chủ đề; không chép nguyên câu yêu cầu của giáo viên.
+            - Các câu (màn) không được trùng nhau, kể cả khi chỉ đổi động từ ("Tìm..."/"Chạm...").
+            - Với game mỗi câu có một đáp án đúng: đáp án đúng phải thay đổi giữa các câu, không để mọi câu cùng một đáp án.
+            - Câu điền khuyết: dùng "..." thay chỗ cần điền, không viết lại từ hoàn chỉnh ở bất kỳ đâu trong câu.
+            - Không viết đáp án, hoặc từ hoàn chỉnh chứa đáp án, ngay trong lời dẫn câu hỏi.
+            - Chỉ dùng từ tiếng Việt có thật, viết đúng chính tả.""";
+
+    static final String KINDERGARTEN_LABEL_RULE =
+            "- Mầm non: mỗi lựa chọn/vế chỉ 1-3 từ hoặc 1 chữ cái/chữ số (ví dụ 'ă', 'Con cá'), không viết câu mô tả như 'Chữ A in hoa'.";
+
     protected String id;
 
     protected String promptTemplate;
@@ -78,7 +92,9 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
         }
         String scope = "Phạm vi yêu cầu:\nMôn: " + (subject == null ? "không cung cấp" : subject.name())
                 + "\nLớp/độ tuổi: " + grade + "\nChủ đề giáo viên: " + topic
-                + "\nGiữ đúng môn, lớp/độ tuổi, kỹ năng và phạm vi được yêu cầu; không tự đổi sang môn hoặc lớp khác.";
+                + "\nGiữ đúng môn, lớp/độ tuổi, kỹ năng và phạm vi được yêu cầu; không tự đổi sang môn hoặc lớp khác."
+                + "\n\n" + COMMON_CONTENT_RULES
+                + (grade == GradeLevel.KINDERGARTEN && hasShortChoiceLabels() ? "\n" + KINDERGARTEN_LABEL_RULE : "");
         String prompt = promptTemplate + "\n\n" + scope + "\n\n" + buildTypeSpecificInstruction(topic, grade);
         return appendCurriculumContext(prompt, curriculumContext);
     }
@@ -104,6 +120,11 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     }
 
     protected abstract String buildTypeSpecificInstruction(String topic, GradeLevel grade);
+
+    /** Loại game mà trẻ chọn giữa các nhãn ngắn (lựa chọn, vế cặp): Mầm non thì nhãn phải rất ngắn. */
+    protected boolean hasShortChoiceLabels() {
+        return false;
+    }
 
     public abstract GameType getSupportedType();
 

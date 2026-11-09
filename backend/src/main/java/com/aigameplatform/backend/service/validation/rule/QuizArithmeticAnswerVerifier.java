@@ -14,6 +14,9 @@ public final class QuizArithmeticAnswerVerifier {
     private static final Pattern CHAINED_OPERATION = Pattern.compile(
             "(?i)^\\s*(?:\\+|−|×|\\*|/|÷|-|x|cộng|trừ|nhân|chia)\\s*-?\\d{1,6}(?![\\p{L}\\p{N}])");
     private static final Pattern INTEGER = Pattern.compile("^\\s*(-?\\d+)\\s*[.!?]?\\s*$");
+    private static final Pattern TARGET = Pattern.compile("(?i)(?:bằng|=)\\s*(-?\\d{1,6})(?![\\p{L}\\p{N}])");
+    /** "lớn hơn hoặc bằng 10", "≥", "không bằng": không phải một kết quả đích duy nhất. */
+    private static final Pattern COMPARISON = Pattern.compile("(?i)hơn|≥|≤|>|<|không bằng|khác");
 
     private QuizArithmeticAnswerVerifier() { }
 
@@ -66,6 +69,37 @@ public final class QuizArithmeticAnswerVerifier {
             errors.add(new ValidationError(correctPath,
                     "Đáp án được chọn không khớp kết quả phép tính hiển thị trong câu hỏi (" + expected + ")"));
         }
+    }
+
+    /**
+     * Dạng ngược: câu hỏi nêu kết quả ("phép tính nào bằng 12?") và mỗi nhãn là một phép tính ("5 + 7"). Khi mọi nhãn
+     * đúng là một phép tính và câu có đúng một số đích thì đúng một nhãn phải ra số đó và phải là nhãn được đánh dấu.
+     */
+    public static void checkTarget(String questionText, List<String> labels, String correctLabel,
+            String optionsPath, String correctPath, List<ValidationError> errors) {
+        Matcher target = TARGET.matcher(questionText);
+        if (labels.isEmpty() || COMPARISON.matcher(questionText).find() || !target.find()) return;
+        long expected = Long.parseLong(target.group(1));
+        if (target.find()) return;
+        List<Long> values = labels.stream().map(QuizArithmeticAnswerVerifier::wholeExpressionValue).toList();
+        if (values.contains(null)) return;
+        if (values.stream().filter(value -> value == expected).count() != 1) {
+            errors.add(new ValidationError(optionsPath,
+                    "Phải có đúng một phép tính trong các lựa chọn cho kết quả " + expected));
+        }
+        Long selected = wholeExpressionValue(correctLabel);
+        if (selected == null || selected != expected) {
+            errors.add(new ValidationError(correctPath, "Lựa chọn được đánh dấu đúng không cho kết quả " + expected));
+        }
+    }
+
+    /** Giá trị của nhãn chỉ gồm đúng một phép tính ("5 + 7"); nhãn khác trả null. */
+    private static Long wholeExpressionValue(String label) {
+        if (label == null) return null;
+        Matcher matcher = EXPRESSION.matcher(label.strip());
+        if (!matcher.matches()) return null;
+        return calculate(Long.parseLong(matcher.group(1)), matcher.group(2).toLowerCase(java.util.Locale.ROOT),
+                Long.parseLong(matcher.group(3)));
     }
 
     private static Long numericValue(String text) {

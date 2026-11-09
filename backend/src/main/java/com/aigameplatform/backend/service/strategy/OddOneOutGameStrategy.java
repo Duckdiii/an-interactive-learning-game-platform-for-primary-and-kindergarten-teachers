@@ -30,6 +30,11 @@ public class OddOneOutGameStrategy extends GameContentStrategy<OddOneOutQuestion
     }
 
     @Override
+    protected boolean hasShortChoiceLabels() {
+        return true;
+    }
+
+    @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
         return "Chủ đề: " + topic + ". Tạo nhóm mục phù hợp chủ đề và YCCĐ ở " + grade
                 + "; cần có đúng một mục khác biệt theo tiêu chí mà người học có thể nhận ra từ nội dung được cung cấp.";

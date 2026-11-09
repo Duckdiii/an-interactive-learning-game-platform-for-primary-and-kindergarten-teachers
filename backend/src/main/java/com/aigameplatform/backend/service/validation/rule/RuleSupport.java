@@ -11,18 +11,27 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 
 /** Các hàm dùng chung cho luật Layer 2. */
-final class RuleSupport {
+public final class RuleSupport {
 
     private RuleSupport() {
     }
 
     /** Chuẩn hóa để so sánh: NFC, bỏ khoảng trắng thừa, không phân biệt hoa thường. Giữ nguyên dấu tiếng Việt. */
-    static String normalize(String text) {
+    public static String normalize(String text) {
         if (text == null) {
             return "";
         }
         String nfc = Normalizer.normalize(text, Normalizer.Form.NFC);
         return nfc.strip().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Từ 3 câu/màn trở lên mà câu nào cũng cùng một đáp án thì từ câu 2 trẻ chỉ cần nhớ đáp án. Bỏ qua khi cả bài chỉ có
+     * tối đa 2 lựa chọn khác nhau (Đúng/Sai, Có/Không) hoặc có câu không xác định được đáp án (lỗi đó đã báo riêng).
+     */
+    public static boolean sameAnswerEverywhere(List<String> correctAnswers, long distinctOptionCount) {
+        return correctAnswers.size() >= 3 && distinctOptionCount > 2 && !correctAnswers.contains("")
+                && correctAnswers.stream().map(RuleSupport::normalize).distinct().count() == 1;
     }
 
     /** Id theo vị trí: 0 -> "a", 1 -> "b"... */

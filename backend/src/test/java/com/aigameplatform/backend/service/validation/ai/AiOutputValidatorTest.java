@@ -147,6 +147,19 @@ class AiOutputValidatorTest {
         assertThat(validate(GameType.QUIZ, json).valid()).isFalse();
     }
 
+    @ParameterizedTest
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
+    void acceptsAnOptionalShortTitleAndRejectsAnOverlongOne(GameType type) throws IOException {
+        ObjectNode root = (ObjectNode) MAPPER.readTree(exampleText(type));
+        root.put("title", "Bé đếm vịt");
+        var report = validator.validate(type, root.toString());
+        assertThat(report.valid()).isTrue();
+        assertThat(report.output().title()).isEqualTo("Bé đếm vịt");
+
+        root.put("title", "x".repeat(61));
+        assertThat(validator.validate(type, root.toString()).valid()).isFalse();
+    }
+
     @Test
     void rejectsExtraTopLevelProperties() {
         assertThat(validator.validate(GameType.QUIZ, "{\"questions\":[],\"gameType\":\"QUIZ\"}").valid()).isFalse();

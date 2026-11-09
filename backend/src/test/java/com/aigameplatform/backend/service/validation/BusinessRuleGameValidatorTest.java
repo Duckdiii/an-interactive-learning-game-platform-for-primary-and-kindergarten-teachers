@@ -289,6 +289,89 @@ class BusinessRuleGameValidatorTest {
     }
 
     @Test
+    void matchingSidesOfAPairMustDifferNotJustInCase() throws IOException {
+        assertThat(errorPaths(GameType.MATCHING, g ->
+                ((ObjectNode) element(question(g, 0), "pairs", 1).get("right")).put("text", "Dog")))
+                .containsExactly("$.questions[0].pairs[1].right");
+    }
+
+    @Test
+    void quizRejectsAFillInTheBlankWhoseHintAlreadyContainsTheAnswer() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            ObjectNode first = question(g, 0);
+            first.put("questionText", "Điền vần còn thiếu: th... gỗ (để có từ 'than gỗ')");
+            element(first, "options", 1).put("text", "an");
+        })).containsExactly("$.questions[0].questionText");
+    }
+
+    @Test
+    void quizAllowsAskingTheRhymeOfAQuotedWordWhenThereIsNoBlank() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "Tiếng 'than' có vần gì?");
+        element(first, "options", 1).put("text", "an");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void matchingAllowsUppercaseToLowercaseOfASingleLetter() throws IOException {
+        ObjectNode game = example(GameType.MATCHING);
+        ObjectNode pair = element(question(game, 0), "pairs", 1);
+        ((ObjectNode) pair.get("left")).put("text", "Ă");
+        ((ObjectNode) pair.get("right")).put("text", "ă");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizAllowsAOneLetterBlankWhenTheHintDoesNotShowTheCompletedWord() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "Điền chữ còn thiếu vào 'co...' để gọi tên con vật đang bơi");
+        element(first, "options", 1).put("text", "n");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizAllowsTrueFalseQuestionsThatShareTheSameAnswer() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        for (int i = 0; i < 2; i++) {
+            element(question(game, i), "options", 0).put("text", "Đúng");
+            element(question(game, i), "options", 1).put("text", "Sai");
+            question(game, i).put("correctOptionId", "a");
+        }
+        ((ArrayNode) question(game, 0).get("options")).remove(2);
+        ObjectNode third = question(game, 1).deepCopy();
+        third.put("id", "q3");
+        third.put("questionText", "Con gà có hai chân?");
+        ((ArrayNode) game.get("questions")).add(third);
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizRejectsARepeatedQuestion() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            ObjectNode copy = question(g, 0).deepCopy();
+            copy.put("id", "q3");
+            ((ArrayNode) g.get("questions")).add(copy);
+        })).containsExactly("$.questions[2].questionText");
+    }
+
+    @Test
+    void quizRejectsTheSameCorrectAnswerInEveryQuestion() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            element(question(g, 1), "options", 0).put("text", "3");
+            ObjectNode third = question(g, 0).deepCopy();
+            third.put("id", "q3");
+            third.put("questionText", "Có mấy con gà?");
+            ((ArrayNode) g.get("questions")).add(third);
+        })).containsExactly("$.questions");
+    }
+
+    @Test
     void matchingPairIdsMustBeDistinct() throws IOException {
         assertThat(errorPaths(GameType.MATCHING, g -> element(question(g, 0), "pairs", 1).put("pairId", "p1")))
                 .containsExactly("$.questions[0].pairs[1].pairId");

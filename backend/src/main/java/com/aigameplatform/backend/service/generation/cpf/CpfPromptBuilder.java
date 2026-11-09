@@ -34,7 +34,10 @@ public class CpfPromptBuilder {
             - answerKey.rounds cùng thứ tự với content.rounds: PICK_ONE có correctChoiceIds 1 phần tử; PICK_ALL có
               correctChoiceIds ít hơn số lựa chọn; SORT có placements đủ mọi lựa chọn, không có correctChoiceIds.
             - Nên 3 đến 6 màn, mỗi màn 3 đến 5 lựa chọn. Nhãn tối đa 30 ký tự, câu hỏi tối đa 120 ký tự, không trùng nhãn trong một màn.
-            - Toán: câu hỏi kết quả viết dạng "3 + 4 = ?" và nhãn chỉ là số; đáp án phải đúng tuyệt đối.
+            - Toán: mặc định câu hỏi viết dạng "3 + 4 = ?" và nhãn chỉ là số. Nếu giáo viên đặt điều kiện lên vật
+              (ví dụ "hứng cà rốt có phép cộng bằng 12") thì làm đúng như vậy: câu hỏi "Phép cộng nào bằng 12?", nhãn là
+              phép tính ("5 + 7"), chỉ đúng MỘT nhãn cho kết quả đó. Đáp án phải đúng tuyệt đối.
+            - Các màn không trùng nhau và đáp án đúng phải thay đổi giữa các màn, không để mọi màn cùng một đáp án.
 
             VẬT (entities, tối đa 10 khai báo)
             - id vật: chữ thường, số, gạch dưới, bắt đầu bằng chữ (ví dụ apples, basket). Không chuỗi nào được rỗng.

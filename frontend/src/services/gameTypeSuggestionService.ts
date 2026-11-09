@@ -1,5 +1,5 @@
 import type { GameTypeSuggestion, SuggestGameTypesInput } from '../types/game-suggestion.types'
-import { hasPhrase, toMatchText } from '../utils/phraseMatch'
+import { hasPhrase, mentionsAny, toMatchText } from '../utils/phraseMatch'
 
 // LUÔN LÀ MÔ PHỎNG: contract (`openapi.yaml`) chưa có endpoint đề xuất loại game, nên hàm này không đi qua cờ `ai` và nhãn
 // "Dữ liệu mô phỏng" ở bước đề xuất luôn hiện. Khi backend có endpoint, thêm nhánh gọi thật dưới cờ `ai`.
@@ -149,6 +149,31 @@ export interface PedagogicalGamePlan {
   reason: string
 }
 
+// Từ khóa nhận diện game vận động: [có dấu, không dấu]. Bộ không dấu chỉ gồm cụm đủ rõ ("ban" một mình có thể là "bàn",
+// "nhat" là "nhất"). Không dùng "quả" (kết quả), "mục tiêu" (mục tiêu bài học) hay "cùng". Có cả từ tiếng Anh.
+type Keywords = readonly [readonly string[], readonly string[]]
+const ENGLISH_CATCH = ['catch', 'falling']
+const ENGLISH_SHOOT = ['shoot', 'slingshot', 'archery', 'arrow']
+const ENGLISH_POP = ['pop', 'balloon', 'balloons']
+const CATCH_WORDS: Keywords = [
+  ['hứng', 'rơi', 'nhặt', 'táo', 'trái cây', 'hoa quả', ...ENGLISH_CATCH],
+  ['hung qua', 'hung tao', 'nhat qua', 'qua tao', 'trai cay', 'hoa qua', 'roi xuong', ...ENGLISH_CATCH],
+]
+const SHOOT_WORDS: Keywords = [
+  ['bắn', 'ná', 'kéo ná', 'cung tên', ...ENGLISH_SHOOT],
+  ['keo na', 'ban na', 'ban cung', 'cung ten', 'ban trung', ...ENGLISH_SHOOT],
+]
+const TAP_WORDS: Keywords = [
+  ['bong bóng', 'bóng bay', 'đập', 'chạm', 'bấm bóng', ...ENGLISH_POP],
+  ['bong bong', 'bong bay', 'bam bong', 'cham bong', 'dap bong', ...ENGLISH_POP],
+]
+// Bộ quyết định chuyển sang game tự do chỉ gồm ĐỘNG TỪ vận động: "đếm táo", "nối trái cây", "count the balloons" không phải game vận động.
+const PHYSICS_ROUTE_WORDS: Keywords = [
+  ['hứng', 'nhặt', 'rơi', 'bắn', 'ná', 'kéo ná', 'cung tên', 'bong bóng', 'vật lý', 'tương tác động', 'cpf', 'catch', 'shoot', 'slingshot', 'pop'],
+  ['hung qua', 'hung tao', 'nhat qua', 'roi xuong', 'keo na', 'ban na', 'ban cung', 'cung ten', 'ban trung', 'bong bong', 'vat ly',
+    'tuong tac dong', 'cpf', 'catch', 'shoot', 'slingshot', 'pop'],
+]
+
 /**
  * Agent Planner: Suy luận Tựa game sư phạm và Mô tả cách chơi từ prompt tự do của giáo viên.
  * Hoàn toàn loại bỏ thuật ngữ kỹ thuật, tập trung vào luật chơi, phản xạ và mục tiêu học tập.
@@ -162,35 +187,17 @@ export function inferPedagogicalGamePlan(idea: string): PedagogicalGamePlan {
     }
   }
 
-  const text = toMatchText(idea)
-  const nonResultText = text.replace(/ket qua/g, '')
-  const nonResultIdea = idea.replace(/kết quả/gi, '')
-
-  // 1. Nhóm Hứng / Rơi quả / Vật phẩm (hứng, rơi, táo, quả, nhặt...) - loại trừ "kết quả"
-  const isCatcher =
-    /(hứng|rơi|táo|nhặt|trái cây|hoa quả)/i.test(nonResultIdea) ||
-    /(quả)/i.test(nonResultIdea) ||
-    ['hung', 'roi', 'tao', 'nhat', 'trai cay', 'hoa qua', 'qua'].some((kw) => hasPhrase(nonResultText, kw))
-
-  // 2. Nhóm Bắn ná / Cung tên / Mục tiêu (bắn, ná, cung, mục tiêu...)
-  const isArchery =
-    /(bắn|ná|cung|mục tiêu)/i.test(idea) ||
-    ['ban', 'keo na', 'na', 'cung', 'muc tieu'].some((kw) => hasPhrase(text, kw))
-
-  // 3. Nhóm Đập / Chạm bóng / Bóng bay (bong bóng, chạm, bấm bóng, đập...)
-  const isTapper =
-    /(bong bóng|bóng bay|đập|chạm|bấm bóng)/i.test(idea) ||
-    ['bong bong', 'bong bay', 'dap', 'cham', 'bam bong'].some((kw) => hasPhrase(text, kw))
+  const isCatcher = mentionsAny(idea, ...CATCH_WORDS)
+  const isArchery = mentionsAny(idea, ...SHOOT_WORDS)
+  const isTapper = mentionsAny(idea, ...TAP_WORDS)
 
   if (isCatcher) {
-    const isFarmOrApple =
-      /(táo|nông trại|vườn|trái cây)/i.test(idea) ||
-      ['tao', 'nong trai', 'vuon', 'trai cay'].some((kw) => hasPhrase(text, kw))
+    const isFarmOrApple = mentionsAny(idea, ['táo', 'nông trại', 'vườn', 'trái cây'], ['qua tao', 'nong trai', 'trai cay'])
 
     return {
       title: isFarmOrApple ? 'Hứng Táo Nông Trại' : 'Hứng Vật Phẩm',
-      description: 'Bé di chuyển giỏ hứng sang trái/phải để đón các quả táo mang đáp án đúng, rèn luyện phản xạ và tư duy số học.',
-      reason: 'Trò chơi vận động tương tác giúp bé vừa rèn phản xạ vừa nhận biết số học một cách trực quan.',
+      description: 'Bé di chuyển giỏ hứng sang trái/phải để đón các vật mang đáp án đúng, vừa rèn phản xạ vừa ôn bài.',
+      reason: 'Trò chơi vận động tương tác giúp bé vừa rèn phản xạ vừa ôn kiến thức của bài một cách trực quan.',
     }
   }
 
@@ -198,13 +205,13 @@ export function inferPedagogicalGamePlan(idea: string): PedagogicalGamePlan {
     return {
       title: 'Bắn Ná Mục Tiêu',
       description: 'Bé kéo và canh góc bắn trúng các mục tiêu mang đáp án chính xác để ghi điểm.',
-      reason: 'Cơ chế kéo thả và canh góc giúp tăng sự tập trung và kích thích hứng thú giải toán.',
+      reason: 'Cơ chế kéo thả và canh góc giúp tăng sự tập trung và kích thích hứng thú học bài.',
     }
   }
 
   if (isTapper) {
     return {
-      title: 'Bong Bóng Số Học',
+      title: 'Chạm Bóng Bay',
       description: 'Bé nhanh tay chạm vỡ các quả bóng bay mang đáp án đúng trước khi bóng bay mất.',
       reason: 'Luyện phản xạ nhanh tay lẹ mắt kết hợp ôn tập kiến thức.',
     }
@@ -222,11 +229,7 @@ export function inferPedagogicalGamePlan(idea: string): PedagogicalGamePlan {
  */
 export function isPhysicsCpfIdea(idea: string): boolean {
   if (!idea || !idea.trim()) return false
-  const text = toMatchText(idea)
-  const keywords = ['hung', 'nhat', 'roi', 'ban', 'keo na', 'na', 'cung', 'bong bong', 'vat ly', 'tuong tac dong', 'cpf']
-  if (keywords.some((kw) => hasPhrase(text, kw))) return true
-
-  return /(hứng|nhặt|rơi|bắn|kéo ná|cung|bong bóng|vật lý|tương tác động)/i.test(idea)
+  return mentionsAny(idea, ...PHYSICS_ROUTE_WORDS)
 }
 
 /**

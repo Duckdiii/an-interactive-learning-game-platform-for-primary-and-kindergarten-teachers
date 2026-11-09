@@ -5,5 +5,6 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record MatchingAiOutput(
-        List<MatchingAiQuestion> questions) implements AiGameOutput {
+        List<MatchingAiQuestion> questions,
+        String title) implements AiGameOutput {
 }

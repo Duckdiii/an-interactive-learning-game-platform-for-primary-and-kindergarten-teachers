@@ -54,6 +54,7 @@ class AiOutputSchemasTest {
         assertThat(raw.has("$schema")).isTrue();
         assertThat(raw.get("title").asString()).contains(type.name());
         assertThat(forLlm.has("$schema")).isFalse();
+        assertThat(forLlm.path("properties").has("title")).as("chỉ bỏ tiêu đề schema, giữ trường title cho AI").isTrue();
         assertThat(forLlm.has("title")).isFalse();
     }
 

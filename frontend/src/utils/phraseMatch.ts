@@ -9,3 +9,16 @@ export function toMatchText(text: string) {
 
 export const hasPhrase = (matchText: string, phrase: string) =>
   matchText.includes(` ${phrase.trim()} `)
+
+// Như trên nhưng GIỮ DẤU: bỏ dấu làm "bàn" trùng "bắn", "nhất" trùng "nhặt", "tạo" trùng "táo".
+export function toAccentMatchText(text: string) {
+  return ` ${text.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()} `
+}
+
+/** Giáo viên gõ có dấu thì so khớp giữ dấu (`accented`); gõ không dấu thì chỉ dùng các cụm không dấu đủ rõ (`plain`). */
+export function mentionsAny(text: string, accented: readonly string[], plain: readonly string[]) {
+  // Chỉ tính chữ có dấu/đ; ngoặc cong, "…", emoji dán từ Word không làm câu không dấu thành "có dấu".
+  const hasDiacritics = /\p{M}|đ/iu.test(text.normalize('NFD'))
+  const matchText = hasDiacritics ? toAccentMatchText(text) : toMatchText(text)
+  return (hasDiacritics ? accented : plain).some((phrase) => hasPhrase(matchText, phrase))
+}

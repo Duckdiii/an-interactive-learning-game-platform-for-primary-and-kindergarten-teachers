@@ -31,6 +31,11 @@ public class QuizGameStrategy extends GameContentStrategy<QuizQuestionDsl, QuizQ
     }
 
     @Override
+    protected boolean hasShortChoiceLabels() {
+        return true;
+    }
+
+    @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
         String instruction = "Chủ đề cần dạy: " + topic + ". Dùng correctIndex để trỏ tới đáp án duy nhất trong options. "
                 + "Bảo đảm nội dung câu hỏi thực sự kiểm tra kỹ năng được yêu cầu ở " + grade

@@ -5,5 +5,6 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record OddOneOutAiOutput(
-        List<OddOneOutAiQuestion> questions) implements AiGameOutput {
+        List<OddOneOutAiQuestion> questions,
+        String title) implements AiGameOutput {
 }

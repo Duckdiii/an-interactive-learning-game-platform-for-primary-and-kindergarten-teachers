@@ -35,7 +35,12 @@ public abstract class AbstractGameRule<G extends GameDsl, Q extends QuestionDsl>
         for (int i = 0; i < questions.size(); i++) {
             checkQuestion(questions.get(i), "$.questions[" + i + "]", errors);
         }
+        checkAcrossQuestions(questions, errors);
         return errors;
+    }
+
+    /** Luật giữa các màn (ví dụ không lặp câu); mặc định không có. */
+    protected void checkAcrossQuestions(List<Q> questions, List<ValidationError> errors) {
     }
 
     protected abstract List<Q> questionsOf(G game);

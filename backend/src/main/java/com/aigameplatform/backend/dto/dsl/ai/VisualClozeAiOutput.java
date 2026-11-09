@@ -5,5 +5,6 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record VisualClozeAiOutput(
-        List<VisualClozeAiQuestion> questions) implements AiGameOutput {
+        List<VisualClozeAiQuestion> questions,
+        String title) implements AiGameOutput {
 }

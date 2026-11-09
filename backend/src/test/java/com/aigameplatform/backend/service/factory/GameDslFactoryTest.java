@@ -256,7 +256,7 @@ class GameDslFactoryTest {
     @Test
     void vietnameseLettersWithDiacriticsStayWhole() {
         String decomposed = Normalizer.normalize("Bò", Normalizer.Form.NFD);
-        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion(decomposed, null, null)));
+        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion(decomposed, null, null)), null);
 
         WordScrambleGameDsl game = (WordScrambleGameDsl) registry(new Random(1))
                 .create(GameType.WORD_SCRAMBLE, output, REQUEST);
@@ -267,7 +267,7 @@ class GameDslFactoryTest {
 
     @Test
     void aWordOfIdenticalLettersIsLeftAsIs() {
-        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion("AA", null, null)));
+        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion("AA", null, null)), null);
 
         WordScrambleGameDsl game = (WordScrambleGameDsl) registry(new Random(1))
                 .create(GameType.WORD_SCRAMBLE, output, REQUEST);
@@ -376,5 +376,18 @@ class GameDslFactoryTest {
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("hơn một");
         assertThatThrownBy(() -> new GameDslFactoryRegistry(List.of(new QuizGameDslFactory(random))))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("Chưa có factory");
+    }
+
+    @Test
+    void usesTheShortTitleChosenByTheAi() {
+        assertThat(AbstractGameDslFactory.titleOf("  Bé đếm vịt  ", "Tạo game cho bé đếm số con vịt")).isEqualTo("Bé đếm vịt");
+    }
+
+    @Test
+    void longTopicWithoutAiTitleIsCutAtAWordBoundaryWithEllipsis() {
+        String topic = "Tạo trò chơi giúp học sinh lớp một luyện tập so sánh hai số trong phạm vi mười bằng các dấu lớn hơn bé hơn và bằng nhau";
+        String title = AbstractGameDslFactory.titleOf(null, topic);
+        assertThat(title).endsWith("…").hasSizeLessThanOrEqualTo(100);
+        assertThat(topic).startsWith(title.substring(0, title.length() - 1) + " ");
     }
 }

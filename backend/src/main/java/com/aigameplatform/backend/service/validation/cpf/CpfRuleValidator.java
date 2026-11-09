@@ -4,6 +4,7 @@ import com.aigameplatform.backend.service.validation.AbstractGameValidator;
 import com.aigameplatform.backend.service.validation.GameValidationContext;
 import com.aigameplatform.backend.service.validation.ValidationError;
 import com.aigameplatform.backend.service.validation.rule.QuizArithmeticAnswerVerifier;
+import com.aigameplatform.backend.service.validation.rule.RuleSupport;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,6 +94,8 @@ final class CpfRuleValidator extends AbstractGameValidator {
         }
         boolean math = "MATH".equals(game.path("metadata").path("subject").asString());
         Set<String> roundIds = new HashSet<>();
+        List<String> pickOneAnswers = new ArrayList<>();
+        Set<String> allLabels = new HashSet<>();
         for (int i = 0; i < rounds.size(); i++) {
             JsonNode round = rounds.get(i);
             String path = "$.content.rounds[" + i + "]";
@@ -119,7 +122,21 @@ final class CpfRuleValidator extends AbstractGameValidator {
                     QuizArithmeticAnswerVerifier.check(round.path("prompt").asString(), List.copyOf(choices.values()),
                             correct, path + ".prompt", path + ".choices", answerPath + ".correctChoiceIds", errors);
                 }
+                if ("PICK_ONE".equals(task) && answer.path("correctChoiceIds").size() == 1) {
+                    String correct = choices.get(answer.path("correctChoiceIds").get(0).asString());
+                    pickOneAnswers.add(correct == null ? "" : normalize(correct));
+                    choices.values().forEach(label -> allLabels.add(normalize(label)));
+                    if (math) {
+                        QuizArithmeticAnswerVerifier.checkTarget(round.path("prompt").asString(), List.copyOf(choices.values()),
+                                correct, path + ".choices", answerPath + ".correctChoiceIds", errors);
+                    }
+                }
             }
+        }
+        // Mọi màn cùng một đáp án thì từ màn 2 trẻ chỉ cần nhớ đáp án, không phải nghĩ (lỗi thật ở kịch bản 007).
+        if (RuleSupport.sameAnswerEverywhere(pickOneAnswers, allLabels.size())) {
+            errors.add(new ValidationError("$.answerKey.rounds",
+                    "Mọi màn đều có cùng đáp án \"" + pickOneAnswers.getFirst() + "\"; đổi đáp án đúng giữa các màn"));
         }
     }
 

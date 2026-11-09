@@ -463,4 +463,52 @@ class CpfValidationServiceTest {
         service.validate(mutated(CATCH, g -> entity(g, 0).put("assetId", "fruit.dragonfruit")));
         verify(moderation, never()).moderate(anyList());
     }
+
+    // ---- đáp án thay đổi giữa các màn, nhãn là phép tính ----
+
+    private static void choiceLabel(ObjectNode game, int round, int choice, String label) {
+        ((ObjectNode) round(game, round).get("choices").get(choice)).put("label", label);
+    }
+
+    @Test
+    void rejectsTheSameCorrectAnswerInEveryRound() throws IOException {
+        assertOnlyError(mutated(RACE, g -> {
+            for (int i = 0; i < 3; i++) round(g, i).put("prompt", "Tìm số tám");
+            answer(g, 0).set("correctChoiceIds", MAPPER.createArrayNode().add("c3"));
+            choiceLabel(g, 1, 0, "8");
+        }), "$.answerKey.rounds", "cùng đáp án");
+    }
+
+    @Test
+    void acceptsExpressionLabelsWhoseMarkedChoiceEqualsTheTarget() throws IOException {
+        JsonNode json = mutated(RACE, g -> {
+            round(g, 0).put("prompt", "Phép nhân nào bằng 6?");
+            choiceLabel(g, 0, 0, "2 x 2");
+            choiceLabel(g, 0, 1, "2 x 3");
+            choiceLabel(g, 0, 2, "2 x 4");
+        });
+        assertThat(errorsOf(json)).isEmpty();
+    }
+
+    @Test
+    void comparisonPromptIsNotTreatedAsASingleTarget() throws IOException {
+        JsonNode json = mutated(RACE, g -> {
+            round(g, 0).put("prompt", "Phép nhân nào lớn hơn hoặc bằng 6?");
+            choiceLabel(g, 0, 0, "2 x 2");
+            choiceLabel(g, 0, 1, "2 x 4");
+            choiceLabel(g, 0, 2, "2 x 1");
+        });
+        assertThat(errorsOf(json)).isEmpty();
+    }
+
+    @Test
+    void rejectsExpressionLabelsWhenTheMarkedChoiceMissesTheTarget() throws IOException {
+        assertOnlyError(mutated(RACE, g -> {
+            round(g, 0).put("prompt", "Phép nhân nào bằng 6?");
+            choiceLabel(g, 0, 0, "2 x 2");
+            choiceLabel(g, 0, 1, "2 x 3");
+            choiceLabel(g, 0, 2, "2 x 4");
+            answer(g, 0).set("correctChoiceIds", MAPPER.createArrayNode().add("c1"));
+        }), "$.answerKey.rounds[0].correctChoiceIds", "không cho kết quả 6");
+    }
 }
