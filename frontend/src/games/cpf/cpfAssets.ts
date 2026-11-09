@@ -2,7 +2,7 @@ import { DEFAULT_PALETTE } from '../common/palette'
 
 // Manifest asset của CPF Game v2.0.0 (docs/cpf-game-v2.0.0.md mục 5): ánh xạ assetId sang file trong public/assets.
 // Id chưa có file trả null; renderer vẽ hình thay thế có nhãn để game vẫn chơi được.
-// shortcut: chỉ gồm file đã có trong repo (chưa rõ nguồn gốc/giấy phép); thêm nguồn CC0 và trường license khi người dùng duyệt nguồn asset.
+// Nguồn và giấy phép từng thư mục: public/assets/LICENSES.md (OpenMoji CC BY-SA 4.0, Microsoft Fluent Emoji MIT).
 
 const ASSET_FILES: Record<string, string> = {
   'bg.farm': '/assets/themes/farm/bg-farm.svg',
@@ -52,6 +52,12 @@ const ASSET_FILES: Record<string, string> = {
   'space.planet': '/assets/themes/space/planet.svg',
   'space.rocket': '/assets/themes/space/rocket.svg',
   'space.ufo': '/assets/themes/space/ufo.svg',
+  'object.basket': '/assets/fluent/object-basket.svg',
+  'object.boat': '/assets/fluent/object-boat.svg',
+  'object.bow': '/assets/fluent/object-bow.svg',
+  'object.target': '/assets/fluent/object-target.svg',
+  'object.sign': '/assets/fluent/object-sign.svg',
+  'object.box': '/assets/fluent/object-box.svg',
 }
 
 /** Đường dẫn file của asset, hoặc null khi manifest chưa có (vẽ hình thay thế). */

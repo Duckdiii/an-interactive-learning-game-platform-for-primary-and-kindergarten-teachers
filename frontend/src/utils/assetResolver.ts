@@ -43,7 +43,7 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   // Đồ vật quen thuộc
   { id: 'obj-star', name: 'Ngôi sao', category: 'objects', url: '/assets/objects/star.svg', keywords: ['sao', 'star', 'ngoi sao', 'ong sao'] },
   { id: 'obj-flower', name: 'Bông hoa', category: 'objects', url: '/assets/objects/flower.svg', keywords: ['hoa', 'flower', 'bong hoa', 'canh hoa'] },
-  { id: 'obj-ball', name: 'Quả bóng', category: 'objects', url: '/assets/objects/ball.svg', keywords: ['bong', 'ball', 'qua bong', 'trai banh', 'banh'] },
+  { id: 'obj-ball', name: 'Quả bóng', category: 'objects', url: '/assets/objects/ball.svg', keywords: ['bong', 'ball', 'qua bong', 'trai banh'] },
   { id: 'obj-candy', name: 'Cây kẹo', category: 'objects', url: '/assets/objects/candy.svg', keywords: ['keo', 'candy', 'vien keo', 'cay keo', 'sweet'] },
   { id: 'obj-heart', name: 'Trái tim', category: 'objects', url: '/assets/objects/heart.svg', keywords: ['tim', 'heart', 'trai tim', 'hinh tim'] },
   { id: 'obj-car', name: 'Xe ô tô', category: 'objects', url: '/assets/objects/car.svg', keywords: ['xe', 'oto', 'car', 'xe hoi', 'o to'] },
@@ -77,6 +77,77 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   { id: 'space-ufo', name: 'Đĩa bay', category: 'themes', url: '/assets/themes/space/ufo.svg', keywords: ['dia bay', 'ufo'] },
   { id: 'space-alien', name: 'Người ngoài hành tinh', category: 'themes', url: '/assets/themes/space/alien.svg', keywords: ['nguoi ngoai hanh tinh', 'alien'] },
   { id: 'space-meteor', name: 'Sao băng', category: 'themes', url: '/assets/themes/space/meteor.svg', keywords: ['sao bang', 'meteor'] },
+
+  // Microsoft Fluent Emoji (MIT, xem public/assets/LICENSES.md), thêm ngày 2026-11-09
+  { id: 'fluent-object-basket', name: 'Cái giỏ', category: 'objects', url: '/assets/fluent/object-basket.svg', keywords: ['cai gio', 'gio hung', 'basket'] },
+  { id: 'fluent-object-boat', name: 'Con thuyền', category: 'objects', url: '/assets/fluent/object-boat.svg', keywords: ['thuyen', 'con thuyen', 'thuyen buom', 'boat', 'sailboat'] },
+  { id: 'fluent-object-bow', name: 'Cung tên', category: 'objects', url: '/assets/fluent/object-bow.svg', keywords: ['cung ten', 'cay cung', 'bow and arrow', 'archery'] },
+  { id: 'fluent-object-target', name: 'Bia bắn', category: 'objects', url: '/assets/fluent/object-target.svg', keywords: ['bia ban', 'hong tam', 'target', 'bullseye'] },
+  { id: 'fluent-object-sign', name: 'Biển báo', category: 'objects', url: '/assets/fluent/object-sign.svg', keywords: ['bien bao', 'tam bien', 'sign', 'placard'] },
+  { id: 'fluent-object-box', name: 'Cái hộp', category: 'objects', url: '/assets/fluent/object-box.svg', keywords: ['cai hop', 'hop qua tang', 'thung hang', 'box', 'package'] },
+  { id: 'fluent-bg-road', name: 'Đường cao tốc', category: 'objects', url: '/assets/fluent/bg-road.svg', keywords: ['duong cao toc', 'duong dua', 'highway', 'road'] },
+  { id: 'fluent-animal-buffalo', name: 'Con trâu', category: 'animals', url: '/assets/fluent/animal-buffalo.svg', keywords: ['trau', 'con trau', 'buffalo', 'water buffalo'] },
+  { id: 'fluent-animal-snake', name: 'Con rắn', category: 'animals', url: '/assets/fluent/animal-snake.svg', keywords: ['con ran', 'snake'] },
+  { id: 'fluent-animal-horse', name: 'Con ngựa', category: 'animals', url: '/assets/fluent/animal-horse.svg', keywords: ['con ngua', 'horse'] },
+  { id: 'fluent-animal-frog', name: 'Con ếch', category: 'animals', url: '/assets/fluent/animal-frog.svg', keywords: ['ech', 'con ech', 'frog'] },
+  { id: 'fluent-animal-butterfly', name: 'Con bướm', category: 'animals', url: '/assets/fluent/animal-butterfly.svg', keywords: ['buom', 'con buom', 'butterfly'] },
+  { id: 'fluent-animal-bee', name: 'Con ong', category: 'animals', url: '/assets/fluent/animal-bee.svg', keywords: ['con ong', 'bee', 'honeybee'] },
+  { id: 'fluent-animal-ant', name: 'Con kiến', category: 'animals', url: '/assets/fluent/animal-ant.svg', keywords: ['con kien', 'ant'] },
+  { id: 'fluent-animal-lion', name: 'Con sư tử', category: 'animals', url: '/assets/fluent/animal-lion.svg', keywords: ['su tu', 'con su tu', 'lion'] },
+  { id: 'fluent-animal-bear', name: 'Con gấu', category: 'animals', url: '/assets/fluent/animal-bear.svg', keywords: ['gau', 'con gau', 'bear'] },
+  { id: 'fluent-animal-panda', name: 'Gấu trúc', category: 'animals', url: '/assets/fluent/animal-panda.svg', keywords: ['gau truc', 'panda'] },
+  { id: 'fluent-animal-zebra', name: 'Ngựa vằn', category: 'animals', url: '/assets/fluent/animal-zebra.svg', keywords: ['ngua van', 'zebra'] },
+  { id: 'fluent-animal-penguin', name: 'Chim cánh cụt', category: 'animals', url: '/assets/fluent/animal-penguin.svg', keywords: ['chim canh cut', 'canh cut', 'penguin'] },
+  { id: 'fluent-animal-owl', name: 'Con cú', category: 'animals', url: '/assets/fluent/animal-owl.svg', keywords: ['cu meo', 'chim cu meo', 'con cu', 'owl'] },
+  { id: 'fluent-animal-crab', name: 'Con cua', category: 'animals', url: '/assets/fluent/animal-crab.svg', keywords: ['con cua', 'crab'] },
+  { id: 'fluent-animal-snail', name: 'Con ốc sên', category: 'animals', url: '/assets/fluent/animal-snail.svg', keywords: ['oc sen', 'con oc sen', 'snail'] },
+  { id: 'fluent-animal-mouse', name: 'Con chuột', category: 'animals', url: '/assets/fluent/animal-mouse.svg', keywords: ['chuot', 'con chuot', 'mouse'] },
+  { id: 'fluent-animal-goat', name: 'Con dê', category: 'animals', url: '/assets/fluent/animal-goat.svg', keywords: ['goat'] },
+  { id: 'fluent-animal-dinosaur', name: 'Khủng long', category: 'animals', url: '/assets/fluent/animal-dinosaur.svg', keywords: ['khung long', 'dinosaur'] },
+  { id: 'fluent-animal-hedgehog', name: 'Con nhím', category: 'animals', url: '/assets/fluent/animal-hedgehog.svg', keywords: ['nhim', 'con nhim', 'hedgehog'] },
+  { id: 'fluent-object-balloon', name: 'Bóng bay', category: 'objects', url: '/assets/fluent/object-balloon.svg', keywords: ['bong bay', 'qua bong bay', 'balloon', 'balloons'] },
+  { id: 'fluent-object-pencil', name: 'Bút chì', category: 'objects', url: '/assets/fluent/object-pencil.svg', keywords: ['but chi', 'pencil'] },
+  { id: 'fluent-object-book', name: 'Quyển sách', category: 'objects', url: '/assets/fluent/object-book.svg', keywords: ['quyen sach', 'cuon sach', 'book'] },
+  { id: 'fluent-object-backpack', name: 'Ba lô', category: 'objects', url: '/assets/fluent/object-backpack.svg', keywords: ['ba lo', 'cap sach', 'backpack', 'school bag'] },
+  { id: 'fluent-object-umbrella', name: 'Cái ô', category: 'objects', url: '/assets/fluent/object-umbrella.svg', keywords: ['cai o', 'cay du', 'umbrella'] },
+  { id: 'fluent-object-clock', name: 'Đồng hồ', category: 'objects', url: '/assets/fluent/object-clock.svg', keywords: ['dong ho', 'clock'] },
+  { id: 'fluent-object-house', name: 'Ngôi nhà', category: 'objects', url: '/assets/fluent/object-house.svg', keywords: ['ngoi nha', 'can nha', 'house'] },
+  { id: 'fluent-object-tree', name: 'Cái cây', category: 'objects', url: '/assets/fluent/object-tree.svg', keywords: ['cai cay', 'cay to', 'tree'] },
+  { id: 'fluent-object-sun', name: 'Mặt trời', category: 'objects', url: '/assets/fluent/object-sun.svg', keywords: ['mat troi', 'sun'] },
+  { id: 'fluent-object-cloud', name: 'Đám mây', category: 'objects', url: '/assets/fluent/object-cloud.svg', keywords: ['dam may', 'may troi', 'cloud'] },
+  { id: 'fluent-object-bicycle', name: 'Xe đạp', category: 'objects', url: '/assets/fluent/object-bicycle.svg', keywords: ['xe dap', 'bicycle', 'bike'] },
+  { id: 'fluent-object-bus', name: 'Xe buýt', category: 'objects', url: '/assets/fluent/object-bus.svg', keywords: ['xe buyt', 'bus'] },
+  { id: 'fluent-object-airplane', name: 'Máy bay', category: 'objects', url: '/assets/fluent/object-airplane.svg', keywords: ['may bay', 'airplane', 'plane'] },
+  { id: 'fluent-object-kite', name: 'Con diều', category: 'objects', url: '/assets/fluent/object-kite.svg', keywords: ['con dieu', 'kite'] },
+  { id: 'fluent-object-teddy', name: 'Gấu bông', category: 'objects', url: '/assets/fluent/object-teddy.svg', keywords: ['gau bong', 'teddy bear', 'teddy'] },
+  { id: 'fluent-object-gift', name: 'Hộp quà', category: 'objects', url: '/assets/fluent/object-gift.svg', keywords: ['hop qua', 'mon qua', 'qua tang', 'gift'] },
+  { id: 'fluent-object-cake', name: 'Bánh sinh nhật', category: 'objects', url: '/assets/fluent/object-cake.svg', keywords: ['banh sinh nhat', 'banh kem', 'cake'] },
+  { id: 'fluent-object-soccer', name: 'Quả bóng đá', category: 'objects', url: '/assets/fluent/object-soccer.svg', keywords: ['bong da', 'qua bong da', 'soccer ball', 'football'] },
+  { id: 'fluent-object-scissors', name: 'Cái kéo', category: 'objects', url: '/assets/fluent/object-scissors.svg', keywords: ['cai keo', 'scissors'] },
+  { id: 'fluent-object-ruler', name: 'Thước kẻ', category: 'objects', url: '/assets/fluent/object-ruler.svg', keywords: ['thuoc ke', 'cay thuoc', 'ruler'] },
+  { id: 'fluent-object-red_envelope', name: 'Bao lì xì', category: 'objects', url: '/assets/fluent/object-red_envelope.svg', keywords: ['li xi', 'bao li xi', 'red envelope'] },
+  { id: 'fluent-object-lantern', name: 'Đèn lồng', category: 'objects', url: '/assets/fluent/object-lantern.svg', keywords: ['den long', 'den ong sao', 'lantern'] },
+  { id: 'fluent-body-ear', name: 'Cái tai', category: 'objects', url: '/assets/fluent/body-ear.svg', keywords: ['cai tai', 'doi tai', 'ear', 'ears'] },
+  { id: 'fluent-body-eye', name: 'Con mắt', category: 'objects', url: '/assets/fluent/body-eye.svg', keywords: ['con mat', 'doi mat', 'eye', 'eyes'] },
+  { id: 'fluent-body-nose', name: 'Cái mũi', category: 'objects', url: '/assets/fluent/body-nose.svg', keywords: ['cai mui', 'nose'] },
+  { id: 'fluent-body-mouth', name: 'Cái miệng', category: 'objects', url: '/assets/fluent/body-mouth.svg', keywords: ['cai mieng', 'mouth'] },
+  { id: 'fluent-body-hand', name: 'Bàn tay', category: 'objects', url: '/assets/fluent/body-hand.svg', keywords: ['ban tay', 'hand', 'hands'] },
+  { id: 'fluent-body-foot', name: 'Bàn chân', category: 'objects', url: '/assets/fluent/body-foot.svg', keywords: ['ban chan', 'foot', 'feet'] },
+  { id: 'fluent-body-leg', name: 'Cái chân', category: 'objects', url: '/assets/fluent/body-leg.svg', keywords: ['cai chan', 'doi chan', 'leg', 'legs'] },
+  { id: 'fluent-body-tooth', name: 'Cái răng', category: 'objects', url: '/assets/fluent/body-tooth.svg', keywords: ['cai rang', 'tooth', 'teeth'] },
+  { id: 'fluent-food-corn', name: 'Bắp ngô', category: 'fruits', url: '/assets/fluent/food-corn.svg', keywords: ['bap ngo', 'corn'] },
+  { id: 'fluent-food-tomato', name: 'Quả cà chua', category: 'fruits', url: '/assets/fluent/food-tomato.svg', keywords: ['ca chua', 'qua ca chua', 'tomato'] },
+  { id: 'fluent-food-grapes', name: 'Chùm nho', category: 'fruits', url: '/assets/fluent/food-grapes.svg', keywords: ['chum nho', 'qua nho', 'grapes'] },
+  { id: 'fluent-food-mango', name: 'Quả xoài', category: 'fruits', url: '/assets/fluent/food-mango.svg', keywords: ['xoai', 'qua xoai', 'mango'] },
+  { id: 'fluent-food-pineapple', name: 'Quả dứa', category: 'fruits', url: '/assets/fluent/food-pineapple.svg', keywords: ['qua dua', 'trai thom', 'pineapple'] },
+  { id: 'fluent-food-bread', name: 'Bánh mì', category: 'fruits', url: '/assets/fluent/food-bread.svg', keywords: ['banh mi', 'bread'] },
+  { id: 'fluent-food-rice', name: 'Bát cơm', category: 'fruits', url: '/assets/fluent/food-rice.svg', keywords: ['bat com', 'rice'] },
+  { id: 'fluent-food-egg', name: 'Quả trứng', category: 'fruits', url: '/assets/fluent/food-egg.svg', keywords: ['qua trung', 'egg'] },
+  { id: 'fluent-food-milk', name: 'Cốc sữa', category: 'fruits', url: '/assets/fluent/food-milk.svg', keywords: ['coc sua', 'ly sua', 'milk'] },
+  { id: 'fluent-plant-rose', name: 'Hoa hồng', category: 'objects', url: '/assets/fluent/plant-rose.svg', keywords: ['hoa hong', 'rose'] },
+  { id: 'fluent-plant-tulip', name: 'Hoa tulip', category: 'objects', url: '/assets/fluent/plant-tulip.svg', keywords: ['hoa tulip', 'tulip'] },
+  { id: 'fluent-plant-sunflower', name: 'Hoa hướng dương', category: 'objects', url: '/assets/fluent/plant-sunflower.svg', keywords: ['hoa huong duong', 'huong duong', 'sunflower'] },
+  { id: 'fluent-plant-mushroom', name: 'Cây nấm', category: 'objects', url: '/assets/fluent/plant-mushroom.svg', keywords: ['cay nam', 'mushroom'] },
 ]
 
 /** Chuẩn hóa xâu chữ: bỏ dấu tiếng Việt, ký tự đặc biệt, chuyển chữ thường */
@@ -163,23 +234,26 @@ export function resolveAssetUrl(text?: string, visualPrompt?: string): string | 
  */
 export function findCatalogItemsInText(text: string): AssetItem[] {
   const norm = normalizeKeyword(text)
-  const matches: AssetItem[] = []
+  const matches: { item: AssetItem; length: number }[] = []
   const seenUrls = new Set<string>()
 
   for (const item of ASSET_CATALOG) {
     if (seenUrls.has(item.url)) continue
-    for (const kw of item.keywords) {
-      const normKw = normalizeKeyword(kw)
-      const regex = new RegExp(`(^|\\s)${normKw}(\\s|$)`, 'i')
-      if (regex.test(norm)) {
-        matches.push(item)
-        seenUrls.add(item.url)
-        break
-      }
+    // Từ khóa dài nhất khớp được của vật này: "bong bay" (bóng bay) phải thắng "bong" (quả bóng).
+    const length = Math.max(
+      0,
+      ...item.keywords
+        .map(normalizeKeyword)
+        .filter((kw) => new RegExp(`(^|\\s)${kw}(\\s|$)`, 'i').test(norm))
+        .map((kw) => kw.length),
+    )
+    if (length > 0) {
+      matches.push({ item, length })
+      seenUrls.add(item.url)
     }
   }
 
-  return matches
+  return matches.sort((a, b) => b.length - a.length).map((match) => match.item)
 }
 
 export type DeduceTheme = 'ocean' | 'farm' | 'space' | 'jungle'

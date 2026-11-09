@@ -3,8 +3,47 @@
  * Zero external audio asset dependencies, instantaneous response, zero network latency.
  */
 
+// Âm thanh Kenney "Interface Sounds" (CC0, xem public/assets/LICENSES.md).
+const SAMPLES = {
+  pop: '/assets/sfx/kenney/tap.ogg',
+  correct: '/assets/sfx/kenney/correct.ogg',
+  wrong: '/assets/sfx/kenney/try-again.ogg',
+  sling: '/assets/sfx/kenney/swoosh.ogg',
+  fanfare: '/assets/sfx/kenney/finish.ogg',
+} as const
+
 class SoundBusEngine {
   private audioCtx: AudioContext | null = null
+
+  /** Phát file âm thanh; trình duyệt không phát được OGG (Safari cũ) hoặc phát lỗi thì gọi âm tổng hợp `fallback`. */
+  private playSample(url: string, fallback: () => void): void {
+    if (typeof Audio === 'undefined') return fallback()
+    const audio = new Audio(url)
+    if (!audio.canPlayType('audio/ogg; codecs="vorbis"')) return fallback()
+    audio.volume = 0.6
+    const played = audio.play()
+    if (played && typeof played.catch === 'function') played.catch(fallback)
+  }
+
+  public playPop(): void {
+    this.playSample(SAMPLES.pop, () => this.synthPop())
+  }
+
+  public playCorrect(): void {
+    this.playSample(SAMPLES.correct, () => this.synthCorrect())
+  }
+
+  public playWrong(): void {
+    this.playSample(SAMPLES.wrong, () => this.synthWrong())
+  }
+
+  public playSling(): void {
+    this.playSample(SAMPLES.sling, () => this.synthSling())
+  }
+
+  public playFanfare(): void {
+    this.playSample(SAMPLES.fanfare, () => this.synthFanfare())
+  }
 
   private getContext(): AudioContext | null {
     if (typeof window === 'undefined') return null
@@ -26,7 +65,7 @@ class SoundBusEngine {
    * SFX_POP: Quick bubble pop sound for UI touches or balloon hits.
    * Sine wave fast downward frequency sweep.
    */
-  public playPop(): void {
+  private synthPop(): void {
     const ctx = this.getContext()
     if (!ctx) return
 
@@ -56,7 +95,7 @@ class SoundBusEngine {
    * SFX_CORRECT: Joyful major triad arpeggio (C5 -> E5 -> G5 -> C6).
    * Rewarding and high-energy for correct answers.
    */
-  public playCorrect(): void {
+  private synthCorrect(): void {
     const ctx = this.getContext()
     if (!ctx) return
 
@@ -91,7 +130,7 @@ class SoundBusEngine {
    * SFX_WRONG: Gentle "boing" buzz sound with lowpass filter for gentle feedback.
    * Soft and non-intimidating for young children.
    */
-  public playWrong(): void {
+  private synthWrong(): void {
     const ctx = this.getContext()
     if (!ctx) return
 
@@ -128,7 +167,7 @@ class SoundBusEngine {
    * SFX_SLING: Elastic tension release and whoosh sound.
    * Modulated frequency curve giving tactile feeling of bowstring snap.
    */
-  public playSling(): void {
+  private synthSling(): void {
     const ctx = this.getContext()
     if (!ctx) return
 
@@ -220,10 +259,10 @@ class SoundBusEngine {
   /**
    * SFX_FANFARE: Celebratory fanfare chord for finishing questions.
    */
-  public playFanfare(): void {
-    this.playCorrect()
+  private synthFanfare(): void {
+    this.synthCorrect()
     setTimeout(() => {
-      this.playPop()
+      this.synthPop()
     }, 120)
   }
 }
