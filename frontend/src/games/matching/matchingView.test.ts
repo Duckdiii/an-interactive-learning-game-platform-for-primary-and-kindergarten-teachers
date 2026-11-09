@@ -6,6 +6,8 @@ import {
   fromStudentQuestion,
   fromTeacherQuestion,
   isCorrectLocally,
+  viewOf,
+  withAutoPicture,
   sideDisplay,
 } from './matchingView'
 
@@ -159,5 +161,46 @@ describe('chấm cục bộ (preview, review)', () => {
       { leftPairId: 'p2', rightPairId: 'p2' },
       { leftPairId: 'p3', rightPairId: 'p3' },
     ])
+  })
+})
+
+describe('withAutoPicture', () => {
+  it('gắn ảnh trong kho khi chữ nói rõ một vật, kể cả dạng "3 con vịt"', () => {
+    expect(withAutoPicture({ text: 'Con cá' }).imageUrl).toBe('/assets/animals/fish.svg')
+    expect(withAutoPicture({ text: '3 con vịt' }).imageUrl).toBe('/assets/animals/duck.svg')
+  })
+
+  it('giữ nguyên khi đã có ảnh, khi chỉ có số hoặc chữ không khớp vật nào', () => {
+    expect(withAutoPicture({ text: 'Con cá', imageUrl: '/x.png' }).imageUrl).toBe('/x.png')
+    expect(withAutoPicture({ text: 'Số 1' }).imageUrl).toBeUndefined()
+    expect(withAutoPicture({ text: 'head' }).imageUrl).toBeUndefined()
+    expect(withAutoPicture({ visualPrompt: 'a duck' }).imageUrl).toBeUndefined()
+  })
+})
+
+describe('viewOf (hình tự động)', () => {
+  const teacher = (pairs: MatchingQuestion['pairs']) =>
+    ({ id: 'q1', timeLimitSeconds: 60, points: 10, pairs }) as unknown as MatchingQuestion
+
+  it('bài chữ ↔ chữ: thẻ nói rõ vật thì có hình', () => {
+    const view = viewOf(teacher([{ pairId: 'p1', left: { text: 'Chữ a' }, right: { text: 'Con cá' } }, { pairId: 'p2', left: { text: 'Chữ ă' }, right: { text: 'Con rắn' } }]))
+    expect(view.rightItems.find((i) => i.content.text === 'Con cá')?.content.imageUrl).toBe('/assets/animals/fish.svg')
+  })
+
+  it('hai cột ra cùng hình thì không gắn (không để trẻ nối hình giống hình)', () => {
+    const view = viewOf(teacher([{ pairId: 'p1', left: { text: 'Con cá' }, right: { text: 'fish' } }, { pairId: 'p2', left: { text: 'Con mèo' }, right: { text: 'cat' } }]))
+    expect([...view.leftItems, ...view.rightItems].every((i) => !i.content.imageUrl)).toBe(true)
+  })
+
+  it('giáo viên đã đặt ảnh ở một thẻ thì giữ nguyên toàn bộ', () => {
+    const view = viewOf(teacher([{ pairId: 'p1', left: { text: 'Con cá' }, right: { imageUrl: '/fish.png' } }, { pairId: 'p2', left: { text: 'Con mèo' }, right: { text: 'meo' } }]))
+    expect(view.leftItems.every((i) => !i.content.imageUrl)).toBe(true)
+  })
+
+  it('dạng học sinh giữ nguyên id mờ', () => {
+    const student = { id: 'q1', leftItems: [{ id: 'L9', text: 'Chữ a' }], rightItems: [{ id: 'R7', text: 'Con cá' }] } as unknown as MatchingStudentQuestion
+    const view = viewOf(student)
+    expect(view.leftItems[0].id).toBe('L9')
+    expect(view.rightItems[0]).toMatchObject({ id: 'R7', content: { imageUrl: '/assets/animals/fish.svg' } })
   })
 })

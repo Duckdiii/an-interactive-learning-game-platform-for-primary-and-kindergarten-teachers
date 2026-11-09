@@ -12,6 +12,8 @@ import { useFeedback } from '../common/useFeedback'
 import { useGamePalette } from '../common/useGamePalette'
 import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
+import SceneBackground, { QuestionPanel } from '../common/SceneBackground'
+import { useAnimationTime } from '../common/useAnimationTime'
 import MatchingCard, { type MatchingCardState } from './MatchingCard'
 import MatchingConfirmButton from './MatchingConfirmButton'
 import MatchingLines, { type MatchingLine } from './MatchingLines'
@@ -30,14 +32,8 @@ import {
 } from './matchingLayout'
 import { canSubmit, createMatchingState, matchingReducer } from './matchingReducer'
 import { missingCorrectLinks, verdictOfLink, type MatchingResult } from './matchingResult'
-import type { MatchingAnswerResult, MatchingView, PairLink } from './matchingTypes'
-import {
-  correctLinksOf,
-  fromStudentQuestion,
-  fromTeacherQuestion,
-  isCorrectLocally,
-  sideDisplay,
-} from './matchingView'
+import type { MatchingAnswerResult, PairLink } from './matchingTypes'
+import { correctLinksOf, isCorrectLocally, sideDisplay, viewOf } from './matchingView'
 
 /**
  * Prop phụ thuộc `mode` (union) để sai là lỗi lúc build thay vì lỗi lúc chạy:
@@ -76,10 +72,6 @@ const PAIR_MATCHED_SOUND = '/sounds/pair-matched.wav'
 
 const HEADING_PADDING = 8
 
-function buildView(question: MatchingQuestion | MatchingStudentQuestion): MatchingView {
-  return 'leftItems' in question ? fromStudentQuestion(question) : fromTeacherQuestion(question)
-}
-
 /** Lớp ngoài chỉ đặt `key`: đổi câu/mode/bài xem lại thì dựng lại toàn bộ state (cách React khuyến nghị). */
 export default function MatchingRenderer(props: MatchingRendererProps) {
   const resetKey =
@@ -97,13 +89,20 @@ function MatchingBoard(props: MatchingRendererProps) {
   const { image: illustration, reserveSpace: hasIllustration } = useIllustration(question.imageUrl)
   const playAudio = useQuestionAudio(question.audioUrl)
 
-  const view = useMemo(() => buildView(question), [question])
+  const view = useMemo(() => viewOf(question), [question])
   const pairCount = view.leftItems.length
 
   const [state, dispatch] = useReducer(matchingReducer, props, (initial) =>
     initial.mode === 'review' ? createMatchingState(initial.matches, 'done') : createMatchingState(),
   )
   const [submitted, setSubmitted] = useState<MatchingResult | null>(null)
+  const time = useAnimationTime(props.mode !== 'review')
+  // Lúc chấm xong (theo đồng hồ hoạt ảnh): thẻ đúng nảy lên, thẻ sai lắc nhẹ đúng một lần.
+  const [reactedAt, setReactedAt] = useState<number | null>(null)
+  const timeRef = useRef(time)
+  useEffect(() => {
+    timeRef.current = time
+  }, [time])
 
   // Xem lại: kết quả suy ra ngay từ các cặp đã nối. Chơi/xem trước: lấy từ lúc chấm.
   const result: MatchingResult | null =
@@ -193,6 +192,7 @@ function MatchingBoard(props: MatchingRendererProps) {
     if (props.mode === 'preview') {
       const isCorrect = isCorrectLocally(links, pairCount)
       setSubmitted({ isCorrect, correctLinks: correctLinksOf(props.question) })
+      setReactedAt(timeRef.current)
       dispatch({ type: 'submitDone' })
       showFeedback(isCorrect)
       // Kiểu `void` không chặn được cha truyền hàm async; bọc lại để Promise bị reject không thành
@@ -208,6 +208,7 @@ function MatchingBoard(props: MatchingRendererProps) {
       const answer = await props.onAnswered(links)
       if (!activeRef.current) return // đã đổi câu/đóng, bỏ qua kết quả cũ
       setSubmitted({ isCorrect: answer.isCorrect, correctLinks: answer.correctAnswer?.matches ?? [] })
+      setReactedAt(timeRef.current)
       dispatch({ type: 'submitDone' })
       // Kiểu đã bắt buộc có `isCorrect`; vẫn kiểm tra lúc chạy phòng cha viết bằng JS hoặc ép kiểu sai
       // (khi đó chỉ khoá lại, không phát feedback).
@@ -286,8 +287,10 @@ function MatchingBoard(props: MatchingRendererProps) {
   return (
     <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight} onScaleChange={setScale}>
       <Layer>
+        <SceneBackground height={layout.stageHeight} time={time} />
         {layout.illustrationY !== null && <QuestionIllustration image={illustration} y={layout.illustrationY} />}
 
+        {layout.headingY !== null && headingText ? <QuestionPanel y={layout.headingY} height={headingHeight} /> : null}
         {layout.headingY !== null && headingText && (
           <Text
             text={headingText}
@@ -315,6 +318,9 @@ function MatchingBoard(props: MatchingRendererProps) {
               content={item.content}
               state={cardState(link, state.selectedLeftId === item.id)}
               accent={accentOf(link) ?? LINK_COLORS[index % LINK_COLORS.length]}
+              colorIndex={index}
+              time={time}
+              reactedAt={reactedAt}
               onPress={() => handleTapLeft(item.id)}
               onImageFailed={() => markImageFailed(`left-${item.id}`)}
             />
@@ -330,6 +336,9 @@ function MatchingBoard(props: MatchingRendererProps) {
               content={item.content}
               state={cardState(link, false)}
               accent={accentOf(link)}
+              colorIndex={index + 3}
+              time={time}
+              reactedAt={reactedAt}
               onPress={() => handleTapRight(item.id)}
               onImageFailed={() => markImageFailed(`right-${item.id}`)}
             />

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Image as KonvaImage, Layer, Rect, Text } from 'react-konva'
-import useImage from 'use-image'
+import { Layer, Text } from 'react-konva'
 import type { QuizQuestion } from '../../types/game-dsl.types'
 import type { StudentQuizQuestion } from '../../types/game-student.types'
 import type { AnswerResult } from '../common/answerResult'
@@ -16,7 +15,7 @@ import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
 import { useAnimationTime } from '../common/useAnimationTime'
 import { objectKindForTheme } from '../common/optionVisual'
-import { useGamePalette } from '../common/useGamePalette'
+import SceneBackground, { QuestionPanel } from '../common/SceneBackground'
 import { useTheme } from '../../player/theme/useTheme'
 import { QUESTION_FONT_SIZE, QUESTION_TEXT_WIDTH, computeQuizLayout } from './quizLayout'
 
@@ -64,8 +63,6 @@ export default function QuizRenderer(props: QuizRendererProps) {
   const { image: illustration, reserveSpace: hasIllustration } = useIllustration(question.imageUrl)
   const playAudio = useQuestionAudio(question.audioUrl)
   const theme = useTheme()
-  const palette = useGamePalette()
-  const [background] = useImage(theme.bgUrl ?? '')
   const time = useAnimationTime(mode !== 'review')
   // Lúc bắt đầu phản hồi đúng/sai (theo đồng hồ hoạt ảnh) để vật nảy lên hoặc lắc nhẹ đúng một lần.
   const [reactedAt, setReactedAt] = useState<number | null>(null)
@@ -186,21 +183,12 @@ export default function QuizRenderer(props: QuizRendererProps) {
   return (
     <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
       <Layer>
-        <SceneBackground image={background} height={layout.stageHeight} time={time} cloud={palette.surface} />
+        <SceneBackground height={layout.stageHeight} time={time} />
         {layout.illustrationY !== null && (
           <QuestionIllustration image={illustration} y={layout.illustrationY} />
         )}
 
-        <Rect
-          x={24}
-          y={layout.questionY - 8}
-          width={STAGE_WIDTH - 48}
-          height={layout.questionHeight + 16}
-          cornerRadius={20}
-          fill={palette.surface}
-          opacity={0.92}
-          listening={false}
-        />
+        <QuestionPanel y={layout.questionY} height={layout.questionHeight} />
         <Text
           text={question.questionText}
           fontSize={QUESTION_FONT_SIZE}
@@ -234,27 +222,5 @@ export default function QuizRenderer(props: QuizRendererProps) {
         ))}
       </Layer>
     </ResponsiveStage>
-  )
-}
-
-/** Nền thế giới game (ảnh theo theme, phủ kín sân khấu) và hai đám mây trôi chậm cho cảnh có sức sống. */
-function SceneBackground({ image, height, time, cloud }: { image?: HTMLImageElement; height: number; time: number; cloud: string }) {
-  const cover = image ? Math.max(STAGE_WIDTH / image.width, height / image.height) : 1
-  const drift = (speed: number, offset: number) => ((time * speed + offset) % (STAGE_WIDTH + 240)) - 160
-  return (
-    <>
-      {image ? (
-        <KonvaImage
-          image={image}
-          width={image.width * cover}
-          height={image.height * cover}
-          x={(STAGE_WIDTH - image.width * cover) / 2}
-          y={(height - image.height * cover) / 2}
-          listening={false}
-        />
-      ) : null}
-      <Rect x={drift(14, 80)} y={18} width={150} height={44} cornerRadius={22} fill={cloud} opacity={0.8} listening={false} />
-      <Rect x={drift(9, 520)} y={56} width={110} height={34} cornerRadius={17} fill={cloud} opacity={0.7} listening={false} />
-    </>
   )
 }
