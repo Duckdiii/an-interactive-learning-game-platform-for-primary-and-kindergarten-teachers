@@ -74,8 +74,12 @@ export const ConfettiEffect: FC<ConfettiEffectProps> = ({
   const particlesRef = useRef<Particle[]>([])
   const startTimeRef = useRef<number>(0)
   const animFrameRef = useRef<number | null>(null)
+  // Cha hay truyền hàm viết tại chỗ (mới mỗi lần vẽ); để trong deps thì renderer vẽ lại theo khung hình sẽ khởi động lại pháo hoa liên tục.
+  const onCompleteRef = useRef(onComplete)
+  onCompleteRef.current = onComplete
 
   useEffect(() => {
+    const onComplete = () => onCompleteRef.current?.()
     if (!active) {
       setAnimating(false)
       if (animFrameRef.current !== null) {
@@ -226,7 +230,7 @@ export const ConfettiEffect: FC<ConfettiEffectProps> = ({
         animFrameRef.current = null
       }
     }
-  }, [active, count, colors, durationMs, onComplete])
+  }, [active, count, colors, durationMs])
 
   if (!active && !animating) return null
 

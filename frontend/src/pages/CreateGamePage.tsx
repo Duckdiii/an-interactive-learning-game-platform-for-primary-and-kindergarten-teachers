@@ -294,12 +294,27 @@ export default function CreateGamePage() {
           >
             <span aria-hidden="true">‹</span>
           </Link>
-        ) : null}
+        ) : (
+          <button
+            type="button"
+            onClick={backToDescribe}
+            aria-label={text.backToDescribe}
+            className="grid h-11 w-11 place-items-center rounded-full bg-surface text-2xl font-bold text-ink shadow-sm transition hover:bg-brand-soft"
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+        )}
         <ol
           aria-label={text.stepsLabel}
           className="flex flex-wrap items-center gap-x-3 gap-y-2 text-base font-semibold"
         >
-          <StepMarker number={1} label={text.stepDescribe} current={step === 'describe'} done={step === 'suggest'} />
+          <StepMarker
+            number={1}
+            label={text.stepDescribe}
+            current={step === 'describe'}
+            done={step === 'suggest'}
+            onSelect={step === 'suggest' ? backToDescribe : undefined}
+          />
           <li aria-hidden="true" className="h-0.5 w-6 bg-ink/20" />
           <StepMarker
             number={2}
@@ -511,14 +526,17 @@ function StepMarker({
   label,
   current,
   done,
+  onSelect,
 }: {
   number: number
   label: string
   current: boolean
   done: boolean
+  /** Có thì bước này bấm được để quay lại. */
+  onSelect?: () => void
 }) {
-  return (
-    <li aria-current={current ? 'step' : undefined} className="flex items-center gap-2">
+  const content = (
+    <>
       <span
         aria-hidden="true"
         className={[
@@ -532,6 +550,21 @@ function StepMarker({
         {label}
         {done ? <span className="sr-only"> ({viText.generator.stepDone})</span> : null}
       </span>
+    </>
+  )
+  return (
+    <li aria-current={current ? 'step' : undefined} className="flex items-center gap-2">
+      {onSelect ? (
+        <button
+          type="button"
+          onClick={onSelect}
+          className="flex min-h-11 items-center gap-2 rounded-full pr-2 underline-offset-4 hover:underline"
+        >
+          {content}
+        </button>
+      ) : (
+        content
+      )}
     </li>
   )
 }

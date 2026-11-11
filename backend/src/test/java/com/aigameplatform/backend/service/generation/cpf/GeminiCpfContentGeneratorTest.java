@@ -48,7 +48,8 @@ class GeminiCpfContentGeneratorTest {
         assertThat(result).isEqualTo("{}");
         var messages = sent.get().messages();
         assertThat(messages.get(0)).isInstanceOf(SystemMessage.class);
-        assertThat(((SystemMessage) messages.get(0)).text()).contains("CPF Game v2.0.0", "fruit.apple", "GRADE_2")
+        assertThat(((SystemMessage) messages.get(0)).text()).contains("CPF Game v2.0.0", "fruit.apple", "GRADE_2",
+                        "kể cả tên game và câu hỏi, viết bằng tiếng Việt")
                 .doesNotContain(FIRST.idea());
         assertThat(((UserMessage) messages.get(1)).singleText()).contains(FIRST.idea());
 

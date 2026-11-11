@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-11 — Nối `git rm` sau lệnh `python` bằng `&&`, máy không có Python nên file bị xóa ngoài ý muốn
+- Lỗi: chạy `python - <<EOF ... EOF && git rm ThemedQuizCanvas.tsx` để sửa `LivePreview.tsx` rồi mới xóa file. Python trên máy này chỉ là lối tắt mở Microsoft Store, in "Python was not found" nhưng trả mã 0, nên `git rm` vẫn chạy và đưa việc xóa vào index trong khi `LivePreview.tsx` chưa được sửa. Một luật mới thêm vào prompt cũng mâu thuẫn với dòng ngay trên ("Chỉ dùng từ tiếng Việt có thật" so với cho phép từ tiếng Anh).
+- Phát hiện nhờ: lần `git rm` sau báo không thấy file, `git status` hiện `D ` trong index; luật mâu thuẫn do `reviewer` và `ai-prompt-evaluator` báo.
+- Nguyên nhân gốc: giả định có Python và tin `&&` sẽ chặn lệnh sau; thêm luật mới mà không đọc lại cả khối luật xung quanh.
+- Cách chặn: máy này không có Python, sửa file bằng Edit hoặc sed; không nối lệnh xóa/ghi git sau một lệnh chưa chắc chạy được, chạy riêng sau khi kiểm kết quả. Thêm luật vào prompt thì đọc lại toàn khối và có test `doesNotContain` câu mâu thuẫn.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-09 — Thêm `description` vào schema đầu ra AI, không chạy test kiểm từ khóa của schema
 - Lỗi: khi thêm trường `title` vào 10 schema `game-ai-output`, có kèm `"description"`; `AiOutputSchemasTest.llmSchemaUsesOnlyKeywordsAnLlmAccepts` chỉ cho từ khóa LLM chấp nhận nên 10 test đỏ. Bộ test con mình chọn chạy không có `AiOutputSchemasTest`. Cùng lượt, các luật Lớp 2 mới bản đầu chặn nhầm bài hợp lệ ("A" ↔ "a", điền khuyết đáp án 1 chữ cái, Đúng/Sai cùng đáp án, "lớn hơn hoặc bằng 10").
 - Phát hiện nhờ: `test-verifier` (chạy toàn bộ), `ai-prompt-evaluator`, `reviewer`.

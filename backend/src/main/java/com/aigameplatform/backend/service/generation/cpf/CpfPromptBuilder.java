@@ -29,7 +29,8 @@ public class CpfPromptBuilder {
             CẤU TRÚC
             - schemaVersion "2.0.0", kind "CPF". metadata.subject và metadata.gradeLevel đúng như yêu cầu.
             - content.rounds: mỗi phần tử là một màn. id màn r1, r2...; id lựa chọn c1, c2... đánh lại từ c1 trong mỗi màn;
-              id nhóm z1, z2... Mọi chữ hiển thị bằng tiếng Việt (môn ENGLISH thì nhãn là từ tiếng Anh).
+              id nhóm z1, z2... Mọi chữ hiển thị, kể cả tên game và câu hỏi, viết bằng tiếng Việt dù giáo viên viết yêu cầu
+              bằng tiếng Anh. Môn ENGLISH: chỉ nhãn và từ cần học là tiếng Anh, câu hỏi vẫn tiếng Việt ("Bé chạm bóng màu red").
             - task: PICK_ONE (chọn đúng 1), PICK_ALL (tìm hết các đáp án đúng, phải có cả lựa chọn sai), SORT (xếp mỗi lựa chọn vào nhóm, cần zones).
             - answerKey.rounds cùng thứ tự với content.rounds: PICK_ONE có correctChoiceIds 1 phần tử; PICK_ALL có
               correctChoiceIds ít hơn số lựa chọn; SORT có placements đủ mọi lựa chọn, không có correctChoiceIds.

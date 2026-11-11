@@ -128,20 +128,18 @@ describe('LivePreview', () => {
     expect(await screen.findByText(/Gần đúng rồi/)).toBeInTheDocument()
   })
 
-  it('gắn themeId hoặc imageUrl thì QUIZ dùng Themed Quiz Canvas với linh vật và nút chuyển chế độ', () => {
+  it('QUIZ luôn dùng renderer thật như màn chơi, không có bản vẽ riêng', () => {
     renderPreview({ themeId: 'farm' })
 
-    const canvasBtn = screen.getByRole('button', { name: '🎨 Đồ họa Canvas' })
-    const standardBtn = screen.getByRole('button', { name: '📄 Tiêu chuẩn' })
-    expect(canvasBtn).toHaveAttribute('aria-pressed', 'true')
-    expect(standardBtn).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.queryByRole('button', { name: /Đồ họa Canvas/ })).not.toBeInTheDocument()
+    expect(screen.getByText('hai')).toBeInTheDocument()
+  })
 
-    fireEvent.click(standardBtn)
-    expect(standardBtn).toHaveAttribute('aria-pressed', 'true')
-    expect(canvasBtn).toHaveAttribute('aria-pressed', 'false')
+  it('chưa chọn thế giới: chọn nền giống màn chơi thử (suy từ chủ đề), không mặc định Nông Trại', () => {
+    renderPreview({ themeId: undefined, topic: 'Bé bay vào vũ trụ ngắm các hành tinh' })
 
-    fireEvent.click(canvasBtn)
-    expect(canvasBtn).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '🚀 Vũ Trụ' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '🌾 Nông Trại' })).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('1-click chuyển đổi theme cập nhật nút theme và gọi onThemeChange', () => {

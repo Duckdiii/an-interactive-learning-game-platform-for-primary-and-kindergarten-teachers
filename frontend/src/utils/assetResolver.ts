@@ -14,16 +14,16 @@ export interface AssetItem {
 
 export const ASSET_CATALOG: readonly AssetItem[] = [
   // Chữ số 1 - 10
-  { id: 'num-1', name: 'Số 1', category: 'numbers', url: '/assets/numbers/number-1.svg', keywords: ['so 1', '1', 'mot', 'one', 'first'] },
-  { id: 'num-2', name: 'Số 2', category: 'numbers', url: '/assets/numbers/number-2.svg', keywords: ['so 2', '2', 'hai', 'two', 'second'] },
-  { id: 'num-3', name: 'Số 3', category: 'numbers', url: '/assets/numbers/number-3.svg', keywords: ['so 3', '3', 'ba', 'three', 'third'] },
-  { id: 'num-4', name: 'Số 4', category: 'numbers', url: '/assets/numbers/number-4.svg', keywords: ['so 4', '4', 'bon', 'four'] },
-  { id: 'num-5', name: 'Số 5', category: 'numbers', url: '/assets/numbers/number-5.svg', keywords: ['so 5', '5', 'nam', 'five'] },
-  { id: 'num-6', name: 'Số 6', category: 'numbers', url: '/assets/numbers/number-6.svg', keywords: ['so 6', '6', 'sau', 'six'] },
-  { id: 'num-7', name: 'Số 7', category: 'numbers', url: '/assets/numbers/number-7.svg', keywords: ['so 7', '7', 'bay', 'seven'] },
-  { id: 'num-8', name: 'Số 8', category: 'numbers', url: '/assets/numbers/number-8.svg', keywords: ['so 8', '8', 'tam', 'eight'] },
-  { id: 'num-9', name: 'Số 9', category: 'numbers', url: '/assets/numbers/number-9.svg', keywords: ['so 9', '9', 'chin', 'nine'] },
-  { id: 'num-10', name: 'Số 10', category: 'numbers', url: '/assets/numbers/number-10.svg', keywords: ['so 10', '10', 'muoi', 'ten'] },
+  { id: 'num-1', name: 'Số 1', category: 'numbers', url: '/assets/numbers/number-1.svg', keywords: ['so 1', '1', 'so mot', 'one', 'first'] },
+  { id: 'num-2', name: 'Số 2', category: 'numbers', url: '/assets/numbers/number-2.svg', keywords: ['so 2', '2', 'so hai', 'two', 'second'] },
+  { id: 'num-3', name: 'Số 3', category: 'numbers', url: '/assets/numbers/number-3.svg', keywords: ['so 3', '3', 'so ba', 'three', 'third'] },
+  { id: 'num-4', name: 'Số 4', category: 'numbers', url: '/assets/numbers/number-4.svg', keywords: ['so 4', '4', 'so bon', 'four'] },
+  { id: 'num-5', name: 'Số 5', category: 'numbers', url: '/assets/numbers/number-5.svg', keywords: ['so 5', '5', 'so nam', 'five'] },
+  { id: 'num-6', name: 'Số 6', category: 'numbers', url: '/assets/numbers/number-6.svg', keywords: ['so 6', '6', 'so sau', 'six'] },
+  { id: 'num-7', name: 'Số 7', category: 'numbers', url: '/assets/numbers/number-7.svg', keywords: ['so 7', '7', 'so bay', 'seven'] },
+  { id: 'num-8', name: 'Số 8', category: 'numbers', url: '/assets/numbers/number-8.svg', keywords: ['so 8', '8', 'so tam', 'eight'] },
+  { id: 'num-9', name: 'Số 9', category: 'numbers', url: '/assets/numbers/number-9.svg', keywords: ['so 9', '9', 'so chin', 'nine'] },
+  { id: 'num-10', name: 'Số 10', category: 'numbers', url: '/assets/numbers/number-10.svg', keywords: ['so 10', '10', 'so muoi', 'ten'] },
 
   // Hoa quả
   { id: 'fruit-apple', name: 'Quả táo', category: 'fruits', url: '/assets/fruits/apple.svg', keywords: ['tao', 'apple', 'qua tao', 'trai tao'] },

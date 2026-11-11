@@ -7,12 +7,10 @@ import { getPlayableRenderer } from '../../../player/renderers'
 import { playerRootVars } from '../../../player/theme/playerRootVars'
 import { resolveTheme } from '../../../player/theme/resolveTheme'
 import { ThemeProvider } from '../../../player/theme/ThemeContext'
-import { deduceThemeFromText } from '../../../utils/assetResolver'
-import type { GameType, QuestionDsl, QuizQuestion } from '../../../types/game-dsl.types'
+import type { GameType, QuestionDsl } from '../../../types/game-dsl.types'
 import GameTypeCover from '../../ui/GameTypeCover'
 import PreviewBoundary from './PreviewBoundary'
 import PreviewStage from './PreviewStage'
-import ThemedQuizCanvas from './ThemedQuizCanvas'
 import { DEFAULT_PREVIEW_DEVICE, PREVIEW_DEVICES, previewDeviceSize } from './previewModel'
 import type { PreviewDevice } from './previewModel'
 
@@ -115,25 +113,13 @@ export default function LivePreview({
   themeId,
   onThemeChange,
 }: LivePreviewProps) {
-  const deduced = deduceThemeFromText(`${title} ${topic ?? ''}`)
   const [device, setDevice] = useState<PreviewDevice>(DEFAULT_PREVIEW_DEVICE)
-  const [localThemeId, setLocalThemeId] = useState<string>(() => themeId || deduced.theme || 'farm')
   const profile = resolveUiProfile({ gradeLevel })
   const Renderer = getPlayableRenderer(gameType)
   const size = previewDeviceSize(gameType, device)
-
-  const activeThemeId = themeId || localThemeId
-  const resolvedTheme = resolveTheme({ themeId: activeThemeId, subject, gameType, topic })
-
-  const isQuiz = gameType === 'QUIZ'
-  const hasQuizTheme = isQuiz && (Boolean(themeId) || Boolean((question as QuizQuestion)?.imageUrl) || Boolean((question as QuizQuestion)?.visualPrompt))
-  const [canvasModeOverride, setCanvasModeOverride] = useState<boolean | null>(null)
-  const canvasMode = canvasModeOverride ?? hasQuizTheme
-
-  const handleSelectTheme = (nextId: string) => {
-    setLocalThemeId(nextId)
-    onThemeChange?.(nextId)
-  }
+  // Cùng cách chọn nền với màn chơi thử (PlayTestPanel) nên "Bé sẽ thấy" khớp với lúc chơi.
+  const resolvedTheme = resolveTheme({ themeId, subject, gameType, topic })
+  const activeThemeId = resolvedTheme.id
 
   const body = () => {
     if (!question) return <p className="text-base text-ink-soft">{viText.editor.emptyQuestions}</p>
@@ -150,25 +136,6 @@ export default function LivePreview({
     }
 
     if (hasIssues) return <p className="rounded-xl bg-sun-soft px-4 py-3 text-base">{text.fixFirst}</p>
-
-    // Stage 2.5: Themed Quiz Canvas cho câu hỏi QUIZ khi có gắn Theme hoặc hình ảnh Asset Bank
-    if (isQuiz && canvasMode) {
-      return (
-        <DeviceFrame width={size.width} height={size.height} vars={playerRootVars(profile).vars}>
-          <PreviewBoundary key={`${question.id}:${JSON.stringify(question)}:${activeThemeId}:themed-canvas`}>
-            <ThemedQuizCanvas
-              question={question as QuizQuestion}
-              themeKey={activeThemeId}
-              title={title}
-              gradeLevel={gradeLevel}
-              subject={subject}
-              width={size.width}
-              height={size.height}
-            />
-          </PreviewBoundary>
-        </DeviceFrame>
-      )
-    }
 
     return (
       <DeviceFrame width={size.width} height={size.height} vars={playerRootVars(profile).vars}>
@@ -195,7 +162,7 @@ export default function LivePreview({
         ) : null}
       </div>
 
-      {/* Stage 2.5: 1-Click Game World Theme Switcher & Canvas Mode Toggle */}
+      {/* Đổi nhanh thế giới game; trình soạn lưu vào bản nháp nên màn chơi thử đổi theo. */}
       <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs font-bold text-ink-soft shrink-0">🎨 Thế giới:</span>
@@ -205,7 +172,7 @@ export default function LivePreview({
                 key={item.id}
                 type="button"
                 aria-pressed={item.id === activeThemeId}
-                onClick={() => handleSelectTheme(item.id)}
+                onClick={() => onThemeChange?.(item.id)}
                 className={[
                   'rounded-lg px-2.5 py-1 text-xs font-bold transition cursor-pointer',
                   item.id === activeThemeId
@@ -219,36 +186,6 @@ export default function LivePreview({
           </div>
         </div>
 
-        {isQuiz ? (
-          <div className="flex items-center gap-1 rounded-xl bg-ink/5 p-1">
-            <button
-              type="button"
-              onClick={() => setCanvasModeOverride(true)}
-              aria-pressed={canvasMode}
-              className={[
-                'rounded-lg px-2 py-0.5 text-xs font-bold transition cursor-pointer',
-                canvasMode
-                  ? 'bg-brand text-white shadow-xs'
-                  : 'text-ink-soft hover:text-ink',
-              ].join(' ')}
-            >
-              🎨 Đồ họa Canvas
-            </button>
-            <button
-              type="button"
-              onClick={() => setCanvasModeOverride(false)}
-              aria-pressed={!canvasMode}
-              className={[
-                'rounded-lg px-2 py-0.5 text-xs font-bold transition cursor-pointer',
-                !canvasMode
-                  ? 'bg-brand text-white shadow-xs'
-                  : 'text-ink-soft hover:text-ink',
-              ].join(' ')}
-            >
-              📄 Tiêu chuẩn
-            </button>
-          </div>
-        ) : null}
       </div>
 
       {question && Renderer ? (

@@ -26,6 +26,14 @@ describe('assetResolver', () => {
     expect(resolveAssetUrl('Số 1')).toBe('/assets/numbers/number-1.svg')
     expect(resolveAssetUrl('Số 5')).toBe('/assets/numbers/number-5.svg')
     expect(resolveAssetUrl('Số 10')).toBe('/assets/numbers/number-10.svg')
+    expect(resolveAssetUrl('số bảy')).toBe('/assets/numbers/number-7.svg')
+  })
+
+  it('số đọc bằng chữ đứng một mình là từ thường, không thành hình chữ số', () => {
+    expect(resolveAssetUrl('hát', 'Một bạn nhỏ đang hát vui vẻ')).toBeNull()
+    expect(resolveAssetUrl('Ăn sau khi rửa tay')).not.toBe('/assets/numbers/number-6.svg')
+    expect(resolveAssetUrl('Chuối chín')).not.toBe('/assets/numbers/number-9.svg')
+    expect(resolveAssetUrl('bóng bay')).not.toBe('/assets/numbers/number-7.svg')
   })
 
   it('tra cứu đúng URL cho con vật và đồ vật', () => {

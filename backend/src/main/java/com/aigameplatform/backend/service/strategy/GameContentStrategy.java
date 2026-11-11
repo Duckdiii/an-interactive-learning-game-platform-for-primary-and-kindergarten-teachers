@@ -40,7 +40,11 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
             - Với game mỗi câu có một đáp án đúng: đáp án đúng phải thay đổi giữa các câu, không để mọi câu cùng một đáp án.
             - Câu điền khuyết: dùng "..." thay chỗ cần điền, không viết lại từ hoàn chỉnh ở bất kỳ đâu trong câu.
             - Không viết đáp án, hoặc từ hoàn chỉnh chứa đáp án, ngay trong lời dẫn câu hỏi.
-            - Chỉ dùng từ tiếng Việt có thật, viết đúng chính tả.""";
+            - Chỉ dùng từ có thật, viết đúng chính tả (tiếng Việt; nội dung tiếng Anh cần học thì đúng chính tả tiếng Anh).
+            - Ngôn ngữ: title, câu hỏi, lời dẫn, câu mẫu và mô tả hình (visualPrompt) luôn viết bằng tiếng Việt, \
+            kể cả khi giáo viên viết yêu cầu bằng tiếng Anh. Riêng môn Tiếng Anh: nội dung trẻ cần học (lựa chọn, \
+            vế nối, từ cần xếp, đáp án) viết bằng tiếng Anh; lời dẫn tiếng Việt được chèn từ tiếng Anh cần học, \
+            ví dụ câu hỏi "Bé chọn quả bóng màu red", lựa chọn "red", "blue".""";
 
     static final String KINDERGARTEN_LABEL_RULE =
             "- Mầm non: mỗi lựa chọn/vế chỉ 1-3 từ hoặc 1 chữ cái/chữ số (ví dụ 'ă', 'Con cá'), không viết câu mô tả như 'Chữ A in hoa'.";

@@ -47,6 +47,19 @@ class GameContentStrategyTest {
     }
 
     @Test
+    void everyPromptAsksForVietnameseTitleAndInstructionsEvenForEnglish() {
+        for (GameContentStrategy strategy : STRATEGIES) {
+            String prompt = strategy.buildPrompt("colors song: red, blue",
+                    com.aigameplatform.backend.entity.enums.Subject.ENGLISH,
+                    com.aigameplatform.backend.entity.enums.GradeLevel.KINDERGARTEN, null);
+
+            assertThat(prompt).as(strategy.getSupportedType().name())
+                    .contains("title, câu hỏi, lời dẫn", "luôn viết bằng tiếng Việt", "Riêng môn Tiếng Anh")
+                    .doesNotContain("Chỉ dùng từ tiếng Việt có thật");
+        }
+    }
+
+    @Test
     void visualClozePromptUsesTheSupportedGradeAndQuestionShape() {
         var strategy = new VisualClozeGameStrategy(MAPPER);
 

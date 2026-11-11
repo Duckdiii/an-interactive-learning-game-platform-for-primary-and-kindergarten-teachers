@@ -458,6 +458,21 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
     await waitFor(() => expect(ideaBox()).toHaveFocus())
   })
 
+  it.each([
+    ['nút ‹ ở đầu trang', 'Quay lại bước Mô tả bài học'],
+    ['bước 1 trên thanh tiến trình', /^Mô tả bài học/],
+  ])('ở bước chọn kiểu chơi, bấm %s cũng quay về bước mô tả và giữ dữ liệu', async (_, name) => {
+    const user = userEvent.setup()
+    renderPage()
+    await chooseGrade(user, 'GRADE_2')
+    await toSuggestions(user)
+
+    await user.click(screen.getByRole('button', { name }))
+
+    expect(ideaBox()).toHaveValue(IDEA)
+    expect(btn('Lớp 2')).toHaveAttribute('aria-pressed', 'true')
+  })
+
   it('"Tạo ngẫu nhiên" cũng sang bước đề xuất và nói rõ AI sẽ chọn chủ đề', async () => {
     const user = userEvent.setup()
     renderPage()

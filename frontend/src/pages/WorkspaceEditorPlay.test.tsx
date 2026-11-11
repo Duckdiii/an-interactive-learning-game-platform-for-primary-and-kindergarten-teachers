@@ -86,6 +86,18 @@ describe('trình soạn thảo: Chơi thử', () => {
     for (const method of Object.values(axiosInstance)) expect(method).not.toHaveBeenCalled()
   })
 
+  it('đổi "Thế giới" ở Bé sẽ thấy thì màn chơi thử dùng đúng nền đó', async () => {
+    const user = userEvent.setup()
+
+    await openLoaded(QUIZ_ID)
+    await user.click(screen.getByRole('button', { name: '🌊 Đại Dương' }))
+    expect(screen.getByRole('button', { name: '🌊 Đại Dương' })).toHaveAttribute('aria-pressed', 'true')
+    await user.click(playButton())
+
+    const panel = await screen.findByRole('region', { name: /chơi thử/i }, { timeout: 10_000 })
+    expect(panel.querySelector('[style*="bg-ocean.svg"]')).not.toBeNull()
+  })
+
   it('dữ liệu chưa đủ (UC-03 2a): từ chối mở màn chơi thử, hiện đúng câu của SRS, sửa xong thì mở được', async () => {
     const user = userEvent.setup()
 

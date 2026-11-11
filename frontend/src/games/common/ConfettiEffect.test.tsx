@@ -32,6 +32,19 @@ describe('ConfettiEffect Component', () => {
     expect(onComplete).toHaveBeenCalled()
   })
 
+  it('cha vẽ lại với onComplete mới không khởi động lại pháo hoa', () => {
+    window.matchMedia = vi.fn().mockImplementation(() => ({ matches: false }))
+    HTMLCanvasElement.prototype.getContext = vi.fn(() => null)
+    const cancel = vi.spyOn(window, 'cancelAnimationFrame')
+    const { rerender } = render(<ConfettiEffect active={true} onComplete={() => undefined} />)
+
+    rerender(<ConfettiEffect active={true} onComplete={() => undefined} />)
+    rerender(<ConfettiEffect active={true} onComplete={() => undefined} />)
+
+    expect(cancel).not.toHaveBeenCalled()
+    cancel.mockRestore()
+  })
+
   it('kết thúc và dọn dẹp khi unmount', () => {
     const onComplete = vi.fn()
     const { unmount } = render(<ConfettiEffect active={true} onComplete={onComplete} />)
