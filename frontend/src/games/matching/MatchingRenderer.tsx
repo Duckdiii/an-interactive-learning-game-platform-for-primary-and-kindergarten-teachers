@@ -13,7 +13,7 @@ import { useGamePalette } from '../common/useGamePalette'
 import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
 import SceneBackground, { QuestionPanel } from '../common/SceneBackground'
-import { useAnimationTime } from '../common/useAnimationTime'
+import { prefersReducedMotion, useAnimationTime } from '../common/useAnimationTime'
 import MatchingCard, { type MatchingCardState } from './MatchingCard'
 import MatchingConfirmButton from './MatchingConfirmButton'
 import MatchingLines, { type MatchingLine } from './MatchingLines'
@@ -97,6 +97,11 @@ function MatchingBoard(props: MatchingRendererProps) {
   )
   const [submitted, setSubmitted] = useState<MatchingResult | null>(null)
   const time = useAnimationTime(props.mode !== 'review')
+  // Thẻ bật vào lần lượt chỉ khi đồng hồ hoạt ảnh chạy; không thì đồng hồ đứng ở 0 và thẻ phải hiện ngay.
+  const [entering] = useState(
+    () => props.mode !== 'review' && !prefersReducedMotion() && typeof requestAnimationFrame === 'function',
+  )
+  const appearDelayOf = (order: number) => (entering ? order * 0.07 : null)
   // Lúc chấm xong (theo đồng hồ hoạt ảnh): thẻ đúng nảy lên, thẻ sai lắc nhẹ đúng một lần.
   const [reactedAt, setReactedAt] = useState<number | null>(null)
   const timeRef = useRef(time)
@@ -321,6 +326,7 @@ function MatchingBoard(props: MatchingRendererProps) {
               colorIndex={index}
               time={time}
               reactedAt={reactedAt}
+              appearDelay={appearDelayOf(index * 2)}
               onPress={() => handleTapLeft(item.id)}
               onImageFailed={() => markImageFailed(`left-${item.id}`)}
             />
@@ -339,6 +345,7 @@ function MatchingBoard(props: MatchingRendererProps) {
               colorIndex={index + 3}
               time={time}
               reactedAt={reactedAt}
+              appearDelay={appearDelayOf(index * 2 + 1)}
               onPress={() => handleTapRight(item.id)}
               onImageFailed={() => markImageFailed(`right-${item.id}`)}
             />

@@ -26,9 +26,31 @@ export function seedOf(text: string): number {
 }
 
 export interface ResolvedPresentation {
+  /** Thế giới (theme id) đã giải, dùng để chọn kiểu thẻ (cardStyleOf). */
+  world: string
   carrier: PresentationCarrier
   layout: PresentationLayout
 }
+
+/** Kiểu thẻ theo thế giới (Matching, Memory): biểu tượng và màu mặt úp, độ bo góc. */
+export interface CardStyle {
+  emblem: string
+  backFrom: string
+  backTo: string
+  radius: number
+}
+
+const CARD_STYLES: Record<string, CardStyle> = {
+  farm: { emblem: '🌻', backFrom: '#86efac', backTo: '#16a34a', radius: 14 },
+  ocean: { emblem: '🐚', backFrom: '#7dd3fc', backTo: '#2563eb', radius: 28 },
+  jungle: { emblem: '🍃', backFrom: '#bef264', backTo: '#4d7c0f', radius: 18 },
+  space: { emblem: '🪐', backFrom: '#a5b4fc', backTo: '#4338ca', radius: 24 },
+}
+const DEFAULT_CARD_STYLE: CardStyle = { emblem: '⭐', backFrom: '#fbbf24', backTo: '#f97316', radius: 20 }
+
+// hasOwn: id lạ như 'constructor' không được rơi vào thuộc tính của Object.prototype.
+export const cardStyleOf = (world: string | undefined): CardStyle =>
+  world && Object.hasOwn(CARD_STYLES, world) ? CARD_STYLES[world] : DEFAULT_CARD_STYLE
 
 /**
  * @param saved metadata.presentation (có thể thiếu)
@@ -39,6 +61,7 @@ export function resolvePresentation(saved: GamePresentation | undefined, themeId
   const hash = seedOf(seed)
   const carriers = CARRIERS_BY_WORLD[themeId] ?? DEFAULT_CARRIERS
   return {
+    world: themeId,
     carrier: saved?.carrier ?? carriers[hash % carriers.length],
     layout: saved?.layout ?? PRESENTATION_LAYOUTS[Math.floor(hash / 7) % PRESENTATION_LAYOUTS.length],
   }

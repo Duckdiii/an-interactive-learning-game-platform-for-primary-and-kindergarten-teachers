@@ -6,6 +6,8 @@ import { bob, burstParticle, easeOutBack, progress, wiggle } from '../common/mot
 import { quantityPicture } from '../common/optionVisual'
 import { OPTION_OBJECT_FILLS, type Palette } from '../common/palette'
 import { useGamePalette } from '../common/useGamePalette'
+import { usePresentation } from '../../player/theme/PresentationContext'
+import { cardStyleOf } from '../../utils/presentation'
 import { CARD_FONT_SIZE, CARD_IMAGE_SIZE, CARD_PADDING, cardTextWidth } from './matchingLayout'
 import { sideDisplay } from './matchingView'
 
@@ -35,6 +37,8 @@ interface MatchingCardProps {
   /** Đồng hồ hoạt ảnh (giây) và lúc chấm xong; 0 và null thì vẽ tĩnh. */
   time?: number
   reactedAt?: number | null
+  /** Giây trễ trước khi thẻ bật vào (thẻ xuất hiện lần lượt); null thì hiện ngay (xem lại, giảm chuyển động). */
+  appearDelay?: number | null
 }
 
 const fillOf = (palette: Palette): Record<MatchingCardState, string> => ({
@@ -65,8 +69,10 @@ export default function MatchingCard({
   colorIndex = 0,
   time = 0,
   reactedAt = null,
+  appearDelay = null,
 }: MatchingCardProps) {
   const palette = useGamePalette()
+  const cardStyle = cardStyleOf(usePresentation()?.world)
   const [image, imageStatus] = useImage(content.imageUrl ?? '')
   const imageFailed = imageStatus === 'failed'
   // Ảnh lỗi thì chữ dự phòng thay chỗ ảnh (xem `sideDisplay`) và báo renderer tính lại bố cục.
@@ -86,6 +92,7 @@ export default function MatchingCard({
   const shake = state === 'wrong' ? wiggle(elapsed, 0.9, 6) : 0
   // Thẻ đang chọn nhô lên một chút để trẻ thấy mình đã chọn ô nào.
   const lift = state === 'selected' ? -6 : -4 * pop
+  const appear = appearDelay === null ? 1 : easeOutBack(progress(time - appearDelay, 0.4))
   const bursting = state === 'correct' && elapsed > 0 && elapsed < 0.9
 
   // Chỉ nhân bản ảnh khi ảnh là hình tự động của "N con X"; ảnh giáo viên tự đặt luôn vẽ một lần.
@@ -98,12 +105,24 @@ export default function MatchingCard({
   const imageTop = (height - CARD_IMAGE_SIZE) / 2 + (count > 1 ? (CARD_IMAGE_SIZE - rows * (mini + 3) + 3) / 2 : 0) + bob(time, colorIndex * 1.4, 3)
 
   return (
-    <Group x={x + shake} y={y + lift} onClick={onPress} onTap={onPress}>
-      <Rect width={width} height={height} y={6} cornerRadius={20} fill={toy} listening={false} />
+    // Phóng to quanh tâm thẻ để thẻ "bật" vào chỗ, không trượt lệch đường nối.
+    <Group
+      x={x + shake + width / 2}
+      y={y + lift + height / 2}
+      offsetX={width / 2}
+      offsetY={height / 2}
+      scaleX={appear}
+      scaleY={appear}
+      opacity={Math.min(1, appear)}
+      onClick={onPress}
+      onTap={onPress}
+    >
+      {/* Bóng dưới thẻ mang màu thế giới; viền giữ màu kẹo theo thứ tự thẻ. */}
+      <Rect width={width} height={height} y={6} cornerRadius={cardStyle.radius} fill={cardStyle.backTo} listening={false} />
       <Rect
         width={width}
         height={height}
-        cornerRadius={20}
+        cornerRadius={cardStyle.radius}
         fill={fillOf(palette)[state]}
         stroke={emphasised ? (accent ?? toy) : toy}
         strokeWidth={emphasised ? 8 : 5}

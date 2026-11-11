@@ -277,3 +277,56 @@
     animation: none;
   }
 }
+
+/* Thẻ lật 3D (Memory): .flip-inner xoay, hai mặt .flip-face chồng lên nhau, mặt sau quay sẵn 180 độ. */
+.flip-card {
+  perspective: 800px;
+}
+
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.flip-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-front {
+  transform: rotateY(180deg);
+}
+
+/* Thẻ xuất hiện lần lượt: animation-delay đặt theo thứ tự thẻ. Chỉ "backwards" để sau khi xong không đè transform của hover/chọn. */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.card-in {
+  animation: card-in 380ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner {
+    transition: none;
+  }
+  .card-in {
+    animation: none;
+  }
+}

@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { StudentMemoryCardQuestion } from '../../types/game-student.types'
 import { PROFILES } from '../profile/profiles'
+import { PresentationProvider } from '../theme/PresentationContext'
 import MemoryCardPlayable from './MemoryCardPlayable'
 
 vi.mock('../../games/common/sound', () => ({
@@ -57,5 +58,23 @@ describe('MemoryCardPlayable', () => {
         flips: 2,
       })
     })
+  })
+
+  it('thẻ úp không có hình hay chữ đáp án trong DOM', () => {
+    const { container } = render(<MemoryCardPlayable question={question} profile={PROFILES.be} onSubmit={vi.fn()} />)
+
+    expect(screen.queryByText('cat')).not.toBeInTheDocument()
+    expect(container.querySelector('img')).toBeNull()
+  })
+
+  it('mặt úp mang biểu tượng của thế giới game', () => {
+    render(
+      <PresentationProvider presentation={{ world: 'ocean', carrier: 'fish', layout: 'row' }}>
+        <MemoryCardPlayable question={question} profile={PROFILES.be} onSubmit={vi.fn()} />
+      </PresentationProvider>,
+    )
+
+    expect(screen.getAllByText('🐚')).toHaveLength(2)
+    expect(screen.queryByText('⭐')).not.toBeInTheDocument()
   })
 })

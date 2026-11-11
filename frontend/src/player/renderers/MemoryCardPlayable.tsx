@@ -2,7 +2,11 @@ import { useMemo, useState } from 'react'
 import { playSound } from '../../games/common/sound'
 import type { PairSide } from '../../types/game-dsl.types'
 import { resolveAssetUrl } from '../../utils/assetResolver'
+import { cardStyleOf } from '../../utils/presentation'
+import { usePresentation } from '../theme/PresentationContext'
 import type { PlayableRendererProps } from './types'
+
+const FLIP_MS = 450
 
 interface CardItem {
   id: string
@@ -14,16 +18,19 @@ interface CardItem {
  * Trình dựng trò chơi Lật Thẻ Nhớ (MEMORY_CARD) cho Bé và Học Sinh.
  * Thiết kế theo phong cách Đồ họa Kẹo ngọt (Candy Gloss / Toy Palette):
  * - Thẻ có hiệu ứng lật vui mắt, viền bo tròn thân thiện mầm non
- * - Mặt úp là ngôi sao may mắn lấp lánh
+ * - Mặt úp mang biểu tượng và màu của thế giới (cardStyleOf); lật thẻ xoay 3D, các thẻ xuất hiện lần lượt
  * - Mặt ngửa là hình vẽ Vector SVG ngộ nghĩnh kèm chữ số/tên gọi to rõ
  * - Tự động phát âm thanh khi tìm đúng cặp và khi hoàn thành
  */
 export default function MemoryCardPlayable({ question, profile, onSubmit }: PlayableRendererProps<'MEMORY_CARD'>) {
   const [flippedCardIds, setFlippedCardIds] = useState<string[]>([])
+  // Thẻ đang úp lại: giữ nội dung tới khi xoay xong (khớp thời gian .flip-inner) để trẻ thấy hình đang úp xuống.
+  const [hidingCardIds, setHidingCardIds] = useState<string[]>([])
   const [matchedPairIds, setMatchedPairIds] = useState<string[]>([])
   const [flips, setFlips] = useState(0)
   const [isLocked, setIsLocked] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
+  const cardStyle = cardStyleOf(usePresentation()?.world)
 
   // Nhân đôi các cặp thành 2 thẻ và xáo bài theo id câu hỏi
   const cards = useMemo<CardItem[]>(() => {
@@ -91,7 +98,9 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
         setIsLocked(true)
         setTimeout(() => {
           setFlippedCardIds([])
+          setHidingCardIds([firstId, card.id])
           setIsLocked(false)
+          setTimeout(() => setHidingCardIds([]), FLIP_MS)
         }, 800)
       }
     }
@@ -114,6 +123,7 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
         {cards.map((card, index) => {
           const isMatched = matchedPairIds.includes(card.pairId)
           const isFlipped = isMatched || flippedCardIds.includes(card.id)
+          const showContent = isFlipped || hidingCardIds.includes(card.id)
           const assetUrl = card.content.imageUrl || resolveAssetUrl(card.content.text, card.content.visualPrompt)
 
           return (
@@ -125,6 +135,8 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
               style={{
                 minWidth: Math.min(profile.tokens.minTouch, 72),
                 minHeight: Math.min(profile.tokens.minTouch, 72),
+                borderRadius: cardStyle.radius,
+                animationDelay: `${index * 60}ms`,
               }}
               aria-label={
                 isFlipped
@@ -132,35 +144,49 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
                   : `Thẻ chưa lật số ${index + 1}`
               }
               className={[
-                'group relative flex aspect-[4/5] w-20 sm:w-24 md:w-28 flex-col items-center justify-center rounded-2xl p-2 transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-play-primary shadow-sm select-none',
-                isFlipped
-                  ? isMatched
-                    ? 'border-3 border-emerald-400 bg-emerald-50/70 scale-95 shadow-none'
-                    : 'border-3 border-amber-400 bg-white shadow-md -translate-y-1'
-                  : 'border-3 border-amber-600/30 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 hover:scale-105 active:scale-95 cursor-pointer',
+                'flip-card card-in relative aspect-[4/5] w-20 sm:w-24 md:w-28 select-none focus:outline-none focus-visible:ring-4 focus-visible:ring-play-primary',
+                'transition-transform',
+                isFlipped ? (isMatched ? 'scale-95' : '-translate-y-1') : 'cursor-pointer hover:scale-105 active:scale-95',
               ].join(' ')}
             >
-              {isFlipped ? (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 animate-in fade-in duration-200">
-                  {assetUrl ? (
-                    <img
-                      src={assetUrl}
-                      alt=""
-                      aria-hidden="true"
-                      className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 object-contain drop-shadow-2xs"
-                    />
-                  ) : null}
-                  {card.content.text ? (
-                    <span className="line-clamp-2 text-center text-xs sm:text-sm font-black text-play-ink leading-tight">
-                      {card.content.text}
-                    </span>
+              <div className={`flip-inner${isFlipped ? ' is-flipped' : ''}`}>
+                {/* Mặt úp: biểu tượng và màu theo thế giới của game. */}
+                <div
+                  className="flip-face flex items-center justify-center border-3 border-white/40 text-white shadow-sm"
+                  style={{
+                    borderRadius: cardStyle.radius,
+                    background: `linear-gradient(135deg, ${cardStyle.backFrom}, ${cardStyle.backTo})`,
+                  }}
+                >
+                  <span className="text-2xl sm:text-3xl select-none">{cardStyle.emblem}</span>
+                </div>
+                <div
+                  className={[
+                    'flip-face flip-front flex flex-col items-center justify-center gap-1.5 p-2 border-3',
+                    isMatched ? 'border-emerald-400 bg-emerald-50' : 'border-amber-400 bg-white shadow-md',
+                  ].join(' ')}
+                  style={{ borderRadius: cardStyle.radius }}
+                >
+                  {/* Nội dung chỉ có trong DOM khi đã lật (hoặc đang xoay úp lại), để thẻ úp không lộ đáp án. */}
+                  {showContent ? (
+                    <>
+                      {assetUrl ? (
+                        <img
+                          src={assetUrl}
+                          alt=""
+                          aria-hidden="true"
+                          className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 object-contain drop-shadow-2xs"
+                        />
+                      ) : null}
+                      {card.content.text ? (
+                        <span className="line-clamp-2 text-center text-xs sm:text-sm font-black text-play-ink leading-tight">
+                          {card.content.text}
+                        </span>
+                      ) : null}
+                    </>
                   ) : null}
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center text-white drop-shadow">
-                  <span className="text-2xl sm:text-3xl select-none">⭐</span>
-                </div>
-              )}
+              </div>
             </button>
           )
         })}
