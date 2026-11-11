@@ -364,6 +364,48 @@ paths:
         '504':
           $ref: '#/components/responses/AiTimeout'
 
+  /games/understand:
+    post:
+      tags: [Games]
+      operationId: understandGameRequest
+      summary: AI phân tích yêu cầu của giáo viên trước khi sinh game (khung chat tạo game)
+      description: |
+        Bước trước `POST /games/generate`. Nhận lịch sử chat giữa giáo viên và trợ lý (tin cuối là của
+        giáo viên) cùng thẻ hiểu yêu cầu hiện tại (nếu giáo viên đã tự sửa), trả lại lời đáp, câu hỏi
+        lại (nếu còn thiếu thông tin) và thẻ hiểu yêu cầu đã cập nhật.
+
+        AI đối chiếu yêu cầu với năng lực của hệ thống (10 loại game DSL và game CPF): phần chưa làm
+        được (ví dụ ghi âm giọng trẻ) được nêu trong `understanding.unsupported` kèm phương án thay thế,
+        không âm thầm đổi sang kiểu khác. Tối đa 2 câu hỏi lại trong một cuộc chat; sau đó AI tự điền
+        phần còn thiếu và ghi vào `assumptions`.
+
+        Không lưu gì vào cơ sở dữ liệu. Khi giáo viên xác nhận thẻ, client ghép thẻ thành `idea` và gửi
+        `POST /games/generate` với `gameType` đã chọn (contract của `/games/generate` không đổi).
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnderstandGameRequest'
+      responses:
+        '200':
+          description: Lời đáp, câu hỏi lại (nếu có) và thẻ hiểu yêu cầu.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameUnderstandingResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+
   /games:
     get:
       tags: [Games]
@@ -2519,6 +2561,130 @@ components:
           $ref: '#/components/schemas/GameType'
         voice:
           $ref: '#/components/schemas/Voice'
+
+    UnderstandGameRequest:
+      type: object
+      required: [subject, gradeLevel, messages]
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        gradeLevel:
+          $ref: '#/components/schemas/GradeLevel'
+        messages:
+          type: array
+          minItems: 1
+          maxItems: 12
+          description: Lịch sử chat theo thứ tự thời gian; tin cuối phải có `role` là `TEACHER`.
+          items:
+            $ref: '#/components/schemas/ChatTurn'
+        understanding:
+          $ref: '#/components/schemas/GameUnderstanding'
+          description: Thẻ hiện tại, kể cả phần giáo viên đã tự sửa; AI giữ những gì giáo viên đã sửa.
+
+    ChatTurn:
+      type: object
+      required: [role, text]
+      properties:
+        role:
+          type: string
+          enum: [TEACHER, ASSISTANT]
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    GameUnderstanding:
+      type: object
+      description: Thẻ "Hệ thống hiểu như sau". Mọi chữ bằng tiếng Việt (môn Tiếng Anh có thể chèn từ cần học).
+      required: [learningGoal, childAction, content, setting, gameType, alternativeGameTypes, unsupported, assumptions]
+      properties:
+        learningGoal:
+          type: string
+          maxLength: 200
+          description: Mục tiêu học.
+        childAction:
+          type: string
+          maxLength: 200
+          description: Trẻ sẽ làm gì khi chơi.
+        content:
+          type: array
+          maxItems: 20
+          description: Nội dung cụ thể (từ, phép tính, cặp...) đã biết hoặc AI đề xuất.
+          items:
+            type: string
+            maxLength: 100
+        setting:
+          type: string
+          maxLength: 200
+          description: Bối cảnh, nhân vật, đồ vật trong game.
+        gameType:
+          $ref: '#/components/schemas/GameType'
+        alternativeGameTypes:
+          type: array
+          maxItems: 2
+          description: Kiểu chơi thay thế, khác `gameType` và không trùng nhau.
+          items:
+            $ref: '#/components/schemas/GameType'
+        unsupported:
+          type: array
+          maxItems: 5
+          description: Phần giáo viên muốn mà hệ thống chưa làm được, kèm phương án thay thế.
+          items:
+            type: object
+            required: [need, fallback]
+            properties:
+              need:
+                type: string
+                maxLength: 200
+              fallback:
+                type: string
+                maxLength: 200
+        assumptions:
+          type: array
+          maxItems: 5
+          description: Những gì AI tự đoán khi giáo viên chưa nói, để giáo viên xem lại.
+          items:
+            type: string
+            maxLength: 200
+
+    GameUnderstandingResponse:
+      type: object
+      required: [reply, understanding, ready]
+      properties:
+        reply:
+          type: string
+          maxLength: 600
+          description: Lời đáp của trợ lý trong khung chat.
+        question:
+          oneOf:
+            - type: 'null'
+            - type: object
+              required: [text, quickReplies]
+              properties:
+                text:
+                  type: string
+                  maxLength: 300
+                quickReplies:
+                  type: array
+                  maxItems: 4
+                  description: Nút trả lời nhanh.
+                  items:
+                    type: string
+                    maxLength: 60
+          description: Câu hỏi lại; `null` khi đã đủ thông tin.
+        understanding:
+          $ref: '#/components/schemas/GameUnderstanding'
+        ready:
+          type: boolean
+          description: Đủ thông tin để tạo game (không còn câu hỏi lại).
+
+    GameUnderstandingResult:
+      type: object
+      required: [success, data]
+      properties:
+        success: { const: true }
+        data:
+          $ref: '#/components/schemas/GameUnderstandingResponse'
 
     # --- DSL v1.0.0 (nguồn sự thật: JSON Schema trong backend, mỗi loại game một file) ---
 

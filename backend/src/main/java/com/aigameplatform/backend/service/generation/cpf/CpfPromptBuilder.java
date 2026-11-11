@@ -2,6 +2,7 @@ package com.aigameplatform.backend.service.generation.cpf;
 
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.service.generation.PromptData;
 import com.aigameplatform.backend.service.validation.ValidationError;
 import com.aigameplatform.backend.service.validation.cpf.CpfAssetCatalog;
 import java.util.Map;
@@ -120,12 +121,9 @@ public class CpfPromptBuilder {
     /** openapi: GenerateGameRequest.idea tối đa 2000 ký tự. */
     static final int MAX_IDEA_LENGTH = 2000;
 
-    /**
-     * Không cho dữ liệu tự đóng/mở vùng {@code <<< >>>} để giả làm chỉ dẫn. Đây là giảm thiểu, không phải biên giới an
-     * toàn: đầu ra vẫn bị ép schema và qua đủ 3 lớp kiểm duyệt.
-     */
+    /** Đầu ra vẫn bị ép schema và qua đủ 3 lớp kiểm duyệt; xem {@link PromptData#asData}. */
     static String asData(String text) {
-        return text == null ? "" : text.replace("<<<", "‹‹‹").replace(">>>", "›››");
+        return PromptData.asData(text);
     }
 
     private static String subjectName(Subject subject) {

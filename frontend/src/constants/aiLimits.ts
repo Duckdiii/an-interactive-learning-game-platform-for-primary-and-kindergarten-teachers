@@ -14,3 +14,10 @@ export const PUBLISH_REQUEST_TIMEOUT_MS = 20_000
 export const REGENERATE_FEEDBACK_MAX = 500
 
 export const REGENERATE_QUESTION_TIMEOUT_MS = AI_BACKEND_ATTEMPTS * AI_ATTEMPT_TIMEOUT_MS + 5_000
+
+// Phân tích yêu cầu trong khung chat (POST /games/understand): một lần gọi Gemini có thể mất 5-15 giây, Backend thử lại tối đa 1 lần khi JSON hỏng.
+export const UNDERSTAND_TIMEOUT_MS = 45_000
+
+// Giới hạn của khung chat theo openapi `UnderstandGameRequest` / `ChatTurn`.
+export const CHAT_MAX_TURNS = 12
+export const CHAT_MESSAGE_MAX = 2000

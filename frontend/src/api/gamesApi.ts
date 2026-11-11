@@ -1,8 +1,9 @@
-import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS } from '../constants/aiLimits'
+import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS, UNDERSTAND_TIMEOUT_MS } from '../constants/aiLimits'
 import axiosInstance from './axiosInstance'
 import type { ApiSuccessResponse } from '../types/api'
 import type { PublishResult } from '../types/publish.types'
 import type { RegeneratedQuestion } from '../types/regenerate.types'
+import type { GameUnderstandingResponse, UnderstandGameRequest } from '../types/understanding.types'
 import type { GenerateGameRequest } from '../utils/generateRequest'
 import type { AnyGameResponse, GameEnvelopeBody, GameResponse } from '../types/game-response.types'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
@@ -70,6 +71,16 @@ export async function postRegenerateQuestion(gameId: string, questionId: string,
     feedback ? { feedback } : undefined,
     { timeout: REGENERATE_QUESTION_TIMEOUT_MS, signal: options.signal },
   )
+
+  return response.data.data
+}
+
+/** POST /games/understand: AI đọc cuộc chat, trả lời đáp, câu hỏi lại (nếu có) và thẻ hiểu yêu cầu. Không lưu gì ở máy chủ. */
+export async function postUnderstandGame(body: UnderstandGameRequest, options: { signal?: AbortSignal } = {}) {
+  const response = await axiosInstance.post<ApiSuccessResponse<GameUnderstandingResponse>>('/games/understand', body, {
+    timeout: UNDERSTAND_TIMEOUT_MS,
+    signal: options.signal,
+  })
 
   return response.data.data
 }

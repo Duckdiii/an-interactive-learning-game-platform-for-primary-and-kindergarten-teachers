@@ -6,6 +6,8 @@ import { gameTypeLabel } from '../constants/labels'
 import { rankGameTypes, suggestGameTypes } from '../services/gameTypeSuggestionService'
 import { renderWithProviders } from '../test/renderWithApp'
 import type { GameTypeSuggestion } from '../types/game-suggestion.types'
+import { understandGame } from '../services/understandingService'
+import type { GameUnderstanding, GameUnderstandingResponse } from '../types/understanding.types'
 import CreateGamePage from './CreateGamePage'
 
 // Dịch vụ đề xuất là mock có độ trễ 1 giây; test thay bằng bản không trễ để chạy nhanh và điều khiển được từng trạng thái.
@@ -14,7 +16,10 @@ vi.mock('../services/gameTypeSuggestionService', async (original) => ({
   suggestGameTypes: vi.fn(),
 }))
 
+vi.mock('../services/understandingService', () => ({ understandGame: vi.fn() }))
+
 const mockedSuggest = vi.mocked(suggestGameTypes)
+const mockedUnderstand = vi.mocked(understandGame)
 
 beforeEach(() => {
   mockedSuggest.mockReset()
@@ -56,9 +61,13 @@ const pdf = (name = 'giao-an.pdf', size = 2048) => {
   return file
 }
 
-// Điền ý tưởng, bấm Tạo và chờ bước đề xuất hiện đủ thẻ.
+const attachLesson = () => fireEvent.change(document.getElementById('create-file') as HTMLInputElement, { target: { files: [pdf()] } })
+
+// Điền ý tưởng kèm giáo án, bấm Tạo và chờ bước đề xuất hiện đủ thẻ. Không có giáo án thì đường mô tả sang khung chat
+// (xem describe "khung chat"), nên bước đề xuất kiểu chơi chỉ còn ở luồng có giáo án hoặc tạo ngẫu nhiên.
 const toSuggestions = async (user: User, idea = IDEA) => {
   fireEvent.change(ideaBox(), { target: { value: idea } })
+  attachLesson()
   await user.click(submit())
   await screen.findByRole('heading', { name: 'AI đề xuất kiểu chơi cho bài này' })
   await screen.findAllByRole('button', { name: /^Dùng kiểu này:/ })
@@ -318,6 +327,7 @@ describe('Tạo game mới: cột gợi ý và thanh bước', () => {
     renderPage()
     await chooseGrade(user, 'GRADE_2')
     fireEvent.change(ideaBox(), { target: { value: 'Từ vựng tiếng Anh về màu sắc' } })
+    attachLesson()
     await user.click(submit())
     await screen.findAllByRole('button', { name: /^Dùng kiểu này:/ })
 
@@ -438,6 +448,7 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
     renderPage()
 
     fireEvent.change(ideaBox(), { target: { value: IDEA } })
+    attachLesson()
     await user.click(submit())
 
     expect(await screen.findByText('AI đang chọn loại trò chơi phù hợp...')).toBeInTheDocument()
@@ -490,6 +501,7 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
     const user = userEvent.setup()
     renderPage()
     fireEvent.change(ideaBox(), { target: { value: IDEA } })
+    attachLesson()
     await user.click(submit())
 
     const alert = await screen.findByRole('alert')
@@ -508,6 +520,7 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
     const user = userEvent.setup()
     renderPage()
     fireEvent.change(ideaBox(), { target: { value: IDEA } })
+    attachLesson()
     await user.click(submit())
 
     expect(await screen.findByText('Chưa có đề xuất cho ý tưởng này')).toBeInTheDocument()
@@ -526,46 +539,197 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
   })
 })
 
-describe('Làm rõ mục tiêu sư phạm (Interactive Clarification - Giai đoạn B)', () => {
-  it('prompt ngắn/mơ hồ ("toán lớp 2"): mở hộp thoại làm rõ, bấm Áp dụng thì làm giàu prompt và chuyển sang bước đề xuất', async () => {
-    const user = userEvent.setup()
-    renderPage()
 
-    fireEvent.change(ideaBox(), { target: { value: 'toán lớp 2' } })
-    await user.click(submit())
+const CARD: GameUnderstanding = {
+  learningGoal: 'Đếm số lượng con vật trong phạm vi 5',
+  childAction: 'Đếm rồi chọn số đúng',
+  content: ['3 con vịt', '5 con gà'],
+  setting: 'Ao làng có vịt và gà',
+  gameType: 'MATCHING',
+  alternativeGameTypes: ['QUIZ', 'CUSTOM'],
+  unsupported: [],
+  assumptions: ['Phạm vi số trong 5'],
+}
 
-    // Hộp thoại làm rõ xuất hiện
-    expect(await screen.findByRole('dialog', { name: /Trợ lý AI đồng hành: Làm rõ mục tiêu tiết dạy/i })).toBeInTheDocument()
-    expect(screen.getByText(/Em thấy Thầy\/Cô muốn chuẩn bị bài học cho học sinh/i)).toBeInTheDocument()
+const understood = (patch: Partial<GameUnderstandingResponse> = {}): GameUnderstandingResponse => ({
+  reply: 'Em hiểu bé sẽ đếm con vật rồi chọn số.',
+  question: null,
+  understanding: CARD,
+  ready: true,
+  ...patch,
+})
 
-    // Bấm áp dụng
-    await user.click(screen.getByRole('button', { name: /Áp dụng & Gợi ý trò chơi/i }))
+const toChat = async (user: User, idea = IDEA) => {
+  await pick(user, 'KINDERGARTEN', 'MATH')
+  fireEvent.change(ideaBox(), { target: { value: idea } })
+  await user.click(submit())
+  await screen.findByRole('heading', { name: 'Trao đổi với trợ lý AI' })
+}
 
-    // Chuyển sang bước đề xuất
-    expect(await screen.findByRole('heading', { name: 'AI đề xuất kiểu chơi cho bài này' })).toBeInTheDocument()
-    expect(mockedSuggest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        idea: expect.stringContaining('toán lớp 2 ('),
-      })
-    )
+describe('Tạo game mới: khung chat với trợ lý (POST /games/understand)', () => {
+  beforeEach(() => {
+    mockedUnderstand.mockReset()
+    mockedUnderstand.mockResolvedValue(understood())
   })
 
-  it('prompt ngắn/mơ hồ: bấm "Bỏ qua & Dùng mặc định" thì giữ nguyên prompt và sang bước đề xuất', async () => {
+  it('chưa chọn môn hoặc khối thì báo lỗi ở ô mô tả, không gọi trợ lý', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    fireEvent.change(ideaBox(), { target: { value: 'Một bài học bất kỳ nào đó' } })
+
+    await user.click(submit())
+
+    expect(ideaBox()).toHaveAccessibleDescription(/chọn môn học và khối lớp/)
+    expect(mockedUnderstand).not.toHaveBeenCalled()
+  })
+
+  it('mô tả là tin nhắn đầu: gửi kèm môn và khối, hiện lời đáp và thẻ hiểu yêu cầu; thanh bước ghi "Xác nhận với AI"', async () => {
     const user = userEvent.setup()
     renderPage()
 
-    fireEvent.change(ideaBox(), { target: { value: 'toán lớp 2' } })
-    await user.click(submit())
+    await toChat(user)
 
-    expect(await screen.findByRole('dialog', { name: /Trợ lý AI đồng hành: Làm rõ mục tiêu tiết dạy/i })).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: /Bỏ qua & Dùng mặc định/i }))
-
-    expect(await screen.findByRole('heading', { name: 'AI đề xuất kiểu chơi cho bài này' })).toBeInTheDocument()
-    expect(mockedSuggest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        idea: 'toán lớp 2',
-      })
+    expect(mockedUnderstand).toHaveBeenCalledWith(
+      { subject: 'MATH', gradeLevel: 'KINDERGARTEN', messages: [{ role: 'TEACHER', text: IDEA }] },
+      expect.anything(),
     )
+    const log = screen.getByRole('log', { name: 'Cuộc trò chuyện với trợ lý AI' })
+    expect(within(log).getByText(IDEA)).toBeInTheDocument()
+    expect(await within(log).findByText('Em hiểu bé sẽ đếm con vật rồi chọn số.')).toBeInTheDocument()
+    expect(screen.getByLabelText('Mục tiêu học')).toHaveValue(CARD.learningGoal)
+    expect(screen.getByLabelText('Nội dung')).toHaveValue('3 con vịt\n5 con gà')
+    expect(screen.getByText('Phạm vi số trong 5')).toBeInTheDocument()
+    expect(btn(gameTypeLabel('MATCHING'))).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('Xác nhận với AI')).toBeInTheDocument()
+  })
+
+  it('câu hỏi lại có nút trả lời nhanh; bấm thì gửi lại đủ lịch sử (cô, trợ lý, cô) và thẻ hiện tại', async () => {
+    mockedUnderstand.mockResolvedValueOnce(
+      understood({ ready: false, reply: 'Em cần hỏi thêm.', question: { text: 'Bé đếm trong phạm vi mấy ạ?', quickReplies: ['Trong 5', 'Trong 10'] } }),
+    )
+    const user = userEvent.setup()
+    renderPage()
+    await toChat(user)
+
+    await user.click(await screen.findByRole('button', { name: 'Trong 5' }))
+
+    await waitFor(() => expect(mockedUnderstand).toHaveBeenCalledTimes(2))
+    expect(mockedUnderstand.mock.calls[1][0]).toEqual({
+      subject: 'MATH',
+      gradeLevel: 'KINDERGARTEN',
+      messages: [
+        { role: 'TEACHER', text: IDEA },
+        { role: 'ASSISTANT', text: 'Em cần hỏi thêm.\nBé đếm trong phạm vi mấy ạ?' },
+        { role: 'TEACHER', text: 'Trong 5' },
+      ],
+      understanding: CARD,
+    })
+  })
+
+  it('phần hệ thống chưa làm được hiện rõ kèm cách làm thay', async () => {
+    mockedUnderstand.mockResolvedValueOnce(
+      understood({ understanding: { ...CARD, unsupported: [{ need: 'Ghi âm giọng bé', fallback: 'Bé nghe rồi chọn tiếng đúng' }] } }),
+    )
+    const user = userEvent.setup()
+    renderPage()
+    await toChat(user)
+
+    expect(await screen.findByText('Hệ thống chưa làm được, sẽ làm thay như sau:')).toBeInTheDocument()
+    expect(screen.getByText('Ghi âm giọng bé')).toBeInTheDocument()
+    expect(screen.getByText(/Bé nghe rồi chọn tiếng đúng/)).toBeInTheDocument()
+  })
+
+  it('cô sửa thẻ (mục tiêu, kiểu chơi) rồi nhắn tiếp: lần gửi sau mang theo bản đã sửa', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await toChat(user)
+    await screen.findByLabelText('Mục tiêu học')
+
+    await user.clear(screen.getByLabelText('Mục tiêu học'))
+    await user.type(screen.getByLabelText('Mục tiêu học'), 'Đếm trong phạm vi 10')
+    await user.click(btn(gameTypeLabel('QUIZ')))
+    await user.type(screen.getByLabelText('Nhắn cho trợ lý'), 'Thêm con mèo{Enter}')
+
+    await waitFor(() => expect(mockedUnderstand).toHaveBeenCalledTimes(2))
+    expect(mockedUnderstand.mock.calls[1][0].understanding).toEqual({
+      ...CARD,
+      learningGoal: 'Đếm trong phạm vi 10',
+      gameType: 'QUIZ',
+      alternativeGameTypes: ['MATCHING', 'CUSTOM'],
+    })
+  })
+
+  it('trợ lý lỗi: báo lỗi, giữ tin của cô; "Thử lại" gửi lại đúng lịch sử đó', async () => {
+    mockedUnderstand.mockReset()
+    mockedUnderstand.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce(understood())
+    const user = userEvent.setup()
+    renderPage()
+    await toChat(user)
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Trợ lý chưa trả lời được lúc này')
+    expect(within(screen.getByRole('log')).getByText(IDEA)).toBeInTheDocument()
+
+    await user.click(within(alert).getByRole('button', { name: 'Thử lại' }))
+
+    await waitFor(() => expect(mockedUnderstand).toHaveBeenCalledTimes(2))
+    expect(mockedUnderstand.mock.calls[1][0]).toEqual(mockedUnderstand.mock.calls[0][0])
+    expect(await screen.findByLabelText('Mục tiêu học')).toHaveValue(CARD.learningGoal)
+  })
+
+  it('quay lại bước mô tả bằng nút ‹, mô tả và lựa chọn vẫn còn', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await toChat(user)
+
+    await user.click(btn('Quay lại bước Mô tả bài học'))
+
+    expect(ideaBox()).toHaveValue(IDEA)
+    expect(btn('Mầm non')).toHaveAttribute('aria-pressed', 'true')
+  })
+})
+
+describe('Tạo game mới: khóa thẻ đúng lúc', () => {
+  beforeEach(() => {
+    mockedUnderstand.mockReset()
+  })
+
+  it('trợ lý còn câu hỏi thì chưa cho tạo game, có lời nhắc; trả lời xong thì mở khóa', async () => {
+    mockedUnderstand
+      .mockResolvedValueOnce(understood({ ready: false, question: { text: 'Phạm vi mấy ạ?', quickReplies: ['Trong 5'] } }))
+      .mockResolvedValueOnce(understood())
+    const user = userEvent.setup()
+    renderPage()
+    await toChat(user)
+
+    const confirm = await screen.findByRole('button', { name: 'Đúng rồi, tạo game' })
+    expect(confirm).toBeDisabled()
+    expect(confirm).toHaveAccessibleDescription(/trả lời câu hỏi của trợ lý/)
+
+    await user.click(btn('Trong 5'))
+
+    await waitFor(() => expect(btn('Đúng rồi, tạo game')).toBeEnabled())
+  })
+
+  it('đang chờ trợ lý trả lời thì các ô của thẻ bị khóa (kết quả mới không ghi đè chỗ cô đang sửa)', async () => {
+    let finish!: (value: GameUnderstandingResponse) => void
+    mockedUnderstand.mockResolvedValueOnce(understood()).mockReturnValueOnce(
+      new Promise((done) => {
+        finish = done
+      }),
+    )
+    const user = userEvent.setup()
+    renderPage()
+    await toChat(user)
+    await screen.findByLabelText('Mục tiêu học')
+
+    await user.type(screen.getByLabelText('Nhắn cho trợ lý'), 'Thêm con mèo{Enter}')
+
+    expect(screen.getByLabelText('Mục tiêu học')).toBeDisabled()
+    expect(btn(gameTypeLabel('QUIZ'))).toBeDisabled()
+    expect(btn('Đúng rồi, tạo game')).toBeDisabled()
+    expect(screen.getByLabelText('Nhắn cho trợ lý')).toHaveFocus()
+    finish(understood())
+    await waitFor(() => expect(screen.getByLabelText('Mục tiêu học')).toBeEnabled())
   })
 })
