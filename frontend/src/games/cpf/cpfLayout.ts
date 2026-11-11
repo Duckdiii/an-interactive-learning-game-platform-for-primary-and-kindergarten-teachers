@@ -58,8 +58,9 @@ function jitter(index: number, salt: number): number {
 /**
  * Ô cho `count` vật xếp trong vùng. Mọi ô nằm trong vùng, cạnh ≥ CPF_MIN_ITEM_SIZE và không chồng nhau.
  * `SINGLE` chỉ dành cho một vật (Lớp 2 chặn `bindTo` + `SINGLE`); nếu vẫn có nhiều vật thì xếp như `ROW`.
+ * `variant` (số màn) chỉ đổi bố cục `SCATTER`: vật lựa chọn đổi ô và đổi chỗ trong ô sau mỗi câu, vẫn không chồng nhau.
  */
-export function layoutGroup(region: CpfRegion, arrangement: CpfArrangement, count: number): Box[] {
+export function layoutGroup(region: CpfRegion, arrangement: CpfArrangement, count: number, variant = 0): Box[] {
   const area = regionBox(region)
   if (count <= 0) return []
 
@@ -73,13 +74,14 @@ export function layoutGroup(region: CpfRegion, arrangement: CpfArrangement, coun
   const cellH = (area.h - GAP * (rows - 1)) / rows
   const boxes: Box[] = []
   for (let i = 0; i < count; i++) {
-    const col = i % cols
-    const row = Math.floor(i / cols)
+    const cell = arrangement === 'SCATTER' ? (i + variant) % count : i
+    const col = cell % cols
+    const row = Math.floor(cell / cols)
     const slackX = cellW - size
     const slackY = cellH - size
     // SCATTER: lệch ngẫu nhiên ổn định trong ô của mình nên không bao giờ chồng ô khác.
-    const offX = arrangement === 'SCATTER' ? jitter(i, 1) * slackX : slackX / 2
-    const offY = arrangement === 'SCATTER' ? jitter(i, 2) * slackY : slackY / 2
+    const offX = arrangement === 'SCATTER' ? jitter(i, 1 + variant * 7) * slackX : slackX / 2
+    const offY = arrangement === 'SCATTER' ? jitter(i, 2 + variant * 7) * slackY : slackY / 2
     boxes.push({ x: area.x + col * (cellW + GAP) + offX, y: area.y + row * (cellH + GAP) + offY, w: size, h: size })
   }
   return boxes

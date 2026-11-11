@@ -24,12 +24,13 @@ public class UnderstandingPromptBuilder {
             - DRAG_DROP: trẻ kéo vật thả vào đúng nhóm hoặc đúng chỗ.
             - ORDERING: trẻ sắp xếp các mục theo đúng thứ tự.
             - VISUAL_CLOZE: trẻ điền từ còn thiếu vào câu có hình minh họa.
-            - CUSTOM: game vận động tự do. Vật mang đáp án rơi xuống, bay lên hoặc đứng yên; trẻ chạm vào vật, kéo giỏ
-              hứng vật, kéo thả tự do, hoặc kéo ná nhắm bắn. Nhiệm vụ mỗi màn: chọn 1 đáp án đúng, tìm hết các đáp án đúng,
+            - CUSTOM: game vận động tự do. Vật mang đáp án rơi xuống, bay lên (thẳng hoặc lắc lư như bóng bay), bay vòng,
+              chạy ngang qua màn, đi qua lại, nhún hoặc đứng yên; trẻ chạm vào vật, kéo giỏ hứng vật, kéo thả tự do, kéo ná
+              nhắm bắn (có đường ngắm), hoặc chạm để một nhân vật (chỉ một) chạy thẳng tới nhặt vật, không có lối đi hay ô bàn cờ. Nhiệm vụ mỗi màn: chọn 1 đáp án đúng, tìm hết các đáp án đúng,
               hoặc phân loại vào 2-4 nhóm; mỗi màn 2-8 lựa chọn. Có thể có một vật tiến dần mỗi câu đúng (xe về đích, tên lửa
               bay lên, cây lớn dần). Nền có sẵn: nông trại, rừng, đại dương, đường phố, vũ trụ.
             CHƯA LÀM ĐƯỢC: ghi âm hoặc nhận diện giọng nói, chấm phát âm; tô, vẽ, viết theo nét; dùng camera hoặc vận động
-            cơ thể thật; mê cung, điều khiển nhân vật đi lại; nhiều người chơi trên cùng một màn hình; gõ phím trả lời tự do;
+            cơ thể thật; mê cung, điều khiển nhân vật bằng phím hoặc cần điều khiển; nhiều người chơi trên cùng một màn hình; gõ phím trả lời tự do;
             hẹn giờ hoặc đếm ngược từng màn; bảng xếp hạng trong game; bàn cờ, xúc xắc; truyện rẽ nhánh; video.""";
 
     static final String RULES = """

@@ -21,8 +21,8 @@ import {
   type CpfRoundResult,
   type CpfState,
 } from './cpfEngine'
-import { CPF_HUD_HEIGHT, CPF_STAGE_HEIGHT, CPF_STAGE_WIDTH, overlaps, progressX } from './cpfLayout'
-import { boxOf, buildInstances, clampX, instanceAt, stepMotion, touching, type CpfInstance } from './cpfScene'
+import { CPF_HUD_HEIGHT, CPF_STAGE_HEIGHT, CPF_STAGE_WIDTH, progressX } from './cpfLayout'
+import { boxOf, buildInstances, clampX, instanceAt, snapZone, stepMotion, stepWalker, touching, traceShot, type CpfInstance, type WalkGoal } from './cpfScene'
 
 /**
  * Renderer CPF Game v2.0.0 (docs/cpf-game-v2.0.0.md). Prop theo `mode` như các renderer khác (.claude/rules/canvas-engine.md):
@@ -79,6 +79,18 @@ export default function CpfRenderer(props: CpfRendererProps) {
   const effectsRef = useRef<Effect[]>([])
   const shotRef = useRef<Shot | null>(null)
   const dragRef = useRef<{ key: string; dx: number; dy: number } | null>(null)
+  // TAP_MOVE: chỗ trẻ vừa chạm (và vật lựa chọn được chạm, nếu có) mà nhân vật đang chạy tới.
+  const walkRef = useRef<WalkGoal | null>(null)
+  const walkerId = useMemo(() => game.entities.find((e) => e.control === 'TAP_MOVE')?.id, [game])
+  // Luật bắn của ná (AIM_SHOOT) và vật làm bia, để vẽ đường ngắm dự đoán.
+  const aimRule = useMemo(() => {
+    const index = game.rules.findIndex(
+      (r) => r.on.type === 'COLLIDE' && (entities.get(r.on.a)?.control === 'AIM_SHOOT' || entities.get(r.on.b)?.control === 'AIM_SHOOT'),
+    )
+    const on = game.rules[index]?.on
+    if (!on || on.type !== 'COLLIDE') return null
+    return { index, targetId: entities.get(on.a)?.control === 'AIM_SHOOT' ? on.b : on.a }
+  }, [game, entities])
   const busyRef = useRef(false)
   const stateRef = useRef(state)
   stateRef.current = state
@@ -100,6 +112,7 @@ export default function CpfRenderer(props: CpfRendererProps) {
     const built = buildInstances(game, state.roundIndex, progressRef.current)
     instancesRef.current = mode === 'review' ? built.map((i) => ({ ...i, y: i.homeY })) : built
     shotRef.current = null
+    walkRef.current = null
     setFrame((f) => f + 1)
   }, [game, state.roundIndex, mode])
 
@@ -235,6 +248,22 @@ export default function CpfRenderer(props: CpfRendererProps) {
 
   const detectCollisions = (dt: number) => {
     if (busyRef.current) return
+    if (walkerId) {
+      const walker = instancesRef.current.find((i) => i.entityId === walkerId)
+      if (walker) {
+        const step = stepWalker(walker, instancesRef.current, walkRef.current, dt)
+        walkRef.current = step.goal
+        updateInstance(walker.key, { x: step.walker.x, y: step.walker.y })
+        const hit = step.hit
+        if (hit) {
+          for (const rule of game.rules) {
+            if (rule.on.type === 'COLLIDE' && [rule.on.a, rule.on.b].includes(walkerId) && [rule.on.a, rule.on.b].includes(hit.entityId)) {
+              void runRule(rule, hit)
+            }
+          }
+        }
+      }
+    }
     game.rules.forEach((rule, ruleIndex) => {
       if (rule.on.type !== 'COLLIDE') return
       const { a, b } = rule.on
@@ -252,14 +281,18 @@ export default function CpfRenderer(props: CpfRendererProps) {
       }
       const shot = shotRef.current
       if (controller?.control === 'AIM_SHOOT' && shot && shot.ruleIndex === ruleIndex) {
-        shot.x += shot.vx * dt
-        shot.y += shot.vy * dt
-        const hit = touching(instancesRef.current, targetId, { x: shot.x - 12, y: shot.y - 12, w: 24, h: 24 })[0]
-        if (hit) {
-          shotRef.current = null
-          void runRule(rule, hit)
-        } else if (shot.x < 0 || shot.x > CPF_STAGE_WIDTH || shot.y < 0 || shot.y > CPF_STAGE_HEIGHT) {
-          shotRef.current = null
+        // Bước nhỏ (≤ 12px, như traceShot) để khung hình chậm không làm viên bắn nhảy qua bia mà đường ngắm báo trúng.
+        const steps = Math.max(1, Math.ceil((Math.hypot(shot.vx, shot.vy) * dt) / 12))
+        for (let k = 0; k < steps && shotRef.current; k++) {
+          shot.x += (shot.vx * dt) / steps
+          shot.y += (shot.vy * dt) / steps
+          const hit = touching(instancesRef.current, targetId, { x: shot.x - 12, y: shot.y - 12, w: 24, h: 24 })[0]
+          if (hit) {
+            shotRef.current = null
+            void runRule(rule, hit)
+          } else if (shot.x < 0 || shot.x > CPF_STAGE_WIDTH || shot.y < 0 || shot.y > CPF_STAGE_HEIGHT) {
+            shotRef.current = null
+          }
         }
       }
     })
@@ -286,8 +319,13 @@ export default function CpfRenderer(props: CpfRendererProps) {
     // Chạm vào dải HUD không tính là chọn vật đang khuất sau nó.
     if (locked || busyRef.current || p.y < CPF_HUD_HEIGHT) return
     const inst = instanceAt(instancesRef.current, p.x, p.y)
+    const control = inst && entities.get(inst.entityId)?.control
+    // TAP_MOVE: chạm vào đâu thì nhân vật chạy tới đó; chạm vào vật lựa chọn thì nhân vật đuổi theo và chỉ chấm vật đó.
+    if (walkerId && control !== 'DRAG_X' && control !== 'DRAG_FREE' && control !== 'AIM_SHOOT') {
+      walkRef.current = { x: p.x, y: p.y, targetKey: inst?.choiceId ? inst.key : undefined }
+      return
+    }
     if (!inst) return
-    const control = entities.get(inst.entityId)?.control
     if (control === 'DRAG_X' || control === 'DRAG_FREE') {
       dragRef.current = { key: inst.key, dx: p.x - inst.x, dy: p.y - inst.y }
       return
@@ -317,9 +355,8 @@ export default function CpfRenderer(props: CpfRendererProps) {
       const pullX = aim.from.x - aim.to.x
       const pullY = aim.from.y - aim.to.y
       const length = Math.hypot(pullX, pullY)
-      const ruleIndex = game.rules.findIndex((r) => r.on.type === 'COLLIDE' && entities.get(r.on.a)?.control === 'AIM_SHOOT' || (r.on.type === 'COLLIDE' && entities.get(r.on.b)?.control === 'AIM_SHOOT'))
-      if (length >= MIN_PULL && ruleIndex >= 0) {
-        shotRef.current = { ruleIndex, x: aim.from.x, y: aim.from.y, vx: (pullX / length) * SHOT_SPEED, vy: (pullY / length) * SHOT_SPEED }
+      if (length >= MIN_PULL && aimRule) {
+        shotRef.current = { ruleIndex: aimRule.index, x: aim.from.x, y: aim.from.y, vx: (pullX / length) * SHOT_SPEED, vy: (pullY / length) * SHOT_SPEED }
         soundBus.playSling()
       }
       setAim(null)
@@ -330,8 +367,8 @@ export default function CpfRenderer(props: CpfRendererProps) {
     const inst = instancesRef.current.find((i) => i.key === drag.key)
     if (!inst || entities.get(inst.entityId)?.control !== 'DRAG_FREE') return
     const rule = game.rules.find((r) => r.on.type === 'DROP' && r.on.item === inst.entityId)
-    const zoneEntity = rule && rule.on.type === 'DROP' ? rule.on.zone : undefined
-    const zone = instancesRef.current.find((z) => z.entityId === zoneEntity && overlaps(boxOf(z), { x: inst.x + inst.w / 2 - 1, y: inst.y + inst.h / 2 - 1, w: 2, h: 2 }))
+    // Thả gần ô (chưa trúng hẳn) vẫn được hút vào ô gần nhất; đúng ô mà bóng mờ đang chỉ.
+    const zone = rule && rule.on.type === 'DROP' ? snapZone(instancesRef.current, rule.on.zone, inst) : undefined
     if (rule && zone) void runRule(rule, inst, zone.zoneId)
     else updateInstance(inst.key, { x: inst.homeX, y: inst.homeY })
   }
@@ -344,6 +381,14 @@ export default function CpfRenderer(props: CpfRendererProps) {
   }, [props, reviewRound])
   const glow = new Set([...state.glowChoiceIds, ...reviewGlow])
   const now = typeof performance === 'undefined' ? 0 : performance.now()
+
+  // Hỗ trợ điều khiển: đường bay dự đoán khi đang kéo ná, bóng mờ ở ô sẽ hút vật đang kéo.
+  const pull = aim ? { x: aim.from.x - aim.to.x, y: aim.from.y - aim.to.y } : null
+  const trajectory =
+    aim && pull && aimRule && Math.hypot(pull.x, pull.y) >= MIN_PULL ? { from: aim.from, ...traceShot(instancesRef.current, aimRule.targetId, aim.from, pull) } : null
+  const dragged = dragRef.current ? instancesRef.current.find((i) => i.key === dragRef.current?.key) : undefined
+  const dropRule = dragged && game.rules.find((r) => r.on.type === 'DROP' && r.on.item === dragged.entityId)
+  const ghostZone = dragged && dropRule && dropRule.on.type === 'DROP' ? snapZone(instancesRef.current, dropRule.on.zone, dragged) : undefined
 
   const restart = () => {
     setState(initialState())
@@ -373,6 +418,18 @@ export default function CpfRenderer(props: CpfRendererProps) {
             ) : null,
           )}
           {aim ? <Line points={[aim.from.x, aim.from.y, aim.to.x, aim.to.y]} stroke={DEFAULT_PALETTE.ink} strokeWidth={4} dash={[12, 8]} listening={false} /> : null}
+          {trajectory ? (
+            <Line points={[trajectory.from.x, trajectory.from.y, trajectory.end.x, trajectory.end.y]} stroke={DEFAULT_PALETTE.primary} strokeWidth={6}
+              dash={[2, 18]} lineCap="round" opacity={0.8} listening={false} />
+          ) : null}
+          {trajectory?.hit ? (
+            <Circle x={trajectory.hit.x + trajectory.hit.w / 2} y={trajectory.hit.y + trajectory.hit.h / 2} radius={Math.max(trajectory.hit.w, trajectory.hit.h) / 2 + 12}
+              stroke={DEFAULT_PALETTE.primary} strokeWidth={5} dash={[10, 8]} listening={false} />
+          ) : null}
+          {ghostZone && dragged ? (
+            <Rect x={ghostZone.x + (ghostZone.w - dragged.w) / 2} y={ghostZone.y + (ghostZone.h - dragged.h) / 2} width={dragged.w} height={dragged.h}
+              cornerRadius={20} fill={DEFAULT_PALETTE.surface} opacity={0.45} stroke={DEFAULT_PALETTE.primary} strokeWidth={4} dash={[10, 8]} listening={false} />
+          ) : null}
           {shotRef.current ? <Circle x={shotRef.current.x} y={shotRef.current.y} radius={12} fill={DEFAULT_PALETTE.primary} listening={false} /> : null}
           {effectsRef.current.map((effect) => (
             <EffectShape key={effect.id} effect={effect} now={now} />

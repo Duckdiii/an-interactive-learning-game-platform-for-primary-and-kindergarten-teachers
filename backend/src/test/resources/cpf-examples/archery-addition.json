@@ -20,14 +20,14 @@
     {
       "id": "bow",
       "assetId": "object.bow",
-      "placement": { "region": "LEFT", "arrangement": "SINGLE" },
+      "placement": { "region": "BOTTOM", "arrangement": "SINGLE" },
       "control": "AIM_SHOOT"
     },
     {
       "id": "targets",
       "assetId": "object.target",
       "bindTo": "choices",
-      "placement": { "region": "RIGHT", "arrangement": "ROW" },
+      "placement": { "region": "TOP", "arrangement": "ROW" },
       "motion": { "type": "BOB", "speed": "SLOW" }
     }
   ],

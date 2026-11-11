@@ -112,6 +112,18 @@ class CpfGenerationServiceTest {
     }
 
     @Test
+    void fastThingsAreSlowedDownForKindergartenInsteadOfRetrying() throws IOException {
+        ObjectNode answer = (ObjectNode) MAPPER.readTree(example("rabbit-pick-carrots"));
+        ((ObjectNode) answer.get("entities").get(0).get("motion")).put("speed", "FAST");
+        var ai = new ScriptedGenerator(MAPPER.writeValueAsString(answer));
+
+        JsonNode game = service(ai).generate("Thỏ nhặt cà rốt", Subject.MATH, GradeLevel.KINDERGARTEN);
+
+        assertThat(game.path("entities").get(0).path("motion").path("speed").asString()).isEqualTo("MEDIUM");
+        assertThat(ai.attempts).hasSize(1);
+    }
+
+    @Test
     void nullOptionalFieldsFromTheDecoderAreDropped() throws IOException {
         ObjectNode answer = (ObjectNode) MAPPER.readTree(example("fishing-compound-words"));
         ((ObjectNode) answer.get("world")).putNull("mascotId");

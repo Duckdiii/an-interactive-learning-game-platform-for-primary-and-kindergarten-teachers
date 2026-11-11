@@ -34,6 +34,7 @@ class CpfValidationServiceTest {
     private static final String FISH = "fishing-compound-words";
     private static final String ARCHERY = "archery-addition";
     private static final String SORT = "sort-land-water-animals";
+    private static final String RABBIT = "rabbit-pick-carrots";
 
     private final ContentModerationClient moderation = mock(ContentModerationClient.class);
     private final CpfValidationService service = new CpfValidationService(new CpfAssetCatalog(MAPPER),
@@ -89,7 +90,7 @@ class CpfValidationServiceTest {
     // ---- ví dụ hợp lệ ----
 
     @ParameterizedTest
-    @ValueSource(strings = {CATCH, RACE, FISH, ARCHERY, SORT})
+    @ValueSource(strings = {CATCH, RACE, FISH, ARCHERY, SORT, RABBIT})
     void everyExamplePassesAllThreeLayers(String name) throws IOException {
         var report = service.validate(example(name));
         assertThat(report.errors()).isEmpty();
@@ -510,5 +511,114 @@ class CpfValidationServiceTest {
             choiceLabel(g, 0, 2, "2 x 4");
             answer(g, 0).set("correctChoiceIds", MAPPER.createArrayNode().add("c1"));
         }), "$.answerKey.rounds[0].correctChoiceIds", "không cho kết quả 6");
+    }
+
+    // ---- khối Đợt 5: chuyển động mới, TAP_MOVE ----
+
+    @Test
+    void catcherAtTheTopAlsoCatchesSwayingBalloons() throws IOException {
+        JsonNode json = mutated(CATCH, g -> {
+            ((ObjectNode) entity(g, 1).get("placement")).put("region", "TOP");
+            ((ObjectNode) entity(g, 0).get("placement")).put("region", "BOTTOM");
+            ((ObjectNode) entity(g, 0).get("motion")).put("type", "SWAY_UP");
+        });
+        assertThat(errorsOf(json)).isEmpty();
+    }
+
+    @Test
+    void rejectsTapMoveTargetsThatLeaveTheScreen() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> ((ObjectNode) entity(g, 0).get("motion")).put("type", "FALL"));
+        assertOnlyError(json, "$.rules[0].on", "ở lại trên màn");
+    }
+
+    @Test
+    void rejectsTapMoveCharacterStartingOnTheChoices() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> ((ObjectNode) entity(g, 1).get("placement")).put("region", "TOP"));
+        assertOnlyError(json, "$.rules[0].on", "hai vùng khác nhau");
+    }
+
+    @Test
+    void rejectsTapRuleInATapMoveGame() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> {
+            ObjectNode tap = ((ArrayNode) g.get("rules")).addObject();
+            tap.putObject("on").put("type", "TAP").put("target", "carrots");
+            tap.putArray("do").addObject().put("type", "SOUND").put("name", "POP");
+        });
+        assertOnlyError(json, "$.rules", "không dùng luật TAP");
+    }
+
+    @Test
+    void rejectsSecondTapMoveCharacter() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> {
+            ObjectNode second = entity(g, 1).deepCopy();
+            second.put("id", "rabbit_two");
+            ((ObjectNode) second.get("placement")).put("region", "MIDDLE");
+            ((ArrayNode) g.get("entities")).add(second);
+        });
+        assertRejectedAt(json, "$.entities", "Chỉ được một vật TAP_MOVE");
+    }
+
+    @Test
+    void rejectsTapMoveWithoutCollide() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> {
+            ObjectNode on = (ObjectNode) rule(g, 0).get("on");
+            on.removeAll();
+            on.put("type", "TAP").put("target", "carrots");
+        });
+        assertRejectedAt(json, "$.entities[1]", "TAP_MOVE cần một luật COLLIDE");
+    }
+
+    @Test
+    void rejectsOrbitingOrCrossingThingsArrivingInAStream() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> ((ObjectNode) entity(g, 0).get("motion")).put("type", "ORBIT").put("spawn", "STREAM"));
+        assertOnlyError(json, "$.entities[0].motion.spawn", "ALL_AT_ONCE");
+    }
+
+    @Test
+    void rejectsFastThingsForKindergarten() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> ((ObjectNode) entity(g, 0).get("motion")).put("speed", "FAST"));
+        assertOnlyError(json, "$.entities[0].motion.speed", "Mầm non");
+    }
+
+    @Test
+    void fastThingsAreFineAboveKindergarten() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> {
+            ((ObjectNode) g.get("metadata")).put("gradeLevel", "GRADE_1");
+            ((ObjectNode) entity(g, 0).get("motion")).put("speed", "FAST");
+        });
+        assertThat(errorsOf(json)).isEmpty();
+    }
+
+    @Test
+    void rejectsTapMoveBoundToChoices() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> entity(g, 1).put("bindTo", "choices").putObject("placement").put("region", "BOTTOM").put("arrangement", "ROW"));
+        assertRejectedAt(json, "$.entities[1].bindTo", "không dùng bindTo");
+    }
+
+    @Test
+    void rejectsFastTargetsForAimShoot() throws IOException {
+        JsonNode json = mutated(ARCHERY, g -> ((ObjectNode) entity(g, 1).get("motion")).put("type", "ORBIT").put("speed", "FAST"));
+        assertOnlyError(json, "$.rules[0].on", "không chạy FAST");
+    }
+
+    @Test
+    void rejectsTapMoveCharacterThatMovesOnItsOwn() throws IOException {
+        JsonNode json = mutated(RABBIT, g -> entity(g, 1).putObject("motion").put("type", "PATROL_X"));
+        assertOnlyError(json, "$.entities[1].motion", "TAP_MOVE không có motion");
+    }
+
+    @Test
+    void rejectsBowShootingSidewaysIntoARowOfTargets() throws IOException {
+        JsonNode json = mutated(ARCHERY, g -> {
+            ((ObjectNode) entity(g, 0).get("placement")).put("region", "LEFT");
+            ((ObjectNode) entity(g, 1).get("placement")).put("region", "RIGHT");
+        });
+        assertOnlyError(json, "$.rules[0].on", "BOTTOM hoặc TOP");
+    }
+
+    @Test
+    void rejectsTargetsStackedInAGridInFrontOfTheBow() throws IOException {
+        JsonNode json = mutated(ARCHERY, g -> ((ObjectNode) entity(g, 1).get("placement")).put("arrangement", "GRID"));
+        assertOnlyError(json, "$.rules[0].on", "GRID");
     }
 }

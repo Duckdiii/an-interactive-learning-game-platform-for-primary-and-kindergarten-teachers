@@ -105,6 +105,14 @@ public class CpfGenerationService {
             metadata.put("subject", subject.name());
             metadata.put("gradeLevel", gradeLevel.name());
         }
+        // Trẻ mầm non chưa theo kịp vật chạy nhanh: hạ FAST xuống MEDIUM thay vì bắt AI thử lại (Lớp 2 vẫn chặn nếu lọt).
+        if (gradeLevel == GradeLevel.KINDERGARTEN) {
+            for (JsonNode entity : game.path("entities")) {
+                if (entity.path("motion") instanceof ObjectNode motion && "FAST".equals(motion.path("speed").asString(""))) {
+                    motion.put("speed", "MEDIUM");
+                }
+            }
+        }
         for (JsonNode rule : game.path("rules")) {
             // ROUND_START không có vật được tương tác nên không có $subject để đặt EFFECT vào (docs mục 4, Lớp 2).
             boolean hasSubject = !"ROUND_START".equals(rule.path("on").path("type").asString(""));

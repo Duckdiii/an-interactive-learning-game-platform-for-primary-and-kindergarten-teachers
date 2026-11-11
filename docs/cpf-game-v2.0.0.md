@@ -2,13 +2,15 @@
 
 Trạng thái: **đặc tả đã duyệt, chờ đóng băng** (2026-11-07, kết thúc Pha 0). Backend đã có kiểm duyệt 3 lớp (`service/validation/cpf`); điều chỉnh khi cài đặt Pha 1–3 phải sửa đồng bộ các nơi ở bảng dưới.
 
+Bổ sung 2026-11-12 (giữ `schemaVersion` 2.0.0, chỉ thêm giá trị nên Lớp 1 vẫn nhận game đã lưu; Lớp 2 chặt hơn nên game đã lưu sẽ bị từ chối khi lưu lại nếu có: cung `AIM_SHOOT` không ở `BOTTOM`/`TOP`, bia cùng vùng cung, bia `GRID` hoặc `FAST`, hoặc vật `FAST` trong game mầm non; các bố trí này vốn không chơi trọn được hoặc quá nhanh với trẻ): `motion.type` thêm `SWAY_UP`, `ORBIT`, `CROSS`; `control` thêm `TAP_MOVE`; luật Lớp 2 cho các khối mới và cho vị trí cung `AIM_SHOOT` (mục 4.2); hỗ trợ điều khiển của runtime (mục 3.5).
+
 Liên quan: `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md` (thiết kế pipeline v2), `docs/game-json-dsl-v1.0.0.md` (10 loại preset, không đổi), [[Mô tả ngoài danh mục game]] (20 khối nguyên tử).
 
 | Thành phần | Đường dẫn |
 |---|---|
 | JSON Schema | `backend/src/main/resources/schema/cpf/2.0.0/cpf-game.schema.json` |
 | Kiểu TypeScript | `frontend/src/types/cpf-game.types.ts` |
-| 5 ví dụ hợp lệ | `backend/src/test/resources/cpf-examples/` |
+| 6 ví dụ hợp lệ | `backend/src/test/resources/cpf-examples/` (frontend: `cpfPlayability.test.ts` cho “bé ảo” chơi thử từng ví dụ) |
 | Test schema | `backend/src/test/java/com/aigameplatform/backend/dto/cpf/CpfGameSchemaTest.java` |
 | Bộ 40 mô tả kỳ vọng | `backend/src/test/resources/generation/pipeline-v2/eval-prompts.jsonl` |
 
@@ -82,11 +84,13 @@ Mỗi `round`:
 | `assetId` | có | Hình, nhóm `animal`, `fruit`, `object`, `vehicle`, `sea`, `space`, `jungle`, `farm`, `ui`. Khi `bindTo: choices`, là hình mặc định cho lựa chọn không có `assetId` riêng |
 | `bindTo` | không | `choices`: một vật cho mỗi lựa chọn của màn hiện tại, mang `label` của lựa chọn. `zones`: một vật cho mỗi nhóm của màn `SORT`. Không ghi: một vật duy nhất |
 | `placement` | có | `region` (`TOP`, `MIDDLE`, `BOTTOM`, `LEFT`, `RIGHT`, `CENTER`), `arrangement` (`SINGLE`, `ROW`, `GRID`, `SCATTER`). Vật đơn không có vị trí đặc biệt dùng `CENTER` + `SINGLE` |
-| `motion` | không | `type` bắt buộc (`STATIC`, `FALL`, `FLOAT_UP`, `PATROL_X`, `BOB`), `speed` (`SLOW`, `MEDIUM`, `FAST`), `spawn` (`ALL_AT_ONCE`, `STREAM`; chỉ cho vật có `bindTo`) |
-| `control` | không | Trẻ điều khiển vật này: `DRAG_X` (kéo ngang, ví dụ giỏ), `DRAG_FREE` (kéo thả), `AIM_SHOOT` (kéo căng rồi thả để bắn) |
+| `motion` | không | `type` bắt buộc (`STATIC`, `FALL`, `FLOAT_UP`, `PATROL_X`, `BOB`, `SWAY_UP` bay lên và lắc ngang, `ORBIT` bay vòng tại chỗ, `CROSS` chạy ngang qua màn rồi vào lại từ mép trái), `speed` (`SLOW`, `MEDIUM`, `FAST`), `spawn` (`ALL_AT_ONCE`, `STREAM`; chỉ cho vật có `bindTo`) |
+| `control` | không | Trẻ điều khiển vật này: `DRAG_X` (kéo ngang, ví dụ giỏ), `DRAG_FREE` (kéo thả), `AIM_SHOOT` (kéo căng rồi thả để bắn), `TAP_MOVE` (một nhân vật, không `bindTo`: trẻ chạm vào đâu nhân vật chạy tới đó) |
 | `role` | không | `PROGRESS`: vật tiến một nấc mỗi `ADVANCE` (xe, tên lửa, cây lớn dần). Đích ở nấc bằng số màn |
 
-Vật `FALL`/`FLOAT_UP` đi ra khỏi màn mà chưa được chọn sẽ được sinh lại, nên màn `PICK_ALL` luôn hoàn thành được.
+Vật `FALL`/`FLOAT_UP`/`SWAY_UP` đi ra khỏi màn mà chưa được chọn sẽ được sinh lại, nên màn `PICK_ALL` luôn hoàn thành được. Vật `bindTo` xếp `SCATTER` đổi chỗ sau mỗi màn (runtime tự làm).
+
+Hỗ trợ điều khiển (runtime luôn bật, JSON không khai báo): khi kéo ná `AIM_SHOOT` có đường chấm dự đoán đường bay tới mép sân và vòng chỉ bia sắp trúng; khi kéo vật `DRAG_FREE` có bóng mờ ở nhóm sẽ nhận vật, và thả cách tâm nhóm tới 180px vẫn được hút vào nhóm đó; vật chưa được kéo xa chỗ cũ quá 24px (chạm rồi nhả) thì không tính là thả.
 
 ### 3.6 `rules[]` (1–8)
 Mỗi luật: `on` (sự kiện) và `do` (1–6 hành động chạy theo thứ tự).
@@ -99,7 +103,7 @@ Sự kiện `on` (chỉ tham chiếu `id` vật, không dùng `$subject`):
 | `DROP` | `item`, `zone` | Thả vật `item` vào vật `zone` |
 | `ROUND_START` | | Bắt đầu mỗi màn |
 
-Với vật có `control: AIM_SHOOT`, `COLLIDE` dùng `id` của vật đó nghĩa là mũi tên/viên đạn bắn ra từ nó chạm vật kia (runtime tự sinh vật bắn ra, không khai báo trong `entities`).
+Với vật có `control: AIM_SHOOT`, `COLLIDE` dùng `id` của vật đó nghĩa là mũi tên/viên đạn bắn ra từ nó chạm vật kia (runtime tự sinh vật bắn ra, không khai báo trong `entities`). Với `control: TAP_MOVE`, `COLLIDE` chỉ xảy ra với vật lựa chọn trẻ đã chạm vào, khi nhân vật chạy tới chạm nó (nhân vật đuổi theo nếu vật đang chuyển động; đi ngang vật khác trên đường không tính). Chạm chỗ trống thì nhân vật chỉ chạy tới đó. Chạm lại đúng vật đó thì chấm lại.
 
 Trong `do`, `$subject` là vật lựa chọn gây ra sự kiện (vật `target` của `TAP`, vật `bindTo: choices` trong `COLLIDE`, vật `item` của `DROP`).
 
@@ -141,7 +145,10 @@ JSON khớp schema ở trên.
 5. Chơi được (trẻ thao tác được và luôn đi tới cuối game):
    - Mọi màn cần một luật có `CHECK`. `CHECK` và `$subject` chỉ được dùng trong luật mà sự kiện có vật `bindTo: choices` (`TAP.target`, một trong `COLLIDE.a`/`b`, `DROP.item`); không dùng với `ROUND_START`.
    - `TAP.target` là vật trẻ chạm được (không phải vật đang bị kéo).
-   - `COLLIDE`: một trong `a`, `b` có `control` (`DRAG_X` hoặc `AIM_SHOOT`), vật kia là `bindTo: choices`. Với `DRAG_X`, vật `bindTo: choices` phải đi qua hàng của vật kéo (`FALL` khi vật kéo ở `BOTTOM`, `FLOAT_UP` khi ở `TOP`).
+   - `COLLIDE`: một trong `a`, `b` có `control` (`DRAG_X`, `AIM_SHOOT` hoặc `TAP_MOVE`), vật kia là `bindTo: choices`. Với `DRAG_X`, vật `bindTo: choices` phải đi qua hàng của vật kéo (`FALL` khi vật kéo ở `BOTTOM`, `FLOAT_UP` hoặc `SWAY_UP` khi ở `TOP`).
+   - `AIM_SHOOT` đặt ở `BOTTOM` hoặc `TOP`; bia ở vùng khác, xếp `ROW` hoặc `SCATTER` (bắn ngang vào một hàng bia hoặc bia xếp `GRID` thì bia trước che bia sau), bia không `FAST`.
+   - `TAP_MOVE`: tối đa một vật, không `bindTo`, cần một `COLLIDE` dùng `id` của nó; vật lựa chọn ở vùng khác nhân vật và ở lại trên màn (không `FALL`, `FLOAT_UP`, `SWAY_UP`); game có `TAP_MOVE` không có luật `TAP`.
+   - `ORBIT`, `CROSS` chỉ dùng `spawn: ALL_AT_ONCE`. Mầm non không dùng `speed: FAST` (bước chuẩn hóa đầu ra AI tự hạ xuống `MEDIUM`).
    - `SORT`: `DROP.item` là vật `bindTo: choices` có `control: DRAG_FREE`; `DROP.zone` là vật `bindTo: zones`.
    - `AIM_SHOOT` cần một `COLLIDE` dùng `id` của nó.
    - `PROGRESS`: có vật `role: PROGRESS` thì mọi màn là `PICK_ONE`, có ít nhất một `ADVANCE`, `ADVANCE` chỉ nằm trong `onCorrect` và `subject` của nó là vật `role: PROGRESS` (để mỗi màn tiến tối đa một nấc).
@@ -183,7 +190,7 @@ Danh mục id hợp lệ (nguồn duy nhất, Lớp 2 kiểm và prompt AI liệ
 
 `backend/src/test/resources/generation/pipeline-v2/eval-prompts.jsonl`, mỗi dòng: `id`, `prompt`, `gradeLevel`/`subject` (tùy chọn, như giáo viên chọn trên form), `expect`:
 - `route`: `PRESET` (kèm `gameType`), `CPF` (kèm `task`, `input` và `progress`), `CLARIFY` (kèm `mustAsk`), `REJECT`. `acceptRoutes` (tùy chọn) liệt kê route khác cũng tính là đúng; khi trả lời theo route phụ thì chỉ chấm `route`, không chấm `gameType`/`task`.
-- `input`: cách trẻ thao tác, `TAP`, `CATCH` (kéo vật hứng, `DRAG_X` + `COLLIDE`), `AIM_SHOOT`, `DRAG` (kéo thả, `DRAG_FREE` + `DROP`). `progress`: có vật `role: PROGRESS` hay không.
+- `input`: cách trẻ thao tác, `TAP`, `CATCH` (kéo vật hứng, `DRAG_X` + `COLLIDE`), `AIM_SHOOT`, `DRAG` (kéo thả, `DRAG_FREE` + `DROP`), `MOVE` (chạm cho nhân vật chạy tới, `TAP_MOVE` + `COLLIDE`; bộ 40 mô tả hiện chưa có câu nào dùng). `progress`: có vật `role: PROGRESS` hay không.
 - `mustAsk`: mã thông tin phải hỏi lại, `SUBJECT`, `GRADE`, `SKILL`, `TOPIC`, `MECHANIC`.
 - `note`: điều kiện riêng không chấm tự động được (người chấm đọc).
 

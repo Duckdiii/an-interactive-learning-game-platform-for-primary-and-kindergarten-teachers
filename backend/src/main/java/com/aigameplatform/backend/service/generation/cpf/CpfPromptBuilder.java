@@ -47,8 +47,11 @@ public class CpfPromptBuilder {
             - Không ghi tọa độ. Vị trí: placement.region (TOP, MIDDLE, BOTTOM, LEFT, RIGHT, CENTER) và arrangement (SINGLE, ROW, GRID, SCATTER).
             - bindTo "choices": một vật cho mỗi lựa chọn của màn (mang nhãn lựa chọn). bindTo "zones": một vật cho mỗi nhóm, chỉ khi có màn SORT. Vật có bindTo không dùng arrangement SINGLE.
             - Ngân sách hiển thị: mỗi khai báo bindTo "choices" tính bằng số lựa chọn của màn nhiều lựa chọn nhất, bindTo "zones" tính bằng số nhóm nhiều nhất, vật thường tính 1; tổng phải ≤ 15. Thường chỉ cần một khai báo bindTo "choices".
-            - motion.type: STATIC, FALL (rơi xuống), FLOAT_UP (bay lên), PATROL_X (bơi qua lại), BOB (nhún). motion.spawn (STREAM hoặc ALL_AT_ONCE) chỉ đặt cho vật có bindTo.
-            - control: DRAG_X (trẻ kéo ngang, chỉ đặt ở TOP hoặc BOTTOM), DRAG_FREE (kéo thả), AIM_SHOOT (kéo căng rồi bắn).
+            - motion.type: STATIC, FALL (rơi xuống), FLOAT_UP (bay thẳng lên), SWAY_UP (bay lên và lắc lư như bóng bay, bong bóng),
+              PATROL_X (bơi qua lại), BOB (nhún), ORBIT (bay vòng tại chỗ như ong, hành tinh), CROSS (chạy ngang qua màn rồi vào lại như xe, con vật chạy).
+              motion.spawn (STREAM hoặc ALL_AT_ONCE) chỉ đặt cho vật có bindTo; ORBIT và CROSS chỉ dùng ALL_AT_ONCE. Mầm non không dùng speed FAST.
+            - control: DRAG_X (trẻ kéo ngang, chỉ đặt ở TOP hoặc BOTTOM), DRAG_FREE (kéo thả), AIM_SHOOT (kéo căng rồi bắn),
+              TAP_MOVE (nhân vật duy nhất, không bindTo: trẻ chạm vào đâu nhân vật chạy tới đó).
             - role PROGRESS: vật tiến một nấc mỗi câu đúng (xe, tên lửa, cây lớn). Có PROGRESS thì BẮT BUỘC cả hai: MỌI màn là PICK_ONE,
               VÀ onCorrect của CHECK có ADVANCE {subject: id vật PROGRESS}. Ý tưởng cần PICK_ALL hoặc SORT thì KHÔNG dùng PROGRESS.
 
@@ -59,17 +62,22 @@ public class CpfPromptBuilder {
               EFFECT {name: STARS|CONFETTI|POP|GLOW|WIGGLE, at}, SOUND {name: CORRECT|GENTLE_WRONG|POP|WHOOSH}, SCORE {add 1-10}.
               "$subject" là vật lựa chọn gây ra sự kiện, chỉ dùng trong do.
             - CHECK chỉ trong luật mà sự kiện gắn với vật bindTo "choices" (TAP vào nó, COLLIDE với nó, DROP nó). Không CHECK lồng nhau.
-            - COLLIDE: đúng một vật có control DRAG_X hoặc AIM_SHOOT, vật kia bindTo "choices". Vật kéo DRAG_X ở BOTTOM thì vật lựa chọn FALL; ở TOP thì FLOAT_UP.
-            - Vật AIM_SHOOT phải có một luật COLLIDE dùng id của nó (mũi bắn ra từ nó chạm vật kia).
+            - COLLIDE: đúng một vật có control DRAG_X, AIM_SHOOT hoặc TAP_MOVE, vật kia bindTo "choices". Vật kéo DRAG_X ở BOTTOM thì vật lựa chọn FALL; ở TOP thì FLOAT_UP hoặc SWAY_UP.
+            - Vật AIM_SHOOT và vật TAP_MOVE phải có một luật COLLIDE dùng id của nó (mũi bắn ra từ nó / nhân vật chạm vật kia). Cung AIM_SHOOT ở BOTTOM hoặc TOP, bia ở vùng khác vùng của cung (ROW hoặc SCATTER, không GRID, không FAST; nên STATIC, BOB, PATROL_X hoặc ORBIT).
+            - TAP_MOVE: vật lựa chọn ở vùng khác nhân vật và ở lại trên màn (STATIC, BOB, PATROL_X, ORBIT hoặc CROSS, không FALL/FLOAT_UP/SWAY_UP); game có TAP_MOVE không có luật TAP; nhân vật TAP_MOVE không có motion.
             - SORT: DROP với item là vật bindTo "choices" có control DRAG_FREE, zone là vật bindTo "zones".
             - ADVANCE chỉ trong onCorrect, subject là vật role PROGRESS.
             - Khi sai chỉ dùng phản hồi nhẹ: EFFECT WIGGLE và SOUND GENTLE_WRONG; không phạt. Runtime tự chuyển màn và tự chỉ đáp án đúng.
 
             MẪU CƠ CHẾ (chọn hoặc ghép cho đúng ý giáo viên)
-            - Chạm: vật bindTo choices (BOB hoặc PATROL_X hoặc FLOAT_UP), luật TAP vào nó -> CHECK.
+            - Chạm: vật bindTo choices (BOB, PATROL_X, FLOAT_UP, SWAY_UP, ORBIT hoặc CROSS), luật TAP vào nó -> CHECK. Bóng bay/bong bóng: SWAY_UP;
+              ong, chim, hành tinh: ORBIT; xe, con vật chạy: CROSS.
             - Hứng: vật bindTo choices FALL từ TOP (spawn STREAM), giỏ control DRAG_X ở BOTTOM, luật COLLIDE giỏ với vật -> CHECK, REMOVE "$subject".
-            - Bắn: cung control AIM_SHOOT ở LEFT, bia bindTo choices ở RIGHT, luật COLLIDE cung với bia -> CHECK.
+            - Bắn: cung control AIM_SHOOT ở BOTTOM (SINGLE), bia bindTo choices ở TOP (ROW hoặc SCATTER), luật COLLIDE cung với bia -> CHECK.
             - Phân loại: vật bindTo choices control DRAG_FREE ở TOP, hộp bindTo zones ở BOTTOM, luật DROP -> CHECK.
+            - Nhân vật đi nhặt: nhân vật control TAP_MOVE ở BOTTOM (SINGLE), vật bindTo choices STATIC hoặc BOB ở TOP (SCATTER),
+              luật COLLIDE nhân vật với vật -> CHECK, onCorrect có REMOVE "$subject".
+            - Ghép Tiến về đích với Nhân vật đi nhặt: giữ luật COLLIDE nhân vật với vật (không thêm luật TAP), đặt ADVANCE vào onCorrect của CHECK trong luật COLLIDE đó.
             - Tiến về đích: vật role PROGRESS ở BOTTOM, vật bindTo choices để chạm, mọi màn PICK_ONE, luật
               {"on":{"type":"TAP","target":"<vật lựa chọn>"},"do":[{"type":"CHECK","onCorrect":[{"type":"ADVANCE","subject":"<vật PROGRESS>"},{"type":"SOUND","name":"CORRECT"}],"onWrong":[{"type":"EFFECT","name":"WIGGLE","at":"$subject"},{"type":"SOUND","name":"GENTLE_WRONG"}]}]}.
             - Ý tưởng cần cơ chế ngoài danh sách (tô màu, xếp thứ tự, thi đấu nhiều người...): chọn cơ chế gần nhất trong danh sách, không tự thêm khối mới.

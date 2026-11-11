@@ -154,12 +154,12 @@
           "additionalProperties": false,
           "required": ["type"],
           "properties": {
-            "type": { "enum": ["STATIC", "FALL", "FLOAT_UP", "PATROL_X", "BOB"] },
+            "type": { "enum": ["STATIC", "FALL", "FLOAT_UP", "PATROL_X", "BOB", "SWAY_UP", "ORBIT", "CROSS"] },
             "speed": { "enum": ["SLOW", "MEDIUM", "FAST"] },
             "spawn": { "enum": ["ALL_AT_ONCE", "STREAM"] }
           }
         },
-        "control": { "enum": ["DRAG_X", "DRAG_FREE", "AIM_SHOOT"] },
+        "control": { "enum": ["DRAG_X", "DRAG_FREE", "AIM_SHOOT", "TAP_MOVE"] },
         "role": { "enum": ["PROGRESS"] }
       },
       "if": { "required": ["motion"], "properties": { "motion": { "required": ["spawn"] } } },

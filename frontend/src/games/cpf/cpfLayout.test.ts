@@ -19,22 +19,24 @@ describe('layoutGroup', () => {
   for (const region of REGIONS) {
     for (const arrangement of ARRANGEMENTS) {
       for (let count = 1; count <= 8; count++) {
-        it(`${region}/${arrangement}/${count}: trong vùng, đủ lớn để chạm, không chồng nhau`, () => {
+        it(`${region}/${arrangement}/${count}: trong vùng, đủ lớn để chạm, không chồng nhau ở mọi màn`, () => {
           const area = regionBox(region)
-          const boxes = layoutGroup(region, arrangement, count)
+          for (const variant of [0, 1, 2, 5]) {
+            const boxes = layoutGroup(region, arrangement, count, variant)
 
-          expect(boxes).toHaveLength(count)
-          for (const b of boxes) {
-            expect(b.w).toBeGreaterThanOrEqual(CPF_MIN_ITEM_SIZE)
-            expect(b.h).toBeGreaterThanOrEqual(CPF_MIN_ITEM_SIZE)
-            expect(b.x).toBeGreaterThanOrEqual(area.x - 0.001)
-            expect(b.y).toBeGreaterThanOrEqual(area.y - 0.001)
-            expect(b.x + b.w).toBeLessThanOrEqual(area.x + area.w + 0.001)
-            expect(b.y + b.h).toBeLessThanOrEqual(area.y + area.h + 0.001)
-          }
-          for (let i = 0; i < boxes.length; i++) {
-            for (let j = i + 1; j < boxes.length; j++) {
-              expect(overlaps(boxes[i], boxes[j])).toBe(false)
+            expect(boxes).toHaveLength(count)
+            for (const b of boxes) {
+              expect(b.w).toBeGreaterThanOrEqual(CPF_MIN_ITEM_SIZE)
+              expect(b.h).toBeGreaterThanOrEqual(CPF_MIN_ITEM_SIZE)
+              expect(b.x).toBeGreaterThanOrEqual(area.x - 0.001)
+              expect(b.y).toBeGreaterThanOrEqual(area.y - 0.001)
+              expect(b.x + b.w).toBeLessThanOrEqual(area.x + area.w + 0.001)
+              expect(b.y + b.h).toBeLessThanOrEqual(area.y + area.h + 0.001)
+            }
+            for (let i = 0; i < boxes.length; i++) {
+              for (let j = i + 1; j < boxes.length; j++) {
+                expect(overlaps(boxes[i], boxes[j])).toBe(false)
+              }
             }
           }
         })
@@ -44,6 +46,11 @@ describe('layoutGroup', () => {
 
   it('cùng đầu vào cho cùng bố cục (SCATTER ổn định)', () => {
     expect(layoutGroup('TOP', 'SCATTER', 5)).toEqual(layoutGroup('TOP', 'SCATTER', 5))
+  })
+
+  it('SCATTER đổi chỗ sau mỗi màn, các cách xếp khác giữ nguyên', () => {
+    expect(layoutGroup('TOP', 'SCATTER', 4, 1)).not.toEqual(layoutGroup('TOP', 'SCATTER', 4, 0))
+    expect(layoutGroup('TOP', 'ROW', 4, 1)).toEqual(layoutGroup('TOP', 'ROW', 4, 0))
   })
 
   it('ROW xếp một hàng khi vừa', () => {

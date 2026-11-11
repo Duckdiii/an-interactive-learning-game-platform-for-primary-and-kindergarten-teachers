@@ -282,7 +282,10 @@
                   "FALL",
                   "FLOAT_UP",
                   "PATROL_X",
-                  "BOB"
+                  "BOB",
+                  "SWAY_UP",
+                  "ORBIT",
+                  "CROSS"
                 ]
               },
               "speed": {
@@ -307,7 +310,8 @@
             "enum": [
               "DRAG_X",
               "DRAG_FREE",
-              "AIM_SHOOT"
+              "AIM_SHOOT",
+              "TAP_MOVE"
             ]
           },
           "role": {

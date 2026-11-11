@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.validation.cpf;
 
+import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.service.validation.AbstractGameValidator;
 import com.aigameplatform.backend.service.validation.GameValidationContext;
 import com.aigameplatform.backend.service.validation.ValidationError;
@@ -242,7 +243,7 @@ final class CpfRuleValidator extends AbstractGameValidator {
      * báo lỗi, khi đó không báo thêm lỗi dây chuyền "thiếu luật" (AI chỉ cần sửa lỗi gốc).
      */
     private record RuleFacts(boolean pickCheck, boolean sortCheck, Set<String> collideIds, boolean advance,
-            boolean brokenTrigger) {
+            boolean brokenTrigger, boolean tapRule) {
     }
 
     private static RuleFacts checkRules(JsonNode game, Map<String, JsonNode> entities, List<ValidationError> errors) {
@@ -250,12 +251,14 @@ final class CpfRuleValidator extends AbstractGameValidator {
         boolean sortCheck = false;
         boolean advance = false;
         boolean brokenTrigger = false;
+        boolean tapRule = false;
         Set<String> collideIds = new HashSet<>();
         JsonNode rules = game.path("rules");
         for (int i = 0; i < rules.size(); i++) {
             JsonNode on = rules.get(i).path("on");
             String path = "$.rules[" + i + "]";
             String type = on.path("type").asString();
+            tapRule |= "TAP".equals(type);
             int errorsBefore = errors.size();
             boolean involvesChoices = switch (type) {
                 case "TAP" -> checkTap(on, entities, path, errors);
@@ -280,7 +283,7 @@ final class CpfRuleValidator extends AbstractGameValidator {
             }
             advance |= actions.advance;
         }
-        return new RuleFacts(pickCheck, sortCheck, collideIds, advance, brokenTrigger);
+        return new RuleFacts(pickCheck, sortCheck, collideIds, advance, brokenTrigger, tapRule);
     }
 
     private static boolean checkTap(JsonNode on, Map<String, JsonNode> entities, String path, List<ValidationError> errors) {
@@ -305,29 +308,72 @@ final class CpfRuleValidator extends AbstractGameValidator {
         JsonNode other = controller == a ? b : a;
         if (controller == null || isMover(other) || !boundTo(other, "choices")) {
             errors.add(new ValidationError(path + ".on",
-                    "COLLIDE cần đúng một vật trẻ điều khiển (DRAG_X hoặc AIM_SHOOT) và một vật bindTo: choices"));
+                    "COLLIDE cần đúng một vật trẻ điều khiển (DRAG_X, AIM_SHOOT hoặc TAP_MOVE) và một vật bindTo: choices"));
             return false;
         }
-        if ("DRAG_X".equals(controller.path("control").asString())) {
-            String region = controller.path("placement").path("region").asString();
-            String needed = switch (region) {
-                case "BOTTOM" -> "FALL";
-                case "TOP" -> "FLOAT_UP";
-                default -> null;
-            };
-            if (needed == null) {
-                errors.add(new ValidationError(path + ".on", "Vật DRAG_X chỉ đặt ở vùng TOP hoặc BOTTOM"));
-            } else if (!needed.equals(other.path("motion").path("type").asString())) {
-                errors.add(new ValidationError(path + ".on",
-                        "Vật lựa chọn phải có motion " + needed + " để đi qua hàng của vật kéo ở vùng " + region));
+        String at = path + ".on";
+        switch (controller.path("control").asString()) {
+            case "DRAG_X" -> checkCatcher(controller, other, at, errors);
+            case "AIM_SHOOT" -> checkBow(controller, other, at, errors);
+            case "TAP_MOVE" -> checkWalker(controller, other, at, errors);
+            default -> {
+                // isMover chỉ nhận ba loại trên.
             }
         }
         return true;
     }
 
+    private static String region(JsonNode entity) {
+        return entity.path("placement").path("region").asString();
+    }
+
+    private static String motionType(JsonNode entity) {
+        return entity.path("motion").path("type").asString("STATIC");
+    }
+
+    /** DRAG_X: vật lựa chọn phải đi qua hàng của giỏ. */
+    private static void checkCatcher(JsonNode catcher, JsonNode choice, String at, List<ValidationError> errors) {
+        Set<String> needed = switch (region(catcher)) {
+            case "BOTTOM" -> Set.of("FALL");
+            case "TOP" -> Set.of("FLOAT_UP", "SWAY_UP");
+            default -> null;
+        };
+        if (needed == null) {
+            errors.add(new ValidationError(at, "Vật DRAG_X chỉ đặt ở vùng TOP hoặc BOTTOM"));
+        } else if (!needed.contains(motionType(choice))) {
+            errors.add(new ValidationError(at, "Vật lựa chọn phải có motion " + String.join(" hoặc ", needed.stream().sorted().toList())
+                    + " để đi qua hàng của vật kéo ở vùng " + region(catcher)));
+        }
+    }
+
+    /**
+     * AIM_SHOOT: bắn ngang vào một hàng bia thì bia gần che hết bia sau (bé ảo trong cpfPlayability.test bắt được), nên cung
+     * ở BOTTOM/TOP bắn lên/xuống vào hàng bia trải ngang ở vùng khác; bia chạy nhanh thì trẻ khó bắn trúng.
+     */
+    private static void checkBow(JsonNode bow, JsonNode target, String at, List<ValidationError> errors) {
+        if (!Set.of("BOTTOM", "TOP").contains(region(bow))) {
+            errors.add(new ValidationError(at, "Vật AIM_SHOOT đặt ở vùng BOTTOM hoặc TOP (bắn lên hoặc xuống về phía hàng bia)"));
+        } else if (region(bow).equals(region(target)) || "GRID".equals(target.path("placement").path("arrangement").asString())) {
+            errors.add(new ValidationError(at, "Bia của AIM_SHOOT ở vùng khác vùng của cung và xếp ROW hoặc SCATTER (GRID làm bia trước che bia sau)"));
+        }
+        if ("FAST".equals(target.path("motion").path("speed").asString(""))) {
+            errors.add(new ValidationError(at, "Bia của vật AIM_SHOOT không chạy FAST (trẻ khó bắn trúng); dùng SLOW hoặc MEDIUM"));
+        }
+    }
+
+    /** TAP_MOVE: nhân vật chạy tới chỗ trẻ chạm; vật cứ rơi/bay khỏi màn thì đuổi không kịp, cùng vùng thì chạm nhau ngay đầu màn. */
+    private static void checkWalker(JsonNode walker, JsonNode choice, String at, List<ValidationError> errors) {
+        if (Set.of("FALL", "FLOAT_UP", "SWAY_UP").contains(motionType(choice))) {
+            errors.add(new ValidationError(at, "Vật lựa chọn của TAP_MOVE phải ở lại trên màn: dùng motion STATIC, BOB, PATROL_X, ORBIT hoặc CROSS"));
+        }
+        if (region(walker).equals(region(choice))) {
+            errors.add(new ValidationError(at, "Vật TAP_MOVE và vật lựa chọn phải ở hai vùng khác nhau"));
+        }
+    }
+
     private static boolean isMover(JsonNode entity) {
         String control = entity.path("control").asString("");
-        return control.equals("DRAG_X") || control.equals("AIM_SHOOT");
+        return control.equals("DRAG_X") || control.equals("AIM_SHOOT") || control.equals("TAP_MOVE");
     }
 
     private static boolean checkDrop(JsonNode on, Map<String, JsonNode> entities, String path, List<ValidationError> errors) {
@@ -391,6 +437,8 @@ final class CpfRuleValidator extends AbstractGameValidator {
 
     private static void checkPlayability(JsonNode game, RuleFacts facts,
             List<ValidationError> errors) {
+        boolean kindergarten = GradeLevel.KINDERGARTEN.name().equals(game.path("metadata").path("gradeLevel").asString());
+        int walkers = 0;
         Set<String> tasks = new HashSet<>();
         game.path("content").path("rounds").forEach(round -> tasks.add(round.path("task").asString()));
         if ((tasks.contains("PICK_ONE") || tasks.contains("PICK_ALL")) && !facts.pickCheck() && !facts.brokenTrigger()) {
@@ -408,9 +456,15 @@ final class CpfRuleValidator extends AbstractGameValidator {
             JsonNode entity = list.get(i);
             String path = "$.entities[" + i + "]";
             String id = entity.path("id").asString();
-            if ("AIM_SHOOT".equals(entity.path("control").asString()) && !facts.collideIds().contains(id)) {
-                errors.add(new ValidationError(path, "Vật AIM_SHOOT cần một luật COLLIDE dùng id của nó"));
+            String control = entity.path("control").asString("");
+            if ((control.equals("AIM_SHOOT") || control.equals("TAP_MOVE")) && !facts.collideIds().contains(id)) {
+                errors.add(new ValidationError(path, "Vật " + control + " cần một luật COLLIDE dùng id của nó"));
             }
+            if (control.equals("TAP_MOVE")) {
+                walkers++;
+                checkWalkerEntity(entity, path, errors);
+            }
+            checkMotion(entity.path("motion"), path, kindergarten, errors);
             if (entity.has("bindTo") && "SINGLE".equals(entity.path("placement").path("arrangement").asString())) {
                 errors.add(new ValidationError(path + ".placement.arrangement",
                         "Vật bindTo có nhiều bản, không dùng arrangement SINGLE"));
@@ -420,6 +474,12 @@ final class CpfRuleValidator extends AbstractGameValidator {
             }
             hasProgress |= "PROGRESS".equals(entity.path("role").asString());
         }
+        if (walkers > 1) {
+            errors.add(new ValidationError("$.entities", "Chỉ được một vật TAP_MOVE (trẻ chạm để điều khiển một nhân vật)"));
+        }
+        if (walkers > 0 && facts.tapRule()) {
+            errors.add(new ValidationError("$.rules", "Game có vật TAP_MOVE không dùng luật TAP: chạm màn hình là để nhân vật chạy tới"));
+        }
         if (hasProgress) {
             if (!tasks.equals(Set.of("PICK_ONE"))) {
                 errors.add(new ValidationError("$.content.rounds", "Game có vật PROGRESS thì mọi màn phải là PICK_ONE"));
@@ -427,6 +487,27 @@ final class CpfRuleValidator extends AbstractGameValidator {
             if (!facts.advance()) {
                 errors.add(new ValidationError("$.rules", "Game có vật PROGRESS cần ít nhất một ADVANCE"));
             }
+        }
+    }
+
+    /** Nhân vật TAP_MOVE là một vật duy nhất và đứng yên tới khi trẻ chạm (chuyển động riêng sẽ đè lên đường chạy). */
+    private static void checkWalkerEntity(JsonNode entity, String path, List<ValidationError> errors) {
+        if (entity.has("bindTo")) {
+            errors.add(new ValidationError(path + ".bindTo", "Vật TAP_MOVE là một nhân vật duy nhất, không dùng bindTo"));
+        }
+        if (!"STATIC".equals(motionType(entity))) {
+            errors.add(new ValidationError(path + ".motion", "Vật TAP_MOVE không có motion (chỉ chạy khi trẻ chạm); bỏ motion hoặc dùng STATIC"));
+        }
+    }
+
+    /** Giới hạn chuyển động không phụ thuộc luật: ORBIT/CROSS không xếp hàng chờ; mầm non không dùng tốc độ nhanh. */
+    private static void checkMotion(JsonNode motion, String path, boolean kindergarten, List<ValidationError> errors) {
+        if (Set.of("ORBIT", "CROSS").contains(motion.path("type").asString("")) && "STREAM".equals(motion.path("spawn").asString(""))) {
+            errors.add(new ValidationError(path + ".motion.spawn", "motion ORBIT và CROSS chỉ dùng spawn ALL_AT_ONCE"));
+        }
+        // Đầu ra AI đã được CpfGenerationService.normalize hạ FAST xuống MEDIUM; luật này chặn game từ nguồn khác (PUT).
+        if (kindergarten && "FAST".equals(motion.path("speed").asString(""))) {
+            errors.add(new ValidationError(path + ".motion.speed", "Mầm non không dùng tốc độ FAST; dùng SLOW hoặc MEDIUM"));
         }
     }
 

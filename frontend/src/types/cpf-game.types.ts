@@ -48,11 +48,12 @@ export interface CpfEntity {
   bindTo?: 'choices' | 'zones'
   placement: { region: CpfRegion; arrangement: CpfArrangement }
   motion?: {
-    type: 'STATIC' | 'FALL' | 'FLOAT_UP' | 'PATROL_X' | 'BOB'
+    type: 'STATIC' | 'FALL' | 'FLOAT_UP' | 'PATROL_X' | 'BOB' | 'SWAY_UP' | 'ORBIT' | 'CROSS'
     speed?: CpfSpeed
     spawn?: 'ALL_AT_ONCE' | 'STREAM'
   }
-  control?: 'DRAG_X' | 'DRAG_FREE' | 'AIM_SHOOT'
+  /** TAP_MOVE: trẻ chạm vào đâu, vật này (một nhân vật, không bindTo) chạy tới đó. */
+  control?: 'DRAG_X' | 'DRAG_FREE' | 'AIM_SHOOT' | 'TAP_MOVE'
   role?: 'PROGRESS'
 }
 
