@@ -9,5 +9,6 @@ public record VisualClozeAiQuestion(
         String visualPrompt,
         String correctAnswer,
         List<String> distractors,
-        String audioText) implements AiQuestion {
+        String audioText,
+        String asset) implements AiQuestion {
 }

@@ -64,7 +64,8 @@ class CurriculumRagConfigurationTest {
                             com.aigameplatform.backend.service.testsupport.GameTestFixtures.strategies(mapper)));
             context.register(CurriculumRagConfiguration.class,
                     com.aigameplatform.backend.service.generation.GeminiChatConfiguration.class,
-                    com.aigameplatform.backend.service.generation.GeminiGameContentGenerator.class);
+                    com.aigameplatform.backend.service.generation.GeminiGameContentGenerator.class,
+                    com.aigameplatform.backend.service.factory.GameAssetCatalog.class);
             assertThatCode(context::refresh).doesNotThrowAnyException();
             assertThat(context.getBean("gameGenerationChatModel"))
                     .isNotSameAs(context.getBean("curriculumSemanticVerifierChatModel"));

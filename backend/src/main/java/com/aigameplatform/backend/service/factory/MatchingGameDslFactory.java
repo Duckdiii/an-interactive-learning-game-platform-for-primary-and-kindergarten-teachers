@@ -19,8 +19,8 @@ import org.springframework.stereotype.Component;
 public class MatchingGameDslFactory extends
         AbstractGameDslFactory<MatchingAiOutput, MatchingAiQuestion, MatchingQuestionDsl, MatchingGameDsl> {
 
-    public MatchingGameDslFactory(RandomGenerator random) {
-        super(GameType.MATCHING, MatchingAiOutput.class, random);
+    public MatchingGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.MATCHING, MatchingAiOutput.class, random, assets);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class MatchingGameDslFactory extends
         return new MatchingGameDsl(schemaVersion(), supportedType(), metadata, settings, questions);
     }
 
-    private static PairSideDsl side(AiSide ai) {
-        return new PairSideDsl(ai.text(), ai.visualPrompt(), null);
+    private PairSideDsl side(AiSide ai) {
+        return new PairSideDsl(ai.text(), ai.visualPrompt(), imageOf(ai.asset()));
     }
 }

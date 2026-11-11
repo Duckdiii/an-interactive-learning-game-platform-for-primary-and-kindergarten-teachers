@@ -7,5 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record AiDragItem(
         String text,
         String visualPrompt,
-        int zoneIndex) {
+        int zoneIndex,
+        String asset) {
 }

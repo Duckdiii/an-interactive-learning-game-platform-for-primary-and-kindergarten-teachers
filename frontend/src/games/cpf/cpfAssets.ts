@@ -25,6 +25,7 @@ const ASSET_FILES: Record<string, string> = {
   'fruit.strawberry': '/assets/fruits/strawberry.svg',
   'fruit.watermelon': '/assets/fruits/watermelon.svg',
   'object.ball': '/assets/objects/ball.svg',
+  'object.balloon': '/assets/fluent/object-balloon.svg',
   'object.candy': '/assets/objects/candy.svg',
   'object.car': '/assets/objects/car.svg',
   'object.flower': '/assets/objects/flower.svg',

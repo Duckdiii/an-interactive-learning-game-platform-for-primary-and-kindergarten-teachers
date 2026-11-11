@@ -20,6 +20,11 @@
             "minLength": 1,
             "maxLength": 100
           },
+          "asset": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
           "targetDescription": {
             "type": "string",
             "minLength": 1,

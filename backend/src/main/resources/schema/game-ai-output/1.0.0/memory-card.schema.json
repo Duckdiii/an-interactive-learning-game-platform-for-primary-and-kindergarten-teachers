@@ -27,6 +27,11 @@
                   "minLength": 1,
                   "maxLength": 100
                 },
+                "asset": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
                 "text": {
                   "type": "string",
                   "minLength": 1,

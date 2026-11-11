@@ -161,6 +161,19 @@ class AiOutputValidatorTest {
     }
 
     @Test
+    void acceptsAnOptionalAssetNextToVisualPromptAndRejectsAnEmptyOrOverlongOne() {
+        String template = """
+                {"questions": [{"pairs": [
+                  {"left": {"text": "bóng bay"}, "right": {"text": "balloon", "visualPrompt": "quả bóng bay", "asset": %s}},
+                  {"left": {"text": "mèo"}, "right": {"text": "cat"}},
+                  {"left": {"text": "cá"}, "right": {"text": "fish"}}]}]}""";
+
+        assertThat(validator.validate(GameType.MATCHING, template.formatted("\"fluent-object-balloon\"")).valid()).isTrue();
+        assertThat(validator.validate(GameType.MATCHING, template.formatted("\"\"")).valid()).isFalse();
+        assertThat(validator.validate(GameType.MATCHING, template.formatted("\"" + "x".repeat(61) + "\"")).valid()).isFalse();
+    }
+
+    @Test
     void rejectsExtraTopLevelProperties() {
         assertThat(validator.validate(GameType.QUIZ, "{\"questions\":[],\"gameType\":\"QUIZ\"}").valid()).isFalse();
     }

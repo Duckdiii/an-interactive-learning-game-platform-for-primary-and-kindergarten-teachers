@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 public class OddOneOutGameDslFactory extends
         AbstractGameDslFactory<OddOneOutAiOutput, OddOneOutAiQuestion, OddOneOutQuestionDsl, OddOneOutGameDsl> {
 
-    public OddOneOutGameDslFactory(RandomGenerator random) {
-        super(GameType.ODD_ONE_OUT, OddOneOutAiOutput.class, random);
+    public OddOneOutGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.ODD_ONE_OUT, OddOneOutAiOutput.class, random, assets);
     }
 
     @Override

@@ -22,11 +22,14 @@ import tools.jackson.databind.json.JsonMapper;
 
 class GeminiGameContentGeneratorTest {
 
+    private static final com.aigameplatform.backend.service.factory.GameAssetCatalog ASSETS =
+            new com.aigameplatform.backend.service.factory.GameAssetCatalog(tools.jackson.databind.json.JsonMapper.builder().build());
+
     @Test
     void matchingDecoderSchemaKeepsStructureAndMovesArrayCountsToDescriptionsWithoutChangingValidation() throws Exception {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
-        var generator = new GeminiGameContentGenerator(modelCapturing(sent), strategies);
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent), strategies, ASSETS);
         String fullSchema = strategies.get(GameType.MATCHING).getStructuredSchema();
         generator.generate(new GenerationAttempt(GameType.MATCHING, "Ghép từ chỉ gia đình với nghĩa tiếng Việt",
                 Subject.ENGLISH, GradeLevel.GRADE_3, fullSchema, "[en-g3-010] Đọc hiểu nghĩa các từ quen thuộc", 1, null, List.of()));
@@ -52,6 +55,23 @@ class GeminiGameContentGeneratorTest {
     }
 
     @Test
+    void theAssetCatalogIsInThePromptOnlyForGameTypesWhoseOutputHasAnAssetField() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent), strategies, ASSETS);
+
+        generator.generate(new GenerationAttempt(GameType.MATCHING, "Nối từ với hình", Subject.ENGLISH, GradeLevel.GRADE_2,
+                strategies.get(GameType.MATCHING).getStructuredSchema(), null, 1, null, List.of()));
+        String matchingPrompt = ((dev.langchain4j.data.message.SystemMessage) sent.get().messages().get(0)).text();
+        generator.generate(new GenerationAttempt(GameType.ODD_ONE_OUT, "Tìm con vật khác loại", Subject.VIETNAMESE,
+                GradeLevel.GRADE_1, strategies.get(GameType.ODD_ONE_OUT).getStructuredSchema(), null, 1, null, List.of()));
+        String oddPrompt = ((dev.langchain4j.data.message.SystemMessage) sent.get().messages().get(0)).text();
+
+        assertThat(matchingPrompt).contains("HÌNH MINH HỌA (trường asset)", "fluent-object-balloon: Bóng bay");
+        assertThat(oddPrompt).doesNotContain("DANH MỤC HÌNH");
+    }
+
+    @Test
     void sdkWireRequestUsesJsonSchemaWithBoundedArrayCountersRemoved() throws Exception {
         var body = new AtomicReference<String>();
         var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
@@ -71,7 +91,7 @@ class GeminiGameContentGeneratorTest {
                     .maxOutputTokens(1800).supportedCapabilities(java.util.Set.of(
                             dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA)).build();
             var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
-            new GeminiGameContentGenerator(model, strategies).generate(new GenerationAttempt(GameType.MATCHING,
+            new GeminiGameContentGenerator(model, strategies, ASSETS).generate(new GenerationAttempt(GameType.MATCHING,
                     "Ghép từ", Subject.ENGLISH, GradeLevel.GRADE_3, strategies.get(GameType.MATCHING).getStructuredSchema(),
                     "[en-g3-010] Đọc hiểu nghĩa từ", 1, null, List.of()));
             var config = MAPPER.readTree(body.get()).path("generationConfig");
@@ -92,7 +112,7 @@ class GeminiGameContentGeneratorTest {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         ChatModel fakeModel = modelCapturing(sent);
         var registry = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
-        var generator = new GeminiGameContentGenerator(fakeModel, registry);
+        var generator = new GeminiGameContentGenerator(fakeModel, registry, ASSETS);
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
 
         String result = generator.generate(attempt(quiz, CURRICULUM, 1, null, List.of()));
@@ -110,7 +130,7 @@ class GeminiGameContentGeneratorTest {
     void nonPilotScopeUsesGroundedScopeAwarePromptInsteadOfMathGradeOneStrategy() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         String context = "[en-g3-003] Listening outcome\nLĩnh vực: LANGUAGE; độ tuổi phù hợp: 8–9\n"
                 + "Nguồn: curriculum.pdf; PDF 1275; printed 26\nProvenance: sourceSha256=" + "a".repeat(64)
                 + "; datasetVersion=english-grade3-draft-v1; embeddingModel=gemini-embedding-001";
@@ -129,7 +149,7 @@ class GeminiGameContentGeneratorTest {
     void groundedPromptCarriesEveryNonPilotPrimarySubjectAndGrade() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         String provenance = "\nNguồn: curriculum.pdf; PDF 10; printed 2\nProvenance: sourceSha256=" + "b".repeat(64)
                 + "; datasetVersion=scope-test-v1; embeddingModel=gemini-embedding-001";
         var scopes = new java.util.ArrayList<java.util.Map.Entry<Subject, GradeLevel>>();
@@ -159,7 +179,7 @@ class GeminiGameContentGeneratorTest {
     void kindergartenPromptRetainsRetrievedAgeAndDomainEvidence() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         String context = "[kg-4-5-001] Kết quả mong đợi\nĐộ tuổi phù hợp: 4–5 tuổi\n"
                 + "Domain: COGNITIVE; subDomain: MATHEMATICAL_CONCEPTS\nNguồn: curriculum.pdf; PDF 10\n"
                 + "Provenance: sourceSha256=" + "c".repeat(64)
@@ -178,7 +198,7 @@ class GeminiGameContentGeneratorTest {
     void retryKeepsCurriculumInSystemPromptAndSendsValidationFeedbackAsUserMessage() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
 
         generator.generate(attempt(quiz, CURRICULUM, 2, OUTPUT,
@@ -194,7 +214,7 @@ class GeminiGameContentGeneratorTest {
     void arithmeticPilotPromptRequiresTheSameExplicitFormThatTheDeterministicVerifierChecks() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
 
         generator.generate(attempt(quiz, CURRICULUM, "Phép cộng nhẩm trong phạm vi 10", 1, null, List.of()));
@@ -209,7 +229,7 @@ class GeminiGameContentGeneratorTest {
     void arithmeticFormattingInstructionDoesNotRewriteRequestsOutsideItsGrammar(String topic) {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
 
         generator.generate(attempt(quiz, CURRICULUM, topic, 1, null, List.of()));
@@ -222,7 +242,7 @@ class GeminiGameContentGeneratorTest {
     void retryExplainsHowToRestoreTheRequestedMentalArithmeticMarker() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
 
         generator.generate(attempt(quiz, CURRICULUM, "Phép cộng nhẩm trong phạm vi 10", 2, OUTPUT,
@@ -236,7 +256,7 @@ class GeminiGameContentGeneratorTest {
     void retryForNonArithmeticRequestDoesNotChangeTheTeachersRequestedSkill() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
 
         generator.generate(attempt(quiz, CURRICULUM, "Đếm con vật", 2, OUTPUT,
@@ -252,7 +272,7 @@ class GeminiGameContentGeneratorTest {
     void retryForArithmeticRequestGivesSpecificMachineCheckCorrection() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
 
         generator.generate(attempt(quiz, CURRICULUM, "Phép cộng nhẩm trong phạm vi 10", 2, OUTPUT,
@@ -266,7 +286,7 @@ class GeminiGameContentGeneratorTest {
     void quizGeneratorKeepsTheRequestedSubjectAndGradeOutsideTheMathOnePilot() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var generator = new GeminiGameContentGenerator(modelCapturing(sent),
-                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), ASSETS);
         QuizGameStrategy quiz = new QuizGameStrategy(MAPPER);
         var englishGradeFive = new GenerationAttempt(GameType.QUIZ, "describe a family", Subject.ENGLISH,
                 GradeLevel.GRADE_5, quiz.getStructuredSchema(), "[eng-g5-001] Family words; PDF 80",
@@ -282,7 +302,7 @@ class GeminiGameContentGeneratorTest {
     void adapterSelectsEachGameTypePromptAndCarriesTheSameCurriculumEvidence() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var registry = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
-        var generator = new GeminiGameContentGenerator(modelCapturing(sent), registry);
+        var generator = new GeminiGameContentGenerator(modelCapturing(sent), registry, ASSETS);
         String englishCurriculum = "[eng-g3-001] English outcome with source page provenance.";
 
         for (GameType type : GameType.dslTypes()) {

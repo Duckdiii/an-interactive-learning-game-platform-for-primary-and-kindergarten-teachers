@@ -36,6 +36,7 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     static final String COMMON_CONTENT_RULES = """
             Quy tắc chung:
             - title: tên game ngắn 2-8 từ, hấp dẫn với trẻ, đặt lại từ chủ đề; không chép nguyên câu yêu cầu của giáo viên.
+              title chỉ nhắc vật, nhân vật, bối cảnh thật sự có trong các câu của game.
             - Các câu (màn) không được trùng nhau, kể cả khi chỉ đổi động từ ("Tìm..."/"Chạm...").
             - Với game mỗi câu có một đáp án đúng: đáp án đúng phải thay đổi giữa các câu, không để mọi câu cùng một đáp án.
             - Câu điền khuyết: dùng "..." thay chỗ cần điền, không viết lại từ hoàn chỉnh ở bất kỳ đâu trong câu.
@@ -121,6 +122,22 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
             jsonSchemaDefinition = AiOutputSchemas.forLlm(getSupportedType());
         }
         return jsonSchemaDefinition;
+    }
+
+    /**
+     * Đầu ra AI của loại game này có trường {@code asset} (hình chọn từ danh mục) hay không: có thì prompt phải kèm danh mục hình. Đọc từ
+     * chính schema đầu ra (dạng cây JSON, không dò chuỗi) nên thêm/bớt {@code asset} trong schema là đủ.
+     */
+    public boolean hasAssetField() {
+        return containsAssetProperty(jsonMapper.readTree(getStructuredSchema()));
+    }
+
+    private static boolean containsAssetProperty(tools.jackson.databind.JsonNode node) {
+        if (node.isObject() && node.path("properties").has("asset")) return true;
+        for (tools.jackson.databind.JsonNode child : node) {
+            if (containsAssetProperty(child)) return true;
+        }
+        return false;
     }
 
     protected abstract String buildTypeSpecificInstruction(String topic, GradeLevel grade);

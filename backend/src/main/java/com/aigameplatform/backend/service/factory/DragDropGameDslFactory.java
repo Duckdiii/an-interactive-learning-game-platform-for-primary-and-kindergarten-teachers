@@ -19,8 +19,8 @@ import org.springframework.stereotype.Component;
 public class DragDropGameDslFactory extends
         AbstractGameDslFactory<DragDropAiOutput, DragDropAiQuestion, DragDropQuestionDsl, DragDropGameDsl> {
 
-    public DragDropGameDslFactory(RandomGenerator random) {
-        super(GameType.DRAG_DROP, DragDropAiOutput.class, random);
+    public DragDropGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.DRAG_DROP, DragDropAiOutput.class, random, assets);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class DragDropGameDslFactory extends
         List<DraggableItemDsl> items = new ArrayList<>();
         for (int i = 0; i < shuffled.size(); i++) {
             AiDragItem item = shuffled.get(i);
-            items.add(new DraggableItemDsl(Ids.numbered("i", i), item.text(), item.visualPrompt(), null,
+            items.add(new DraggableItemDsl(Ids.numbered("i", i), item.text(), item.visualPrompt(), imageOf(item.asset()),
                     Ids.numbered("z", item.zoneIndex())));
         }
         return new DragDropQuestionDsl(base.id(), base.timeLimitSeconds(), base.points(), ai.audioText(), null,

@@ -44,7 +44,7 @@ import tools.jackson.databind.json.JsonMapper;
  * Luồng đầu-cuối không gọi LLM: JSON thô của AI, kiểm tra đầu ra AI, Backend dựng DSL hoàn chỉnh, rồi 3 lớp kiểm
  * duyệt. Toàn bộ bean do Spring nối, không cần DB; chưa có API key nên Layer 3 chỉ dùng danh sách từ cấm.
  */
-@SpringJUnitConfig({RandomConfig.class, GameDslFactoryRegistry.class, QuizGameDslFactory.class,
+@SpringJUnitConfig({RandomConfig.class, GameAssetCatalog.class, GameDslFactoryRegistry.class, QuizGameDslFactory.class,
         AudioVisualMatchGameDslFactory.class, OddOneOutGameDslFactory.class, SpotTheTargetGameDslFactory.class,
         WordScrambleGameDslFactory.class, MatchingGameDslFactory.class, MemoryCardGameDslFactory.class,
         DragDropGameDslFactory.class, OrderingGameDslFactory.class, VisualClozeGameDslFactory.class,

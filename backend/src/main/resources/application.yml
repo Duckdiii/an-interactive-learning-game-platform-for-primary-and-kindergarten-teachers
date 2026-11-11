@@ -77,6 +77,10 @@ app:
       model: ${GEMINI_MODEL:gemini-3-flash-preview}
       game-generation:
         enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
+  generation:
+    # Rà chính tả bằng AI sau khi sinh game: thêm tới 2 lần gọi Gemini mỗi game (tốn hạn mức theo ngày của gói Gemini), nên tắt mặc định.
+    wording-review:
+      enabled: ${WORDING_REVIEW_ENABLED:false}
   curriculum-rag:
     constraints-approved-sha256: ${CURRICULUM_CONSTRAINTS_APPROVED_SHA256:}
     enabled: ${CURRICULUM_RAG_ENABLED:false}

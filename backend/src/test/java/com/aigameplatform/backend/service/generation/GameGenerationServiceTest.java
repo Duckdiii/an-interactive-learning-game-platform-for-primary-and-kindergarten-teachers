@@ -21,6 +21,7 @@ import com.aigameplatform.backend.service.strategy.WordScrambleGameStrategy;
 import com.aigameplatform.backend.service.validation.AbstractGameValidator;
 import com.aigameplatform.backend.service.validation.GameValidationService;
 import com.aigameplatform.backend.service.validation.SafetyGameValidator;
+import com.aigameplatform.backend.service.validation.ValidationError;
 import com.aigameplatform.backend.service.validation.ai.AiOutputValidator;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.service.validation.safety.ContentModerationClient;
@@ -382,7 +383,17 @@ class GameGenerationServiceTest {
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
             ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled,
             List<com.aigameplatform.backend.service.curriculum.CurriculumDataset> catalogDatasets) {
+        return service(generator, maxRetries, moderation, curriculum, ragEnabled, catalogDatasets, null, true);
+    }
+
+    private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
+            ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled,
+            List<com.aigameplatform.backend.service.curriculum.CurriculumDataset> catalogDatasets,
+            WordingReviewer wording, boolean wordingEnabled) {
         DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
+        if (wording != null) {
+            beans.registerSingleton("wordingReviewer", wording);
+        }
         beans.registerSingleton("catalog", new com.aigameplatform.backend.service.curriculum.CurriculumCatalog(
                 catalogDatasets, java.util.EnumSet.copyOf(java.util.List.of(GameType.dslTypes()))));
         if (generator != null) {
@@ -409,7 +420,17 @@ class GameGenerationServiceTest {
                 GameTestFixtures.factoryRegistry(random),
                 validation, MAPPER, beans.getBeanProvider(CurriculumContextProvider.class),
                 beans.getBeanProvider(com.aigameplatform.backend.service.curriculum.CurriculumCatalog.class),
-                beans.getBeanProvider(com.aigameplatform.backend.service.curriculum.CurriculumMetrics.class), ragEnabled, maxRetries);
+                beans.getBeanProvider(com.aigameplatform.backend.service.curriculum.CurriculumMetrics.class), ragEnabled, maxRetries,
+                beans.getBeanProvider(WordingReviewer.class), wordingEnabled);
+    }
+
+    /** Service có bước rà chính tả (giả) để kiểm vòng sinh lại. */
+    private static GameGenerationService service(GameContentGenerator generator, int maxRetries, WordingReviewer wording,
+            boolean wordingEnabled) {
+        try {
+            return service(generator, maxRetries, moderation(false, false), null, false,
+                    List.of(com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadDefault()), wording, wordingEnabled);
+        } catch (IOException e) { throw new java.io.UncheckedIOException(e); }
     }
 
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries) {
@@ -491,6 +512,67 @@ class GameGenerationServiceTest {
         assertThat(second.isRetry()).isTrue();
         assertThat(second.previousOutput()).isEqualTo("{\"questions\":[]}");
         assertThat(second.previousErrors()).isNotEmpty();
+    }
+
+    // ---- rà chính tả (từ không có thật) ----
+
+    @Test
+    void aMisspelledWordFoundByTheWordingReviewIsSentBackAndTheNextTryIsReturned() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ), validOutput(GameType.QUIZ));
+        List<String> topics = new ArrayList<>();
+        Queue<List<ValidationError>> reviews = new LinkedList<>(List.of(
+                List.of(new ValidationError("$.questions[0].options[1].text", "Từ không có thật hoặc sai chính tả: \"dạp\"")),
+                List.of()));
+        GameGenerationService service = service(generator, 2, (game, topic) -> {
+            topics.add(topic);
+            return reviews.remove();
+        }, true);
+
+        service.generate(GameType.QUIZ, REQUEST);
+
+        assertThat(generator.attempts).hasSize(2);
+        assertThat(generator.attempts.get(1).previousErrors()).extracting(ValidationError::message)
+                .containsExactly("Từ không có thật hoặc sai chính tả: \"dạp\"");
+        assertThat(topics).containsOnly("Đếm con vật");
+    }
+
+    @Test
+    void theLastTryIsNotReviewedAndAFailingReviewIsSkippedSoGenerationStillSucceeds() throws IOException {
+        ScriptedGenerator lastTry = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        GameGenerationService noRetries = service(lastTry, 0, (game, topic) -> {
+            throw new AssertionError("lần thử cuối không được rà");
+        }, true);
+        assertThat(noRetries.generate(GameType.QUIZ, REQUEST).gameType()).isEqualTo(GameType.QUIZ);
+
+        ScriptedGenerator failingReview = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        GameGenerationService service = service(failingReview, 2, (game, topic) -> {
+            throw new AiServiceUnavailableException("503");
+        }, true);
+        assertThat(service.generate(GameType.QUIZ, REQUEST).gameType()).isEqualTo(GameType.QUIZ);
+        assertThat(failingReview.attempts).hasSize(1);
+    }
+
+    @Test
+    void ifTheRetriesAfterAWordingReviewAllFailTheEarlierValidGameIsReturnedInsteadOfAnError() throws IOException {
+        // Bước rà có thể báo nhầm: không được làm mất game đã qua 3 lớp chỉ vì các lần sinh lại hỏng.
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ), "{\"questions\":[]}", "không phải json");
+        GameGenerationService service = service(generator, 2,
+                (game, topic) -> List.of(new ValidationError("$.questions[0].questionText", "báo nhầm")), true);
+
+        GameDsl game = service.generate(GameType.QUIZ, REQUEST);
+
+        assertThat(game.gameType()).isEqualTo(GameType.QUIZ);
+        assertThat(generator.attempts).hasSize(3);
+    }
+
+    @Test
+    void theWordingReviewCanBeTurnedOff() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        GameGenerationService service = service(generator, 2, (game, topic) -> List.of(new ValidationError("$", "lỗi")), false);
+
+        service.generate(GameType.QUIZ, REQUEST);
+
+        assertThat(generator.attempts).hasSize(1);
     }
 
     @Test

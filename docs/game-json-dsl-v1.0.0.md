@@ -28,6 +28,7 @@ Giáo viên chỉnh sửa (`PUT`) gửi lại dạng hoàn chỉnh, và Backend 
 
 - Gốc có `{ "questions": [...] }` và `title` tùy chọn (tên game ngắn 1-60 ký tự do AI đặt; factory ghi vào `metadata.title`, thiếu thì lấy chủ đề cắt ở ranh giới từ). Loại game, khối lớp, chủ đề đã biết từ yêu cầu nên AI không lặp lại. Không có vỏ, không có `id`, `points`, `timeLimitSeconds`, `hitboxScale`, `imageUrl`, `audioUrl`, `scrambledLetters`.
 - Chọn đáp án bằng **chỉ số** (bắt đầu từ 0) thay cho id, theo phong cách của spike Gemini cho Quiz (`text`, `options`, `correctIndex`).
+- Chỗ nào có `visualPrompt` thì có thêm `asset` tùy chọn: id hình AI chọn trong danh mục `backend/src/main/resources/assets/game-asset-catalog.json` (prompt liệt kê danh mục). Factory đổi `asset` thành `imageUrl` của DSL; id lạ hoặc trống thì không gán `imageUrl` (frontend hiện chữ hoặc tự đoán hình). DSL v1.0.0 không đổi. Riêng lựa chọn của Trắc nghiệm và Tìm vật khác loại chỉ là chữ nên chưa có `asset`.
 - Schema: `backend/src/main/resources/schema/game-ai-output/1.0.0/*.schema.json` (tự chứa, chỉ dùng từ khóa đơn giản để LLM chấp nhận); record Java: `dto/dsl/ai`; `GameContentStrategy.getStructuredSchema()` trả schema này (đã bỏ `$schema` và `title` tiêu đề của schema; trường `title` trong `properties` vẫn giữ).
 - Kiểm tra bằng `AiOutputValidator`: đúng schema, rồi các chỉ số phải nằm trong phạm vi (`correctIndex`, `oddOneOutIndex`, `zoneIndex`), lỗi báo kèm vị trí để gửi lại cho AI.
 

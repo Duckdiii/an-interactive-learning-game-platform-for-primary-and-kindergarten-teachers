@@ -55,6 +55,8 @@ public class GameGenerationService {
     private final boolean curriculumRagEnabled;
     private final int maxRetries;
     private volatile GeneratedContentReviewer generatedContentReviewer;
+    // null khi chưa cấu hình AI hoặc đã tắt bằng app.generation.wording-review.enabled=false.
+    private final WordingReviewer wordingReviewer;
 
     // ObjectProvider để ứng dụng vẫn khởi động khi chưa có bản cài đặt cổng AI; thiếu thì báo lúc gọi.
     public GameGenerationService(
@@ -69,7 +71,9 @@ public class GameGenerationService {
             ObjectProvider<CurriculumCatalog> curriculumCatalog,
             ObjectProvider<CurriculumMetrics> metricsProvider,
             @Value("${app.curriculum-rag.enabled:false}") boolean curriculumRagEnabled,
-            @Value("${app.generation.max-retries:2}") int maxRetries) {
+            @Value("${app.generation.max-retries:2}") int maxRetries,
+            ObjectProvider<WordingReviewer> wordingReviewers,
+            @Value("${app.generation.wording-review.enabled:false}") boolean wordingReviewEnabled) {
         if (maxRetries < 0) {
             throw new IllegalArgumentException("app.generation.max-retries không được âm");
         }
@@ -85,6 +89,7 @@ public class GameGenerationService {
         this.metricsProvider = metricsProvider;
         this.curriculumRagEnabled = curriculumRagEnabled;
         this.maxRetries = maxRetries;
+        this.wordingReviewer = wordingReviewEnabled ? wordingReviewers.getIfAvailable() : null;
     }
 
     @Autowired(required = false)
@@ -118,6 +123,7 @@ public class GameGenerationService {
 
         String previousOutput = null;
         String lastUnverifiedReason = null;
+        GenerationResult lastPassed = null;
         List<ValidationError> previousErrors = List.of();
         for (int attemptNumber = 1; attemptNumber <= maxRetries + 1; attemptNumber++) {
             String raw = callAi(generator, new GenerationAttempt(type, request.topic(), request.subject(),
@@ -139,8 +145,13 @@ public class GameGenerationService {
                     }
                     errors = report.errors();
                 } else if (!curriculumRagEnabled) {
-                    return new GenerationResult(report.game(), curriculum.evidence(),
+                    GenerationResult passed = new GenerationResult(report.game(), curriculum.evidence(),
                             com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable());
+                    List<ValidationError> wording = attemptNumber > maxRetries ? List.of() : reviewWording(report.game(), request.topic());
+                    if (wording.isEmpty()) return passed;
+                    // Game này đã qua 3 lớp: giữ lại để trả về nếu các lần sinh lại đều hỏng (bước rà có thể báo nhầm).
+                    lastPassed = passed;
+                    errors = wording;
                 } else {
                     if (type == GameType.QUIZ && request.subject() == Subject.MATH
                             && request.gradeLevel() == GradeLevel.GRADE_1) {
@@ -198,8 +209,28 @@ public class GameGenerationService {
             previousOutput = raw;
             previousErrors = errors.stream().limit(MAX_FEEDBACK_ERRORS).toList();
         }
+        if (lastPassed != null) {
+            log.info("Các lần sinh lại sau bước rà chính tả đều chưa hợp lệ, trả game đã qua 3 lớp trước đó");
+            return lastPassed;
+        }
         if (lastUnverifiedReason != null) throw new GeneratedContentUnverifiedException(lastUnverifiedReason);
         throw new AiGenerationTimeoutException("AI chưa sinh được game hợp lệ sau " + (maxRetries + 1) + " lần thử");
+    }
+
+    /**
+     * Rà từ không có thật / sai chính tả. Lần thử cuối không rà (trả game đã qua 3 lớp thay vì báo lỗi), và bước rà lỗi thì bỏ qua: đây là
+     * kiểm tra phụ, không được làm hỏng việc tạo game. Nhánh RAG (thí điểm có kiểm chứng chương trình học) cố ý không rà: đã có bộ kiểm
+     * riêng và giữ đúng hành vi đã được duyệt của nhánh đó.
+     */
+    private List<ValidationError> reviewWording(GameDsl game, String topic) {
+        WordingReviewer reviewer = wordingReviewer;
+        if (reviewer == null) return List.of();
+        try {
+            return reviewer.review(game, topic);
+        } catch (AiServiceUnavailableException e) {
+            log.warn("Bỏ qua bước rà chính tả ({})", e.getCause() == null ? e.getClass().getSimpleName() : e.getCause().getClass().getSimpleName());
+            return List.of();
+        }
     }
 
     private GeneratedContentReviewer.Result reviewSemantically(GameDsl game, String topic,

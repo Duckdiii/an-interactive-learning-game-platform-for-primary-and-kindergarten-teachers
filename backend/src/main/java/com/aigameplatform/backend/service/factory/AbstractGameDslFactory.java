@@ -30,11 +30,18 @@ public abstract class AbstractGameDslFactory<O extends AiGameOutput, A extends A
     private final GameType supportedType;
     private final Class<O> outputClass;
     protected final RandomGenerator random;
+    private final GameAssetCatalog assets;
 
-    protected AbstractGameDslFactory(GameType supportedType, Class<O> outputClass, RandomGenerator random) {
+    protected AbstractGameDslFactory(GameType supportedType, Class<O> outputClass, RandomGenerator random, GameAssetCatalog assets) {
         this.supportedType = supportedType;
         this.outputClass = outputClass;
         this.random = random;
+        this.assets = assets;
+    }
+
+    /** Hình AI chọn từ danh mục ({@code asset}) thành {@code imageUrl}; id lạ hoặc trống thì không gán hình. */
+    protected final String imageOf(String asset) {
+        return assets.urlOf(asset);
     }
 
     public GameType supportedType() {

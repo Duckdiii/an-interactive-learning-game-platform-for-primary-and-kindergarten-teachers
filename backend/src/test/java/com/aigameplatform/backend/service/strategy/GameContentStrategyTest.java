@@ -47,6 +47,14 @@ class GameContentStrategyTest {
     }
 
     @Test
+    void everyTypeWithAVisualPromptAlsoOffersAnAssetFromTheCatalogExceptOddOneOut() {
+        for (GameContentStrategy strategy : STRATEGIES) {
+            assertThat(strategy.hasAssetField()).as(strategy.getSupportedType().name())
+                    .isEqualTo(strategy.getSupportedType() != GameType.ODD_ONE_OUT);
+        }
+    }
+
+    @Test
     void everyPromptAsksForVietnameseTitleAndInstructionsEvenForEnglish() {
         for (GameContentStrategy strategy : STRATEGIES) {
             String prompt = strategy.buildPrompt("colors song: red, blue",

@@ -22,6 +22,7 @@ import com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl;
 import com.aigameplatform.backend.dto.dsl.WordScrambleGameDsl;
 import com.aigameplatform.backend.dto.dsl.ai.AiGameOutput;
 import com.aigameplatform.backend.dto.dsl.ai.DragDropAiOutput;
+import com.aigameplatform.backend.dto.dsl.ai.MatchingAiOutput;
 import com.aigameplatform.backend.dto.dsl.ai.OddOneOutAiOutput;
 import com.aigameplatform.backend.dto.dsl.ai.OrderingAiOutput;
 import com.aigameplatform.backend.dto.dsl.ai.QuizAiOutput;
@@ -32,6 +33,7 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.KindergartenAgeBand;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.service.validation.GameValidationService;
+import com.aigameplatform.backend.service.testsupport.GameAssetCatalogFixture;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
 import com.aigameplatform.backend.service.validation.ValidationReport;
 import com.aigameplatform.backend.service.validation.ai.AiOutputValidator;
@@ -107,25 +109,34 @@ class GameDslFactoryTest {
     }
 
     @Test
-    void doesNotInventMediaUrls() throws IOException {
+    void doesNotInventImageUrlsWithoutAnAssetChosenByTheAi() throws IOException {
+        // Các ví dụ không có trường asset: không được tự đoán hình theo chữ (trước đây "cho bé" ra hình con chó).
         for (GameType type : GameType.dslTypes()) {
-            if (type == GameType.QUIZ) {
-                // Chặng 2.5: QuizGameDslFactory tự động gắn asset SVG chuẩn K-5 khi có visualPrompt
-                continue;
-            }
             JsonNode json = MAPPER.valueToTree(create(type, 1));
 
-            assertThat(json.toString()).as(type.name()).doesNotContain("audioUrl").doesNotContain("imageUrl");
+            assertThat(json.toString()).as(type.name()).doesNotContain("imageUrl");
+            if (type != GameType.QUIZ) assertThat(json.toString()).as(type.name()).doesNotContain("audioUrl");
         }
     }
 
     @Test
-    void quizDslBindsK5AssetsWhenVisualPromptPresent() throws IOException {
-        QuizGameDsl game = (QuizGameDsl) create(GameType.QUIZ, 1);
-        QuizQuestionDsl q1 = game.questions().get(0);
-        // q1 có visualPrompt "three cats" -> tự động gắn sprite SVG /assets/animals/cat.svg
-        assertThat(q1.imageUrl()).isEqualTo("/assets/animals/cat.svg");
-        assertThat(q1.audioUrl()).isEqualTo("/mock/q1.wav");
+    void anAssetFromTheCatalogBecomesTheImageUrlAndAnUnknownOneIsDropped() throws IOException {
+        var matching = MAPPER.readValue("""
+                {"title": "Nối hình", "questions": [{"pairs": [
+                  {"left": {"text": "bóng bay"}, "right": {"text": "balloon", "visualPrompt": "quả bóng bay đỏ", "asset": "fluent-object-balloon"}},
+                  {"left": {"text": "mèo"}, "right": {"text": "cat", "visualPrompt": "con mèo", "asset": "khong-co-hinh-nay"}},
+                  {"left": {"text": "cá"}, "right": {"text": "fish"}}]}]}""", MatchingAiOutput.class);
+        var quiz = MAPPER.readValue("""
+                {"title": "Đếm", "questions": [{"text": "Có mấy quả bóng bay?", "options": ["1", "2"], "correctIndex": 1,
+                  "visualPrompt": "hai quả bóng bay", "asset": "fluent-object-balloon"}]}""", QuizAiOutput.class);
+
+        var pairs = ((MatchingGameDsl) registry(new Random(1)).create(GameType.MATCHING, matching, REQUEST)).questions().get(0).pairs();
+        var quizQuestion = ((QuizGameDsl) registry(new Random(1)).create(GameType.QUIZ, quiz, REQUEST)).questions().get(0);
+
+        assertThat(pairs.get(0).right().imageUrl()).isEqualTo("/assets/fluent/object-balloon.svg");
+        assertThat(pairs.get(1).right().imageUrl()).isNull();
+        assertThat(pairs.get(2).right().imageUrl()).isNull();
+        assertThat(quizQuestion.imageUrl()).isEqualTo("/assets/fluent/object-balloon.svg");
     }
 
     @Test
@@ -256,7 +267,7 @@ class GameDslFactoryTest {
     @Test
     void vietnameseLettersWithDiacriticsStayWhole() {
         String decomposed = Normalizer.normalize("Bò", Normalizer.Form.NFD);
-        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion(decomposed, null, null)), null);
+        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion(decomposed, null, null, null)), null);
 
         WordScrambleGameDsl game = (WordScrambleGameDsl) registry(new Random(1))
                 .create(GameType.WORD_SCRAMBLE, output, REQUEST);
@@ -267,7 +278,7 @@ class GameDslFactoryTest {
 
     @Test
     void aWordOfIdenticalLettersIsLeftAsIs() {
-        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion("AA", null, null)), null);
+        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion("AA", null, null, null)), null);
 
         WordScrambleGameDsl game = (WordScrambleGameDsl) registry(new Random(1))
                 .create(GameType.WORD_SCRAMBLE, output, REQUEST);
@@ -372,9 +383,9 @@ class GameDslFactoryTest {
         Random random = new Random(1);
 
         assertThatThrownBy(() -> new GameDslFactoryRegistry(List.of(
-                new QuizGameDslFactory(random), new QuizGameDslFactory(random))))
+                new QuizGameDslFactory(random, GameAssetCatalogFixture.ASSETS), new QuizGameDslFactory(random, GameAssetCatalogFixture.ASSETS))))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("hơn một");
-        assertThatThrownBy(() -> new GameDslFactoryRegistry(List.of(new QuizGameDslFactory(random))))
+        assertThatThrownBy(() -> new GameDslFactoryRegistry(List.of(new QuizGameDslFactory(random, GameAssetCatalogFixture.ASSETS))))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("Chưa có factory");
     }
 

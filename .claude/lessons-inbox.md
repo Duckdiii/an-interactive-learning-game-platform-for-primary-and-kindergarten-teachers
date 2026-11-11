@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-11 — Thêm phụ thuộc constructor mà quên context Spring liệt kê bean tay; viết luật prompt trái thứ tự Structured Outputs
+- Lỗi: thêm `GameAssetCatalog` vào constructor của 10 factory và `GeminiGameContentGenerator`, chỉ sửa chỗ `new` trong test, quên `GameCreationPipelineTest` (`@SpringJUnitConfig` liệt kê class) và `CurriculumRagConfigurationTest` (`context.register(...)`): 12 test đỏ. Cùng lượt, thêm luật "đặt title sau cùng" trong prompt dù schema đặt `title` đầu `properties` và Structured Outputs sinh theo thứ tự đó.
+- Phát hiện nhờ: `test-verifier`, `ai-prompt-evaluator`.
+- Nguyên nhân gốc: chỉ grep `new XFactory(` mà không grep tên class trong cấu hình Spring của test; viết luật cho mô hình mà không đối chiếu với cách giải mã có ràng buộc schema.
+- Cách chặn: thêm tham số constructor cho `@Component` thì grep cả `XFactory.class` trong `src/test`; luật về thứ tự sinh phải khớp thứ tự `properties` của schema đầu ra (hoặc không viết).
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-11 — Nối `git rm` sau lệnh `python` bằng `&&`, máy không có Python nên file bị xóa ngoài ý muốn
 - Lỗi: chạy `python - <<EOF ... EOF && git rm ThemedQuizCanvas.tsx` để sửa `LivePreview.tsx` rồi mới xóa file. Python trên máy này chỉ là lối tắt mở Microsoft Store, in "Python was not found" nhưng trả mã 0, nên `git rm` vẫn chạy và đưa việc xóa vào index trong khi `LivePreview.tsx` chưa được sửa. Một luật mới thêm vào prompt cũng mâu thuẫn với dòng ngay trên ("Chỉ dùng từ tiếng Việt có thật" so với cho phép từ tiếng Anh).
 - Phát hiện nhờ: lần `git rm` sau báo không thấy file, `git status` hiện `D ` trong index; luật mâu thuẫn do `reviewer` và `ai-prompt-evaluator` báo.

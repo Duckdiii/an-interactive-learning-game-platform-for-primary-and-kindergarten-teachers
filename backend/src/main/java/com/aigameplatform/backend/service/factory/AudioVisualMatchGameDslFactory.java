@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 public class AudioVisualMatchGameDslFactory extends AbstractGameDslFactory<AudioVisualMatchAiOutput,
         AudioVisualMatchAiQuestion, AudioVisualMatchQuestionDsl, AudioVisualMatchGameDsl> {
 
-    public AudioVisualMatchGameDslFactory(RandomGenerator random) {
-        super(GameType.AUDIO_VISUAL_MATCH, AudioVisualMatchAiOutput.class, random);
+    public AudioVisualMatchGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.AUDIO_VISUAL_MATCH, AudioVisualMatchAiOutput.class, random, assets);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class AudioVisualMatchGameDslFactory extends AbstractGameDslFactory<Audio
     protected AudioVisualMatchQuestionDsl createQuestion(AudioVisualMatchAiQuestion ai, QuestionBase base) {
         // Hình đúng và hình nhiễu lưu riêng; việc trộn thứ tự hiển thị là của bản dành cho học sinh.
         return new AudioVisualMatchQuestionDsl(base.id(), base.timeLimitSeconds(), base.points(), ai.audioText(),
-                null, null, null, image(ai.correct()), ai.distractors().stream().map(AudioVisualMatchGameDslFactory::image).toList());
+                null, null, null, image(ai.correct()), ai.distractors().stream().map(this::image).toList());
     }
 
     @Override
@@ -39,7 +39,7 @@ public class AudioVisualMatchGameDslFactory extends AbstractGameDslFactory<Audio
         return new AudioVisualMatchGameDsl(schemaVersion(), supportedType(), metadata, settings, questions);
     }
 
-    private static ImageChoiceDsl image(AiImage ai) {
-        return new ImageChoiceDsl(ai.visualPrompt(), null);
+    private ImageChoiceDsl image(AiImage ai) {
+        return new ImageChoiceDsl(ai.visualPrompt(), imageOf(ai.asset()));
     }
 }

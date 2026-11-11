@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 public class OrderingGameDslFactory extends
         AbstractGameDslFactory<OrderingAiOutput, OrderingAiQuestion, OrderingQuestionDsl, OrderingGameDsl> {
 
-    public OrderingGameDslFactory(RandomGenerator random) {
-        super(GameType.ORDERING, OrderingAiOutput.class, random);
+    public OrderingGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.ORDERING, OrderingAiOutput.class, random, assets);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class OrderingGameDslFactory extends
         for (int display = 0; display < order.size(); display++) {
             int original = order.get(display);
             AiStep step = ai.steps().get(original);
-            steps.add(new OrderStepDsl(Ids.numbered("s", display), step.text(), step.visualPrompt(), null, original + 1));
+            steps.add(new OrderStepDsl(Ids.numbered("s", display), step.text(), step.visualPrompt(), imageOf(step.asset()), original + 1));
         }
         return new OrderingQuestionDsl(base.id(), base.timeLimitSeconds(), base.points(), ai.audioText(), null,
                 null, null, steps);

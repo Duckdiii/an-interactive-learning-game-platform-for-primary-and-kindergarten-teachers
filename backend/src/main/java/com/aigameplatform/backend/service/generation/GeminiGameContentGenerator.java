@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.generation;
 
+import com.aigameplatform.backend.service.factory.GameAssetCatalog;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
@@ -36,14 +37,24 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
             không được đổi chủ đề, kỹ năng, giới hạn số hoặc thêm phép tính.
             """;
 
+    private static final String ASSET_RULES = """
+            HÌNH MINH HỌA (trường asset): ở mỗi chỗ có visualPrompt, đặt asset là id trong DANH MỤC HÌNH dưới đây khi có
+            hình đúng NGHĨA của chữ trong ngữ cảnh (ví dụ "bóng bay" là fluent-object-balloon, không phải quả bóng đá).
+            Không có hình đúng nghĩa thì BỎ HẲN trường asset (không để chuỗi rỗng), không chọn hình gần giống. Chỉ dùng đúng id
+            có trong danh mục.
+            DANH MỤC HÌNH (id: tên):
+            """;
+
     private final ChatModel model;
     private final GameContentStrategyRegistry strategies;
+    private final GameAssetCatalog assets;
     private final CurriculumTopicParser topicParser = new CurriculumTopicParser();
 
     public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
-            GameContentStrategyRegistry strategies) {
+            GameContentStrategyRegistry strategies, GameAssetCatalog assets) {
         this.model = model;
         this.strategies = strategies;
+        this.assets = assets;
     }
 
     @Override
@@ -51,6 +62,10 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         GameContentStrategy<?, ?> strategy = strategies.get(attempt.gameType());
         String systemPrompt = strategy.buildPrompt(attempt.topic(), attempt.subject(), attempt.gradeLevel(),
                 attempt.curriculumContext());
+        // Chỉ loại game có trường asset trong schema đầu ra mới cần danh mục (tránh prompt dài vô ích).
+        if (strategy.hasAssetField()) {
+            systemPrompt += "\n\n" + ASSET_RULES + assets.promptList();
+        }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;
         String userPrompt = attempt.isRetry()
