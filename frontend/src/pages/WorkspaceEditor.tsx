@@ -110,8 +110,6 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   // Giọng đọc đang chọn cho các lần tạo giọng đọc (FLD-12): giữ ở đây để đổi sang câu khác vẫn còn nguyên.
   const [voice, setVoice] = useState<VoiceGender>('FEMALE')
   const voiceApi = useMemo(() => ({ voice, setVoice }), [voice])
-  // Chưa chọn thì để trống: LivePreview và màn chơi thử cùng tự suy nền theo chủ đề nên luôn khớp nhau.
-  const [editorTheme, setEditorTheme] = useState<string | undefined>(() => (draft.metadata as { theme?: string }).theme)
   // `lazy` ghi nhớ cả lần tải LỖI: muốn thử lại sau khi mạng ổn lại phải dựng `lazy` mới, nên tạo lại mỗi lần thoát khỏi màn chơi thử.
   const [PlayTestPanel, setPlayTestPanel] = useState(() => lazy(loadPlayTestPanel))
   // Đã bấm "Chơi thử" mà dữ liệu chưa đủ: lỗi được tính lại theo từng lần sửa để sửa xong là hết.
@@ -315,11 +313,9 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
         subject={draft.metadata.subject}
         topic={draft.metadata.topic}
         hasIssues={issuesByQuestion.has(index)}
-        themeId={editorTheme}
-        onThemeChange={(nextTheme) => {
-          setEditorTheme(nextTheme)
-          ;(draft.metadata as { theme?: string }).theme = nextTheme
-        }}
+        presentation={draft.metadata.presentation}
+        seed={draft.metadata.title}
+        onPresentationChange={editor.setPresentation}
       />
       <PublishReadiness
         issues={editor.readinessIssues}

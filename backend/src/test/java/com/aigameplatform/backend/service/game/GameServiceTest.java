@@ -84,7 +84,7 @@ class GameServiceTest {
     @Test
     void generatedGameIsSavedAsDraftOwnedByTheTeacherViaTheMatchingHandler() {
         when(cpf.generate(eq(GameType.CUSTOM), anyString(), any(), any())).thenReturn(
-                new GameContentHandler.GeneratedContent("Hứng táo", "2.0.0", List.of(new CpfQuestion())));
+                new GameContentHandler.GeneratedContent("Hứng táo", "2.0.0", List.of(new CpfQuestion()), null));
 
         ObjectNode response = service.generate(OWNER, request("Bé kéo giỏ hứng táo số chẵn", null, GameType.CUSTOM));
 
@@ -110,7 +110,7 @@ class GameServiceTest {
     @Test
     void randomTopicGivesTheDslHandlerAGeneratedTopic() {
         when(dsl.generate(eq(GameType.QUIZ), anyString(), any(), any()))
-                .thenReturn(new GameContentHandler.GeneratedContent("Quiz", "1.0.0", List.of()));
+                .thenReturn(new GameContentHandler.GeneratedContent("Quiz", "1.0.0", List.of(), null));
 
         service.generate(OWNER, request(null, true, null));
 

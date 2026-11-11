@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { AUDIO_BUTTON_HEIGHT, ILLUSTRATION_SIZE } from '../common/mediaLayout'
-import { OPTION_BUTTON_HEIGHT, optionGridHeight, optionPosition } from '../common/optionGrid'
+import { OPTION_BUTTON_HEIGHT, OPTION_BUTTON_WIDTH, optionGridHeight, optionPosition } from '../common/optionGrid'
 import { computeQuizLayout, type QuizLayoutInput } from './quizLayout'
 
 /**
@@ -125,5 +125,46 @@ describe('optionGrid', () => {
     expect(optionGridHeight(2)).toBe(OPTION_BUTTON_HEIGHT)
     expect(optionGridHeight(3)).toBeGreaterThan(optionGridHeight(2))
     expect(optionGridHeight(4)).toBe(optionGridHeight(3))
+  })
+})
+
+describe('optionGrid: mọi bố cục (scatter, row, arc)', () => {
+  const LAYOUTS = ['scatter', 'row', 'arc'] as const
+
+  it('không ô nào chạm ô nào, không tràn khung rộng 800, không lên trên mép lưới và nằm gọn trong chiều cao lưới', () => {
+    for (const layout of LAYOUTS) {
+      for (const count of [2, 3, 4]) {
+        const cells = Array.from({ length: count }, (_, i) => optionPosition(i, 100, count, layout))
+        const label = `${layout}/${count}`
+        cells.forEach((cell, i) => {
+          expect(cell.x, label).toBeGreaterThanOrEqual(0)
+          expect(cell.x + OPTION_BUTTON_WIDTH, label).toBeLessThanOrEqual(800)
+          expect(cell.y, label).toBeGreaterThanOrEqual(100)
+          expect(cell.y + OPTION_BUTTON_HEIGHT, label).toBeLessThanOrEqual(100 + optionGridHeight(count, layout))
+          cells.slice(i + 1).forEach((other) => {
+            const apart = cell.x + OPTION_BUTTON_WIDTH <= other.x || other.x + OPTION_BUTTON_WIDTH <= cell.x
+              || cell.y + OPTION_BUTTON_HEIGHT <= other.y || other.y + OPTION_BUTTON_HEIGHT <= cell.y
+            expect(apart, label).toBe(true)
+          })
+        })
+      }
+    }
+  })
+
+  it('canvas Trắc nghiệm luôn chứa đủ ô cuối cùng với mọi bố cục', () => {
+    for (const optionLayout of LAYOUTS) {
+      for (const input of COMBOS) {
+        const layout = computeQuizLayout({ ...input, optionLayout })
+        const bottom = Math.max(...Array.from({ length: input.optionCount }, (_, i) =>
+          optionPosition(i, layout.optionsOriginY, input.optionCount, optionLayout).y + OPTION_BUTTON_HEIGHT))
+        expect(bottom, `${optionLayout}/${JSON.stringify(input)}`).toBeLessThanOrEqual(layout.stageHeight)
+      }
+    }
+  })
+
+  it('"row" giữ đúng lưới cũ; "scatter" và "arc" đặt ô lẻ cuối vào giữa', () => {
+    expect(optionPosition(2, 100, 3, 'row')).toEqual(optionPosition(2, 100))
+    expect(optionPosition(2, 100, 3, 'scatter').x).toBe((800 - OPTION_BUTTON_WIDTH) / 2)
+    expect(optionPosition(2, 100, 3, 'arc').x).toBe((800 - OPTION_BUTTON_WIDTH) / 2)
   })
 })

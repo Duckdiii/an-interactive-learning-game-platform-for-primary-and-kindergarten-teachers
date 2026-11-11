@@ -22,6 +22,19 @@ describe('editorReducer', () => {
     expect(start.draft.metadata.title).toBe(quiz().metadata.title)
   })
 
+  it('đổi cách trình bày: gộp với phần đã có, là thay đổi cần lưu; bỏ hết thì xóa hẳn presentation', () => {
+    const start = createEditorState(quiz())
+    const world = editorReducer(start, { type: 'setPresentation', presentation: { world: 'ocean' } })
+    const both = editorReducer(world, { type: 'setPresentation', presentation: { carrier: 'fish' } })
+    const cleared = editorReducer(both, { type: 'setPresentation', presentation: { world: undefined, carrier: undefined } })
+
+    expect(both.draft.metadata.presentation).toEqual({ world: 'ocean', carrier: 'fish' })
+    expect(isDirty(both)).toBe(true)
+    expect(start.draft.metadata.presentation).toBeUndefined()
+    expect('presentation' in cleared.draft.metadata).toBe(false)
+    expect(isDirty(cleared)).toBe(false)
+  })
+
   it('sửa rồi gõ lại đúng như cũ thì hết "chưa lưu"', () => {
     const start = createEditorState(quiz())
     const edited = editorReducer(start, { type: 'setTitle', title: 'Khác' })

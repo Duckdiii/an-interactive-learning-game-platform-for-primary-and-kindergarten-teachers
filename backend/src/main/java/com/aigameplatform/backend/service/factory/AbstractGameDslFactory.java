@@ -3,8 +3,10 @@ package com.aigameplatform.backend.service.factory;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.GameMetadata;
 import com.aigameplatform.backend.dto.dsl.GameplaySettings;
+import com.aigameplatform.backend.dto.dsl.PresentationDsl;
 import com.aigameplatform.backend.dto.dsl.QuestionDsl;
 import com.aigameplatform.backend.dto.dsl.ai.AiGameOutput;
+import com.aigameplatform.backend.dto.dsl.ai.AiPresentation;
 import com.aigameplatform.backend.dto.dsl.ai.AiQuestion;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
@@ -39,6 +41,11 @@ public abstract class AbstractGameDslFactory<O extends AiGameOutput, A extends A
         this.assets = assets;
     }
 
+    /** Cách trình bày AI đề xuất, chỉ giữ giá trị hợp lệ; không có gì thì null (frontend tự chọn). */
+    static PresentationDsl presentationOf(AiPresentation ai) {
+        return ai == null ? null : PresentationDsl.normalize(ai.world(), ai.carrier(), ai.layout());
+    }
+
     /** Hình AI chọn từ danh mục ({@code asset}) thành {@code imageUrl}; id lạ hoặc trống thì không gán hình. */
     protected final String imageOf(String asset) {
         return assets.urlOf(asset);
@@ -64,7 +71,7 @@ public abstract class AbstractGameDslFactory<O extends AiGameOutput, A extends A
         }
         GameMetadata metadata = new GameMetadata(
                 titleOf(output.title(), request.topic()), request.subject(), request.gradeLevel(),
-                truncate(request.topic().strip(), MAX_TOPIC_LENGTH));
+                truncate(request.topic().strip(), MAX_TOPIC_LENGTH), presentationOf(output.presentation()));
         return assemble(metadata, new GameplaySettings(GameDefaults.hitboxScale(request.gradeLevel())), questions);
     }
 

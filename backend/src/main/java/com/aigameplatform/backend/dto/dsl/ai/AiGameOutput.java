@@ -8,4 +8,7 @@ public sealed interface AiGameOutput permits QuizAiOutput, AudioVisualMatchAiOut
     List<? extends AiQuestion> questions();
 
     String title();
+
+    /** Cách trình bày AI đề xuất; có thể thiếu. */
+    AiPresentation presentation();
 }

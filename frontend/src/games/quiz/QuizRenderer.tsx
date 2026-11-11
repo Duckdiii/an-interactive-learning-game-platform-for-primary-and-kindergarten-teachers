@@ -15,6 +15,7 @@ import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
 import { useAnimationTime } from '../common/useAnimationTime'
 import { objectKindForTheme } from '../common/optionVisual'
+import { usePresentation } from '../../player/theme/PresentationContext'
 import SceneBackground, { QuestionPanel } from '../common/SceneBackground'
 import { useTheme } from '../../player/theme/useTheme'
 import { QUESTION_FONT_SIZE, QUESTION_TEXT_WIDTH, computeQuizLayout } from './quizLayout'
@@ -83,12 +84,17 @@ export default function QuizRenderer(props: QuizRendererProps) {
     [question.questionText],
   )
 
+  // Vật và bố cục theo cách trình bày của game; chưa có nơi cung cấp (vd. xem trước cũ) thì theo thế giới và lưới cũ.
+  const presentation = usePresentation()
+  const optionKind = presentation?.carrier ?? objectKindForTheme(theme.id)
+  const optionLayout = presentation?.layout ?? 'row'
   const layout = computeQuizLayout({
     hasIllustration,
     hasAudio: Boolean(question.audioUrl),
     optionCount: question.options.length,
     questionLength: question.questionText.length,
     measuredQuestionHeight,
+    optionLayout,
   })
 
   // Component có thể được cha tái sử dụng cho câu khác hoặc đổi mode mà không unmount (ví dụ GV bấm
@@ -215,7 +221,9 @@ export default function QuizRenderer(props: QuizRendererProps) {
             isCorrect={revealCorrect && option.id === correctId}
             locked={locked}
             onClick={() => handleSelect(option.id)}
-            kind={objectKindForTheme(theme.id)}
+            kind={optionKind}
+            layout={optionLayout}
+            count={question.options.length}
             time={time}
             reactedAt={reactedAt}
           />

@@ -189,7 +189,10 @@ export default function QuestionStage({ api, sessionId, title, question, Rendere
       <PlayerShell title={title} progress={progress} score={rules.showScore ? score : undefined} remainingSeconds={remaining} feedback={feedback}
         showHotkeyHint onPause={() => setPaused(true)}
         mascot={profile.tokens.decoration ? <Mascot state={mascotStateFor(result)} /> : undefined}>
-        <Renderer question={question} profile={profile} onSubmit={submit} />
+        {/* QuestionStage dựng lại theo từng câu (key ở cha) nên hiệu ứng question-in chạy mỗi lần sang câu mới. */}
+        <div className="question-in h-full w-full">
+          <Renderer question={question} profile={profile} onSubmit={submit} />
+        </div>
       </PlayerShell>
       </div>
       {paused ? <PauseOverlay onResume={() => setPaused(false)} /> : null}

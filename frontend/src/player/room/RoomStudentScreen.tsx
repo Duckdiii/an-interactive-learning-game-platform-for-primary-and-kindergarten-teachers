@@ -9,6 +9,8 @@ import { REVIEW_DESCRIBERS } from '../review/describers'
 import PlayerShell from '../shells/PlayerShell'
 import { resolveTheme } from '../theme/resolveTheme'
 import { ThemeProvider } from '../theme/ThemeContext'
+import { PresentationProvider } from '../theme/PresentationContext'
+import { resolvePresentation } from '../../utils/presentation'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 import type { RoomJoinErrorCode, RoomMe, RoomMyFinal, RoomQuestion, StudentRoomClient } from './RoomClient'
 import { initialStudentRoomState, studentRoomReducer, studentRoomView } from './studentRoomReducer'
@@ -55,6 +57,8 @@ function Question({ client, game, question, remainingMs, paused }: QuestionProps
   return (
     <div inert={paused}>
       <PlayerShell title={game.metadata.title} progress={{ current: question.index + 1, total: question.total }} remainingSeconds={seconds} feedback={feedback}>
+        {/* Question dựng lại theo questionId nên hiệu ứng sang câu chạy mỗi câu. */}
+        <div className="question-in h-full w-full">
         <Renderer
           question={content}
           profile={PROFILES.hocSinh}
@@ -75,6 +79,7 @@ function Question({ client, game, question, remainingMs, paused }: QuestionProps
             )
           }}
         />
+        </div>
       </PlayerShell>
     </div>
   )
@@ -158,9 +163,12 @@ export default function RoomStudentScreen({ client, nickname, game }: RoomStuden
   const content = game.questions.find((item) => item.id === me?.questionId)
   const correctLine = content && state.correctAnswer !== undefined ? (REVIEW_DESCRIBERS[game.gameType]?.correct(content as never, state.correctAnswer) ?? null) : null
 
+  const roomTheme = resolveTheme({ themeId: game.metadata.presentation?.world, gameType: game.gameType, subject: game.metadata.subject })
+
   return (
     <UiProfileProvider profile={PROFILES.hocSinh}>
-      <ThemeProvider theme={resolveTheme({ gameType: game.gameType, subject: game.metadata.subject })}>
+      <ThemeProvider theme={roomTheme}>
+        <PresentationProvider presentation={resolvePresentation(game.metadata.presentation, roomTheme.id, game.metadata.title)}>
         {view === 'wait' ? <Wait nickname={nickname} count={state.participantCount} /> : null}
         {view === 'question' && question ? <Question key={question.questionId} client={client} game={game} question={question} remainingMs={state.remainingMs} paused={state.status === 'PAUSED'} /> : null}
         {view === 'feedback' && me ? <Feedback me={me} correctLine={correctLine} /> : null}
@@ -180,6 +188,7 @@ export default function RoomStudentScreen({ client, nickname, game }: RoomStuden
             </button>
           </p>
         ) : null}
+        </PresentationProvider>
       </ThemeProvider>
     </UiProfileProvider>
   )

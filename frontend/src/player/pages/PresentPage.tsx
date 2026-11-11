@@ -18,6 +18,8 @@ import { UiProfileProvider } from '../profile/UiProfileContext'
 import PresentShell from '../shells/PresentShell'
 import { resolveTheme } from '../theme/resolveTheme'
 import { ThemeProvider } from '../theme/ThemeContext'
+import { PresentationProvider } from '../theme/PresentationContext'
+import { resolvePresentation } from '../../utils/presentation'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 
 const text = viText.present
@@ -82,7 +84,7 @@ export default function PresentPage() {
   const game = query.data && !isCpfGameResponse(query.data) ? query.data : undefined
   const profile = resolveUiProfile({ gradeLevel: game?.metadata.gradeLevel })
   const theme = resolveTheme({
-    themeId: (game?.metadata as { theme?: string })?.theme || null,
+    themeId: game?.metadata.presentation?.world ?? null,
     gameType: game?.gameType,
     subject: game?.metadata.subject,
   })
@@ -102,7 +104,9 @@ export default function PresentPage() {
     <UiProfileProvider profile={profile}>
       <ThemeProvider theme={theme}>
         {game ? (
-          <PresentSession game={game} end={end} onLeave={leave} />
+          <PresentationProvider presentation={resolvePresentation(game.metadata.presentation, theme.id, game.metadata.title)}>
+            <PresentSession game={game} end={end} onLeave={leave} />
+          </PresentationProvider>
         ) : (
           <PresentShell controls={end}>
             <div className="m-auto max-w-xl space-y-6 text-center">

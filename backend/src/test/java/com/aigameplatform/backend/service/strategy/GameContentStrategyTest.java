@@ -55,6 +55,16 @@ class GameContentStrategyTest {
     }
 
     @Test
+    void thePromptOffersEveryAllowedPresentationValue() {
+        String prompt = new QuizGameStrategy(MAPPER).buildPrompt("biển", com.aigameplatform.backend.entity.enums.Subject.MATH,
+                com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_1, null);
+
+        java.util.stream.Stream.of(com.aigameplatform.backend.dto.dsl.PresentationDsl.WORLDS,
+                        com.aigameplatform.backend.dto.dsl.PresentationDsl.CARRIERS, com.aigameplatform.backend.dto.dsl.PresentationDsl.LAYOUTS)
+                .flatMap(java.util.List::stream).forEach(value -> assertThat(prompt).as(value).contains(value));
+    }
+
+    @Test
     void everyPromptAsksForVietnameseTitleAndInstructionsEvenForEnglish() {
         for (GameContentStrategy strategy : STRATEGIES) {
             String prompt = strategy.buildPrompt("colors song: red, blue",

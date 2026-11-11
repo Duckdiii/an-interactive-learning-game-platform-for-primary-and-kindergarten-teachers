@@ -109,6 +109,22 @@ class GameDslFactoryTest {
     }
 
     @Test
+    void thePresentationChosenByTheAiGoesIntoTheMetadataWithoutUnknownValues() throws IOException {
+        var withPresentation = MAPPER.readValue("""
+                {"title": "Cá con", "presentation": {"world": "ocean", "carrier": "submarine", "layout": "arc"},
+                 "questions": [{"text": "Có mấy con cá?", "options": ["1", "2"], "correctIndex": 1}]}""", QuizAiOutput.class);
+        var withoutPresentation = MAPPER.readValue("""
+                {"questions": [{"text": "Có mấy con cá?", "options": ["1", "2"], "correctIndex": 1}]}""", QuizAiOutput.class);
+
+        var metadata = registry(new Random(1)).create(GameType.QUIZ, withPresentation, REQUEST).metadata();
+
+        assertThat(metadata.presentation()).isEqualTo(new com.aigameplatform.backend.dto.dsl.PresentationDsl("ocean", null, "arc"));
+        assertThat(registry(new Random(1)).create(GameType.QUIZ, withoutPresentation, REQUEST).metadata().presentation()).isNull();
+        assertThat(MAPPER.valueToTree(registry(new Random(1)).create(GameType.QUIZ, withoutPresentation, REQUEST)).toString())
+                .doesNotContain("presentation");
+    }
+
+    @Test
     void doesNotInventImageUrlsWithoutAnAssetChosenByTheAi() throws IOException {
         // Các ví dụ không có trường asset: không được tự đoán hình theo chữ (trước đây "cho bé" ra hình con chó).
         for (GameType type : GameType.dslTypes()) {
@@ -267,7 +283,7 @@ class GameDslFactoryTest {
     @Test
     void vietnameseLettersWithDiacriticsStayWhole() {
         String decomposed = Normalizer.normalize("Bò", Normalizer.Form.NFD);
-        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion(decomposed, null, null, null)), null);
+        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion(decomposed, null, null, null)), null, null);
 
         WordScrambleGameDsl game = (WordScrambleGameDsl) registry(new Random(1))
                 .create(GameType.WORD_SCRAMBLE, output, REQUEST);
@@ -278,7 +294,7 @@ class GameDslFactoryTest {
 
     @Test
     void aWordOfIdenticalLettersIsLeftAsIs() {
-        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion("AA", null, null, null)), null);
+        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion("AA", null, null, null)), null, null);
 
         WordScrambleGameDsl game = (WordScrambleGameDsl) registry(new Random(1))
                 .create(GameType.WORD_SCRAMBLE, output, REQUEST);

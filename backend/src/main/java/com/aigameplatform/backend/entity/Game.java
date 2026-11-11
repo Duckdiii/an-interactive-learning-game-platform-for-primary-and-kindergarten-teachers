@@ -51,6 +51,10 @@ public class Game {
     @Column(nullable = false)
     private GameStatus status = GameStatus.DRAFT;
 
+    // Ba cột null cùng lúc thì Hibernate trả null (game chưa có cách trình bày riêng).
+    @Embedded
+    private GamePresentation presentation;
+
     // Hibernate tự đặt khi thêm và mỗi lần sửa; trả ra API là updatedAt.
     @org.hibernate.annotations.UpdateTimestamp
     @Column(nullable = false)

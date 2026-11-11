@@ -60,6 +60,24 @@ class DslGameContentHandlerTest {
     }
 
     @Test
+    void thePresentationChosenByTheTeacherIsKeptWhenSavedAndRemovedWhenCleared() throws Exception {
+        Game game = game(GameType.QUIZ);
+        ObjectNode withWorld = (ObjectNode) quiz();
+        ((ObjectNode) withWorld.path("metadata")).putObject("presentation").put("world", "space").put("carrier", "planet");
+
+        handler.replaceContent(game, withWorld);
+        JsonNode saved = handler.toResponse(game, MAPPER.createObjectNode());
+
+        assertThat(game.getPresentation().getWorld()).isEqualTo("space");
+        assertThat(saved.path("metadata").path("presentation").path("world").asString()).isEqualTo("space");
+        assertThat(saved.path("metadata").path("presentation").path("carrier").asString()).isEqualTo("planet");
+        assertThat(saved.path("metadata").path("presentation").has("layout")).isFalse();
+
+        handler.replaceContent(game, quiz());
+        assertThat(handler.toResponse(game, MAPPER.createObjectNode()).path("metadata").has("presentation")).isFalse();
+    }
+
+    @Test
     void cannotChangeTheGameType() throws Exception {
         assertThatThrownBy(() -> handler.replaceContent(game(GameType.MATCHING), quiz()))
                 .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR));

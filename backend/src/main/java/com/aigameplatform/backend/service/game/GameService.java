@@ -61,6 +61,7 @@ public class GameService {
         game.setTitle(content.title());
         game.setSubject(request.subject());
         game.setGrade(request.gradeLevel());
+        game.setPresentation(content.presentation());
         game.setSchemaVersion(content.schemaVersion());
         game.setStatus(GameStatus.DRAFT);
         game.getQuestions().addAll(content.questions());

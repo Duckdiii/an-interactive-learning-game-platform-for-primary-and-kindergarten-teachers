@@ -1,6 +1,7 @@
 package com.aigameplatform.backend.service.game;
 
 import com.aigameplatform.backend.entity.Game;
+import com.aigameplatform.backend.entity.GamePresentation;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
@@ -27,7 +28,8 @@ public interface GameContentHandler {
     /** Dựng {@code GameResponse} theo openapi.yaml từ game đã lưu và ba trường quản lý (gameId, status, updatedAt). */
     ObjectNode toResponse(Game game, ObjectNode management);
 
-    /** Nội dung đã sinh: tên game, phiên bản định dạng và các câu hỏi để lưu. */
-    record GeneratedContent(String title, String schemaVersion, List<QuestionGame> questions) {
+    /** Nội dung đã sinh: tên game, phiên bản định dạng, các câu hỏi để lưu và cách trình bày (null nếu không có). */
+    record GeneratedContent(String title, String schemaVersion, List<QuestionGame> questions,
+            GamePresentation presentation) {
     }
 }

@@ -26,7 +26,7 @@ Giáo viên chỉnh sửa (`PUT`) gửi lại dạng hoàn chỉnh, và Backend 
 
 ### Dạng đầu ra của AI (Game AI Output v1.0.0)
 
-- Gốc có `{ "questions": [...] }` và `title` tùy chọn (tên game ngắn 1-60 ký tự do AI đặt; factory ghi vào `metadata.title`, thiếu thì lấy chủ đề cắt ở ranh giới từ). Loại game, khối lớp, chủ đề đã biết từ yêu cầu nên AI không lặp lại. Không có vỏ, không có `id`, `points`, `timeLimitSeconds`, `hitboxScale`, `imageUrl`, `audioUrl`, `scrambledLetters`.
+- Gốc có `{ "questions": [...] }`, `presentation` tùy chọn (xem `metadata.presentation`) và `title` tùy chọn (tên game ngắn 1-60 ký tự do AI đặt; factory ghi vào `metadata.title`, thiếu thì lấy chủ đề cắt ở ranh giới từ). Loại game, khối lớp, chủ đề đã biết từ yêu cầu nên AI không lặp lại. Không có vỏ, không có `id`, `points`, `timeLimitSeconds`, `hitboxScale`, `imageUrl`, `audioUrl`, `scrambledLetters`.
 - Chọn đáp án bằng **chỉ số** (bắt đầu từ 0) thay cho id, theo phong cách của spike Gemini cho Quiz (`text`, `options`, `correctIndex`).
 - Chỗ nào có `visualPrompt` thì có thêm `asset` tùy chọn: id hình AI chọn trong danh mục `backend/src/main/resources/assets/game-asset-catalog.json` (prompt liệt kê danh mục). Factory đổi `asset` thành `imageUrl` của DSL; id lạ hoặc trống thì không gán `imageUrl` (frontend hiện chữ hoặc tự đoán hình). DSL v1.0.0 không đổi. Riêng lựa chọn của Trắc nghiệm và Tìm vật khác loại chỉ là chữ nên chưa có `asset`.
 - Schema: `backend/src/main/resources/schema/game-ai-output/1.0.0/*.schema.json` (tự chứa, chỉ dùng từ khóa đơn giản để LLM chấp nhận); record Java: `dto/dsl/ai`; `GameContentStrategy.getStructuredSchema()` trả schema này (đã bỏ `$schema` và `title` tiêu đề của schema; trường `title` trong `properties` vẫn giữ).
@@ -69,6 +69,7 @@ Giáo viên chỉnh sửa (`PUT`) gửi lại dạng hoàn chỉnh, và Backend 
 | `metadata.title`, `topic` | string | |
 | `metadata.subject` | enum | `MATH`, `VIETNAMESE`, `ENGLISH` |
 | `metadata.gradeLevel` | enum | `KINDERGARTEN`, `GRADE_1`, `GRADE_2`, `GRADE_3`, `GRADE_4`, `GRADE_5` |
+| `metadata.presentation` | object, tùy chọn | Cách trình bày: `world` (`farm`, `ocean`, `jungle`, `space`), `carrier` vật mang đáp án (`balloon`, `bubble`, `planet`, `fruit`, `card`, `fish`, `flower`), `layout` (`scatter`, `row`, `arc`). Trường nào cũng tùy chọn; thiếu thì frontend tự chọn theo game. AI đề xuất khi sinh (đầu ra AI có `presentation` cùng tên, giá trị lạ bị bỏ), giáo viên đổi trong trình soạn. Lưu ở cột `games.presentation_world`, `presentation_carrier`, `presentation_layout` (migration V9) |
 | `gameplaySettings.hitboxScale` | number | **Backend tự gán** theo khối lớp (ví dụ 1.5 cho `KINDERGARTEN` và `GRADE_1`, 1.0 cho các lớp lớn). AI không sinh |
 | `questions[]` | array | Mỗi phần tử là một màn chơi |
 

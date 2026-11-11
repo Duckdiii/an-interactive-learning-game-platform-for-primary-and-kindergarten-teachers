@@ -129,25 +129,32 @@ describe('LivePreview', () => {
   })
 
   it('QUIZ luôn dùng renderer thật như màn chơi, không có bản vẽ riêng', () => {
-    renderPreview({ themeId: 'farm' })
+    renderPreview({ presentation: { world: 'farm' } })
 
     expect(screen.queryByRole('button', { name: /Đồ họa Canvas/ })).not.toBeInTheDocument()
     expect(screen.getByText('hai')).toBeInTheDocument()
   })
 
   it('chưa chọn thế giới: chọn nền giống màn chơi thử (suy từ chủ đề), không mặc định Nông Trại', () => {
-    renderPreview({ themeId: undefined, topic: 'Bé bay vào vũ trụ ngắm các hành tinh' })
+    renderPreview({ presentation: undefined, topic: 'Bé bay vào vũ trụ ngắm các hành tinh' })
 
     expect(screen.getByRole('button', { name: '🚀 Vũ Trụ' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: '🌾 Nông Trại' })).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('1-click chuyển đổi theme cập nhật nút theme và gọi onThemeChange', () => {
-    const onThemeChange = vi.fn()
-    renderPreview({ themeId: 'farm', onThemeChange })
+  it('bấm chip thế giới hoặc vật mang đáp án thì báo đúng phần đổi để trình soạn ghi vào presentation', () => {
+    const onPresentationChange = vi.fn()
+    renderPreview({ presentation: { world: 'farm' }, onPresentationChange })
 
-    const oceanBtn = screen.getByRole('button', { name: '🌊 Đại Dương' })
-    fireEvent.click(oceanBtn)
-    expect(onThemeChange).toHaveBeenCalledWith('ocean')
+    fireEvent.click(screen.getByRole('button', { name: '🌊 Đại Dương' }))
+    fireEvent.click(screen.getByRole('button', { name: '🐟 Cá' }))
+
+    expect(onPresentationChange).toHaveBeenNthCalledWith(1, { world: 'ocean' })
+    expect(onPresentationChange).toHaveBeenNthCalledWith(2, { carrier: 'fish' })
+  })
+
+  it('vật mang đáp án đã lưu thì sáng đúng chip; chưa lưu thì tự chọn cố định theo game', () => {
+    renderPreview({ presentation: { world: 'ocean', carrier: 'card' } })
+    expect(screen.getByRole('button', { name: '🃏 Thẻ' })).toHaveAttribute('aria-pressed', 'true')
   })
 })

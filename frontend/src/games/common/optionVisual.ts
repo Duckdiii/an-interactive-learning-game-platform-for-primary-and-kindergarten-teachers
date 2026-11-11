@@ -1,9 +1,10 @@
 // Hình hóa nội dung lựa chọn mà không đổi contract DSL: đọc chữ đáp án để biết nên vẽ vật gì (hàm thuần, có test).
+import type { PresentationCarrier } from '../../types/game-dsl.types'
 import { findCatalogItemsInText } from '../../utils/assetResolver'
 import type { ColorWord } from './palette'
 
 /** Vật đại diện cho lựa chọn theo thế giới game: bóng bay (mặc định), bong bóng nước (đại dương), hành tinh (vũ trụ). */
-export type OptionObjectKind = 'balloon' | 'bubble' | 'planet'
+export type OptionObjectKind = PresentationCarrier
 
 export function objectKindForTheme(themeId: string | undefined): OptionObjectKind {
   if (themeId === 'ocean') return 'bubble'

@@ -1,6 +1,6 @@
 import { Group, Image as KonvaImage, Rect, Text } from 'react-konva'
 import useImage from 'use-image'
-import type { TextChoice } from '../../types/game-dsl.types'
+import type { PresentationLayout, TextChoice } from '../../types/game-dsl.types'
 import { bob, breathe, burstParticle, easeOutBack, progress, wiggle } from './motion'
 import { colorWordOf, quantityPicture, singlePicture, type OptionObjectKind } from './optionVisual'
 import { COLOR_WORD_FILLS, OPTION_OBJECT_FILLS } from './palette'
@@ -19,6 +19,9 @@ interface OptionButtonProps {
   onClick: () => void
   /** Vật đại diện theo thế giới game. */
   kind?: OptionObjectKind
+  /** Bố cục lưới đáp án và tổng số lựa chọn (để đặt ô lẻ cuối vào giữa). */
+  layout?: PresentationLayout
+  count?: number
   /** Đồng hồ hoạt ảnh (giây) và lúc bắt đầu phản hồi đúng/sai; 0 và null thì vẽ tĩnh. */
   time?: number
   reactedAt?: number | null
@@ -29,7 +32,7 @@ const CY = OPTION_BUTTON_HEIGHT / 2
 const BURST = 8
 
 /**
- * Lựa chọn vẽ thành một vật trong cảnh (bóng bay, bong bóng nước, hành tinh) thay cho ô chữ, chữ đáp án nằm trên nhãn trắng viền đậm.
+ * Lựa chọn vẽ thành một vật trong cảnh (bóng bay, bong bóng, hành tinh, quả, thẻ, cá, bông hoa) thay cho ô chữ, chữ đáp án nằm trên nhãn trắng viền đậm.
  * Đáp án là tên màu thì vật mang đúng màu đó; "3 con vịt" thì vẽ 3 con vịt. Giữ nguyên ô 340x200 và vị trí lưới nên bố cục không đổi.
  * Chỉ dùng Group/Rect/Text/Image (các test giả lập react-konva chỉ có những phần này).
  */
@@ -42,11 +45,13 @@ export default function OptionButton({
   locked,
   onClick,
   kind = 'balloon',
+  layout = 'row',
+  count = 0,
   time = 0,
   reactedAt = null,
 }: OptionButtonProps) {
   const palette = useGamePalette()
-  const { x, y } = optionPosition(index, originY)
+  const { x, y } = optionPosition(index, originY, count, layout)
   const extra = option as unknown as { imageUrl?: string }
 
   const color = colorWordOf(option.text)
@@ -169,6 +174,52 @@ function ObjectShape({ kind, fill, outline, highlight, solid }: { kind: OptionOb
         <Rect x={-82} y={-82} width={164} height={164} cornerRadius={82} fill={fill} stroke={outline} strokeWidth={3} />
         <Rect x={-112} y={-14} width={224} height={28} cornerRadius={14} stroke={outline} strokeWidth={4} rotation={-12} opacity={0.6} />
         <Rect x={-50} y={-60} width={30} height={18} cornerRadius={9} fill={highlight} opacity={0.5} />
+      </Group>
+    )
+  }
+  if (kind === 'fruit') {
+    // Quả tròn có cuống và lá.
+    return (
+      <Group>
+        <Rect x={-3} y={-100} width={6} height={22} fill={outline} />
+        <Rect x={4} y={-104} width={34} height={18} cornerRadius={9} fill={COLOR_WORD_FILLS.green} stroke={outline} strokeWidth={2} rotation={-20} />
+        <Rect x={-82} y={-80} width={164} height={164} cornerRadius={82} fill={fill} stroke={outline} strokeWidth={3} />
+        <Rect x={-54} y={-56} width={26} height={36} cornerRadius={13} fill={highlight} opacity={0.5} rotation={20} />
+      </Group>
+    )
+  }
+  if (kind === 'card') {
+    // Thẻ bo góc có viền trong.
+    return (
+      <Group>
+        <Rect x={-90} y={-86} width={180} height={172} cornerRadius={22} fill={fill} stroke={outline} strokeWidth={3} />
+        <Rect x={-76} y={-72} width={152} height={144} cornerRadius={16} stroke={highlight} strokeWidth={4} opacity={0.7} />
+      </Group>
+    )
+  }
+  if (kind === 'fish') {
+    // Thân cá bầu dục, đuôi hai vây chéo, mắt.
+    return (
+      <Group>
+        <Rect x={64} y={-46} width={56} height={40} cornerRadius={10} fill={fill} stroke={outline} strokeWidth={3} rotation={30} />
+        <Rect x={64} y={6} width={56} height={40} cornerRadius={10} fill={fill} stroke={outline} strokeWidth={3} rotation={-30} />
+        <Rect x={-96} y={-70} width={176} height={140} cornerRadius={70} fill={fill} stroke={outline} strokeWidth={3} />
+        <Rect x={-66} y={-34} width={18} height={18} cornerRadius={9} fill={outline} />
+      </Group>
+    )
+  }
+  if (kind === 'flower') {
+    // Năm cánh hoa quanh nhị tròn.
+    const petals = [0, 72, 144, 216, 288]
+    return (
+      <Group>
+        {/* Xoay cả nhóm quanh tâm hoa (Rect tự xoay quanh góc trên-trái nên cánh sẽ văng ra ngoài ô). */}
+        {petals.map((angle) => (
+          <Group key={angle} rotation={angle}>
+            <Rect x={-30} y={-92} width={60} height={84} cornerRadius={30} fill={fill} stroke={outline} strokeWidth={2} />
+          </Group>
+        ))}
+        <Rect x={-50} y={-50} width={100} height={100} cornerRadius={50} fill={highlight} stroke={outline} strokeWidth={3} />
       </Group>
     )
   }

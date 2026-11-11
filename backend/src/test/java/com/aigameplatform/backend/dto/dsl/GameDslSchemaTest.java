@@ -121,6 +121,26 @@ class GameDslSchemaTest {
         assertThat(errorsOf(GameType.QUIZ, json)).isNotEmpty();
     }
 
+    @ParameterizedTest
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
+    void acceptsAnOptionalPresentationAndRoundTripsIt(GameType type) throws IOException {
+        JsonNode json = mutated(type, g -> ((ObjectNode) g.get("metadata")).putObject("presentation")
+                .put("world", "ocean").put("carrier", "fish").put("layout", "arc"));
+
+        assertThat(errorsOf(type, json)).isEmpty();
+        GameDsl game = MAPPER.treeToValue(json, GAME_CLASSES.get(type));
+        assertThat(game.metadata().presentation()).isEqualTo(new PresentationDsl("ocean", "fish", "arc"));
+    }
+
+    @Test
+    void rejectsAnUnknownPresentationValueOrField() throws IOException {
+        JsonNode badValue = mutated(GameType.QUIZ, g -> ((ObjectNode) g.get("metadata")).putObject("presentation").put("carrier", "rocket"));
+        JsonNode badField = mutated(GameType.QUIZ, g -> ((ObjectNode) g.get("metadata")).putObject("presentation").put("color", "red"));
+
+        assertThat(errorsOf(GameType.QUIZ, badValue)).isNotEmpty();
+        assertThat(errorsOf(GameType.QUIZ, badField)).isNotEmpty();
+    }
+
     @Test
     void rejectsUnknownGradeLevel() throws IOException {
         JsonNode json = mutated(GameType.QUIZ, g -> ((ObjectNode) g.get("metadata")).put("gradeLevel", "ELEMENTARY"));

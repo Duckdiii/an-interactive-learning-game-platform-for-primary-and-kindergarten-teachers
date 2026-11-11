@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-11 — Thay chuỗi bằng script Node trên file CRLF, không kiểm kết quả nên mất một chỗ sửa
+- Lỗi: dùng `node -e` với `s.replace("...\n...")` để sửa `QuizRenderer.tsx` và `quizLayout.ts`. Hai file dùng CRLF nên chuỗi có `\n` không khớp, `replace` lặng lẽ không làm gì; script không in MISS. Kết quả `computeQuizLayout` không nhận `optionLayout`, canvas tính chiều cao theo lưới cũ trong khi ô đã lệch xuống. Test bố cục vẫn xanh vì test tự truyền `optionLayout`.
+- Phát hiện nhờ: `reviewer` (đọc chỗ gọi thật trong renderer); `tsc` chỉ bắt được một nửa (biến không dùng ở `quizLayout.ts`).
+- Nguyên nhân gốc: tin script đã chạy mà không kiểm từng chỗ thay; repo trộn LF và CRLF.
+- Cách chặn: sửa nhiều dòng thì dùng công cụ Edit (báo lỗi khi không khớp); nếu dùng script thì chuẩn hóa CRLF trước và in MISS cho mọi chỗ không khớp, rồi grep lại kết quả. Test bố cục phải có ít nhất một ca đi qua component thật hoặc assert chỗ gọi.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-11 — Thêm phụ thuộc constructor mà quên context Spring liệt kê bean tay; viết luật prompt trái thứ tự Structured Outputs
 - Lỗi: thêm `GameAssetCatalog` vào constructor của 10 factory và `GeminiGameContentGenerator`, chỉ sửa chỗ `new` trong test, quên `GameCreationPipelineTest` (`@SpringJUnitConfig` liệt kê class) và `CurriculumRagConfigurationTest` (`context.register(...)`): 12 test đỏ. Cùng lượt, thêm luật "đặt title sau cùng" trong prompt dù schema đặt `title` đầu `properties` và Structured Outputs sinh theo thứ tự đó.
 - Phát hiện nhờ: `test-verifier`, `ai-prompt-evaluator`.

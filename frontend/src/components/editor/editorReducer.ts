@@ -1,4 +1,4 @@
-import type { GameDsl, QuestionDsl } from '../../types/game-dsl.types'
+import type { GameDsl, GamePresentation, QuestionDsl } from '../../types/game-dsl.types'
 import { deepEqual, trimContent } from '../../utils/gameContent'
 import { applyGameDefault } from '../../utils/gameDefaults'
 import type { DefaultField } from '../../utils/gameDefaults'
@@ -24,6 +24,8 @@ export interface EditorState {
 export type EditorAction =
   | { type: 'setTitle'; title: string }
   | { type: 'setTopic'; topic: string }
+  // Đổi một phần cách trình bày (thế giới, vật mang đáp án, bố cục); undefined thì bỏ phần đó để frontend tự chọn.
+  | { type: 'setPresentation'; presentation: GamePresentation }
   // Áp một bản vá (hàm thuần trong `forms/*Editing`) lên câu HIỆN HÀNH ở vị trí `index`. Bản vá chạy trên trạng thái mới nhất nên
   // một lần kiểm tra từ ngữ về muộn không ghi đè các sửa đổi khác; `questionId` phải còn khớp (đã đổi câu/khôi phục thì bỏ qua).
   | { type: 'updateQuestion'; index: number; questionId: string; update: (question: QuestionDsl) => QuestionDsl }
@@ -60,6 +62,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, draft: { ...state.draft, metadata: { ...state.draft.metadata, title: action.title } } }
     case 'setTopic':
       return { ...state, draft: { ...state.draft, metadata: { ...state.draft.metadata, topic: action.topic } } }
+    case 'setPresentation': {
+      const merged = { ...state.draft.metadata.presentation, ...action.presentation }
+      const presentation = Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== undefined)) as GamePresentation
+      const { presentation: _previous, ...base } = state.draft.metadata
+      const metadata = Object.keys(presentation).length === 0 ? base : { ...base, presentation }
+      return { ...state, draft: { ...state.draft, metadata } }
+    }
     case 'setGameDefault': {
       const questions = applyGameDefault(state.draft.questions as QuestionDsl[], action.field, action.value)
       // Câu nào bị đổi theo thì hết hoàn tác, như khi sửa tay câu đó.

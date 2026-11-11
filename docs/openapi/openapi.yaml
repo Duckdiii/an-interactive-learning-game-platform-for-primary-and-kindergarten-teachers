@@ -2802,6 +2802,22 @@ components:
               type: string
               minLength: 1
               maxLength: 200
+            presentation:
+              type: object
+              additionalProperties: false
+              description: |
+                Cách trình bày (tùy chọn, xem `metadata.presentation` trong docs/game-json-dsl-v1.0.0.md); thiếu thì
+                frontend tự chọn. Gửi lại trong `PUT /games/{gameId}` để lưu lựa chọn của giáo viên.
+              properties:
+                world:
+                  type: string
+                  enum: [farm, ocean, jungle, space]
+                carrier:
+                  type: string
+                  enum: [balloon, bubble, planet, fruit, card, fish, flower]
+                layout:
+                  type: string
+                  enum: [scatter, row, arc]
         gameplaySettings:
           type: object
           required: [hitboxScale]
@@ -3059,6 +3075,8 @@ components:
         chưa tạo phiên được. Biến đổi theo từng loại game xem mô tả của `GET /sessions/{sessionId}/questions`.
         Cấu trúc câu hỏi chưa có schema máy đọc cho hầu hết loại game (DSL chưa mô tả dạng học sinh; đây là
         cam kết ở cấp hợp đồng). Đã có schema cho MATCHING: `MatchingStudentQuestion`.
+        Chưa có `metadata.presentation`: màn học sinh tự chọn cách trình bày theo mã chia sẻ (giáo viên chọn
+        trong trình soạn chỉ áp dụng ở xem trước, chơi thử, trình chiếu và phòng chơi).
       properties:
         schemaVersion:
           const: '1.0.0'

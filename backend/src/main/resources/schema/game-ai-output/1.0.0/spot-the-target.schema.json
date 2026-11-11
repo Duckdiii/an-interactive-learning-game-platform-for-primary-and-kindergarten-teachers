@@ -8,6 +8,24 @@
       "minLength": 1,
       "maxLength": 60
     },
+    "presentation": {
+      "type": "object",
+      "properties": {
+        "world": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "carrier": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "layout": {
+          "type": "string",
+          "maxLength": 20
+        }
+      },
+      "additionalProperties": false
+    },
     "questions": {
       "type": "array",
       "minItems": 1,

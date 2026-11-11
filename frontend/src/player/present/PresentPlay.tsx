@@ -159,7 +159,9 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
               </div>
             ) : Renderer && question ? (
               <FitToHeight key={`${question.id}-${state.attempt}`}>
-                <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile} onSubmit={onSubmit} />
+                <div className="question-in h-full w-full">
+                  <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile} onSubmit={onSubmit} />
+                </div>
               </FitToHeight>
             ) : (
               <div className="grid h-full place-items-center text-center">

@@ -1,6 +1,7 @@
 package com.aigameplatform.backend.service.game;
 
 import com.aigameplatform.backend.dto.dsl.GameDsl;
+import com.aigameplatform.backend.dto.dsl.PresentationDsl;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
@@ -42,7 +43,8 @@ public class DslGameContentHandler implements GameContentHandler {
     @Override
     public GeneratedContent generate(GameType type, String idea, Subject subject, GradeLevel gradeLevel) {
         GameDsl dsl = generation.generate(type, new GameDslRequest(idea, subject, gradeLevel));
-        return new GeneratedContent(dsl.metadata().title(), dsl.schemaVersion(), strategies.get(type).parseToQuestions(dsl));
+        return new GeneratedContent(dsl.metadata().title(), dsl.schemaVersion(), strategies.get(type).parseToQuestions(dsl),
+                PresentationDsl.toEntity(dsl.metadata().presentation()));
     }
 
     @Override
@@ -56,6 +58,7 @@ public class DslGameContentHandler implements GameContentHandler {
         game.setTitle(dsl.metadata().title());
         game.setSubject(dsl.metadata().subject());
         game.setGrade(dsl.metadata().gradeLevel());
+        game.setPresentation(PresentationDsl.toEntity(dsl.metadata().presentation()));
         game.getQuestions().clear();
         game.getQuestions().addAll(strategies.get(dsl.gameType()).parseToQuestions(dsl));
         game.setQuestionNum(game.getQuestions().size());

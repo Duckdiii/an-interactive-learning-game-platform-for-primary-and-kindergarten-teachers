@@ -84,6 +84,25 @@ class OpenAiModerationClientTest {
     }
 
     @Test
+    void textsAlreadyApprovedAreNotSentAgainButFlaggedOnesAre() {
+        String flagged = "{\"flagged\":true,\"categories\":{\"violence\":true}}";
+        server.expect(requestTo(URL)).andExpect(jsonPath("$.input.length()").value(2))
+                .andRespond(withSuccess(response(CLEAN, flagged), MediaType.APPLICATION_JSON));
+        // Lần lưu sau: chỉ đoạn bị gắn cờ và đoạn mới phải gửi lại; đoạn trùng trong cùng lần chỉ gửi một lần.
+        server.expect(requestTo(URL)).andExpect(jsonPath("$.input.length()").value(2))
+                .andExpect(jsonPath("$.input[0]").value("bạo lực"))
+                .andExpect(jsonPath("$.input[1]").value("câu mới"))
+                .andRespond(withSuccess(response(flagged, CLEAN), MediaType.APPLICATION_JSON));
+
+        client.moderate(List.of("Con mèo", "bạo lực"));
+        List<ModerationResult> second = client.moderate(List.of("Con mèo", "bạo lực", "câu mới", "Con mèo", "câu mới"));
+
+        assertThat(second).extracting(ModerationResult::flagged).containsExactly(false, true, false, false, false);
+        server.verify();
+        assertThat(client.moderate(List.of("Con mèo", "câu mới"))).extracting(ModerationResult::flagged).containsExactly(false, false);
+    }
+
+    @Test
     void serverErrorBecomesUnavailable() {
         server.expect(requestTo(URL)).andRespond(withServerError());
 

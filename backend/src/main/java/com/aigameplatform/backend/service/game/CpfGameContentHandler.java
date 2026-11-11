@@ -43,7 +43,7 @@ public class CpfGameContentHandler implements GameContentHandler {
     @Override
     public GeneratedContent generate(GameType type, String idea, Subject subject, GradeLevel gradeLevel) {
         JsonNode cpf = generation.generate(idea, subject, gradeLevel);
-        return new GeneratedContent(cpf.path("metadata").path("title").asString(), SCHEMA_VERSION, List.of(question(cpf)));
+        return new GeneratedContent(cpf.path("metadata").path("title").asString(), SCHEMA_VERSION, List.of(question(cpf)), null);
     }
 
     @Override

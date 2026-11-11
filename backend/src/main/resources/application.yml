@@ -16,6 +16,9 @@ spring:
       maximum-pool-size: 5
       # Supabase installs pgvector in the extensions schema; LangChain4j needs it on the search path.
       connection-init-sql: SET search_path TO public, extensions
+      data-source-properties:
+        # Driver gộp các lệnh insert cùng loại trong một lô thành một câu multi-row: ít lượt đi về Supabase hơn.
+        reWriteBatchedInserts: true
 
   jpa:
     hibernate:
@@ -24,6 +27,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Mỗi lượt đi về Supabase mất hàng trăm ms: lưu một game (xóa rồi ghi lại mọi câu, bảng JOINED, danh sách lựa chọn) từng
+        # tốn khoảng 100 câu lệnh lẻ. Gộp insert/update/delete theo lô và đọc các danh sách con theo lô thay vì từng câu một.
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        default_batch_fetch_size: 50
     open-in-view: false
 
   flyway:

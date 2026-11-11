@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.strategy;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.GameMetadata;
 import com.aigameplatform.backend.dto.dsl.GameplaySettings;
+import com.aigameplatform.backend.dto.dsl.PresentationDsl;
 import com.aigameplatform.backend.dto.dsl.QuestionDsl;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
@@ -37,6 +38,10 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
             Quy tắc chung:
             - title: tên game ngắn 2-8 từ, hấp dẫn với trẻ, đặt lại từ chủ đề; không chép nguyên câu yêu cầu của giáo viên.
               title chỉ nhắc vật, nhân vật, bối cảnh thật sự có trong các câu của game.
+            - presentation: chọn cách trình bày hợp với nội dung bài, mỗi trường lấy đúng một giá trị trong danh sách:
+              world (farm, ocean, jungle, space), carrier là vật mang đáp án (balloon, bubble, planet, fruit, card, fish,
+              flower), layout (scatter, row, arc). Ví dụ bài về biển: ocean + fish; về cây trái: farm + fruit; về vũ trụ:
+              space + planet. Không có gì gợi ý thì chọn tự do để các game không giống hệt nhau.
             - Các câu (màn) không được trùng nhau, kể cả khi chỉ đổi động từ ("Tìm..."/"Chạm...").
             - Với game mỗi câu có một đáp án đúng: đáp án đúng phải thay đổi giữa các câu, không để mọi câu cùng một đáp án.
             - Câu điền khuyết: dùng "..." thay chỗ cần điền, không viết lại từ hoàn chỉnh ở bất kỳ đâu trong câu.
@@ -194,7 +199,8 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
      */
     public GameDsl toGameDsl(Game game) {
         requireSupportedType(game.getGameType());
-        GameMetadata metadata = new GameMetadata(game.getTitle(), game.getSubject(), game.getGrade(), game.getTitle());
+        GameMetadata metadata = new GameMetadata(game.getTitle(), game.getSubject(), game.getGrade(), game.getTitle(),
+                PresentationDsl.fromEntity(game.getPresentation()));
         GameplaySettings settings = new GameplaySettings(GameDefaults.hitboxScale(game.getGrade()));
         return assemble(metadata, settings, toQuestionDsls(game.getQuestions()));
     }
