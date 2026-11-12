@@ -82,6 +82,15 @@ describe('gameAssetCatalog: danh mục backend sinh từ ASSET_CATALOG', () => {
     expect(JSON.parse(formatGameAssetCatalog(entries)).assets).toEqual(entries)
   })
 
+  it('từ khóa riêng cho backend (matchKeywords) có trong JSON nhưng không làm đổi bộ khớp của frontend', () => {
+    const elephant = ASSET_CATALOG.find((item) => item.id === 'kenney-animal-elephant')
+
+    expect(elephant?.keywords).toEqual([])
+    expect(entries.find((entry) => entry.id === 'kenney-animal-elephant')?.keywords).toEqual(['con voi', 'elephant'])
+    // Mọi hình đều có ít nhất một từ khóa trong danh mục backend để bộ khớp tìm được.
+    expect(entries.filter((entry) => entry.keywords.length === 0).map((entry) => entry.id)).toEqual([])
+  })
+
   it('nhãn riêng cho AI (promptLabel) thắng tên hiển thị, giữ nhãn phân biệt bóng với bóng bay', () => {
     expect(entries.find((entry) => entry.id === 'obj-ball')?.label).toContain('không phải bóng bay')
     expect(entries.find((entry) => entry.id === 'fluent-object-balloon')?.label).toBe('Bóng bay')

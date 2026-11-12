@@ -71,6 +71,13 @@ app:
       same-site: Strict
       # Secure cookies need HTTPS in production; browsers still accept them on http://localhost.
       secure: ${COOKIE_SECURE:true}
+  assets:
+    # Thử nghiệm: chữ nói tới hình A mà gắn hình B thì báo lỗi Layer 2 để AI sinh lại (retrieval + luật).
+    meaning-check:
+      enabled: ${ASSET_MEANING_CHECK_ENABLED:false}
+    # Thử nghiệm: đưa các hình có từ khóa trong yêu cầu lên đầu danh mục trong prompt.
+    shortlist:
+      enabled: ${ASSET_SHORTLIST_ENABLED:false}
   moderation:
     # Mặc định true: app từ chối khởi động nếu chưa có OPENAI_API_KEY, để không lỡ chạy với kiểm duyệt yếu.
     # Chỉ đặt MODERATION_REQUIRED=false khi chạy thử ở máy cá nhân (khi đó chỉ dùng danh sách từ cấm).

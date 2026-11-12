@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * phải INVALID: không cho AI sinh lại mà từ chối hoặc báo thử lại.
  */
 @Component
-@Order(3)
+@Order(4)
 public class SafetyGameValidator extends AbstractGameValidator {
 
     private final ContentSafetyCheck safetyCheck;

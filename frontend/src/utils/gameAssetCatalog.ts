@@ -21,8 +21,10 @@ export interface GameAssetEntry {
   group: AssetGroup
   /** Họ phong cách của hình: mỗi game nên dùng một họ. */
   family: AssetFamily
-  /** Từ khóa không dấu, dùng khớp chữ với hình. */
+  /** Từ khóa không dấu để khớp chữ với hình: `keywords` cộng `matchKeywords` của ASSET_CATALOG. */
   keywords: readonly string[]
+  /** Từ khóa có dấu, khớp nguyên từ và phân biệt dấu, cho từ ngắn trùng âm khi bỏ dấu ("bàn" khác "bạn"). */
+  exactKeywords: readonly string[]
 }
 
 export const ASSET_GROUPS: readonly AssetGroup[] = [
@@ -34,7 +36,8 @@ export const ASSET_FAMILIES: readonly AssetFamily[] = ['openmoji', 'fluent', 'ke
 export const GAME_ASSET_CATALOG_DESCRIPTION =
   'Danh mục hình cho game DSL v1.0.0: AI chọn id (trường asset của đầu ra AI), backend gán imageUrl = url. SINH TỰ ĐỘNG từ ' +
   'ASSET_CATALOG trong frontend/src/utils/assetResolver.ts (bỏ nhóm themes) bằng `node scripts/assets/build-game-asset-catalog.mjs`; ' +
-  'không sửa tay (test gameAssetCatalog.test.ts kiểm khớp). group: nhóm nghĩa; family: họ phong cách; keywords: từ khóa không dấu.'
+  'không sửa tay (test gameAssetCatalog.test.ts kiểm khớp). group: nhóm nghĩa; family: họ phong cách; keywords: từ khóa không dấu; ' +
+  'exactKeywords: từ khóa có dấu, khớp nguyên từ.'
 
 /** Họ phong cách theo thư mục chứa hình; các thư mục còn lại (animals, fruits, objects, numbers, mascots) là OpenMoji. */
 export function familyOf(url: string): AssetFamily {
@@ -105,7 +108,8 @@ export function toGameAssetCatalog(items: readonly AssetItem[]): GameAssetEntry[
       url: item.url,
       group: groupOf(item.id),
       family: familyOf(item.url),
-      keywords: item.keywords,
+      keywords: [...new Set([...item.keywords, ...(item.matchKeywords ?? [])])],
+      exactKeywords: item.exactKeywords ?? [],
     }))
 }
 
@@ -115,7 +119,7 @@ export function formatGameAssetCatalog(entries: readonly GameAssetEntry[]): stri
   const lines = entries.map(
     (e) =>
       `    { "id": ${j(e.id)}, "label": ${j(e.label)}, "url": ${j(e.url)}, "group": ${j(e.group)}, "family": ${j(e.family)}, ` +
-      `"keywords": [${e.keywords.map(j).join(', ')}] }`,
+      `"keywords": [${e.keywords.map(j).join(', ')}], "exactKeywords": [${e.exactKeywords.map(j).join(', ')}] }`,
   )
   return `{\n  "description": ${JSON.stringify(GAME_ASSET_CATALOG_DESCRIPTION)},\n  "assets": [\n${lines.join(',\n')}\n  ]\n}\n`
 }

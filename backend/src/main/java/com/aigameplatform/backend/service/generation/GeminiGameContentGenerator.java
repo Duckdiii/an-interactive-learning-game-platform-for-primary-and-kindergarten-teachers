@@ -1,6 +1,10 @@
 package com.aigameplatform.backend.service.generation;
 
+import com.aigameplatform.backend.service.asset.AssetRetriever;
 import com.aigameplatform.backend.service.factory.GameAssetCatalog;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
@@ -37,6 +41,8 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
             không được đổi chủ đề, kỹ năng, giới hạn số hoặc thêm phép tính.
             """;
 
+    private static final int SHORTLIST_SIZE = 12;
+
     private static final String ASSET_RULES = """
             HÌNH MINH HỌA (trường asset): ở mỗi chỗ có visualPrompt, đặt asset là id trong DANH MỤC HÌNH dưới đây khi có
             hình đúng NGHĨA của chữ trong ngữ cảnh (ví dụ "bóng bay" là fluent-object-balloon, không phải quả bóng đá).
@@ -53,12 +59,25 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
     private final GameContentStrategyRegistry strategies;
     private final GameAssetCatalog assets;
     private final CurriculumTopicParser topicParser = new CurriculumTopicParser();
+    private final AssetRetriever retriever;
+    private final boolean shortlistEnabled;
 
     public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
-            GameContentStrategyRegistry strategies, GameAssetCatalog assets) {
+            GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
+            @Value("${app.assets.shortlist.enabled:false}") boolean shortlistEnabled) {
         this.model = model;
         this.strategies = strategies;
         this.assets = assets;
+        this.retriever = retriever;
+        this.shortlistEnabled = shortlistEnabled;
+    }
+
+    /** Hình có từ khóa trong yêu cầu của giáo viên, đưa lên đầu danh mục để AI chọn đúng hình (thử nghiệm, sau cờ). */
+    private String shortlist(String topic) {
+        if (!shortlistEnabled) return "";
+        String lines = retriever.match(topic).stream().limit(SHORTLIST_SIZE).map(match -> assets.find(match.assetId()))
+                .filter(Objects::nonNull).map(entry -> entry.id() + ": " + entry.label()).collect(Collectors.joining("\n"));
+        return lines.isEmpty() ? "" : "HÌNH LIÊN QUAN TỚI YÊU CẦU (ưu tiên chọn nếu đúng nghĩa):\n" + lines + "\n\n";
     }
 
     @Override
@@ -68,7 +87,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                 attempt.curriculumContext());
         // Chỉ loại game có trường asset trong schema đầu ra mới cần danh mục (tránh prompt dài vô ích).
         if (strategy.hasAssetField()) {
-            systemPrompt += "\n\n" + ASSET_RULES + assets.promptList();
+            systemPrompt += "\n\n" + ASSET_RULES + shortlist(attempt.topic()) + assets.promptList();
         }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;

@@ -1,0 +1,159 @@
+# Bộ dữ liệu đo bộ khớp hình (AssetRetrieverEvalTest). Mỗi dòng: chữ cần khớp ; id hình đúng ; ghi chú.
+# id là "-" nghĩa là KHÔNG được ra hình nào (kho không có hình đó, hoặc câu thường có từ trùng âm khi bỏ dấu).
+# Nguồn: 87 danh từ cần hình rút từ 100 kịch bản (docs/wiki "Khảo sát kho asset và độ phủ"), mô tả hình thật của thử nghiệm lần 4, 5, 6.
+# --- con vật
+con vịt;anim-duck;
+con voi;kenney-animal-elephant;
+con thỏ;anim-rabbit;
+con chuột;fluent-animal-mouse;
+con mèo;anim-cat;
+con chó;anim-dog;
+con trâu;fluent-animal-buffalo;
+con gà;kenney-animal-chicken;
+con cá;anim-fish;
+khủng long;fluent-animal-dinosaur;
+con bò;kenney-animal-cow;
+con lợn;kenney-animal-pig;
+con heo;kenney-animal-pig;
+con sư tử;fluent-animal-lion;
+con khỉ;kenney-animal-monkey;
+hươu cao cổ;kenney-animal-giraffe;
+con ngựa;fluent-animal-horse;
+elephant;kenney-animal-elephant;
+duck;anim-duck;
+# --- bộ phận cơ thể (tiếng Anh như kịch bản 004, tiếng Việt như tên hình)
+head;custom-body-head;
+shoulders;custom-body-shoulder;
+knees;custom-body-knee;
+toes;custom-body-toe;
+eyes;fluent-body-eye;
+nose;fluent-body-nose;
+ears;fluent-body-ear;
+mouth;fluent-body-mouth;
+cái đầu;custom-body-head;
+đôi vai;custom-body-shoulder;
+đầu gối;custom-body-knee;
+ngón chân;custom-body-toe;
+con mắt;fluent-body-eye;
+cái mũi;fluent-body-nose;
+bàn tay;fluent-body-hand;
+cái răng;fluent-body-tooth;
+# --- đồ ăn
+cà rốt;fluent-food-carrot;
+phô mai;fluent-food-cheese;
+bánh chưng;custom-food-banh-chung;
+rau muống;custom-food-rau-muong;
+cà tím;fluent-food-eggplant;
+bánh rán;custom-food-banh-ran;
+pizza;fluent-food-pizza;
+quả táo;fruit-apple;
+quả chuối;fruit-banana;
+quả cam;fruit-orange;
+dưa hấu;fruit-watermelon;
+dâu tây;fruit-strawberry;
+bánh trung thu;fluent-food-mooncake;
+mâm ngũ quả;custom-food-mam-ngu-qua;
+ăn sáng;fluent-food-pancakes;
+# --- phương tiện
+xe đạp;fluent-object-bicycle;
+xe máy;fluent-object-motorcycle;
+xe ba gác;fluent-object-tricycle;
+tàu hỏa;fluent-object-train;
+con thuyền;fluent-object-boat;
+xe đua;fluent-object-race-car;
+xe tải;~;kho chưa có hình xe tải
+máy bay;fluent-object-airplane;
+# --- đồ vật
+cái trống;fluent-object-drum;
+trống;fluent-object-drum;
+quả bóng;obj-ball;
+bóng bay;fluent-object-balloon;
+quả bóng đá;fluent-object-soccer;
+cái cân;fluent-object-scale;
+khối gỗ;fluent-object-brick;
+bàn phím;fluent-object-keyboard;
+màn hình;fluent-object-computer;
+cái loa;fluent-object-speaker;
+đèn lồng;fluent-object-lantern;
+lì xì;fluent-object-red_envelope;
+đồng hồ;fluent-object-clock;
+nốt nhạc;fluent-object-music-note;
+cái bàn;custom-object-table;
+đàn ghi-ta;fluent-object-guitar;
+xúc xắc;-;kho chưa có hình xúc xắc
+# --- thiên nhiên, không gian
+cái cây;fluent-object-tree;
+cây lúa;fluent-plant-rice;
+hoa hồng;fluent-plant-rose;
+hoa đào;fluent-plant-peach-blossom;
+mặt trời;fluent-object-sun;
+đám mây;fluent-object-cloud;
+trời mưa;fluent-weather-rain;
+nước đá;fluent-weather-ice;
+sao Thủy;kenney-planet-mercury;
+sao Kim;kenney-planet-venus;
+sao Hỏa;kenney-planet-mars;
+Trái Đất;fluent-object-earth;
+phi hành gia;fluent-people-astronaut;
+# --- nghề nghiệp, quần áo, cờ, hoạt động
+bác sĩ;fluent-people-doctor;
+công an;-;kho chưa có hình công an
+lính cứu hỏa;fluent-people-firefighter;
+nông dân;fluent-people-farmer;
+cô giáo;fluent-people-teacher;
+áo ấm;fluent-clothes-coat;
+mũ len;custom-clothes-beanie;
+găng tay;fluent-clothes-gloves;
+cờ Việt Nam;kenney-flag-vn;
+cờ Thái Lan;kenney-flag-th;
+đánh răng;fluent-object-toothbrush;
+thức dậy;fluent-object-alarm-clock;
+ngôi nhà;fluent-object-house;
+# --- thẻ chữ và mô tả hình thật (game vần, kịch bản 003)
+Thẻ chữ bàn;custom-object-table;
+Từ b... (bàn);custom-object-table;
+Thẻ chữ khăn;fluent-clothes-scarf;
+Từ kh... (khăn);fluent-clothes-scarf;
+Thẻ chữ cân;fluent-object-scale;
+Từ c... (cân);fluent-object-scale;
+Thẻ chữ chân;fluent-body-foot;
+Thẻ chữ đàn;fluent-object-guitar;
+Từ đ... (đàn);fluent-object-guitar;
+Thẻ chữ răng;fluent-body-tooth;
+Thẻ chữ chăn;-;kho chưa có hình chăn
+Thẻ chữ nhẫn;-;kho chưa có hình nhẫn
+Thẻ chữ lan;-;kho chưa có hình hoa lan
+Thẻ chữ lăn;-;động từ, không có hình
+# --- mô tả câu đếm (kịch bản 001)
+3 con vịt;anim-duck;
+Ba con vịt;anim-duck;
+Một con vịt;anim-duck;
+Hai con vịt;anim-duck;
+# --- câu thường có từ trùng âm khi bỏ dấu: KHÔNG được ra hình
+đau bụng;-;đau lẫn đầu, dâu
+trong lớp học;-;trong lẫn trống
+vài bạn nhỏ;-;vài lẫn vai, bạn lẫn bàn
+các bạn học bài;-;bạn lẫn bàn
+hẹn gặp bạn;-;hẹn lẫn hen
+chơi với bạn;-;với lẫn voi
+tại sao em đến muộn;-;sao
+khi nào em về;-;khi lẫn khỉ
+năm học mới;-;năm
+ông và bà của em;-;
+số nhỏ nhất;-;
+miếng bánh;-;
+ngứa tay;-;
+ngõ nhỏ;-;
+bố mẹ em đi làm;-;bố lẫn bò, bỏ
+# --- từ đa nghĩa trong câu thường (reviewer chỉ ra): KHÔNG được ra hình
+Chọn đáp án cho bé;-;cho lẫn chó
+bài ca của em;-;ca lẫn cá
+Điền vào chỗ trống;-;trống nhạc
+đàn gà con;~;đàn là nhạc cụ, đàn gà là bầy
+khó khăn;~;khăn
+bắt đầu bài học;-;đầu
+vai trò của em;~;vai
+cân bằng;~;cân
+3 + 5 bằng mấy;~;số đứng riêng trong phép tính
+Em hãy chọn hình đúng;-;
+trái tim biết yêu thương;~;tim, trái

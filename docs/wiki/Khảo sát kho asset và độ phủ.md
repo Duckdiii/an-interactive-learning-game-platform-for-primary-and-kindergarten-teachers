@@ -270,3 +270,38 @@ Bạn đã chốt làm thẳng mức B (bỏ mức A, vì mốc so sánh đã c�
 **Chưa làm và cần xử lý ở bước 2:**
 - Sáu con vật Kenney (voi, hươu cao cổ, khỉ, bò, gà, lợn) đang có **danh sách từ khóa rỗng** (đặt ở lần sửa trước để khỏi trùng với mục chủ đề cùng nghĩa trong bộ khớp của frontend). Bộ khớp ở backend sẽ cần từ khóa cho chúng, nên phải tách "từ khóa cho frontend" khỏi "từ khóa cho backend" hoặc đặt thứ tự ưu tiên rõ ràng.
 - Backend (`GameAssetCatalog.java`) chưa đọc `group`, `family`, `keywords`; bước 2 sẽ đọc.
+
+## 12. Giai đoạn 4, mức B, bước 2 đến 5: bộ khớp, đo, luật và shortlist (2026-11-13)
+
+Tất cả nằm trên nhánh `dev`, **chưa commit**. Hai tính năng cuối đều sau cờ và mặc định tắt.
+
+**Bước 2, bộ khớp từ khóa** (`service/asset/`: `VietnameseText`, `AssetRetriever`, `KeywordAssetRetriever`, `AssetMatch`)
+- Khớp theo từ nguyên, lấy từ khóa dài nhất của mỗi hình, sắp theo độ dài. Nhãn hiển thị (không có ngoặc) cũng là từ khóa.
+- Bỏ dấu làm nhiều từ trùng nhau (bàn, bạn, bản, bận cùng thành "ban"; đầu, dâu, đau thành "dau"). Vì vậy danh mục có thêm `exactKeywords` (có dấu, chỉ cho 10 hình) và bộ khớp có lớp khớp phân biệt dấu (`VietnameseText.fold`).
+- `GameAssetCatalog` đã đọc `group`, `family`, `keywords`, `exactKeywords`; thêm `find`, `findByUrl`, `entries`.
+
+**Bước 3, đo offline** (`retrieval-eval.csv` khoảng 145 dòng, `AssetRetrieverEvalTest`)
+- Bộ đo gồm 87 danh từ của 100 kịch bản, mô tả hình thật của các lần thử, và câu thường có từ trùng âm khi bỏ dấu (phải không ra hình).
+- Lần đo đầu: ra đúng hình **112/112** nhưng câu thường chỉ sạch **64%** vì từ ngắn đa nghĩa khớp bừa (cho ra chó, ca ra cá, chỗ trống ra cái trống, đầu trong "bắt đầu").
+- Sửa: từ khóa một chữ dài tối đa 5 ký tự chỉ khớp khi chữ có tối đa 3 từ. Kết quả: đúng 112/112, sạch **26/26**.
+- Giới hạn còn lại, chỉ báo cáo (đánh `~` trong CSV): "khó khăn" ra cái khăn, "cân bằng" ra cái cân, "đàn gà con" ra đàn ghi-ta, "3 + 5" ra số 3 và số 5, "trái tim biết yêu thương" ra trái tim, "vai trò" ra đôi vai.
+
+**Bước 4, luật Layer 2 "hình sai nghĩa"** (`AssetMeaningGameValidator`, bật bằng `ASSET_MEANING_CHECK_ENABLED=true`)
+- Duyệt JSON, với mỗi phần tử có `imageUrl` thuộc danh mục thì so với chữ mô tả (`visualPrompt`, `text`, `label`). Báo lỗi khi chữ nhắc rõ một hình khác mà không nhắc hình đang gắn; chữ không nhắc hình nào thì cho qua.
+- Là một lớp thêm trong chuỗi Layer 2, không sửa `BusinessRuleGameValidator`.
+
+**Bước 5, shortlist trong prompt** (`GeminiGameContentGenerator`, bật bằng `ASSET_SHORTLIST_ENABLED=true`)
+- Hình có từ khóa trong yêu cầu của giáo viên (tối đa 12) đặt lên đầu danh mục, dưới tiêu đề "HÌNH LIÊN QUAN TỚI YÊU CẦU".
+
+**Chạy thật** (`gemini-3.1-flash-lite`, mỗi kịch bản một lần, hay gặp 503 nên phải chạy lại)
+
+| Lần | Cờ | Kịch bản 1 (đếm vịt) | Kịch bản 4 (cơ thể) | Kịch bản 3 (vần) |
+|---|---|---|---|---|
+| Thử nghiệm lần 7 | luật hình | 5 câu đều hình vịt | 6 hình đúng | "con gián" ra rắn, "cần câu" ra cây cung |
+| Thử nghiệm lần 8 | luật hình và shortlist | 5 câu đều hình vịt | 6 hình đúng | không còn hình sai nghĩa; "sân" ra hình con đường (gần nghĩa) |
+
+**Kết luận thật thà**
+- Luật hình **chưa lần nào báo lỗi** khi chạy thật. Hai hình sai ở lần 7 vượt qua vì chữ "con gián", "cần câu" không có từ khóa nào, nên luật coi là "không biết". Muốn bắt ca này phải thêm hình vào kho hoặc từ khóa.
+- Kịch bản 3 ở lần 8 sạch có thể chỉ vì AI chọn từ khác. Yêu cầu của kịch bản ("Ôn vần an, ăn, ân...") không chứa từ khóa hình nào nên shortlist rỗng ở đó. **Tác dụng riêng của shortlist chưa chứng minh được**; chỉ kịch bản 1 và 4 có từ khóa trong yêu cầu.
+- Sau review (reviewer, kiến trúc, test-verifier, migration-checker) đã sửa: validator dùng `AssetRetriever.mentions` (không áp luật chữ ngắn) vì chữ mô tả được nối thành chuỗi dài; luật hình đổi `@Order(3)` và Layer 3 thành `@Order(4)` để thứ tự không phụ thuộc tên class; bỏ constructor kép của `GeminiGameContentGenerator`. Còn ghi nhận: luật hình nằm trong chuỗi chung nên cũng chặn khi giáo viên tự sửa và lưu game (chỉ khi bật cờ); `GameAssetCatalog` nên chuyển sang `service/asset` sau này.
+- Việc nên làm tiếp nếu muốn kết luận: chạy mỗi cấu hình (không cờ, luật, luật + shortlist) nhiều lần trên cùng bộ kịch bản; thêm hình gián, cần câu, nhẫn, lan; xét `reviewer` cho toàn bộ bước 2 đến 5.
