@@ -42,6 +42,9 @@ export function colorWordOf(text: string): ColorWord | null {
   return COLOR_WORDS.find(([words]) => words.includes(normalized))?.[1] ?? null
 }
 
+/** AI đôi khi viết "Ba con vịt" thay vì "3 con vịt". */
+const NUMBER_WORDS: Record<string, number> = { một: 1, hai: 2, ba: 3, bốn: 4, năm: 5, sáu: 6, bảy: 7, tám: 8, chín: 9, mười: 10 }
+
 /** Số lượng tối đa vẽ thành hình (nhiều hơn thì chật ô và trẻ khó đếm). */
 export const MAX_PICTURE_COUNT = 10
 
@@ -50,10 +53,11 @@ export const MAX_PICTURE_COUNT = 10
  * (không nhận chữ cái lẻ hay đơn vị đo: "50 m", "3 kg" bỏ qua). Trả `null` khi không hình hóa được.
  */
 export function quantityPicture(text: string): { count: number; imageUrl: string } | null {
-  const match = text.normalize('NFC').trim().match(/^(\d{1,2})\s+(.+)$/u)
+  const match = text.normalize('NFC').trim().match(/^(\d{1,2}|một|hai|ba|bốn|năm|sáu|bảy|tám|chín|mười)\s+(.+)$/iu)
   if (!match) return null
-  const count = Number(match[1])
-  if (count < 1 || count > MAX_PICTURE_COUNT) return null
+  const said = match[1].toLowerCase()
+  const count = /^\d/.test(said) ? Number(said) : NUMBER_WORDS[said]
+  if (!(count >= 1 && count <= MAX_PICTURE_COUNT)) return null
   const item = findCatalogItemsInText(match[2]).find((candidate) => candidate.category !== 'numbers')
   return item ? { count, imageUrl: item.url } : null
 }
@@ -78,6 +82,9 @@ export function wordCardText(visualPrompt: string | undefined): string | null {
   const clean = (word: string) => word.replace(/^["'“”]|["'“”.]$/gu, '').trim() || null
   const card = text.match(/^(?:tấm\s+)?thẻ\s+(?:chữ|từ|tiếng)\s+(.+)$/iu)
   if (card) return clean(card[1])
+  // AI hay viết "Từ c... (cân)": chữ cần hiện nằm trong ngoặc.
+  const glossed = text.match(/^từ\s+\p{L}+(?:\.{3}|…)\s*\((\p{L}+)\)$/iu)
+  if (glossed) return glossed[1]
   const bare = text.match(/^chữ\s+(["'“]?[\p{L}]+["'”.]?)$/iu)
   return bare && bare[1].toLowerCase() !== 'cái' ? clean(bare[1]) : null
 }

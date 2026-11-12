@@ -148,6 +148,9 @@
     { "id": "kenney-flag-th", "label": "Cờ Thái Lan", "url": "/assets/kenney/flags/th.png" },
     { "id": "kenney-planet-mercury", "label": "Sao Thủy", "url": "/assets/kenney/planets/mercury.png" },
     { "id": "kenney-planet-venus", "label": "Sao Kim", "url": "/assets/kenney/planets/venus.png" },
-    { "id": "kenney-planet-mars", "label": "Sao Hỏa", "url": "/assets/kenney/planets/mars.png" }
+    { "id": "kenney-planet-mars", "label": "Sao Hỏa", "url": "/assets/kenney/planets/mars.png" },
+    { "id": "custom-object-table", "label": "Cái bàn", "url": "/assets/custom/object-table.svg" },
+    { "id": "fluent-clothes-scarf", "label": "Cái khăn", "url": "/assets/fluent/clothes-scarf.svg" },
+    { "id": "fluent-object-guitar", "label": "Đàn ghi-ta", "url": "/assets/fluent/object-guitar.svg" }
   ]
 }

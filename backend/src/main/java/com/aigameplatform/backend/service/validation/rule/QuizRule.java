@@ -6,6 +6,7 @@ import com.aigameplatform.backend.dto.dsl.TextChoiceDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.service.validation.ValidationError;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,17 @@ public class QuizRule extends AbstractGameRule<QuizGameDsl, QuizQuestionDsl> {
     private static final Pattern FILL_IN_BLANK = Pattern.compile("(\\p{L}*)(?:\\.{3}|…|_{2,})(\\p{L}*)");
     /** Đoạn trong một cặp ngoặc cùng loại. */
     private static final Pattern QUOTED = Pattern.compile("'([^']+)'|\"([^\"]+)\"|‘([^’]+)’|“([^”]+)”");
+    /** Hình thẻ số (numbers/number-N.svg), N là đáp án. */
+    private static final Pattern NUMBER_CARD = Pattern.compile("/numbers/number-(\\d+)\\.svg$");
+    /** Mô tả hình nói về chính con số ("chữ số 3", "Số 3"), không phải vật cần đếm. "số lượng" thì không tính. */
+    private static final Pattern ABOUT_A_NUMBER = Pattern.compile("(?<!\\p{L})(chữ số|thẻ số|con số|số\\s+\\d)");
+    private static final Map<String, Integer> NUMBER_WORDS = Map.of("một", 1, "hai", 2, "ba", 3, "bốn", 4, "năm", 5,
+            "sáu", 6, "bảy", 7, "tám", 8, "chín", 9, "mười", 10);
+    /** Mô tả hình bắt đầu bằng số lượng vật: "3 con vịt", "Hai con vịt". */
+    private static final Pattern COUNT_AT_START = Pattern.compile("^(\\d{1,2}|một|hai|ba|bốn|năm|sáu|bảy|tám|chín|mười)\\s+\\p{L}+");
+    private static final Pattern COUNTING_QUESTION = Pattern.compile("bao nhiêu|mấy|đếm");
+    /** Câu có phép thêm/bớt/so sánh: số trong hình không nhất thiết là đáp án. */
+    private static final Pattern NOT_A_PLAIN_COUNT = Pattern.compile("thêm|bớt|còn lại|hơn|kém|cộng|trừ");
     /** Cách đọc thành lời của dấu so sánh, để bắt lời đọc "3 nhỏ hơn 8" cho đáp án "<". */
     private static final Map<String, List<String>> SPOKEN = Map.of(
             "<", List.of("<", "nhỏ hơn", "bé hơn"), ">", List.of(">", "lớn hơn"), "=", List.of("=", "bằng"));
@@ -45,7 +57,25 @@ public class QuizRule extends AbstractGameRule<QuizGameDsl, QuizQuestionDsl> {
             QuizArithmeticAnswerVerifier.check(question, path, errors);
             checkAnswerNotRevealed(question, path, errors);
             checkAudioDoesNotSayTheAnswer(question, path, errors);
+            checkIllustrationIsNotTheAnswer(question, path, errors);
+            checkCountMatchesTheAnswer(question, path, errors);
         }
+    }
+
+    /**
+     * Câu đếm ("3 con vịt") mà hình minh họa lại là thẻ số đúng bằng đáp án: lộ đáp án và không có vật nào để đếm (lỗi thật ở
+     * kịch bản 001, thử nghiệm lần 4). Không chặn câu nhận biết chữ số, khi mô tả hình nói về con số ("chữ số 3", "Số 3").
+     * "Số lượng 3 con vịt" vẫn là câu đếm nên không được miễn.
+     */
+    private static void checkIllustrationIsNotTheAnswer(QuizQuestionDsl question, String path, List<ValidationError> errors) {
+        if (question.imageUrl() == null) return;
+        var card = NUMBER_CARD.matcher(question.imageUrl());
+        if (!card.find() || !card.group(1).equals(correctText(question))) return;
+        String prompt = question.visualPrompt() == null ? "" : question.visualPrompt().toLowerCase(Locale.ROOT);
+        if (ABOUT_A_NUMBER.matcher(prompt).find()) return;
+        errors.add(new ValidationError(path + ".imageUrl", "Hình minh họa là thẻ số " + card.group(1) + " (asset num-"
+                + card.group(1) + ") trùng đáp án trong khi mô tả là vật cần đếm; đổi asset sang hình vật được đếm"
+                + " (ví dụ con vịt) hoặc bỏ trường asset"));
     }
 
     /**
@@ -96,6 +126,25 @@ public class QuizRule extends AbstractGameRule<QuizGameDsl, QuizQuestionDsl> {
                         + "\" trong khi câu hỏi để trống; chỉ đọc lại câu hỏi (chỗ trống đọc là \"chỗ trống\") hoặc bỏ audioText"));
                 return;
             }
+        }
+    }
+
+    /**
+     * Câu đếm ("Có bao nhiêu con vịt?") mà mô tả hình nói 2 con còn đáp án là 3: hình và đáp án mâu thuẫn, trẻ đếm đúng vẫn bị
+     * tính sai (lỗi thật ở kịch bản 001, thử nghiệm lần 5). Chỉ xét câu đếm thuần, bỏ qua câu có thêm/bớt/so sánh.
+     */
+    private static void checkCountMatchesTheAnswer(QuizQuestionDsl question, String path, List<ValidationError> errors) {
+        if (question.visualPrompt() == null || question.questionText() == null) return;
+        String text = question.questionText().toLowerCase(Locale.ROOT);
+        if (!COUNTING_QUESTION.matcher(text).find() || NOT_A_PLAIN_COUNT.matcher(text).find()) return;
+        var count = COUNT_AT_START.matcher(question.visualPrompt().toLowerCase(Locale.ROOT).strip());
+        String answer = correctText(question);
+        if (!count.find() || !answer.matches("\\d+")) return;
+        String said = count.group(1);
+        int shown = said.chars().allMatch(Character::isDigit) ? Integer.parseInt(said) : NUMBER_WORDS.get(said);
+        if (shown != Integer.parseInt(answer)) {
+            errors.add(new ValidationError(path + ".correctOptionId", "Mô tả hình nói " + shown + " nhưng đáp án đúng là " + answer
+                    + "; sửa đáp án hoặc mô tả hình cho khớp số lượng"));
         }
     }
 

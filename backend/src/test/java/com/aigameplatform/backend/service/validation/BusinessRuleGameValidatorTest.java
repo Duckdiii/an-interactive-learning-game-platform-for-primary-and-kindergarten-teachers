@@ -346,6 +346,77 @@ class BusinessRuleGameValidatorTest {
         assertThat(service.validate(number).errors()).isEmpty();
     }
 
+    @Test
+    void quizRejectsANumberCardIllustrationThatIsTheAnswerOfACountingQuestion() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> counting(question(g, 0), "3 con vịt", "/assets/numbers/number-3.svg")))
+                .containsExactly("$.questions[0].imageUrl");
+    }
+
+    @Test
+    void quizRejectsTheNumberCardEvenWhenTheCountingPromptSaysQuantityOrHasNoPrompt() throws IOException {
+        // "số lượng" là câu đếm, không phải câu nhận biết chữ số; thiếu mô tả hình cũng vẫn là thẻ số lộ đáp án.
+        assertThat(errorPaths(GameType.QUIZ, g -> counting(question(g, 0), "Số lượng 3 con vịt", "/assets/numbers/number-3.svg")))
+                .containsExactly("$.questions[0].imageUrl");
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            counting(question(g, 0), "3 con vịt", "/assets/numbers/number-3.svg");
+            question(g, 0).remove("visualPrompt");
+        })).containsExactly("$.questions[0].imageUrl");
+    }
+
+    @Test
+    void quizAllowsANumberCardWhenTheQuestionIsAboutTheNumberItself() throws IOException {
+        for (String prompt : List.of("chữ số 3 to", "Số 3 màu xanh")) {
+            ObjectNode game = example(GameType.QUIZ);
+            counting(question(game, 0), prompt, "/assets/numbers/number-3.svg");
+
+            assertThat(service.validate(game).errors()).as(prompt).isEmpty();
+        }
+    }
+
+    @Test
+    void quizAllowsAnObjectIllustrationOrANumberCardThatIsNotTheAnswer() throws IOException {
+        ObjectNode object = example(GameType.QUIZ);
+        counting(question(object, 0), "3 con vịt", "/assets/animals/duck.svg");
+        assertThat(service.validate(object).errors()).isEmpty();
+
+        ObjectNode other = example(GameType.QUIZ);
+        counting(question(other, 0), "3 con vịt", "/assets/numbers/number-2.svg");
+        assertThat(service.validate(other).errors()).isEmpty();
+    }
+
+    @Test
+    void quizRejectsACountingQuestionWhoseImageShowsAnotherNumberThanTheAnswer() throws IOException {
+        // Lỗi thật ở kịch bản 001, thử nghiệm lần 5: mô tả "Hai con vịt" nhưng đáp án đúng là 3.
+        assertThat(errorPaths(GameType.QUIZ, g -> counting(question(g, 0), "Hai con vịt", "/assets/animals/duck.svg")))
+                .containsExactly("$.questions[0].correctOptionId");
+        assertThat(errorPaths(GameType.QUIZ, g -> counting(question(g, 0), "2 con vịt", "/assets/animals/duck.svg")))
+                .containsExactly("$.questions[0].correctOptionId");
+    }
+
+    @Test
+    void quizAllowsACountingQuestionWhoseImageMatchesTheAnswerOrWhoseQuestionAddsOrCompares() throws IOException {
+        ObjectNode same = example(GameType.QUIZ);
+        counting(question(same, 0), "Ba con vịt", "/assets/animals/duck.svg");
+        assertThat(service.validate(same).errors()).isEmpty();
+
+        // Có phép thêm: số trong hình không phải đáp án.
+        ObjectNode adds = example(GameType.QUIZ);
+        counting(question(adds, 0), "2 con vịt", "/assets/animals/duck.svg");
+        question(adds, 0).put("questionText", "Có 2 con vịt, thêm 1 con nữa, hỏi có bao nhiêu con vịt?");
+        assertThat(service.validate(adds).errors()).isEmpty();
+    }
+
+    /** Câu đếm với ba lựa chọn 1, 2, 3 (đúng là 3) và hình minh họa tuỳ ý. */
+    private static void counting(ObjectNode question, String visualPrompt, String imageUrl) {
+        question.put("questionText", "Có bao nhiêu con vịt?");
+        question.put("visualPrompt", visualPrompt);
+        question.put("imageUrl", imageUrl);
+        element(question, "options", 0).put("text", "1");
+        element(question, "options", 1).put("text", "2");
+        element(question, "options", 2).put("text", "3");
+        question.put("correctOptionId", "c");
+    }
+
     /** Câu so sánh "3 ... 8" có đáp án "<" (lựa chọn b) và lời đọc cho trước. */
     private static void comparison(ObjectNode question, String audioText) {
         question.put("questionText", "Bé chọn dấu thích hợp: 3 ... 8");

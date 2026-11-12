@@ -25,6 +25,8 @@ public class AudioVisualMatchGameStrategy
                 Dùng correct và distractors theo schema; mỗi lựa chọn là một mô tả hình ảnh có ID, đúng một lựa chọn khớp.
                 Tạo mô tả ngắn, phân biệt được bằng căn cứ đã cho. audioText/visualPrompt chỉ là chỉ dẫn văn bản;
                 không khẳng định đã có tệp âm thanh hay hình ảnh. Không biến cơ chế đối chiếu thành bộ câu hỏi trắc nghiệm chữ.
+                Lựa chọn là từ phải là từ tiếng Việt có thật, đúng chính tả; không bịa từ vô nghĩa chỉ để có vần. Lựa chọn chỉ có chữ
+                (không có hình đúng nghĩa) thì visualPrompt viết đúng dạng "Thẻ chữ <từ>" (ví dụ "Thẻ chữ cân"), không thêm chữ khác.
                 Chỉ trả JSON theo schema.
                 """);
     }

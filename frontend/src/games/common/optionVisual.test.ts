@@ -79,6 +79,19 @@ describe('illustrationCount', () => {
   })
 })
 
+describe('quantityPicture với số viết bằng chữ', () => {
+  it('"Ba con vịt" cũng vẽ 3 con như "3 con vịt" (lỗi thật ở thử nghiệm lần 5)', () => {
+    expect(quantityPicture('Ba con vịt')?.count).toBe(3)
+    expect(quantityPicture('Hai con vịt')?.imageUrl).toBe(quantityPicture('2 con vịt')?.imageUrl)
+    expect(illustrationCount('Năm con vịt', quantityPicture('5 con vịt')?.imageUrl)).toBe(5)
+  })
+
+  it('chữ trùng nghĩa khác không bị coi là số lượng', () => {
+    expect(quantityPicture('năm học mới')).toBeNull()
+    expect(quantityPicture('ba mẹ')).toBeNull()
+  })
+})
+
 describe('wordCardText', () => {
   it('nhận ra lựa chọn là thẻ chữ và trả lại đúng chữ cần hiện', () => {
     expect(wordCardText('Thẻ chữ bàn')).toBe('bàn')
@@ -86,6 +99,13 @@ describe('wordCardText', () => {
     expect(wordCardText('Tấm thẻ chữ "cân"')).toBe('cân')
     expect(wordCardText('thẻ từ quả bóng')).toBe('quả bóng')
     expect(wordCardText('chữ sân')).toBe('sân')
+  })
+
+  it('lấy chữ trong ngoặc khi AI viết kiểu "Từ c... (cân)" (lỗi thật ở thử nghiệm lần 4)', () => {
+    expect(wordCardText('Từ c... (cân)')).toBe('cân')
+    expect(wordCardText('Từ kh... (khăn)')).toBe('khăn')
+    expect(wordCardText('Từ c… (cân)')).toBe('cân')
+    expect(wordCardText('Từ điển (nhỏ)')).toBeNull()
   })
 
   it('mô tả hình bình thường không phải thẻ chữ', () => {

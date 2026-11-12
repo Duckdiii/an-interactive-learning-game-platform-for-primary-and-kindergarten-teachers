@@ -55,6 +55,7 @@ describe('kho asset bổ sung (giai đoạn 3)', () => {
     expect(objects('đau bụng')).toEqual([])
     expect(objects('trong lớp học')).toEqual([])
     expect(objects('vài bạn nhỏ')).toEqual([])
+    expect(objects('các bạn học bài')).toEqual([])
     expect(first('dâu tây')).toBe('/assets/fruits/strawberry.svg')
   })
 
@@ -67,7 +68,7 @@ describe('kho asset bổ sung (giai đoạn 3)', () => {
 
   it('mục mới không có từ khóa đơn ngắn dễ trùng âm (trừ danh sách cho phép)', () => {
     // Chỉ xét hình mới của giai đoạn 3 (tự vẽ, Kenney). Từ tiếng Anh đủ rõ nghĩa thì cho phép.
-    const allowed = new Set(['head', 'knee', 'knees', 'toe', 'toes', 'mars'])
+    const allowed = new Set(['head', 'knee', 'knees', 'toe', 'toes', 'mars', 'desk'])
     const risky = ASSET_CATALOG.filter((item) => item.url.startsWith('/assets/custom/') || item.url.startsWith('/assets/kenney/'))
       .flatMap((item) => item.keywords.map((kw) => ({ id: item.id, kw })))
       .filter(({ kw }) => !kw.includes(' ') && kw.length <= 4 && !allowed.has(kw))

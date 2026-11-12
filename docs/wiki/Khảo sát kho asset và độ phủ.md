@@ -212,3 +212,46 @@ Chưa thử: màn Trắc nghiệm với hình minh họa lớn của câu hỏi 
 - Từ khóa tiếng Việt trơ trọi vẫn có thể gắn nhầm ở các mục có sẵn (ví dụ "khi" của con khỉ); chưa sửa.
 - Chưa có **bước truy xuất danh sách ngắn** (giai đoạn 4): prompt vẫn đưa cả danh mục vào, nay là 148 dòng.
 - Chưa chạy lại kịch bản thật (giai đoạn 5), chưa xem hình mới trong màn chơi thật sau khi vào danh mục.
+
+## 9. Giai đoạn 5: chạy lại kịch bản thật (2026-11-13)
+
+Chạy kịch bản 001, 003, 004 qua giao diện thật sau giai đoạn 3. Kết quả chi tiết ở `Thử nghiệm lần 4/kết quả.md` trong thư mục từng kịch bản (`docs/Kịch bản/Kịch bản tạo game/`). Thư mục `docs/Kịch bản/Kịch bản tạo game/` bị `.gitignore` chặn nên **các kết quả này chỉ lưu cục bộ trên máy chạy, không nằm trong repo** (các liên kết tới `Thử nghiệm lần 4`, `5`, `6` trong trang này chỉ dùng được trên máy đó).
+
+**Điều kiện chạy (không so sánh trực tiếp được với lần 3):**
+- Mô hình `gemini-3-flash-preview` (dùng ở lần 3) trả **503 UNAVAILABLE "high demand"** suốt buổi chạy; backend đặt `maxRetries(0)` nên báo lỗi ngay, giáo viên thấy "Trợ lý AI trả lời quá lâu".
+- `gemini-3.5-flash` chậm (12 đến 52 giây) và hết giờ chờ ở bước sinh game. `gemini-2.5-flash` đã bị Google ngừng cấp cho tài khoản mới (404).
+- Kết quả dưới đây dùng **`gemini-3.1-flash-lite`** (nhanh và ổn định, nhưng nhẹ hơn): một số lỗi chọn hình có thể do mô hình, chưa kiểm với mô hình lần 3.
+
+| KB | Kết quả | Đánh giá |
+|---|---|---|
+| 004 Bộ phận cơ thể | AI chọn đúng cả 6 hình, gồm 4 hình tự vẽ mới (đầu, vai, đầu gối, ngón chân) | **Đ** |
+| 001 Đếm vịt | Mô tả "3 con vịt" nhưng hình là **thẻ số 3**: không có gì để đếm, hình lộ đáp án | **G** (kém lần 3) |
+| 003 Vần an, ăn, ân | Hết hình đoán bừa, lựa chọn thiếu hình hiện thẻ chữ; nhưng "bàn" ra quyển sách, "khăn" ra cái ô, từ vô nghĩa gắn hình cái kéo | **S** |
+
+**Ba vấn đề rút ra:**
+1. **AI chọn hình số thay vì hình vật** ở câu đếm. Hướng xử lý: dặn trong prompt, thêm luật Lớp 2 bắt hình thẻ số trùng đáp án.
+2. **AI chọn hình gần giống thay vì bỏ trống** khi kho thiếu hình đúng nghĩa (bàn, khăn). Hướng xử lý: bổ sung hình thiếu, siết luật bỏ trống, bỏ từ vô nghĩa khỏi lựa chọn.
+3. **Hình tự vẽ "đầu" và "vai" khó phân biệt ở cỡ thẻ**: chỉ khác vòng đánh dấu nhỏ. Lỗi do hình vẽ, không do AI. Hướng xử lý: phóng to, làm đậm vòng, hoặc cắt cận cảnh.
+
+Hai vấn đề đầu chính là loại vấn đề giai đoạn 4 nhắm tới (AI chọn hình), nhưng với 148 hình thì không phải do prompt quá dài mà do **AI không tuân luật chọn hình**; bộ lọc danh sách ngắn sẽ không tự sửa chúng.
+
+**Chưa làm:** chạy lại với `gemini-3-flash-preview` khi hết quá tải; xem hết các câu và màn kết quả; chạy kịch bản 002 và 007 đến 012.
+
+## 10. Sửa lỗi hình sau thử nghiệm lần 4 (2026-11-13)
+
+Ba lỗi lộ ra ở mục 9 đã được sửa và chạy lại trên game thật (`Thử nghiệm lần 5` cho kịch bản 1, 3, 4; `Thử nghiệm lần 6` cho kịch bản 1). Vẫn dùng `gemini-3.1-flash-lite`, nên không so sánh trực tiếp được với lần 3.
+
+| Lỗi | Cách sửa | Kết quả trên game thật |
+|---|---|---|
+| AI chọn thẻ số cho "3 con vịt" (lộ đáp án) | Dặn trong prompt `ASSET_RULES`; luật Lớp 2 trong `QuizRule` bắt thẻ số trùng đáp án khi mô tả là vật cần đếm | Lần 5: hình là con vịt |
+| Câu đếm vẽ 1 con, đáp án lệch ("Hai con vịt" đáp án 3) | Màn chơi nhận số viết bằng chữ; luật Lớp 2 bắt mô tả hình khác đáp án; dặn AI viết mô tả bằng chữ số | Lần 6: vẽ đủ 3 con, 5 câu đều đúng |
+| Game vần: bàn ra quyển sách, từ vô nghĩa ra cái kéo, thẻ chữ ghi "Từ c... (cân)" | Thêm hình cái bàn (tự vẽ), cái khăn, đàn ghi-ta; siết luật "không chọn hình khác nghĩa"; dặn từ phải có thật; thẻ chữ hiểu kiểu "Từ c... (cân)" | Lần 5: bàn, khăn, cân, đàn, chân đều đúng hình; còn 3 hình nhiễu sai nghĩa (nhẫn, lăn, lan) |
+| Hình đầu và vai giống nhau ở cỡ nhỏ | Vẽ lại: làm mờ phần còn lại của bé, chỉ bộ phận được đánh dấu giữ màu, vòng đậm hơn | Lần 5: phân biệt được đầu, vai, đầu gối ở cỡ thẻ thật |
+
+**Đánh giá cuối:** kịch bản 1 và 4 đạt, kịch bản 3 đạt kèm vài hình nhiễu chưa đúng nghĩa.
+
+**Hạn chế:**
+- Mỗi kịch bản mới chạy **một lần** với một mô hình nhẹ; chưa chạy lại với `gemini-3-flash-preview` (mô hình của lần 3) khi hết quá tải.
+- Chưa có luật máy bắt "hình khác nghĩa với từ" (chỉ có trong prompt); kho thiếu hình nhẫn, lan.
+- Game vần chỉ có hình, không hiện chữ; chưa kiểm với trẻ lớp 1 có gọi đúng tên hình không.
+- Các luật đếm chỉ áp dụng cho Trắc nghiệm.

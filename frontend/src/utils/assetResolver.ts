@@ -202,6 +202,10 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   { id: 'kenney-planet-mercury', name: 'Sao Thủy', category: 'objects', url: '/assets/kenney/planets/mercury.png', keywords: ['sao thuy', 'mercury'] },
   { id: 'kenney-planet-venus', name: 'Sao Kim', category: 'objects', url: '/assets/kenney/planets/venus.png', keywords: ['sao kim', 'venus'] },
   { id: 'kenney-planet-mars', name: 'Sao Hỏa', category: 'objects', url: '/assets/kenney/planets/mars.png', keywords: ['sao hoa', 'mars'] },
+  // Bổ sung sau thử nghiệm lần 4: hình còn thiếu cho game vần (bàn, khăn, đàn). Không dùng 'ban', 'dan' trơ trọi (lẫn "bạn", "dân").
+  { id: 'custom-object-table', name: 'Cái bàn', category: 'objects', url: '/assets/custom/object-table.svg', keywords: ['cai ban', 'chiec ban', 'table', 'desk'] },
+  { id: 'fluent-clothes-scarf', name: 'Cái khăn', category: 'objects', url: '/assets/fluent/clothes-scarf.svg', keywords: ['cai khan', 'khan quang', 'khan len', 'scarf'] },
+  { id: 'fluent-object-guitar', name: 'Đàn ghi-ta', category: 'objects', url: '/assets/fluent/object-guitar.svg', keywords: ['dan ghi ta', 'cay dan', 'dan guitar', 'guitar'] },
 ]
 
 /** Chuẩn hóa xâu chữ: bỏ dấu tiếng Việt, ký tự đặc biệt, chuyển chữ thường */

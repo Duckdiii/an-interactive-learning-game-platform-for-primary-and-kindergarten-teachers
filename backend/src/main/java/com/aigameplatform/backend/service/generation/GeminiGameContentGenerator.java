@@ -40,8 +40,12 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
     private static final String ASSET_RULES = """
             HÌNH MINH HỌA (trường asset): ở mỗi chỗ có visualPrompt, đặt asset là id trong DANH MỤC HÌNH dưới đây khi có
             hình đúng NGHĨA của chữ trong ngữ cảnh (ví dụ "bóng bay" là fluent-object-balloon, không phải quả bóng đá).
-            Không có hình đúng nghĩa thì BỎ HẲN trường asset (không để chuỗi rỗng), không chọn hình gần giống. Chỉ dùng đúng id
-            có trong danh mục.
+            Không có hình đúng nghĩa thì BỎ HẲN trường asset (không để chuỗi rỗng); TUYỆT ĐỐI không chọn hình khác nghĩa chỉ để có hình
+            (ví dụ "bàn" không phải quyển sách, "khăn" không phải cái ô, từ vô nghĩa không có hình). Chỉ dùng đúng id có trong danh mục.
+            Câu đếm số lượng ("3 con vịt"): asset là hình VẬT được đếm (con vịt), KHÔNG chọn hình thẻ số vì thẻ số lộ đáp án và
+            không có gì để đếm.
+            Mô tả hình (visualPrompt) của câu đếm viết bằng chữ số, ví dụ "3 con vịt" (không viết "ba con vịt"), và số đó phải
+            bằng đáp án đúng.
             DANH MỤC HÌNH (id: tên):
             """;
 
