@@ -5,6 +5,7 @@ import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.exception.AiGenerationTimeoutException;
 import com.aigameplatform.backend.exception.UnsafeContentException;
 import com.aigameplatform.backend.service.generation.AiServiceUnavailableException;
+import com.aigameplatform.backend.service.generation.Revision;
 import com.aigameplatform.backend.service.validation.ValidationError;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationReport;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationService;
@@ -48,13 +49,18 @@ public class CpfGenerationService {
 
     /** @return game CPF dạng hoàn chỉnh đã qua cả 3 lớp kiểm duyệt */
     public JsonNode generate(String idea, Subject subject, GradeLevel gradeLevel) {
+        return generate(idea, subject, gradeLevel, null);
+    }
+
+    /** Như {@link #generate(String, Subject, GradeLevel)}; có {@code revision} thì AI sửa game hiện tại thay vì làm mới. */
+    public JsonNode generate(String idea, Subject subject, GradeLevel gradeLevel, Revision revision) {
         CpfContentGenerator generator = generatorProvider.getIfAvailable();
         if (generator == null) throw new AiGenerationTimeoutException("Chưa cấu hình dịch vụ AI để sinh game");
 
         String previousOutput = null;
         List<ValidationError> previousErrors = List.of();
         for (int attempt = 1; attempt <= maxRetries + 1; attempt++) {
-            String raw = callAi(generator, new CpfGenerationAttempt(idea, subject, gradeLevel, attempt, previousOutput, previousErrors));
+            String raw = callAi(generator, new CpfGenerationAttempt(idea, subject, gradeLevel, attempt, previousOutput, previousErrors, revision));
             CpfValidationReport report = validate(raw, subject, gradeLevel);
             if (report.valid()) return report.game();
             if (report.unsafe()) {

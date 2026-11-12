@@ -219,4 +219,20 @@ describe('editorReducer: AI làm lại một câu và hoàn tác', () => {
     expect((undoFirst.draft.questions[1] as { questionText: string }).questionText).toBe('Câu 2 do AI')
     expect(Object.keys(undoFirst.undo)).toEqual(['q2'])
   })
+
+  it('áp game AI sửa qua chat: thay cả bản nháp, hoàn tác được một bước khi chưa sửa thêm', () => {
+    const start = createEditorState(quiz())
+    const revised = { ...quiz(), metadata: { ...quiz().metadata, title: 'Bản AI sửa' } }
+    const applied = editorReducer(start, { type: 'applyChatRevision', content: revised })
+
+    expect(applied.draft).toBe(revised)
+    expect(isDirty(applied)).toBe(true)
+    expect(editorReducer(applied, { type: 'undoChatRevision' }).draft).toBe(start.draft)
+
+    // Đã sửa tay sau khi áp: hoàn tác không ghi đè phần sửa tay, chỉ bỏ khả năng hoàn tác.
+    const edited = editorReducer(applied, { type: 'setTitle', title: 'Cô tự sửa' })
+    const undone = editorReducer(edited, { type: 'undoChatRevision' })
+    expect(undone.draft.metadata.title).toBe('Cô tự sửa')
+    expect(undone.chatUndo).toBeNull()
+  })
 })

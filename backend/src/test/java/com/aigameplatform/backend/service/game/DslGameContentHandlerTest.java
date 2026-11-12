@@ -91,4 +91,30 @@ class DslGameContentHandlerTest {
         assertThatThrownBy(() -> handler.replaceContent(game(GameType.QUIZ), broken))
                 .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR));
     }
+
+    @Test
+    void reviseSendsTheStoredGameWithoutManagementFieldsAndKeepsPresentationAndMediaTheAiCannotCarry() throws Exception {
+        GameGenerationService generation = mock(GameGenerationService.class);
+        GameValidationService validation = new GameValidationService(GameTestFixtures.schemaAndBusinessRuleValidators(MAPPER), MAPPER);
+        DslGameContentHandler reviser = new DslGameContentHandler(generation, validation,
+                new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)), MAPPER);
+        ObjectNode current = (ObjectNode) quiz();
+        ((ObjectNode) current.path("metadata")).putObject("presentation").put("world", "ocean");
+        current.put("gameId", "g").put("status", "DRAFT").put("updatedAt", "t");
+        // AI trả game không có cách trình bày và không có đường dẫn hình/âm thanh (đầu ra AI không mang được).
+        ObjectNode fromAi = (ObjectNode) quiz();
+        fromAi.path("questions").forEach(q -> ((ObjectNode) q).remove(java.util.List.of("imageUrl", "audioUrl")));
+        var revision = org.mockito.ArgumentCaptor.forClass(com.aigameplatform.backend.service.generation.Revision.class);
+        org.mockito.Mockito.when(generation.revise(org.mockito.ArgumentMatchers.eq(GameType.QUIZ), org.mockito.ArgumentMatchers.any(),
+                revision.capture())).thenReturn(validation.validate(fromAi).game());
+
+        ObjectNode revised = reviser.revise(current, "dễ hơn", java.util.List.of());
+
+        assertThat(revision.getValue().currentGame()).doesNotContain("updatedAt").contains("Ví dụ QUIZ");
+        assertThat(revision.getValue().instruction()).isEqualTo("dễ hơn");
+        assertThat(revised.path("metadata").path("presentation").path("world").asString()).isEqualTo("ocean");
+        assertThat(revised.path("questions").get(0).path("imageUrl").asString())
+                .isEqualTo(quiz().path("questions").get(0).path("imageUrl").asString());
+        assertThat(revised.has("gameId")).isFalse();
+    }
 }

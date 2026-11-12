@@ -1,6 +1,7 @@
 package com.aigameplatform.backend.service.game;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.ReviseGameRequest;
 import com.aigameplatform.backend.dto.response.GameSummaryResponse;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameStatus;
@@ -16,6 +17,7 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionOperations;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -33,13 +35,17 @@ public class GameService {
     private final TeacherRepository teachers;
     private final List<GameContentHandler> handlers;
     private final JsonMapper jsonMapper;
+    private final AiRequestRateLimiter rateLimiter;
+    private final TransactionOperations transactions;
 
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
-            JsonMapper jsonMapper) {
+            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions) {
         this.games = games;
         this.teachers = teachers;
         this.handlers = handlers;
         this.jsonMapper = jsonMapper;
+        this.rateLimiter = rateLimiter;
+        this.transactions = transactions;
     }
 
     /**
@@ -94,6 +100,27 @@ public class GameService {
         // Chỉ sửa câu hỏi thì hàng games không "bẩn" nên @UpdateTimestamp không chạy; đặt tường minh để GET /games sắp đúng.
         game.setUpdatedAt(Instant.now());
         return toResponse(games.saveAndFlush(game));
+    }
+
+    /**
+     * POST /games/{gameId}/revise: AI sửa game đang lưu theo yêu cầu chat, qua đủ 3 lớp kiểm duyệt, KHÔNG lưu (trình soạn
+     * áp vào bản nháp rồi lưu bằng PUT). Đọc game trong transaction ngắn rồi gọi AI ngoài transaction, như {@link #generate},
+     * để không giữ kết nối Hikari suốt lúc chờ AI.
+     */
+    public ObjectNode revise(String teacherId, String gameId, ReviseGameRequest request) {
+        StoredGame stored = transactions.execute(status -> {
+            Game game = owned(teacherId, gameId);
+            return new StoredGame(game.getGameType(), toResponse(game));
+        });
+        // Kiểm quyền (403/404) trước khi tính vào hạn mức, để lỗi sai game không ăn mất lượt của giáo viên.
+        try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
+            ObjectNode revised = handlerFor(stored.type()).revise(stored.response(), request.instruction().trim(), request.history());
+            GameReports.MANAGEMENT_FIELDS.forEach(field -> revised.set(field, stored.response().get(field)));
+            return revised;
+        }
+    }
+
+    private record StoredGame(GameType type, ObjectNode response) {
     }
 
     /** 409 khi game còn dữ liệu liên quan (phiên chơi) giữ khóa ngoại, thay vì 500. */

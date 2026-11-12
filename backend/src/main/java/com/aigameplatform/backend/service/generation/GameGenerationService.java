@@ -107,11 +107,20 @@ public class GameGenerationService {
     }
 
     public GenerationResult generateResult(GameType type, GameDslRequest request) {
-        return metricsProvider.getIfAvailable(CurriculumMetrics::noop).measure(CurriculumMetrics.Stage.TOTAL,
-                request.subject(), request.gradeLevel(), () -> generateGame(type, request), g -> CurriculumMetrics.Outcome.SUCCESS);
+        return generateResult(type, request, null);
     }
 
-    private GenerationResult generateGame(GameType type, GameDslRequest request) {
+    /** Sửa game đã có theo chat: như {@link #generate} nhưng mỗi lần gọi AI mang theo {@code revision} (game hiện tại + yêu cầu). */
+    public GameDsl revise(GameType type, GameDslRequest request, Revision revision) {
+        return generateResult(type, request, revision).game();
+    }
+
+    private GenerationResult generateResult(GameType type, GameDslRequest request, Revision revision) {
+        return metricsProvider.getIfAvailable(CurriculumMetrics::noop).measure(CurriculumMetrics.Stage.TOTAL,
+                request.subject(), request.gradeLevel(), () -> generateGame(type, request, revision), g -> CurriculumMetrics.Outcome.SUCCESS);
+    }
+
+    private GenerationResult generateGame(GameType type, GameDslRequest request, Revision revision) {
         var curriculum = curriculumRagEnabled ? retrieveCurriculumContext(type, request) : CurriculumContextProvider.Evidence.insufficient();
         String curriculumContext = curriculumRagEnabled
                 ? withPreschoolPedagogy(curriculum.context(), request.gradeLevel()) : null;
@@ -127,7 +136,8 @@ public class GameGenerationService {
         List<ValidationError> previousErrors = List.of();
         for (int attemptNumber = 1; attemptNumber <= maxRetries + 1; attemptNumber++) {
             String raw = callAi(generator, new GenerationAttempt(type, request.topic(), request.subject(),
-                    request.gradeLevel(), schema, curriculumContext, attemptNumber, previousOutput, previousErrors));
+                    request.gradeLevel(), schema, curriculumContext, attemptNumber, previousOutput, previousErrors,
+                    revision));
 
             AiOutputReport aiReport = aiOutputValidator.validate(type, raw);
             List<ValidationError> errors;

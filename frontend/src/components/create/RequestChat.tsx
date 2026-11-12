@@ -17,12 +17,20 @@ interface RequestChatProps {
   mock: boolean
   onSend: (text: string) => boolean
   onRetry: () => void
+  /** Đổi tiêu đề, lời nhắc và mã phần tử khi dùng ở nơi khác trang tạo game (ví dụ sửa game bằng chat trong trình soạn). */
+  labels?: { title: string; placeholder: string; thinking: string; inputLabel: string }
+  idPrefix?: string
+  /** Nhắn trước tin đầu tiên (ví dụ hướng dẫn cách nhắn). */
+  intro?: string
+  /** Số ký tự tối đa của một tin (mặc định của khung chat tạo game). */
+  maxLength?: number
 }
 
 const text = viText.chat
 
 // Khung chat bên trái của bước "Trao đổi với trợ lý": lịch sử, nút trả lời nhanh cho câu hỏi lại, ô nhập. Enter để gửi, Shift+Enter xuống dòng.
-export default function RequestChat({ messages, question, pending, error, canSend, mock, onSend, onRetry }: RequestChatProps) {
+export default function RequestChat({ messages, question, pending, error, canSend, mock, onSend, onRetry, labels, idPrefix = 'request-chat', intro, maxLength = CHAT_MESSAGE_MAX }: RequestChatProps) {
+  const words = labels ?? { title: text.title, placeholder: text.placeholder, thinking: text.thinking, inputLabel: text.inputLabel }
   const [draft, setDraft] = useState('')
   const endRef = useRef<HTMLLIElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -56,13 +64,15 @@ export default function RequestChat({ messages, question, pending, error, canSen
   }
 
   return (
-    <section aria-labelledby="request-chat-title" className="flex flex-col gap-4 rounded-3xl bg-surface p-5 shadow-sm sm:p-6">
+    <section aria-labelledby={`${idPrefix}-title`} className="flex flex-col gap-4 rounded-3xl bg-surface p-5 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 id="request-chat-title" className="font-display text-xl font-extrabold">
-          {text.title}
+        <h2 id={`${idPrefix}-title`} className="font-display text-xl font-extrabold">
+          {words.title}
         </h2>
         {mock ? <MockBadge /> : null}
       </div>
+
+      {intro ? <p className="text-base text-ink-soft">{intro}</p> : null}
 
       <ol role="log" aria-live="polite" aria-label={text.logLabel} className="max-h-[28rem] space-y-3 overflow-y-auto pr-1">
         {messages.map((turn, index) => (
@@ -80,7 +90,7 @@ export default function RequestChat({ messages, question, pending, error, canSen
         ))}
         {pending ? (
           <li className="flex justify-start">
-            <p className="rounded-2xl rounded-bl-md bg-paper px-4 py-2.5 text-base text-ink-soft">{text.thinking}</p>
+            <p className="rounded-2xl rounded-bl-md bg-paper px-4 py-2.5 text-base text-ink-soft">{words.thinking}</p>
           </li>
         ) : null}
         <li ref={endRef} aria-hidden="true" />
@@ -107,16 +117,16 @@ export default function RequestChat({ messages, question, pending, error, canSen
       ) : null}
 
       <form onSubmit={onSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-end">
-        <label htmlFor="request-chat-input" className="sr-only">
-          {text.inputLabel}
+        <label htmlFor={`${idPrefix}-input`} className="sr-only">
+          {words.inputLabel}
         </label>
         <textarea
-          id="request-chat-input"
+          id={`${idPrefix}-input`}
           ref={inputRef}
           rows={2}
           value={draft}
-          maxLength={CHAT_MESSAGE_MAX}
-          placeholder={canSend || pending ? text.placeholder : text.limitReached}
+          maxLength={maxLength}
+          placeholder={canSend || pending ? words.placeholder : text.limitReached}
           disabled={!canSend && !pending}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={onKeyDown}

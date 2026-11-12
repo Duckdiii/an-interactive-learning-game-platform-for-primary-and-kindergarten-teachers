@@ -1,8 +1,11 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { viText } from '../../../constants/viText'
 import type { MemoryCardQuestion, MemoryPair } from '../../../types/game-dsl.types'
 import { QUESTION_LIMITS, TYPE_LIMITS } from '../../../utils/questionSpecs'
 import { resolveAssetUrl } from '../../../utils/assetResolver'
+import { cardStyleOf } from '../../../utils/presentation'
+import { usePresentation } from '../../../player/theme/PresentationContext'
+import MemoryCardFaces from '../../../player/renderers/MemoryCardFaces'
 import Button from '../../Button'
 import Icon from '../../ui/Icon'
 import CheckedTextField from './CheckedTextField'
@@ -146,6 +149,10 @@ function CardFields({ pair, index, issues, onCommit }: CardFieldsProps) {
   const needError = fieldMessage(issues, base)
   const prefix = idPrefix(pair.pairId)
   const assetUrl = pair.content.imageUrl || resolveAssetUrl(pair.content.text, pair.content.visualPrompt)
+  const cardStyle = cardStyleOf(usePresentation()?.world)
+  // Thẻ mẫu mở sẵn mặt ngửa; giáo viên bấm để xem mặt úp như bé thấy khi bắt đầu.
+  const [faceUp, setFaceUp] = useState(true)
+  const hasFace = Boolean(pair.content.text || assetUrl)
 
   return (
     <fieldset
@@ -184,6 +191,21 @@ function CardFields({ pair, index, issues, onCommit }: CardFieldsProps) {
           onCommit={(next) => onCommit('visualPrompt', next)}
         />
       </div>
+      {hasFace ? (
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setFaceUp((up) => !up)}
+            aria-pressed={!faceUp}
+            aria-label={text.flipCard}
+            className="flip-card relative aspect-[4/5] w-20 shrink-0 select-none focus:outline-none focus-visible:ring-4 focus-visible:ring-brand"
+            style={{ borderRadius: cardStyle.radius }}
+          >
+            <MemoryCardFaces content={pair.content} cardStyle={cardStyle} flipped={faceUp} showContent={faceUp} />
+          </button>
+          <p className="text-sm text-ink-soft">{text.cardPreviewHint}</p>
+        </div>
+      ) : null}
       {assetUrl ? (
         <div className="flex items-center gap-2.5 rounded-xl border border-purple-200/70 bg-white/90 p-2 shadow-2xs">
           <img src={assetUrl} alt="" className="h-8 w-8 shrink-0 rounded-lg bg-surface object-contain p-0.5 border border-ink/5" aria-hidden="true" />

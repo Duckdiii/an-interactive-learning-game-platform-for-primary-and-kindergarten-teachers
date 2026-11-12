@@ -20,4 +20,6 @@ export const UNDERSTAND_TIMEOUT_MS = 45_000
 
 // Giới hạn của khung chat theo openapi `UnderstandGameRequest` / `ChatTurn`.
 export const CHAT_MAX_TURNS = 12
+// openapi ReviseGameRequest.instruction tối đa 500 ký tự.
+export const REVISE_INSTRUCTION_MAX = 500
 export const CHAT_MESSAGE_MAX = 2000

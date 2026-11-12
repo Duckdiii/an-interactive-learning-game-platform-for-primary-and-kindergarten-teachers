@@ -31,7 +31,7 @@ class CpfDecoderSchemaTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"catch-even-apples", "race-multiplication", "fishing-compound-words", "archery-addition",
-            "sort-land-water-animals"})
+            "sort-land-water-animals", "rabbit-pick-carrots"})
     void decoderAcceptsEveryValidExample(String name) throws Exception {
         try (InputStream in = getClass().getResourceAsStream("/cpf-examples/" + name + ".json")) {
             assertThat(decoder().validate(MAPPER.readTree(in))).isEmpty();
@@ -56,5 +56,27 @@ class CpfDecoderSchemaTest {
         String user = prompts.userPrompt(new CpfGenerationAttempt(idea, Subject.MATH, GradeLevel.GRADE_1, 1, null, List.of()));
 
         assertThat(user).doesNotContain("a".repeat(CpfPromptBuilder.MAX_IDEA_LENGTH + 1)).contains("a".repeat(CpfPromptBuilder.MAX_IDEA_LENGTH));
+    }
+
+    @Test
+    void retryOfARevisionStillCarriesTheOriginalGameAndTheRequest() {
+        var prompts = new CpfPromptBuilder(new CpfAssetCatalog(MAPPER));
+        var revision = new com.aigameplatform.backend.service.generation.Revision("{\"title\":\"GỐC\"}", "thêm 2 màn", null, null);
+        String user = prompts.userPrompt(new CpfGenerationAttempt("Hứng táo", com.aigameplatform.backend.entity.enums.Subject.MATH,
+                com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_1, 2, "{\"broken\":true}",
+                java.util.List.of(new com.aigameplatform.backend.service.validation.ValidationError("$.rules", "thiếu luật")), revision));
+
+        org.assertj.core.api.Assertions.assertThat(user).contains("GỐC", "thêm 2 màn", "broken", "thiếu luật");
+    }
+
+    @Test
+    void revisionPromptCarriesTheWholeCurrentGameEvenWhenLong() throws Exception {
+        String current = "{\"padding\":\"" + "x".repeat(5000) + "\",\"end\":\"MARKER\"}";
+        var revision = new com.aigameplatform.backend.service.generation.Revision(current, "thêm 2 màn", null, null);
+        var prompts = new CpfPromptBuilder(new CpfAssetCatalog(MAPPER));
+        String user = prompts.userPrompt(new CpfGenerationAttempt("Hứng táo", com.aigameplatform.backend.entity.enums.Subject.MATH,
+                com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_1, 1, null, java.util.List.of(), revision));
+
+        org.assertj.core.api.Assertions.assertThat(user).contains("MARKER", "thêm 2 màn");
     }
 }

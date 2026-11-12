@@ -3,7 +3,7 @@ import axiosInstance from './axiosInstance'
 import type { ApiSuccessResponse } from '../types/api'
 import type { PublishResult } from '../types/publish.types'
 import type { RegeneratedQuestion } from '../types/regenerate.types'
-import type { GameUnderstandingResponse, UnderstandGameRequest } from '../types/understanding.types'
+import type { ChatTurn, GameUnderstandingResponse, UnderstandGameRequest } from '../types/understanding.types'
 import type { GenerateGameRequest } from '../utils/generateRequest'
 import type { AnyGameResponse, GameEnvelopeBody, GameResponse } from '../types/game-response.types'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
@@ -76,6 +76,21 @@ export async function postRegenerateQuestion(gameId: string, questionId: string,
 }
 
 /** POST /games/understand: AI đọc cuộc chat, trả lời đáp, câu hỏi lại (nếu có) và thẻ hiểu yêu cầu. Không lưu gì ở máy chủ. */
+export interface ReviseGameBody {
+  instruction: string
+  history?: ChatTurn[]
+}
+
+/** `POST /games/{gameId}/revise`: AI sửa game đang lưu theo yêu cầu chat; KHÔNG lưu, trả game đã sửa (đủ 3 lớp kiểm duyệt). */
+export async function postReviseGame(gameId: string, body: ReviseGameBody, options: { signal?: AbortSignal } = {}) {
+  const response = await axiosInstance.post<ApiSuccessResponse<AnyGameResponse>>(`/games/${encodeURIComponent(gameId)}/revise`, body, {
+    timeout: GENERATE_GAME_TIMEOUT_MS,
+    signal: options.signal,
+  })
+
+  return response.data.data
+}
+
 export async function postUnderstandGame(body: UnderstandGameRequest, options: { signal?: AbortSignal } = {}) {
   const response = await axiosInstance.post<ApiSuccessResponse<GameUnderstandingResponse>>('/games/understand', body, {
     timeout: UNDERSTAND_TIMEOUT_MS,

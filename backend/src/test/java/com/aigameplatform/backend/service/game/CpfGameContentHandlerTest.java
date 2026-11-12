@@ -124,4 +124,21 @@ class CpfGameContentHandlerTest {
             assertThatThrownBy(() -> handler.replaceContent(new Game(), dsl)).isInstanceOf(ApiException.class);
         }
     }
+
+    @Test
+    void reviseSendsTheCurrentGameAndTheRequestToTheAiAndReturnsTheRevisedCpf() throws Exception {
+        ObjectNode current = MAPPER.createObjectNode().put("gameId", "g").put("gameType", "CUSTOM");
+        current.set("cpf", example("catch-even-apples"));
+        var revision = org.mockito.ArgumentCaptor.forClass(com.aigameplatform.backend.service.generation.Revision.class);
+        when(generation.generate(org.mockito.ArgumentMatchers.eq("Số chẵn trong phạm vi 10"), org.mockito.ArgumentMatchers.eq(Subject.MATH),
+                org.mockito.ArgumentMatchers.eq(GradeLevel.GRADE_1), revision.capture())).thenReturn(example("race-multiplication"));
+
+        ObjectNode revised = handler.revise(current, "thêm 1 màn", List.of());
+
+        assertThat(revised.path("gameType").asString()).isEqualTo("CUSTOM");
+        assertThat(revised.path("cpf")).isEqualTo(example("race-multiplication"));
+        assertThat(revised.has("gameId")).isFalse();
+        assertThat(revision.getValue().currentGame()).contains("Hứng táo số chẵn");
+        assertThat(revision.getValue().instruction()).isEqualTo("thêm 1 màn");
+    }
 }

@@ -13,6 +13,9 @@ final class GameReports {
 
     private static final int MAX_ERRORS_IN_MESSAGE = 5;
 
+    /** Ba trường quản lý của GameResponse (không phải nội dung game). */
+    static final List<String> MANAGEMENT_FIELDS = List.of("gameId", "status", "updatedAt");
+
     private GameReports() {
     }
 

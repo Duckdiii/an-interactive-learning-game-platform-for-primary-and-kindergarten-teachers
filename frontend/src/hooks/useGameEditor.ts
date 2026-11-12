@@ -320,6 +320,17 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
 
       return { ok: true }
     },
+    /** Áp game AI đã sửa theo chat vào bản nháp (tự lưu như sửa tay); hoàn tác được một bước bằng `undoChatRevision`. */
+    applyChatRevision: (content: GameDsl) => {
+      edit({ type: 'applyChatRevision', content })
+      setRevision((value) => value + 1)
+    },
+    /** Còn hoàn tác được lần sửa bằng chat gần nhất: bản nháp vẫn đúng là game AI vừa đưa vào. */
+    canUndoChatRevision: Boolean(state.chatUndo && deepEqual(state.draft, state.chatUndo.applied)),
+    undoChatRevision: () => {
+      edit({ type: 'undoChatRevision' })
+      setRevision((value) => value + 1)
+    },
     undoRegenerated: (index: number, questionId: string) => {
       edit({ type: 'undoRegenerated', index, questionId })
       setRevision((value) => value + 1)

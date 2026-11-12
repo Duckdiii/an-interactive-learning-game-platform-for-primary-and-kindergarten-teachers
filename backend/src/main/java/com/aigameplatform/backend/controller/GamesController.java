@@ -1,6 +1,7 @@
 package com.aigameplatform.backend.controller;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.ReviseGameRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
 import com.aigameplatform.backend.dto.response.GameSummaryResponse;
 import com.aigameplatform.backend.entity.enums.GameStatus;
@@ -59,6 +60,12 @@ public class GamesController {
     public ResponseEntity<ApiResponse<JsonNode>> update(@PathVariable String gameId, @RequestBody JsonNode body,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
         return ResponseEntity.ok(ApiResponse.ok(games.update(teacherId(teacher), gameId, body)));
+    }
+
+    @PostMapping("/{gameId}/revise")
+    public ResponseEntity<ApiResponse<JsonNode>> revise(@PathVariable String gameId, @Valid @RequestBody ReviseGameRequest request,
+            @AuthenticationPrincipal AuthenticatedTeacher teacher) {
+        return ResponseEntity.ok(ApiResponse.ok(games.revise(teacherId(teacher), gameId, request)));
     }
 
     @DeleteMapping("/{gameId}")

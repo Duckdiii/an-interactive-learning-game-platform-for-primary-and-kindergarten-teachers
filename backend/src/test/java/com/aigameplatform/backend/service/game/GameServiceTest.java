@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.ReviseGameRequest;
+import com.aigameplatform.backend.exception.RateLimitedException;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.Teacher;
 import com.aigameplatform.backend.entity.enums.GameStatus;
@@ -28,6 +30,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.transaction.support.TransactionOperations;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -40,6 +43,7 @@ class GameServiceTest {
     private final TeacherRepository teachers = mock(TeacherRepository.class);
     private final GameContentHandler dsl = mock(GameContentHandler.class);
     private final GameContentHandler cpf = mock(GameContentHandler.class);
+    private final AiRequestRateLimiter limiter = mock(AiRequestRateLimiter.class);
     private GameService service;
 
     @BeforeEach
@@ -55,7 +59,7 @@ class GameServiceTest {
             return g;
         });
         when(teachers.getReferenceById(anyString())).thenAnswer(inv -> teacher(inv.getArgument(0)));
-        service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER);
+        service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction());
     }
 
     private static Teacher teacher(String id) {
@@ -210,5 +214,54 @@ class GameServiceTest {
         assertThat(service.list(OWNER, Subject.VIETNAMESE, null, null)).singleElement()
                 .satisfies(s -> assertThat(s.gameType()).isEqualTo("CUSTOM"));
         assertThat(service.list(OWNER, null, null, GameStatus.PUBLISHED)).isEmpty();
+    }
+
+    // ---- revise (sửa bằng chat) ----
+
+    @Test
+    void reviseAsksTheHandlerOfTheStoredTypeKeepsManagementFieldsAndDoesNotSave() {
+        when(games.findById("g1")).thenReturn(Optional.of(game("g1", OWNER, GameType.QUIZ)));
+        when(dsl.revise(any(), eq("dễ hơn"), any())).thenReturn(MAPPER.createObjectNode().put("gameType", "QUIZ").put("kind", "REVISED"));
+
+        ObjectNode revised = service.revise(OWNER, "g1", new ReviseGameRequest("  dễ hơn ", List.of()));
+
+        assertThat(revised.path("kind").asString()).isEqualTo("REVISED");
+        assertThat(revised.path("gameId").asString()).isEqualTo("g1");
+        assertThat(revised.path("status").asString()).isEqualTo("DRAFT");
+        assertThat(revised.path("updatedAt").asString()).isEqualTo(Instant.EPOCH.toString());
+        verify(games, never()).saveAndFlush(any());
+        verify(limiter).acquire(OWNER);
+    }
+
+    @Test
+    void reviseOfAnotherTeachersGameIsForbiddenWithoutCallingTheAi() {
+        when(games.findById("g1")).thenReturn(Optional.of(game("g1", "someone-else", GameType.QUIZ)));
+
+        assertThatThrownBy(() -> service.revise(OWNER, "g1", new ReviseGameRequest("dễ hơn", null)))
+                .isInstanceOf(ApiException.class).extracting("errorCode").isEqualTo(ErrorCode.FORBIDDEN);
+        verify(dsl, never()).revise(any(), any(), any());
+        verify(limiter, never()).acquire(any());
+    }
+
+    @Test
+    void reviseOverTheRateLimitDoesNotCallTheAi() {
+        when(games.findById("g1")).thenReturn(Optional.of(game("g1", OWNER, GameType.CUSTOM)));
+        org.mockito.Mockito.doThrow(new RateLimitedException("chậm lại", 30)).when(limiter).acquire(OWNER);
+
+        assertThatThrownBy(() -> service.revise(OWNER, "g1", new ReviseGameRequest("dễ hơn", null)))
+                .isInstanceOf(RateLimitedException.class);
+        verify(cpf, never()).revise(any(), any(), any());
+    }
+
+    @Test
+    void aFailedRevisionFreesTheTeachersSlotForTheNextOne() {
+        var realLimiter = new AiRequestRateLimiter(java.time.Clock.systemUTC());
+        var withLimiter = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, realLimiter, TransactionOperations.withoutTransaction());
+        when(games.findById("g1")).thenReturn(Optional.of(game("g1", OWNER, GameType.QUIZ)));
+        when(dsl.revise(any(), any(), any())).thenThrow(new ApiException(ErrorCode.UNSAFE_CONTENT, "x"))
+                .thenReturn(MAPPER.createObjectNode().put("gameType", "QUIZ"));
+
+        assertThatThrownBy(() -> withLimiter.revise(OWNER, "g1", new ReviseGameRequest("dễ hơn", null))).isInstanceOf(ApiException.class);
+        assertThat(withLimiter.revise(OWNER, "g1", new ReviseGameRequest("dễ hơn", null)).path("gameId").asString()).isEqualTo("g1");
     }
 }

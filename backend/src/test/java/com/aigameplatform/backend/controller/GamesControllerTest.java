@@ -142,4 +142,32 @@ class GamesControllerTest {
         mvc.perform(delete("/api/games/g")).andExpect(status().isNoContent());
         verify(games).delete("teacher-1", "g");
     }
+
+    @Test
+    void reviseReturnsTheRevisedGame() throws Exception {
+        when(games.revise(eq("teacher-1"), eq("g1"), any())).thenReturn(MAPPER.createObjectNode().put("gameId", "g1").put("gameType", "QUIZ"));
+
+        mvc.perform(post("/api/games/g1/revise").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"instruction\":\"Câu 2 đổi thành phép trừ\",\"history\":[{\"role\":\"TEACHER\",\"text\":\"dễ hơn\"}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.gameId").value("g1"));
+    }
+
+    @Test
+    void reviseWithoutInstructionIs400() throws Exception {
+        mvc.perform(post("/api/games/g1/revise").contentType(MediaType.APPLICATION_JSON).content("{\"instruction\":\"  \"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void reviseOverTheLimitIs429WithRetryAfter() throws Exception {
+        when(games.revise(eq("teacher-1"), eq("g1"), any()))
+                .thenThrow(new com.aigameplatform.backend.exception.RateLimitedException("chậm lại", 17));
+
+        mvc.perform(post("/api/games/g1/revise").contentType(MediaType.APPLICATION_JSON).content("{\"instruction\":\"dễ hơn\"}"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Retry-After", "17"))
+                .andExpect(jsonPath("$.error.code").value("RATE_LIMITED"));
+    }
 }

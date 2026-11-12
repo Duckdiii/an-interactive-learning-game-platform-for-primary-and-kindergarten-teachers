@@ -295,7 +295,7 @@ describe('MEMORY_CARD: dùng được bằng bàn phím', () => {
     expect(document.activeElement?.id).toMatch(/^memory-p\d+-text$/)
   })
 
-  it('thứ tự Tab đi theo thứ tự trên màn hình: nút Xóa cặp, chữ trên thẻ, mô tả hình trên thẻ, rồi sang cặp kế', async () => {
+  it('thứ tự Tab đi theo thứ tự trên màn hình: nút Xóa cặp, chữ trên thẻ, mô tả hình trên thẻ, thẻ mẫu, rồi sang cặp kế', async () => {
     const user = userEvent.setup()
 
     await openLoaded()
@@ -303,12 +303,12 @@ describe('MEMORY_CARD: dùng được bằng bàn phím', () => {
 
     const order: string[] = []
 
-    for (let step = 0; step < 4; step += 1) {
+    for (let step = 0; step < 5; step += 1) {
       await user.tab()
       order.push((document.activeElement as HTMLElement).id || (document.activeElement as HTMLElement).getAttribute('aria-label') || '')
     }
 
-    expect(order).toEqual(['memory-p1-text', 'memory-p1-image', 'Xóa cặp 2', 'memory-p2-text'])
+    expect(order).toEqual(['memory-p1-text', 'memory-p1-image', 'Lật thẻ mẫu', 'Xóa cặp 2', 'memory-p2-text'])
   })
 
   it('mỗi cặp là một nhóm có tên riêng và mặt thẻ là nhóm con', async () => {
@@ -316,6 +316,16 @@ describe('MEMORY_CARD: dùng được bằng bàn phím', () => {
 
     expect(within(pairsGroup()).getByRole('group', { name: 'Cặp 1' })).toBeInTheDocument()
     expect(within(pairItem(0)).getByRole('group', { name: 'Mặt thẻ' })).toBeInTheDocument()
+  })
+
+  it('mỗi cặp có thẻ mẫu giống thẻ bé thấy, bấm để lật xem mặt úp', async () => {
+    const user = userEvent.setup()
+    await openLoaded()
+
+    const card = within(pairItem(0)).getByRole('button', { name: 'Lật thẻ mẫu' })
+    expect(card).toHaveAttribute('aria-pressed', 'false')
+    await user.click(card)
+    expect(within(pairItem(0)).getByRole('button', { name: 'Lật thẻ mẫu' })).toHaveAttribute('aria-pressed', 'true')
   })
 })
 

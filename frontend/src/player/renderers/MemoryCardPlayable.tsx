@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { playSound } from '../../games/common/sound'
 import type { PairSide } from '../../types/game-dsl.types'
-import { resolveAssetUrl } from '../../utils/assetResolver'
 import { cardStyleOf } from '../../utils/presentation'
 import { usePresentation } from '../theme/PresentationContext'
+import MemoryCardFaces from './MemoryCardFaces'
 import type { PlayableRendererProps } from './types'
 
 const FLIP_MS = 450
@@ -124,7 +124,6 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
           const isMatched = matchedPairIds.includes(card.pairId)
           const isFlipped = isMatched || flippedCardIds.includes(card.id)
           const showContent = isFlipped || hidingCardIds.includes(card.id)
-          const assetUrl = card.content.imageUrl || resolveAssetUrl(card.content.text, card.content.visualPrompt)
 
           return (
             <button
@@ -149,44 +148,7 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
                 isFlipped ? (isMatched ? 'scale-95' : '-translate-y-1') : 'cursor-pointer hover:scale-105 active:scale-95',
               ].join(' ')}
             >
-              <div className={`flip-inner${isFlipped ? ' is-flipped' : ''}`}>
-                {/* Mặt úp: biểu tượng và màu theo thế giới của game. */}
-                <div
-                  className="flip-face flex items-center justify-center border-3 border-white/40 text-white shadow-sm"
-                  style={{
-                    borderRadius: cardStyle.radius,
-                    background: `linear-gradient(135deg, ${cardStyle.backFrom}, ${cardStyle.backTo})`,
-                  }}
-                >
-                  <span className="text-2xl sm:text-3xl select-none">{cardStyle.emblem}</span>
-                </div>
-                <div
-                  className={[
-                    'flip-face flip-front flex flex-col items-center justify-center gap-1.5 p-2 border-3',
-                    isMatched ? 'border-emerald-400 bg-emerald-50' : 'border-amber-400 bg-white shadow-md',
-                  ].join(' ')}
-                  style={{ borderRadius: cardStyle.radius }}
-                >
-                  {/* Nội dung chỉ có trong DOM khi đã lật (hoặc đang xoay úp lại), để thẻ úp không lộ đáp án. */}
-                  {showContent ? (
-                    <>
-                      {assetUrl ? (
-                        <img
-                          src={assetUrl}
-                          alt=""
-                          aria-hidden="true"
-                          className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 object-contain drop-shadow-2xs"
-                        />
-                      ) : null}
-                      {card.content.text ? (
-                        <span className="line-clamp-2 text-center text-xs sm:text-sm font-black text-play-ink leading-tight">
-                          {card.content.text}
-                        </span>
-                      ) : null}
-                    </>
-                  ) : null}
-                </div>
-              </div>
+              <MemoryCardFaces content={card.content} cardStyle={cardStyle} flipped={isFlipped} showContent={showContent} matched={isMatched} />
             </button>
           )
         })}

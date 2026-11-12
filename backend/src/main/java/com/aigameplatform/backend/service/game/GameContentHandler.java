@@ -6,6 +6,7 @@ import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.QuestionGame;
+import com.aigameplatform.backend.dto.understanding.ChatTurn;
 import java.util.List;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -24,6 +25,12 @@ public interface GameContentHandler {
 
     /** Kiểm duyệt lại đủ 3 lớp nội dung giáo viên sửa rồi áp vào game (chưa lưu). Sai thì ném lỗi 400/422. */
     void replaceContent(Game game, JsonNode body);
+
+    /**
+     * Sửa game theo yêu cầu chat bằng AI (POST /games/{gameId}/revise): nhận {@code GameResponse} hiện tại, trả nội dung đã
+     * sửa cùng dạng (chưa có ba trường quản lý), đã qua đủ 3 lớp kiểm duyệt. Không đổi loại game, không lưu.
+     */
+    ObjectNode revise(ObjectNode current, String instruction, List<ChatTurn> history);
 
     /** Dựng {@code GameResponse} theo openapi.yaml từ game đã lưu và ba trường quản lý (gameId, status, updatedAt). */
     ObjectNode toResponse(Game game, ObjectNode management);

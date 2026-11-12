@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.game;
 
+import com.aigameplatform.backend.dto.understanding.ChatTurn;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
@@ -7,6 +8,7 @@ import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.CpfQuestion;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
+import com.aigameplatform.backend.service.generation.Revision;
 import com.aigameplatform.backend.service.generation.cpf.CpfGenerationService;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationReport;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationService;
@@ -58,6 +60,19 @@ public class CpfGameContentHandler implements GameContentHandler {
         game.getQuestions().clear();
         game.getQuestions().add(question(cpf));
         game.setQuestionNum(1);
+    }
+
+    @Override
+    public ObjectNode revise(ObjectNode current, String instruction, List<ChatTurn> history) {
+        JsonNode cpf = current.path("cpf");
+        JsonNode metadata = cpf.path("metadata");
+        Revision revision = new Revision(jsonMapper.writeValueAsString(cpf), instruction, history, Revision.CPF_FORMAT);
+        JsonNode revised = generation.generate(metadata.path("topic").asString(), Subject.valueOf(metadata.path("subject").asString()),
+                GradeLevel.valueOf(metadata.path("gradeLevel").asString()), revision);
+        ObjectNode body = jsonMapper.createObjectNode();
+        body.put("gameType", GameType.CUSTOM.name());
+        body.set("cpf", revised);
+        return body;
     }
 
     @Override

@@ -21,7 +21,15 @@ public record GenerationAttempt(
         String curriculumContext,
         int attemptNumber,
         String previousOutput,
-        List<ValidationError> previousErrors) {
+        List<ValidationError> previousErrors,
+        Revision revision) {
+
+    /** Lần sinh game mới (không phải sửa game đã có). */
+    public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel, String structuredSchema,
+            String curriculumContext, int attemptNumber, String previousOutput, List<ValidationError> previousErrors) {
+        this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext, attemptNumber, previousOutput,
+                previousErrors, null);
+    }
 
     public boolean isRetry() {
         return attemptNumber > 1;

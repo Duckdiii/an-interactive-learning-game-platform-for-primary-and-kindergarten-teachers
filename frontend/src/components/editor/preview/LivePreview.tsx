@@ -5,11 +5,10 @@ import { resolveUiProfile } from '../../../player/profile/resolveUiProfile'
 import { UiProfileProvider } from '../../../player/profile/UiProfileContext'
 import { getPlayableRenderer } from '../../../player/renderers'
 import { playerRootVars } from '../../../player/theme/playerRootVars'
-import { resolveTheme } from '../../../player/theme/resolveTheme'
 import { ThemeProvider } from '../../../player/theme/ThemeContext'
 import type { GamePresentation, GameType, PresentationCarrier, PresentationWorld, QuestionDsl } from '../../../types/game-dsl.types'
 import { PresentationProvider } from '../../../player/theme/PresentationContext'
-import { resolvePresentation } from '../../../utils/presentation'
+import { editorPresentation } from './editorPresentation'
 import GameTypeCover from '../../ui/GameTypeCover'
 import PreviewBoundary from './PreviewBoundary'
 import PreviewStage from './PreviewStage'
@@ -163,9 +162,8 @@ export default function LivePreview({
   const Renderer = getPlayableRenderer(gameType)
   const size = previewDeviceSize(gameType, device)
   // Cùng cách chọn nền với màn chơi thử (PlayTestPanel) nên "Bé sẽ thấy" khớp với lúc chơi.
-  const resolvedTheme = resolveTheme({ themeId: presentation?.world, subject, gameType, topic })
+  const { theme: resolvedTheme, presentation: resolved } = editorPresentation({ presentation, subject, gameType, topic, seed: seed ?? title })
   const activeThemeId = resolvedTheme.id
-  const resolved = resolvePresentation(presentation, activeThemeId, seed ?? title)
 
   const body = () => {
     if (!question) return <p className="text-base text-ink-soft">{viText.editor.emptyQuestions}</p>

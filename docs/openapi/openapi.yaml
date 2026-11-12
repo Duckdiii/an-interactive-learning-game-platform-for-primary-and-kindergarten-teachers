@@ -645,6 +645,50 @@ paths:
         '504':
           $ref: '#/components/responses/AiTimeout'
 
+  /games/{gameId}/revise:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [Games]
+      operationId: reviseGame
+      summary: Sửa game bằng chat (trình soạn)
+      description: |
+        Giáo viên nhắn một yêu cầu sửa (ví dụ "câu 2 đổi thành phép trừ", "thêm 2 câu", "dễ hơn"). AI nhận nội dung
+        game hiện tại cùng yêu cầu, giữ nguyên phần không được nhắc tới, rồi trả về game đã sửa qua đủ 3 lớp kiểm
+        duyệt như `generate`. **Không lưu**: trình soạn áp kết quả vào bản nháp (giáo viên hoàn tác được), việc lưu
+        vẫn qua `PUT /games/{gameId}`. Vì không lưu nên `status` và `updatedAt` trong response là của game đang lưu.
+
+        Nội dung hiện tại lấy từ game đã lưu; trình soạn lưu bản nháp trước khi gọi. Không đổi `gameType`.
+        Game `CUSTOM`: sửa trong trường `cpf`. Giới hạn 10 yêu cầu mỗi phút cho mỗi giáo viên (429 kèm `Retry-After`).
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviseGameRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/GameSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+
   /games/{gameId}/questions/{questionId}/regenerate:
     parameters:
       - $ref: '#/components/parameters/GameId'
@@ -2336,7 +2380,7 @@ components:
         | `AI_GENERATION_TIMEOUT` | 504 | đã cài | Dịch vụ AI timeout sau khi retry |
         | `INTERNAL_ERROR` | 500 | đã cài | Lỗi không xác định |
         | `CONFLICT` | 409 | chưa cài | Xung đột trạng thái nghiệp vụ |
-        | `RATE_LIMITED` | 429 | chưa cài | Vượt giới hạn tần suất; kèm `Retry-After` |
+        | `RATE_LIMITED` | 429 | đã cài (`POST /games/{gameId}/revise`) | Vượt giới hạn tần suất; kèm `Retry-After` |
         | `ACCOUNT_LOCKED` | 403 | chưa cài | Tài khoản bị quản trị viên khoá |
         | `LOGIN_TEMPORARILY_LOCKED` | 429 | chưa cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
         | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |
@@ -2580,6 +2624,22 @@ components:
         understanding:
           $ref: '#/components/schemas/GameUnderstanding'
           description: Thẻ hiện tại, kể cả phần giáo viên đã tự sửa; AI giữ những gì giáo viên đã sửa.
+
+    ReviseGameRequest:
+      type: object
+      required: [instruction]
+      properties:
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Yêu cầu sửa mới nhất của giáo viên.
+        history:
+          type: array
+          maxItems: 10
+          description: Các lượt chat sửa trước đó trong phiên soạn (cũ trước), để AI hiểu yêu cầu nối tiếp. Có thể bỏ trống.
+          items:
+            $ref: '#/components/schemas/ChatTurn'
 
     ChatTurn:
       type: object

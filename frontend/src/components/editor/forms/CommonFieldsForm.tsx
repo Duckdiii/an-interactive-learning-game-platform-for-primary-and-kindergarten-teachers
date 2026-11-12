@@ -6,6 +6,7 @@ import type { GameType } from '../../../types/game-dsl.types'
 import { REQUIRED_COMMON_FIELDS } from '../../../utils/gameValidation'
 import { QUESTION_LIMITS } from '../../../utils/questionSpecs'
 import { mediaToolsAvailable } from '../../../services/mediaService'
+import ListenPreviewButton from './ListenPreviewButton'
 import CheckedTextField from './CheckedTextField'
 import { setOptionalText, setPoints, setTimeLimit } from './commonEditing'
 import type { QuestionFormProps } from './formTypes'
@@ -61,6 +62,7 @@ export default function CommonFieldsForm({ question, issues, onUpdate, gameType,
             error={fieldMessage(issues, 'audioText')}
             onCommit={(value) => onUpdate((current) => setOptionalText(current, 'audioText', value))}
           />
+          <ListenPreviewButton id={`${idPrefix}-listen`} text={question.audioText} />
           <MediaField
             kind="audio"
             idPrefix={idPrefix}

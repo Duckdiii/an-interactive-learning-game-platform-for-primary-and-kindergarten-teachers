@@ -19,6 +19,8 @@ export interface EditorState {
   // Theo mã thẻ câu. Một mục biến mất khi giáo viên sửa tiếp CHÍNH câu đó, khi câu đó ĐÃ ĐƯỢC LƯU thành công, hoặc khi khôi phục bản sao lưu.
   // (Bấm Lưu mà lưu lỗi thì chưa mất: bản nháp vẫn chứa câu AI và chưa lưu.)
   undo: Readonly<Record<string, RegenerateUndo>>
+  // Bản nháp trước khi áp game AI sửa qua chat (`previous`) và game vừa áp (`applied`): "Hoàn tác" một bước, chỉ khi giáo viên chưa sửa gì thêm.
+  chatUndo: { previous: GameDsl; applied: GameDsl } | null
 }
 
 export type EditorAction =
@@ -35,6 +37,10 @@ export type EditorAction =
   | { type: 'undoRegenerated'; index: number; questionId: string }
   // Đổi thời gian/điểm mặc định của game: mọi câu đang theo mặc định cũ đổi theo (xem utils/gameDefaults).
   | { type: 'setGameDefault'; field: DefaultField; value: number }
+  // Áp game AI đã sửa theo chat (POST /games/{id}/revise) thay cả bản nháp, nhớ bản cũ để hoàn tác.
+  | { type: 'applyChatRevision'; content: GameDsl }
+  // Trả bản nháp về trước lần áp gần nhất, chỉ khi bản nháp vẫn đúng là game AI vừa đưa vào.
+  | { type: 'undoChatRevision' }
   // Thay cả bản nháp bằng bản sao lưu trong trình duyệt (giáo viên chọn "Khôi phục").
   | { type: 'restore'; content: GameDsl }
   // Lưu thành công: `snapshot` là đúng nội dung đã gửi. Nếu giáo viên gõ thêm trong lúc chờ thì `draft` vẫn giữ phần mới đó.
@@ -43,7 +49,7 @@ export type EditorAction =
   | { type: 'normalize' }
 
 export function createEditorState(content: GameDsl): EditorState {
-  return { baseline: content, draft: content, undo: {} }
+  return { baseline: content, draft: content, undo: {}, chatUndo: null }
 }
 
 const without = (undo: EditorState['undo'], questionId: string): EditorState['undo'] => {
@@ -117,8 +123,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
 
       return { ...state, draft: { ...state.draft, questions } as GameDsl, undo: without(state.undo, action.questionId) }
     }
+    case 'applyChatRevision':
+      return { ...state, draft: action.content, undo: {}, chatUndo: { previous: state.draft, applied: action.content } }
+    case 'undoChatRevision':
+      if (!state.chatUndo || !deepEqual(state.draft, state.chatUndo.applied)) return { ...state, chatUndo: null }
+      return { ...state, draft: state.chatUndo.previous, chatUndo: null }
     case 'restore':
-      return { ...state, draft: action.content, undo: {} }
+      return { ...state, draft: action.content, undo: {}, chatUndo: null }
     case 'saved':
       // Tự lưu chạy vài giây sau mỗi lần sửa, nên lưu xong vẫn giữ "Hoàn tác" của câu AI làm lại: hoàn tác chỉ đưa câu cũ về bản nháp rồi lại được tự lưu.
       return { ...state, baseline: action.snapshot }
