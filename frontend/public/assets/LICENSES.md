@@ -38,3 +38,13 @@ SOFTWARE.
 ## Kenney (CC0 1.0)
 
 Xem `sfx/kenney/LICENSE-Kenney.txt`. Không bắt buộc ghi công; vẫn ghi để rõ nguồn.
+
+## Bổ sung giai đoạn 3 (2026-11-12)
+
+| Thư mục | Nguồn | Giấy phép |
+|---|---|---|
+| `fluent/` (các tệp `food-*`, `object-*` mới, `weather-*`, `plant-rice`, `plant-peach-blossom`, `people-*`, `clothes-coat`, `clothes-gloves`) | [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji), kiểu Flat (tải đúng các biểu tượng cần dùng) | MIT (xem phần Microsoft Fluent Emoji ở trên) |
+| `kenney/animals/`, `kenney/flags/`, `kenney/planets/` | [Kenney](https://kenney.nl): Animal Pack (kiểu Round outline), Flag Pack, Planets | CC0 1.0 |
+| `custom/` | Hình tự vẽ cho dự án (SVG), kiểu Fluent Flat đơn giản và kiểu Kenney | Thuộc dự án; không dùng nguồn bên ngoài |
+
+Ghi chú: ba hình hành tinh trong `kenney/planets/` là các quả cầu họa tiết của gói Planets, đặt tên sao Thủy, sao Kim, sao Hỏa theo màu gần đúng, không phải ảnh thật của các hành tinh.

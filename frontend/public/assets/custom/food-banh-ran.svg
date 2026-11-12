@@ -1,0 +1,11 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<mask id="dr-m"><rect width="32" height="32" fill="white"/><circle cx="26" cy="7" r="6" fill="black"/></mask>
+<clipPath id="dr-c"><circle cx="16" cy="17" r="13"/></clipPath>
+</defs>
+<g mask="url(#dr-m)">
+<circle cx="16" cy="17" r="13" fill="#F3D9A4"/>
+<circle cx="16" cy="17" r="10.8" fill="#C98A3B"/>
+<ellipse cx="12.5" cy="13.2" rx="5.2" ry="3" fill="#E0AA5C" transform="rotate(-30 12.5 13.2)"/>
+</g>
+<g clip-path="url(#dr-c)"><circle cx="26" cy="7" r="7.2" stroke="#7B2D1F" stroke-width="2.4"/><circle cx="26" cy="7" r="9.2" stroke="#F3D9A4" stroke-width="1.8"/></g></svg>

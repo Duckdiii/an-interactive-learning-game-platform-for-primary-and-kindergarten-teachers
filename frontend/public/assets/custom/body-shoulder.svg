@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="19" y="43" width="11" height="13" rx="4.5" fill="#5C6BC0" stroke="#5B3A29" stroke-width="1.4"/>
+<rect x="34" y="43" width="11" height="13" rx="4.5" fill="#5C6BC0" stroke="#5B3A29" stroke-width="1.4"/>
+<ellipse cx="24.5" cy="58.2" rx="7" ry="3.4" fill="#F5B87A" stroke="#5B3A29" stroke-width="1.4"/>
+<ellipse cx="39.5" cy="58.2" rx="7" ry="3.4" fill="#F5B87A" stroke="#5B3A29" stroke-width="1.4"/>
+<g fill="#F5B87A" stroke="#5B3A29" stroke-width=".8"><circle cx="19" cy="56.4" r="1.5"/><circle cx="22" cy="55.4" r="1.5"/><circle cx="25.2" cy="55.2" r="1.5"/><circle cx="28.3" cy="55.6" r="1.5"/><circle cx="31" cy="56.6" r="1.4"/><circle cx="33" cy="56.4" r="1.4"/><circle cx="36" cy="55.4" r="1.5"/><circle cx="39.2" cy="55.2" r="1.5"/><circle cx="42.3" cy="55.6" r="1.5"/><circle cx="45" cy="56.6" r="1.4"/></g>
+<rect x="13" y="24" width="38" height="22" rx="10" fill="#4FC3F7" stroke="#5B3A29" stroke-width="1.4"/>
+<rect x="6.5" y="26" width="9.5" height="19" rx="4.7" fill="#4FC3F7" stroke="#5B3A29" stroke-width="1.4"/>
+<rect x="48" y="26" width="9.5" height="19" rx="4.7" fill="#4FC3F7" stroke="#5B3A29" stroke-width="1.4"/>
+<circle cx="11.2" cy="46.5" r="4.2" fill="#F5B87A" stroke="#5B3A29" stroke-width="1.4"/>
+<circle cx="52.8" cy="46.5" r="4.2" fill="#F5B87A" stroke="#5B3A29" stroke-width="1.4"/>
+<circle cx="32" cy="14" r="11.5" fill="#F5B87A" stroke="#5B3A29" stroke-width="1.4"/>
+<path d="M20.6 12.5C21 5.6 26 2.4 32 2.4s11 3.2 11.4 10.1c-4.2-1.8-7.6-4.4-9.6-6.4-3.4 3.2-7.6 5.6-13.2 6.4Z" fill="#7B4A2B" stroke="#5B3A29" stroke-width="1.4" stroke-linejoin="round"/>
+<circle cx="27.6" cy="15.5" r="1.6" fill="#5B3A29"/><circle cx="36.4" cy="15.5" r="1.6" fill="#5B3A29"/>
+<path d="M28.5 19.6c2 2 5 2 7 0" stroke="#5B3A29" stroke-width="1.5" stroke-linecap="round"/>
+<circle cx="24" cy="18.6" r="2" fill="#F48FB1" opacity=".6"/><circle cx="40" cy="18.6" r="2" fill="#F48FB1" opacity=".6"/>
+<circle cx="15.5" cy="28" r="7" stroke="#FFFFFF" stroke-width="5.2"/><circle cx="15.5" cy="28" r="7" stroke="#FF9800" stroke-width="2.8" stroke-dasharray="5 3.4" stroke-linecap="round"/><circle cx="48.5" cy="28" r="7" stroke="#FFFFFF" stroke-width="5.2"/><circle cx="48.5" cy="28" r="7" stroke="#FF9800" stroke-width="2.8" stroke-dasharray="5 3.4" stroke-linecap="round"/>
+</svg>

@@ -173,7 +173,7 @@ describe('withAutoPicture', () => {
   it('giữ nguyên khi đã có ảnh, khi chỉ có số hoặc chữ không khớp vật nào', () => {
     expect(withAutoPicture({ text: 'Con cá', imageUrl: '/x.png' }).imageUrl).toBe('/x.png')
     expect(withAutoPicture({ text: 'Số 1' }).imageUrl).toBeUndefined()
-    expect(withAutoPicture({ text: 'head' }).imageUrl).toBeUndefined()
+    expect(withAutoPicture({ text: 'hello' }).imageUrl).toBeUndefined()
     expect(withAutoPicture({ visualPrompt: 'a duck' }).imageUrl).toBeUndefined()
   })
 })
