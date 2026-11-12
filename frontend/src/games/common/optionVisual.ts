@@ -58,6 +58,30 @@ export function quantityPicture(text: string): { count: number; imageUrl: string
   return item ? { count, imageUrl: item.url } : null
 }
 
+/**
+ * Số hình cần vẽ cho ảnh minh họa câu hỏi: mô tả "3 con vịt vàng…" mà ảnh đúng là hình tự động của con vịt thì vẽ 3 con
+ * để trẻ đếm được. Ảnh giáo viên tự đặt (khác hình tự động) hoặc mô tả không có số thì vẽ một lần.
+ */
+export function illustrationCount(visualPrompt: string | undefined, imageUrl: string | undefined): number {
+  if (!visualPrompt || !imageUrl) return 1
+  const picture = quantityPicture(visualPrompt)
+  return picture && picture.imageUrl === imageUrl ? picture.count : 1
+}
+
+/**
+ * Lựa chọn là một tấm thẻ chữ ("Thẻ chữ bàn", "thẻ từ quả bóng", hoặc "chữ khăn" với đúng một từ): trả lại chữ cần hiện;
+ * không phải thì null. Thẻ chữ phải hiện đúng chữ, không được thay bằng một hình đoán theo từ khóa. Không nhận "Tiếng chuông
+ * reo", "Chữ cái A", "Từ điển": đó là mô tả hình/âm thanh, không phải thẻ chữ.
+ */
+export function wordCardText(visualPrompt: string | undefined): string | null {
+  const text = visualPrompt?.normalize('NFC').trim() ?? ''
+  const clean = (word: string) => word.replace(/^["'“”]|["'“”.]$/gu, '').trim() || null
+  const card = text.match(/^(?:tấm\s+)?thẻ\s+(?:chữ|từ|tiếng)\s+(.+)$/iu)
+  if (card) return clean(card[1])
+  const bare = text.match(/^chữ\s+(["'“]?[\p{L}]+["'”.]?)$/iu)
+  return bare && bare[1].toLowerCase() !== 'cái' ? clean(bare[1]) : null
+}
+
 /** Một hình minh họa cho lựa chọn chỉ có tên vật ("Con mèo", "apple"), không kèm số. */
 export function singlePicture(text: string): string | null {
   if (/\d/.test(text) || text.trim().split(/\s+/).length > 4) return null

@@ -147,6 +147,19 @@ describe('chuyển động mới (Đợt 5)', () => {
     expect(wrapped).toBe(true)
   })
 
+  it('vật bay lên cùng lúc được rải độ cao: lúc nào cũng có ít nhất một vật nằm trọn trong vùng chơi', () => {
+    const game = load('rabbit-pick-carrots')
+    game.entities[0].placement = { region: 'MIDDLE', arrangement: 'ROW' }
+    game.entities[0].motion = { type: 'SWAY_UP', speed: 'SLOW', spawn: 'ALL_AT_ONCE' }
+    // Nằm trọn trong vùng chơi (dưới HUD, trên đáy): chạm được. Code cũ cả hàng ra khỏi màn cùng lúc nên có khung không vật nào.
+    const visible = (i: CpfInstance) => i.y >= CPF_HUD_HEIGHT && i.y + i.h <= CPF_STAGE_HEIGHT
+    const starts = buildInstances(game, 0).filter((i) => i.choiceId).map((i) => i.y)
+    expect(new Set(starts.map(Math.round)).size).toBe(starts.length)
+    run(game, 20, (insts) => {
+      expect(insts.filter((i) => i.choiceId).some(visible)).toBe(true)
+    })
+  })
+
   it('SCATTER đổi chỗ vật lựa chọn giữa các màn', () => {
     const game = load('rabbit-pick-carrots')
     const spots = (round: number) => buildInstances(game, round).filter((i) => i.choiceId).map((i) => [i.x, i.y])

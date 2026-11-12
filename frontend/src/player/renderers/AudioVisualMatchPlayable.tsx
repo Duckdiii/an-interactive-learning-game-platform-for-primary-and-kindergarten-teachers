@@ -3,6 +3,7 @@ import { useQuestionAudio } from '../../games/common/useQuestionAudio'
 import { speakVietnamese } from '../../services/pipeline/assetBank'
 import { soundBus } from '../../services/pipeline/soundBus'
 import type { AnswerResult } from '../../types/game-student.types'
+import { wordCardText } from '../../games/common/optionVisual'
 import { resolveAssetUrl } from '../../utils/assetResolver'
 import type { PlayableRendererProps } from './types'
 
@@ -110,10 +111,9 @@ export default function AudioVisualMatchPlayable({
             (result?.isCorrect && isSelected) || correctOptionId === option.id
           const isWrong = result && !result.isCorrect && isSelected
 
-          const assetUrl =
-            option.imageUrl ||
-            resolveAssetUrl(option.visualPrompt) ||
-            resolveAssetUrl(option.id)
+          // Thẻ chữ hiện đúng chữ; không đoán hình theo mã lựa chọn (a, b, c là vị trí, không phải nội dung: "a" từng ra quả táo).
+          const word = option.imageUrl ? null : wordCardText(option.visualPrompt)
+          const assetUrl = word ? null : option.imageUrl || resolveAssetUrl(option.visualPrompt)
 
           let cardStyle =
             'border-4 border-play-outline bg-play-surface shadow-md hover:scale-105 active:scale-95'
@@ -141,7 +141,7 @@ export default function AudioVisualMatchPlayable({
               }}
               aria-label={`Lựa chọn ${idx + 1}: ${option.visualPrompt}`}
               className={[
-                'group relative flex aspect-square w-32 sm:w-40 md:w-48 flex-col items-center justify-center rounded-3xl p-3 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-play-primary',
+                'group relative flex aspect-square w-full max-w-48 flex-col items-center justify-center rounded-3xl p-3 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-play-primary',
                 cardStyle,
               ].join(' ')}
             >
@@ -164,6 +164,8 @@ export default function AudioVisualMatchPlayable({
                   alt={option.visualPrompt}
                   className="h-20 w-20 sm:h-28 sm:w-28 object-contain transition-transform duration-200 group-hover:scale-110 drop-shadow-sm"
                 />
+              ) : word ? (
+                <span className="text-center font-black text-3xl sm:text-4xl text-play-ink">{word}</span>
               ) : (
                 <span className="text-center font-extrabold text-sm sm:text-base text-play-ink">
                   {option.visualPrompt}

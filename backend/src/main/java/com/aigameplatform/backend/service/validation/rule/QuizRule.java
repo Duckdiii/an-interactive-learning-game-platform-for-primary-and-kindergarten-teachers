@@ -6,6 +6,7 @@ import com.aigameplatform.backend.dto.dsl.TextChoiceDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.service.validation.ValidationError;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,9 @@ public class QuizRule extends AbstractGameRule<QuizGameDsl, QuizQuestionDsl> {
     private static final Pattern FILL_IN_BLANK = Pattern.compile("(\\p{L}*)(?:\\.{3}|…|_{2,})(\\p{L}*)");
     /** Đoạn trong một cặp ngoặc cùng loại. */
     private static final Pattern QUOTED = Pattern.compile("'([^']+)'|\"([^\"]+)\"|‘([^’]+)’|“([^”]+)”");
+    /** Cách đọc thành lời của dấu so sánh, để bắt lời đọc "3 nhỏ hơn 8" cho đáp án "<". */
+    private static final Map<String, List<String>> SPOKEN = Map.of(
+            "<", List.of("<", "nhỏ hơn", "bé hơn"), ">", List.of(">", "lớn hơn"), "=", List.of("=", "bằng"));
 
     @Override
     protected void checkQuestion(QuizQuestionDsl question, String path, List<ValidationError> errors) {
@@ -40,6 +44,7 @@ public class QuizRule extends AbstractGameRule<QuizGameDsl, QuizQuestionDsl> {
         } else {
             QuizArithmeticAnswerVerifier.check(question, path, errors);
             checkAnswerNotRevealed(question, path, errors);
+            checkAudioDoesNotSayTheAnswer(question, path, errors);
         }
     }
 
@@ -68,6 +73,40 @@ public class QuizRule extends AbstractGameRule<QuizGameDsl, QuizQuestionDsl> {
                 }
             }
         }
+    }
+
+    /**
+     * Câu có chỗ trống mà lời đọc lại nói ra đáp án ("Bé chọn dấu thích hợp: 3 nhỏ hơn 8" cho "3 ... 8"): trẻ bấm "Nghe lại"
+     * là biết đáp án (lỗi thật ở kịch bản 002, thử nghiệm lần 3). Chỉ xét câu có chỗ trống, chỉ khi câu hỏi không chứa chữ đó, và
+     * bỏ qua lời đọc nhắc từ hai lựa chọn trở lên (đang đọc các lựa chọn: "Chọn dấu lớn hơn, bé hơn hay bằng").
+     * Giới hạn đã biết: chưa bắt được đáp án đọc bằng chữ khác cách viết ("ba" cho "3") và chỗ trống dạng "?".
+     */
+    private static void checkAudioDoesNotSayTheAnswer(QuizQuestionDsl question, String path, List<ValidationError> errors) {
+        if (question.audioText() == null) return;
+        String text = RuleSupport.normalize(question.questionText());
+        String audio = RuleSupport.normalize(question.audioText());
+        String answer = correctText(question);
+        if (answer.isEmpty() || !FILL_IN_BLANK.matcher(text).find()) return;
+        long optionsHeard = question.options().stream()
+                .filter(o -> spokenForms(RuleSupport.normalize(o.text())).stream().anyMatch(s -> says(audio, s))).count();
+        if (optionsHeard > 1) return;
+        for (String spoken : spokenForms(answer)) {
+            if (says(audio, spoken) && !says(text, spoken)) {
+                errors.add(new ValidationError(path + ".audioText", "Lời đọc nói ra đáp án \"" + spoken
+                        + "\" trong khi câu hỏi để trống; chỉ đọc lại câu hỏi (chỗ trống đọc là \"chỗ trống\") hoặc bỏ audioText"));
+                return;
+            }
+        }
+    }
+
+    private static List<String> spokenForms(String option) {
+        return SPOKEN.getOrDefault(option, List.of(option));
+    }
+
+    /** Có nói ra {@code spoken} không: ký hiệu (dấu so sánh) tìm cả khi viết liền số ("3<8"), chữ thì phải là nguyên từ. */
+    private static boolean says(String text, String spoken) {
+        if (!spoken.chars().anyMatch(Character::isLetterOrDigit)) return text.contains(spoken);
+        return Pattern.compile("(?<![\\p{L}\\p{N}])" + Pattern.quote(spoken) + "(?![\\p{L}\\p{N}])").matcher(text).find();
     }
 
     /** Không lặp câu (cùng lời dẫn và cùng đáp án), và không để mọi câu cùng một đáp án (từ 3 câu trở lên). */

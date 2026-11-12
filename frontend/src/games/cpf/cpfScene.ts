@@ -53,6 +53,12 @@ export function buildInstances(game: CpfStudentGame, roundIndex: number, progres
       // STREAM: xếp nối đuôi phía trên (FALL) hoặc phía dưới (FLOAT_UP) để rơi/bay lần lượt.
       if (entity.motion?.spawn === 'STREAM' && entity.motion.type === 'FALL') y = CPF_HUD_HEIGHT - box.h - i * (box.h + STREAM_GAP)
       if (entity.motion?.spawn === 'STREAM' && (entity.motion.type === 'FLOAT_UP' || entity.motion.type === 'SWAY_UP')) y = CPF_STAGE_HEIGHT + i * (box.h + STREAM_GAP)
+      // Bay lên cùng lúc mà cùng một hàng thì cả nhóm ra khỏi màn cùng lúc, màn trống hẳn (thử nghiệm lần 3, kịch bản 006):
+      // rải độ cao xuất phát đều trên một vòng bay để lúc nào cũng còn vật trên màn.
+      else if (entity.bindTo && copies.length > 1 && (entity.motion?.type === 'FLOAT_UP' || entity.motion?.type === 'SWAY_UP')) {
+        const loop = CPF_STAGE_HEIGHT - CPF_HUD_HEIGHT + box.h
+        y = CPF_HUD_HEIGHT - box.h + ((box.y - CPF_HUD_HEIGHT + box.h + (i * loop) / copies.length) % loop)
+      }
       const x = entity.role === 'PROGRESS' ? progressX(box, entity.placement.region, progressStep, game.content.rounds.length) : box.x
       out.push({
         ...copy,

@@ -24,6 +24,8 @@ public class QuizGameStrategy extends GameContentStrategy<QuizQuestionDsl, QuizQ
                 Bạn tạo nội dung cho game QUIZ theo đúng môn, lớp/độ tuổi và chủ đề trong yêu cầu.
                 Mỗi câu dùng các trường của schema hiện có: text, options và correctIndex.
                 Mỗi câu phải có một đáp án đúng duy nhất; lựa chọn sai phải hợp lý nhưng không được đồng thời đúng.
+                Lời đọc (audioText, tùy chọn) chỉ đọc lại câu hỏi, KHÔNG nói ra đáp án đúng. Câu có chỗ trống thì đọc chỗ trống là
+                "chỗ trống" (ví dụ câu "3 ... 8" không được đọc thành "3 nhỏ hơn 8"); không chắc thì bỏ hẳn audioText.
                 Viết câu rõ, phù hợp độ tuổi và ngôn ngữ của môn học. Không mặc định môn Toán, lớp 1 hay một số lượng
                 lựa chọn cố định ngoài các ràng buộc được nêu trong schema.
                 Chỉ trả dữ liệu theo schema JSON, không thêm lời dẫn.

@@ -14,7 +14,7 @@ import { useFeedback } from '../common/useFeedback'
 import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
 import { useAnimationTime } from '../common/useAnimationTime'
-import { objectKindForTheme } from '../common/optionVisual'
+import { objectKindForTheme, illustrationCount } from '../common/optionVisual'
 import { usePresentation } from '../../player/theme/PresentationContext'
 import SceneBackground, { QuestionPanel } from '../common/SceneBackground'
 import { useTheme } from '../../player/theme/useTheme'
@@ -191,7 +191,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
       <Layer>
         <SceneBackground height={layout.stageHeight} time={time} />
         {layout.illustrationY !== null && (
-          <QuestionIllustration image={illustration} y={layout.illustrationY} />
+          <QuestionIllustration image={illustration} y={layout.illustrationY} count={illustrationCount(question.visualPrompt, question.imageUrl)} />
         )}
 
         <QuestionPanel y={layout.questionY} height={layout.questionHeight} />

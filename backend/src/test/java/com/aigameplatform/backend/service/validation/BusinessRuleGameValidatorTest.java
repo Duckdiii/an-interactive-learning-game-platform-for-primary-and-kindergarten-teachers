@@ -305,6 +305,58 @@ class BusinessRuleGameValidatorTest {
     }
 
     @Test
+    void quizRejectsAudioThatSaysTheAnswerOfABlank() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> comparison(question(g, 0), "Bé chọn dấu thích hợp: 3 nhỏ hơn 8")))
+                .containsExactly("$.questions[0].audioText");
+    }
+
+    @Test
+    void quizAllowsAudioThatOnlyReadsTheQuestion() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        comparison(question(game, 0), "Bé chọn dấu thích hợp: 3 mấy 8");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizRejectsAudioThatSaysAnEqualsAnswerOrASymbolGluedToNumbers() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            ObjectNode first = question(g, 0);
+            comparison(first, "Năm bằng năm");
+            first.put("questionText", "Bé chọn dấu thích hợp: 5 ... 5");
+            first.put("correctOptionId", "c");
+        })).containsExactly("$.questions[0].audioText");
+        assertThat(errorPaths(GameType.QUIZ, g -> comparison(question(g, 0), "Bé chọn dấu: 3<8"))).containsExactly("$.questions[0].audioText");
+    }
+
+    @Test
+    void quizAllowsAudioThatReadsTheChoicesOrRepeatsANumberAlreadyInTheQuestion() throws IOException {
+        ObjectNode choices = example(GameType.QUIZ);
+        comparison(question(choices, 0), "Bé chọn dấu lớn hơn, bé hơn hay bằng cho 3 và 8");
+        assertThat(service.validate(choices).errors()).isEmpty();
+
+        ObjectNode number = example(GameType.QUIZ);
+        ObjectNode first = question(number, 0);
+        first.put("questionText", "Số liền trước của 4 là ...");
+        first.put("audioText", "Số liền trước của 4 là số mấy?");
+        element(first, "options", 0).put("text", "5");
+        element(first, "options", 1).put("text", "3");
+        element(first, "options", 2).put("text", "4");
+        first.put("correctOptionId", "b");
+        assertThat(service.validate(number).errors()).isEmpty();
+    }
+
+    /** Câu so sánh "3 ... 8" có đáp án "<" (lựa chọn b) và lời đọc cho trước. */
+    private static void comparison(ObjectNode question, String audioText) {
+        question.put("questionText", "Bé chọn dấu thích hợp: 3 ... 8");
+        question.put("audioText", audioText);
+        element(question, "options", 0).put("text", ">");
+        element(question, "options", 1).put("text", "<");
+        element(question, "options", 2).put("text", "=");
+        question.put("correctOptionId", "b");
+    }
+
+    @Test
     void quizAllowsAskingTheRhymeOfAQuotedWordWhenThereIsNoBlank() throws IOException {
         ObjectNode game = example(GameType.QUIZ);
         ObjectNode first = question(game, 0);

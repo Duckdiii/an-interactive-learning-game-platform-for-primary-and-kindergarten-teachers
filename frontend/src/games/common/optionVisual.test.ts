@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { burstParticle, easeOutBack, progress, wiggle } from './motion'
-import { colorWordOf, objectKindForTheme, quantityPicture, singlePicture } from './optionVisual'
+import { colorWordOf, illustrationCount, wordCardText, objectKindForTheme, quantityPicture, singlePicture } from './optionVisual'
 
 describe('colorWordOf', () => {
   it.each([
@@ -63,5 +63,37 @@ describe('motion', () => {
     expect(burstParticle(0, 6, 0.9).opacity).toBe(0)
     expect(burstParticle(0, 6, -1).opacity).toBe(0)
     expect(progress(5, 0)).toBe(1)
+  })
+})
+
+describe('illustrationCount', () => {
+  it('câu đếm vẽ đủ số con theo mô tả hình khi ảnh là hình tự động của vật đó', () => {
+    expect(illustrationCount('3 con vịt vàng đang bơi dưới ao', '/assets/animals/duck.svg')).toBe(3)
+  })
+
+  it('ảnh khác hình tự động, mô tả không có số hoặc thiếu ảnh thì vẽ một lần', () => {
+    expect(illustrationCount('3 con vịt', '/uploads/anh-cua-co.png')).toBe(1)
+    expect(illustrationCount('Con vịt bơi dưới ao', '/assets/animals/duck.svg')).toBe(1)
+    expect(illustrationCount(undefined, '/assets/animals/duck.svg')).toBe(1)
+    expect(illustrationCount('3 con vịt', undefined)).toBe(1)
+  })
+})
+
+describe('wordCardText', () => {
+  it('nhận ra lựa chọn là thẻ chữ và trả lại đúng chữ cần hiện', () => {
+    expect(wordCardText('Thẻ chữ bàn')).toBe('bàn')
+    expect(wordCardText('thẻ chữ khăn.')).toBe('khăn')
+    expect(wordCardText('Tấm thẻ chữ "cân"')).toBe('cân')
+    expect(wordCardText('thẻ từ quả bóng')).toBe('quả bóng')
+    expect(wordCardText('chữ sân')).toBe('sân')
+  })
+
+  it('mô tả hình bình thường không phải thẻ chữ', () => {
+    expect(wordCardText('Con rắn')).toBeNull()
+    expect(wordCardText('Quả nhãn chín')).toBeNull()
+    expect(wordCardText('Tiếng chuông reo')).toBeNull()
+    expect(wordCardText('Chữ cái A')).toBeNull()
+    expect(wordCardText('Từ điển')).toBeNull()
+    expect(wordCardText(undefined)).toBeNull()
   })
 })

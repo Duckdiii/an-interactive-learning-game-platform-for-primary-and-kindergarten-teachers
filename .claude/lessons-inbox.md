@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-12 — Viết code có dấu `\` qua `node -e` trong bash: mất một lớp escape
+- Lỗi: hai lần ghi biểu thức chính quy qua `node -e '...'` (chuỗi JS lồng trong lệnh bash): `\\s` trong TypeScript (`optionVisual.wordCardText`) thành `s`, và `\\p{L}` trong Java (`QuizRule`) thành `\p{L}` (lỗi biên dịch). Lần TypeScript chạy được nhưng sai nghĩa, chỉ test mới bắt được.
+- Phát hiện nhờ: test vừa viết (`optionVisual.test.ts`) và grep lại đoạn vừa ghi.
+- Nguyên nhân gốc: chuỗi đi qua hai lớp (bash rồi chuỗi JS) nên mỗi `\` bị ăn một lần; dùng `node -e` cho tiện thay vì Edit.
+- Cách chặn: đoạn code có `\` (regex, escape) thì luôn dùng công cụ Edit/Write, không ghi qua `node -e`/heredoc lồng chuỗi JS; nếu buộc dùng script thì đặt script trong file riêng (Write) và grep lại dòng vừa ghi.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-11 — Thay chuỗi bằng script Node trên file CRLF, không kiểm kết quả nên mất một chỗ sửa
 - Lỗi: dùng `node -e` với `s.replace("...\n...")` để sửa `QuizRenderer.tsx` và `quizLayout.ts`. Hai file dùng CRLF nên chuỗi có `\n` không khớp, `replace` lặng lẽ không làm gì; script không in MISS. Kết quả `computeQuizLayout` không nhận `optionLayout`, canvas tính chiều cao theo lưới cũ trong khi ô đã lệch xuống. Test bố cục vẫn xanh vì test tự truyền `optionLayout`.
 - Phát hiện nhờ: `reviewer` (đọc chỗ gọi thật trong renderer); `tsc` chỉ bắt được một nửa (biến không dùng ở `quizLayout.ts`).
