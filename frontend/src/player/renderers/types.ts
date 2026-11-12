@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type { GameType } from '../../types/game-dsl.types'
+import type { GameType, Subject } from '../../types/game-dsl.types'
 import type { AnswerByType, AnswerResult, StudentQuestionByType } from '../../types/game-student.types'
 import type { UiProfile } from '../profile/types'
 
@@ -14,7 +14,13 @@ import type { UiProfile } from '../profile/types'
 export interface PlayableRendererProps<T extends GameType = GameType> {
   question: StudentQuestionByType[T]
   profile: UiProfile
+  /** Môn học giúp các renderer có phát âm văn bản chọn đúng ngôn ngữ TTS. */
+  subject?: Subject
   onSubmit: (answer: AnswerByType[T]) => Promise<AnswerResult>
+  /** Khung cung cấp audio khi cần dùng chung với chức năng nghe lại. */
+  playAudio?: () => void
+  /** Khóa lựa chọn khi hết giờ; nút nghe lại vẫn hoạt động. */
+  answerDisabled?: boolean
 }
 
 export type PlayableRenderer<T extends GameType = GameType> = ComponentType<PlayableRendererProps<T>>

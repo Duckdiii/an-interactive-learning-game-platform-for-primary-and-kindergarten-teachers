@@ -10,6 +10,7 @@ import com.aigameplatform.backend.service.strategy.QuizGameStrategy;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
 import com.aigameplatform.backend.service.validation.ValidationError;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
@@ -49,6 +50,34 @@ class GeminiGameContentGeneratorTest {
         while (array.size() > 1) array.remove(array.size()-1);
         assertThat(new com.aigameplatform.backend.service.validation.ai.AiOutputValidator(MAPPER)
                 .validate(GameType.MATCHING, MAPPER.writeValueAsString(invalid)).valid()).isFalse();
+    }
+
+    @Test
+    void imageModeSendsTheValidatedSceneBytesAsImageContent() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
+        byte[] bytes = new byte[] {1, 2, 3, 4};
+        var scene = new com.aigameplatform.backend.service.media.LoadedSceneImage(bytes, "image/png", 640, 480);
+        var input = new VisualClozeImageGenerationInput("https://images.example.edu/scene.png", scene, List.of(
+                new VisualClozeOptionImageInput("https://assets.example.edu/cat.png", "cat",
+                        new com.aigameplatform.backend.service.media.LoadedSceneImage(bytes, "image/png", 64, 64)),
+                new VisualClozeOptionImageInput("https://assets.example.edu/dog.png", "dog",
+                        new com.aigameplatform.backend.service.media.LoadedSceneImage(bytes, "image/png", 64, 64))));
+        var attempt = new GenerationAttempt(GameType.VISUAL_CLOZE, "animals", Subject.ENGLISH,
+                GradeLevel.GRADE_1, com.aigameplatform.backend.service.validation.ai.AiOutputSchemas.visualClozeImageForLlm(),
+                "[en-g1-001] Identify familiar animals", 1, null, List.of(), input);
+
+        new GeminiGameContentGenerator(modelCapturing(sent), strategies).generate(attempt);
+
+        var userMessage = UserMessage.findLast(sent.get().messages()).orElseThrow();
+        var image = userMessage.contents().stream().filter(ImageContent.class::isInstance)
+                .map(ImageContent.class::cast).findFirst().orElseThrow();
+        assertThat(image.image().base64Data()).isEqualTo(java.util.Base64.getEncoder().encodeToString(bytes));
+        assertThat(image.image().mimeType()).isEqualTo("image/png");
+        assertThat(sent.get().parameters().responseFormat().jsonSchema()).isNotNull();
+        assertThat(SystemMessage.findFirst(sent.get().messages()).orElseThrow().text())
+                .contains("actual scene image attached", "640 by 480", "https://assets.example.edu/cat.png", "cat",
+                        "https://assets.example.edu/dog.png", "dog", "Do not invent URLs or create images");
     }
 
     @Test

@@ -138,7 +138,7 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
             entity.setAudioText(dsl.audioText());
             entity.setAudioUrl(dsl.audioUrl());
             entity.setVisualPrompt(dsl.visualPrompt());
-            entity.setImageUrl(dsl.imageUrl());
+            entity.setImageUrl(imageUrl(dsl));
             result.add(entity);
         }
         return result;
@@ -147,14 +147,15 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     // ---- entity -> Game DSL ----
 
     /**
-     * Dựng lại Game DSL từ game đã lưu. Game chưa lưu chủ đề riêng nên topic lấy theo title; hitboxScale tính lại
+     * Dựng lại Game DSL từ game đã lưu. Game cũ chưa có topic dùng title; hitboxScale tính lại
      * theo khối lớp như lúc tạo.
      */
     public GameDsl toGameDsl(Game game) {
         requireSupportedType(game.getGameType());
-        GameMetadata metadata = new GameMetadata(game.getTitle(), game.getSubject(), game.getGrade(), game.getTitle());
+        GameMetadata metadata = new GameMetadata(game.getTitle(), game.getSubject(), game.getGrade(),
+                game.getTopic() == null || game.getTopic().isBlank() ? game.getTitle() : game.getTopic());
         GameplaySettings settings = new GameplaySettings(GameDefaults.hitboxScale(game.getGrade()));
-        return assemble(metadata, settings, toQuestionDsls(game.getQuestions()));
+        return assemble(game, metadata, settings, toQuestionDsls(game.getQuestions()));
     }
 
     public List<D> toQuestionDsls(List<? extends QuestionGame> questions) {
@@ -176,7 +177,16 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     /** Dựng màn chơi DSL từ entity; các trường chung (thời gian, điểm, media) đọc thẳng từ entity. */
     protected abstract D toDsl(E entity, String questionId);
 
+    protected String imageUrl(D dsl) {
+        return dsl.imageUrl();
+    }
+
     protected abstract GameDsl assemble(GameMetadata metadata, GameplaySettings settings, List<D> questions);
+
+    /** Allows a strategy to restore persisted envelope metadata while preserving existing implementations. */
+    protected GameDsl assemble(Game game, GameMetadata metadata, GameplaySettings settings, List<D> questions) {
+        return assemble(metadata, settings, questions);
+    }
 
     private void requireSupportedType(GameType type) {
         if (type != getSupportedType()) {

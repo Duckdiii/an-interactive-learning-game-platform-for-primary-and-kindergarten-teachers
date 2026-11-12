@@ -60,7 +60,7 @@ describe('registry renderer', () => {
   it('chỉ các loại đã có renderer chơi được; loại khác khung hiện "chưa hỗ trợ"', () => {
     const playable = GAME_TYPES.filter((type) => getPlayableRenderer(type))
 
-    expect(playable).toEqual(['QUIZ', 'ODD_ONE_OUT', 'WORD_SCRAMBLE', 'MATCHING', 'DRAG_DROP', 'VISUAL_CLOZE'])
+    expect(playable).toEqual(['QUIZ', 'AUDIO_VISUAL_MATCH', 'ODD_ONE_OUT', 'WORD_SCRAMBLE', 'MATCHING', 'DRAG_DROP', 'VISUAL_CLOZE'])
   })
 })
 

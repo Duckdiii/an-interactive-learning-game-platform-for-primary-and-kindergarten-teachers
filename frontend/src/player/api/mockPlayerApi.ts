@@ -2,7 +2,10 @@ import { buildMockGameContents } from '../../services/mock/gameFixtures'
 import { mockApiError } from '../../services/mock/mockErrors'
 import { runMock } from '../../services/mock/mockRuntime'
 import type { GameDsl } from '../../types/game-dsl.types'
-import type { AnswerPayload, AnswerResult, PlayerSession, PublishInfo, StudentGame, UiOverride } from '../../types/game-student.types'
+import type { AnswerPayload, AnswerResult, PlayerSession, PublishInfo, StudentGame, StudentVisualClozeImagePlacement, UiOverride } from '../../types/game-student.types'
+import { gradeImagePlacement } from '../../games/visual-cloze-image/gradeImagePlacement'
+import { buildAudioVisualMock, buildImageClozeMock } from '../../services/mock/imageGameFixtures'
+import { buildOddOneOutImageMock } from '../../services/mock/oddOneOutImageFixtures'
 import { MOCK_HANDLERS } from './mockPlayerHandlers'
 import type { PlayerApi } from './PlayerApi'
 
@@ -27,6 +30,7 @@ interface MockSession {
   expiresAt: string
   score: number
   results: Map<string, AnswerResult>
+  imagePlacements: Map<string, StudentVisualClozeImagePlacement[]>
 }
 
 export const mockShareCodes = () => buildMockGameContents().map((_, index) => `MOCK${String(index).padStart(2, '0')}`)
@@ -84,7 +88,7 @@ export class MockPlayerApi implements PlayerApi {
       const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString()
 
       this.nextId += 1
-      this.sessions.set(sessionId, { game, participantId, nickname: name, expiresAt, score: 0, results: new Map() })
+      this.sessions.set(sessionId, { game, participantId, nickname: name, expiresAt, score: 0, results: new Map(), imagePlacements: new Map() })
 
       return { sessionId, participantId, nickname: name, sessionType: 'SELF', status: 'ACTIVE', expiresAt }
     })
@@ -99,9 +103,12 @@ export class MockPlayerApi implements PlayerApi {
       return {
         schemaVersion: game.schemaVersion,
         gameType: game.gameType,
+        ...('mode' in game ? { mode: game.mode } : {}),
         metadata: game.metadata,
         gameplaySettings: game.gameplaySettings,
-        questions: game.questions.map((q) => handler.toStudent(q, `${sessionId}:${q.id}`)),
+        questions: game.questions.map((q) => ({ ...handler.toStudent(q, `${sessionId}:${q.id}`),
+          ...(session.imagePlacements.has(q.id) ? { acceptedPlacements: session.imagePlacements.get(q.id) } : {}),
+        })),
         answeredQuestionIds: [...session.results.keys()],
       } as StudentGame
     })
@@ -117,6 +124,18 @@ export class MockPlayerApi implements PlayerApi {
       const saved = session.results.get(questionId)
 
       if (saved) return saved
+
+      if (session.game.gameType === 'VISUAL_CLOZE' && 'sceneImageUrl' in question) {
+        const grade = gradeOrReject(() => gradeImagePlacement(question, answer, session.imagePlacements.get(questionId) ?? []))
+        session.imagePlacements.set(questionId, grade.acceptedPlacements)
+        if (grade.result.retryable) return { ...grade.result, totalScore: session.score }
+        const ratio = Math.min(1, Math.max(0, timeSpentMs / Math.max(1000, question.timeLimitSeconds * 1000)))
+        const pointsEarned = grade.result.isCorrect ? Math.round(question.points * (1 - SCORE_TIME_FACTOR * ratio)) : 0
+        session.score += pointsEarned
+        const result = { ...grade.result, pointsEarned, totalScore: session.score }
+        session.results.set(questionId, result)
+        return result
+      }
 
       const handler = MOCK_HANDLERS[session.game.gameType]
       const seed = `${sessionId}:${questionId}`
@@ -146,6 +165,11 @@ export class MockPlayerApi implements PlayerApi {
     const failure = ERROR_CODES[code]
 
     if (failure) throw mockApiError(404, failure.code, failure.message)
+    if (code === 'MOCK12') return buildImageClozeMock()
+    if (code === 'MOCK13') return buildAudioVisualMock()
+    if (code === 'MOCK14') return buildOddOneOutImageMock(4)
+    if (code === 'MOCK15') return buildOddOneOutImageMock(5)
+    if (code === 'MOCK16') return buildOddOneOutImageMock(6)
 
     const game = this.games[OVERRIDDEN_CODES[code]?.gameIndex ?? mockShareCodes().indexOf(code)]
 
@@ -164,7 +188,7 @@ export class MockPlayerApi implements PlayerApi {
 }
 
 // Phần trả lời sai hình dạng (thiếu trường) là lỗi 400 như Backend thật, không phải "trả lời sai".
-function gradeOrReject(grade: () => boolean) {
+function gradeOrReject<T>(grade: () => T): T {
   try {
     return grade()
   } catch {

@@ -11,7 +11,7 @@ import { autosaved } from '../test/autosave'
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-  Group: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => <div onClick={onClick}>{children}</div>,
   Rect: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
   Image: () => null,
@@ -19,6 +19,7 @@ vi.mock('react-konva', () => ({
 }))
 vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
 vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() } }))
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
 
 // Form sửa câu ODD_ONE_OUT (mock-game-9). Câu 1: 3 mục (Hình tròn nhỏ, Hình tròn to, Hình vuông), khác loại là C. Câu 2: 4 mục, khác loại là C (Con cá).
 // Câu 3: 4 mục, khác loại là D (Cái bàn).
@@ -267,11 +268,12 @@ describe('form sửa câu ODD_ONE_OUT', () => {
     })
   })
 
-  it('chơi thử vẫn "chưa hỗ trợ" (chưa có renderer Canvas cho loại này)', async () => {
+  it('chơi thử giữ game chữ hiện có và chấm lựa chọn cục bộ', async () => {
     await openLoaded()
     fireEvent.click(screen.getByRole('button', { name: 'Chơi thử' }))
 
-    expect(await screen.findByText(/chưa hỗ trợ chơi thử/, {}, { timeout: 10_000 })).toBeInTheDocument()
+    fireEvent.click(await screen.findByText('Hình vuông'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
   })
 })
 

@@ -33,7 +33,7 @@ public abstract class AbstractGameRule<G extends GameDsl, Q extends QuestionDsl>
         List<ValidationError> errors = new ArrayList<>();
         RuleSupport.checkUnique(questions, Q::id, "$.questions", "id", errors);
         for (int i = 0; i < questions.size(); i++) {
-            checkQuestion(questions.get(i), "$.questions[" + i + "]", errors);
+            checkQuestion(gameClass.cast(game), questions.get(i), "$.questions[" + i + "]", errors);
         }
         return errors;
     }
@@ -42,4 +42,8 @@ public abstract class AbstractGameRule<G extends GameDsl, Q extends QuestionDsl>
 
     /** Kiểm tra một màn chơi; {@code path} là vị trí của màn đó, ví dụ {@code $.questions[0]}. */
     protected abstract void checkQuestion(Q question, String path, List<ValidationError> errors);
+
+    protected void checkQuestion(G game, Q question, String path, List<ValidationError> errors) {
+        checkQuestion(question, path, errors);
+    }
 }

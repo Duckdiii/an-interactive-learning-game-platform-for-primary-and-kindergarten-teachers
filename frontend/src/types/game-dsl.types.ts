@@ -96,7 +96,11 @@ export interface AudioVisualMatchQuestion extends QuestionBase {
 }
 
 export interface OddOneOutQuestion extends QuestionBase {
-  items: TextChoice[]
+  /** Có trong câu IMAGE; tiêu chí để trẻ phân biệt nhóm. */
+  questionText?: string
+  /** Marker dùng cho preview/mock; API học sinh đặt marker từ mode của game. */
+  renderMode?: 'IMAGE'
+  items: (TextChoice & { assetId?: string; imageUrl?: string })[]
   /** [ĐA] id của mục khác loại. */
   oddOneOutId: string
 }
@@ -185,6 +189,30 @@ export interface VisualClozeQuestion extends QuestionBase {
   distractors: string[]
 }
 
+export interface VisualClozeImageBlankDsl {
+  id: string
+  /** Pixel-center in the original scene image. */
+  x: number
+  y: number
+  /** Teacher-only answer mapping; omitted from student payloads. */
+  correctOptionId: string
+}
+
+export interface VisualClozeImageOptionDsl {
+  id: string
+  visualPrompt: string
+  imageUrl?: string
+}
+
+export interface VisualClozeImageQuestionDsl extends QuestionBase {
+  questionText: string
+  sceneImageUrl: string
+  sceneWidth: number
+  sceneHeight: number
+  blanks: VisualClozeImageBlankDsl[]
+  options: VisualClozeImageOptionDsl[]
+}
+
 // ---- game hoàn chỉnh ----
 
 interface GameEnvelope<T extends GameType, Q extends QuestionBase> {
@@ -197,14 +225,32 @@ interface GameEnvelope<T extends GameType, Q extends QuestionBase> {
 
 export type QuizGame = GameEnvelope<'QUIZ', QuizQuestion>
 export type AudioVisualMatchGame = GameEnvelope<'AUDIO_VISUAL_MATCH', AudioVisualMatchQuestion>
-export type OddOneOutGame = GameEnvelope<'ODD_ONE_OUT', OddOneOutQuestion>
+export type OddOneOutTextGame = GameEnvelope<'ODD_ONE_OUT', OddOneOutQuestion> & { mode?: 'TEXT' }
+export interface OddOneOutImageGame {
+  schemaVersion: '1.1.0'
+  gameType: 'ODD_ONE_OUT'
+  mode: 'IMAGE'
+  metadata: GameMetadata
+  gameplaySettings: GameplaySettings
+  questions: OddOneOutQuestion[]
+}
+export type OddOneOutGame = OddOneOutTextGame | OddOneOutImageGame
 export type SpotTheTargetGame = GameEnvelope<'SPOT_THE_TARGET', SpotTheTargetQuestion>
 export type WordScrambleGame = GameEnvelope<'WORD_SCRAMBLE', WordScrambleQuestion>
 export type MatchingGame = GameEnvelope<'MATCHING', MatchingQuestion>
 export type MemoryCardGame = GameEnvelope<'MEMORY_CARD', MemoryCardQuestion>
 export type DragDropGame = GameEnvelope<'DRAG_DROP', DragDropQuestion>
 export type OrderingGame = GameEnvelope<'ORDERING', OrderingQuestion>
-export type VisualClozeGame = GameEnvelope<'VISUAL_CLOZE', VisualClozeQuestion>
+export type VisualClozeTextGame = GameEnvelope<'VISUAL_CLOZE', VisualClozeQuestion> & { mode?: 'TEXT' }
+export interface VisualClozeImageGame {
+  schemaVersion: '1.1.0'
+  gameType: 'VISUAL_CLOZE'
+  mode: 'IMAGE'
+  metadata: GameMetadata
+  gameplaySettings: GameplaySettings
+  questions: VisualClozeImageQuestionDsl[]
+}
+export type VisualClozeGame = VisualClozeTextGame | VisualClozeImageGame
 
 /** Game DSL hoàn chỉnh. Thu hẹp kiểu bằng `game.gameType` (union phân biệt). */
 export type GameDsl =

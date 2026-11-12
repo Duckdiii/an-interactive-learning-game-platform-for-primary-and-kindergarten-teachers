@@ -45,5 +45,9 @@ export async function mockGenerateGame(request: GenerateGameRequest, signal?: Ab
     throw mockApiError(422, 'UNSAFE_CONTENT', 'Nội dung không đạt chuẩn an toàn học đường.')
   }
 
-  return createMockGame({ gameType: request.gameType ?? 'QUIZ', subject: request.subject, gradeLevel: request.gradeLevel, idea: request.idea })
+  if (request.mode === 'IMAGE' && (request.gameType === 'ODD_ONE_OUT' || request.gameType === 'AUDIO_VISUAL_MATCH'))
+    throw mockApiError(400, 'VALIDATION_ERROR', 'Chế độ AI mô phỏng chưa hỗ trợ hình Noto; hãy bật backend AI thật.')
+
+  return createMockGame({ gameType: request.gameType ?? 'QUIZ', subject: request.subject, gradeLevel: request.gradeLevel, idea: request.idea,
+    mode: request.mode, sceneImageUrl: request.sceneImageUrl, optionImages: request.optionImages })
 }

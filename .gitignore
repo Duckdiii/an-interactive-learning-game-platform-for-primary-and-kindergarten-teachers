@@ -71,3 +71,20 @@ logs/
 
 # Cấu hình cá nhân của Obsidian
 .obsidian/
+
+# Local Superpowers plans and specifications
+/docs/superpowers/
+
+# Local-only Visual Cloze IMAGE test mock
+/frontend/visual-cloze-image-mock.html
+/frontend/src/pages/dev/VisualClozeImageSandbox.tsx
+/frontend/src/pages/dev/VisualClozeImageSandbox.test.tsx
+/frontend/src/pages/dev/visualClozeImageMockEntry.tsx
+/frontend/game-renderers-mock.html
+/frontend/src/pages/dev/GameRenderersSandbox.tsx
+/frontend/src/pages/dev/gameRenderersMockEntry.tsx
+
+# Local-only Noto Emoji Odd One Out mock catalog and downloaded sample assets
+/frontend/public/mock/noto-emoji-ooo/
+/frontend/src/pages/dev/NotoOddOneOutFixtures.ts
+/frontend/src/pages/dev/GameRenderersSandbox.test.tsx

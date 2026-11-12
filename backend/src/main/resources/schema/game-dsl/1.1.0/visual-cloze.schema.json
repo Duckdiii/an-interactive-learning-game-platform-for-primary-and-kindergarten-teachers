@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Game DSL v1.1.0 - VISUAL_CLOZE",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "gameType", "metadata", "gameplaySettings", "questions"],
+  "properties": {
+    "schemaVersion": { "const": "1.1.0" },
+    "gameType": { "const": "VISUAL_CLOZE" },
+    "mode": { "enum": ["TEXT", "IMAGE"] },
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "gameplaySettings": { "$ref": "#/$defs/gameplaySettings" },
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "IMAGE" } }, "required": ["mode"] },
+      "then": { "properties": { "questions": { "items": { "$ref": "#/$defs/imageQuestion" } } } },
+      "else": { "properties": { "questions": { "items": { "$ref": "#/$defs/textQuestion" } } } }
+    }
+  ],
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "subject", "gradeLevel", "topic"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "subject": { "type": "string", "enum": ["MATH", "VIETNAMESE", "ENGLISH"] },
+        "gradeLevel": { "type": "string", "enum": ["KINDERGARTEN", "GRADE_1", "GRADE_2", "GRADE_3", "GRADE_4", "GRADE_5"] },
+        "topic": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "gameplaySettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hitboxScale"],
+      "properties": { "hitboxScale": { "type": "number", "exclusiveMinimum": 0, "maximum": 3 } }
+    },
+    "questionBase": {
+      "type": "object",
+      "required": ["id", "timeLimitSeconds", "points"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^q[0-9]+$" },
+        "timeLimitSeconds": { "type": "integer", "minimum": 5, "maximum": 600 },
+        "points": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "audioText": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "textQuestion": {
+      "allOf": [
+        { "$ref": "#/$defs/questionBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sentenceTemplate", "visualPrompt", "correctAnswer", "distractors"],
+          "properties": {
+            "id": {}, "timeLimitSeconds": {}, "points": {}, "audioText": {},
+            "audioUrl": { "type": "string", "maxLength": 2048 },
+            "visualPrompt": { "type": "string", "minLength": 1, "maxLength": 100 },
+            "imageUrl": { "type": "string", "maxLength": 2048 },
+            "sentenceTemplate": { "type": "string", "minLength": 3, "maxLength": 200, "pattern": "___" },
+            "correctAnswer": { "type": "string", "minLength": 1, "maxLength": 50 },
+            "distractors": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "type": "string", "minLength": 1, "maxLength": 50 } }
+          }
+        }
+      ]
+    },
+    "blank": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "x", "y", "correctOptionId"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "x": { "type": "number", "minimum": 0 },
+        "y": { "type": "number", "minimum": 0 },
+        "correctOptionId": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    },
+    "imageOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "visualPrompt", "imageUrl"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "visualPrompt": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "imageUrl": { "type": "string", "format": "uri", "pattern": "^https://", "minLength": 1, "maxLength": 2048 }
+      }
+    },
+    "imageQuestion": {
+      "allOf": [
+        { "$ref": "#/$defs/questionBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["questionText", "sceneImageUrl", "sceneWidth", "sceneHeight", "blanks", "options"],
+          "properties": {
+            "id": {}, "timeLimitSeconds": {}, "points": {}, "audioText": {},
+            "questionText": { "type": "string", "minLength": 1, "maxLength": 255 },
+            "sceneImageUrl": { "type": "string", "format": "uri", "pattern": "^https://", "maxLength": 2048 },
+            "sceneWidth": { "type": "integer", "minimum": 1 },
+            "sceneHeight": { "type": "integer", "minimum": 1 },
+            "blanks": { "type": "array", "minItems": 1, "maxItems": 8, "items": { "$ref": "#/$defs/blank" } },
+            "options": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "$ref": "#/$defs/imageOption" } }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -14,6 +14,7 @@ import type {
   QuizQuestion,
   SpotTheTargetQuestion,
   VisualClozeQuestion,
+  VisualClozeImageQuestionDsl,
   WordScrambleQuestion,
 } from '../types/game-dsl.types'
 import { CLOZE_BLANK, DSL_TIME_LIMIT, GAME_LIMITS, QUESTION_LIMITS, TYPE_LIMITS } from './questionSpecs'
@@ -132,7 +133,7 @@ function checkSide(c: Collector, field: string, label: string, side: { text?: st
 
 // ---- luật riêng từng loại game ----
 
-const POSITION_IDS = ['a', 'b', 'c', 'd', 'e']
+const POSITION_IDS = ['a', 'b', 'c', 'd', 'e', 'f']
 
 function quizRule(q: QuizQuestion, c: Collector) {
   const limits = TYPE_LIMITS.QUIZ
@@ -155,11 +156,24 @@ function audioVisualRule(q: AudioVisualMatchQuestion, c: Collector) {
     checkText(c, `distractors[${index}].visualPrompt`, L.distractorTexts, item?.visualPrompt, QUESTION_LIMITS.visualPrompt),
   )
   checkUnique(c, 'distractors', L.distractorTexts, [q.correct?.visualPrompt ?? '', ...distractors.map((item) => item?.visualPrompt ?? '')])
+  const imageUrls = [q.correct?.imageUrl, ...distractors.map((item) => item?.imageUrl)]
+    .filter((url): url is string => typeof url === 'string' && Boolean(url.trim())).map((url) => url.trim())
+  if (new Set(imageUrls).size !== imageUrls.length) c.add('distractors', 'duplicate', { label: 'URL ảnh lựa chọn' })
 }
 
 function oddOneOutRule(q: OddOneOutQuestion, c: Collector) {
   const limits = TYPE_LIMITS.ODD_ONE_OUT
-  const items = checkCount(c, 'items', L.items, q.items, limits.items)
+  const imageMode = typeof q.questionText === 'string'
+  const items = checkCount(c, 'items', L.items, q.items, imageMode ? { min: 4, max: 6 } : limits.items)
+
+  if (imageMode) {
+    checkText(c, 'questionText', L.questionText, q.questionText, { min: 1, max: 255 })
+    items.forEach((item, index) => {
+      checkText(c, `items[${index}].assetId`, 'Mã ảnh', item?.assetId, { min: 1, max: 64 })
+      checkText(c, `items[${index}].imageUrl`, 'URL ảnh', item?.imageUrl, { min: 1, max: 2048 })
+    })
+    checkUnique(c, 'items', 'Mã ảnh', items.map((item) => item?.assetId ?? ''))
+  }
 
   items.forEach((item, index) => checkText(c, `items[${index}].text`, L.itemText, item?.text, limits.itemText))
   checkUnique(c, 'items', L.itemTexts, items.map((item) => item?.text ?? ''))
@@ -294,7 +308,45 @@ function orderingRule(q: OrderingQuestion, c: Collector) {
   }
 }
 
-function visualClozeRule(q: VisualClozeQuestion, c: Collector) {
+function visualClozeImageRule(q: VisualClozeImageQuestionDsl, c: Collector) {
+  checkText(c, 'questionText', L.questionText, q.questionText, { min: 1, max: 200 })
+  checkText(c, 'sceneImageUrl', 'URL ảnh cảnh', q.sceneImageUrl, { min: 1, max: 2048 })
+  if (typeof q.sceneImageUrl === 'string' && !/^https:\/\//i.test(q.sceneImageUrl)) c.add('sceneImageUrl', 'required', { label: 'URL HTTPS ảnh cảnh' })
+  checkRange(c, 'sceneWidth', 'Chiều rộng ảnh cảnh', q.sceneWidth, { min: 1, max: 100_000 })
+  checkRange(c, 'sceneHeight', 'Chiều cao ảnh cảnh', q.sceneHeight, { min: 1, max: 100_000 })
+
+  const options = checkCount(c, 'options', L.options, q.options, { min: 2, max: 8 })
+  checkUnique(c, 'options', L.optionTexts, options.map((option) => option?.visualPrompt ?? ''))
+  checkUnique(c, 'options', L.optionTexts, options.map((option) => option?.id ?? ''), 'duplicateId')
+  checkIds(c, 'options', L.optionTexts, options.map((option) => option?.id), /^o\d+$/)
+  const imageUrls = new Set<string>()
+  options.forEach((option, index) => {
+    checkText(c, `options[${index}].visualPrompt`, L.visualPrompt, option?.visualPrompt, QUESTION_LIMITS.visualPrompt)
+    checkText(c, `options[${index}].imageUrl`, 'URL ảnh lựa chọn', option?.imageUrl, { min: 1, max: 2048 })
+    if (typeof option?.imageUrl === 'string' && !/^https:\/\//i.test(option.imageUrl)) c.add(`options[${index}].imageUrl`, 'required', { label: 'URL HTTPS ảnh lựa chọn' })
+    if (typeof option?.imageUrl === 'string' && option.imageUrl.trim()) {
+      const url = option.imageUrl.trim()
+      if (imageUrls.has(url)) c.add(`options[${index}].imageUrl`, 'duplicate', { label: 'URL ảnh lựa chọn' })
+      imageUrls.add(url)
+    }
+  })
+
+  const blanks = checkCount(c, 'blanks', 'Ô trống', q.blanks, { min: 1, max: 8 })
+  checkUnique(c, 'blanks', 'Mã ô trống', blanks.map((blank) => blank?.id ?? ''), 'duplicateId')
+  checkIds(c, 'blanks', 'Mã ô trống', blanks.map((blank) => blank?.id), /^b\d+$/)
+  const mapped = new Set<string>()
+  blanks.forEach((blank, index) => {
+    if (!Number.isFinite(blank?.x) || blank.x < 50 || blank.x > q.sceneWidth - 50) c.add(`blanks[${index}].x`, 'range', { label: 'Tọa độ X của ô trống', min: 50, max: q.sceneWidth - 50 })
+    if (!Number.isFinite(blank?.y) || blank.y < 50 || blank.y > q.sceneHeight - 50) c.add(`blanks[${index}].y`, 'range', { label: 'Tọa độ Y của ô trống', min: 50, max: q.sceneHeight - 50 })
+    if (!options.some((option) => option?.id === blank?.correctOptionId)) c.add(`blanks[${index}].correctOptionId`, 'badRef', { label: 'Ảnh đúng' })
+    if (blank?.correctOptionId && mapped.has(blank.correctOptionId)) c.add(`blanks[${index}].correctOptionId`, 'duplicate', { label: 'Ảnh đúng đã dùng ở ô khác' })
+    if (blank?.correctOptionId) mapped.add(blank.correctOptionId)
+  })
+  if (options.length < blanks.length) c.add('options', 'count', { label: L.options, min: blanks.length, max: 8 })
+}
+
+function visualClozeRule(q: VisualClozeQuestion | VisualClozeImageQuestionDsl, c: Collector) {
+  if ('sceneImageUrl' in q) return visualClozeImageRule(q, c)
   const limits = TYPE_LIMITS.VISUAL_CLOZE
 
   checkText(c, 'visualPrompt', L.visualPrompt, q.visualPrompt, QUESTION_LIMITS.visualPrompt)
@@ -326,7 +378,7 @@ const RULES: Readonly<Record<GameType, Rule>> = {
   MEMORY_CARD: (q, c) => memoryRule(q as MemoryCardQuestion, c),
   DRAG_DROP: (q, c) => dragDropRule(q as DragDropQuestion, c),
   ORDERING: (q, c) => orderingRule(q as OrderingQuestion, c),
-  VISUAL_CLOZE: (q, c) => visualClozeRule(q as VisualClozeQuestion, c),
+  VISUAL_CLOZE: (q, c) => visualClozeRule(q as VisualClozeQuestion | VisualClozeImageQuestionDsl, c),
 }
 
 // Trường chung mà loại game coi là BẮT BUỘC và tự kiểm trong luật riêng (form dùng bảng này để đánh dấu ô bắt buộc).
@@ -372,7 +424,8 @@ export function validateQuestion(
   checkRange(c, 'timeLimitSeconds', L.timeLimitSeconds, question.timeLimitSeconds, untouchedTime ? DSL_TIME_LIMIT : QUESTION_LIMITS.timeLimitSeconds)
   checkRange(c, 'points', L.points, question.points, QUESTION_LIMITS.points)
   // Trường mà luật của loại game đã kiểm (bắt buộc) thì không kiểm lần hai, tránh báo một lỗi hai lần.
-  const owned = REQUIRED_COMMON_FIELDS[gameType]
+  const imageCloze = gameType === 'VISUAL_CLOZE' && 'sceneImageUrl' in question
+  const owned = imageCloze ? ['visualPrompt', 'audioText'] : REQUIRED_COMMON_FIELDS[gameType]
 
   if (!owned.includes('audioText')) checkText(c, 'audioText', L.audioText, question.audioText, QUESTION_LIMITS.audioText, false)
   if (!owned.includes('visualPrompt')) checkText(c, 'visualPrompt', L.visualPrompt, question.visualPrompt, QUESTION_LIMITS.visualPrompt, false)

@@ -72,6 +72,19 @@ class AiOutputValidatorTest {
         assertThat(report.output().questions()).isNotEmpty();
     }
 
+    @Test
+    void visualClozeImageOutputUsesItsOwnStrictSchemaWithoutChangingTextOutput() throws Exception {
+        String imageOutput = """
+                {"questions":[{"questionText":"Which animal is shown?","blanks":[{"id":"b1","x":100,"y":90,"correctOptionId":"o1"}],"options":[{"id":"o1","visualPrompt":"cat","imageUrl":"https://images.example/cat.png"},{"id":"o2","visualPrompt":"dog","imageUrl":"https://images.example/dog.png"}]}]}
+                """;
+        var image = validator.validate(GameType.VISUAL_CLOZE, imageOutput, true);
+        assertThat(image.valid()).isTrue();
+        assertThat(image.output()).isInstanceOf(VisualClozeAiOutput.class);
+        assertThat(validator.validate(GameType.VISUAL_CLOZE, exampleText(GameType.VISUAL_CLOZE), true).valid()).isFalse();
+        assertThat(validator.validate(GameType.VISUAL_CLOZE, imageOutput, false).valid()).isFalse();
+        assertThat(validator.validate(GameType.QUIZ, imageOutput, true).valid()).isFalse();
+    }
+
     @ParameterizedTest
     @EnumSource(GameType.class)
     void anExampleIsRejectedByTheSchemaOfAnotherGameType(GameType type) throws IOException {

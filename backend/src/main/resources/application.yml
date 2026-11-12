@@ -49,6 +49,8 @@ springdoc:
 app:
   cors:
     allowed-origins: http://localhost:5173
+  player:
+    browser-origin: ${PLAYER_ORIGIN:http://localhost:5173}
   jwt:
     # HS256 signing key, at least 32 bytes. Provide it via the JWT_SECRET environment variable.
     secret: ${JWT_SECRET}

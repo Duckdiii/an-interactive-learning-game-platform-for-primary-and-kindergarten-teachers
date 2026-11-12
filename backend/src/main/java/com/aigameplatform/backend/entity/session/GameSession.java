@@ -26,6 +26,9 @@ public abstract class GameSession {
     @Column(unique = true)
     private String accessCode;
 
+    @Column(name = "student_option_salt", length = 64)
+    private String studentOptionSalt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SessionStatus status = SessionStatus.ACTIVE;

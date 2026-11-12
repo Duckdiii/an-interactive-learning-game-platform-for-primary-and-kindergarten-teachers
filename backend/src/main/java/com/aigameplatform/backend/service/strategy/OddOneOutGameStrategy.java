@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl;
 import com.aigameplatform.backend.dto.dsl.OddOneOutQuestionDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.OddOneOutMode;
 import com.aigameplatform.backend.entity.question.OddOneOutQuestion;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import tools.jackson.databind.json.JsonMapper;
@@ -40,13 +41,32 @@ public class OddOneOutGameStrategy extends GameContentStrategy<OddOneOutQuestion
         // Kiểm tra oddOneOutId thuộc danh sách; entity giữ id này, còn id các mục luôn theo vị trí.
         ChoiceMapping.indexOfId(dsl.items(), dsl.oddOneOutId());
         OddOneOutQuestion question = new OddOneOutQuestion();
-        question.setItems(new ArrayList<>(ChoiceMapping.texts(dsl.items())));
+        if (dsl.items().stream().anyMatch(item -> item.assetId() != null || item.imageUrl() != null)) {
+            question.setQuestionText(dsl.questionText());
+            question.setImageItems(new ArrayList<>(dsl.items().stream().map(item ->
+                    new com.aigameplatform.backend.entity.question.embedded.OddOneOutImageItem(
+                            item.assetId(), item.text(), item.imageUrl())).toList()));
+        } else {
+            question.setItems(new ArrayList<>(ChoiceMapping.texts(dsl.items())));
+        }
         question.setOddOneOutId(dsl.oddOneOutId());
         return question;
     }
 
     @Override
     protected OddOneOutQuestionDsl toDsl(OddOneOutQuestion entity, String questionId) {
+        if (entity.getImageItems() != null && !entity.getImageItems().isEmpty()) {
+            var items = new ArrayList<com.aigameplatform.backend.dto.dsl.TextChoiceDsl>();
+            for (int i = 0; i < entity.getImageItems().size(); i++) {
+                var item = entity.getImageItems().get(i);
+                items.add(new com.aigameplatform.backend.dto.dsl.TextChoiceDsl(
+                        com.aigameplatform.backend.service.factory.Ids.positional(i), item.getLabel(),
+                        item.getAssetId(), item.getImageUrl()));
+            }
+            return new OddOneOutQuestionDsl(questionId, entity.getTimeLimit(), entity.getPoint(), entity.getAudioText(),
+                    entity.getAudioUrl(), entity.getVisualPrompt(), entity.getImageUrl(), items,
+                    entity.getOddOneOutId(), entity.getQuestionText());
+        }
         return new OddOneOutQuestionDsl(questionId, entity.getTimeLimit(), entity.getPoint(), entity.getAudioText(),
                 entity.getAudioUrl(), entity.getVisualPrompt(), entity.getImageUrl(),
                 ChoiceMapping.withPositionalIds(entity.getItems()), entity.getOddOneOutId());
@@ -56,6 +76,15 @@ public class OddOneOutGameStrategy extends GameContentStrategy<OddOneOutQuestion
     protected GameDsl assemble(GameMetadata metadata, GameplaySettings settings, List<OddOneOutQuestionDsl> questions) {
         return new OddOneOutGameDsl(GameDslSchemaRegistry.SUPPORTED_VERSION, GameType.ODD_ONE_OUT, metadata, settings,
                 questions);
+    }
+
+    @Override
+    protected GameDsl assemble(com.aigameplatform.backend.entity.Game game, GameMetadata metadata,
+            GameplaySettings settings, List<OddOneOutQuestionDsl> questions) {
+        if (game.getOddOneOutMode() == OddOneOutMode.IMAGE)
+            return new OddOneOutGameDsl(game.getSchemaVersion(), GameType.ODD_ONE_OUT, OddOneOutMode.IMAGE,
+                    metadata, settings, questions);
+        return assemble(metadata, settings, questions);
     }
 
     @Override

@@ -5,6 +5,7 @@ import type { PublishResult } from '../../types/publish.types'
 import type { GameFilters, GameSummary } from '../../types/game-summary.types'
 import { validateGame } from '../../utils/gameValidation'
 import { buildMockGameContents } from './gameFixtures'
+import { buildImageClozeMock } from './imageGameFixtures'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
 // Kho game trong bộ nhớ cho các nhóm mô phỏng `games` và `editor`: 10 game mẫu (đủ 10 loại) có nội dung DSL đầy đủ; danh
@@ -158,6 +159,9 @@ export interface MockGeneratedInfo {
   gradeLevel?: string
   // Ý tưởng giáo viên nhập; trống khi tạo ngẫu nhiên.
   idea?: string
+  mode?: 'TEXT' | 'IMAGE'
+  sceneImageUrl?: string
+  optionImages?: { imageUrl: string; visualPrompt: string }[]
 }
 
 /**
@@ -165,7 +169,12 @@ export interface MockGeneratedInfo {
  * KHÔNG khớp mô tả của giáo viên; chỉ tên, chủ đề, môn và khối lớp theo yêu cầu. Giao diện luôn nhắc điều này (`isMockGenerated`).
  */
 export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()): GameResponse {
-  const template = buildMockGameContents().find((content) => content.gameType === info.gameType) ?? buildMockGameContents()[0]
+  const imageMode = info.gameType === 'VISUAL_CLOZE' && info.mode === 'IMAGE'
+  if (imageMode && (!info.sceneImageUrl || !/^https:\/\//i.test(info.sceneImageUrl) || !info.optionImages || info.optionImages.length < 2 || info.optionImages.length > 8 ||
+    info.optionImages.some((option) => !/^https:\/\//i.test(option.imageUrl) || !option.visualPrompt?.trim())))
+    throw mockApiError(400, 'VALIDATION_ERROR', 'IMAGE cần URL HTTPS ảnh cảnh và 2–8 ảnh lựa chọn có mô tả.')
+  const template = imageMode ? buildImageClozeMock({ sceneImageUrl: info.sceneImageUrl!, optionImages: info.optionImages! }) :
+    buildMockGameContents().find((content) => content.gameType === info.gameType) ?? buildMockGameContents()[0]
   const idea = info.idea?.trim() ?? ''
   const content = structuredClone(template)
 

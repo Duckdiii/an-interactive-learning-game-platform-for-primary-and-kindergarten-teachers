@@ -8,21 +8,26 @@ import { UiProfileProvider } from '../profile/UiProfileContext'
 import { resolveTheme } from '../theme/resolveTheme'
 import { ThemeProvider } from '../theme/ThemeContext'
 import PresentPlay from './PresentPlay'
+import { buildImageClozeMock } from '../../services/mock/imageGameFixtures'
+import { fireEvent, waitFor } from '@testing-library/react'
+
+const images = vi.hoisted(() => ({ loaded: false }))
 
 // Canvas không có trong jsdom: Konva thay bằng DOM thường như ở test của renderer.
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => (
+  Group: ({ children, onClick, name }: { children?: React.ReactNode; onClick?: () => void; name?: string }) => (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div onClick={onClick}>{children}</div>
+    <div data-testid={name} onClick={onClick}>{children}</div>
   ),
   Rect: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
   Image: () => null,
   Line: () => null,
 }))
-vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
+vi.mock('use-image', () => ({ default: () => images.loaded ? [{ width: 800, height: 480 }, 'loaded'] : [undefined, 'loading'] }))
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
 vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() } }))
 vi.mock('../../games/common/measureText', () => ({ measureWrappedTextHeight: () => null }))
 vi.mock('../../games/common/sound', () => ({ playSound: vi.fn() }))
@@ -33,10 +38,13 @@ vi.mock('../../games/common/OptionButton', () => ({
 
 const replay = vi.fn()
 
-vi.mock('../../games/common/useQuestionAudio', () => ({ useQuestionAudio: () => replay }))
+vi.mock('../../games/common/useQuestionAudio', () => ({
+  useQuestionAudio: (url: string | undefined) =>
+    url?.startsWith('/sounds/feedback/') ? vi.fn() : replay,
+}))
 
 // Đáp án đúng của 3 câu mẫu: '3', '5', '9'. Chọn đáp án khác là sai.
-const [quiz, , , unplayable] = buildMockGameContents()
+const [quiz, , , audioVisual, unplayable] = buildMockGameContents()
 const asGame = (content: unknown) => ({ ...(content as object), gameId: 'g1', status: 'PUBLISHED', updatedAt: '' }) as GameResponse
 
 function renderPlay(game: GameResponse = asGame(quiz), onLeave = vi.fn()) {
@@ -55,9 +63,68 @@ function renderPlay(game: GameResponse = asGame(quiz), onLeave = vi.fn()) {
 
 const button = (name: string | RegExp) => screen.getByRole('button', { name })
 
-beforeEach(() => replay.mockClear())
+beforeEach(() => { replay.mockClear(); images.loaded = false })
 
 describe('PresentPlay', () => {
+  it('keeps image Odd One Out feedback until results and resets on single-question replay', async () => {
+    const question = { id: 'odd-image', timeLimitSeconds: 30, points: 10, renderMode: 'IMAGE' as const, oddOneOutId: '1',
+      items: Array.from({ length: 6 }, (_, i) => ({ id: String(i), text: i === 1 ? 'Chó' : 'Mèo', imageUrl: '/mock/cat.png' })) }
+    renderPlay(asGame({ ...buildMockGameContents().find((g) => g.gameType === 'ODD_ONE_OUT')!, questions: [question] }))
+    fireEvent.click(screen.getByTestId('avm-option-0'))
+    await waitFor(() => expect(button('Cho thử lại')).toHaveAttribute('aria-disabled', 'false'))
+    fireEvent.click(button('Xem kết quả'))
+    fireEvent.click(button('Chơi lại'))
+    expect(button('Cho thử lại')).toHaveAttribute('aria-disabled', 'true')
+    fireEvent.click(screen.getByTestId('avm-option-1'))
+    await waitFor(() => expect(screen.getByText('Giỏi quá!')).toBeInTheDocument())
+  })
+  it('IMAGE presentation keeps the question open until the final correct pair', async () => {
+    images.loaded = true
+    const width = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800)
+    try {
+      renderPlay(asGame(buildImageClozeMock()))
+      fireEvent.click(button('Con bướm'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b1'))
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'Con bướm' })).not.toBeInTheDocument())
+      expect(button('Cho thử lại')).toHaveAttribute('aria-disabled', 'true')
+      fireEvent.click(button('Con ong'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b2'))
+      await waitFor(() => expect(button('Cho thử lại')).toHaveAttribute('aria-disabled', 'false'))
+      expect(screen.getByText('Hoàn thành!')).toBeInTheDocument()
+    } finally { width.mockRestore() }
+  })
+  it('starts a fresh IMAGE grading round when replaying a single-question game', async () => {
+    images.loaded = true
+    const width = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800)
+    try {
+      renderPlay(asGame(buildImageClozeMock()))
+      fireEvent.click(button('Con bướm'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b1'))
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'Con bướm' })).not.toBeInTheDocument())
+      fireEvent.click(button('Con ong'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b2'))
+      await waitFor(() => expect(screen.getByText('Hoàn thành!')).toBeInTheDocument())
+
+      await userEvent.setup().click(button('Xem kết quả'))
+      await waitFor(() => expect(button('Chơi lại')).toBeInTheDocument())
+      await userEvent.setup().click(button('Chơi lại'))
+      fireEvent.click(button('Con bướm'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b1'))
+
+      await waitFor(() => expect(button('Cho thử lại')).toHaveAttribute('aria-disabled', 'true'))
+      expect(screen.queryByText('Hoàn thành!')).not.toBeInTheDocument()
+    } finally { width.mockRestore() }
+  })
+  it('AVM cho nghe lại sau khi trả lời trong chế độ trình chiếu', async () => {
+    const user = userEvent.setup()
+    renderPlay(asGame(audioVisual))
+    await user.click(screen.getByText(/a cute cat/))
+    expect(await screen.findByText('🔊 Nghe lại')).not.toHaveAttribute('inert')
+    expect(screen.getByText('🔊 Nghe lại').closest('[inert]')).toBeNull()
+    await user.click(screen.getByText('🔊 Nghe lại'))
+    expect(replay).toHaveBeenCalledTimes(1)
+  })
+
   it('chuyển câu bằng ← → và bằng nút, chặn ở câu đầu', async () => {
     const user = userEvent.setup()
 

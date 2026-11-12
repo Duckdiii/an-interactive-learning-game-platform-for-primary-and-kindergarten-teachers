@@ -8,7 +8,12 @@ import java.util.List;
 public record OddOneOutAiQuestion(
         List<String> items,
         int oddOneOutIndex,
-        String audioText) implements AiQuestion {
+        String audioText,
+        String questionText) implements AiQuestion {
+
+    public OddOneOutAiQuestion(List<String> items, int oddOneOutIndex, String audioText) {
+        this(items, oddOneOutIndex, audioText, null);
+    }
 
     @Override
     public List<String> problems() {

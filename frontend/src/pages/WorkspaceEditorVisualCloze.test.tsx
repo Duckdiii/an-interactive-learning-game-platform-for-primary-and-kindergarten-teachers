@@ -11,7 +11,7 @@ import { autosaved } from '../test/autosave'
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-  Group: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => <div onClick={onClick}>{children}</div>,
   Rect: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
   Image: () => null,
@@ -19,6 +19,7 @@ vi.mock('react-konva', () => ({
 }))
 vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
 vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() } }))
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
 
 // Form sửa câu VISUAL_CLOZE (mock-game-10). Câu 1: "Con mèo đang ___ trên ghế." đúng "ngủ", nhiễu chạy, bay; hình "a cat sleeping on a sofa". Câu 2: "Con chim
 // đang ___ trên trời." đúng "bay", nhiễu bơi, ngủ. Câu 3: "Con cá đang ___ dưới ao." đúng "bơi", nhiễu bay, chạy, hát.
@@ -316,11 +317,12 @@ describe('VISUAL_CLOZE: kiểm tra từ ngữ, lưu và chơi thử', () => {
     })
   })
 
-  it('chơi thử vẫn "chưa hỗ trợ" (chưa có renderer Canvas cho loại này)', async () => {
+  it('chơi thử TEXT bằng renderer thật và chấm tại chỗ', async () => {
     await openLoaded()
     fireEvent.click(screen.getByRole('button', { name: 'Chơi thử' }))
 
-    expect(await screen.findByText(/chưa hỗ trợ chơi thử/, {}, { timeout: 10_000 })).toBeInTheDocument()
+    fireEvent.click(await screen.findByText('ngủ'))
+    expect(await screen.findByRole('status')).toHaveTextContent('Đúng rồi!')
   })
 })
 

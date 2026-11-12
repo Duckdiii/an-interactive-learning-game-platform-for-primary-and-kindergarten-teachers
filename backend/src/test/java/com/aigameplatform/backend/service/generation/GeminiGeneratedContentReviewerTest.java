@@ -9,6 +9,7 @@ import com.aigameplatform.backend.service.curriculum.CurriculumRAGService;
 import com.aigameplatform.backend.service.curriculum.CurriculumSource;
 import com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
@@ -22,6 +23,90 @@ class GeminiGeneratedContentReviewerTest {
     private static final String REVIEW = """
             {"questions":[{"questionId":"q1","answerCorrect":true,"supportedByCurriculum":true,"matchesTeacherRequest":true,"uniqueCorrectAnswer":true,"supportingChunkIds":["math-g1-001"],"reason":"Supported"}]}
             """;
+
+    @Test
+    void oddImageWithoutCurriculumReviewsLabelsWithoutClaimingVisualOrCurriculumInspection() {
+        var captured = new AtomicReference<ChatRequest>();
+        var question = new OddOneOutQuestionDsl("q1", 30, 10, null, null, null, null,
+                List.of(new TextChoiceDsl("a", "Táo", "apple", "/assets/noto/emoji_u1f34e.svg"),
+                        new TextChoiceDsl("b", "Chuối", "banana", "/assets/noto/emoji_u1f34c.svg"),
+                        new TextChoiceDsl("c", "Nho", "grapes", "/assets/noto/emoji_u1f347.svg"),
+                        new TextChoiceDsl("d", "Cà rốt", "carrot", "/assets/noto/emoji_u1f955.svg")),
+                "d", "Hình nào không phải trái cây?");
+        var game = new OddOneOutGameDsl("1.1.0", GameType.ODD_ONE_OUT, OddOneOutMode.IMAGE,
+                new GameMetadata("Trái cây", Subject.VIETNAMESE, GradeLevel.GRADE_1, "Trái cây"),
+                new GameplaySettings(1), List.of(question));
+        String response = """
+                {"questions":[{"questionId":"q1","answerCorrect":true,"matchesTeacherRequest":true,
+                "uniqueCorrectAnswer":true,"supportedByCurriculum":false,"supportingChunkIds":[],"reason":"Catalog labels"}]}
+                """;
+        var result = new GeminiGeneratedContentReviewer(model(captured, response), MAPPER, "fixture")
+                .review(game, "Trái cây", CurriculumEvidence.empty());
+        assertThat(result.accepted()).isTrue();
+        assertThat(result.review().status()).isEqualTo(
+                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.UNAVAILABLE);
+        String instruction = dev.langchain4j.data.message.SystemMessage.findFirst(captured.get().messages()).orElseThrow().text();
+        assertThat(instruction).contains("curated Noto catalog", "do not claim that you visually inspected", "no curriculum chunks");
+    }
+
+    @Test
+    void imageModeReviewerReceivesTheSameValidatedSceneBytes() {
+        var captured = new AtomicReference<ChatRequest>();
+        var image = new com.aigameplatform.backend.service.media.LoadedSceneImage(
+                new byte[] {9, 8, 7}, "image/png", 320, 240);
+        var optionImages = java.util.Map.of(
+                "q1/o1", new com.aigameplatform.backend.service.media.LoadedSceneImage(new byte[] {1, 2}, "image/png", 32, 32),
+                "q1/o2", new com.aigameplatform.backend.service.media.LoadedSceneImage(new byte[] {3, 4}, "image/jpeg", 32, 32));
+        var game = new VisualClozeGameDsl("1.1.0", GameType.VISUAL_CLOZE, VisualClozeMode.IMAGE,
+                new GameMetadata("Animals", Subject.ENGLISH, GradeLevel.GRADE_1, "Identify an animal"),
+                new GameplaySettings(1.0), List.of(new VisualClozeQuestionDsl("q1", 30, 10, null, null,
+                        null, null, null, null, null, "Which animal is shown?", "https://images.example.edu/scene.png",
+                        320, 240, List.of(new VisualClozeBlankDsl("b1", 100, 90, "o1")),
+                        List.of(new VisualClozeImageOptionDsl("o1", "cat", "https://images.example.edu/cat.png"),
+                                new VisualClozeImageOptionDsl("o2", "dog", "https://images.example.edu/dog.png")))));
+        var reviewer = new GeminiGeneratedContentReviewer(model(captured, REVIEW), MAPPER, "fixture");
+
+        assertThat(reviewer.review(game, "Identify an animal", evidence(), image, optionImages).accepted()).isTrue();
+
+        var userMessage = dev.langchain4j.data.message.UserMessage.findLast(captured.get().messages()).orElseThrow();
+        var actualImages = userMessage.contents().stream().filter(ImageContent.class::isInstance)
+                .map(ImageContent.class::cast).toList();
+        assertThat(actualImages).hasSize(3);
+        var actual = actualImages.getFirst();
+        assertThat(actual.image().base64Data()).isEqualTo(java.util.Base64.getEncoder().encodeToString(image.bytes()));
+        assertThat(actual.image().mimeType()).isEqualTo("image/png");
+        assertThat(actualImages.get(1).image().base64Data()).isEqualTo(java.util.Base64.getEncoder().encodeToString(optionImages.get("q1/o1").bytes()));
+        assertThat(actualImages.get(2).image().base64Data()).isEqualTo(java.util.Base64.getEncoder().encodeToString(optionImages.get("q1/o2").bytes()));
+        assertThat(actualImages.get(2).image().mimeType()).isEqualTo("image/jpeg");
+        assertThat(userMessage.toString()).contains("sceneImageUrl", "optionImageAssets", "q1/o1", "q1/o2");
+    }
+
+    @Test
+    void imageModeReviewerFailsClosedWhenAnyOptionImageBytesAreMissing() {
+        var imageGame = imageGame();
+        var scene = new com.aigameplatform.backend.service.media.LoadedSceneImage(new byte[] {9}, "image/png", 320, 240);
+        assertThatThrownBy(() -> new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), REVIEW), MAPPER, "fixture")
+                .review(imageGame, "Identify an animal", evidence(), scene, java.util.Map.of("q1/o1", scene)))
+                .isInstanceOf(AiServiceUnavailableException.class);
+    }
+
+    @Test
+    void imageModeReviewerFailsClosedWhenSceneBytesAreMissing() {
+        var imageGame = imageGame();
+        assertThatThrownBy(() -> new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), REVIEW), MAPPER, "fixture")
+                .review(imageGame, "Identify an animal", evidence()))
+                .isInstanceOf(AiServiceUnavailableException.class);
+    }
+
+    private static VisualClozeGameDsl imageGame() {
+        return new VisualClozeGameDsl("1.1.0", GameType.VISUAL_CLOZE, VisualClozeMode.IMAGE,
+                new GameMetadata("Animals", Subject.ENGLISH, GradeLevel.GRADE_1, "Identify an animal"),
+                new GameplaySettings(1.0), List.of(new VisualClozeQuestionDsl("q1", 30, 10, null, null,
+                        null, null, null, null, null, "Which animal is shown?", "https://images.example.edu/scene.png",
+                        320, 240, List.of(new VisualClozeBlankDsl("b1", 100, 90, "o1")),
+                        List.of(new VisualClozeImageOptionDsl("o1", "cat", "https://images.example.edu/cat.png"),
+                                new VisualClozeImageOptionDsl("o2", "dog", "https://images.example.edu/dog.png")))));
+    }
 
     @Test
     void savedOrderingDraftIsPresentedInSolutionOrderWithoutMutatingTheDisplayedGame() throws Exception {

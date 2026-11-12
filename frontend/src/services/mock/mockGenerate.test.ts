@@ -18,6 +18,32 @@ afterEach(() => {
 })
 
 describe('mockGenerateGame', () => {
+  it('không giả vờ đã sinh Odd One Out hình khi đang dùng mock AI', async () => {
+    await expect(mockGenerateGame({ ...request, gameType: 'ODD_ONE_OUT', mode: 'IMAGE' }))
+      .rejects.toMatchObject({ response: { status: 400 } })
+  })
+  it('không giả vờ đã sinh Audio Visual Match có ảnh catalog khi dùng mock AI', async () => {
+    await expect(mockGenerateGame({ ...request, gameType: 'AUDIO_VISUAL_MATCH', mode: 'IMAGE' }))
+      .rejects.toMatchObject({ response: { status: 400 } })
+  })
+  it('keeps IMAGE mode and caller image URLs instead of silently creating TEXT', async () => {
+    const game = await mockGenerateGame({ ...request, gameType: 'VISUAL_CLOZE', mode: 'IMAGE',
+      sceneImageUrl: 'https://example.com/garden.png', optionImages: [
+        { imageUrl: 'https://example.com/cat.png', visualPrompt: 'Con mèo' },
+        { imageUrl: 'https://example.com/dog.png', visualPrompt: 'Con chó' },
+      ] })
+    expect(game).toMatchObject({ schemaVersion: '1.1.0', gameType: 'VISUAL_CLOZE', mode: 'IMAGE' })
+    expect(game.questions[0]).toMatchObject({ sceneImageUrl: 'https://example.com/garden.png',
+      options: [
+        { imageUrl: 'https://example.com/cat.png', visualPrompt: 'Con mèo' },
+        { imageUrl: 'https://example.com/dog.png', visualPrompt: 'Con chó' },
+      ] })
+  })
+
+  it('rejects IMAGE without supplied assets instead of pretending generation succeeded', async () => {
+    await expect(mockGenerateGame({ ...request, gameType: 'VISUAL_CLOZE', mode: 'IMAGE' }))
+      .rejects.toMatchObject({ response: { status: 400 } })
+  })
   it('thành công: thêm đúng MỘT game nháp vào kho và trả game đó', async () => {
     const game = await mockGenerateGame(request)
 
