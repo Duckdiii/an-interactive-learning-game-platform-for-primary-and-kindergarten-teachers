@@ -1,27 +1,37 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from '../../api/axiosInstance'
 import { buildMockGameContents } from '../../services/mock/gameFixtures'
 import type { GameDsl, GameType } from '../../types/game-dsl.types'
 import PlayTestPanel from './PlayTestPanel'
+import { buildImageClozeMock } from '../../services/mock/imageGameFixtures'
+
+const canvas = vi.hoisted(() => ({ loaded: false, audioOptions: [] as unknown[] }))
 
 // react-konva vẽ lên <canvas> thật mà jsdom không có: mock thành DOM thường để test hành vi (chọn, nối, chấm, sang câu), không
 // kiểm màu hay tọa độ (đã xem bằng mắt trên trình duyệt thật). Cùng cách với test của renderer.
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => (
+  Group: ({ children, onClick, name }: { children?: React.ReactNode; onClick?: () => void; name?: string }) => (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div onClick={onClick}>{children}</div>
+    <div data-testid={name} onClick={onClick}>{children}</div>
   ),
   Rect: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
   Image: () => null,
   Line: ({ dash }: { dash?: number[] }) => <i data-testid="line" data-dashed={dash ? 'yes' : 'no'} />,
 }))
-vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
+vi.mock('use-image', () => ({ default: () => canvas.loaded ? [{ width: 800, height: 480 }, 'loaded'] : [undefined, 'loading'] }))
 vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() } }))
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
+vi.mock('../../games/common/useQuestionAudio', () => ({
+  useQuestionAudio: (_url: string | undefined, options: unknown) => {
+    canvas.audioOptions.push(options)
+    return vi.fn()
+  },
+}))
 vi.mock('../../games/common/measureText', () => ({ measureWrappedTextHeight: () => null }))
 vi.mock('../../games/common/useFeedback', () => ({ useFeedback: () => ({ showFeedback: vi.fn() }) }))
 vi.mock('../../games/common/sound', () => ({ playSound: vi.fn() }))
@@ -40,7 +50,51 @@ const fetchSpy = vi.fn()
 const xhrOpenSpy = vi.spyOn(XMLHttpRequest.prototype, 'open')
 
 beforeEach(() => {
+  canvas.loaded = false
+  canvas.audioOptions = []
   vi.stubGlobal('fetch', fetchSpy)
+})
+
+describe('PlayTestPanel: AVM TTS language', () => {
+  it('reads an English subject prompt with English browser TTS', () => {
+    const game = gameOf('AUDIO_VISUAL_MATCH')
+    game.metadata.subject = 'ENGLISH'
+    Object.assign(game.questions[0], { audioText: 'Cat', audioUrl: undefined })
+
+    render(<PlayTestPanel game={game} onExit={vi.fn()} />)
+
+    expect(canvas.audioOptions).toContainEqual(expect.objectContaining({ ttsText: 'Cat', ttsLanguage: 'en-US' }))
+    expectNoRequests()
+  })
+})
+
+describe('PlayTestPanel: VISUAL_CLOZE', () => {
+  it('plays legacy TEXT and reports its result locally', async () => {
+    render(<PlayTestPanel game={gameOf('VISUAL_CLOZE')} onExit={vi.fn()} />)
+    click('ngủ')
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
+    expectNoRequests()
+  })
+
+  it('IMAGE waits for both blanks, lets a wrong image be replaced, and finishes without any API', async () => {
+    canvas.loaded = true
+    const width = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800)
+    try {
+      render(<PlayTestPanel game={buildImageClozeMock()} onExit={vi.fn()} />)
+      fireEvent.click(button('Con bướm'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b1'))
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'Con bướm' })).not.toBeInTheDocument())
+      expect(screen.queryByRole('button', { name: 'Xem kết quả' })).not.toBeInTheDocument()
+      fireEvent.click(button('Bọ rùa'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b2'))
+      await waitFor(() => expect(button('Bọ rùa')).not.toBeDisabled())
+      expect(screen.queryByRole('button', { name: 'Thử gửi lại' })).not.toBeInTheDocument()
+      fireEvent.click(button('Con ong'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b2'))
+      await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
+      expectNoRequests()
+    } finally { width.mockRestore() }
+  })
 })
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -209,8 +263,34 @@ describe('PlayTestPanel: MATCHING', () => {
   })
 })
 
+describe('PlayTestPanel: ODD_ONE_OUT', () => {
+  it('plays legacy text locally', async () => {
+    render(<PlayTestPanel game={gameOf('ODD_ONE_OUT')} onExit={vi.fn()} />)
+    fireEvent.click(screen.getByText('Hình vuông'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
+    expectNoRequests()
+  })
+  it('plays image choice once, then starts fresh on retry and single-question replay', async () => {
+    const question = { id: 'odd-image', timeLimitSeconds: 30, points: 10, renderMode: 'IMAGE' as const, oddOneOutId: '1',
+      items: ['Mèo', 'Chó', 'Mèo', 'Mèo'].map((text, i) => ({ id: String(i), text, imageUrl: '/mock/cat.png' })) }
+    render(<PlayTestPanel game={{ ...gameOf('ODD_ONE_OUT'), questions: [question] } as GameDsl} onExit={vi.fn()} />)
+    fireEvent.click(screen.getByTestId('avm-option-0'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Chưa đúng'))
+    fireEvent.click(screen.getByTestId('avm-option-1'))
+    expect(screen.getByRole('status')).toHaveTextContent('Chưa đúng')
+    fireEvent.click(button('Thử lại câu này'))
+    fireEvent.click(screen.getByTestId('avm-option-1'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
+    fireEvent.click(button('Xem kết quả'))
+    fireEvent.click(button('Chơi lại'))
+    fireEvent.click(screen.getByTestId('avm-option-0'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Chưa đúng'))
+    expectNoRequests()
+  })
+})
+
 describe('PlayTestPanel: loại game chưa có renderer', () => {
-  const unsupported: GameType[] = ['AUDIO_VISUAL_MATCH', 'ODD_ONE_OUT', 'SPOT_THE_TARGET', 'WORD_SCRAMBLE', 'MEMORY_CARD', 'DRAG_DROP', 'ORDERING', 'VISUAL_CLOZE']
+  const unsupported: GameType[] = ['SPOT_THE_TARGET', 'WORD_SCRAMBLE', 'MEMORY_CARD', 'DRAG_DROP', 'ORDERING']
 
   it.each(unsupported)('%s: hiện ảnh minh họa tĩnh, thông báo "chưa hỗ trợ chơi thử" và nội dung chữ, không giả lập', (type) => {
     const onExit = vi.fn()
@@ -228,8 +308,8 @@ describe('PlayTestPanel: loại game chưa có renderer', () => {
     expectNoRequests()
   })
 
-  it('đủ 10 loại game: 2 loại chơi thử được và 8 loại còn lại hiện khung chưa hỗ trợ', () => {
-    expect(unsupported).toHaveLength(8)
-    expect(new Set([...unsupported, 'QUIZ', 'MATCHING']).size).toBe(10)
+  it('đủ 10 loại game: 5 loại chơi thử được và 5 loại còn lại hiện khung chưa hỗ trợ', () => {
+    expect(unsupported).toHaveLength(5)
+    expect(new Set([...unsupported, 'QUIZ', 'MATCHING', 'AUDIO_VISUAL_MATCH', 'VISUAL_CLOZE', 'ODD_ONE_OUT']).size).toBe(10)
   })
 })

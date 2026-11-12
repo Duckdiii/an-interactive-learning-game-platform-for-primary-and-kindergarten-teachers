@@ -288,6 +288,37 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /catalog/noto:
+    get:
+      tags: [Games]
+      summary: Lấy danh mục Noto để sửa ảnh trò chơi
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Danh mục ảnh có mã, nhãn và URL cố định.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { type: boolean, const: true }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, label, group, imageUrl, conceptId]
+                      properties:
+                        id: { type: string }
+                        label: { type: string }
+                        group: { type: string }
+                        imageUrl: { type: string }
+                        conceptId: { type: string }
+        '401':
+          description: Cần đăng nhập tài khoản giáo viên.
+
   /games/generate:
     post:
       tags: [Games]
@@ -310,7 +341,7 @@ paths:
 
         Xử lý có thể mất vài giây đến vài chục giây; Frontend đặt timeout riêng lớn hơn mặc định.
         Giới hạn 10 yêu cầu mỗi phút mỗi người dùng (NFR-04).
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -405,7 +436,7 @@ paths:
       tags: [Games]
       operationId: getGame
       summary: Mở Workspace Editor
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -424,17 +455,9 @@ paths:
       operationId: updateGame
       summary: Lưu bản nháp / chỉnh sửa thủ công (UC-04, UC-05)
       description: |
-        Body là **chỉ phần envelope DSL**. Id lấy từ đường dẫn; `gameId, status, updatedAt` do server
-        quản. `gameType` không đổi được.
-
-        Backend chạy lại đủ 3 lớp kiểm duyệt trước khi lưu, tự ghi `EditLog` (người sửa là giáo viên)
-        và tự so sánh với bản cũ để biết trường nào bị sửa (phục vụ KPI-03, không cần endpoint riêng).
-        Lưu bản nháp **không** bắt buộc đủ `hitRegion` của SPOT_THE_TARGET (nới lỏng so với JSON
-        Schema DSL, chỉ bắt buộc khi xuất bản).
-
-        Game đang `PUBLISHED` vẫn giữ `PUBLISHED`. **Nếu game đang có phiên chưa kết thúc**
-        (`WAITING`, `ACTIVE` hoặc `PAUSED`) thì bị từ chối 409 `CONFLICT`.
-      x-status: planned
+        Request body is the game DSL envelope. The game type cannot change.
+        This task edits DRAFT games only; editing a PUBLISHED game returns 409 CONFLICT.
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -499,7 +522,7 @@ paths:
         400 khi dữ liệu chưa hợp lệ (câu chưa có đáp án đúng, cấu trúc chưa hoàn chỉnh) hoặc game
         SPOT_THE_TARGET còn câu chưa có `hitRegion` (UC-07 2c). 500 khi không lưu được hoặc không tạo
         được mã chia sẻ (UC-07 2a, 2b): game không chuyển sang `PUBLISHED`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -1202,7 +1225,7 @@ paths:
         | Loại game | Dạng học sinh |
         |---|---|
         | QUIZ | Bỏ `correctOptionId` |
-        | ODD_ONE_OUT | Bỏ `oddOneOutId` |
+        | ODD_ONE_OUT IMAGE | Bỏ `oddOneOutId`; thay ID bằng mã riêng theo phiên, xáo ảnh và giữ `questionText`, `renderMode: IMAGE` |
         | AUDIO_VISUAL_MATCH | Gộp `correct` và `distractors` thành `options: [{ id, imageUrl, visualPrompt }]` đã xáo (`id` là `a, b, c...` gán sau khi xáo); bỏ `correct`, `distractors` |
         | SPOT_THE_TARGET | Bỏ `hitRegion`; giữ `targetDescription`, `imageUrl` |
         | WORD_SCRAMBLE | Bỏ `correctWord`; giữ `scrambledLetters` |
@@ -1210,11 +1233,12 @@ paths:
         | MEMORY_CARD | Giữ nguyên `pairs` (không có bí mật); Frontend nhân đôi và xáo thẻ |
         | DRAG_DROP | Giữ `dropZones`; bỏ `targetZoneId` ở từng vật |
         | ORDERING | Bỏ `correctPosition`; thứ tự mảng `steps` là thứ tự hiển thị đã xáo |
-        | VISUAL_CLOZE | Bỏ `correctAnswer`; thay `distractors` bằng `options: [chuỗi]` đã xáo (đáp án đúng và gây nhiễu) |
+        | VISUAL_CLOZE TEXT | Bỏ `correctAnswer`; thay `distractors` bằng `options: [chuỗi]` đã xáo (đáp án đúng và gây nhiễu) |
+        | VISUAL_CLOZE IMAGE | Giữ scene, blanks và ảnh option; bỏ `correctOptionId`; thay ID blank/option bằng mã mờ riêng theo phiên/câu hỏi và xáo options |
 
         Thứ tự xáo và mã mờ được sinh **xác định** từ HMAC (khoá bí mật của server, `sessionId`,
         `questionId`): tải lại vẫn ra cùng thứ tự, Backend không cần lưu ánh xạ.
-      x-status: planned
+      x-status: implemented
       security:
         - participantId: []
       responses:
@@ -1259,7 +1283,8 @@ paths:
         | MATCHING | `matches: [{ leftPairId, rightPairId }]` (mã mờ của dạng học sinh). Frontend chỉ nộp **một lần** sau khi trẻ nối đủ mọi cặp và bấm «Xong rồi!»; thiếu cặp thì chấm `INCORRECT` (đúng hết hoặc không). `correctAnswer` trả về cùng dạng: `{ matches: [...] }` | Mọi cặp nối đúng |
         | MEMORY_CARD | `matchedPairIds: [...]`, `flips` | Tìm đủ mọi cặp; `flips` lưu vào `attemptsCount` |
         | DRAG_DROP | `placements: [{ itemId, zoneId }]` | Mọi vật vào đúng vùng |
-        | VISUAL_CLOZE | `answer` | Trùng đáp án sau khi chuẩn hoá chữ hoa/thường và khoảng trắng |
+        | VISUAL_CLOZE TEXT | `answer` | Trùng đáp án sau khi chuẩn hoá chữ hoa/thường và khoảng trắng |
+        | VISUAL_CLOZE IMAGE | Submit one placement pair per request with opaque IDs. Correct placements persist; wrong placements return INCORRECT and can be retried. | Every blank is correct; only then status is CORRECT and the mapping is returned. |
         | ORDERING | `order: [id, ...]` | Thứ tự khớp thứ tự đúng |
         | WORD_SCRAMBLE | `word` | Trùng `correctWord` (chuẩn hoá như trên) |
 
@@ -1268,12 +1293,11 @@ paths:
         cộng 1 giây dung sai thì coi là `TIMEOUT`. Chấm đúng/sai theo kiểu đúng hết hoặc không. Hệ số
         0.5 là hằng số cấu hình, không nằm trong API.
 
-        `correctAnswer` chỉ trả **sau khi đã chấm**, để trẻ được chỉ cho thấy đáp án đúng (quy ước UX).
+        For VISUAL_CLOZE IMAGE, a wrong placement returns INCORRECT and retryable=true; a correct placement with blanks remaining returns IN_PROGRESS. Neither result reveals the answer mapping. The mapping is returned only when all blanks are correct; timeout and skip never reveal it.
 
-        **Gửi lại cùng cặp (participant, `questionId`)** trả 200 với kết quả đã lưu, không tạo bản ghi
-        mới, không cộng điểm lần hai. Phiên không ở trạng thái `ACTIVE` (hoặc sau `expiresAt` ở phiên
-        `SELF`) trả 409.
-      x-status: planned
+        Resubmitting a completed question for the same participant and questionId returns its saved result without duplicate score. For an IMAGE question still IN_PROGRESS, wrong placements may be retried and correct placements remain saved after reload.
+        A session that is not ACTIVE (or is past expiresAt for SELF sessions) returns 409.
+      x-status: implemented
       security:
         - participantId: []
       requestBody:
@@ -1382,7 +1406,7 @@ paths:
       description: |
         404 khi mã không tồn tại hoặc game không còn `PUBLISHED` ("Trò chơi hiện không thể truy cập",
         UC-08 2a). Chỉ đếm lượt tra mã sai, tối đa 10 lần mỗi phút mỗi IP.
-      x-status: planned
+      x-status: implemented
       security: []
       responses:
         '200':
@@ -1415,7 +1439,7 @@ paths:
         endpoint này. Sau đó dùng `GET /sessions/{id}/questions`, `POST /sessions/{id}/interactions`,
         `GET /sessions/{id}/my-result` với `X-Participant-Id`. Kết quả lượt `SELF` được ghi nhận kèm
         biệt danh (UC-08 hậu điều kiện) và giáo viên chủ game xem được.
-      x-status: planned
+      x-status: implemented
       security: []
       requestBody:
         required: true
@@ -2463,7 +2487,7 @@ components:
 
     GenerateGameRequest:
       type: object
-      required: [subject, gradeLevel]
+      required: [subject, gradeLevel, gameType]
       description: |
         Phải có ít nhất một trong `idea`, `randomTopic` (hoặc `file` khi dùng multipart); Backend
         kiểm tra điều này (không biểu diễn bằng `anyOf` vì tệp nằm ngoài schema JSON).
@@ -2485,6 +2509,29 @@ components:
             server tự đề xuất chủ đề phù hợp lứa tuổi.
         gameType:
           $ref: '#/components/schemas/GameType'
+        mode:
+          type: string
+          enum: [TEXT, IMAGE]
+          description: |
+            IMAGE cho VISUAL_CLOZE yêu cầu sceneImageUrl và optionImages. IMAGE cho ODD_ONE_OUT
+            và AUDIO_VISUAL_MATCH dùng ảnh Noto đã gắn nhãn. Khi bỏ mode, giữ luồng cũ.
+        sceneImageUrl:
+          type: string
+          format: uri
+          pattern: '^https://'
+          maxLength: 2048
+          description: HTTPS image URL supplied by the teacher; required for VISUAL_CLOZE IMAGE.
+        optionImages:
+          type: array
+          minItems: 2
+          maxItems: 8
+          description: Required for VISUAL_CLOZE IMAGE. Teacher supplies all option assets; the backend never generates image files.
+          items:
+            type: object
+            required: [imageUrl, visualPrompt]
+            properties:
+              imageUrl: { type: string, format: uri, pattern: '^https://', maxLength: 2048 }
+              visualPrompt: { type: string, minLength: 1, maxLength: 255 }
         voice:
           $ref: '#/components/schemas/Voice'
 
@@ -2506,6 +2553,8 @@ components:
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/drag-drop.schema.json'
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/ordering.schema.json'
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/visual-cloze.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.1.0/visual-cloze.schema.json'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.1.0/odd-one-out.schema.json'
 
     Question:
       description: Một câu hỏi theo DSL v1.0.0, cấu trúc phụ thuộc `gameType` (dạng đầy đủ cho giáo viên).
@@ -2520,6 +2569,8 @@ components:
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/drag-drop.schema.json#/$defs/question'
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/ordering.schema.json#/$defs/question'
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.0.0/visual-cloze.schema.json#/$defs/question'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.1.0/visual-cloze.schema.json#/$defs/imageQuestion'
+        - $ref: '../../backend/src/main/resources/schema/game-dsl/1.1.0/odd-one-out.schema.json#/$defs/question'
 
     GameResponse:
       type: object
@@ -2546,9 +2597,13 @@ components:
           type: string
           format: date-time
         schemaVersion:
-          const: '1.0.0'
+          type: string
+          enum: ['1.0.0', '1.1.0']
         gameType:
           $ref: '#/components/schemas/GameType'
+        mode:
+          type: string
+          enum: [TEXT, IMAGE]
         metadata:
           type: object
           required: [title, subject, gradeLevel, topic]
@@ -2664,7 +2719,7 @@ components:
 
     InteractionStatus:
       type: string
-      enum: [CORRECT, INCORRECT, SKIPPED, TIMEOUT]
+      enum: [CORRECT, INCORRECT, SKIPPED, TIMEOUT, IN_PROGRESS]
 
     GroupingStrategy:
       type: string
@@ -2815,15 +2870,17 @@ components:
       type: object
       required: [schemaVersion, gameType, metadata, gameplaySettings, questions, answeredQuestionIds]
       description: |
-        Dạng dành cho học sinh của `GameResponse`: bỏ `gameId, status, updatedAt`, bỏ trường đáp án, các
-        phần tử đã xáo. Biến đổi theo từng loại game xem mô tả của `GET /sessions/{sessionId}/questions`.
-        Cấu trúc câu hỏi chưa có schema máy đọc cho hầu hết loại game (DSL chưa mô tả dạng học sinh; đây là
-        cam kết ở cấp hợp đồng). Đã có schema cho MATCHING: `MatchingStudentQuestion`.
+        Student-facing form of GameResponse. IMAGE questions can be in progress; they are omitted from answeredQuestionIds and restored through acceptedPlacements.
+        Question structures are documented by the schema references below.
       properties:
         schemaVersion:
-          const: '1.0.0'
+          type: string
+          enum: ['1.0.0', '1.1.0']
         gameType:
           $ref: '#/components/schemas/GameType'
+        mode:
+          type: string
+          enum: [TEXT, IMAGE]
         metadata:
           type: object
           required: [title, subject, gradeLevel, topic]
@@ -2850,6 +2907,8 @@ components:
           items:
             anyOf:
               - $ref: '#/components/schemas/MatchingStudentQuestion'
+              - $ref: '#/components/schemas/StudentVisualClozeImageQuestion'
+              - $ref: '#/components/schemas/StudentOddOneOutImageQuestion'
               - type: object
                 required: [id]
                 properties:
@@ -2859,11 +2918,34 @@ components:
                 additionalProperties: true
         answeredQuestionIds:
           type: array
-          description: Để tiếp tục đúng chỗ khi tải lại trang.
+          description: Completed questions only; in-progress VISUAL_CLOZE IMAGE progress is restored from acceptedPlacements.
           items:
             type: string
           examples:
             - [q1, q2]
+
+    StudentOddOneOutImageQuestion:
+      type: object
+      description: Câu hình Noto dành cho học sinh; không chứa oddOneOutId.
+      required: [id, timeLimitSeconds, points, questionText, renderMode, items]
+      properties:
+        id: { type: string }
+        timeLimitSeconds: { type: integer }
+        points: { type: integer }
+        questionText: { type: string }
+        renderMode: { type: string, enum: [IMAGE] }
+        items:
+          type: array
+          minItems: 4
+          maxItems: 6
+          items:
+            type: object
+            required: [id, text, assetId, imageUrl]
+            properties:
+              id: { type: string, description: Mã mờ ổn định trong phiên }
+              text: { type: string }
+              assetId: { type: string }
+              imageUrl: { type: string }
 
     MatchingStudentItem:
       type: object
@@ -2949,6 +3031,52 @@ components:
             - { id: r1, text: mèo }
             - { id: r2, text: táo }
             - { id: r3, text: chó }
+
+    StudentVisualClozeImageQuestion:
+      type: object
+      description: |
+        Student-facing VISUAL_CLOZE IMAGE question. Does not contain correctOptionId. Opaque option IDs are stable within the session.
+        acceptedPlacements contains only backend-confirmed correct pairs for an in-progress question; incorrect guesses are not persisted.
+      required: [id, questionText, sceneImageUrl, sceneWidth, sceneHeight, blanks, options]
+      properties:
+        id: { type: string }
+        questionText: { type: string }
+        acceptedPlacements:
+          type: array
+          description: Blank-option pairs that the backend has already confirmed correct for an in-progress question.
+          items:
+            type: object
+            required: [blankId, optionId]
+            properties:
+              blankId: { type: string }
+              optionId: { type: string }
+        elapsedTimeMs:
+          type: integer
+          minimum: 0
+          description: Accumulated active time for an in-progress question, restored by the server after reload.
+        sceneImageUrl: { type: string, format: uri }
+        sceneWidth: { type: integer, minimum: 1 }
+        sceneHeight: { type: integer, minimum: 1 }
+        blanks:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [id, x, y]
+            properties:
+              id: { type: string }
+              x: { type: number, minimum: 0 }
+              y: { type: number, minimum: 0 }
+        options:
+          type: array
+          minItems: 2
+          items:
+            type: object
+            required: [id, visualPrompt]
+            properties:
+              id: { type: string }
+              visualPrompt: { type: string }
+              imageUrl: { type: string, format: uri }
 
     InteractionBase:
       type: object
@@ -3067,11 +3195,24 @@ components:
         - title: VISUAL_CLOZE
           allOf:
             - $ref: '#/components/schemas/InteractionBase'
-            - type: object
-              required: [answer]
-              properties:
-                answer:
-                  type: string
+            - oneOf:
+                - type: object
+                  required: [answer]
+                  properties:
+                    answer:
+                      type: string
+                - type: object
+                  required: [placements]
+                  properties:
+                    placements:
+                      type: array
+                      minItems: 1
+                      items:
+                        type: object
+                        required: [blankId, optionId]
+                        properties:
+                          blankId: { type: string }
+                          optionId: { type: string }
         - title: ORDERING
           allOf:
             - $ref: '#/components/schemas/InteractionBase'
@@ -3100,7 +3241,13 @@ components:
           $ref: '#/components/schemas/InteractionStatus'
         isCorrect:
           type: boolean
-          description: '`true` khi `status` là `CORRECT`.'
+          description: True when the current IMAGE placement is correct, or when the whole question is CORRECT.
+        placementCorrect:
+          type: boolean
+          description: Whether the IMAGE placement in this interaction was correct; present only for VISUAL_CLOZE IMAGE.
+        retryable:
+          type: boolean
+          description: Whether another placement or a retry is accepted for this VISUAL_CLOZE IMAGE question.
         pointsEarned:
           type: integer
           minimum: 0

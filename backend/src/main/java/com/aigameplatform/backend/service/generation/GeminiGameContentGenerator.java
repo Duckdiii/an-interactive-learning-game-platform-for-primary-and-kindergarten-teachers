@@ -8,6 +8,7 @@ import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import com.aigameplatform.backend.service.curriculum.CurriculumTopicParser;
 import com.aigameplatform.backend.service.curriculum.CurriculumConstraints;
 import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -19,6 +20,7 @@ import dev.langchain4j.model.chat.request.json.JsonSchema;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import java.util.Base64;
 
 /** Gemini adapter that delegates content instructions and schema to the selected game strategy. */
 @Component
@@ -49,8 +51,44 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
     @Override
     public String generate(GenerationAttempt attempt) {
         GameContentStrategy<?, ?> strategy = strategies.get(attempt.gameType());
-        String systemPrompt = strategy.buildPrompt(attempt.topic(), attempt.subject(), attempt.gradeLevel(),
-                attempt.curriculumContext());
+        String systemPrompt;
+        if (attempt.imageInput() != null) {
+            if (!(strategy instanceof com.aigameplatform.backend.service.strategy.VisualClozeGameStrategy visualCloze)) {
+                throw new AiServiceUnavailableException("Image input is supported only for Visual Cloze");
+            }
+            var scene = attempt.imageInput().sceneImage();
+            systemPrompt = visualCloze.buildImagePrompt(attempt.topic(), attempt.subject(), attempt.gradeLevel(),
+                    attempt.curriculumContext(), scene.width(), scene.height(), attempt.imageInput().optionImages()
+                            .stream().map(asset -> new com.aigameplatform.backend.dto.request.GenerateGameRequest.OptionImage(
+                                    asset.imageUrl(), asset.visualPrompt())).toList());
+        } else {
+            systemPrompt = strategy.buildPrompt(attempt.topic(), attempt.subject(), attempt.gradeLevel(),
+                    attempt.curriculumContext());
+        }
+        if (attempt.oddImageMode()) {
+            String catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog().assets().stream()
+                    .map(asset -> asset.id() + " | " + asset.label() + " | " + asset.group())
+                    .collect(java.util.stream.Collectors.joining("\n"));
+            systemPrompt += "\n\n" + """
+                    ODD_ONE_OUT IMAGE MODE: items phải là 4 đến 6 mã asset khác nhau từ catalog dưới đây,
+                    không phải nhãn hay URL. Chọn các hình cùng group, trừ đúng một hình thuộc group khác;
+                    oddOneOutIndex trỏ vào hình khác. questionText nêu rõ tiêu chí phân loại để trẻ nhận ra.
+                    Nếu catalog không hỗ trợ yêu cầu thì không thay chủ đề hoặc tự bịa asset.
+                    CATALOG (mã | nhãn đã biên tập | nhóm):
+                    """ + catalog;
+        }
+        if (attempt.avmCatalogMode()) {
+            String catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog().assets().stream()
+                    .map(asset -> asset.id() + " | " + asset.label() + " | " + asset.group())
+                    .collect(java.util.stream.Collectors.joining("\n"));
+            systemPrompt += "\n\n" + """
+                    AVM CATALOG MODE: correct.visualPrompt và từng distractor.visualPrompt phải là các mã asset
+                    khác nhau lấy nguyên văn từ catalog, không phải nhãn hay URL. audioText là nội dung trẻ sẽ nghe;
+                    chọn đúng một ảnh khớp audioText và các ảnh sai phân biệt được. Giữ đúng môn, lớp và chủ đề.
+                    Nếu catalog không hỗ trợ chủ đề, không bịa mã hoặc tự đổi chủ đề.
+                    CATALOG (mã | nhãn đã biên tập | nhóm):
+                    """ + catalog;
+        }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;
         String userPrompt = attempt.isRetry()
@@ -61,8 +99,12 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                         .schema(decoderSchema(attempt.structuredSchema())).build()).build()).build();
         ChatRequestParameters parameters = ChatRequestParameters.builder().responseFormat(schemaFormat).build();
         try {
+            UserMessage userMessage = attempt.imageInput() == null ? UserMessage.from(userPrompt)
+                    : UserMessage.from(userPrompt, ImageContent.from(
+                            Base64.getEncoder().encodeToString(attempt.imageInput().sceneImage().bytes()),
+                            attempt.imageInput().sceneImage().mediaType()));
             var response = model.chat(ChatRequest.builder()
-                    .messages(SystemMessage.from(systemPrompt), UserMessage.from(userPrompt))
+                    .messages(SystemMessage.from(systemPrompt), userMessage)
                     .parameters(parameters).build());
             if (response == null || response.aiMessage() == null || response.aiMessage().text() == null) {
                 throw new AiServiceUnavailableException("Gemini returned an empty response");

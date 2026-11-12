@@ -5,6 +5,7 @@ import { getMockGame, resetMockGames, saveMockGame } from '../services/mock/mock
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import type { AudioVisualMatchGame } from '../types/game-dsl.types'
+import { viText } from '../constants/viText'
 import WorkspaceEditor from './WorkspaceEditor'
 import { autosaved } from '../test/autosave'
 
@@ -12,7 +13,7 @@ import { autosaved } from '../test/autosave'
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-  Group: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Group: ({ children, onClick, name }: { children?: React.ReactNode; onClick?: () => void; name?: string }) => <div data-testid={name} onClick={onClick}>{children}</div>,
   Rect: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
   Image: () => null,
@@ -20,6 +21,7 @@ vi.mock('react-konva', () => ({
 }))
 vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
 vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() } }))
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
 
 // Form sửa câu AUDIO_VISUAL_MATCH (mock-game-4). Câu 1: lời đọc "Cat", hình đúng "a cute cat", hình sai "a brown dog", "a small bird". Câu 2: "Dog", đúng "a brown dog",
 // sai "a cute cat", "a white rabbit". Câu 3: "Fish", đúng "a goldfish in a bowl", 3 hình sai ("a small bird", "a white rabbit", "a cute cat").
@@ -82,6 +84,17 @@ afterEach(() => {
 })
 
 describe('form sửa câu AUDIO_VISUAL_MATCH', () => {
+  it('cho giáo viên nhập URL ảnh đúng và ảnh nhiễu rồi lưu vào câu hỏi', async () => {
+    await openLoaded()
+    fireEvent.change(screen.getByRole('textbox', { name: 'URL ảnh đúng' }), { target: { value: 'https://images.example/cat.png' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'URL ảnh sai 1' }), { target: { value: 'https://images.example/dog.png' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'URL âm thanh câu hỏi' }), { target: { value: 'https://media.example/cat.mp3' } })
+    await saveWhenApplied()
+    expect(stored().correct.imageUrl).toBe('https://images.example/cat.png')
+    expect(stored().distractors[0].imageUrl).toBe('https://images.example/dog.png')
+    expect(stored().audioUrl).toBe('https://media.example/cat.mp3')
+  })
+
   it('không còn thông báo "chưa có form"; hiện lời đọc (bắt buộc), hình đúng, 2 hình sai của câu 1, kèm trường chung', async () => {
     await openLoaded()
 
@@ -402,11 +415,19 @@ describe('AUDIO_VISUAL_MATCH: thời gian, lưu và chơi thử', () => {
     })
   })
 
-  it('chơi thử vẫn "chưa hỗ trợ" (chưa có renderer Canvas cho loại này)', async () => {
+  it('chơi thử được bằng renderer thật, chấm cục bộ sai rồi đúng mà không gọi API', async () => {
     await openLoaded()
     fireEvent.click(screen.getByRole('button', { name: 'Chơi thử' }))
 
-    expect(await screen.findByText(/chưa hỗ trợ chơi thử/, {}, { timeout: 10_000 })).toBeInTheDocument()
+    await screen.findAllByTestId(/^avm-option-/)
+    const wrongOption = screen.getAllByTestId(/^avm-option-/).find((option) => option.textContent?.includes('a brown dog'))
+    fireEvent.click(wrongOption as HTMLElement)
+    expect(await screen.findByText(viText.editor.play.wrong)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: viText.editor.play.retryQuestion }))
+    const correctOption = screen.getAllByTestId(/^avm-option-/).find((option) => option.textContent?.includes('a cute cat'))
+    fireEvent.click(correctOption as HTMLElement)
+    expect(await screen.findByText(viText.editor.play.correct)).toBeInTheDocument()
   })
 })
 
@@ -447,14 +468,14 @@ describe('AUDIO_VISUAL_MATCH: dùng được bằng bàn phím', () => {
 
     const order: string[] = []
 
-    for (let step = 0; step < 3; step += 1) {
+    for (let step = 0; step < 5; step += 1) {
       await user.tab()
       const active = document.activeElement as HTMLElement
 
       order.push(active.id || active.textContent || active.getAttribute('aria-label') || '')
     }
 
-    expect(order).toEqual(['Xóa hình sai 1', 'avm-distractor-0', 'Xóa hình sai 2'])
+    expect(order).toEqual(['avm-correct-image-url', 'Xóa hình sai 1', 'avm-distractor-0', 'avm-distractor-image-url-0', 'Xóa hình sai 2'])
   })
 
   it('mỗi ô và nút có tên riêng để trình đọc màn hình phân biệt (hình sai 1, hình sai 2, xóa hình sai 1...)', async () => {

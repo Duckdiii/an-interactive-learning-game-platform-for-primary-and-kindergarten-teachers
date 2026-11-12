@@ -5,7 +5,7 @@ import { resolveUiProfile } from '../../../player/profile/resolveUiProfile'
 import { UiProfileProvider } from '../../../player/profile/UiProfileContext'
 import { getPlayableRenderer } from '../../../player/renderers'
 import { playerRootVars } from '../../../player/theme/playerRootVars'
-import type { GameType, QuestionDsl } from '../../../types/game-dsl.types'
+import type { GameType, QuestionDsl, Subject } from '../../../types/game-dsl.types'
 import GameTypeCover from '../../ui/GameTypeCover'
 import PreviewBoundary from './PreviewBoundary'
 import PreviewStage from './PreviewStage'
@@ -20,7 +20,7 @@ interface LivePreviewProps {
   index: number
   total: number
   gradeLevel: string
-  subject: string
+  subject: Subject
   /** Câu đang chọn còn lỗi kiểm tra: không dựng renderer vì dữ liệu dở có thể làm nó vỡ. */
   hasIssues: boolean
 }
@@ -114,7 +114,7 @@ export default function LivePreview({ gameType, question, title, index, total, g
         {/* Dựng lại khi câu đổi hoặc được sửa: sửa form là xem trước cập nhật (một câu nên JSON.stringify đủ rẻ). */}
         <PreviewBoundary key={`${question.id}:${JSON.stringify(question)}`}>
           <UiProfileProvider profile={profile}>
-            <PreviewStage gameType={gameType} Renderer={Renderer} question={question} title={title} index={index} total={total} />
+            <PreviewStage gameType={gameType} Renderer={Renderer} question={question} subject={subject} title={title} index={index} total={total} />
           </UiProfileProvider>
         </PreviewBoundary>
       </DeviceFrame>

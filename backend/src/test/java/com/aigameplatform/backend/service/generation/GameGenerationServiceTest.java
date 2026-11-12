@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.exception.AiGenerationTimeoutException;
 import com.aigameplatform.backend.exception.CurriculumEvidenceNotFoundException;
 import com.aigameplatform.backend.exception.CurriculumServiceUnavailableException;
@@ -321,6 +322,156 @@ class GameGenerationServiceTest {
         assertThatThrownBy(() -> service(generator, 0).generate(GameType.QUIZ, REQUEST))
                 .isInstanceOf(AiGenerationTimeoutException.class);
         assertThat(output.getAll()).doesNotContain("CANARY_TEACHER_SECRET");
+    }
+
+    @Test
+    void imageModeLoadsRealSceneAndPassesItToGeneratorAndReviewerWhileBackendOwnsDimensions() throws Exception {
+        byte[] png = scenePng(400, 300);
+        String output = """
+                {"questions":[{"questionText":"Which animal is in the scene?","blanks":[{"id":"b1","x":150,"y":120,"correctOptionId":"o1"}],"options":[{"id":"o1","visualPrompt":"cat","imageUrl":"https://images.example.edu/cat.png"},{"id":"o2","visualPrompt":"dog","imageUrl":"https://images.example.edu/dog.png"}]}]}
+                """;
+        ScriptedGenerator generator = new ScriptedGenerator(output);
+        var service = service(generator, 0, moderation(false, false));
+        service.setSceneImageLoader(new com.aigameplatform.backend.service.media.SceneImageLoader(
+                (host, deadline) -> List.of(java.net.InetAddress.getByAddress(new byte[] {(byte) 93, (byte) 184, (byte) 216, 34})),
+                (uri, address, policy, deadline) -> new com.aigameplatform.backend.service.media.SceneImageResponse(
+                        200, java.util.Map.of("content-type", "image/png"), png),
+                new com.aigameplatform.backend.service.media.SceneImagePolicy(1_000_000, 1000, 1_000_000,
+                        4_000_000, 2, 2, java.time.Duration.ofSeconds(2), java.time.Duration.ofSeconds(4))));
+        var imageReviewer = new java.util.concurrent.atomic.AtomicReference<com.aigameplatform.backend.service.media.LoadedSceneImage>();
+        var optionReviewer = new java.util.concurrent.atomic.AtomicReference<java.util.Map<String, com.aigameplatform.backend.service.media.LoadedSceneImage>>();
+        service.setGeneratedContentReviewer(new GeneratedContentReviewer() {
+            @Override
+            public Result review(GameDsl game, String teacherTopic,
+                    com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence evidence) {
+                throw new AssertionError("IMAGE review must receive scene bytes");
+            }
+
+            @Override
+            public Result review(GameDsl game, String teacherTopic,
+                    com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence evidence,
+                    com.aigameplatform.backend.service.media.LoadedSceneImage sceneImage,
+                    java.util.Map<String, com.aigameplatform.backend.service.media.LoadedSceneImage> optionImages) {
+                imageReviewer.set(sceneImage);
+                optionReviewer.set(optionImages);
+                return new Result(List.of(),
+                        com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable(), true);
+            }
+        });
+        GameDslRequest request = new GameDslRequest("Identify animals", Subject.ENGLISH, GradeLevel.GRADE_1,
+                null, null, VisualClozeMode.IMAGE, "https://images.example.edu/teacher-scene.png",
+                List.of(new com.aigameplatform.backend.dto.request.GenerateGameRequest.OptionImage(
+                                "https://images.example.edu/cat.png", "cat"),
+                        new com.aigameplatform.backend.dto.request.GenerateGameRequest.OptionImage(
+                                "https://images.example.edu/dog.png", "dog")));
+
+        var aiReport = new AiOutputValidator(MAPPER).validate(GameType.VISUAL_CLOZE, output, true);
+        assertThat(aiReport.errors()).isEmpty();
+        var assembled = GameTestFixtures.factoryRegistry(new Random(1)).create(GameType.VISUAL_CLOZE, aiReport.output(), request,
+                new VisualClozeImageGenerationInput(request.sceneImageUrl(),
+                        new com.aigameplatform.backend.service.media.LoadedSceneImage(png, "image/png", 400, 300),
+                        request.optionImages().stream().map(asset -> new VisualClozeOptionImageInput(asset.imageUrl(),
+                                asset.visualPrompt(), new com.aigameplatform.backend.service.media.LoadedSceneImage(
+                                        png, "image/png", 64, 64))).toList()));
+        assertThat(GameTestFixtures.schemaAndBusinessRuleValidation(MAPPER)
+                .validate(MAPPER.valueToTree(assembled)).errors()).isEmpty();
+
+        var result = service.generateResult(GameType.VISUAL_CLOZE, request);
+
+        assertThat(generator.attempts).hasSize(1);
+        assertThat(generator.attempts.getFirst().imageInput().sceneImage().bytes()).isEqualTo(png);
+        assertThat(imageReviewer.get().bytes()).isEqualTo(png);
+        assertThat(optionReviewer.get()).containsKeys("q1/o1", "q1/o2");
+        assertThat(optionReviewer.get().get("q1/o1").bytes()).isEqualTo(png);
+        var game = (com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl) result.game();
+        assertThat(game.schemaVersion()).isEqualTo("1.1.0");
+        assertThat(game.mode()).isEqualTo(VisualClozeMode.IMAGE);
+        assertThat(game.questions().getFirst().sceneImageUrl()).isEqualTo(request.sceneImageUrl());
+        assertThat(game.questions().getFirst().sceneWidth()).isEqualTo(400);
+        assertThat(game.questions().getFirst().sceneHeight()).isEqualTo(300);
+    }
+
+    @Test
+    void oddImageRetriesUnknownCatalogIdsAndRequiresReviewerEvenWithoutRag() {
+        String valid = """
+                {"questions":[{"questionText":"Hình nào không phải trái cây?",
+                "items":["apple","banana","grapes","carrot"],"oddOneOutIndex":3}]}
+                """;
+        var generator = new ScriptedGenerator(valid.replace("grapes", "invented"), valid);
+        var service = service(generator, 1);
+        var reviews = new java.util.concurrent.atomic.AtomicInteger();
+        service.setGeneratedContentReviewer((game, topic, evidence) -> {
+            reviews.incrementAndGet();
+            return new GeneratedContentReviewer.Result(List.of(),
+                    com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable(), true);
+        });
+        var request = new GameDslRequest("Trái cây và rau củ", Subject.VIETNAMESE, GradeLevel.GRADE_1,
+                null, null, VisualClozeMode.IMAGE, null, null);
+        var game = (com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl) service.generate(GameType.ODD_ONE_OUT, request);
+        assertThat(generator.attempts).hasSize(2);
+        assertThat(generator.attempts.getFirst().oddImageMode()).isTrue();
+        assertThat(generator.attempts.get(1).previousErrors()).isNotEmpty();
+        assertThat(game.questions().getFirst().items()).hasSize(4);
+        assertThat(reviews).hasValue(1);
+    }
+
+    @Test
+    void audioVisualCatalogGenerationMapsIdsToBundledImagesAndRunsReview() {
+        String valid = """
+                {"questions":[{"audioText":"cat","correct":{"visualPrompt":"cat-face"},
+                 "distractors":[{"visualPrompt":"dog-face"},{"visualPrompt":"apple"}]}]}
+                """;
+        var generator = new ScriptedGenerator(valid);
+        var service = service(generator, 0);
+        var reviews = new java.util.concurrent.atomic.AtomicInteger();
+        service.setGeneratedContentReviewer((game, topic, evidence) -> {
+            reviews.incrementAndGet();
+            return new GeneratedContentReviewer.Result(List.of(),
+                    com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.unavailable(), true);
+        });
+        var request = new GameDslRequest("Listen and find the cat", Subject.ENGLISH, GradeLevel.GRADE_1,
+                null, null, VisualClozeMode.IMAGE, null, null);
+        var game = (com.aigameplatform.backend.dto.dsl.AudioVisualMatchGameDsl) service.generate(GameType.AUDIO_VISUAL_MATCH, request);
+        assertThat(game.questions().getFirst().correct().imageUrl()).isEqualTo("/assets/noto/emoji_u1f431.svg");
+        assertThat(game.questions().getFirst().distractors()).allSatisfy(choice ->
+                assertThat(choice.imageUrl()).startsWith("/assets/noto/"));
+        assertThat(generator.attempts.getFirst().avmCatalogMode()).isTrue();
+        assertThat(reviews).hasValue(1);
+    }
+
+    @Test
+    void catalogGenerationExplainsInvalidIdsAfterRetriesInsteadOfReportingNetworkTimeout() {
+        String invalid = """
+                {"questions":[{"questionText":"Hình nào khác?",
+                 "items":["apple","banana","grapes","invented"],"oddOneOutIndex":3}]}
+                """;
+        var request = new GameDslRequest("Chủ đề mẫu cho Noto", Subject.VIETNAMESE, GradeLevel.GRADE_1,
+                null, null, VisualClozeMode.IMAGE, null, null);
+        assertThatThrownBy(() -> service(new ScriptedGenerator(invalid), 0).generate(GameType.ODD_ONE_OUT, request))
+                .isInstanceOfSatisfying(com.aigameplatform.backend.exception.ApiException.class, error -> {
+                    assertThat(error.getErrorCode()).isEqualTo(com.aigameplatform.backend.exception.ErrorCode.VALIDATION_ERROR);
+                    assertThat(error.getMessage()).contains("thư viện Noto");
+                });
+    }
+
+    @Test
+    void audioVisualRejectsMultipleDepictionsOfTheSameAnswerConcept() {
+        String ambiguous = """
+                {"questions":[{"audioText":"cat","correct":{"visualPrompt":"cat-face"},
+                 "distractors":[{"visualPrompt":"cat-standing"},{"visualPrompt":"dog-face"}]}]}
+                """;
+        var request = new GameDslRequest("Listen and find the cat", Subject.ENGLISH, GradeLevel.GRADE_1,
+                null, null, VisualClozeMode.IMAGE, null, null);
+        assertThatThrownBy(() -> service(new ScriptedGenerator(ambiguous), 0).generate(GameType.AUDIO_VISUAL_MATCH, request))
+                .isInstanceOfSatisfying(com.aigameplatform.backend.exception.ApiException.class, error ->
+                        assertThat(error.getErrorCode()).isEqualTo(com.aigameplatform.backend.exception.ErrorCode.VALIDATION_ERROR));
+    }
+
+    private static byte[] scenePng(int width, int height) throws IOException {
+        var image = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        var bytes = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(image, "png", bytes);
+        return bytes.toByteArray();
     }
 
     private static final JsonMapper MAPPER = JsonMapper.builder().build();

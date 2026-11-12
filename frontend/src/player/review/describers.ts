@@ -78,9 +78,20 @@ const ODD_ONE_OUT: ReviewDescriber<'ODD_ONE_OUT'> = {
 }
 
 const VISUAL_CLOZE: ReviewDescriber<'VISUAL_CLOZE'> = {
-  prompt: (q) => q.sentenceTemplate,
-  chosen: (_q, a) => a.answer,
-  correct: (_q, correctAnswer) => (typeof correctAnswer?.answer === 'string' ? correctAnswer.answer : null),
+  prompt: (q) => 'sentenceTemplate' in q ? q.sentenceTemplate : q.questionText,
+  chosen: (q, a) => {
+    if ('answer' in a) return a.answer
+    if (!('sceneImageUrl' in q)) return text.unknownOption
+    return a.placements.map(({ optionId }) => q.options.find((option) => option.id === optionId)?.visualPrompt ?? text.unknownOption).join('; ')
+  },
+  correct: (q, correctAnswer) => {
+    if (typeof correctAnswer?.answer === 'string') return correctAnswer.answer
+    if (!('sceneImageUrl' in q) || !Array.isArray(correctAnswer?.placements)) return null
+    return correctAnswer.placements.map((placement) => {
+      const optionId = (placement as { optionId?: unknown })?.optionId
+      return typeof optionId === 'string' ? q.options.find((option) => option.id === optionId)?.visualPrompt ?? text.unknownOption : text.unknownOption
+    }).join('; ')
+  },
 }
 
 const DRAG_DROP: ReviewDescriber<'DRAG_DROP'> = {

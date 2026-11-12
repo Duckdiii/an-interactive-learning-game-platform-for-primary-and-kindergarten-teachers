@@ -35,6 +35,13 @@ const quizDescriber = REVIEW_DESCRIBERS.QUIZ!
 const matchingDescriber = REVIEW_DESCRIBERS.MATCHING!
 
 describe('describer ODD_ONE_OUT và VISUAL_CLOZE', () => {
+  it('keeps image item labels available in the review', () => {
+    const q = { id: 'image', timeLimitSeconds: 30, points: 10, renderMode: 'IMAGE' as const,
+      items: [{ id: 'x', text: 'Mèo', imageUrl: '/mock/cat.png' }, { id: 'y', text: 'Chó', imageUrl: '/mock/dog.png' }] }
+    const describer = REVIEW_DESCRIBERS.ODD_ONE_OUT!
+    expect(describer.chosen(q as never, { selectedItemId: 'x' } as never, null)).toBe('Mèo')
+    expect(describer.correct(q as never, { selectedItemId: 'y' })).toBe('Chó')
+  })
   const odd = { id: 'q1', items: [{ id: 'a', text: 'mèo' }, { id: 'b', text: 'xe' }] }
   const cloze = { id: 'q1', sentenceTemplate: 'Con ___ kêu meo', options: ['mèo', 'chó'] }
 

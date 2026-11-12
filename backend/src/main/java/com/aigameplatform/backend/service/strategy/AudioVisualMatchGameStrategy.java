@@ -25,6 +25,7 @@ public class AudioVisualMatchGameStrategy
                 Dùng correct và distractors theo schema; mỗi lựa chọn là một mô tả hình ảnh có ID, đúng một lựa chọn khớp.
                 Tạo mô tả ngắn, phân biệt được bằng căn cứ đã cho. audioText/visualPrompt chỉ là chỉ dẫn văn bản;
                 không khẳng định đã có tệp âm thanh hay hình ảnh. Không biến cơ chế đối chiếu thành bộ câu hỏi trắc nghiệm chữ.
+                Với môn ENGLISH, audioText phải bằng tiếng Anh, phù hợp hình đúng; ví dụ hình con mèo đọc là cat.
                 Chỉ trả JSON theo schema.
                 """);
     }

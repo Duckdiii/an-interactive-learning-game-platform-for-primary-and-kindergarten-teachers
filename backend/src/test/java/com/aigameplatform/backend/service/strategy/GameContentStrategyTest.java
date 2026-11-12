@@ -58,6 +58,14 @@ class GameContentStrategyTest {
     }
 
     @Test
+    void audioVisualPromptTellsTheModelToUseEnglishForEnglishAudio() {
+        var strategy = new AudioVisualMatchGameStrategy(MAPPER);
+        String prompt = strategy.buildPrompt("animals", com.aigameplatform.backend.entity.enums.Subject.ENGLISH,
+                com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_3, null);
+        assertThat(prompt).contains("audioText", "môn ENGLISH", "bằng tiếng Anh", "cat");
+    }
+
+    @Test
     void anExplicitlyAssignedSchemaStillWins() {
         GameContentStrategy strategy = new QuizGameStrategy(MAPPER);
         strategy.setJsonSchemaDefinition("{\"custom\":true}");

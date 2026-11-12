@@ -468,7 +468,7 @@ export const viText = {
       resultWrong: 'Chưa đúng',
       unsupportedTitle: 'Loại game này chưa hỗ trợ chơi thử',
       unsupportedDescription:
-        'Hiện chỉ chơi thử được trò chơi Trắc nghiệm và Nối cặp. Bạn vẫn xem được nội dung từng câu ở dưới; chơi thử cho loại này sẽ có sau.',
+        'Loại trò chơi này chưa hỗ trợ chơi thử. Bạn vẫn xem được nội dung từng câu ở dưới.',
       unsupportedListLabel: 'Nội dung các câu hỏi',
     },
     // Cột "Bé sẽ thấy": xem trước bằng khung và renderer của phần chơi.

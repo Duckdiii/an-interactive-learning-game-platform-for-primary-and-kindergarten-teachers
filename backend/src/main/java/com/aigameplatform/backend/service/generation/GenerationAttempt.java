@@ -21,7 +21,31 @@ public record GenerationAttempt(
         String curriculumContext,
         int attemptNumber,
         String previousOutput,
-        List<ValidationError> previousErrors) {
+        List<ValidationError> previousErrors,
+        VisualClozeImageGenerationInput imageInput,
+        boolean oddImageMode,
+        boolean avmCatalogMode) {
+
+    public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
+            String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
+            List<ValidationError> previousErrors, VisualClozeImageGenerationInput imageInput, boolean oddImageMode) {
+        this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext,
+                attemptNumber, previousOutput, previousErrors, imageInput, oddImageMode, false);
+    }
+
+    public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
+            String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
+            List<ValidationError> previousErrors, VisualClozeImageGenerationInput imageInput) {
+        this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext,
+                attemptNumber, previousOutput, previousErrors, imageInput, false, false);
+    }
+
+    public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
+            String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
+            List<ValidationError> previousErrors) {
+        this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext,
+                attemptNumber, previousOutput, previousErrors, null, false, false);
+    }
 
     public boolean isRetry() {
         return attemptNumber > 1;

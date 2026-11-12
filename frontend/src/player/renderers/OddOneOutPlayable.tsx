@@ -1,9 +1,11 @@
 import { viText } from '../../constants/viText'
 import QuizRenderer from '../../games/quiz/QuizRenderer'
+import OddOneOutRenderer from '../../games/odd-one-out/OddOneOutRenderer'
 import type { PlayableRendererProps } from './types'
 
-/** Cùng dạng "chọn một ô chữ" với QUIZ nên dùng lại `QuizRenderer` (bố cục, phản hồi, phím số), chỉ đổi tên trường theo contract. */
+/** IMAGE is an internal frontend fixture; published text games retain the QuizRenderer path. */
 export default function OddOneOutPlayable({ question, onSubmit }: PlayableRendererProps<'ODD_ONE_OUT'>) {
+  if (question.renderMode === 'IMAGE') return <OddOneOutRenderer question={question} onSubmit={onSubmit} />
   const { items, ...rest } = question
 
   return (

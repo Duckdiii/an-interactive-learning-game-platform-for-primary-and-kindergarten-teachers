@@ -1,7 +1,8 @@
 import { useReducer } from 'react'
 import type { ComponentProps } from 'react'
 import { viText } from '../../constants/viText'
-import { gradePreviewAnswer, toPreviewStudentQuestion } from '../../components/editor/preview/previewModel'
+import { toPreviewStudentQuestion } from '../../components/editor/preview/previewModel'
+import { usePreviewGrader } from '../../components/editor/preview/usePreviewGrader'
 import { useQuestionAudio } from '../../games/common/useQuestionAudio'
 import type { AnswerPayload, AnswerResult } from '../../types/game-student.types'
 import type { GameResponse } from '../../types/game-response.types'
@@ -42,8 +43,16 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
   const theme = useTheme()
   const [state, dispatch] = useReducer(presentReducer, game.questions, (questions) => initialPresentState(questions.map((question) => question.id)))
   const question = game.questions[state.index]
+  const grade = usePreviewGrader(game.gameType, question, `${state.phase}:${state.attempt}`)
   const Renderer = getPlayableRenderer(game.gameType)
-  const replay = useQuestionAudio(question?.audioUrl)
+  const isAudioVisual = game.gameType === 'AUDIO_VISUAL_MATCH'
+  const replay = useQuestionAudio(isAudioVisual && state.phase !== 'play' ? undefined : question?.audioUrl, {
+    autoPlayOnMount: isAudioVisual && state.phase === 'play',
+    html5: isAudioVisual,
+    questionId: isAudioVisual ? `${question?.id}-${state.attempt}` : undefined,
+    ...(isAudioVisual && state.phase === 'play' && !question?.audioUrl ? { ttsText: question?.audioText,
+      ttsLanguage: game.metadata.subject === 'ENGLISH' ? 'en-US' : 'vi-VN' } : {}),
+  })
   const record = recordOf(state, currentId(state))
   const result = record.answered ? verdict(record.lastCorrect) : null
   const last = isLastQuestion(state)
@@ -70,9 +79,9 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
   }
 
   const onSubmit = async (answer: AnswerPayload) => {
-    const graded = gradePreviewAnswer(game.gameType, question, answer)
+    const graded = grade(answer)
 
-    dispatch({ type: 'answered', isCorrect: graded.isCorrect })
+    if (!graded.retryable) dispatch({ type: 'answered', isCorrect: graded.isCorrect })
 
     return graded
   }
@@ -151,7 +160,7 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
         </div>
         <div className="flex min-h-0 flex-1 gap-6">
           {/* inert khi đã có kết quả: bé/cô không bấm tiếp được, muốn chơi lại thì "Cho thử lại". */}
-          <div inert={record.answered} className="min-w-0 flex-1 overflow-hidden rounded-3xl bg-play-surface p-4">
+          <div inert={record.answered && !isAudioVisual} className="min-w-0 flex-1 overflow-hidden rounded-3xl bg-play-surface p-4">
             {record.answered && !state.answeredHere ? (
               // Quay lại câu đã trả lời: không dựng lại renderer trống (bé bấm được mà không chấm), chỉ báo và mời "Cho thử lại".
               <div className="grid h-full place-items-center text-center">
@@ -159,7 +168,7 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
               </div>
             ) : Renderer && question ? (
               <FitToHeight key={`${question.id}-${state.attempt}`}>
-                <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile} onSubmit={onSubmit} />
+                <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile} onSubmit={onSubmit} playAudio={isAudioVisual ? replay : undefined} />
               </FitToHeight>
             ) : (
               <div className="grid h-full place-items-center text-center">

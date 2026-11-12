@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { GAME_TYPES } from '../../types/game-dsl.types'
 import type { GameType } from '../../types/game-dsl.types'
-import type { AnswerPayload, MatchingStudentQuestion, StudentGame } from '../../types/game-student.types'
-import { getPlayerApi, PlayerApiNotSupportedError } from './index'
+import type { AnswerPayload, MatchingStudentQuestion, StudentGame, StudentOddOneOutQuestion } from '../../types/game-student.types'
+import { getPlayerApi } from './index'
+import { RealPlayerApi } from './realPlayerApi'
 import { MockPlayerApi, mockShareCodes } from './mockPlayerApi'
 
 // Tên mọi trường [ĐA] của DSL v1.0.0 (docs/game-json-dsl-v1.0.0.md, các mục có ký hiệu [ĐA]) cộng `correctAnswer`, chỉ được có SAU khi chấm.
@@ -53,6 +54,44 @@ afterEach(() => {
 })
 
 describe('MockPlayerApi: JSON trả cho học sinh không lộ đáp án', () => {
+  it.each([['MOCK14', 4], ['MOCK15', 5], ['MOCK16', 6]] as const)('keeps IMAGE media/marker, hides the answer and grades %s once', async (code, count) => {
+    const api = new MockPlayerApi()
+    expect(await api.getPublishInfo(code)).toMatchObject({ gameType: 'ODD_ONE_OUT' })
+    const { sessionId, game } = await openSession(api, code)
+    expect(collectKeys(game).has('oddOneOutId')).toBe(false)
+    const q = game.questions[0] as StudentOddOneOutQuestion
+    expect(q.renderMode).toBe('IMAGE')
+    expect(q.items).toHaveLength(count)
+    expect(q.items.every((i) => i.imageUrl?.startsWith('/assets/noto/'))).toBe(true)
+    const dog = q.items.find((i) => i.id === 'b')!
+    const cat = q.items.find((i) => i.id === 'a')!
+    const wrong = await api.submitInteraction(sessionId, q.id, { selectedItemId: cat.id })
+    expect(wrong).toMatchObject({ isCorrect: false, correctAnswer: { selectedItemId: dog.id } })
+    expect(await api.submitInteraction(sessionId, q.id, { selectedItemId: dog.id })).toEqual(wrong)
+    const next = await openSession(api, code)
+    const correct = await api.submitInteraction(next.sessionId, q.id, { selectedItemId: dog.id })
+    expect(correct.isCorrect).toBe(true)
+    expect(correct.pointsEarned).toBeGreaterThan(0)
+    expect(await api.submitInteraction(next.sessionId, q.id, { selectedItemId: dog.id })).toEqual(correct)
+  })
+  it('IMAGE demo accepts retry per pair, restores partial progress, and scores once on the final blank', async () => {
+    const api = new MockPlayerApi()
+    const { sessionId, game } = await openSession(api, 'MOCK12')
+    expect(collectKeys(game).has('correctOptionId')).toBe(false)
+    const q = game.questions[0] as { id: string; options: { id: string; visualPrompt: string }[] }
+    const idOf = (label: string) => q.options.find((o) => o.visualPrompt === label)!.id
+    const first = await api.submitInteraction(sessionId, q.id, { placements: [{ blankId: 'b1', optionId: idOf('Con bướm') }] })
+    expect(first).toMatchObject({ status: 'IN_PROGRESS', placementCorrect: true, retryable: true, correctAnswer: null, pointsEarned: 0 })
+    const resumed = await api.getGameForStudent(sessionId)
+    expect(resumed.answeredQuestionIds).toEqual([])
+    expect(resumed.questions[0]).toHaveProperty('acceptedPlacements', [{ blankId: 'b1', optionId: idOf('Con bướm') }])
+    const wrong = await api.submitInteraction(sessionId, q.id, { placements: [{ blankId: 'b2', optionId: idOf('Bọ rùa') }] })
+    expect(wrong).toMatchObject({ status: 'INCORRECT', placementCorrect: false, retryable: true, correctAnswer: null })
+    const final = await api.submitInteraction(sessionId, q.id, { placements: [{ blankId: 'b2', optionId: idOf('Con ong') }] })
+    expect(final).toMatchObject({ status: 'CORRECT', retryable: false })
+    expect(final.pointsEarned).toBeGreaterThan(0)
+    expect(await api.submitInteraction(sessionId, q.id, { placements: [{ blankId: 'b2', optionId: idOf('Con ong') }] })).toEqual(final)
+  })
   it('có đủ 10 loại game, mỗi loại một mã chia sẻ', async () => {
     const api = new MockPlayerApi()
     const types = await Promise.all(mockShareCodes().map(async (code) => (await api.getPublishInfo(code)).gameType))
@@ -163,8 +202,7 @@ describe('getPlayerApi', () => {
   it('VITE_PLAYER_API=real: endpoint chưa có thì báo "chưa hỗ trợ" rõ ràng', async () => {
     vi.stubEnv('VITE_PLAYER_API', 'real')
 
-    await expect((await getPlayerApi()).getPublishInfo('MOCK00')).rejects.toBeInstanceOf(PlayerApiNotSupportedError)
-    await expect((await getPlayerApi()).getPublishInfo('MOCK00')).rejects.toThrow(/Chưa hỗ trợ/)
+    expect(await getPlayerApi()).toBeInstanceOf(RealPlayerApi)
   })
 
   it('VITE_PLAYER_API=mock: dùng một bản mô phỏng duy nhất (giữ phiên giữa các lần gọi)', async () => {
@@ -181,7 +219,7 @@ describe('getPlayerApi', () => {
     expect(await (await getPlayerApi()).getPublishInfo('MOCK00')).toMatchObject({ gameType: 'QUIZ' })
 
     vi.stubEnv('VITE_USE_MOCK', 'none')
-    await expect((await getPlayerApi()).getPublishInfo('MOCK00')).rejects.toBeInstanceOf(PlayerApiNotSupportedError)
+    expect(await getPlayerApi()).toBeInstanceOf(RealPlayerApi)
   })
 })
 

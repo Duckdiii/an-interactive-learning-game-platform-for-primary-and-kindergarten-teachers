@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useReducer, useRef } from 'react'
 import { viText } from '../../constants/viText'
 import type { GameDsl } from '../../types/game-dsl.types'
+import { resolveUiProfile } from '../../player/profile/resolveUiProfile'
+import { UiProfileProvider } from '../../player/profile/UiProfileContext'
 import { summarizeQuestions } from '../../utils/questionSummary'
 import Button from '../Button'
 import Icon from '../ui/Icon'
@@ -73,11 +75,14 @@ export default function PlayTestPanel({ game, onExit }: PlayTestPanelProps) {
 
       {/* Dựng lại renderer từ đầu khi sang câu khác hoặc thử lại câu này. */}
       <div className="mx-auto w-full max-w-3xl rounded-2xl bg-white sm:border-2 sm:border-ink/10 sm:p-4">
-        <Player
-          key={`${state.index}-${state.attempt}`}
-          question={question}
-          onResult={(isCorrect) => dispatch({ type: 'answered', isCorrect })}
-        />
+        <UiProfileProvider profile={resolveUiProfile({ gradeLevel: game.metadata.gradeLevel })}>
+          <Player
+            key={`${state.index}-${state.attempt}`}
+            question={question}
+            subject={game.metadata.subject}
+            onResult={(isCorrect) => dispatch({ type: 'answered', isCorrect })}
+          />
+        </UiProfileProvider>
       </div>
 
       {state.answered ? (

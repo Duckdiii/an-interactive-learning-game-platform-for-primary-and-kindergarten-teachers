@@ -13,5 +13,10 @@ public record OddOneOutQuestionDsl(
         String visualPrompt,
         String imageUrl,
         List<TextChoiceDsl> items,
-        String oddOneOutId) implements QuestionDsl {
+        String oddOneOutId,
+        String questionText) implements QuestionDsl {
+    public OddOneOutQuestionDsl(String id, int timeLimitSeconds, int points, String audioText, String audioUrl,
+            String visualPrompt, String imageUrl, List<TextChoiceDsl> items, String oddOneOutId) {
+        this(id, timeLimitSeconds, points, audioText, audioUrl, visualPrompt, imageUrl, items, oddOneOutId, null);
+    }
 }

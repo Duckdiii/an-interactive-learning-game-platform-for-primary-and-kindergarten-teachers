@@ -6,6 +6,8 @@ import Icon from '../../ui/Icon'
 import { addDistractor, canAddDistractor, canRemoveDistractor, DISTRACTOR_LIMITS, hasImage, removeDistractor, setCorrectPrompt, setDistractorPrompt } from './avmEditing'
 import CheckedTextField from './CheckedTextField'
 import CommonFieldsForm from './CommonFieldsForm'
+import FormField from '../../ui/FormField'
+import { inputClass } from '../../ui/formStyles'
 import type { QuestionFormProps } from './formTypes'
 import { fieldMessage } from './issueText'
 import { useStableKeys } from './useStableKeys'
@@ -67,6 +69,14 @@ export default function AudioVisualMatchForm({ gameType, question: raw, issues, 
         error={fieldMessage(issues, 'correct.visualPrompt')}
         onCommit={(value) => onUpdate((current) => setCorrectPrompt(current as AudioVisualMatchQuestion, value))}
       />
+      <FormField id="avm-correct-image-url" label="URL ảnh đúng">
+        <input id="avm-correct-image-url" type="url" className={inputClass(false)}
+          value={question.correct.imageUrl ?? ''}
+          onChange={(event) => {
+            const imageUrl = event.target.value || undefined
+            onUpdate((current) => ({ ...current, correct: { ...(current as AudioVisualMatchQuestion).correct, imageUrl } }) as AudioVisualMatchQuestion)
+          }} />
+      </FormField>
 
       <fieldset className="space-y-3" aria-describedby={describedBy}>
         <legend className="text-base font-semibold text-ink">{text.avmDistractorsLegend}</legend>
@@ -108,6 +118,19 @@ export default function AudioVisualMatchForm({ gameType, question: raw, issues, 
                     })
                   }
                 />
+                <FormField id={`avm-distractor-image-url-${index}`} label={`URL ảnh sai ${index + 1}`}>
+                  <input id={`avm-distractor-image-url-${index}`} type="url" className={inputClass(false)}
+                    value={choice.imageUrl ?? ''}
+                    onChange={(event) => {
+                      const imageUrl = event.target.value || undefined
+                      onUpdate((current) => {
+                        const position = indexOfKey(key)
+                        if (position < 0) return current
+                        const value = current as AudioVisualMatchQuestion
+                        return { ...value, distractors: value.distractors.map((item, at) => at === position ? { ...item, imageUrl } : item) }
+                      })
+                    }} />
+                </FormField>
               </li>
             )
           })}
@@ -130,6 +153,13 @@ export default function AudioVisualMatchForm({ gameType, question: raw, issues, 
         </div>
       </fieldset>
 
+      <FormField id="avm-audio-url" label="URL âm thanh câu hỏi" hint="Để trống để dùng lời đọc của trình duyệt.">
+        <input id="avm-audio-url" type="url" className={inputClass(false)} value={question.audioUrl ?? ''}
+          onChange={(event) => {
+            const audioUrl = event.target.value || undefined
+            onUpdate((current) => ({ ...current, audioUrl }))
+          }} />
+      </FormField>
       <CommonFieldsForm gameType={gameType} question={question} issues={issues} onUpdate={onUpdate} idPrefix="avm" />
     </div>
   )

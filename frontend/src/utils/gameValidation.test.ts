@@ -41,6 +41,37 @@ describe('game mẫu', () => {
       }
     }
   })
+
+  it('VISUAL_CLOZE IMAGE mode validates supplied images and answer mapping without TEXT fields', () => {
+    const game = structuredClone(base('VISUAL_CLOZE')) as unknown as Loose
+    game.schemaVersion = '1.1.0'
+    game.mode = 'IMAGE'
+    game.questions = [{
+      id: 'q1',
+      timeLimitSeconds: 30,
+      points: 10,
+      questionText: 'Kéo hình đúng vào ô trống.',
+      sceneImageUrl: 'https://example.com/scene.png',
+      sceneWidth: 800,
+      sceneHeight: 600,
+      blanks: [{ id: 'b1', x: 200, y: 200, correctOptionId: 'o1' }],
+      options: [
+        { id: 'o1', visualPrompt: 'Mèo', imageUrl: 'https://example.com/cat.png' },
+        { id: 'o2', visualPrompt: 'Chó', imageUrl: 'https://example.com/dog.png' },
+      ],
+    }]
+
+    expect(validateGame(game as unknown as GameDsl, 'publish')).toEqual([])
+
+    const question = (game.questions as Loose[])[0]
+    const options = question.options as Loose[]
+    options[1].imageUrl = 'https://example.com/cat.png'
+    expect(validateGame(game as unknown as GameDsl, 'publish').some((issue) => issue.field === 'options[1].imageUrl' && issue.code === 'duplicate')).toBe(true)
+    options[1].imageUrl = 'https://example.com/Cat.png'
+    expect(validateGame(game as unknown as GameDsl, 'publish').some((issue) => issue.field.endsWith('.imageUrl') && issue.code === 'duplicate')).toBe(false)
+    ;(question.blanks as Loose[])[0].correctOptionId = 'unknown'
+    expect(validateGame(game as unknown as GameDsl, 'publish').some((issue) => issue.field === 'blanks[0].correctOptionId')).toBe(true)
+  })
 })
 
 describe('thông tin chung của game', () => {
@@ -168,6 +199,13 @@ describe('QUIZ (FLD-05, FLD-06)', () => {
 })
 
 describe('AUDIO_VISUAL_MATCH', () => {
+  it('báo lỗi khi ảnh đúng và ảnh sai dùng chung URL', () => {
+    const issues = run('AUDIO_VISUAL_MATCH', (q) => {
+      ;(q.correct as Loose).imageUrl = 'https://images.example/cat.png'
+      ;(q.distractors as Loose[])[0].imageUrl = 'https://images.example/cat.png'
+    })
+    expect(has(issues, 'duplicate', 'distractors')).toBe(true)
+  })
   it('lời đọc bắt buộc; 1 đến 3 hình nhiễu; các hình không trùng nhau', () => {
     expect(has(run('AUDIO_VISUAL_MATCH', (q) => delete q.audioText), 'required', 'audioText')).toBe(true)
     expect(has(run('AUDIO_VISUAL_MATCH', (q) => (q.distractors = [])), 'count', 'distractors')).toBe(true)
@@ -181,6 +219,17 @@ describe('AUDIO_VISUAL_MATCH', () => {
 })
 
 describe('ODD_ONE_OUT', () => {
+  it('chấp nhận câu IMAGE có 6 ảnh catalog và tiêu chí rõ', () => {
+    const game = structuredClone(base('ODD_ONE_OUT')) as unknown as Loose
+    game.schemaVersion = '1.1.0'
+    game.mode = 'IMAGE'
+    game.questions = [{ id: 'q1', timeLimitSeconds: 30, points: 10,
+      questionText: 'Phương tiện nào không đi trên đường bộ?', oddOneOutId: 'f',
+      items: ['car', 'bus', 'taxi', 'truck', 'bicycle', 'ship'].map((assetId, i) => ({
+        id: String.fromCharCode(97 + i), text: assetId, assetId, imageUrl: `/assets/noto/${assetId}.svg`,
+      })) }]
+    expect(validateGame(game as unknown as GameDsl, 'save')).toEqual([])
+  })
   it('chưa chọn mục khác loại: câu riêng "hãy chọn mục khác loại", còn QUIZ giữ câu "chưa có đáp án đúng"; câu tổng quát theo SRS dùng chung', () => {
     const odd = run('ODD_ONE_OUT', (q) => delete q.oddOneOutId)
     const quiz = run('QUIZ', (q) => delete q.correctOptionId)

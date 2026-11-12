@@ -46,6 +46,8 @@ public class SecurityConfig {
                 // Logout không nằm trong danh sách này: phải có access token hợp lệ.
                 .requestMatchers(HttpMethod.POST,
                         "/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/interactions").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)
@@ -64,7 +66,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList(allowedOrigins));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Participant-Id"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

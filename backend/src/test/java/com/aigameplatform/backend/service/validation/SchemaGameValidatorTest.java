@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.QuizGameDsl;
+import com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl;
 import com.aigameplatform.backend.entity.enums.GameType;
+import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -50,6 +52,38 @@ class SchemaGameValidatorTest {
         GameDsl game = context.getGame();
         assertThat(game).isNotNull();
         assertThat(game.gameType()).isEqualTo(type);
+    }
+
+    @Test
+    void acceptsVisualClozeImageV1_1WithoutChangingTheV1_0Example() throws IOException {
+        ObjectNode image = loadVisualClozeImageV1_1();
+        GameValidationContext context = new GameValidationContext(image);
+
+        List<ValidationError> errors = validator.validate(context);
+
+        assertThat(errors).isEmpty();
+        assertThat(context.getGame()).isNotNull();
+        assertThat(context.getGame().schemaVersion()).isEqualTo("1.1.0");
+        VisualClozeGameDsl game = (VisualClozeGameDsl) context.getGame();
+        assertThat(game.mode()).isEqualTo(VisualClozeMode.IMAGE);
+        assertThat(game.questions().getFirst().sceneWidth()).isEqualTo(1200);
+        assertThat(game.questions().getFirst().blanks()).hasSize(1);
+    }
+
+    @Test
+    void rejectsNonHttpsSceneImageInV1_1() throws IOException {
+        ObjectNode image = loadVisualClozeImageV1_1();
+        question(image, 0).put("sceneImageUrl", "http://images.example.edu/scene.png");
+
+        assertThat(validator.validate(new GameValidationContext(image)))
+                .extracting(ValidationError::path).contains("$.questions[0].sceneImageUrl");
+    }
+
+    private static ObjectNode loadVisualClozeImageV1_1() throws IOException {
+        try (InputStream in = SchemaGameValidatorTest.class.getResourceAsStream(
+                "/dsl-examples/visual-cloze-image-v1.1.json")) {
+            return (ObjectNode) MAPPER.readTree(in);
+        }
     }
 
     @Test
