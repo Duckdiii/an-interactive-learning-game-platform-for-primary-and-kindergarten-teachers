@@ -2,11 +2,16 @@
  * Bộ chuyển đổi và tra cứu kho tài nguyên đồ họa (Asset Bank) dành cho mầm non và tiểu học.
  * Hỗ trợ nhận diện tự động từ khóa (tiếng Việt, tiếng Anh, không dấu/có dấu)
  * để gán hình ảnh minh họa vector sắc nét (Candy Vector) cho các câu hỏi, thẻ chơi.
+ *
+ * ASSET_CATALOG là nguồn duy nhất của danh mục hình (backend sinh từ đây: scripts/assets/build-game-asset-catalog.mjs).
+ * Tệp này KHÔNG được import gì lúc chạy: script Node nạp thẳng tệp .ts và không hiểu đường dẫn không có đuôi.
  */
 
 export interface AssetItem {
   id: string
   name: string
+  /** Nhãn riêng đưa vào prompt cho AI khi `name` chưa đủ phân biệt (ví dụ quả bóng đồ chơi và bóng bay). */
+  promptLabel?: string
   category: 'numbers' | 'fruits' | 'animals' | 'objects' | 'themes'
   url: string
   keywords: readonly string[]
@@ -43,7 +48,7 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   // Đồ vật quen thuộc
   { id: 'obj-star', name: 'Ngôi sao', category: 'objects', url: '/assets/objects/star.svg', keywords: ['sao', 'star', 'ngoi sao', 'ong sao'] },
   { id: 'obj-flower', name: 'Bông hoa', category: 'objects', url: '/assets/objects/flower.svg', keywords: ['hoa', 'flower', 'bong hoa', 'canh hoa'] },
-  { id: 'obj-ball', name: 'Quả bóng', category: 'objects', url: '/assets/objects/ball.svg', keywords: ['bong', 'ball', 'qua bong', 'trai banh'] },
+  { id: 'obj-ball', name: 'Quả bóng', promptLabel: 'Quả bóng tròn đồ chơi (không phải bóng bay)', category: 'objects', url: '/assets/objects/ball.svg', keywords: ['bong', 'ball', 'qua bong', 'trai banh'] },
   { id: 'obj-candy', name: 'Cây kẹo', category: 'objects', url: '/assets/objects/candy.svg', keywords: ['keo', 'candy', 'vien keo', 'cay keo', 'sweet'] },
   { id: 'obj-heart', name: 'Trái tim', category: 'objects', url: '/assets/objects/heart.svg', keywords: ['tim', 'heart', 'trai tim', 'hinh tim'] },
   { id: 'obj-car', name: 'Xe ô tô', category: 'objects', url: '/assets/objects/car.svg', keywords: ['xe', 'oto', 'car', 'xe hoi', 'o to'] },

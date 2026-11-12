@@ -255,3 +255,18 @@ Ba lỗi lộ ra ở mục 9 đã được sửa và chạy lại trên game th�
 - Chưa có luật máy bắt "hình khác nghĩa với từ" (chỉ có trong prompt); kho thiếu hình nhẫn, lan.
 - Game vần chỉ có hình, không hiện chữ; chưa kiểm với trẻ lớp 1 có gọi đúng tên hình không.
 - Các luật đếm chỉ áp dụng cho Trắc nghiệm.
+
+## 11. Giai đoạn 4, mức B, bước 1: một nguồn duy nhất cho danh mục (2026-11-13)
+
+Bạn đã chốt làm thẳng mức B (bỏ mức A, vì mốc so sánh đã có sẵn là `Thử nghiệm lần 5` và `6` với cả 151 hình trong prompt) và làm theo từng bước có điểm dừng đánh giá. Kế hoạch 5 bước: (1) nguồn duy nhất cho danh mục, (2) bộ khớp tiếng Việt bằng Java, (3) bài đo offline, (4) dùng làm luật kiểm hình khác nghĩa, (5) dùng làm danh sách ngắn trong prompt; bước 4 và 5 đặt sau cờ cấu hình.
+
+**Đã làm ở bước 1:**
+- `ASSET_CATALOG` (`frontend/src/utils/assetResolver.ts`) giữ làm **nguồn duy nhất**. Thêm trường tùy chọn `promptLabel` cho nhãn riêng đưa vào prompt (thay chỗ nhãn `obj-ball` trước đây sửa tay trong JSON).
+- Module mới `frontend/src/utils/gameAssetCatalog.ts` biến `ASSET_CATALOG` thành danh mục backend, thêm **nhóm nghĩa** (`group`: number, food, animal, body, plant, weather, people, clothes, flag, space, scene, vehicle, school, music, furniture, object) và **họ phong cách** (`family`: openmoji, fluent, kenney, custom), kèm từ khóa không dấu. Nhóm nghĩa suy từ tiền tố id, trừ các hình tiền tố nói sai nghĩa (mặt trời, mây, cây, trái đất, xe, đồ học tập...) có bảng `GROUP_BY_MEANING` ưu tiên; hình mới có tiền tố lạ thì báo lỗi, buộc phải phân nhóm. Sau khi sửa theo `reviewer`, nhóm `object` giảm từ 51 xuống 26 hình, các hình còn lại nằm đúng nhóm nghĩa.
+- Script `scripts/assets/build-game-asset-catalog.mjs` sinh `backend/src/main/resources/assets/game-asset-catalog.json` (có chế độ `--check`). Script nạp thẳng các tệp `.ts` bằng Node, không cần cài thêm gì.
+- Test `gameAssetCatalog.test.ts` (6 test): JSON trên đĩa phải khớp từng chữ với bản sinh ra, nên sửa `ASSET_CATALOG` mà quên sinh lại thì test đỏ.
+- JSON vẫn 151 hình; **id, nhãn, đường dẫn của mọi mục không đổi**, chỉ thêm trường mới. Phân bố: 31 con vật, 24 đồ ăn, 12 bộ phận cơ thể, 9 phương tiện, 8 cây cối, 5 đồ học tập, 26 đồ vật khác; 103 hình Fluent, 27 OpenMoji, 11 Kenney, 10 tự vẽ.
+
+**Chưa làm và cần xử lý ở bước 2:**
+- Sáu con vật Kenney (voi, hươu cao cổ, khỉ, bò, gà, lợn) đang có **danh sách từ khóa rỗng** (đặt ở lần sửa trước để khỏi trùng với mục chủ đề cùng nghĩa trong bộ khớp của frontend). Bộ khớp ở backend sẽ cần từ khóa cho chúng, nên phải tách "từ khóa cho frontend" khỏi "từ khóa cho backend" hoặc đặt thứ tự ưu tiên rõ ràng.
+- Backend (`GameAssetCatalog.java`) chưa đọc `group`, `family`, `keywords`; bước 2 sẽ đọc.
