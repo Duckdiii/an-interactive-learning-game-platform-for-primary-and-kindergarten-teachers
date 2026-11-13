@@ -17,6 +17,20 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-13 — Thêm từ khóa hình bằng cụm có dấu của động từ, tính từ thông dụng mà không thử câu thường
+- Lỗi: khi thêm 52 hình Fluent, đặt từ khóa cho "chạy" là cụm "đang chạy", cho "tập thể dục" có "khởi động", cho "gió" là "gio thoi", cho "cấm lửa" là "cam lua". Cụm nhiều chữ không bị giới hạn "từ đơn ngắn", nên "con chó đang chạy" và "khởi động máy" kéo hình người, "giờ thôi" ra hình gió. Đồng thời viết wiki nói đã bỏ "khởi động" khi code còn giữ.
+- Phát hiện nhờ: `reviewer` (suy luận từ `KeywordAssetRetriever`).
+- Nguyên nhân gốc: chỉ thử từ khóa với câu đúng nghĩa, không thử câu thường chứa cùng từ; viết tài liệu từ ý định chứ không đối chiếu code.
+- Cách chặn: mỗi hình mới có từ khóa là động từ hoặc tính từ thông dụng (đang chạy, khởi động, nguy hiểm) thì chỉ dùng tên riêng của vật, hoặc thêm ít nhất một dòng âm vào `retrieval-eval.csv` trước khi kết luận; đối chiếu wiki với code bằng grep trước khi báo.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-13 — Lặp lại lỗi mất lớp escape khi ghi script bằng heredoc, và sơ đồ thiếu bước có trong ví dụ
+- Lỗi: (1) viết script Node qua heredoc có biểu thức chính quy chứa dấu gạch chéo ngược; một lớp escape bị mất, script lỗi cú pháp, rồi sửa bằng `sed` cũng không khớp; chỉ xong khi dùng công cụ Edit. Đây là lỗi đã ghi ở mục 2026-11-12. (2) sơ đồ pipeline đầu tiên vẽ vector rồi đồ thị nhưng bỏ bước tra bảng nhãn, dù ví dụ minh họa đã có bước đó.
+- Phát hiện nhờ: (1) lỗi cú pháp khi chạy; (2) người dùng hỏi "ô này nằm ở đâu trong sơ đồ".
+- Nguyên nhân gốc: (1) quên áp dụng bài học đang chờ duyệt; (2) vẽ sơ đồ từ trí nhớ về thiết kế thay vì đối chiếu từng bước với ví dụ đã đưa.
+- Cách chặn: (1) đoạn code có dấu gạch chéo ngược thì dùng Write/Edit, không dùng heredoc lồng chuỗi; (2) trước khi đưa sơ đồ, đối chiếu từng bước trong ví dụ đã nói với các hộp trong sơ đồ, thiếu bước nào thì thêm.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-12 — Viết code có dấu `\` qua `node -e` trong bash: mất một lớp escape
 - Lỗi: hai lần ghi biểu thức chính quy qua `node -e '...'` (chuỗi JS lồng trong lệnh bash): `\\s` trong TypeScript (`optionVisual.wordCardText`) thành `s`, và `\\p{L}` trong Java (`QuizRule`) thành `\p{L}` (lỗi biên dịch). Lần TypeScript chạy được nhưng sai nghĩa, chỉ test mới bắt được.
 - Phát hiện nhờ: test vừa viết (`optionVisual.test.ts`) và grep lại đoạn vừa ghi.
