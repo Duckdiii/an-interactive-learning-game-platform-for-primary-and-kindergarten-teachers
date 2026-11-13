@@ -21,6 +21,17 @@ hươu cao cổ;kenney-animal-giraffe;
 con ngựa;fluent-animal-horse;
 elephant;kenney-animal-elephant;
 duck;anim-duck;
+con cá sấu;kenney-animal-crocodile;
+cá voi;kenney-animal-whale;
+con hà mã;kenney-animal-hippo;
+tê giác;kenney-animal-rhino;
+khỉ đột;kenney-animal-gorilla;
+nai sừng tấm;kenney-animal-moose;
+kỳ lân biển;kenney-animal-narwhal;
+con vẹt;kenney-animal-parrot;
+con lười;kenney-animal-sloth;
+hải mã;kenney-animal-walrus;
+con gà con;kenney-animal-chick;
 # --- bộ phận cơ thể (tiếng Anh như kịch bản 004, tiếng Việt như tên hình)
 head;custom-body-head;
 shoulders;custom-body-shoulder;
@@ -109,6 +120,62 @@ cờ Thái Lan;kenney-flag-th;
 đánh răng;fluent-object-toothbrush;
 thức dậy;fluent-object-alarm-clock;
 ngôi nhà;fluent-object-house;
+# --- bổ sung Fluent (tải thêm 2026-11-13, đo nhu cầu theo kịch bản và chuẩn mầm non)
+cá heo;fluent-animal-dolphin;
+cá mập;fluent-animal-shark;
+con rùa;fluent-animal-turtle;
+con tôm;fluent-animal-shrimp;
+bạch tuộc;fluent-animal-octopus;
+con hổ;fluent-animal-tiger;
+con cừu;fluent-animal-sheep;
+bố;fluent-people-father;
+mẹ;fluent-people-mother;
+ông nội;fluent-people-grandfather;
+bà ngoại;fluent-people-grandmother;
+em bé;fluent-people-baby;
+bé trai;fluent-people-boy;
+bé gái;fluent-people-girl;
+đầu bếp;fluent-people-cook;
+thợ xây;fluent-people-builder;
+chạy bộ;fluent-people-running;
+vỗ tay;fluent-people-clapping;
+tập thể dục;fluent-people-exercise;
+cái lưỡi;fluent-body-tongue;
+đôi giày;fluent-clothes-shoes;
+áo thun;fluent-clothes-tshirt;
+quần dài;fluent-clothes-jeans;
+cái váy;fluent-clothes-dress;
+đôi tất;fluent-clothes-socks;
+xe cứu thương;fluent-object-ambulance;
+máy bay trực thăng;fluent-object-helicopter;
+xe cứu hỏa;fluent-object-fire-engine;
+tàu thủy;fluent-object-ship;
+máy kéo;fluent-object-tractor;
+bông tuyết;fluent-weather-snowflake;
+sấm chớp;fluent-weather-lightning;
+cầu vồng;fluent-weather-rainbow;
+mặt trăng;fluent-weather-moon;
+giọt nước;fluent-weather-droplet;
+gió thổi;fluent-weather-wind;
+người tuyết;fluent-weather-snowman;
+chiếc lá rụng;fluent-plant-fallen-leaf;
+cái ghế;fluent-object-chair;
+chuột máy tính;fluent-object-computer-mouse;
+cốc nước;fluent-object-cup;
+người máy;fluent-object-robot;
+cây non;fluent-plant-seedling;
+chậu cây;fluent-plant-potted;
+hũ muối;fluent-food-salt;
+micro;fluent-object-microphone;
+nhà vệ sinh;fluent-object-restroom;
+cấm hút thuốc;fluent-object-no-smoking;
+biển cảnh báo;fluent-object-warning;
+nơi nguy hiểm;fluent-object-warning;
+cấm lửa;fluent-object-no-smoking;
+con chó đang chạy;anim-dog;đang chạy không được kéo hình người chạy
+trường học;fluent-object-school;
+siêu thị;fluent-object-supermarket;
+công viên;fluent-object-park;
 # --- thẻ chữ và mô tả hình thật (game vần, kịch bản 003)
 Thẻ chữ bàn;custom-object-table;
 Từ b... (bàn);custom-object-table;
@@ -154,7 +221,7 @@ bố mẹ em đi làm;-;bố lẫn bò, bỏ
 Chọn đáp án cho bé;-;cho lẫn chó
 bài ca của em;-;ca lẫn cá
 Điền vào chỗ trống;-;trống nhạc
-đàn gà con;~;đàn là nhạc cụ, đàn gà là bầy
+đàn gà con;~;ra gà con trước, vẫn ra thêm đàn ghi-ta vì "đàn" là nhạc cụ
 khó khăn;~;khăn
 bắt đầu bài học;-;đầu
 vai trò của em;~;vai
@@ -164,4 +231,12 @@ Em hãy chọn hình đúng;-;
 trái tim biết yêu thương;~;tim, trái
 em giận bạn;-;giận lẫn gián
 nhân vật trong truyện;-;nhân lẫn nhẫn
+vết bẩn trên áo;-;vết lẫn vẹt
+tuyệt vời lắm;-;tuyệt khác tuyết
+rửa tay trước khi ăn;-;rửa lẫn rùa
+cứu người bị nạn;-;cứu lẫn cứu hỏa
+tất cả các bạn;-;tất là từ thường, không phải đôi tất
+ba nói với con;-;ba (bố) không phải bà
+khởi động máy;-;khởi động không phải thể dục
+bé lười ăn rau;-;lười (tính từ) khác con lười
 bé lăn tròn xuống dốc;-;lăn lẫn lan
