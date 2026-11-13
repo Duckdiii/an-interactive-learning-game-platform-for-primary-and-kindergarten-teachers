@@ -143,6 +143,7 @@ Quy tắc đã duyệt (mỗi quy tắc rút từ một lỗi thật, chi tiết
 - Viết tiêu chí cho agent kiểm tra từ nội dung file thật, không từ giả định; chạy thử trên dữ liệu thật trước khi coi agent là xong.
 - Máy không có `gh`; thao tác GitHub dùng công cụ `mcp__github__*`. Kiểm tra công cụ có sẵn trước khi đưa vào prompt agent.
 - Agent vừa tạo chưa gọi theo tên được trong cùng phiên (chỉ nạp lúc bắt đầu phiên); thử bằng `general-purpose` kèm thân file agent.
+- Đổi hành vi một hàm dùng chung thì grep mọi chỗ gọi và thêm test cho chỗ gọi đó; thêm bean vào chuỗi theo `@Order` thì kiểm giá trị đang có, không để trùng.
 
 Quy trình: khi gặp lỗi của chính mình (test/build fail do mình gây ra, bị người dùng sửa lại, subagent báo lệch), thêm một mục theo mẫu vào phần "Chờ duyệt" của `.claude/lessons-inbox.md` trước khi báo hoàn thành. Không tự chuyển vào `CLAUDE.md` hay prompt agent; người dùng duyệt trước. Khi lỗi có thể kiểm tra tự động, ưu tiên biến thành mục kiểm tra trong prompt agent hoặc test thay vì chỉ thêm chữ vào file này. Chỉ ghi lỗi có hậu quả hoặc lặp lại, không ghi typo/format.
 

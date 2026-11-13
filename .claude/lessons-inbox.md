@@ -17,13 +17,6 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
-### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau
-- Lỗi: `KeywordAssetRetriever.match` được thêm luật "từ khóa ngắn chỉ khớp ở chữ ≤3 từ" để câu thường không ra hình giả, rồi `AssetMeaningGameValidator` dùng lại chính hàm đó trên chuỗi dài (nối visualPrompt, text, label). Hình đã gắn không được tính là "được nhắc" nên validator báo lỗi sai khi chữ dài có từ khóa ngắn của hình đó. Ngoài ra thêm validator `@Order(2)` trùng với `BusinessRuleGameValidator`.
-- Phát hiện nhờ: `reviewer` và `backend-architect-reviewer` (đọc code, không phải test).
-- Nguyên nhân gốc: sửa hàm dùng chung (bước 3) mà không rà lại chỗ gọi đã viết ở bước trước; bộ đo chỉ có ca ≤3 từ nên không bắt được; không kiểm `@Order` của các bean cùng chuỗi.
-- Cách chặn: khi đổi hành vi của hàm dùng chung thì grep mọi chỗ gọi và thêm test ca chữ dài; thêm bean vào chuỗi `@Order` thì kiểm giá trị đang có (đã thêm test khóa thứ tự trong `AssetMeaningGameValidatorTest`).
-- Trạng thái: CHỜ DUYỆT
-
 ### 2026-11-12 — Viết code có dấu `\` qua `node -e` trong bash: mất một lớp escape
 - Lỗi: hai lần ghi biểu thức chính quy qua `node -e '...'` (chuỗi JS lồng trong lệnh bash): `\\s` trong TypeScript (`optionVisual.wordCardText`) thành `s`, và `\\p{L}` trong Java (`QuizRule`) thành `\p{L}` (lỗi biên dịch). Lần TypeScript chạy được nhưng sai nghĩa, chỉ test mới bắt được.
 - Phát hiện nhờ: test vừa viết (`optionVisual.test.ts`) và grep lại đoạn vừa ghi.
@@ -191,6 +184,13 @@ Mẫu một mục:
 - Trạng thái: CHỜ DUYỆT
 
 ## Đã xử lý
+
+### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau
+- Lỗi: `KeywordAssetRetriever.match` được thêm luật "từ khóa ngắn chỉ khớp ở chữ ≤3 từ" để câu thường không ra hình giả, rồi `AssetMeaningGameValidator` dùng lại chính hàm đó trên chuỗi dài (nối visualPrompt, text, label). Hình đã gắn không được tính là "được nhắc" nên validator báo lỗi sai khi chữ dài có từ khóa ngắn của hình đó. Ngoài ra thêm validator `@Order(2)` trùng với `BusinessRuleGameValidator`.
+- Phát hiện nhờ: `reviewer` và `backend-architect-reviewer` (đọc code, không phải test).
+- Nguyên nhân gốc: sửa hàm dùng chung (bước 3) mà không rà lại chỗ gọi đã viết ở bước trước; bộ đo chỉ có ca ≤3 từ nên không bắt được; không kiểm `@Order` của các bean cùng chuỗi.
+- Cách chặn: khi đổi hành vi của hàm dùng chung thì grep mọi chỗ gọi và thêm test ca chữ dài; thêm bean vào chuỗi `@Order` thì kiểm giá trị đang có (đã thêm test khóa thứ tự trong `AssetMeaningGameValidatorTest`).
+- Trạng thái: ĐÃ ÁP DỤNG (test khóa thứ tự trong AssetMeaningGameValidatorTest, test ca chữ dài; quy tắc trong CLAUDE.md)
 
 ### 2026-10-11 — Agent kiểm tra diff bỏ sót thay đổi chưa commit
 - Lỗi: `contract-guardian` chỉ so `main...HEAD`, nên không thấy sửa đổi chưa commit; cùng mẫu còn ở `migration-checker` (kiểm migration cũ bị sửa) và `doc-syncer`.
