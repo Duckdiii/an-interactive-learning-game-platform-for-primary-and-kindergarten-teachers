@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-13 — Sửa file trong lúc subagent kiểm tra đang chạy test, và lại so chữ tiếng Việt sau khi bỏ dấu
+- Lỗi: (1) chạy script đồng bộ từ khóa (sửa `assetResolver.ts` và JSON) khi `test-verifier` đang chạy `npm test`, làm nó báo fail giả ở `gameAssetCatalog.test.ts` và tốn một lượt chạy lại. (2) script đo biến thể gom khái niệm bằng chữ đã bỏ dấu, ra 5 cặp nhầm ("bò" với "bố"), cùng loại lỗi đã ghi hai lần trong hộp này.
+- Phát hiện nhờ: `test-verifier` (diff đúng ở các dòng vừa sửa) và tự xem danh sách cặp.
+- Nguyên nhân gốc: coi việc sửa dữ liệu là độc lập với lượt kiểm tra đang chạy; dùng hàm bỏ dấu cho mọi phép so chữ theo thói quen.
+- Cách chặn: khi có agent kiểm tra đang chạy thì không sửa file trong phạm vi nó kiểm, hoặc dừng và chạy lại sau khi sửa; so tên, nhãn tiếng Việt luôn giữ dấu, chỉ bỏ dấu khi có lý do và kèm danh sách cặp để soát.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-13 — Lặp lại lỗi từ khóa dễ khớp nhầm khi thêm hình tự vẽ, và quên kiểm từ khóa đã có
 - Lỗi: thêm 16 hình tự vẽ với từ khóa "mam co" (khớp "mầm cỏ"), "sao vang" đứng riêng (cướp "ngôi sao vàng"), và "den ong sao" trùng từ khóa đang nằm ở đèn lồng cũ nên hình mới đứng sau. Cùng loại lỗi đã ghi ở mục cùng ngày về từ khóa cụm có dấu.
 - Phát hiện nhờ: bộ đo offline (206/207) và `reviewer`.
