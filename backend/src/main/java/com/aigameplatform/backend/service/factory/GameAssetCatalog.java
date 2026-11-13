@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
@@ -85,9 +87,14 @@ public class GameAssetCatalog {
                 (first, second) -> first, LinkedHashMap::new));
     }
 
-    /** Một dòng "id: nhãn" cho mỗi hình, để đưa vào prompt. */
+    /**
+     * Một dòng "id: nhãn" cho mỗi nhãn, để đưa vào prompt. Biến thể cùng nhãn (cùng khái niệm, khác họ phong cách) chỉ đưa mục
+     * đứng trước trong file: AI không tự chọn họ phong cách, việc đó để cho bước gán hình sau.
+     */
     public String promptList() {
-        return assets.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue().label())
+        Set<String> seenLabels = new HashSet<>();
+        return assets.entrySet().stream().filter(entry -> seenLabels.add(entry.getValue().label()))
+                .map(entry -> entry.getKey() + ": " + entry.getValue().label())
                 .collect(Collectors.joining("\n"));
     }
 }

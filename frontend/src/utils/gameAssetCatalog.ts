@@ -62,6 +62,7 @@ export const GROUP_BY_MEANING: Readonly<Record<string, AssetGroup>> = {
   'fluent-object-race-car': 'vehicle',
   'fluent-object-tricycle': 'vehicle',
   'fluent-object-truck': 'vehicle',
+  'fluent-object-car': 'vehicle',
   'fluent-object-ambulance': 'vehicle',
   'fluent-object-helicopter': 'vehicle',
   'fluent-object-fire-engine': 'vehicle',

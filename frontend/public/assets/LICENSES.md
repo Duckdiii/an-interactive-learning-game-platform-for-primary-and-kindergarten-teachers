@@ -47,6 +47,8 @@ Xem `sfx/kenney/LICENSE-Kenney.txt`. Không bắt buộc ghi công; vẫn ghi đ
 | `kenney/animals/`, `kenney/flags/`, `kenney/planets/` | [Kenney](https://kenney.nl): Animal Pack (kiểu Round outline), Flag Pack, Planets | CC0 1.0 |
 | `custom/` | Hình tự vẽ cho dự án (SVG), kiểu Fluent Flat đơn giản và kiểu Kenney | Thuộc dự án; không dùng nguồn bên ngoài |
 
+Ghi chú (2026-11-13): thêm biến thể phong cách cho khái niệm đã có hình: 12 con vật vào `kenney/animals/` (gấu, chó, vịt, ếch, dê, ngựa, cú, gấu trúc, chim cánh cụt, thỏ, rắn, ngựa vằn; Kenney Animal Pack, CC0 1.0) và 31 biểu tượng vào `fluent/` (con vật, trái cây, ngôi sao, bông hoa, kẹo, trái tim, xe ô tô; Microsoft Fluent Emoji kiểu Flat, MIT).
+
 Ghi chú (2026-11-13): thêm 16 hình tự vẽ vào `custom/` (rau mồng tơi, rau dền, mâm cỗ Trung thu, cây bàng, bình tưới, quả cân, đèn ông sao, mặt nạ, cốc đong, búp bê, biển lối ra, Vịnh Hạ Long, Chùa Một Cột, chợ quê, tiệm bánh, cái ao), SVG vẽ riêng cho dự án, không dùng nguồn bên ngoài.
 
 Ghi chú (2026-11-13): thêm 52 biểu tượng vào `fluent/` (con vật, người và gia đình, quần áo, phương tiện, thời tiết, đồ vật, ký hiệu, nơi chốn, hành động), tải từ [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) kiểu Flat, giấy phép MIT như các hình Fluent trên.

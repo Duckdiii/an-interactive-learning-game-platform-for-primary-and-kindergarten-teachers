@@ -43,4 +43,25 @@ class GameAssetCatalogTest {
         assertThat(catalog.urlOf(null)).isNull();
         assertThat(catalog.promptList()).contains("fluent-object-balloon: Bóng bay");
     }
+
+    @Test
+    void promptListsEachLabelOnceKeepingTheEntryThatComesFirst() {
+        // "Con chó" có ba biến thể phong cách (OpenMoji, Kenney, Fluent): prompt chỉ đưa mục đứng trước.
+        String prompt = catalog.promptList();
+
+        assertThat(prompt).contains("anim-dog: Con chó").doesNotContain("kenney-animal-dog", "fluent-animal-dog");
+        assertThat(prompt).contains("kenney-animal-elephant: Con voi").doesNotContain("fluent-animal-elephant");
+        java.util.List<String> labels = prompt.lines().map(line -> line.substring(line.indexOf(": ") + 2)).toList();
+        assertThat(labels).doesNotHaveDuplicates();
+        assertThat(catalog.find("fluent-animal-dog")).as("biến thể vẫn có trong danh mục").isNotNull();
+    }
+
+    @Test
+    void entriesSharingALabelAreTheSameConceptInTheSameGroup() {
+        // promptList bỏ mục trùng nhãn: hai hình khác nghĩa mà trùng nhãn (khác nhóm) sẽ mất khỏi prompt mà không báo gì.
+        java.util.Map<String, java.util.Set<String>> groupsByLabel = new java.util.HashMap<>();
+        catalog.entries().forEach(entry ->
+                groupsByLabel.computeIfAbsent(entry.label(), label -> new java.util.HashSet<>()).add(entry.group()));
+        groupsByLabel.forEach((label, groups) -> assertThat(groups).as(label).hasSize(1));
+    }
 }

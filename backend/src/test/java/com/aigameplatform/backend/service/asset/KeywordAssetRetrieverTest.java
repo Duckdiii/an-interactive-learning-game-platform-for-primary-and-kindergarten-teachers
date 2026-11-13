@@ -93,6 +93,18 @@ class KeywordAssetRetrieverTest {
     }
 
     @Test
+    void styleVariantsShareTheConceptKeywordsButTheOriginalStaysFirst() {
+        // Biến thể (Kenney, Fluent) chép đủ từ khóa của mục gốc: mentions nhận biến thể là đúng hình; khi hòa điểm mục gốc vẫn ra trước.
+        assertThat(retriever.mentions("Mèo", "fluent-animal-cat")).isTrue();
+        assertThat(retriever.mentions("Chó", "kenney-animal-dog")).isTrue();
+        assertThat(retriever.mentions("Quả táo đỏ", "fluent-food-apple")).isTrue();
+        assertThat(top("con mèo")).isEqualTo("anim-cat");
+        assertThat(top("con chó")).isEqualTo("anim-dog");
+        assertThat(top("quả táo")).isEqualTo("fruit-apple");
+        assertThat(ids("con chó")).contains("anim-dog", "kenney-animal-dog", "fluent-animal-dog");
+    }
+
+    @Test
     void collidingWordsDoNotInventAPicture() {
         assertThat(ids("đau bụng")).isEmpty();
         assertThat(ids("trong lớp học")).isEmpty();
