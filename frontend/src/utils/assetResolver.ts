@@ -141,7 +141,7 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   { id: 'fluent-object-scissors', name: 'Cái kéo', category: 'objects', url: '/assets/fluent/object-scissors.svg', keywords: ['cai keo', 'scissors'] },
   { id: 'fluent-object-ruler', name: 'Thước kẻ', category: 'objects', url: '/assets/fluent/object-ruler.svg', keywords: ['thuoc ke', 'cay thuoc', 'ruler'] },
   { id: 'fluent-object-red_envelope', name: 'Bao lì xì', category: 'objects', url: '/assets/fluent/object-red_envelope.svg', keywords: ['li xi', 'bao li xi', 'red envelope'] },
-  { id: 'fluent-object-lantern', name: 'Đèn lồng', category: 'objects', url: '/assets/fluent/object-lantern.svg', keywords: ['den long', 'den ong sao', 'lantern'] },
+  { id: 'fluent-object-lantern', name: 'Đèn lồng', category: 'objects', url: '/assets/fluent/object-lantern.svg', keywords: ['den long', 'lantern'] },
   { id: 'fluent-body-ear', name: 'Cái tai', category: 'objects', url: '/assets/fluent/body-ear.svg', keywords: ['cai tai', 'doi tai', 'ear', 'ears'] },
   { id: 'fluent-body-eye', name: 'Con mắt', category: 'objects', url: '/assets/fluent/body-eye.svg', keywords: ['con mat', 'doi mat', 'eye', 'eyes'] },
   { id: 'fluent-body-nose', name: 'Cái mũi', category: 'objects', url: '/assets/fluent/body-nose.svg', keywords: ['cai mui', 'nose'] },
@@ -224,7 +224,7 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   { id: 'kenney-animal-sloth', name: 'Con lười', category: 'animals', url: '/assets/kenney/animals/sloth.png', keywords: [], matchKeywords: ['con luoi', 'sloth'], exactKeywords: ['con lười'] },
   { id: 'kenney-animal-walrus', name: 'Hải mã', category: 'animals', url: '/assets/kenney/animals/walrus.png', keywords: [], matchKeywords: ['hai ma', 'con hai ma', 'walrus'] },
   { id: 'kenney-animal-whale', name: 'Cá voi', category: 'animals', url: '/assets/kenney/animals/whale.png', keywords: [], matchKeywords: ['ca voi', 'con ca voi', 'whale'] },
-  { id: 'kenney-flag-vn', name: 'Cờ Việt Nam', category: 'objects', url: '/assets/kenney/flags/vn.png', keywords: ['co viet nam', 'quoc ky viet nam', 'vietnam flag', 'flag of vietnam'] },
+  { id: 'kenney-flag-vn', name: 'Cờ Việt Nam', category: 'objects', url: '/assets/kenney/flags/vn.png', keywords: ['co viet nam', 'quoc ky viet nam', 'vietnam flag', 'flag of vietnam'], matchKeywords: ['co do sao vang'] },
   { id: 'kenney-flag-th', name: 'Cờ Thái Lan', category: 'objects', url: '/assets/kenney/flags/th.png', keywords: ['co thai lan', 'thailand flag', 'flag of thailand'] },
   { id: 'kenney-planet-mercury', name: 'Sao Thủy', category: 'objects', url: '/assets/kenney/planets/mercury.png', keywords: ['sao thuy', 'mercury'] },
   { id: 'kenney-planet-venus', name: 'Sao Kim', category: 'objects', url: '/assets/kenney/planets/venus.png', keywords: ['sao kim', 'venus'] },
@@ -295,6 +295,24 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   { id: 'fluent-object-school', name: 'Trường học', category: 'objects', url: '/assets/fluent/object-school.svg', keywords: [], matchKeywords: ['truong hoc', 'nha truong', 'school'] },
   { id: 'fluent-object-supermarket', name: 'Siêu thị', category: 'objects', url: '/assets/fluent/object-supermarket.svg', keywords: [], matchKeywords: ['sieu thi', 'cua hang tap hoa', 'convenience store', 'supermarket'] },
   { id: 'fluent-object-park', name: 'Công viên', category: 'objects', url: '/assets/fluent/object-park.svg', keywords: [], matchKeywords: ['cong vien', 'vuon quoc gia', 'national park', 'park'] },
+  // Hình tự vẽ bổ sung 2026-11-13 (đo nhu cầu: không nguồn quốc tế nào có món, rau, địa danh, đồ Trung thu Việt). Cùng cách với các mục trên: keywords rỗng, chỉ backend khớp.
+  // Từ trùng âm khi bỏ dấu dùng từ khóa có dấu: "ao" khác "áo", "chợ" khác "chờ", "quả cân" khác "quá cần".
+  { id: 'custom-food-rau-mong-toi', name: 'Rau mồng tơi', category: 'objects', url: '/assets/custom/food-rau-mong-toi.svg', keywords: [], matchKeywords: ['rau mong toi', 'mong toi', 'malabar spinach'] },
+  { id: 'custom-food-rau-den', name: 'Rau dền', category: 'objects', url: '/assets/custom/food-rau-den.svg', keywords: [], matchKeywords: ['rau den', 'amaranth'] },
+  { id: 'custom-food-mam-co-trung-thu', name: 'Mâm cỗ Trung thu', category: 'objects', url: '/assets/custom/food-mam-co-trung-thu.svg', keywords: [], matchKeywords: ['mam co trung thu', 'mid autumn feast'], exactKeywords: ['mâm cỗ'] },
+  { id: 'custom-plant-bang', name: 'Cây bàng', category: 'objects', url: '/assets/custom/plant-bang.svg', keywords: [], matchKeywords: ['cay bang', 'la bang', 'banyan'], exactKeywords: ['bàng'] },
+  { id: 'custom-object-watering-can', name: 'Bình tưới nước', category: 'objects', url: '/assets/custom/object-watering-can.svg', keywords: [], matchKeywords: ['binh tuoi nuoc', 'binh tuoi', 'watering can'] },
+  { id: 'custom-object-weight', name: 'Quả cân (quả cân kg)', category: 'objects', url: '/assets/custom/object-weight.svg', keywords: [], matchKeywords: ['weight', 'kg weight'], exactKeywords: ['quả cân'] },
+  { id: 'custom-object-den-ong-sao', name: 'Đèn ông sao', category: 'objects', url: '/assets/custom/object-den-ong-sao.svg', keywords: ['den ong sao'], matchKeywords: ['den sao', 'star lantern'] },
+  { id: 'custom-object-mat-na', name: 'Mặt nạ Trung thu', category: 'objects', url: '/assets/custom/object-mat-na.svg', keywords: [], matchKeywords: ['mat na', 'mask'] },
+  { id: 'custom-object-measuring-cup', name: 'Cốc đong', category: 'objects', url: '/assets/custom/object-measuring-cup.svg', keywords: [], matchKeywords: ['coc dong', 'binh dong', 'measuring cup'] },
+  { id: 'custom-object-doll', name: 'Búp bê', category: 'objects', url: '/assets/custom/object-doll.svg', keywords: [], matchKeywords: ['bup be', 'doll'] },
+  { id: 'custom-scene-ha-long', name: 'Vịnh Hạ Long', category: 'objects', url: '/assets/custom/scene-ha-long.svg', keywords: [], matchKeywords: ['vinh ha long', 'ha long', 'ha long bay'] },
+  { id: 'custom-scene-chua-mot-cot', name: 'Chùa Một Cột', category: 'objects', url: '/assets/custom/scene-chua-mot-cot.svg', keywords: [], matchKeywords: ['chua mot cot', 'one pillar pagoda'] },
+  { id: 'custom-object-exit-sign', name: 'Biển lối ra', category: 'objects', url: '/assets/custom/object-exit-sign.svg', keywords: [], matchKeywords: ['exit', 'exit sign', 'emergency exit'], exactKeywords: ['lối ra', 'lối thoát', 'lối ra vào'] },
+  { id: 'custom-scene-cho-que', name: 'Chợ quê (chợ làng)', category: 'objects', url: '/assets/custom/scene-cho-que.svg', keywords: [], matchKeywords: ['village market', 'market'], exactKeywords: ['chợ quê', 'chợ phiên', 'chợ'] },
+  { id: 'custom-scene-tiem-banh', name: 'Tiệm bánh', category: 'objects', url: '/assets/custom/scene-tiem-banh.svg', keywords: [], matchKeywords: ['tiem banh', 'cua hang banh', 'bakery', 'cake shop'] },
+  { id: 'custom-scene-ao', name: 'Cái ao (ao làng)', category: 'objects', url: '/assets/custom/scene-ao.svg', keywords: [], matchKeywords: ['pond'], exactKeywords: ['ao', 'cái ao', 'ao làng', 'ao cá'] },
 ]
 
 /** Chuẩn hóa xâu chữ: bỏ dấu tiếng Việt, ký tự đặc biệt, chuyển chữ thường */

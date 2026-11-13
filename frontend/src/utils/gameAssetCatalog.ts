@@ -97,7 +97,7 @@ const GROUP_BY_ID: ReadonlyArray<readonly [RegExp, AssetGroup]> = [
   [/^(fluent|custom)-clothes-/, 'clothes'],
   [/^kenney-flag-/, 'flag'],
   [/^kenney-planet-/, 'space'],
-  [/^fluent-bg-/, 'scene'],
+  [/^(fluent-bg-|custom-scene-)/, 'scene'],
   [/^(obj-|(fluent|custom)-object-)/, 'object'],
 ]
 

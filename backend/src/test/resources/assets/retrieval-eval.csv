@@ -176,6 +176,25 @@ con chó đang chạy;anim-dog;đang chạy không được kéo hình người 
 trường học;fluent-object-school;
 siêu thị;fluent-object-supermarket;
 công viên;fluent-object-park;
+# --- hình tự vẽ bổ sung 2026-11-13 (món, rau, địa danh, đồ Trung thu Việt)
+rau mồng tơi;custom-food-rau-mong-toi;
+rau dền;custom-food-rau-den;
+mâm cỗ Trung thu;custom-food-mam-co-trung-thu;
+cây bàng;custom-plant-bang;
+bình tưới nước;custom-object-watering-can;
+quả cân;custom-object-weight;
+đèn ông sao;custom-object-den-ong-sao;
+mặt nạ;custom-object-mat-na;
+cốc đong;custom-object-measuring-cup;
+búp bê;custom-object-doll;
+vịnh Hạ Long;custom-scene-ha-long;
+chùa Một Cột;custom-scene-chua-mot-cot;
+lối ra;custom-object-exit-sign;
+chợ quê;custom-scene-cho-que;
+tiệm bánh;custom-scene-tiem-banh;
+cái ao;custom-scene-ao;
+dưới ao;custom-scene-ao;
+cờ đỏ sao vàng;kenney-flag-vn;sao vàng của quốc kỳ dùng chung hình cờ
 # --- thẻ chữ và mô tả hình thật (game vần, kịch bản 003)
 Thẻ chữ bàn;custom-object-table;
 Từ b... (bàn);custom-object-table;
@@ -238,5 +257,12 @@ cứu người bị nạn;-;cứu lẫn cứu hỏa
 tất cả các bạn;-;tất là từ thường, không phải đôi tất
 ba nói với con;-;ba (bố) không phải bà
 khởi động máy;-;khởi động không phải thể dục
+cái áo mới;-;áo khác ao
+chờ đợi mãi;~;"chờ" bỏ dấu thành "cho" khớp con chó (từ khóa có sẵn của con chó), không phải chợ
+bảng đen;-;bảng khác bàng
+mầm cỏ xanh;-;mầm cỏ khác mâm cỗ
+ngôi sao vàng;obj-star;sao vàng đứng riêng không được cướp hình ngôi sao thưởng
+ao ước;~;"ao" đứng riêng vẫn ra cái ao, rất hiếm
+quá cần thiết;-;quá cần khác quả cân
 bé lười ăn rau;-;lười (tính từ) khác con lười
 bé lăn tròn xuống dốc;-;lăn lẫn lan
