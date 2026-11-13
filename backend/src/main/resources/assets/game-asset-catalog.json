@@ -151,6 +151,13 @@
     { "id": "kenney-planet-mars", "label": "Sao Hỏa", "url": "/assets/kenney/planets/mars.png", "group": "space", "family": "kenney", "keywords": ["sao hoa", "mars"], "exactKeywords": [] },
     { "id": "custom-object-table", "label": "Cái bàn", "url": "/assets/custom/object-table.svg", "group": "furniture", "family": "custom", "keywords": ["cai ban", "chiec ban", "table", "desk"], "exactKeywords": ["bàn"] },
     { "id": "fluent-clothes-scarf", "label": "Cái khăn", "url": "/assets/fluent/clothes-scarf.svg", "group": "clothes", "family": "fluent", "keywords": ["cai khan", "khan quang", "khan len", "scarf"], "exactKeywords": ["khăn"] },
+    { "id": "fluent-animal-cockroach", "label": "Con gián", "url": "/assets/fluent/animal-cockroach.svg", "group": "animal", "family": "fluent", "keywords": ["con gian", "cockroach"], "exactKeywords": ["gián"] },
+    { "id": "fluent-object-fishing-pole", "label": "Cần câu", "url": "/assets/fluent/object-fishing-pole.svg", "group": "object", "family": "fluent", "keywords": ["can cau", "fishing rod", "fishing pole"], "exactKeywords": ["cần câu"] },
+    { "id": "fluent-object-ring", "label": "Chiếc nhẫn", "url": "/assets/fluent/object-ring.svg", "group": "object", "family": "fluent", "keywords": ["chiec nhan", "nhan cuoi", "ring"], "exactKeywords": ["nhẫn"] },
+    { "id": "fluent-object-truck", "label": "Xe tải", "url": "/assets/fluent/object-truck.svg", "group": "vehicle", "family": "fluent", "keywords": ["xe tai", "truck", "lorry"], "exactKeywords": [] },
+    { "id": "fluent-object-dice", "label": "Xúc xắc", "url": "/assets/fluent/object-dice.svg", "group": "object", "family": "fluent", "keywords": ["xuc xac", "dice"], "exactKeywords": [] },
+    { "id": "fluent-people-police", "label": "Chú công an", "url": "/assets/fluent/people-police.svg", "group": "people", "family": "fluent", "keywords": ["cong an", "chu cong an", "canh sat", "police", "policeman"], "exactKeywords": [] },
+    { "id": "custom-plant-orchid", "label": "Hoa lan", "url": "/assets/custom/plant-orchid.svg", "group": "plant", "family": "custom", "keywords": ["hoa lan", "orchid"], "exactKeywords": ["lan"] },
     { "id": "fluent-object-guitar", "label": "Đàn ghi-ta", "url": "/assets/fluent/object-guitar.svg", "group": "music", "family": "fluent", "keywords": ["dan ghi ta", "cay dan", "dan guitar", "guitar"], "exactKeywords": ["đàn"] }
   ]
 }

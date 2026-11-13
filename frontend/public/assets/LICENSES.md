@@ -43,7 +43,7 @@ Xem `sfx/kenney/LICENSE-Kenney.txt`. Không bắt buộc ghi công; vẫn ghi đ
 
 | Thư mục | Nguồn | Giấy phép |
 |---|---|---|
-| `fluent/` (các tệp `food-*`, `object-*` mới, `weather-*`, `plant-rice`, `plant-peach-blossom`, `people-*`, `clothes-coat`, `clothes-gloves`, `clothes-scarf`) | [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji), kiểu Flat (tải đúng các biểu tượng cần dùng) | MIT (xem phần Microsoft Fluent Emoji ở trên) |
+| `fluent/` (các tệp `animal-cockroach`, `food-*`, `object-*` mới, `weather-*`, `plant-rice`, `plant-peach-blossom`, `people-*`, `clothes-coat`, `clothes-gloves`, `clothes-scarf`) | [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji), kiểu Flat (tải đúng các biểu tượng cần dùng) | MIT (xem phần Microsoft Fluent Emoji ở trên) |
 | `kenney/animals/`, `kenney/flags/`, `kenney/planets/` | [Kenney](https://kenney.nl): Animal Pack (kiểu Round outline), Flag Pack, Planets | CC0 1.0 |
 | `custom/` | Hình tự vẽ cho dự án (SVG), kiểu Fluent Flat đơn giản và kiểu Kenney | Thuộc dự án; không dùng nguồn bên ngoài |
 

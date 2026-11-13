@@ -220,6 +220,14 @@ export const ASSET_CATALOG: readonly AssetItem[] = [
   // Bổ sung sau thử nghiệm lần 4: hình còn thiếu cho game vần (bàn, khăn, đàn). Không dùng 'ban', 'dan' trơ trọi (lẫn "bạn", "dân").
   { id: 'custom-object-table', name: 'Cái bàn', category: 'objects', url: '/assets/custom/object-table.svg', keywords: ['cai ban', 'chiec ban', 'table', 'desk'], exactKeywords: ['bàn'] },
   { id: 'fluent-clothes-scarf', name: 'Cái khăn', category: 'objects', url: '/assets/fluent/clothes-scarf.svg', keywords: ['cai khan', 'khan quang', 'khan len', 'scarf'], exactKeywords: ['khăn'] },
+  // Bổ sung sau thử nghiệm lần 7: AI chọn hình gần nghĩa (gián ra rắn, cần câu ra cây cung) vì kho thiếu hình đúng.
+  { id: 'fluent-animal-cockroach', name: 'Con gián', category: 'animals', url: '/assets/fluent/animal-cockroach.svg', keywords: ['con gian', 'cockroach'], exactKeywords: ['gián'] },
+  { id: 'fluent-object-fishing-pole', name: 'Cần câu', category: 'objects', url: '/assets/fluent/object-fishing-pole.svg', keywords: ['can cau', 'fishing rod', 'fishing pole'], exactKeywords: ['cần câu'] },
+  { id: 'fluent-object-ring', name: 'Chiếc nhẫn', category: 'objects', url: '/assets/fluent/object-ring.svg', keywords: ['chiec nhan', 'nhan cuoi', 'ring'], exactKeywords: ['nhẫn'] },
+  { id: 'fluent-object-truck', name: 'Xe tải', category: 'objects', url: '/assets/fluent/object-truck.svg', keywords: ['xe tai', 'truck', 'lorry'] },
+  { id: 'fluent-object-dice', name: 'Xúc xắc', category: 'objects', url: '/assets/fluent/object-dice.svg', keywords: ['xuc xac', 'dice'] },
+  { id: 'fluent-people-police', name: 'Chú công an', category: 'objects', url: '/assets/fluent/people-police.svg', keywords: ['cong an', 'chu cong an', 'canh sat', 'police', 'policeman'] },
+  { id: 'custom-plant-orchid', name: 'Hoa lan', category: 'objects', url: '/assets/custom/plant-orchid.svg', keywords: ['hoa lan', 'orchid'], exactKeywords: ['lan'] },
   { id: 'fluent-object-guitar', name: 'Đàn ghi-ta', category: 'objects', url: '/assets/fluent/object-guitar.svg', keywords: ['dan ghi ta', 'cay dan', 'dan guitar', 'guitar'], exactKeywords: ['đàn'] },
 ]
 

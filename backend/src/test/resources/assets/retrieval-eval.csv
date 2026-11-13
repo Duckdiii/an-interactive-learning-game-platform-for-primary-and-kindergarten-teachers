@@ -61,7 +61,7 @@ xe ba gác;fluent-object-tricycle;
 tàu hỏa;fluent-object-train;
 con thuyền;fluent-object-boat;
 xe đua;fluent-object-race-car;
-xe tải;~;kho chưa có hình xe tải
+xe tải;fluent-object-truck;
 máy bay;fluent-object-airplane;
 # --- đồ vật
 cái trống;fluent-object-drum;
@@ -80,7 +80,7 @@ lì xì;fluent-object-red_envelope;
 nốt nhạc;fluent-object-music-note;
 cái bàn;custom-object-table;
 đàn ghi-ta;fluent-object-guitar;
-xúc xắc;-;kho chưa có hình xúc xắc
+xúc xắc;fluent-object-dice;
 # --- thiên nhiên, không gian
 cái cây;fluent-object-tree;
 cây lúa;fluent-plant-rice;
@@ -97,7 +97,7 @@ Trái Đất;fluent-object-earth;
 phi hành gia;fluent-people-astronaut;
 # --- nghề nghiệp, quần áo, cờ, hoạt động
 bác sĩ;fluent-people-doctor;
-công an;-;kho chưa có hình công an
+công an;fluent-people-police;
 lính cứu hỏa;fluent-people-firefighter;
 nông dân;fluent-people-farmer;
 cô giáo;fluent-people-teacher;
@@ -121,8 +121,13 @@ Thẻ chữ đàn;fluent-object-guitar;
 Từ đ... (đàn);fluent-object-guitar;
 Thẻ chữ răng;fluent-body-tooth;
 Thẻ chữ chăn;-;kho chưa có hình chăn
-Thẻ chữ nhẫn;-;kho chưa có hình nhẫn
-Thẻ chữ lan;-;kho chưa có hình hoa lan
+Thẻ chữ nhẫn;fluent-object-ring;
+Thẻ chữ lan;custom-plant-orchid;
+con gián;fluent-animal-cockroach;
+Thẻ chữ gián;fluent-animal-cockroach;
+cần câu;fluent-object-fishing-pole;
+chiếc nhẫn;fluent-object-ring;
+hoa lan;custom-plant-orchid;
 Thẻ chữ lăn;-;động từ, không có hình
 # --- mô tả câu đếm (kịch bản 001)
 3 con vịt;anim-duck;
@@ -157,3 +162,6 @@ cân bằng;~;cân
 3 + 5 bằng mấy;~;số đứng riêng trong phép tính
 Em hãy chọn hình đúng;-;
 trái tim biết yêu thương;~;tim, trái
+em giận bạn;-;giận lẫn gián
+nhân vật trong truyện;-;nhân lẫn nhẫn
+bé lăn tròn xuống dốc;-;lăn lẫn lan

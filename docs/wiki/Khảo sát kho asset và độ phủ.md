@@ -305,3 +305,22 @@ Tất cả nằm trên nhánh `dev`, **chưa commit**. Hai tính năng cuối đ
 - Kịch bản 3 ở lần 8 sạch có thể chỉ vì AI chọn từ khác. Yêu cầu của kịch bản ("Ôn vần an, ăn, ân...") không chứa từ khóa hình nào nên shortlist rỗng ở đó. **Tác dụng riêng của shortlist chưa chứng minh được**; chỉ kịch bản 1 và 4 có từ khóa trong yêu cầu.
 - Sau review (reviewer, kiến trúc, test-verifier, migration-checker) đã sửa: validator dùng `AssetRetriever.mentions` (không áp luật chữ ngắn) vì chữ mô tả được nối thành chuỗi dài; luật hình đổi `@Order(3)` và Layer 3 thành `@Order(4)` để thứ tự không phụ thuộc tên class; bỏ constructor kép của `GeminiGameContentGenerator`. Còn ghi nhận: luật hình nằm trong chuỗi chung nên cũng chặn khi giáo viên tự sửa và lưu game (chỉ khi bật cờ); `GameAssetCatalog` nên chuyển sang `service/asset` sau này.
 - Việc nên làm tiếp nếu muốn kết luận: chạy mỗi cấu hình (không cờ, luật, luật + shortlist) nhiều lần trên cùng bộ kịch bản; thêm hình gián, cần câu, nhẫn, lan; xét `reviewer` cho toàn bộ bước 2 đến 5.
+
+## 13. Thêm 7 hình còn thiếu sau thử nghiệm lần 7 (2026-11-13)
+
+Lần 7 kịch bản 3 có hai hình sai nghĩa vì kho thiếu hình đúng (AI chọn gần nghĩa: gián ra rắn, cần câu ra cây cung). Đã thêm 7 hình, kho từ 151 lên **158**:
+
+| Từ | Id | Nguồn |
+|---|---|---|
+| gián | `fluent-animal-cockroach` | Fluent Flat (cockroach) |
+| cần câu | `fluent-object-fishing-pole` | Fluent Flat (fishing pole) |
+| nhẫn | `fluent-object-ring` | Fluent Flat (ring) |
+| xe tải | `fluent-object-truck` (nhóm vehicle) | Fluent Flat (delivery truck) |
+| xúc xắc | `fluent-object-dice` | Fluent Flat (game die) |
+| công an | `fluent-people-police` | Fluent Flat (police officer), hình cảnh sát chung theo quyết định của người dùng |
+| lan | `custom-plant-orchid` | tự vẽ theo phong cách Fluent Flat (không có emoji hoa lan); bản gốc ở `D:Data	lcn_kltngamecustom_drawn` |
+
+- Nguồn `microsoft/fluentui-emoji`, giấy phép MIT. Bản gốc tải về ở `D:Data	lcn_kltngameluent_downloadlat2` (có thêm `articulated_lorry` không dùng).
+- Từ khóa có dấu cho từ trùng âm khi bỏ dấu: `gián`, `cần câu`, `nhẫn`, `lan` (tránh khớp "giận", "nhân", "lăn"). Các từ khóa không dấu `xe tai`, `xuc xac`, `cong an`, `hoa lan` khớp nguyên cụm nên không cần.
+- Bộ đo `retrieval-eval.csv`: 5 ca trước đây đặt "không ra hình" (xe tải, công an, xúc xắc, nhẫn, lan) chuyển sang id đúng, thêm gián, cần câu, chiếc nhẫn, hoa lan và 3 câu thường dễ nhầm (em giận bạn, nhân vật trong truyện, bé lăn tròn xuống dốc). Kết quả: đúng **122/122**, câu thường sạch **25/25**.
+- Chưa kiểm: chưa chạy lại kịch bản thật với 7 hình mới (kịch bản 3 lần 7 có thể ra hình gián, cần câu đúng); hình hoa lan tự vẽ mới xem ở cỡ lớn và 48px, chưa xem trong game. Hình "gián" có thể hơi khó chịu với một số trẻ.
