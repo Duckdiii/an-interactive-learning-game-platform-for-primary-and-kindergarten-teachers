@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-13 — Lặp lại lỗi từ khóa dễ khớp nhầm khi thêm hình tự vẽ, và quên kiểm từ khóa đã có
+- Lỗi: thêm 16 hình tự vẽ với từ khóa "mam co" (khớp "mầm cỏ"), "sao vang" đứng riêng (cướp "ngôi sao vàng"), và "den ong sao" trùng từ khóa đang nằm ở đèn lồng cũ nên hình mới đứng sau. Cùng loại lỗi đã ghi ở mục cùng ngày về từ khóa cụm có dấu.
+- Phát hiện nhờ: bộ đo offline (206/207) và `reviewer`.
+- Nguyên nhân gốc: chỉ thử từ khóa với câu đúng nghĩa, không grep từ khóa đã có trong `ASSET_CATALOG` và không thử câu thường; bài học trước chưa thành kiểm tra tự động.
+- Cách chặn: trước khi thêm hình, grep từng từ khóa mới trong `assetResolver.ts` để biết hình nào đang giữ; mỗi hình mới có từ khóa có dấu phải kèm ít nhất một dòng âm có nghĩa trong `retrieval-eval.csv`; cân nhắc test đọc `ASSET_CATALOG` và báo từ khóa trùng giữa hai hình.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-13 — Thêm từ khóa hình bằng cụm có dấu của động từ, tính từ thông dụng mà không thử câu thường
 - Lỗi: khi thêm 52 hình Fluent, đặt từ khóa cho "chạy" là cụm "đang chạy", cho "tập thể dục" có "khởi động", cho "gió" là "gio thoi", cho "cấm lửa" là "cam lua". Cụm nhiều chữ không bị giới hạn "từ đơn ngắn", nên "con chó đang chạy" và "khởi động máy" kéo hình người, "giờ thôi" ra hình gió. Đồng thời viết wiki nói đã bỏ "khởi động" khi code còn giữ.
 - Phát hiện nhờ: `reviewer` (suy luận từ `KeywordAssetRetriever`).
