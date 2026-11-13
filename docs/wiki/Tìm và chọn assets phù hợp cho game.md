@@ -1,8 +1,8 @@
 # Tìm và chọn assets phù hợp cho game
 
 > **Nguồn**: thảo luận giữa người dùng và phiên chính ngày 2026-11-11; cơ chế hiện tại đối chiếu từ code (`GameAssetCatalog`, `CpfAssetCatalog`, `assetResolver.ts`). Phần phương án là **đề xuất, chưa cài đặt, chưa đo**.
-> **Cập nhật**: 2026-11-11
-> **Liên kết liên quan**: [[Tiêu chuẩn Đồ họa và Asset Pipeline]], [[Mô tả ngoài danh mục game]], [[Game JSON DSL]], [[Kiến trúc và công nghệ]], [[Trải nghiệm cho trẻ]]
+> **Cập nhật**: 2026-11-13 (thêm liên kết tới thiết kế đã chọn hướng)
+> **Liên kết liên quan**: [[Pipeline chọn hình bằng đồ thị khái niệm và vector]] (hướng đã chọn từ các phương án 2, 3, 4 và vector), [[Tiêu chuẩn Đồ họa và Asset Pipeline]], [[Mô tả ngoài danh mục game]], [[Game JSON DSL]], [[Kiến trúc và công nghệ]], [[Trải nghiệm cho trẻ]]
 
 Trang này lưu các phương án cho một bài toán: kho asset ngày càng lớn (đã có thêm nhiều gói Kenney và các gói khác), làm sao để hệ thống **tìm và chọn đúng asset nhanh nhất, hiệu quả nhất** cho mô tả game của giáo viên. Mỗi phương án là một mục riêng; phương án nào được chốt thì ghi vào [[Các quyết định đã chốt]].
 

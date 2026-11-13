@@ -25,7 +25,8 @@ Cửa vào duy nhất của kho: cần tài liệu gì thì bắt đầu từ đ
 - [[24 Cơ chế game chuẩn hóa]]: danh mục 24 cơ chế preset chuẩn hóa (STT 1-24, mã DSL, hành vi tương tác, môn học, độ phức tạp renderer).
 - [[Tiêu chuẩn Đồ họa và Asset Pipeline]]: 5 trụ cột đồ họa K-5, bảng đánh giá 16 nguồn asset quốc tế (CC0/MIT), 3 tầng Canvas 60 FPS, Toy Palette, Juiciness.
 - [[Tìm và chọn assets phù hợp cho game]]: 6 phương án để hệ thống tìm và chọn đúng asset trong kho lớn: ba tầng (chỉ mục offline, danh sách ngắn, AI chọn) làm nền, cùng tầng khái niệm, gán hình sau, chọn theo vai trò trong game, nhãn bằng mô hình nhìn hình, học từ giáo viên. Đề xuất, chưa cài.
-- [[Khảo sát kho asset và độ phủ]]: phân loại 69 gói đã tải và đo độ phủ 87 danh từ cần hình so với kho hiện tại (31 đã có, 12 có trong gói đã tải, 44 thiếu); ghi nhận bỏ dấu làm nhiều từ trùng nhau và kết quả giai đoạn 3.
+- [[Pipeline chọn hình bằng đồ thị khái niệm và vector]]: thiết kế chốt hướng thay cách chọn hình hiện tại: Gemini chỉ tả hình, bộ chọn tra nhãn, vector tìm khái niệm cho từ lạ, đồ thị ra hình ứng viên, rồi khóa một họ phong cách cho cả game và chọn hình nhiễu; quy tắc lùi họ phong cách khi thiếu. Đề xuất, chưa cài, chưa đo.
+- [[Khảo sát kho asset và độ phủ]]: phân loại 69 gói đã tải và đo độ phủ 87 danh từ cần hình so với kho hiện tại (31 đã có, 12 có trong gói đã tải, 44 thiếu); ghi nhận bỏ dấu làm nhiều từ trùng nhau và kết quả giai đoạn 3; mục 14 đo nhu cầu hình từ 100 kịch bản và chuẩn mầm non (146 mục, phủ 82) và nhập 11 con vật vào danh mục; mục 15 tải 52 biểu tượng Fluent (danh mục 221 hình, phủ khoảng 123/146).
 - [[Mô tả ngoài danh mục game]]: giải pháp Composable Primitives Framework (CPF) 20 khối nguyên tử, ma trận bao phủ 10 game và 4 module chuyên sâu.
 - [[Trải nghiệm cho trẻ]]: nguyên tắc theo lứa tuổi, đồ họa Candy Gloss, âm thanh, cách đo 60 FPS.
 

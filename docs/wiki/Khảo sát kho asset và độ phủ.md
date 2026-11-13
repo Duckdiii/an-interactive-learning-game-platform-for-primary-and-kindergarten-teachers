@@ -324,3 +324,53 @@ Lần 7 kịch bản 3 có hai hình sai nghĩa vì kho thiếu hình đúng (AI
 - Từ khóa có dấu cho từ trùng âm khi bỏ dấu: `gián`, `cần câu`, `nhẫn`, `lan` (tránh khớp "giận", "nhân", "lăn"). Các từ khóa không dấu `xe tai`, `xuc xac`, `cong an`, `hoa lan` khớp nguyên cụm nên không cần.
 - Bộ đo `retrieval-eval.csv`: 5 ca trước đây đặt "không ra hình" (xe tải, công an, xúc xắc, nhẫn, lan) chuyển sang id đúng, thêm gián, cần câu, chiếc nhẫn, hoa lan và 3 câu thường dễ nhầm (em giận bạn, nhân vật trong truyện, bé lăn tròn xuống dốc). Kết quả: đúng **122/122**, câu thường sạch **25/25**.
 - Chưa kiểm: chưa chạy lại kịch bản thật với 7 hình mới (kịch bản 3 lần 7 có thể ra hình gián, cần câu đúng); hình hoa lan tự vẽ mới xem ở cỡ lớn và 48px, chưa xem trong game. Hình "gián" có thể hơi khó chịu với một số trẻ.
+
+## 14. Đo nhu cầu theo kịch bản và chuẩn mầm non, nhập 11 con vật (2026-11-13)
+
+**Cách đo.** Rút 146 mục cần hình từ hai nguồn: 100 kịch bản (`docs/Kịch bản/Kịch bản tạo game/100 kịch bản tạo game.md`) và chuẩn đầu ra mầm non trong `backend/src/main/resources/curriculum/kindergarten/chunks.jsonl`. Trong đó 115 mục **nêu rõ** trong nguồn, 31 mục **người viết suy ra** từ chủ đề (ví dụ "động vật sống dưới nước" suy ra cá heo, cá mập). Thêm 7 mục không cần ảnh vì vẽ bằng code (hình học, màu, dấu so sánh, phân số, đồng hồ kim, mê cung). Đối chiếu bằng script khớp từ khóa với danh mục (sau khi soát tay các khớp nhầm do bỏ dấu: ông/ong, bà/ba lô, gió/giỏ, hổ/ho).
+
+**Kết quả lúc đo (danh mục 158 hình): đã có 82/146.**
+
+| Nhóm | Tổng | Đã có |
+|---|---|---|
+| Nêu rõ trong nguồn | 115 | 72 |
+| Suy ra | 31 | 10 |
+
+| Chủ đề | Đã có/tổng | Chủ đề | Đã có/tổng |
+|---|---|---|---|
+| Không gian | 4/4 | Đồ học tập | 2/2 |
+| Cơ thể | 7/8 | Phương tiện | 8/10 |
+| Đồ ăn | 11/16 | Quần áo | 4/6 |
+| Đồ vật | 15/24 | Con vật | 13/22 |
+| Cây | 4/8 | Nghề, người | 6/13 |
+| Thiên nhiên | 4/11 | Lễ hội | 1/2 |
+| Ký hiệu | 1/5 | Hành động | 1/5 |
+| **Nơi chốn** | **0/6** | **Địa danh** | **0/2** |
+
+Thiếu 64 mục. Gợi ý nguồn bổ sung (nhận định của người viết, chưa kiểm): 2 mục có trong gói Kenney đã tải (cá voi, cá sấu); 45 mục có thể lấy từ Fluent Emoji (gia đình, hành động, ký hiệu, thí nghiệm, thời tiết, nghề...); 17 mục phải tự vẽ vì không nguồn quốc tế nào có (rau mồng tơi, rau dền, đèn ông sao, mâm cỗ Trung thu, cây bàng, Vịnh Hạ Long, Hồ Gươm, chợ quê...). Nơi chốn và địa danh là cảnh, có thể cần hình nền thay vì biểu tượng.
+
+**Giới hạn.** Danh sách 146 mục do người viết chọn tay; 31 mục suy ra không phải nhu cầu nêu rõ. Dữ liệu toán lớp 2 đến 5, tiếng Việt, tiếng Anh nằm trong `backend/src/main/resources/curriculum/spike/` bị chặn bởi cài đặt quyền nên chưa đo. Một số mục tính "đã có" chỉ ở mức gần đúng (xe ba gác, khối gỗ, và mục gộp thức dậy, đánh răng, ăn sáng chỉ có hình bàn chải).
+
+**Đã nhập từ kho đã tải.** 11 con vật của gói Animal Pack (kiểu Round outline) chưa có trong danh mục: gà con, cá sấu, khỉ đột, hà mã, nai sừng tấm, kỳ lân biển, vẹt, tê giác, con lười, hải mã, cá voi. Làm đúng theo 6 con Kenney trước: `keywords` rỗng ở frontend, từ khóa nằm ở `matchKeywords` cho bộ khớp backend; `con vẹt` và `con lười` có thêm từ khóa có dấu. Danh mục từ 158 lên **169 hình**, JSON sinh lại bằng `scripts/assets/build-game-asset-catalog.mjs`. Bộ đo `retrieval-eval.csv`: đúng 133/133, câu thường sạch 27/27; câu "đàn gà con" nay ra gà con trước đàn ghi-ta.
+
+**Chưa làm.** Chưa chạy lại kịch bản thật; chưa xem 11 hình trong màn chơi. Các mục thiếu còn lại xem mục 15.
+
+## 15. Tải thêm 52 biểu tượng Fluent và nhập vào danh mục (2026-11-13)
+
+**Tải.** Người dùng duyệt danh sách 52 biểu tượng trước khi tải. Nguồn: `microsoft/fluentui-emoji`, kiểu Flat, giấy phép MIT, tải từng tệp SVG (không tải cả repo). Lưu ngoài repo ở `D:\Data\tlcn_kltn\game\fluent_download\flat3`. Dung lượng thật 164 KB (167.803 byte); con số 70 KB báo trước là sai vì lấy từ phản hồi HEAD, vốn là kích thước nén. Cả 52 tệp là SVG, không có script hay mã chủ động. Con cừu lấy theo tên `Ewe` (không có `Sheep`).
+
+**Nhập vào danh mục.** Danh mục từ 169 lên **221 hình**; tệp chép vào `frontend/public/assets/fluent/`. Làm theo cách của các con vật Kenney: `keywords` rỗng, chỉ backend khớp qua `matchKeywords` và `exactKeywords`, nên bộ khớp frontend không đổi. Các điểm cần nhớ khi thêm từ khóa:
+- Từ trùng âm khi bỏ dấu dùng từ khóa **có dấu**: bố, mẹ, ông, bà, hổ, cừu, tuyết, gió, rùa, tôm, ghế, cốc, muối, váy...
+- Nhãn không có ngoặc cũng thành từ khóa, nên nhóm gia đình đặt nhãn có ngoặc ("Ông (ông nội, ông ngoại)") để "ông" không thành `ong` (con ong).
+- Bỏ các từ khóa không dấu dễ trùng câu thường: "đang chạy" (đang cháy), "ba nói" (bà), "co be" (có bé), "khởi động", "tuyet", "muoi" (mười).
+- 10 hình ghi đè nhóm nghĩa trong `GROUP_BY_MEANING` (xe cứu thương, trực thăng, xe cứu hỏa, tàu thủy, máy kéo vào phương tiện; ghế vào đồ nội thất; micro vào âm nhạc; trường học, siêu thị, công viên vào cảnh).
+
+**Kết quả đo.** Bộ đo `retrieval-eval.csv`: đúng **188/188**, câu thường sạch **33/33**. Thêm 6 câu thường mới để kiểm bẫy trùng âm (tuyệt vời, rửa tay, cứu người, tất cả, ba nói, khởi động máy). `reviewer` chỉ ra 5 từ khóa dễ khớp nhầm câu thường (cụm có dấu "đang chạy" và "khởi động" kéo hình người cho cả "con chó đang chạy" và "khởi động máy", "gio thoi" trùng "giờ thôi", "cam lua" trùng "cám lúa"); đã bỏ các cụm đó (giữ "cấm lửa" ở dạng có dấu) và thêm dòng đo bảo vệ.
+
+**Xem hình.** Dựng trang xem trước 52 hình bằng Edge chạy ngầm: cùng một phong cách, hiển thị đúng. Một số hình chỉ gần đúng: "Cốc nước" là cốc có ống hút mang đi; "Gió thổi" là khuôn mặt thổi gió; "Công viên" là phong cảnh núi và hồ (Fluent "National park"); "Cái lưỡi" là cái miệng thè lưỡi. Chưa xem trong màn chơi thật.
+
+**Độ phủ nhu cầu sau đợt này (chạy lại script mục 14).** Khoảng **123/146** (tính tay "giày" vì script chưa nhận nhãn "Đôi giày"). Còn thiếu khoảng 23 mục:
+- 17 mục tự vẽ: rau mồng tơi, rau dền, mâm cỗ Trung thu, cây bàng, bình tưới nước, quả cân, đèn ông sao, đồ chơi Trung thu, cốc đong, búp bê, sao vàng, Vịnh Hạ Long, Hồ Gươm và Chùa Một Cột, lối ra vào, chợ quê, tiệm bánh, ao đồng ruộng.
+- Khoảng 6 mục không có ở Fluent: đường, hạt giống (chỉ có cây non), hơi nước, đồ dùng gia đình (chén, thìa, nồi), hát, nhảy.
+
+**Chưa làm.** Chưa chạy lại kịch bản thật; chưa đọc dữ liệu `spike/` (toán 2 đến 5, tiếng Việt, tiếng Anh) nên nhu cầu của các môn này chưa đo.
