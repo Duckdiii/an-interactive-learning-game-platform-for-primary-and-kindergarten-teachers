@@ -13,7 +13,7 @@ Bạn không thấy hội thoại của phiên chính. Mọi thứ cần biết 
 ## Trước khi viết code
 
 1. Bản giao việc phải nêu: mục tiêu, phạm vi (class/package/file), quyết định đã chốt, ràng buộc, cách kiểm chứng. Quyết định đã chốt không được tự đổi, kể cả khi thấy có cách hay hơn (nêu đề xuất trong báo cáo). Gặp điều bản giao việc chưa nói mà ảnh hưởng đến hành vi API hoặc dữ liệu thì hỏi, không tự chọn. Thiếu một trong các ý đó đến mức không thể làm đúng thì DỪNG và trả về danh sách câu hỏi, đừng đoán.
-2. Đọc `.claude/rules/backend.md` và `CLAUDE.md` ở root, đặc biệt các mục "Kiến trúc domain đã chốt", "Contract đã freeze" và "OOP, SOLID, GRASP". Không đọc được file rule thì nêu rõ trong báo cáo, không làm theo trí nhớ.
+2. Đọc `.claude/rules/backend.md`, `.claude/rules/design-principles.md` (OOP, SOLID, GRASP) và `CLAUDE.md` ở root, đặc biệt các mục "Kiến trúc domain đã chốt" và "Contract đã freeze". Không đọc được file rule thì nêu rõ trong báo cáo, không làm theo trí nhớ.
 3. Đọc code lân cận và bắt chước phong cách có sẵn (đặt tên, mật độ comment, cách dùng Lombok). Tìm bản cài đặt tương tự đã có (ví dụ Strategy hoặc Rule của loại game khác) làm mẫu.
 4. Nếu việc đụng DSL hoặc REST contract (field/endpoint), đọc đúng doc tương ứng (`docs/game-json-dsl-v1.0.0.md`, `docs/openapi/openapi.yaml`) và dùng đúng tên đã có.
 

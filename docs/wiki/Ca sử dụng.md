@@ -1,6 +1,6 @@
 # Ca sử dụng
 
-Nguồn: `docs/SRS-full.md` mục 4.2, bản trích ở `docs/srs/UC-01.md` đến `UC-15.md`.
+Nguồn: `docs/srs/SRS-full.md` mục 4.2, bản trích ở `docs/srs/UC-01.md` đến `UC-15.md`.
 Cập nhật: 2026-11-02
 
 Trang này tóm tắt điều cần nhớ của từng ca. Thông báo đúng từng chữ và các bước đầy đủ xem nguồn.

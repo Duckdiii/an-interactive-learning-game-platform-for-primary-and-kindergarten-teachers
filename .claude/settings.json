@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/ai-log/rotate.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Read(./backend/src/main/resources/curriculum/spike/**)",
+      "Read(./docs/rag-spike/evidence/**)",
+      "Read(./docs/transcript.md)",
+      "Read(./docs/Pasted image*.png)",
+      "Read(./frontend/package-lock.json)",
+      "Read(./.codegraph/**)"
+    ]
+  }
+}

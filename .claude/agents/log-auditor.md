@@ -10,9 +10,9 @@ Bạn kiểm tra file `ai-usage-log.md` ở root repo. Bạn CHỈ ĐỌC; khôn
 ## Cách làm
 
 1. Đọc phần "Quy ước ghi log" ở đầu file để biết chuẩn của dự án, và các quy tắc trong mục "Ghi log sử dụng AI" của `CLAUDE.md`.
-2. Đọc bảng. File dài, nên dùng Grep để lấy các dòng bắt đầu bằng `| <số> |` rồi đọc từng dòng cần soi.
+2. Đọc bảng. File chỉ giữ khoảng 25 dòng mới nhất; dòng cũ nằm ở `docs/ai-usage-log-archive/STT-xxxx-yyyy.md` (do `scripts/ai-log/rotate.mjs` chuyển). Dùng Grep để lấy các dòng bắt đầu bằng `| <số> |` ở cả file gốc và thư mục archive; chỉ đọc kỹ file gốc (và archive khi người gọi nêu STT cụ thể).
 3. Kiểm tra:
-   - **STT**: tăng dần liên tục, không trùng, không thiếu (đặc biệt sau khi merge nhánh, từng có STT trùng).
+   - **STT**: tăng dần liên tục, không trùng, không thiếu, tính trên GỘP archive + file gốc (STT đầu bảng gốc phải bằng STT cuối archive + 1; mỗi file archive chỉ chứa STT trong khoảng ghi ở tên file). Đặc biệt sau khi merge nhánh, từng có STT trùng.
    - **Số cột**: mỗi dòng đủ số cột như dòng tiêu đề (đếm dấu `|` không nằm trong dấu backtick; chú ý ký tự `|` trong nội dung làm vỡ bảng).
    - **Ngày**: định dạng `YYYY-MM-DD`, không lùi so với dòng trước một cách bất thường.
    - **Công cụ AI**: có phiên bản model, không chỉ tên chung. Nhóm dùng nhiều công cụ (Claude, Codex/GPT, Gemini...), nên chấp nhận mọi công cụ hợp lệ như `Claude Sonnet 5.5` hay `Codex GPT-5`; chỉ báo khi thiếu phiên bản (ví dụ chỉ ghi `Claude` hoặc `Codex`). KHÔNG đòi đổi sang Claude.

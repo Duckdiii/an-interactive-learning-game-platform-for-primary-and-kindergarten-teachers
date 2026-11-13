@@ -1,3 +1,6 @@
 # Keep reviewed byte hashes stable across Windows and Unix checkouts.
 backend/src/main/resources/curriculum/spike/math-grade1/constraints.jsonl text eol=lf
 backend/src/test/resources/curriculum/acceptance/exploratory.jsonl text eol=lf
+
+# Hook chạy bằng sh: CRLF làm hook hỏng trên Linux/macOS (và Git Bash khi autocrlf=true).
+.githooks/* text eol=lf

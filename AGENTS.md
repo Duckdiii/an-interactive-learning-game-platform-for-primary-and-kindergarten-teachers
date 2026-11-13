@@ -34,3 +34,10 @@ Gắn nhãn **đề xuất/chưa đo** cho ngưỡng chất lượng, độ tr�
 - Khi bật RAG, thiếu căn cứ phải dừng sinh game; lỗi dịch vụ phải phân biệt với ngoài phạm vi chương trình.
 - Giữ tương thích DSL đang công bố. Đề xuất thêm dữ liệu đánh giá/căn cứ phải làm rõ contract và tác động đến bên tiêu thụ.
 - Không lưu topic, prompt, output của giáo viên hoặc secret vào log/cache bền vững nếu chưa có yêu cầu lưu trữ và chính sách truy cập/thời hạn phù hợp.
+
+## Nhật ký AI và tài liệu lớn (mọi agent)
+
+- Mỗi khi sinh hoặc sửa code/nội dung đáng kể (tính năng, module, config, migration, test), thêm 1 dòng vào bảng trong `ai-usage-log.md` trước khi báo hoàn thành. Điền theo "Quy ước ghi log" ở đầu file (công cụ AI kèm phiên bản model, mức đóng góp, prompt theo cấu trúc Bối cảnh / Mục tiêu / Ràng buộc / Cách làm việc / Kiểm chứng, kết quả kiểm chứng đã chạy). Cột SHA ghi `TODO`, người dùng cập nhật sau khi commit; không tự commit.
+- **Không đọc cả `ai-usage-log.md`.** Bảng chỉ giữ khoảng 25 dòng mới nhất; lấy STT cuối bằng `tail`/grep rồi chèn dòng mới (STT cuối + 1) trước phần "Case study". Dòng cũ tự nằm ở `docs/ai-usage-log-archive/` (do `scripts/ai-log/rotate.mjs` chuyển khi commit, nếu đã bật `git config core.hooksPath .githooks`); không sửa tay các file archive.
+- `docs/openapi/openapi.yaml` rất dài (~4000 dòng): đọc `docs/openapi/INDEX.md` trước để biết operation/schema nằm ở dòng nào rồi chỉ đọc đoạn đó. Sửa `openapi.yaml` xong chạy `node scripts/openapi/build-index.mjs` để làm mới INDEX (CI sẽ đỏ nếu quên).
+- Các file nặng không cần đọc: `backend/src/main/resources/curriculum/spike/**`, `docs/rag-spike/evidence/**`, `docs/transcript.md`, `frontend/package-lock.json`, `.codegraph/`.

@@ -74,3 +74,7 @@ logs/
 
 # Kết quả chạy thử 100 kịch bản tạo game (ảnh, ghi chú từng game): chỉ để ở máy, không đưa lên git
 /docs/Kịch bản/Kịch bản tạo game/
+
+# Ảnh dán tạm từ Obsidian và script thử nghiệm cá nhân, không đưa vào repo
+docs/Pasted image*.png
+frontend/scratch/

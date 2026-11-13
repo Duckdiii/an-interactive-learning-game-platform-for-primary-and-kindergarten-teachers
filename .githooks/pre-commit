@@ -1,0 +1,17 @@
+#!/bin/sh
+# Xoay vòng ai-usage-log.md trước mỗi commit, bất kể agent hay người tạo commit.
+# Bật một lần sau khi clone: git config core.hooksPath .githooks
+command -v node >/dev/null 2>&1 || exit 0
+
+out=$(node scripts/ai-log/rotate.mjs 2>&1)
+status=$?
+if [ $status -ne 0 ]; then
+  # Chỉ cảnh báo, không chặn commit; CI sẽ chặn nếu log quá dài.
+  echo "pre-commit: không xoay vòng được ai-usage-log.md: $out" >&2
+  exit 0
+fi
+if [ -n "$out" ]; then
+  echo "$out"
+  git add ai-usage-log.md docs/ai-usage-log-archive
+fi
+exit 0

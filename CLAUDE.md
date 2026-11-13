@@ -44,35 +44,14 @@ Claude Code tự nạp các file này khi đọc file khớp `paths`. Lập kế
 ## Contract đã freeze — mọi thay đổi field/endpoint phải đồng bộ cả Backend, Frontend và doc
 
 - JSON DSL Schema v1.0.0 (cấu trúc field `QuestionGame` cho từng loại game). Đặc tả: `docs/game-json-dsl-v1.0.0.md`; JSON Schema: `backend/src/main/resources/schema/game-dsl/1.0.0/*.schema.json` (mỗi loại game một file, tự chứa); record Java: `dto/dsl`. Kiểu TypeScript: `frontend/src/types/game-dsl.types.ts`. Sửa DSL phải sửa đồng bộ cả bốn nơi và cập nhật test `GameDslSchemaTest`. "Dạng đầu ra của AI" (đơn giản hơn, dùng làm Structured Outputs): schema `backend/src/main/resources/schema/game-ai-output/1.0.0/*.schema.json`, record `dto/dsl/ai`, kiểm tra bằng `service/validation/ai/AiOutputValidator`; sửa thì cập nhật test `AiOutputValidatorTest`.
-- REST API Contract v1.1.0 (endpoint, response envelope `{success, data}` / `{success, error}`, error code). Nguồn sự thật: `docs/openapi/openapi.yaml` (OpenAPI 3.1, thiết kế trước, code theo sau). Mỗi operation có `x-status`: `implemented` (đã cài), `extended-pending` (đã có nhưng phần mở rộng chưa cài), `planned` (chưa cài, code theo đúng spec). Sửa endpoint/field/mã lỗi phải sửa file này trước, rồi kiểm tra bằng `npx @redocly/cli lint docs/openapi/openapi.yaml` (chỉ để kiểm tra cú pháp spec, không phải để xem). Xem API trực tiếp: chạy Backend rồi mở `http://localhost:8080/swagger-ui.html` (springdoc, sinh từ controller đã cài nên chỉ thấy endpoint đã có code, có nút Try it; tắt khi triển khai bằng `SWAGGER_ENABLED=false`). Code Frontend auth hiện còn theo contract cũ (refreshToken trong body, `AuthUser.id`), cần chuyển sang cookie và `teacherId`.
+- REST API Contract v1.1.0 (endpoint, response envelope `{success, data}` / `{success, error}`, error code). Nguồn sự thật: `docs/openapi/openapi.yaml` (OpenAPI 3.1, thiết kế trước, code theo sau). Mỗi operation có `x-status`: `implemented` (đã cài), `extended-pending` (đã có nhưng phần mở rộng chưa cài), `planned` (chưa cài, code theo đúng spec). Sửa endpoint/field/mã lỗi phải sửa file này trước, rồi kiểm tra bằng `npx @redocly/cli lint docs/openapi/openapi.yaml` (chỉ để kiểm tra cú pháp spec, không phải để xem). **Đọc spec lớn (~4000 dòng): mở `docs/openapi/INDEX.md` trước** (operation/schema nằm ở dòng nào), rồi `Read` đúng đoạn bằng `offset`/`limit`; không nạp cả file. Sửa `openapi.yaml` xong chạy `node scripts/openapi/build-index.mjs` để làm mới INDEX (test `build-index.test.mjs` sẽ đỏ nếu quên). Xem API trực tiếp: chạy Backend rồi mở `http://localhost:8080/swagger-ui.html` (springdoc, sinh từ controller đã cài nên chỉ thấy endpoint đã có code, có nút Try it; tắt khi triển khai bằng `SWAGGER_ENABLED=false`). Code Frontend auth hiện còn theo contract cũ (refreshToken trong body, `AuthUser.id`), cần chuyển sang cookie và `teacherId`.
 - WebSocket Message Format v1.0.0 (`/topic/session/{sessionId}/...`, `/app/session/{sessionId}/...`)
 
 Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi.yaml`; tài liệu WebSocket Message Format riêng chưa viết (TODO, tạm xem tag `Realtime` trong `openapi.yaml`). Trước khi sinh code liên quan đến field JSON, endpoint mới hay message WebSocket mới, đọc đúng doc tương ứng; không tự đặt tên field/endpoint khác đi.
 
 ## Nguyên tắc thiết kế: OOP, SOLID, GRASP
 
-Áp dụng cho cả code mới lẫn khi sửa code cũ. Khi có nguyên tắc mâu thuẫn với "Kiến trúc domain đã chốt", ưu tiên kiến trúc đã chốt và báo user.
-
-**OOP**
-- **Đóng gói**: field `private` (hoặc `protected` nếu class diagram ghi `#`), truy cập qua getter/setter hoặc method nghiệp vụ. Không mở public field.
-- **Kế thừa** chỉ khi quan hệ là "is-a" thật (ví dụ `QuizQuestion` là một `QuestionGame`). Ưu tiên composition khi chỉ để tái sử dụng code.
-- **Đa hình**: gọi qua kiểu cha/interface, không dùng chuỗi `if/switch` theo `gameType` để rẽ nhánh hành vi. Thêm game type mới phải là thêm class mới, không sửa nhiều chỗ.
-- **Trừu tượng**: `abstract`/interface cho khái niệm chung; lớp bên ngoài chỉ phụ thuộc vào phần public là "hợp đồng".
-
-**SOLID**
-- **S** (Single Responsibility): mỗi class một lý do để thay đổi. Controller chỉ nhận request/trả response, logic nghiệp vụ ở `service`, truy cập dữ liệu ở `repository`. Entity không chứa logic gọi API ngoài hay validate JSON.
-- **O** (Open/Closed): mở rộng bằng class mới (Strategy, Factory, Validator mới), không sửa code đã chạy ổn để thêm case.
-- **L** (Liskov): class con thay được class cha mà không đổi ý nghĩa. Không override để ném `UnsupportedOperationException` (ngoại lệ duy nhất: khung `TODO` tạm thời đã ghi rõ trong `service/strategy`).
-- **I** (Interface Segregation): interface nhỏ, đúng vai trò; không ép class cài method không dùng.
-- **D** (Dependency Inversion): phụ thuộc vào abstraction, inject qua constructor (Spring DI). Không `new` service/repository trong code nghiệp vụ; API ngoài (Gemini, TTS, Moderation) đi qua interface để mock được khi test.
-
-**GRASP**
-- **Information Expert**: đặt hành vi ở class đang giữ dữ liệu cần thiết.
-- **Creator**: class nào chứa/sở hữu đối tượng thì chịu trách nhiệm tạo nó (khớp với composition trong class diagram, và các Factory đã chốt).
-- **Controller**: lớp REST controller/WebSocket handler chỉ điều phối, ủy quyền cho service.
-- **Low Coupling / High Cohesion**: ít phụ thuộc chéo giữa package, mỗi class gắn với một mục đích rõ.
-- **Polymorphism, Pure Fabrication, Indirection, Protected Variations**: dùng Strategy, Factory, Registry đã chốt để cô lập điểm thay đổi (loại game, nhà cung cấp AI).
-- Không thêm tầng trừu tượng "phòng xa" khi chưa có nhu cầu thật; chỉ tách khi thấy lặp lại hoặc điểm thay đổi rõ ràng.
+Chi tiết ở `.claude/rules/design-principles.md` (tự nạp khi đụng `backend/**`, `frontend/src/**`; lập kế hoạch hoặc review thì đọc trước). Tóm tắt: đóng gói, đa hình thay cho `switch(gameType)`, mở rộng bằng class mới, DI qua constructor, API ngoài đi qua interface. Nguyên tắc mâu thuẫn với "Kiến trúc domain đã chốt" thì ưu tiên kiến trúc đã chốt và báo user.
 
 ## Testing & ngôn ngữ
 
@@ -86,6 +65,7 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 - Cột "Câu lệnh chính": trình bày theo cấu trúc Bối cảnh / Mục tiêu / Ràng buộc và quyết định của user / Cách làm việc / Kiểm chứng, dựa đúng trên những gì user đã yêu cầu (không thêm thắt, không bịa yêu cầu); xuống dòng trong ô bằng `<br>`.
 - Cột "Lỗi / Ảo giác AI & Cách xử lý": chỉ ghi lỗi của chính bạn (sai, ảo giác, bỏ sót, giả định sai) rồi tự sửa. Không ghi lỗi của user hay việc chưa làm được. Không có lỗi thì ghi "Không có lỗi của AI được ghi nhận ở phần này." và không bịa lỗi.
 - Cột "Người thực hiện": ghi tên người đang ra lệnh cho agent, lấy từ `git config user.name` (chạy lệnh này để biết, không tự đoán). Cột "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`).
+- `ai-usage-log.md` chỉ giữ khoảng 25 dòng mới nhất (dòng cũ tự chuyển sang `docs/ai-usage-log-archive/` bằng `scripts/ai-log/rotate.mjs`: hook Stop của Claude Code, git pre-commit `.githooks/` cho mọi agent, và CI chặn nếu quá 60 dòng). Không đọc cả file: lấy STT cuối bằng `tail`/Grep rồi chèn dòng mới trước phần "Case study". Cột "Mã Commit SHA" của dòng đã vào archive cập nhật trong file archive tương ứng.
 - Không tự commit. Cột "Mã Commit SHA" ghi `TODO` để user cập nhật sau khi commit; nhắc user làm việc này trong câu báo cáo cuối.
 
 ## Trước mỗi task: chọn công cụ
@@ -149,7 +129,7 @@ Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.m
 | Luồng đầy đủ của một ca sử dụng | `docs/srs/UC-xx.md` |
 | Yêu cầu chức năng, phi chức năng | `docs/srs/FR-summary.md`, `docs/srs/NFR.md` |
 | Trường FLD, KPI | `docs/srs/FLD.md`, `docs/srs/KPI.md` |
-| Các mục SRS khác | `docs/SRS-full.md`; hình trong SRS ở `docs/SRS.docx` |
+| Các mục SRS khác | `docs/srs/SRS-full.md`; hình trong SRS ở `docs/SRS.docx` |
 | Sơ đồ kiến trúc, use case, class, tuần tự | `docs/wiki/Sơ đồ hệ thống.md`, `docs/diagrams/` (chỉ lấy nhãn, không đọc nguyên file `.drawio`) |
 | Định hướng đề tài | `docs/Dinh_huong_de_tai.md` |
 | Field DSL | `docs/game-json-dsl-v1.0.0.md` |

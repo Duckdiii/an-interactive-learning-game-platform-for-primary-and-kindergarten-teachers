@@ -1,6 +1,6 @@
 # Các luồng nghiệp vụ
 
-Nguồn: `docs/SRS-full.md` mục 2.1.2, 2.6, 4.2 (sơ đồ luồng và tuần tự UC-02); `docs/Dinh_huong_de_tai.md` mục 5.1.
+Nguồn: `docs/srs/SRS-full.md` mục 2.1.2, 2.6, 4.2 (sơ đồ luồng và tuần tự UC-02); `docs/Dinh_huong_de_tai.md` mục 5.1.
 Cập nhật: 2026-10-31
 
 ## Luồng 5 bước

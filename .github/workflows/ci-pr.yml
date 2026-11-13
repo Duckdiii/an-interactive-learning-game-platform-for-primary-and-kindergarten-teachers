@@ -1,8 +1,9 @@
-# ci-pr: chạy trên mỗi PR nhắm vào main. 3 job độc lập, chạy song song.
+# ci-pr: chạy trên mỗi PR nhắm vào main. 4 job độc lập, chạy song song.
 # - backend-test: 447 unit test + AigameBackendApplicationTests (khởi động thật, chạy Flyway trên Supabase thật
 #   của dự án — cần 5 secret bên dưới) + JaCoCo (chặn nếu LINE coverage < 70%, xem backend/pom.xml).
 # - frontend-build: lint (oxlint) + test (Vitest) + build (gồm type-check TypeScript).
 # - secret-scan: Gitleaks quét toàn bộ diff của PR, tìm secret bị commit nhầm.
+# - docs-scripts: log AI không quá dài (xoay vòng bằng scripts/ai-log/rotate.mjs) và docs/openapi/INDEX.md còn mới.
 #
 # Còn thiếu so với sơ đồ CI/CD gốc (để làm sau, cần thêm tài khoản/hạ tầng):
 # - SonarCloud (cần tài khoản) — khi có, gộp luôn phần "lint backend" vào đó.
@@ -76,6 +77,20 @@ jobs:
       # Chạy cục bộ vẫn dùng mặc định của vite.config.ts.
       - run: npm run test -- --maxWorkers=2
       - run: npm run build
+
+  docs-scripts:
+    name: Log AI và chỉ mục OpenAPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.1"
+
+      # Lỗi ở đây nghĩa là quên chạy: node scripts/ai-log/rotate.mjs hoặc node scripts/openapi/build-index.mjs
+      - run: node scripts/ai-log/rotate.mjs --check
+      - run: node --test scripts/ai-log/rotate.test.mjs scripts/openapi/build-index.test.mjs
 
   secret-scan:
     name: Secret scan (Gitleaks)
