@@ -374,3 +374,26 @@ Thiếu 64 mục. Gợi ý nguồn bổ sung (nhận định của người vi�
 - Khoảng 6 mục không có ở Fluent: đường, hạt giống (chỉ có cây non), hơi nước, đồ dùng gia đình (chén, thìa, nồi), hát, nhảy.
 
 **Chưa làm.** Chưa chạy lại kịch bản thật; chưa đọc dữ liệu `spike/` (toán 2 đến 5, tiếng Việt, tiếng Anh) nên nhu cầu của các môn này chưa đo.
+
+## 16. Vẽ 16 hình còn thiếu (2026-11-13)
+
+**Phạm vi.** Mục 15 còn 17 mục phải tự vẽ. Vẽ 16 SVG; mục "sao vàng, quốc khánh" không vẽ vì đã có hình cờ Việt Nam, chỉ thêm từ khóa `cờ đỏ sao vàng` cho `kenney-flag-vn`. Từ khóa `sao vàng` đứng riêng đã bỏ sau review vì cướp "ngôi sao vàng" (phần thưởng quen thuộc với trẻ). Với mục gộp nhiều vật, chọn một đại diện: "đồ chơi Trung thu (mặt nạ, trống ếch)" vẽ mặt nạ; "Hồ Gươm, Chùa Một Cột" vẽ Chùa Một Cột; "ao, đồng ruộng" vẽ ao; "cốc đong, bình đong" vẽ cốc đong. Chưa vẽ: Hồ Gươm (Tháp Rùa), trống ếch, đồng ruộng.
+
+**Phong cách.** Khung 32x32, màu phẳng bảng Material, không viền, giống 11 hình tự vẽ trước. Bản gốc nằm ở thư mục `custom_drawn` ngoài repo, chép vào `frontend/public/assets/custom/`.
+
+| Nhóm | Hình (id `custom-...`) |
+|---|---|
+| Đồ ăn | rau mồng tơi, rau dền, mâm cỗ Trung thu |
+| Cây | cây bàng |
+| Đồ vật | bình tưới nước, quả cân, đèn ông sao, mặt nạ Trung thu, cốc đong, búp bê, biển lối ra |
+| Cảnh (nhóm `scene`) | Vịnh Hạ Long, Chùa Một Cột, chợ quê, tiệm bánh, cái ao |
+
+**Từ khóa.** Cùng cách với các đợt trước: `keywords` rỗng, chỉ backend khớp. Ngoại lệ: `đèn ông sao` có `keywords: ['den ong sao']` và bỏ từ khóa đó khỏi đèn lồng cũ (trước đây đèn lồng giữ từ khóa này để xấp xỉ), để cả frontend lẫn backend ra hình mới. Bẫy trùng âm khi bỏ dấu dùng từ khóa có dấu hoặc nhãn có ngoặc: "ao" khác "áo", "chợ" khác "chờ", "quả cân" khác "quá cần", "chùa" khác "chưa", "bàng". Thêm quy tắc `custom-scene-` vào nhóm `scene` ở `GROUP_BY_ID`.
+
+**Kết quả đo.** Danh mục **237 hình**. Bộ đo `retrieval-eval.csv`: đúng **207/207**, câu thường sạch **37/37**. Thêm các câu thường kiểm bẫy trùng âm: "cái áo mới", "quá cần thiết", "bảng đen", "mầm cỏ xanh", cùng ca dương "ngôi sao vàng" (không bị cờ cướp). Hai giới hạn đã biết ghi dạng `~`: "ao ước" vẫn ra cái ao (từ "ao" đứng riêng), "chờ đợi mãi" ra con chó (từ khóa "cho" bỏ dấu của con chó có sẵn). Lần đo đầu ra 206/207 vì đèn lồng cũ giữ từ khóa "đèn ông sao"; đã chuyển từ khóa. `reviewer` còn chỉ ra "mam co" bỏ dấu khớp "mầm cỏ", đã chuyển sang từ khóa có dấu "mâm cỗ". Độ phủ nhu cầu theo script mục 14: khoảng **138/146**.
+
+**Xem hình.** Dựng trang xem trước 16 hình ở cỡ lớn và cỡ thẻ 40px bằng Edge chạy ngầm. Cây bàng vẽ lại một lần vì bản đầu các tầng dính nhau, giống cây thông. Đây là hình vẽ bằng mã SVG đơn giản, chưa ngang họa sĩ: cây bàng vẫn hơi giống cây thông tầng, cái bình tưới có tay cầm trông như túi xách. Cần người duyệt từng hình trước khi coi là đạt.
+
+**Còn thiếu (khoảng 8 mục).** Đường, hạt giống (chỉ có cây non), hơi nước, đồ dùng gia đình (chén, thìa, nồi), chạy và nhảy, hát, khởi động thể dục (có hình tập thể dục nhưng từ khóa "khởi động" đã bỏ vì khớp nhầm câu thường), Hồ Gươm.
+
+**Chưa làm.** Chưa xem 16 hình trong màn chơi thật; chưa chạy lại kịch bản thật.
