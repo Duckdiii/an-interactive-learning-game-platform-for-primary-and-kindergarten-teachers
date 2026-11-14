@@ -78,3 +78,5 @@ logs/
 # Ảnh dán tạm từ Obsidian và script thử nghiệm cá nhân, không đưa vào repo
 docs/Pasted image*.png
 frontend/scratch/
+# Script tạm do agent ghi (hook block-node-eval chỉ dẫn ghi vào đây thay vì `node -e` nhiều dòng)
+scripts/tmp/
