@@ -17,10 +17,8 @@ import tools.jackson.databind.JsonNode;
         // Chỉ cho H2 của test này: profile test tắt Flyway và để ddl-auto none nên chưa có bảng nào.
         "spring.jpa.hibernate.ddl-auto=create-drop",
         // backend/.env của dev có thể bật Gemini thật; ghi đè để không có hai bean GameContentGenerator cùng lúc.
-        "app.ai.gemini.game-generation.enabled=false",
-        // CI truyền secret OPENAI_API_KEY vào job backend: không ghi đè thì Layer 3 gọi OpenAI Moderation thật và test
-        // phụ thuộc mạng, key. Để rỗng: Layer 3 chỉ dùng danh sách từ cấm (phần gọi OpenAI đã có test mock riêng).
-        "app.moderation.openai.api-key="})
+        // Khoá OpenAI để rỗng ở application-test.yml (dùng chung cho profile test), không ghi đè riêng ở đây.
+        "app.ai.gemini.game-generation.enabled=false"})
 @ActiveProfiles({"test", "verify-flow"})
 class TeacherFlowVerificationTest extends AbstractTeacherFlowTest {
 

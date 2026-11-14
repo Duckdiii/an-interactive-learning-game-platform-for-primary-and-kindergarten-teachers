@@ -15,7 +15,9 @@ import tools.jackson.databind.JsonNode;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "app.moderation.required=false",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "app.ai.gemini.game-generation.enabled=true"})
+        "app.ai.gemini.game-generation.enabled=true",
+        // application-test.yml để khoá OpenAI rỗng cho test thường; bản live vẫn dùng khoá thật nếu có trong môi trường.
+        "app.moderation.openai.api-key=${OPENAI_API_KEY:}"})
 @ActiveProfiles("test")
 class TeacherFlowLiveTest extends AbstractTeacherFlowTest {
 
