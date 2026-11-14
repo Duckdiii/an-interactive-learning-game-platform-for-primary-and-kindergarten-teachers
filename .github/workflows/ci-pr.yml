@@ -105,9 +105,11 @@ jobs:
       - run: node scripts/ai-log/check-ai-usage-log.mjs
       - run: node scripts/db/check-migrations.mjs --base "origin/${{ github.base_ref }}"
       - run: node scripts/hooks/check-config.mjs --tracked
+      # Mọi test script do git theo dõi (test mới tự được chạy; trước đây danh sách viết tay chỉ chạy 5/22 file).
+      # shortcut: tạm loại extract-srs/extract-uc vì lỗi thời so với docs/srs (KNOWN-GAPS #18), bỏ loại trừ khi sửa xong.
       - run: >-
-          node --test scripts/ai-log/rotate.test.mjs scripts/openapi/build-index.test.mjs
-          scripts/ai-log/check-ai-usage-log.test.mjs scripts/db/check-migrations.test.mjs scripts/hooks/check-config.test.mjs
+          node --test $(git ls-files 'scripts/*.test.mjs' '.claude/hooks/*.test.mjs'
+          | grep -v -e 'ai-review/extract-srs' -e 'ai-review/extract-uc')
 
   secret-scan:
     name: Secret scan (Gitleaks)
