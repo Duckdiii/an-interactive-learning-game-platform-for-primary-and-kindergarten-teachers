@@ -51,7 +51,7 @@ class CurriculumRagGeminiLiveSmokeTest {
                     assertThat(chunk.pdfPages()).isNotEmpty();
                 });
         assertThat(result.review().status()).isEqualTo(
-                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED);
+                com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.REVIEWED);
         assertThat(result.review().reviewerModel()).isEqualTo("math-g1-quiz-deterministic-v1");
         assertThat(((QuizGameDsl) game).questions()).allSatisfy(question -> {
             assertThat(question.questionText()).isNotBlank();

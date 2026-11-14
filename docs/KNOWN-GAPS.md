@@ -1,0 +1,22 @@
+# Khoảng trống đã biết (known gaps)
+
+Các khoảng trống thật đã tìm thấy khi dựng harness (GĐ0–GĐ3, 2026-11-14), mỗi mục kèm bằng chứng file:dòng hoặc output lệnh.
+File này **chỉ ghi nhận**, không đề xuất cách sửa; quyết định sửa thuộc về người dùng. Sửa xong mục nào thì đổi trạng thái và
+ghi một dòng vào `docs/corrections.md`. Đường dẫn rút gọn như `docs/FEATURE-MAP.md`: `C/` = `backend/src/main/java/com/aigameplatform/backend/`,
+`T/` = `backend/src/test/java/com/aigameplatform/backend/`, `F/` = `frontend/src/`, `OA` = `docs/openapi/openapi.yaml`.
+
+| # | Khoảng trống | Bằng chứng | Trạng thái |
+|---|---|---|---|
+| 1 | `GET /api/games/{id}/curriculum-review` luôn trả 404: `GameCurriculumReviewService.saveWithGame` không được gọi ở đâu trong code main nên không có bản đối chiếu nào được ghi. Endpoint cũng không có trong OA. | Định nghĩa `C/service/curriculum/review/GameCurriculumReviewService.java:38`; `grep -rn saveWithGame backend/src/main` chỉ ra dòng định nghĩa; thông điệp 404 ở `GameCurriculumReviewService.java:92`; test kỳ vọng 200 đang `@Disabled` ở `T/flow/TeacherFlowVerificationTest.java:32` (ép chạy: "expected: 200 but was: 404") | Chưa sửa (người dùng quyết; không sửa logic nghiệp vụ trong nhánh harness) |
+| 2 | Xuất bản game chưa có backend; frontend gọi qua mock. | Frontend `F/api/gamesApi.ts:120`; công tắc mock `F/services/publishService.ts:12`; OA `POST /games/{gameId}/publish` dòng 542, `x-status: planned` | Chưa có backend |
+| 3 | Sinh lại một câu hỏi chưa có backend; frontend gọi qua mock. | Frontend `F/api/gamesApi.ts:67`; mock `F/services/aiService.ts:18`; OA `POST /games/{gameId}/questions/{questionId}/regenerate` dòng 696, `planned` | Chưa có backend |
+| 4 | Tải ảnh/âm thanh chưa có backend; frontend gọi qua mock. | Frontend `F/api/mediaApi.ts:19`; mock `F/services/mediaService.ts:12`; OA `POST /media/upload` dòng 762, `planned` | Chưa có backend |
+| 5 | `PlayInteractionDetail` chưa có `@Inheritance(JOINED)` và chưa có lớp con nào, trong khi CLAUDE.md chốt cả ba lớp (`QuestionGame`, `PlayInteractionDetail`, `GameSession`) dùng JOINED với 7 lớp con. Rule ArchUnit chỉ bắt khi có lớp con đầu tiên. | `C/entity/interaction/PlayInteractionDetail.java:15` (không có `@Inheritance`); `CLAUDE.md:28`; ghi chú trong `T/ArchitectureRulesTest.java:92` | Chưa sửa (người dùng quyết) |
+| 6 | Test không kiểm schema Supabase thật: profile test dùng H2 trong bộ nhớ, Flyway tắt, `ddl-auto: none`; test luồng cho Hibernate tự tạo bảng. Migration và việc entity khớp schema thật chưa được test nào chạy. | `backend/src/test/resources/application-test.yml:3` (H2), `:10` (Flyway tắt), `:13` (`ddl-auto: none`); `T/flow/TeacherFlowVerificationTest.java:18` (`create-drop`) | Chưa có (Testcontainers/Supabase đã hoãn) |
+| 7 | Hai test âm tính trong PlayFlow có thể xanh mà không kiểm gì: chúng gửi phím ngay sau `findBy`, nếu listener chưa gắn thì "không có gì xảy ra" vẫn đúng. | `F/player/play/PlayFlow.test.tsx:662` (test "Enter … chưa có kết quả thì không làm gì", phím ở dòng 667) và `:766` (test "đang gõ trong ô nhập", phím ở dòng 773) | Chưa sửa |
+| 8 | `pressUntil` đánh đổi độ nhạy: gửi lại phím tới khi thấy kết quả nên không bắt được hồi quy kiểu "phím đầu tiên bị bỏ, chỉ ăn từ lần thứ hai". | `F/player/play/PlayFlow.test.tsx:654` | Đánh đổi có chủ ý (để hết chập chờn) |
+| 9 | Hook pre-commit từng có mode 100644 trong git (trên `dev`), nên trên macOS/Linux git không chạy hook này. | `git ls-tree 2af3f0e .githooks/pre-commit` → `100644 blob 72ff2bd…` | Đã đóng: commit `46843f9` đặt mode 100755 |
+| 10 | Rule ArchUnit "không switch theo gameType" chỉ bắt `switch` trên enum (qua `ordinal()`); chuỗi `if`/`==` hay `switch` pattern Java 21 theo gameType lọt qua. | `T/ArchitectureRulesTest.java:86` (comment `shortcut:`), `:88` | Giới hạn đã biết |
+| 11 | Hai dòng cũ trong `ai-usage-log.md` có lỗi định dạng thật, đang được checker miễn tạm: STT 169 (câu "không có lỗi" không chuẩn), STT 186 (cột Lỗi là `TODO`). | `scripts/ai-log/check-ai-usage-log.mjs:17` (`KNOWN_BAD_ROWS`) | Chờ người ghi dòng sửa tay |
+| 12 | Trên máy hiện tại chưa cài gitleaks nên hook không quét secret ở máy này (CI vẫn quét); cũng chưa có actionlint để kiểm cú pháp workflow. | `which gitleaks`, `which actionlint`: không có (2026-11-14) | Môi trường máy |
+| 13 | Wiki còn 2 liên kết hỏng (có từ trước harness). | `node scripts/wiki/check-links.mjs`: `Tiêu chuẩn Đồ họa và Asset Pipeline.md` → `[[experiments/results/t10-bee-garden/README]]`; `Điểm lệch và việc cần chốt.md` → `docs/SRS-full.md` | Chưa sửa |

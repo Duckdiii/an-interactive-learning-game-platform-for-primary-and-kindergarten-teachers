@@ -1,17 +1,31 @@
 #!/bin/sh
-# Xoay vòng ai-usage-log.md trước mỗi commit, bất kể agent hay người tạo commit.
-# Bật một lần sau khi clone: git config core.hooksPath .githooks
-command -v node >/dev/null 2>&1 || exit 0
+# Hook pre-commit cho mọi agent và người. Bật một lần sau khi clone: node scripts/setup-hooks.mjs
+# 1. Xoay vòng ai-usage-log.md (không chặn). 2. Chặn file nhạy cảm/cấu hình nguy hiểm. 3. Quét secret bằng gitleaks.
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: CHẶN vì không tìm thấy node, không chạy được kiểm tra cấu hình." >&2
+  exit 1
+fi
 
 out=$(node scripts/ai-log/rotate.mjs 2>&1)
-status=$?
-if [ $status -ne 0 ]; then
-  # Chỉ cảnh báo, không chặn commit; CI sẽ chặn nếu log quá dài.
+if [ $? -ne 0 ]; then
+  # Chỉ cảnh báo; CI chặn nếu log quá dài.
   echo "pre-commit: không xoay vòng được ai-usage-log.md: $out" >&2
-  exit 0
-fi
-if [ -n "$out" ]; then
+elif [ -n "$out" ]; then
   echo "$out"
   git add ai-usage-log.md docs/ai-usage-log-archive
+fi
+
+node scripts/hooks/check-config.mjs || {
+  echo "pre-commit: commit bị chặn (xem các dòng [CHẶN] ở trên)." >&2
+  exit 1
+}
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --staged --redact --no-banner || {
+    echo "pre-commit: gitleaks phát hiện secret trong phần đã stage, commit bị chặn." >&2
+    exit 1
+  }
+else
+  echo "pre-commit: CẢNH BÁO chưa cài gitleaks nên KHÔNG quét secret ở máy này (CI vẫn quét). Cài: winget install gitleaks.gitleaks" >&2
 fi
 exit 0

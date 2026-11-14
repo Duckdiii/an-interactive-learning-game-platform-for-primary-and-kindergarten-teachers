@@ -1,9 +1,13 @@
 # ci-pr: chạy trên mỗi PR nhắm vào main. 4 job độc lập, chạy song song.
-# - backend-test: 447 unit test + AigameBackendApplicationTests (khởi động thật, chạy Flyway trên Supabase thật
-#   của dự án — cần 5 secret bên dưới) + JaCoCo (chặn nếu LINE coverage < 70%, xem backend/pom.xml).
+# - backend-test: toàn bộ test backend (unit test, ArchitectureRulesTest, AigameBackendApplicationTests) + JaCoCo
+#   (chặn nếu LINE coverage < 70%, xem backend/pom.xml). AigameBackendApplicationTests khởi động context trên H2 trong
+#   bộ nhớ (profile test: Flyway tắt, ddl-auto none), nên CHƯA kiểm migration hay entity khớp schema Supabase thật;
+#   các test *LiveTest gọi DB/AI thật chỉ chạy khi đặt biến RUN_LIVE_*. TeacherFlowVerificationTest chạy luồng giáo
+#   viên qua HTTP với AI giả (H2, schema do Hibernate tạo), bằng chứng tải lên artifact verify-flow-evidence.
 # - frontend-build: lint (oxlint) + test (Vitest) + build (gồm type-check TypeScript).
 # - secret-scan: Gitleaks quét toàn bộ diff của PR, tìm secret bị commit nhầm.
-# - docs-scripts: log AI không quá dài (xoay vòng bằng scripts/ai-log/rotate.mjs) và docs/openapi/INDEX.md còn mới.
+# - docs-scripts: log AI không quá dài và đúng định dạng, migration Flyway không bị sửa so với base, cấu hình dùng
+#   chung không có giá trị nguy hiểm, và docs/openapi/INDEX.md còn mới.
 #
 # Còn thiếu so với sơ đồ CI/CD gốc (để làm sau, cần thêm tài khoản/hạ tầng):
 # - SonarCloud (cần tài khoản) — khi có, gộp luôn phần "lint backend" vào đó.
@@ -31,22 +35,17 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - name: Run tests (unit test + Layer 1-3 + khởi động thật trên Supabase)
+      - name: Run tests (unit test + Layer 1-3 + ArchUnit + khởi động context trên H2)
         env:
           DB_URL: ${{ secrets.DB_URL }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-        # PR của Dependabot không nhận Actions secret nên không kết nối được Supabase; chỉ bỏ test khởi động thật,
-        # không thêm secret DB cho Dependabot vì code của gói bên thứ ba chạy trong job này.
-        run: |
-          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
-            ./mvnw --batch-mode test '-Dtest=!AigameBackendApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
-          else
-            ./mvnw --batch-mode test
-          fi
+        # PR của Dependabot không nhận Actions secret; không thêm secret cho Dependabot vì code của gói bên thứ ba chạy
+        # trong job này. Không cần loại test nào: mọi test không gắn RUN_LIVE_* chạy trên H2 (profile test), đã kiểm khi
+        # bỏ hết secret (AigameBackendApplicationTests, TeacherFlowVerificationTest đều xanh).
+        run: ./mvnw --batch-mode test
 
       - name: Upload JaCoCo coverage report
         if: always()
@@ -55,6 +54,16 @@ jobs:
           name: jacoco-report
           path: backend/target/site/jacoco
           retention-days: 14
+
+      # Bằng chứng từng bước của TeacherFlowVerificationTest (luồng giáo viên qua HTTP, AI giả, token đã che).
+      - name: Upload verify-flow evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-flow-evidence
+          path: backend/target/verify-evidence
+          retention-days: 14
+          if-no-files-found: warn
 
   frontend-build:
     name: Frontend lint & build
@@ -83,6 +92,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # check-migrations cần lịch sử để tìm merge-base với nhánh base.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -90,7 +102,12 @@ jobs:
 
       # Lỗi ở đây nghĩa là quên chạy: node scripts/ai-log/rotate.mjs hoặc node scripts/openapi/build-index.mjs
       - run: node scripts/ai-log/rotate.mjs --check
-      - run: node --test scripts/ai-log/rotate.test.mjs scripts/openapi/build-index.test.mjs
+      - run: node scripts/ai-log/check-ai-usage-log.mjs
+      - run: node scripts/db/check-migrations.mjs --base "origin/${{ github.base_ref }}"
+      - run: node scripts/hooks/check-config.mjs --tracked
+      - run: >-
+          node --test scripts/ai-log/rotate.test.mjs scripts/openapi/build-index.test.mjs
+          scripts/ai-log/check-ai-usage-log.test.mjs scripts/db/check-migrations.test.mjs scripts/hooks/check-config.test.mjs
 
   secret-scan:
     name: Secret scan (Gitleaks)

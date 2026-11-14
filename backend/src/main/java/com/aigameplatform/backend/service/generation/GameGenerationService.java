@@ -194,7 +194,7 @@ public class GameGenerationService {
                                     "claim", "Question arithmetic and numeric scope passed deterministic pilot checks"))
                                     .toList();
                             var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                                    com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.REVIEWED,
+                                    com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.REVIEWED,
                                     claims, List.of(), "math-g1-quiz-deterministic-v1");
                             return new GenerationResult(report.game(), curriculum.evidence(), review);
                         }

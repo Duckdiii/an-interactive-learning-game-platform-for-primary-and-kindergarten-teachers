@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.curriculum.review;
 
+import com.aigameplatform.backend.entity.enums.CurriculumReviewStatus;
 import com.aigameplatform.backend.entity.*;
 import com.aigameplatform.backend.exception.*;
 import com.aigameplatform.backend.repository.*;
@@ -21,11 +22,11 @@ public class GameCurriculumReviewService {
         this.games = games; this.reviews = reviews; this.mapper = mapper;
     }
 
-    public record ReviewView(UUID id, String gameId, Instant createdAt, CurriculumEvidenceReview.Status status,
+    public record ReviewView(UUID id, String gameId, Instant createdAt, CurriculumReviewStatus status,
                              JsonNode evidence, JsonNode claims, JsonNode warnings, String datasetVersion,
                              String curriculumVersion, String embeddingModel, String reviewerModel,
                              String curriculumLabel) {
-        public ReviewView(UUID id, String gameId, Instant createdAt, CurriculumEvidenceReview.Status status,
+        public ReviewView(UUID id, String gameId, Instant createdAt, CurriculumReviewStatus status,
                           JsonNode evidence, JsonNode claims, JsonNode warnings, String datasetVersion,
                           String curriculumVersion, String embeddingModel, String reviewerModel) {
             this(id, gameId, createdAt, status, evidence, claims, warnings, datasetVersion,
@@ -79,7 +80,7 @@ public class GameCurriculumReviewService {
         edited.setAuthor(owned.getAuthor());
         var saved = games.saveAndFlush(edited);
         reviews.findByGame_IdAndGame_Author_Id(saved.getId(), teacherId).ifPresent(review -> {
-            review.setStatus(CurriculumEvidenceReview.Status.STALE);
+            review.setStatus(CurriculumReviewStatus.STALE);
             review.setWarnings(mapper.writeValueAsString(List.of("GAME_CHANGED_REVIEW_STALE")));
             reviews.saveAndFlush(review);
         });

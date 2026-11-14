@@ -505,11 +505,12 @@ describe('lỗi và mất mạng (P2.5)', () => {
     await screen.findByText(/mã lỗi NET-01/)
 
     setMockScenario('normal')
-    act(() => {
-      window.dispatchEvent(new Event('online'))
+    // Listener `online` gắn trong effect của pha lỗi; máy bận thì effect có thể chưa chạy khi findBy ở trên trả về (xem
+    // pressUntil). Gửi lại tới khi thấy câu 1; start() có cờ chặn chạy trùng nên gửi thừa vô hại.
+    await waitFor(() => {
+      if (screen.queryByText(/mã lỗi NET-01/)) fireEvent(window, new Event('online'))
+      expect(screen.getByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
     })
-
-    expect(await screen.findByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
   })
 
   it('tải lại trang giữa chừng: không hỏi lại biệt danh, vào thẳng câu chưa làm', async () => {
@@ -646,6 +647,16 @@ describe('thiết bị: điện thoại dọc (P2.6)', () => {
 })
 
 const press = (key: string, target: Element | Window = window) => fireEvent.keyDown(target, { key })
+// findBy trả về ngay khi DOM có phần tử, nhưng listener phím (usePlayerHotkeys) và handler mới nhất được gắn trong effect:
+// asyncWrapper của Testing Library tắt act lúc chờ, nên máy bận thì effect có thể chạy SAU khi findBy trả về và phím gửi
+// ngay bị mất (đã gặp 3 lần ở CI/máy bận, luôn "không tìm thấy" sau đúng 10 giây). Gửi lại tới khi thấy kết quả; lần
+// bị mất không có tác dụng gì, và chỉ gửi khi kết quả chưa có nên không bấm thừa.
+const pressUntil = (key: string, done: () => boolean) =>
+  waitFor(() => {
+    if (!done()) press(key)
+    expect(done()).toBe(true)
+  })
+const pauseShown = () => screen.queryByRole('dialog', { name: 'Tạm dừng' }) !== null
 
 describe('phím tắt (P2.6)', () => {
   it('Enter sau khi có kết quả sang câu sau; chưa có kết quả thì không làm gì', async () => {
@@ -658,9 +669,7 @@ describe('phím tắt (P2.6)', () => {
 
     tap('3')
     await screen.findByText('Giỏi quá!')
-    press('Enter')
-
-    expect(await screen.findByRole('img', { name: 'Câu 2/3' })).toBeInTheDocument()
+    await pressUntil('Enter', () => screen.queryByRole('img', { name: 'Câu 2/3' }) !== null)
   })
 
   it('QUIZ: phím 1 chọn lựa chọn đầu và nộp như chạm', async () => {
@@ -669,7 +678,7 @@ describe('phím tắt (P2.6)', () => {
     await start()
     await screen.findByRole('img', { name: 'Câu 1/3' })
 
-    press('1')
+    await pressUntil('1', () => submit.mock.calls.length > 0)
 
     expect(await screen.findByRole('button', { name: 'Câu tiếp theo' })).toBeInTheDocument()
     expect(submit).toHaveBeenCalledTimes(1)
@@ -684,8 +693,7 @@ describe('phím tắt (P2.6)', () => {
     await start()
     await screen.findByRole('img', { name: 'Câu 1/3' })
 
-    press('Escape')
-    expect(await screen.findByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
+    await pressUntil('Escape', pauseShown)
     ;(document.activeElement as HTMLElement | null)?.blur()
     press('1', document.body)
 
@@ -703,8 +711,7 @@ describe('phím tắt (P2.6)', () => {
     let offset = 0
     vi.spyOn(Date, 'now').mockImplementation(() => realNow() + offset)
 
-    press('Escape')
-    await screen.findByRole('dialog', { name: 'Tạm dừng' })
+    await pressUntil('Escape', pauseShown)
     offset = 20_000
     press('Escape')
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Tạm dừng' })).toBeNull())
@@ -721,8 +728,7 @@ describe('phím tắt (P2.6)', () => {
     await screen.findByRole('timer')
     await screen.findByRole('button', { name: 'Tạm dừng' })
 
-    press('Escape')
-    expect(await screen.findByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
+    await pressUntil('Escape', pauseShown)
     const before = screen.getByRole('timer').textContent
 
     await act(async () => {
@@ -754,8 +760,7 @@ describe('phím tắt (P2.6)', () => {
     await screen.findByRole('img', { name: 'Câu 1/3' })
 
     expect(screen.queryByRole('button', { name: 'Tạm dừng' })).not.toBeInTheDocument()
-    press('Escape')
-    expect(screen.getByRole('dialog', { name: 'Tạm dừng' })).toBeInTheDocument()
+    await pressUntil('Escape', pauseShown)
   })
 
   it('đang gõ trong ô nhập thì phím tắt không kích hoạt', async () => {

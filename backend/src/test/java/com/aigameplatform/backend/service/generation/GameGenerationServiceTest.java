@@ -58,7 +58,7 @@ class GameGenerationServiceTest {
             assertThat(suppliedTopic).isEqualTo(topic);
             return new GeneratedContentReviewer.Result(List.of(),
                     new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                            com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                            com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                             List.of(java.util.Map.of("chunkId", "math-g1-007", "claim", "Semantic review accepted fixture")), List.of("AUTOMATED_ONLY"), "fixture-semantic"));
         });
         assertThat(service.generateResult(GameType.QUIZ,
@@ -113,7 +113,7 @@ class GameGenerationServiceTest {
         var generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
         var service = service(generator, 0, moderation(false, false), provider, true, List.of(dataset));
         var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                 List.of(java.util.Map.of("chunkId", chunk.chunkId())), List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), "test-model");
         var reviewCalls = new java.util.concurrent.atomic.AtomicInteger();
         service.setGeneratedContentReviewer((game, topic, curriculumEvidence) -> {
@@ -128,7 +128,7 @@ class GameGenerationServiceTest {
         assertThat(result.game().metadata().subject()).isEqualTo(Subject.ENGLISH);
         assertThat(result.evidence().datasetVersion()).isEqualTo(dataset.source().datasetVersion());
         assertThat(result.review().status()).isEqualTo(
-                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING);
+                com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING);
         assertThat(reviewCalls).hasValue(1);
         assertThat(result.evidence().chunks()).containsExactly(retrieved);
         assertThat(generator.attempts.getFirst().subject()).isEqualTo(Subject.ENGLISH);
@@ -224,7 +224,7 @@ class GameGenerationServiceTest {
         service.setGeneratedContentReviewer((game, topic, suppliedEvidence) ->
                 new GeneratedContentReviewer.Result(List.of(),
                         new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                                com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                                 List.of(java.util.Map.of("questionId", game.questions().getFirst().id(),
                                         "supportingChunkIds", List.of(chunk.chunkId()))),
                                 List.of("FIXTURE_REVIEW_ONLY"), "fixture")));
@@ -249,7 +249,7 @@ class GameGenerationServiceTest {
         var service = service(generator, 0, moderation(false, false), provider, true);
         service.setGeneratedContentReviewer((game, topic, evidence) -> new GeneratedContentReviewer.Result(List.of(),
                 new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                        com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                        com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                         List.of(java.util.Map.of("chunkId", "math-g1-001")), List.of("AUTOMATED_ONLY"), "fixture-semantic")));
         var result = service.generateResult(GameType.QUIZ, REQUEST);
         assertThat(result.review().reviewerModel()).isEqualTo("fixture-semantic");

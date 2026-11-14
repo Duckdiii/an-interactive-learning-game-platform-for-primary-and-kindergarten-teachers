@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.generation;
 
+import com.aigameplatform.backend.entity.enums.CurriculumReviewStatus;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.OrderingGameDsl;
 import com.aigameplatform.backend.dto.dsl.OrderStepDsl;
@@ -95,7 +96,7 @@ public class GeminiGeneratedContentReviewer implements GeneratedContentReviewer 
                     "supportedByCurriculum", Boolean.TRUE.equals(q.supportedByCurriculum()),
                     "supportingChunkIds", q.supportingChunkIds() == null ? List.of() : q.supportingChunkIds())).toList();
             var evidenceReview = validation.isEmpty()
-                    ? new CurriculumEvidenceReview(CurriculumEvidenceReview.Status.PENDING, claims,
+                    ? new CurriculumEvidenceReview(CurriculumReviewStatus.PENDING, claims,
                             List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), modelName)
                     : CurriculumEvidenceReview.unavailable();
             return new GeneratedContentReviewer.Result(validation, evidenceReview);

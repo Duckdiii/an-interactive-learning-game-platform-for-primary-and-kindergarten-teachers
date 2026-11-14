@@ -17,6 +17,41 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-14 — Lặp lần 3: viết code Java có `\` qua `node -e` trong bash, mất một lớp escape
+- Lỗi: khi tách bước curriculum-review, viết lại `AbstractTeacherFlowTest.java` bằng `node -e`; regex JWT `"eyJ[\\w-]+…"` thành `"eyJ[\w-]+…"` (không biên dịch được). Cùng loại với mục 2026-11-12 và 2026-11-13.
+- Phát hiện nhờ: tự grep dòng `JWT =` sau khi ghi, trước khi biên dịch.
+- Nguyên nhân gốc: vẫn chọn `node -e` cho thay đổi lớn vì tiện, dù hai mục trước đã ghi; tầng 3 (ghi chú) không đủ để chặn.
+- Cách chặn: đã ghi vào `docs/corrections.md` là ứng viên đẩy lên tầng cao hơn; đề xuất (chờ duyệt) dùng Write/Edit cho mọi file nguồn có ký tự `\`, không sinh mã nguồn qua `node -e`/heredoc.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — "Chứng minh test bắt lỗi" bằng một thay đổi làm hỏng biên dịch, và tin file bằng chứng cũ
+- Lỗi: để chứng minh test luồng bắt được lỗi, đổi tên component của record `AuthResponse`; build lỗi biên dịch nên test không chạy, exit 1 bị coi là "test fail", và 8 file bằng chứng của lần trước vẫn còn trông như kết quả mới.
+- Phát hiện nhờ: tự thấy vẫn đủ 8 file dù lẽ ra phải dừng ở bước login, rồi đọc log thấy `COMPILATION ERROR`.
+- Nguyên nhân gốc: chỉ nhìn exit code; không kiểm test có thật sự chạy tới assert hay không; công cụ ghi bằng chứng không xoá kết quả cũ.
+- Cách chặn: mỗi lần cố ý làm hỏng phải trích được đúng dòng assert fail (không phải lỗi biên dịch); thay đổi để chứng minh phải biên dịch được (ví dụ đổi tên trên JSON bằng annotation); script bằng chứng xoá kết quả cũ trước khi chạy và FAIL khi thiếu bước (đã làm trong `verify-flow.mjs`).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Lặp lại: thay chuỗi bằng script Node trên file CRLF, khớp 0 chỗ
+- Lỗi: script `node -e` thay 5 chỗ trong `PlayFlow.test.tsx` dừng ngay vì khớp 0 chỗ (file CRLF), cùng loại lỗi đã ghi ngày 2026-11-11. Lần này có kiểm số lần khớp nên không sửa thiếu âm thầm.
+- Phát hiện nhờ: script tự ném lỗi "found 0x".
+- Nguyên nhân gốc: dùng chuỗi nhiều dòng có `\n` trên file không biết kiểu xuống dòng.
+- Cách chặn: sửa nhiều dòng trong file của repo thì dùng Edit (chịu được CRLF); nếu dùng script thì kiểm số lần khớp như lần này.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Viết checker tất định chỉ từ định nghĩa agent, chưa đối chiếu với kết quả agent trên dữ liệu thật
+- Lỗi: `check-ai-usage-log.mjs` qua hết dữ liệu thật trong khi `log-auditor` tìm ra 2 lỗi thật (STT 169 dùng câu "Không ghi nhận…", STT 186 có cột Lỗi là `TODO`); rule switch ArchUnit bản đầu không bắt được vi phạm nào; rule "không new service" bản mở rộng chặn nhầm `this(...)`.
+- Phát hiện nhờ: `log-auditor` chạy song song; bước cố ý vi phạm từng rule; chạy lại toàn bộ ArchUnit.
+- Nguyên nhân gốc: coi checker "qua dữ liệu thật" là đủ, trong khi qua có thể vì checker lỏng; chỉ thử ca vi phạm cho phần mình nghĩ ra.
+- Cách chặn: khi thay một agent bằng checker, chạy agent đó một lần trên cùng dữ liệu và biến mỗi lỗi agent tìm ra thành một ca test của checker trước khi coi là thay được; mỗi rule phải có ca vi phạm thật làm đỏ (đã làm cho ArchUnit trong GĐ1).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Đổi tên bằng sed chỉ theo tên đầy đủ, sót chỗ dùng tên ngắn; ghi file chưa Read nên chạy thử bằng bản cũ
+- Lỗi: (1) đổi `CurriculumEvidenceReview.Status` bằng sed, sót field `private Status status;` trong entity dùng import tên ngắn, build lỗi biên dịch. (2) `Write` hook pre-commit bị từ chối vì chưa Read, nhưng lệnh chạy thử nối sau vẫn chạy với hook cũ và in "exit=0"; thêm `git update-index --chmod` lỡ stage file.
+- Phát hiện nhờ: lỗi biên dịch của Maven; đọc lại output thấy không có dòng [CHẶN].
+- Nguyên nhân gốc: sed theo chuỗi thay vì theo symbol; gộp bước ghi file và bước kiểm vào cùng một lượt mà không kiểm bước ghi đã thành công.
+- Cách chặn: đổi tên kiểu/symbol thì sau sed grep cả tên ngắn (`\bStatus\b` trong file có import cũ) và chạy `test-compile` ngay; không chạy bước chứng minh trong cùng lượt với lệnh ghi file có thể thất bại; không dùng lệnh git ghi index khi người dùng cấm commit.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-13 — Sửa file trong lúc subagent kiểm tra đang chạy test, và lại so chữ tiếng Việt sau khi bỏ dấu
 - Lỗi: (1) chạy script đồng bộ từ khóa (sửa `assetResolver.ts` và JSON) khi `test-verifier` đang chạy `npm test`, làm nó báo fail giả ở `gameAssetCatalog.test.ts` và tốn một lượt chạy lại. (2) script đo biến thể gom khái niệm bằng chữ đã bỏ dấu, ra 5 cặp nhầm ("bò" với "bố"), cùng loại lỗi đã ghi hai lần trong hộp này.
 - Phát hiện nhờ: `test-verifier` (diff đúng ở các dòng vừa sửa) và tự xem danh sách cặp.

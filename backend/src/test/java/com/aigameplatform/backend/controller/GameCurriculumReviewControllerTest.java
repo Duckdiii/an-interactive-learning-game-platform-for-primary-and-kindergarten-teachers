@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.controller;
 
+import com.aigameplatform.backend.entity.enums.CurriculumReviewStatus;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -48,7 +49,7 @@ class GameCurriculumReviewControllerTest {
                 new UsernamePasswordAuthenticationToken(teacher, "", List.of()));
         var mapper = new JsonMapper();
         var view = new GameCurriculumReviewService.ReviewView(UUID.randomUUID(), "game-1", Instant.EPOCH,
-                CurriculumEvidenceReview.Status.UNAVAILABLE, mapper.readTree("{\"chunks\":[{\"chunkId\":\"outcome-1\",\"ageBand\":\"AGE_3_4\"}]}"),
+                CurriculumReviewStatus.UNAVAILABLE, mapper.readTree("{\"chunks\":[{\"chunkId\":\"outcome-1\",\"ageBand\":\"AGE_3_4\"}]}"),
                 mapper.readTree("[]"), mapper.readTree("[\"REVIEWER_NOT_CONFIGURED\"]"),
                 "preschool-v1", "curriculum-v1", "gemini-embedding-001", null,
                 "Nội dung tương ứng kết quả mong đợi của trẻ 3–4 tuổi.");
