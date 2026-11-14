@@ -21,10 +21,23 @@ node scripts/hooks/check-config.mjs || {
 }
 
 if command -v gitleaks >/dev/null 2>&1; then
-  gitleaks git --pre-commit --staged --redact --no-banner || {
-    echo "pre-commit: gitleaks phát hiện secret trong phần đã stage, commit bị chặn." >&2
+  # GIT_ATTR_NOSYSTEM chỉ cho lệnh này: Git for Windows gán `*.docx diff=astextplain` ở cấp hệ thống, bộ chuyển đổi đó
+  # lỗi với .docx làm `git diff` dừng giữa chừng; gitleaks chỉ ghi ERR rồi vẫn exit 0 "no leaks found" (đã quét 0 byte).
+  gl_out=$(GIT_ATTR_NOSYSTEM=1 gitleaks git --pre-commit --staged --redact --no-banner --no-color 2>&1)
+  gl_code=$?
+  printf '%s\n' "$gl_out"
+  if [ $gl_code -ne 0 ]; then
+    echo "pre-commit: gitleaks phát hiện secret hoặc chạy lỗi (exit $gl_code), commit bị chặn." >&2
     exit 1
-  }
+  fi
+  # Fail-closed: gitleaks có thể exit 0 dù đọc diff lỗi, nên dòng log mức ERR cũng chặn. Không có --no-color thì log
+  # có mã màu ANSI cả khi gom vào biến (đã đo bằng od); vẫn bỏ mã màu phòng bản gitleaks khác. ERR phải đứng ngay sau
+  # giờ ("5:17PM ERR ...") để không bắt nhầm tên file.
+  esc=$(printf '\033')
+  if printf '%s\n' "$gl_out" | sed "s/${esc}\[[0-9;]*m//g" | grep -Eq '^[^ ]+ ERR( |$)'; then
+    echo "pre-commit: gitleaks báo lỗi khi đọc phần đã stage (dòng ERR ở trên), không chắc đã quét hết nên commit bị chặn." >&2
+    exit 1
+  fi
 else
   echo "pre-commit: CẢNH BÁO chưa cài gitleaks nên KHÔNG quét secret ở máy này (CI vẫn quét). Cài: winget install gitleaks.gitleaks" >&2
 fi

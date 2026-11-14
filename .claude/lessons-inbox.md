@@ -253,6 +253,13 @@ Mẫu một mục:
 - Cách chặn: số liệu ghi vào tài liệu phải lấy từ lệnh đếm (`| wc -l`, `grep -c`) hoặc từ dòng tổng của script, không từ output đã cắt bằng `head`/`tail`; đề xuất (chờ duyệt) cho `check-links.mjs` tự in tổng số dòng lỗi.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-14 — Chứng minh nhánh chặn của hook bằng công cụ giả có output khác công cụ thật
+- Lỗi: nhánh fail-closed theo dòng `ERR` trong `.githooks/pre-commit` dùng regex `(^|[^A-Za-z])ERR(...)`; gitleaks thật in mã màu ANSI (`\033[31mERR`) cả khi bị gom vào biến, nên regex không bao giờ khớp. Tôi "chứng minh" bằng một gitleaks giả in `ERR` không màu, nên test xanh mà nhánh vô hiệu.
+- Phát hiện nhờ: `reviewer` đo output thật bằng `od -c`.
+- Nguyên nhân gốc: viết công cụ giả theo hình dung về output, không đối chiếu byte với output thật trước.
+- Cách chặn: khi giả lập một công cụ ngoài để thử nhánh lỗi, lấy output thật (đo bằng `od`) làm mẫu, hoặc dùng công cụ thật với điều kiện lỗi thật (wrapper gỡ biến môi trường như đã làm); đã sửa hook (`--no-color`, bỏ mã ANSI, neo ERR sau giờ) và chứng minh lại bằng gitleaks thật có màu.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau
