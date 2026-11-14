@@ -14,6 +14,22 @@ const isSpace = (ch) => ch === " " || ch === "\t" || ch === "\n" || ch === "\r";
 
 const tooLong = (code) => code.includes("\n") || code.length > MAX_INLINE;
 
+// Đọc một đối số shell bắt đầu ở i: trong nháy đơn, trong nháy kép (bỏ qua ký tự sau `\`), hoặc tới khoảng trắng.
+// Chỉ đo đúng đối số code, nên chữ `node -e` nằm trong lời văn (ví dụ heredoc của `git commit -m`) không bị chặn.
+function readWord(text, i) {
+  const quote = text[i];
+  if (quote === "'" || quote === '"') {
+    let j = i + 1;
+    while (j < text.length && text[j] !== quote) j += quote === '"' && text[j] === "\\" ? 2 : 1;
+    return { code: text.slice(i + 1, j), end: Math.min(j + 1, text.length) };
+  }
+  // Từ không nháy dừng ở cả ký tự nối lệnh, để `node -e x;node -e …` vẫn thấy `node` thứ hai.
+  // shortcut: từ ghép nhiều đoạn (`'x'"a;\nb"`) chỉ đo đoạn đầu; đủ cho cách viết thường gặp.
+  let j = i;
+  while (j < text.length && !isSpace(text[j]) && !";&|()".includes(text[j])) j++;
+  return { code: text.slice(i, j), end: j };
+}
+
 /** true nếu lệnh có `node -e`/`--eval` mà phần code nhiều dòng hoặc dài hơn MAX_INLINE ký tự. */
 export function shouldBlock(command) {
   const text = command ?? "";
@@ -31,9 +47,20 @@ export function shouldBlock(command) {
         break;
       }
       const token = text.slice(start, i);
-      // shortcut: đo từ sau cờ tới hết lệnh (gồm cả lệnh nối phía sau); có thể chặn thừa lệnh dài nối sau `node -e` ngắn.
-      if (token === "-e" || token === "--eval") return tooLong(text.slice(i).replace(/^\s+/, ""));
-      if (token.startsWith("--eval=")) return tooLong(text.slice(start + "--eval=".length));
+      let codeStart = -1;
+      if (token === "-e" || token === "--eval") {
+        while (i < text.length && isSpace(text[i])) i++;
+        codeStart = i;
+      } else if (token.startsWith("--eval=")) {
+        codeStart = start + "--eval=".length;
+      }
+      if (codeStart >= 0) {
+        // shortcut: code lấy từ nơi khác (`-e "$(cat x.js)"`, heredoc `node <<EOF`) không bị đo; đủ cho lỗi mất escape đã gặp.
+        const { code, end } = readWord(text, codeStart);
+        if (tooLong(code)) return true;
+        i = end; // code ngắn: quét tiếp phần sau, có thể còn một `node -e` khác trong cùng lệnh
+        break;
+      }
     }
     // Các `node` nằm trong tuỳ chọn vừa duyệt (ví dụ token `-;node`) không duyệt lại: giữ tổng công việc tuyến tính.
     NODE.lastIndex = Math.max(NODE.lastIndex, i);

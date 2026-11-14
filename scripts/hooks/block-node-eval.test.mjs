@@ -40,3 +40,22 @@ test("vẫn tìm `node -e` nằm sau một đối số không có dấu gạch",
   assert.equal(shouldBlock("node scripts/x.mjs && node -e 'a;\nb'"), true);
   assert.equal(shouldBlock("node -a;node -e 'a;\nb'"), true);
 });
+
+test("không chặn `node -e` nằm trong lời văn của commit message nhiều dòng", () => {
+  const commit = "git commit -m \"$(cat <<'EOF'\nfix(hooks): sửa lỗi\n\nTrước đây node -e x bị chặn nhầm.\nEOF\n)\"";
+  assert.equal(shouldBlock(commit), false);
+  assert.equal(shouldBlock("node -e 'console.log(1)' && echo 'dòng 1\ndòng 2'"), false);
+});
+
+test("chỉ đo đúng đối số code, rồi quét tiếp phần sau", () => {
+  assert.equal(shouldBlock("node -e \"a;\nb\""), true);
+  assert.equal(shouldBlock("node --eval='a;\nb'"), true);
+  assert.equal(shouldBlock("node -e 'x'; node -e 'a;\nb'"), true);
+  assert.equal(shouldBlock("git commit -m \"node -e\"; node -e 'a;\nb'"), true);
+  assert.equal(shouldBlock(`node -e "a\\"b;\nc"`), true);
+  // reviewer: code không nháy ngắn từng nuốt luôn `;node` phía sau
+  assert.equal(shouldBlock("node -e x;node -e 'a;\nb'"), true);
+  assert.equal(shouldBlock("node -e x&&node -e 'a;\nb'"), true);
+  assert.equal(shouldBlock("node --eval='x' && node -e 'a;\nb'"), true);
+  assert.equal(shouldBlock("node -e 'chưa đóng\nnháy"), true);
+});
