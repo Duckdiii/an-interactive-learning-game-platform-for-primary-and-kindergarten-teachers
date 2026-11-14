@@ -32,6 +32,7 @@
 		<json-schema-validator.version>3.0.7</json-schema-validator.version>
 		<springdoc.version>3.1.1</springdoc.version>
 		<jacoco.version>0.8.12</jacoco.version>
+		<archunit.version>1.5.1</archunit.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -155,6 +156,13 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Quy tắc phân tầng chạy như unit test (ArchitectureRulesTest) thay cho review bằng agent. -->
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5</artifactId>
+			<version>${archunit.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.generation;
 
+import com.aigameplatform.backend.entity.enums.CurriculumReviewStatus;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence;
 import com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview;
@@ -12,8 +13,8 @@ public interface GeneratedContentReviewer {
         public Result { errors = List.copyOf(errors); }
         public boolean accepted() {
             return errors.isEmpty() && review != null && !review.claims().isEmpty()
-                    && (review.status() == CurriculumEvidenceReview.Status.PENDING
-                        || review.status() == CurriculumEvidenceReview.Status.REVIEWED);
+                    && (review.status() == CurriculumReviewStatus.PENDING
+                        || review.status() == CurriculumReviewStatus.REVIEWED);
         }
     }
 

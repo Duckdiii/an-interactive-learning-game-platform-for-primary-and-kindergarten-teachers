@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.curriculum;
 
+import com.aigameplatform.backend.entity.enums.CurriculumReviewStatus;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import com.aigameplatform.backend.dto.dsl.*;
@@ -68,12 +69,12 @@ class GameCurriculumReviewPersistenceLiveTest {
         var review = service.getForTeacher(game.getId(), teacher.getId());
         assertThat(review.evidence().path("chunks").get(0).path("chunkId").asString()).isEqualTo("fixture-outcome");
         assertThat(review.datasetVersion()).isEqualTo("fixture-v1");
-        assertThat(review.status()).isEqualTo(CurriculumEvidenceReview.Status.UNAVAILABLE);
+        assertThat(review.status()).isEqualTo(CurriculumReviewStatus.UNAVAILABLE);
         assertThatThrownBy(() -> service.getForTeacher(game.getId(), "another-teacher")).isInstanceOf(com.aigameplatform.backend.exception.ApiException.class);
         game.setTitle("Edited fixture game");
         service.saveEditedGame(game, teacher.getId());
         var edited = service.getForTeacher(game.getId(), teacher.getId());
-        assertThat(edited.status()).isEqualTo(CurriculumEvidenceReview.Status.STALE);
+        assertThat(edited.status()).isEqualTo(CurriculumReviewStatus.STALE);
         assertThat(edited.warnings().get(0).asString()).isEqualTo("GAME_CHANGED_REVIEW_STALE");
     }
 
