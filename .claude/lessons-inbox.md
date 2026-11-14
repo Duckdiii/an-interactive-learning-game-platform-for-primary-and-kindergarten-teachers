@@ -274,6 +274,13 @@ Mẫu một mục:
 - Cách chặn: trước khi dùng một công tắc toàn cục (biến môi trường, cờ tắt cấu hình), liệt kê mọi thứ nó chạm tới (ở đây: `git check-attr diff` cho các đuôi file trong gitattributes hệ thống) và kiểm ít nhất một ca của mỗi nhóm; ghi ở KNOWN-GAPS #15.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-15 — Bỏ người chặn một luật vì tin công cụ khác "chắc đã phủ"
+- Lỗi: ở B2, tôi bỏ `pre-commit-checker` khỏi mọi commit và ghi "secret hardcode → gitleaks" mà không chạy gitleaks với dạng secret mà agent cũ kiểm (mật khẩu chữ thường trong yml, connection string có mật khẩu). gitleaks bỏ sót cả hai. Tôi cũng viết "chạy `check-config.mjs` trước khi đưa commit message" trong khi script chỉ đọc phần đã stage, còn agent không stage.
+- Phát hiện nhờ: `reviewer` (prompt mới sau A1) khi review diff B2.
+- Nguyên nhân gốc: đối chiếu luật → thứ chặn bằng tên công cụ, không bằng một ca vi phạm thật cho từng luật; không đọc chế độ mặc định (staged) của script trước khi đặt nó vào quy trình.
+- Cách chặn: trước khi gỡ một người chặn (agent, hook, bước CI), chạy thứ thay thế với một ca vi phạm thật cho từng luật nó đang giữ; đã đẩy luật secret chữ cố định lên `check-config.mjs` (tầng 2).
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau

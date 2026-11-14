@@ -1,6 +1,6 @@
 ---
 name: log-auditor
-description: Kiểm tra định dạng và tính nhất quán của ai-usage-log.md (STT liên tục không trùng, đủ cột, đúng cấu trúc Bối cảnh/Mục tiêu/Ràng buộc/Cách làm/Kiểm chứng, SHA còn TODO). Dùng trước khi chốt log, sau khi merge nhánh, hoặc khi thêm dòng mới. Chỉ báo cáo, không sửa file.
+description: Đối chiếu ai-usage-log.md với git và nội dung (SHA có thật, Phạm vi khớp git show --stat, cấu trúc Bối cảnh/Mục tiêu/Ràng buộc/Cách làm/Kiểm chứng, cột lỗi AI, SHA còn TODO); lỗi định dạng lấy từ check-ai-usage-log.mjs. Dùng khi thêm hoặc sửa dòng log, sau khi merge nhánh. Chỉ báo cáo, không sửa file.
 tools: Read, Grep, Glob, Bash
 model: haiku
 ---
