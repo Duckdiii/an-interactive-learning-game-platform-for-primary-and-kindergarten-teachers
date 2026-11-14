@@ -4,7 +4,12 @@ Worktree `D:/Data/project/aigame-batch1`, nhánh `chore/harness-batch-1`, tách 
 
 ## Báo cáo cuối
 
-_(điền sau khi CI chạy xong)_
+- **Xong:** T2 `0f6ae8e`, T3 `4c70229`, T4 (a+b) `f2b1596`, T5 `98f37c6`; sổ ghi `de50b2f`. PR #44 vào `dev`, chưa merge.
+- **Bỏ qua:** T1, vì yêu cầu còn chỗ giữ chỗ `<ĐIỀN_TAY_TRƯỚC_KHI_GỬI>` (nội dung tương tự đã có ở PR #43).
+- **CI của PR #44** (commit `de50b2f`, run 43587298301): Backend test xanh (1 m 10 s), Frontend lint & build xanh (3 m 28 s), Log AI và chỉ mục OpenAPI xanh, Secret scan (Gitleaks) xanh, Scan repository history for secrets ×2 xanh; CodeRabbit bỏ qua (không review PR vào nhánh khác nhánh mặc định).
+- **Bằng chứng T3:** annotation của CI PR #40 là "15 warnings and 4 notices", có "Node.js 20 is deprecated" và "setup-java v4 is deprecated"; PR #44 là "10 warnings and 4 notices", 0 cảnh báo Node.js 20, 0 cảnh báo setup-java v4 (10 cảnh báo còn lại là lint React ở frontend, có từ trước).
+- **Câu hỏi cho Duy:** 6 câu, xem mục bên dưới.
+- **`git status` cuối của worktree:** sạch, không có file thay đổi hay chưa track (sau commit sổ ghi này).
 
 ## Tiến độ
 
@@ -12,7 +17,7 @@ _(điền sau khi CI chạy xong)_
 |---|---|---|---|
 | T1 (việc 5B) | Bỏ qua | — | Dòng điều kiện trong yêu cầu vẫn còn `<ĐIỀN_TAY_TRƯỚC_KHI_GỬI>`. Cùng nội dung sửa đã có ở PR #43 (chưa merge, CI xanh 6 check; cột 10 STT 186 = `TODO` theo lựa chọn trước đó của Duy). |
 | T2 (việc 16) | Xong | `0f6ae8e` | `check-links` 36 dòng → "Tổng: 31 trang, 522 liên kết và đường dẫn đã kiểm, 10 lỗi."; test mới đỏ trên bản cũ (12/13), xanh sau sửa (13/13, rồi 14/14 thêm nhánh "Đạt"). |
-| T3 (việc 17) | Xong (chờ CI) | `4c70229` | actionlint 0 cảnh báo; SHA trùng SHA đã ghim ở workflow khác. Bằng chứng fail→pass: CI PR #40 có cảnh báo "Node.js 20 is deprecated" và "setup-java v4 is deprecated"; xem CI của PR này. |
+| T3 (việc 17) | Xong | `4c70229` | actionlint 0 cảnh báo; SHA trùng SHA đã ghim ở workflow khác. Bằng chứng fail→pass: CI PR #40 có cảnh báo "Node.js 20 is deprecated" và "setup-java v4 is deprecated"; xem CI của PR này. |
 | T4 (a) | Xong | `f2b1596` | KNOWN-GAPS #14, trích dẫn đã được `reviewer` đối chiếu đúng. |
 | T4 (b) | Xong | `f2b1596` | Với `OPENAI_API_KEY=sk-fake-ci-hermetic`: bỏ ghi đè riêng mà chưa có cấu hình chung → `TeacherFlowVerificationTest` đỏ ("Gọi OpenAI Moderation thất bại: Unauthorized", "expected: 200 but was: 504"); có cấu hình chung → xanh, log "KHÔNG gọi OpenAI Moderation"; cả bộ backend: 990 test, 0 fail, 0 error, 10 skipped. |
 | T5 (việc 14) | Xong | `98f37c6` | 10 test; endpoint giả `GET /api/games/zz-fake-endpoint` thêm tạm vào `GamesController` bị bắt, hoàn tác xong còn 0 thay đổi. |
