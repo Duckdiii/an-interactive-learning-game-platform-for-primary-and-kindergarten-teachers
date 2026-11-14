@@ -97,7 +97,9 @@ Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/c
 | Khi nào | Chạy |
 |---|---|
 | Có sửa code (`backend/**`, `frontend/src/**`) | `reviewer` + `test-verifier` |
-| Mọi commit | `pre-commit-checker` (sau cùng) |
+| Mọi commit | Không cần agent: hook `.githooks/pre-commit` (`check-config.mjs` với file đã stage, gitleaks) và CI (`check-config --tracked`, `check-migrations.mjs`, `check-ai-usage-log.mjs`, gitleaks) chặn phần kiểm tra tất định |
+
+Bảng chỉ còn agent cho việc cần phán đoán; luật nào đã có script/CI chặn thì không gọi agent cho luật đó (đối chiếu luật → script ở `docs/harness-evals/B2-routing.md`).
 
 **Chạy thêm khi đụng phần liên quan:**
 
@@ -105,10 +107,11 @@ Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/c
 |---|---|
 | `backend/**/*.java` | `backend-architect-reviewer` |
 | `dto/dsl`, `schema/game-dsl`, `schema/game-ai-output`, `game-dsl.types.ts`, `docs/openapi/openapi.yaml`, controller/DTO REST | `contract-guardian` |
-| `backend/src/main/resources/db/migration/`, `entity/`, `application*.yml` | `migration-checker` |
-| `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` (bổ sung, không thay `pre-commit-checker`) |
+| `backend/src/main/resources/db/migration/`, `entity/` | `migration-checker` (entity khớp migration, an toàn dữ liệu; tên/version/`ddl-auto` đã do `check-migrations.mjs`) |
+| `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` |
 | `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
-| `ai-usage-log.md` | `log-auditor` |
+| `ai-usage-log.md` | `log-auditor` (đối chiếu với git: SHA có thật, Phạm vi khớp `git show --stat`; định dạng đã do checker) |
+| Thêm file nhị phân/lớn, sửa `.gitignore`, hoặc máy chưa cài gitleaks | `pre-commit-checker` (file lớn bất thường, file lọt `.gitignore`; script chưa kiểm) |
 | `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |
 | Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
 | Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch |
@@ -162,5 +165,5 @@ Mỗi lần sửa như vậy, thêm một dòng vào `docs/corrections.md` (lỗ
 
 - Backend: build thử bằng `./mvnw clean install -DskipTests` (hoặc chạy test nếu có DB thật) trước khi báo xong.
 - Frontend: chạy `npm run build` (type-check + build) và/hoặc mở thử bằng dev server trước khi báo xong.
-- Chạy song song các agent theo bảng định tuyến; đợi tất cả xong rồi mới sửa theo kết quả, sau đó chạy lại `test-verifier`. Ngay trước khi đưa commit message, chạy `pre-commit-checker`. Khi sửa `ai-usage-log.md`, chạy `log-auditor`.
+- Chạy song song các agent theo bảng định tuyến; đợi tất cả xong rồi mới sửa theo kết quả, sau đó chạy lại `test-verifier`. Khi commit, hook tự chạy `check-config.mjs` và gitleaks trên phần đã stage (script không tham số chỉ đọc phần đã stage, chưa stage thì im lặng); chỉ gọi `pre-commit-checker` trong các trường hợp ở bảng định tuyến. Khi sửa `ai-usage-log.md`, chạy checker log rồi `log-auditor`.
 - Cuối mỗi tác vụ có làm việc thật (sửa file, chạy agent, dùng trình duyệt...), chạy `node scripts/tool-usage/summarize.mjs --current` và dán dòng kết quả "Công cụ đã dùng: Skill ... · MCP ... · Subagent ... · Tool ..." vào câu báo cáo cuối. Số liệu đọc từ transcript, không tự khai từ trí nhớ; có thể thiếu vài lệnh gọi cuối cùng vì transcript ghi chậm (nêu rõ nếu thấy lệch). Không dùng skill nào thì ghi `Skill: (không)`. Câu hỏi chỉ trò chuyện thì không cần dòng này.

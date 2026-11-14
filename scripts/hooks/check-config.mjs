@@ -18,6 +18,10 @@ const SKIP_CONTENT = /(^|\/)src\/test\/|^docs\//;
 const CONTENT_RULES = [
   [/:6543\b/, "cổng Transaction Pooler 6543 của Supabase (không tương thích prepared statement của Hibernate)"],
   [/(MODERATION_REQUIRED|moderation\.required)\s*[=:]\s*["']?false/i, MODERATION_OFF],
+  // gitleaks chỉ bắt chuỗi entropy cao; mật khẩu yếu như "hocsinh2026" lọt (đã chạy thử), nên chặn theo dạng.
+  [/:\/\/[^\s:/@]+:(?!\$\{)[^\s@/]+@/, "connection string có mật khẩu chữ cố định (dùng ${DB_PASSWORD})"],
+  [/^\s*(?:-\s+|export\s+)?["']?[\w.-]*(?:password|passwd|pwd|secret|api[-_]?key|token|(?:secret|signing|private|access)[-_]?key)["']?\s*[:=]\s*(?!\$\{|["']\$\{|<|(["'])\1\s*$|(?:read|write|none)\s*$)\S/i, // <...> là chỗ điền mẫu; read/write là quyền của workflow
+    "mật khẩu/secret là chữ cố định, phải đọc từ biến môi trường ${...}"],
 ];
 
 /** files: [{path, content}] (content null nếu không đọc được, ví dụ file bị xoá). Trả về mảng lỗi. */

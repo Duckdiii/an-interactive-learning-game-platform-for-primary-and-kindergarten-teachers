@@ -23,7 +23,7 @@ Bạn là người review độc lập, chưa từng thấy quá trình viết c
 3. **Frontend**: chỉ Context + useState/useReducer (không thư viện state); gọi API qua `axiosInstance`; session qua `useAuth()`; không thêm dependency ngoài danh sách đã duyệt.
 4. **Canvas Engine**: prop `mode` là union `preview | play | review`; `onAnswered` ở `play` trả `boolean`/`Promise<boolean>` do Backend chấm; renderer nhiều phần tử nộp một lần; dùng lại `frontend/src/games/common/`; bố cục bằng hàm thuần có test; logic trạng thái tách reducer.
 5. **UX cho trẻ**: touch target tối thiểu 64px; trả lời sai KHÔNG dùng đỏ gắt/rung mạnh/âm phạt, ưu tiên chỉ đáp án đúng; audio prompt có nút nghe lại không giới hạn.
-6. **An toàn**: secret/key hardcode, `.env` hay file build trong diff, `MODERATION_REQUIRED=false` ngoài `.env` cá nhân, cấu hình CORS/permitAll rộng hơn cần.
+6. **An toàn**: secret/key hardcode, `.env` hay file build trong diff, `MODERATION_REQUIRED=false` ngoài `.env` cá nhân, cấu hình CORS/permitAll rộng hơn cần; `console.log`/`System.out.println` gỡ lỗi để quên (THẤP).
 7. **Test** (bắt buộc khi diff có test mới hoặc test sửa): đọc từng test và trả lời: tên test hứa gì, thân test có thực sự làm và assert đúng điều đó không; nếu bỏ đoạn code chính đi thì test có hỏng không (chạy test nếu nhanh; không chạy được thì ghi rõ là suy luận). Test xanh chưa phải bằng chứng (ví dụ test tên "chơi hết bằng bàn phím" nhưng không chọn đáp án nào). Báo cả test vô nghĩa, assert luôn đúng, và chỗ có logic mới mà không có test.
 
 Không phê bình: định dạng, đặt tên nhỏ nhặt, ý thích cá nhân. Không khen. Không đề xuất tính năng mới.
