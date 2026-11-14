@@ -145,7 +145,18 @@ Quy tắc đã duyệt (mỗi quy tắc rút từ một lỗi thật, chi tiết
 - Agent vừa tạo chưa gọi theo tên được trong cùng phiên (chỉ nạp lúc bắt đầu phiên); thử bằng `general-purpose` kèm thân file agent.
 - Đổi hành vi một hàm dùng chung thì grep mọi chỗ gọi và thêm test cho chỗ gọi đó; thêm bean vào chuỗi theo `@Order` thì kiểm giá trị đang có, không để trùng.
 
-Quy trình: khi gặp lỗi của chính mình (test/build fail do mình gây ra, bị người dùng sửa lại, subagent báo lệch), thêm một mục theo mẫu vào phần "Chờ duyệt" của `.claude/lessons-inbox.md` trước khi báo hoàn thành. Không tự chuyển vào `CLAUDE.md` hay prompt agent; người dùng duyệt trước. Khi lỗi có thể kiểm tra tự động, ưu tiên biến thành mục kiểm tra trong prompt agent hoặc test thay vì chỉ thêm chữ vào file này. Chỉ ghi lỗi có hậu quả hoặc lặp lại, không ghi typo/format.
+Quy trình: khi gặp lỗi của chính mình (test/build fail do mình gây ra, bị người dùng sửa lại, subagent báo lệch), thêm một mục theo mẫu vào phần "Chờ duyệt" của `.claude/lessons-inbox.md` trước khi báo hoàn thành. Không tự chuyển vào `CLAUDE.md` hay prompt agent; người dùng duyệt trước. Khi lỗi có thể kiểm tra tự động, ưu tiên biến thành test hoặc kiểm tra CI thay vì thêm chữ vào file này hay vào prompt agent. Chỉ ghi lỗi có hậu quả hoặc lặp lại, không ghi typo/format.
+
+### Thứ tự chặn lỗi (correction hierarchy)
+
+Khi sửa một lỗi có hậu quả hoặc lặp lại (của code hay của agent), trước khi sửa hãy hỏi: tầng mạnh nhất nào chặn được lỗi này lần sau? Chọn tầng cao nhất làm được, theo thứ tự:
+
+1. **Kiến trúc/code**: làm cho không viết sai được (đổi kiểu, chuyển package, bỏ đường đi sai).
+2. **Lint, test, CI**: máy chặn tự động (ArchUnit, unit test, script trong `scripts/`, job CI). Phải chứng minh bằng một lần cố ý vi phạm thấy đỏ rồi hoàn tác thấy xanh.
+3. **Rules, skills, `lessons-inbox`**: chỉ khi không viết được kiểm tra máy.
+4. **Review bằng agent hoặc người**: chỉ cho phần cần phán đoán; agent tìm ra lỗi thì hỏi lại câu trên để đẩy lên tầng 1–2.
+
+Mỗi lần sửa như vậy, thêm một dòng vào `docs/corrections.md` (lỗi, ai phát hiện, đã chặn ở tầng nào, bằng chứng). Lỗi ở tầng 3–4 lặp từ lần thứ hai là ứng viên đẩy lên tầng 1–2; khoảng trống chưa sửa ghi ở `docs/KNOWN-GAPS.md`.
 
 ## Trước khi báo hoàn thành
 
