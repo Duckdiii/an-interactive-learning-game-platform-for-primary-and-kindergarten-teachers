@@ -260,6 +260,13 @@ Mẫu một mục:
 - Cách chặn: khi giả lập một công cụ ngoài để thử nhánh lỗi, lấy output thật (đo bằng `od`) làm mẫu, hoặc dùng công cụ thật với điều kiện lỗi thật (wrapper gỡ biến môi trường như đã làm); đã sửa hook (`--no-color`, bỏ mã ANSI, neo ERR sau giờ) và chứng minh lại bằng gitleaks thật có màu.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-14 — Phân loại "checker báo sai" mà không đọc quy ước liên kết của kho
+- Lỗi: khi phân loại 36 dòng của `check-links`, tôi kết luận 20 liên kết `[[docs/rag-spike/…]]` là "checker báo sai tiền tố `docs/`" chỉ vì file đích có trên đĩa; ghi vào KNOWN-GAPS #13 và người dùng giao việc "sửa checker" dựa trên đó. Quy ước ở `docs/wiki/README.md` là vault Obsidian là `docs/`, đường dẫn tính từ vault, nên 20 liên kết này hỏng thật và checker đúng.
+- Phát hiện nhờ: tự đọc `docs/wiki/README.md` trước khi sửa checker ở lô harness #1.
+- Nguyên nhân gốc: kiểm "file đích có tồn tại không" thay vì "liên kết có mở được theo quy ước của công cụ đọc nó không".
+- Cách chặn: trước khi kết luận một checker báo sai, đọc quy ước mà checker đang áp dụng (README, cấu hình); đã sửa 20 liên kết thay vì nới checker.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau
