@@ -246,6 +246,13 @@ Mẫu một mục:
 - Cách chặn: phần chặn quyền dùng danh sách cho phép; mặc định là chặn; mọi code an ninh phải có người khác thử vượt qua.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-14 — Đếm số lỗi từ output đã cắt bằng `tail`
+- Lỗi: ghi KNOWN-GAPS #13 là "2 liên kết hỏng" vì chạy `node scripts/wiki/check-links.mjs 2>&1 | tail -2` rồi lấy 2 dòng hiện ra làm tổng; thực tế 36 dòng (từ GĐ1 tới nay không đổi).
+- Phát hiện nhờ: `test-verifier` chạy đủ output (36 dòng), người dùng hỏi vì sao từ 2 lên 36.
+- Nguyên nhân gốc: dùng `tail` để rút gọn output cho đỡ dài, rồi quên rằng output đã bị cắt khi ghi số liệu.
+- Cách chặn: số liệu ghi vào tài liệu phải lấy từ lệnh đếm (`| wc -l`, `grep -c`) hoặc từ dòng tổng của script, không từ output đã cắt bằng `head`/`tail`; đề xuất (chờ duyệt) cho `check-links.mjs` tự in tổng số dòng lỗi.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau

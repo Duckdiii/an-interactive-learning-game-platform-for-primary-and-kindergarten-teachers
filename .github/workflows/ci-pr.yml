@@ -1,4 +1,4 @@
-# ci-pr: chạy trên mỗi PR nhắm vào main. 4 job độc lập, chạy song song.
+# ci-pr: chạy trên mỗi PR nhắm vào main hoặc dev. 4 job độc lập, chạy song song.
 # - backend-test: toàn bộ test backend (unit test, ArchitectureRulesTest, AigameBackendApplicationTests) + JaCoCo
 #   (chặn nếu LINE coverage < 70%, xem backend/pom.xml). AigameBackendApplicationTests khởi động context trên H2 trong
 #   bộ nhớ (profile test: Flyway tắt, ddl-auto none), nên CHƯA kiểm migration hay entity khớp schema Supabase thật;
@@ -17,7 +17,7 @@ name: ci-pr
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   backend-test:
