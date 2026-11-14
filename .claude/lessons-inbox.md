@@ -267,6 +267,13 @@ Mẫu một mục:
 - Cách chặn: trước khi kết luận một checker báo sai, đọc quy ước mà checker đang áp dụng (README, cấu hình); đã sửa 20 liên kết thay vì nới checker.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-14 — Sửa lỗi bằng một công tắc rộng hơn lỗi (GIT_ATTR_NOSYSTEM)
+- Lỗi: để chữa `astextplain` lỗi với `.docx` trong hook pre-commit (PR #42), tôi đặt `GIT_ATTR_NOSYSTEM=1`, tắt toàn bộ gitattributes cấp hệ thống, nên hook mất luôn textconv đang chạy đúng cho `.odt`, `.ods`, `.pdf`; chỉ kiểm ca `.docx` và ca bình thường, không kiểm các loại file khác mà công tắc cũng chạm tới.
+- Phát hiện nhờ: `/pstack:interrogate` ở A2 (adversary tái hiện bằng `.odt` chứa token giả: hook cũ bắt được, hook mới quét 0 byte).
+- Nguyên nhân gốc: chọn sửa ở mức "tắt cả nhóm cấu hình" thay vì đúng thứ đang hỏng, và không liệt kê những gì công tắc đó ảnh hưởng.
+- Cách chặn: trước khi dùng một công tắc toàn cục (biến môi trường, cờ tắt cấu hình), liệt kê mọi thứ nó chạm tới (ở đây: `git check-attr diff` cho các đuôi file trong gitattributes hệ thống) và kiểm ít nhất một ca của mỗi nhóm; ghi ở KNOWN-GAPS #15.
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau
