@@ -12,9 +12,9 @@ export const PROMPT_PARTS = ["Bối cảnh", "Mục tiêu", "Kiểm chứng"];
 // chỉ kiểm các cột cứng. Không thêm STT mới vào đây để "chữa" dòng mới.
 export const LEGACY_MAX_STT = 50;
 export const LEGACY_ROWS = new Set([159, 160, 172]);
-// Lỗi thật đã có trước khi có checker (log-auditor phát hiện 2026-11-14): 169 dùng câu "không lỗi" không chuẩn, 186 có cột
-// Lỗi là TODO và nội dung lỗi nằm nhầm cột Người review. Chờ người ghi dòng sửa tay; sửa xong thì xoá STT khỏi đây.
-export const KNOWN_BAD_ROWS = new Set([169, 186]);
+// Dòng có lỗi thật đang chờ người sửa tay: checker chỉ cảnh báo thay vì chặn; sửa xong thì xoá STT khỏi đây.
+// (169 và 186 đã sửa tay ngày 2026-11-14.)
+export const KNOWN_BAD_ROWS = new Set();
 const ROW = /^\| (\d+) \|/;
 // Một hoặc nhiều SHA (có thể trong backtick, cách nhau dấu phẩy), có thể kèm một chú thích trong ngoặc ở cuối.
 const SHA_CELL = /^`?[0-9a-f]{7,40}`?(\s*,\s*`?[0-9a-f]{7,40}`?)*(\s*\(.*\))?$/;
