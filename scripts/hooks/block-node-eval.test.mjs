@@ -17,4 +17,26 @@ test("cho qua lệnh ngắn một dòng và lệnh chạy file", () => {
   assert.equal(shouldBlock("npx vitest run -e2e\nmore"), false);
   assert.equal(shouldBlock(""), false);
   assert.equal(shouldBlock(undefined), false);
+  assert.equal(shouldBlock("node -e"), false);
+});
+
+test("chạy tuyến tính với chuỗi CodeQL báo ReDoS (node - rồi lặp '-- -')", () => {
+  const evil = "node -" + "-- -".repeat(50_000);
+  const t0 = performance.now();
+  assert.equal(shouldBlock(evil), false);
+  assert.equal(shouldBlock(evil + " -e 'a;\nb'"), true);
+  assert.ok(performance.now() - t0 < 500, "phải chạy xong rất nhanh");
+});
+
+test("tuyến tính khi có rất nhiều lần `node` (reviewer: bản trước mất ~38 giây)", () => {
+  const t0 = performance.now();
+  assert.equal(shouldBlock("node " + "-;node ".repeat(20_000)), false);
+  assert.equal(shouldBlock("node - ".repeat(50_000)), false);
+  assert.ok(performance.now() - t0 < 500, "phải chạy xong rất nhanh");
+});
+
+test("vẫn tìm `node -e` nằm sau một đối số không có dấu gạch", () => {
+  assert.equal(shouldBlock("node x;node -e 'a;\nb'"), true);
+  assert.equal(shouldBlock("node scripts/x.mjs && node -e 'a;\nb'"), true);
+  assert.equal(shouldBlock("node -a;node -e 'a;\nb'"), true);
 });

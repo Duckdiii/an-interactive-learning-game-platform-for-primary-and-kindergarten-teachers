@@ -7,17 +7,38 @@ import { fileURLToPath } from "node:url";
 
 export const MAX_INLINE = 200;
 export const MESSAGE = "Hãy ghi script vào một file .mjs trong scripts/tmp/ rồi chạy file đó";
-// `node` (hoặc node.exe), tuỳ chọn có dấu gạch (ví dụ --input-type=module), rồi -e/--eval. Không vượt qua đối số
-// không phải tuỳ chọn, nên `node scripts/x.mjs | grep -e y` không khớp.
-const NODE_EVAL = /(?:^|[\s;&|(])node(?:\.exe)?((?:\s+--?[\w-]+(?:=\S+)?)*?)\s+(?:-e|--eval)(?:=|\s+)/;
+// `node` hoặc `node.exe` đứng đầu lệnh hoặc sau khoảng trắng, ; & | (. Không có lượng từ lồng nhau: bản regex cũ gộp cả
+// phần tuỳ chọn vào một regex bị CodeQL báo backtrack theo hàm mũ (ReDoS), nên phần tuỳ chọn duyệt bằng vòng lặp.
+const NODE = /(?:^|[\s;&|(])node(?:\.exe)?(?=\s)/g;
+const isSpace = (ch) => ch === " " || ch === "\t" || ch === "\n" || ch === "\r";
+
+const tooLong = (code) => code.includes("\n") || code.length > MAX_INLINE;
 
 /** true nếu lệnh có `node -e`/`--eval` mà phần code nhiều dòng hoặc dài hơn MAX_INLINE ký tự. */
 export function shouldBlock(command) {
-  const m = NODE_EVAL.exec(command ?? "");
-  if (!m) return false;
-  // shortcut: đo từ sau cờ tới hết lệnh (gồm cả lệnh nối phía sau); đủ để chặn ca nguy hiểm, có thể chặn thừa lệnh dài.
-  const code = command.slice(m.index + m[0].length);
-  return code.includes("\n") || code.length > MAX_INLINE;
+  const text = command ?? "";
+  NODE.lastIndex = 0;
+  for (let m = NODE.exec(text); m; m = NODE.exec(text)) {
+    let i = m.index + m[0].length;
+    // Chỉ đi qua các tuỳ chọn có dấu gạch (ví dụ --input-type=module); gặp đối số khác thì dừng, nên
+    // `node scripts/x.mjs | grep -e y` không khớp.
+    for (;;) {
+      while (i < text.length && isSpace(text[i])) i++;
+      const start = i;
+      while (i < text.length && !isSpace(text[i])) i++;
+      if (text[start] !== "-") {
+        i = start; // token này có thể chứa `;node` (ví dụ `x;node -e …`): để lần exec sau tìm trong nó
+        break;
+      }
+      const token = text.slice(start, i);
+      // shortcut: đo từ sau cờ tới hết lệnh (gồm cả lệnh nối phía sau); có thể chặn thừa lệnh dài nối sau `node -e` ngắn.
+      if (token === "-e" || token === "--eval") return tooLong(text.slice(i).replace(/^\s+/, ""));
+      if (token.startsWith("--eval=")) return tooLong(text.slice(start + "--eval=".length));
+    }
+    // Các `node` nằm trong tuỳ chọn vừa duyệt (ví dụ token `-;node`) không duyệt lại: giữ tổng công việc tuyến tính.
+    NODE.lastIndex = Math.max(NODE.lastIndex, i);
+  }
+  return false;
 }
 
 function main() {
