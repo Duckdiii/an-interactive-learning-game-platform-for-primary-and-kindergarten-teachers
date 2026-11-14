@@ -85,13 +85,17 @@ test("chạy thật: kho đúng thoát 0, kho có liên kết hỏng thoát 1", 
   try {
     mkdirSync(join(root, "docs", "wiki"), { recursive: true });
     writeFileSync(join(root, "docs", "wiki", "index.md"), "[[index]]");
-    assert.equal(spawnSync(process.execPath, [script, root], { encoding: "utf8" }).status, 0);
+    const ok = spawnSync(process.execPath, [script, root], { encoding: "utf8" });
+    assert.equal(ok.status, 0);
+    assert.match(ok.stdout, /Tổng: 1 trang, 1 liên kết và đường dẫn đã kiểm, 0 lỗi\./);
 
     writeFileSync(join(root, "docs", "wiki", "index.md"), "[[Không có]]");
     const broken = spawnSync(process.execPath, [script, root], { encoding: "utf8" });
 
     assert.equal(broken.status, 1);
     assert.match(broken.stderr, /liên kết hỏng/);
+    // Dòng tổng để ghi số liệu không phải đếm tay từ output (lỗi đếm từ `tail -2` ngày 2026-11-14).
+    assert.match(broken.stderr, /Tổng: 1 trang, 1 liên kết và đường dẫn đã kiểm, 1 lỗi\./);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

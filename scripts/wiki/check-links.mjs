@@ -73,10 +73,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const wikiDir = join(root, "docs", "wiki");
   const pages = new Map(readdirSync(wikiDir).filter((n) => n.endsWith(".md")).map((n) => [n, readFileSync(join(wikiDir, n), "utf8")]));
   const errors = checkWiki(pages, listEntries(join(root, "docs")));
+  const checked = [...pages.values()].reduce((n, text) => n + wikiLinks(text).length + docPaths(text).length, 0);
+  const total = `Tổng: ${pages.size} trang, ${checked} liên kết và đường dẫn đã kiểm, ${errors.length} lỗi.`;
 
   if (errors.length > 0) {
-    console.error(errors.join("\n"));
+    console.error(`${errors.join("\n")}\n${total}`);
     process.exit(1);
   }
-  console.log(`Đạt: ${pages.size} trang, không có liên kết hỏng.`);
+  console.log(`Đạt: ${pages.size} trang, không có liên kết hỏng. ${total}`);
 }

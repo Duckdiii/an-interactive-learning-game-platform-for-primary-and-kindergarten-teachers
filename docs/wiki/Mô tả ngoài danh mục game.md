@@ -1,11 +1,11 @@
 # Mô tả ngoài danh mục game & Composable Primitives Framework (CPF)
 
 > **Nguồn tài liệu gốc**:  
-> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Giải pháp cho vấn đề nếu như giáo viên gửi mô tả nằm ngoài cơ chế game hiện có.pdf`  
-> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 1 Bộ Phân giải & Kiểm định Khối (Parser & Validator).pdf`  
-> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 2 Bộ Lắp ghép Đồ thị Trò chơi (Scene & Graph Assembler).pdf`  
-> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 3 Máy ảo Điều phối Đa năng (Virtual Runtime Engine).pdf`  
-> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 4 Tầng Kết xuất Phần cứng Canvas (Konva Driver).pdf`  
+> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Giải pháp cho vấn đề nếu như giáo viên gửi mô tả nằm ngoài cơ chế game hiện có.md`  
+> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 1 Bộ Phân giải & Kiểm định Khối (Parser & Validator).md`  
+> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 2 Bộ Lắp ghép Đồ thị Trò chơi (Scene & Graph Assembler).md`  
+> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 3 Máy ảo Điều phối Đa năng (Virtual Runtime Engine).md`  
+> - `docs/Giáo viên mô tả ngoài danh sách game có sẵn/giải pháp/Module 4 Tầng Kết xuất Phần cứng Canvas (Konva Driver).md`  
 > - `docs/Dinh_huong_de_tai.md`, `raw/Pipeline_Tao_Tro_Choi_AI.drawio`  
 > **Cập nhật**: 2026-11-07 (thêm mục 9 Hiện trạng cài đặt)  
 > **Liên kết liên quan**: [[Game JSON DSL]], [[24 Cơ chế game chuẩn hóa]], [[Tiêu chuẩn Đồ họa và Asset Pipeline]], [[Sơ đồ hệ thống]], [[Cơ sở khoa học và GamED-AI]]

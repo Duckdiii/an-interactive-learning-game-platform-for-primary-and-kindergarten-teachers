@@ -1,6 +1,6 @@
 # Điểm lệch và việc cần chốt
 
-Nguồn: đối chiếu `docs/SRS-full.md` bản từ `everyone/UI` (commit `5d39f54`, 5 sơ đồ đã xem), `docs/Dinh_huong_de_tai.md`, `docs/decisions.md`, `docs/ui/PLAN.md`, `docs/game-json-dsl-v1.0.0.md`, `CLAUDE.md`.
+Nguồn: đối chiếu `docs/srs/SRS-full.md` bản từ `everyone/UI` (commit `5d39f54`, 5 sơ đồ đã xem), `docs/Dinh_huong_de_tai.md`, `docs/decisions.md`, `docs/ui/PLAN.md`, `docs/game-json-dsl-v1.0.0.md`, `CLAUDE.md`.
 Cập nhật: 2026-10-31
 
 Đây là nhận định của người viết sau khi đối chiếu, không phải nội dung của tài liệu nguồn. Mỗi mục cần nhóm quyết định. Wiki chỉ ghi lại, không tự chọn.
