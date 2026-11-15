@@ -1,8 +1,11 @@
-// So endpoint trong docs/openapi/openapi.yaml với controller Spring trong backend, cả hai chiều. Chỉ báo cáo, luôn exit 0.
-// Dùng: node scripts/openapi/compare-endpoints.mjs [gốc-repo]
+// So endpoint trong docs/openapi/openapi.yaml với controller Spring trong backend, cả hai chiều.
+// Dùng: node scripts/openapi/compare-endpoints.mjs [--strict] [gốc-repo]
+//   Không có --strict: chỉ báo cáo, luôn exit 0. Có --strict (CI): exit 1 khi code có endpoint không có trong spec, spec ghi
+//   implemented/extended-pending mà code không có, spec ghi planned mà code đã có, hoặc có endpoint không đọc được.
 // Không dùng thư viện YAML (bố cục cố định như build-index.mjs: path 2 dấu cách, method 4, thuộc tính 6).
 // shortcut: chỉ đọc @RequestMapping("...") ở mức class và @Get/Post/Put/Patch/DeleteMapping với một đường dẫn chuỗi
 // (hoặc không có đường dẫn); dạng mảng, `value =`, `method =` hay hằng số thì chưa hỗ trợ: báo "không đọc được" để người xem.
+// Annotation viết đủ tên gói (`@org.springframework.web.bind.annotation.GetMapping`) thì bị bỏ qua im lặng, kể cả với --strict.
 // Controller có tiền tố class không đọc được thì bỏ cả các endpoint của nó (tránh báo lệch giả ở hai chiều). Nâng cấp
 // sang parser Java thật nếu số "không đọc được" tăng.
 import { readFileSync, readdirSync } from "node:fs";
@@ -81,6 +84,17 @@ export function compare(specOps, codeOps) {
   };
 }
 
+/** Lý do --strict làm đỏ (mảng chuỗi, rỗng là đạt). `planned` có trong spec mà chưa có code là bình thường. */
+export function strictFailures({ onlyCode, onlySpec, stalePlanned }, unreadable) {
+  const implemented = onlySpec.filter((o) => o.status === "implemented" || o.status === "extended-pending");
+  return [
+    ...onlyCode.map((o) => `${o.method} ${o.path} có trong code (${o.file}:${o.line}) nhưng không có trong openapi.yaml`),
+    ...implemented.map((o) => `${o.method} ${o.path} ghi ${o.status} (openapi.yaml:${o.line}) nhưng không có controller`),
+    ...stalePlanned.map((o) => `${o.method} ${o.path} ghi planned (openapi.yaml:${o.line}) nhưng code đã có: đổi x-status`),
+    ...unreadable.map((u) => `${u.file}:${u.line}: không đọc được ${u.text}`),
+  ];
+}
+
 function javaFiles(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
     e.isDirectory() ? javaFiles(join(dir, e.name)) : e.name.endsWith(".java") ? [join(dir, e.name)] : []);
@@ -101,10 +115,14 @@ export function controllerEndpoints(root) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const root = resolve(process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), "..", ".."));
+  const args = process.argv.slice(2);
+  const strict = args.includes("--strict");
+  const rootArg = args.find((a) => a !== "--strict");
+  const root = resolve(rootArg ?? join(dirname(fileURLToPath(import.meta.url)), "..", ".."));
   const specOps = openapiOperations(readFileSync(join(root, "docs/openapi/openapi.yaml"), "utf8"));
   const { codeOps, unreadable } = controllerEndpoints(root);
-  const { onlyCode, onlySpec, stalePlanned } = compare(specOps, codeOps);
+  const result = compare(specOps, codeOps);
+  const { onlyCode, onlySpec, stalePlanned } = result;
   console.log(`openapi.yaml: ${specOps.length} operation; controller: ${codeOps.length} endpoint.`);
   console.log(`\nCó trong code, không có trong openapi.yaml (${onlyCode.length}):`);
   for (const o of onlyCode) console.log(`  ${o.method} ${o.path}  (${o.file}:${o.line})`);
@@ -117,5 +135,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (unreadable.length) {
     console.log(`\nKhông đọc được (${unreadable.length}), cần xem tay:`);
     for (const u of unreadable) console.log(`  ${u.text}  (${u.file}:${u.line})`);
+  }
+  if (strict) {
+    const failures = strictFailures(result, unreadable);
+    for (const f of failures) console.error(`[LỖI] ${f}`);
+    if (failures.length) process.exit(1);
+    console.log("\n--strict: openapi.yaml khớp controller.");
   }
 }

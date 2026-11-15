@@ -107,6 +107,8 @@ jobs:
       - run: node scripts/hooks/check-config.mjs --tracked
       # Thêm/đổi endpoint mà quên cập nhật docs/FEATURE-MAP.md, hoặc trích dẫn trỏ tới file đã xoá, thì đỏ.
       - run: node scripts/verify/check-feature-map.mjs
+      # Controller và openapi.yaml lệch nhau (endpoint thiếu trong spec, x-status sai) thì đỏ: spec trước, code sau.
+      - run: node scripts/openapi/compare-endpoints.mjs --strict
       # Mọi test script do git theo dõi (test mới tự được chạy; trước đây danh sách viết tay chỉ chạy 5/22 file).
       # shortcut: tạm loại extract-srs/extract-uc vì lỗi thời so với docs/srs (KNOWN-GAPS #18), bỏ loại trừ khi sửa xong.
       - run: >-
