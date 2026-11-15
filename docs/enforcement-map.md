@@ -21,7 +21,7 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 
 | # | Luật | Mục gốc (lặp) | Tầng | Thứ cưỡng chế | Đẩy lên được? |
 |---|---|---|---|---|---|
-| L1 | Code có `\` ghi bằng Write/Edit, không qua `node -e`/heredoc | 10-13, 10-30, 11-12, 11-13, 11-14 (khoảng 9 lần kể cả dòng lặp) | 2 một phần | `BNE` (PreToolUse trong `.claude/settings.json`), test `block-node-eval.test.mjs` | Lỗ còn lại: heredoc không nháy, `$'...'` (KNOWN-GAPS #17). Cỡ S–M, cần chốt cách chặn |
+| L1 | Code có `\` ghi bằng Write/Edit, không qua `node -e`/heredoc | 10-13, 10-30, 11-12, 11-13, 11-14 (khoảng 9 lần kể cả dòng lặp) | 2 một phần | `BNE` (PreToolUse trong `.claude/settings.json`): `node -e` dài/nhiều dòng kể cả `$'...'` và đối số ghép, heredoc không nháy có `\\` `\$` `` \` `` hay `\` cuối dòng; test `block-node-eval.test.mjs` | Lỗ không chặn được bằng máy: công cụ Bash gộp `\\` thành `\` trước khi tới hook (KNOWN-GAPS #20); chỉ còn quy tắc ghi file qua Write/Edit |
 | L2 | Sửa nhiều dòng bằng Edit, không thay chuỗi bằng script trên file CRLF | 11-11, 11-14 (2) | 3 | (gián tiếp: `BNE` chặn `node -e` nhiều dòng) | `.gitattributes` ép `eol=lf` toàn repo: cỡ M vì phải chuẩn hoá lại file |
 | L3 | Test phải đỏ khi chưa sửa, đỏ đúng lý do; biến thể sai chỉ sai một chỗ | 10-14, 10-27, 10-30, 11-07, 11-09, 11-14 ×2 (7) | 4 | `reviewer` mục Test; `mutation-checker` khi được yêu cầu | Mutation testing (PIT/Stryker) là dependency mới, đã nằm trong giai đoạn D |
 | L4 | Sửa thư mục nào cũng chạy test toàn bộ trước khi báo xong | 11-01, 11-09 (2) | 2 (CI) | `CI:48` `./mvnw test`, `CI:84-88` lint/test/build frontend | Đủ |
@@ -108,6 +108,8 @@ Lúc lập (PR #49) đã đối chiếu 29 dòng: mọi thứ chặn tầng 2 gh
 
 **PR đề xuất 4** (R28, R29): `frontend/src/api/frontendRules.test.ts`. Thử đỏ: thêm `zustand` vào `package.json` và một lời gọi `axios.get` vào `src/hooks/useGames.ts` → hai test đỏ, hoàn tác xanh.
 
+**PR đề xuất 5** (L1, KNOWN-GAPS #17): `scripts/hooks/block-node-eval.mjs` chặn thêm `node -e $'...'`, đối số ghép nhiều đoạn, và heredoc không nháy có chuỗi bash nuốt `\`. Trong lúc làm đo được công cụ Bash gộp `\\` ngay từ chuỗi lệnh (KNOWN-GAPS #20).
+
 ## Đề xuất chờ duyệt (cỡ S, mỗi cái một PR nhỏ)
 
 Ưu tiên theo số lần lặp và rủi ro:
@@ -115,6 +117,6 @@ Lúc lập (PR #49) đã đối chiếu 29 dòng: mọi thứ chặn tầng 2 gh
 2. ~~**R24** checker log kiểm SHA có thật~~ (đã làm).
 3. ~~**R4, R11, R13** rule ArchUnit~~ (đã làm; R4 hoá ra đã ở tầng 1 nên chỉ thêm hai rule).
 4. ~~**R28, R29** chặn thư viện state và gọi axios trực tiếp ngoài `axiosInstance.ts`~~ (đã làm).
-5. **L1** chặn heredoc không nháy và `$'...'` trong `BNE` (cần chốt có chặn `cat > f <<EOF` không).
+5. ~~**L1** chặn heredoc không nháy và `$'...'` trong `BNE`~~ (đã làm; chặn mọi lệnh có heredoc không nháy mà thân có chuỗi bash nuốt `\`, kể cả `cat > f <<EOF`).
 6. **L12, L13** quyền `ask` cho tạo nhánh, chặn `cd` (đổi cấu hình mọi phiên).
 7. **KNOWN-GAPS #19**: nối `agent-guard` vào frontmatter các agent chỉ đọc có `memory`, hoặc xoá.
