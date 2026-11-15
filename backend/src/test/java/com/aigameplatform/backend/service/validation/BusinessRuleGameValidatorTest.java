@@ -49,11 +49,16 @@ class BusinessRuleGameValidatorTest {
     }
 
     private List<String> errorPaths(GameType type, Consumer<ObjectNode> mutation) throws IOException {
+        List<String> paths = allErrorPaths(type, mutation);
+        assertThat(paths).as("JSON sai phải bị chặn").isNotEmpty();
+        return paths;
+    }
+
+    /** Mọi lỗi (Layer 1 và 2) sau khi sửa ví dụ; dùng cho ca mong đợi hợp lệ, không bắt buộc phải có lỗi như errorPaths. */
+    private List<String> allErrorPaths(GameType type, Consumer<ObjectNode> mutation) throws IOException {
         ObjectNode json = example(type);
         mutation.accept(json);
-        ValidationReport report = service.validate(json);
-        assertThat(report.valid()).as("JSON sai phải bị chặn").isFalse();
-        return report.errors().stream().map(ValidationError::path).toList();
+        return service.validate(json).errors().stream().map(ValidationError::path).toList();
     }
 
     private static ObjectNode question(ObjectNode game, int index) {
@@ -199,6 +204,15 @@ class BusinessRuleGameValidatorTest {
     void oddOneOutItemTextsMustBeDistinct() throws IOException {
         assertThat(errorPaths(GameType.ODD_ONE_OUT, g -> element(question(g, 0), "items", 1).put("text", "MÈO")))
                 .containsExactly("$.questions[0].items[1].text");
+    }
+
+    @Test
+    void oddOneOutItemIdsMustFollowTheirPosition() throws IOException {
+        // Đổi chỗ hai id hợp lệ ("b", "a"): schema chỉ giới hạn tập id nên chỉ luật Layer 2 bắt được thứ tự sai.
+        assertThat(errorPaths(GameType.ODD_ONE_OUT, g -> {
+            element(question(g, 0), "items", 0).put("id", "b");
+            element(question(g, 0), "items", 1).put("id", "a");
+        })).containsExactly("$.questions[0].items[0].id", "$.questions[0].items[1].id");
     }
 
     // ---- AUDIO_VISUAL_MATCH ----
@@ -500,6 +514,29 @@ class BusinessRuleGameValidatorTest {
                 .containsExactly("$.questions[0].pairs[1].pairId");
     }
 
+    @Test
+    void matchingAcceptsImageOnlySidesWithDifferentPictures() throws IOException {
+        // Vế chỉ có hình: không được coi là trùng nhau (khoá theo từ khoá hình) và không so "cùng chữ" khi vế không có chữ.
+        assertThat(allErrorPaths(GameType.MATCHING, g -> {
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 0).get("left"), "apple");
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 1).get("right"), "dog");
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 2).get("right"), "cat");
+        })).isEmpty();
+    }
+
+    @Test
+    void matchingImageOnlySidesWithTheSamePictureAreDuplicates() throws IOException {
+        assertThat(errorPaths(GameType.MATCHING, g -> {
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 1).get("right"), "dog");
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 2).get("right"), "Dog");
+        })).containsExactly("$.questions[0].pairs[2].right");
+    }
+
+    private static void imageOnly(ObjectNode side, String visualPrompt) {
+        side.removeAll();
+        side.put("visualPrompt", visualPrompt);
+    }
+
     // ---- MEMORY_CARD ----
 
     @Test
@@ -543,6 +580,13 @@ class BusinessRuleGameValidatorTest {
                 .containsExactly("$.questions[0].items[1].id");
     }
 
+    @Test
+    void dragDropZoneIdsMustBeDistinct() throws IOException {
+        // z2 biến mất nên item i2 (nhắm z2) cũng báo lỗi; lỗi chính cần kiểm là id trùng của vùng thả.
+        assertThat(errorPaths(GameType.DRAG_DROP, g -> element(question(g, 0), "dropZones", 1).put("id", "z1")))
+                .containsExactlyInAnyOrder("$.questions[0].dropZones[1].id", "$.questions[0].items[1].targetZoneId");
+    }
+
     // ---- ORDERING ----
 
     @Test
@@ -561,6 +605,23 @@ class BusinessRuleGameValidatorTest {
     void orderingStepTextsMustBeDistinct() throws IOException {
         assertThat(errorPaths(GameType.ORDERING, g -> element(question(g, 0), "steps", 1).put("text", "gieo hạt")))
                 .containsExactly("$.questions[0].steps[1].text");
+    }
+
+    @Test
+    void orderingStepIdsMustBeDistinct() throws IOException {
+        assertThat(errorPaths(GameType.ORDERING, g -> element(question(g, 0), "steps", 1).put("id", "s1")))
+                .containsExactly("$.questions[0].steps[1].id");
+    }
+
+    @Test
+    void orderingAcceptsImageOnlyStepsWithDifferentPictures() throws IOException {
+        assertThat(allErrorPaths(GameType.ORDERING, g -> {
+            for (int i = 0; i < 3; i++) {
+                ObjectNode step = element(question(g, 0), "steps", i);
+                step.remove("text");
+                step.put("visualPrompt", List.of("seed", "watering can", "tree").get(i));
+            }
+        })).isEmpty();
     }
 
     // ---- VISUAL_CLOZE ----
