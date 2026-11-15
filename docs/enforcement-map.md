@@ -12,10 +12,10 @@ Cập nhật khi: thêm mục `lessons-inbox`, thêm dòng `corrections`, hoặc
 
 | | Số luật | Tầng 1–2 | Tầng 2 một phần | Tầng 3–4 |
 |---|---|---|---|---|
-| Từ `lessons-inbox` (gộp mục trùng) | 27 | 8 | 5 | 14 |
+| Từ `lessons-inbox` (gộp mục trùng) | 27 | 7 | 6 | 14 |
 | Từ `CLAUDE.md` và `.claude/rules/` | 38 | 16 | 5 | 17 |
 
-Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard`, `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa ở PR #49 (mục "Đã làm"). Đề xuất 1–3 đã làm ở PR #50 (L8, R4, R11, R13, R24), đề xuất 4 ở PR sau (R28, R29).
+Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard` (đã xoá sau), `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa ở PR #49 (mục "Đã làm"). Đề xuất 1–3 ở PR #50 (L8, R4, R11, R13, R24), đề xuất 4 ở PR #52 (R28, R29), đề xuất 5 ở PR #53 (L1), đề xuất 6–7 ở PR sau (L12, xoá `agent-guard`).
 
 ## A. Luật từ `lessons-inbox`
 
@@ -32,14 +32,14 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | L9 | Viết tiêu chí/checker từ dữ liệu thật, không từ giả định | 10-11, 11-14 (2) | 3 (luật) / 2 (checker đã có) | `scripts/ai-log/check-ai-usage-log.mjs` + test, `CI` | Không máy hoá được cho checker mới |
 | L10 | Agent lấy diff gồm `main...HEAD` + `git diff` + `git diff --cached` | 10-11 | 3 | `CLAUDE.md`, prompt 6 agent | S: test quét `.claude/agents/*.md` |
 | L11 | Không giả định công cụ có sẵn (`gh`, Python); agent mới chưa gọi theo tên được | 10-11 ×2, 11-11 (3) | 3 | `CLAUDE.md` mục "Học từ lỗi" | S cho phần `gh` (test grep prompt agent); hai ý còn lại là hành vi nền tảng |
-| L12 | Không tạo nhánh khi chưa được phép | 10-13 | 3 | `CLAUDE.md`, memory | S: `permissions.ask` cho `git checkout -b`/`git switch -c` (đổi cấu hình, cần duyệt) |
-| L13 | Không `cd` trong Bash, dùng đường dẫn tuyệt đối | 10-31 | 3 | (chưa có) | S: mở rộng hook PreToolUse; đổi hành vi mọi phiên, cần duyệt |
+| L12 | Không tạo nhánh khi chưa được phép | 10-13 | 2 một phần | `.claude/settings.json` `permissions.ask`: `git checkout -b/-B/--orphan`, `git switch -c/-C/--create/--force-create`, và dạng `git -C <thư mục> checkout -b`/`switch -c` hỏi người dùng | Lọt `git branch <tên>` (quy tắc tiền tố không tách được khỏi `git branch -a`) và tuỳ chọn toàn cục khác `-C`; `git worktree add -b` cố ý cho chạy |
+| L13 | Không `cd` trong Bash, dùng đường dẫn tuyệt đối | 10-31 | 3 | (chưa có) | Người dùng chọn không chặn (2026-11-15): công cụ Bash đã trả về thư mục gốc sau mỗi lệnh, chặn `cd` làm hỏng nhiều lệnh `cd X && …` mà lỗi gốc chỉ một lần |
 | L14 | Không `vi.unstubAllEnvs()` trong test player; mock clipboard sau `userEvent.setup()` | 10-13, 10-27 (2) | 3 | chú thích trong `mockPlayerApi.test.ts:49`, `PlayPage.test.tsx:21` | S: test grep dưới `frontend/src/player`; còn 4 file ngoài player dùng `unstubAllEnvs`, cần xác định phạm vi |
 | L15 | Khoá cache react-query gắn danh tính người dùng | 10-13 | 2 | `frontend/src/hooks/useGames.test.tsx:99` | Đủ |
 | L16 | Kiểm tràn ngang ở 360/768/1024/1280/1920 | 10-13 | 4 | (chưa có) | Cần trình duyệt thật (C1, Playwright) |
 | L17 | Kích thước/hàm xáo chọn theo tính chất (nhãn theo độ dài chữ, derangement) | 10-27, 11-08 (2) | 3 | (chưa xác minh) | M: test hàm thuần cho bề rộng nhãn |
 | L18 | Phiên chính tự tạo worktree từ đúng commit; chép về rồi mới xoá; đối chiếu báo cáo agent với `git status` | 10-27 ×2, 10-31 (3–5) | 3–4 | `CLAUDE.md`, prompt agent thực thi | Hành vi công cụ nền, không máy hoá |
-| L19 | Phần chặn quyền dùng danh sách cho phép; mỗi rule có ca vi phạm thật | 10-31, 11-14 (2) | 2 | `.claude/hooks/agent-guard-rules.mjs:6-12` + test | Đủ về code, nhưng hook **không được nối** ở đâu (KNOWN-GAPS #19) |
+| L19 | Phần chặn quyền dùng danh sách cho phép; mỗi rule có ca vi phạm thật | 10-31, 11-14 (2) | 3 | `lessons-inbox` (hook `agent-guard` từng cài luật này nhưng không được nối, đã xoá: KNOWN-GAPS #19) | Áp dụng khi viết hook chặn quyền mới |
 | L20 | Script bằng chứng xoá kết quả cũ, FAIL khi thiếu bước | 11-14 ×2 | 2 | `scripts/verify-flow.mjs:25,38` | Đủ (script không chạy ở CI) |
 | L21 | Số liệu ghi tài liệu lấy từ dòng tổng của script, không đếm từ output đã cắt | 11-14 | 2 một phần | `scripts/wiki/check-links.mjs` in dòng "Tổng: …" (PR #44) | Đủ cho check-links |
 | L22 | Đổi tên symbol thì grep cả tên ngắn; không chạy kiểm cùng lượt với lệnh ghi có thể thất bại | 11-14 | 2 (CI biên dịch) / 3 | `./mvnw test` | Phần quy trình không máy hoá |
@@ -77,7 +77,7 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | R22 | CLAUDE.md | Test API ngoài phải mock | 2 một phần | test luồng tắt Gemini/OpenAI (`TeacherFlowVerificationTest.java:20-23`); `*LiveTest` gate bằng biến môi trường | S–M: ArchUnit cho test không dùng model thật |
 | R23 | CLAUDE.md | Ghi `ai-usage-log.md` đúng định dạng | 2 | `check-ai-usage-log.mjs`, `rotate.mjs --check` ở `CI` | Chưa kiểm "có đổi code thì có dòng log" (S, cần cơ chế bỏ qua) |
 | R24 | CLAUDE.md | SHA trong log là commit có thật | 2 | `check-ai-usage-log.mjs` (`gitShaMissing`, `git cat-file --batch-check`) ở `CI`; clone nông thì chỉ báo nghi ngờ | Đủ. Rebase/amend/squash sau khi ghi SHA làm CI đỏ (thông báo lỗi nhắc ghi lại SHA mới); repo hiện merge bằng merge commit |
-| R25 | CLAUDE.md | Không tự commit, subagent không ghi log, agent ghi chạy trong worktree | 3 | quy trình; `agent-guard` có code nhưng chưa nối | Xem KNOWN-GAPS #19 |
+| R25 | CLAUDE.md | Không tự commit, subagent không ghi log, agent ghi chạy trong worktree | 3 | quy trình; agent chỉ đọc không có Write/Edit trong frontmatter | Hook giới hạn Bash (`agent-guard`) đã xoá vì chặn cả việc chạy test/checker mà agent kiểm tra cần (KNOWN-GAPS #19) |
 | R26 | CLAUDE.md | File agent nhắc bước đọc `.claude/rules/` | 3 | — | S: test quét `.claude/agents/*.md` |
 | R27 | CLAUDE.md | Liên kết wiki không hỏng | 3 | `check-links.mjs` (chạy tay, còn 10 lỗi) | S sau khi người dùng quyết 10 lỗi (KNOWN-GAPS #13) |
 | R28 | frontend.md | Không Zustand/Redux/Jotai hay thư viện state khác | 2 | `frontend/src/api/frontendRules.test.ts` (danh sách thư viện đã biết trong `package.json`) | Đủ; thư viện state chưa có tên trong danh sách thì lọt |
@@ -118,5 +118,5 @@ Lúc lập (PR #49) đã đối chiếu 29 dòng: mọi thứ chặn tầng 2 gh
 3. ~~**R4, R11, R13** rule ArchUnit~~ (đã làm; R4 hoá ra đã ở tầng 1 nên chỉ thêm hai rule).
 4. ~~**R28, R29** chặn thư viện state và gọi axios trực tiếp ngoài `axiosInstance.ts`~~ (đã làm).
 5. ~~**L1** chặn heredoc không nháy và `$'...'` trong `BNE`~~ (đã làm; chặn mọi lệnh có heredoc không nháy mà thân có chuỗi bash nuốt `\`, kể cả `cat > f <<EOF`).
-6. **L12, L13** quyền `ask` cho tạo nhánh, chặn `cd` (đổi cấu hình mọi phiên).
-7. **KNOWN-GAPS #19**: nối `agent-guard` vào frontmatter các agent chỉ đọc có `memory`, hoặc xoá.
+6. ~~**L12, L13** quyền `ask` cho tạo nhánh, chặn `cd`~~ (đã làm phần L12; L13 người dùng chọn không chặn).
+7. ~~**KNOWN-GAPS #19**: nối `agent-guard` hoặc xoá~~ (đã xoá theo quyết định của người dùng).

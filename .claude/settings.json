@@ -25,6 +25,17 @@
     ]
   },
   "permissions": {
+    "ask": [
+      "Bash(git checkout -b *)",
+      "Bash(git checkout -B *)",
+      "Bash(git switch -c *)",
+      "Bash(git switch -C *)",
+      "Bash(git switch --create *)",
+      "Bash(git switch --force-create *)",
+      "Bash(git checkout --orphan *)",
+      "Bash(git -C * checkout -b *)",
+      "Bash(git -C * switch -c *)"
+    ],
     "deny": [
       "Read(./backend/src/main/resources/curriculum/spike/**)",
       "Read(./docs/rag-spike/evidence/**)",
