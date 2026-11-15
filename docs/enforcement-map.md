@@ -13,7 +13,7 @@ Cập nhật khi: thêm mục `lessons-inbox`, thêm dòng `corrections`, hoặc
 | | Số luật | Tầng 1–2 | Tầng 2 một phần | Tầng 3–4 |
 |---|---|---|---|---|
 | Từ `lessons-inbox` (gộp mục trùng) | 27 | 7 | 6 | 14 |
-| Từ `CLAUDE.md` và `.claude/rules/` | 38 | 16 | 6 | 16 |
+| Từ `CLAUDE.md` và `.claude/rules/` | 39 | 16 | 7 | 16 |
 
 Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard` (đã xoá sau), `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa ở PR #49 (mục "Đã làm"). Đề xuất 1–3 ở PR #50 (L8, R4, R11, R13, R24), đề xuất 4 ở PR #52 (R28, R29), đề xuất 5 ở PR #53 (L1), đề xuất 6–7 ở PR sau (L12, xoá `agent-guard`).
 
@@ -47,7 +47,7 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | L24 | Màn `src/player` dùng token, không viết mã màu hex | 11-01 | 2 | `frontend/src/player/theme/tokens.test.tsx:26` | Đủ |
 | L25 | Chứng minh nhánh chặn bằng công cụ thật, không bằng công cụ giả | 11-14 | 3 | `reviewer.md` bước 6 (sau A1) | Không máy hoá |
 | L26 | Đọc quy ước của checker trước khi kết luận checker báo sai | 11-14 | 3 | `lessons-inbox` | Không máy hoá |
-| L27 | Trước khi dùng công tắc toàn cục hay gỡ một người chặn, kiểm một ca của mỗi nhóm nó chạm tới | 11-14, 11-15 (2) | 3 | `lessons-inbox`; ca B2 đã đẩy luật mật khẩu lên `CC` | Không máy hoá chung |
+| L27 | Trước khi dùng công tắc toàn cục hay gỡ một người chặn, kiểm một ca của mỗi nhóm nó chạm tới (kể cả nhánh tắt của điều kiện bật/tắt test) | 11-14, 11-15 (3) | 3 | `lessons-inbox`; ca B2 đã đẩy luật mật khẩu lên `CC`; ca `@EnabledIf` không kế thừa (Testcontainers) đã thay bằng `ExecutionCondition` và thử nhánh tắt | Không máy hoá chung |
 
 ## B. Luật trong `CLAUDE.md` và `.claude/rules/`
 
@@ -91,6 +91,7 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | R36 | canvas-engine.md | PairMatch nộp một lần; dùng lại `games/common` | 4 | `reviewer` | Không máy hoá nhỏ |
 | R37 | rules | Diff gồm thay đổi chưa commit | 3 | = L10 | |
 | R38 | rules | Ghi `lessons-inbox`, `corrections` khi có lỗi | 3 | quy trình | Không máy hoá |
+| R39 | CLAUDE.md (bảng định tuyến, `migration-checker`) | Entity khớp migration | 2 một phần | `PostgresMigrationTest` (Testcontainers, `ddl-auto: validate`, có chạy trên CI): bắt entity có cột/bảng mà migration không có, và sai kiểu. Chưa bắt: cột thừa trong migration, `nullable`/độ dài, an toàn dữ liệu | Phần còn lại: `migration-checker` |
 
 ## C. `corrections.md`: thứ chặn còn tồn tại?
 

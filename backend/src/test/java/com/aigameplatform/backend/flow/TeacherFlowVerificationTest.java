@@ -32,8 +32,8 @@ class TeacherFlowVerificationTest extends AbstractTeacherFlowTest {
     /**
      * Sinh game xong thì giáo viên xem được bản đối chiếu chương trình; sửa game bằng PUT thì bản đó thành STALE.
      * Profile test tắt truy xuất chương trình nên trạng thái lúc sinh là UNAVAILABLE.
-     * shortcut: không assert kiểu của {@code evidence}/{@code claims}/{@code warnings}: H2 trả cột JSON thành chuỗi, còn Postgres
-     * jsonb trả object/mảng (đã kiểm ở GameCurriculumReviewPersistenceLiveTest); kiểm kiểu khi có test Postgres thật (KNOWN-GAPS #22).
+     * Không assert kiểu của {@code evidence}/{@code claims}/{@code warnings} ở đây: H2 trả cột JSON thành chuỗi (KNOWN-GAPS #22);
+     * kiểu object/mảng được kiểm trên Postgres thật ở {@code GameCurriculumReviewPersistenceTest} (Testcontainers).
      */
     @Test
     void generatedGameHasCurriculumReviewThatGoesStaleAfterEdit() throws Exception {

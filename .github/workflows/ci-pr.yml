@@ -1,8 +1,9 @@
 # ci-pr: chạy trên mỗi PR nhắm vào main hoặc dev. 4 job độc lập, chạy song song.
 # - backend-test: toàn bộ test backend (unit test, ArchitectureRulesTest, AigameBackendApplicationTests) + JaCoCo
 #   (chặn nếu LINE coverage < 70%, xem backend/pom.xml). AigameBackendApplicationTests khởi động context trên H2 trong
-#   bộ nhớ (profile test: Flyway tắt, ddl-auto none), nên CHƯA kiểm migration hay entity khớp schema Supabase thật;
-#   các test *LiveTest gọi DB/AI thật chỉ chạy khi đặt biến RUN_LIVE_*. TeacherFlowVerificationTest chạy luồng giáo
+#   bộ nhớ (profile test: Flyway tắt, ddl-auto none). Migration và entity khớp schema được kiểm trên Postgres thật bằng
+#   Testcontainers (PostgresMigrationTest, GameCurriculumReviewPersistenceTest; cần Docker của runner, kéo image
+#   pgvector/pgvector:pg17). Các test *LiveTest gọi DB/AI thật chỉ chạy khi đặt biến RUN_LIVE_*. TeacherFlowVerificationTest chạy luồng giáo
 #   viên qua HTTP với AI giả (H2, schema do Hibernate tạo), bằng chứng tải lên artifact verify-flow-evidence.
 # - frontend-build: lint (oxlint) + test (Vitest) + build (gồm type-check TypeScript).
 # - secret-scan: Gitleaks quét toàn bộ diff của PR, tìm secret bị commit nhầm.
@@ -43,8 +44,9 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         # PR của Dependabot không nhận Actions secret; không thêm secret cho Dependabot vì code của gói bên thứ ba chạy
-        # trong job này. Không cần loại test nào: mọi test không gắn RUN_LIVE_* chạy trên H2 (profile test), đã kiểm khi
-        # bỏ hết secret (AigameBackendApplicationTests, TeacherFlowVerificationTest đều xanh).
+        # trong job này. Không cần loại test nào: mọi test không gắn RUN_LIVE_* chạy trên H2 (profile test) hoặc trên
+        # Postgres của Testcontainers (đè DB_* bằng property test, không chạm Supabase). Đã kiểm khi không có secret nào
+        # (không biến DB_*/JWT_SECRET/OPENAI_API_KEY, không backend/.env): 997 test xanh, ngày 2026-11-15.
         run: ./mvnw --batch-mode test
 
       - name: Upload JaCoCo coverage report
