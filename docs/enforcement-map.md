@@ -13,9 +13,9 @@ Cập nhật khi: thêm mục `lessons-inbox`, thêm dòng `corrections`, hoặc
 | | Số luật | Tầng 1–2 | Tầng 2 một phần | Tầng 3–4 |
 |---|---|---|---|---|
 | Từ `lessons-inbox` (gộp mục trùng) | 27 | 8 | 5 | 14 |
-| Từ `CLAUDE.md` và `.claude/rules/` | 38 | 14 | 5 | 19 |
+| Từ `CLAUDE.md` và `.claude/rules/` | 38 | 16 | 5 | 17 |
 
-Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard`, `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa ở PR #49 (mục "Đã làm"). Đề xuất 1–3 đã làm ở PR sau (L8, R4, R11, R13, R24).
+Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard`, `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa ở PR #49 (mục "Đã làm"). Đề xuất 1–3 đã làm ở PR #50 (L8, R4, R11, R13, R24), đề xuất 4 ở PR sau (R28, R29).
 
 ## A. Luật từ `lessons-inbox`
 
@@ -80,8 +80,8 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | R25 | CLAUDE.md | Không tự commit, subagent không ghi log, agent ghi chạy trong worktree | 3 | quy trình; `agent-guard` có code nhưng chưa nối | Xem KNOWN-GAPS #19 |
 | R26 | CLAUDE.md | File agent nhắc bước đọc `.claude/rules/` | 3 | — | S: test quét `.claude/agents/*.md` |
 | R27 | CLAUDE.md | Liên kết wiki không hỏng | 3 | `check-links.mjs` (chạy tay, còn 10 lỗi) | S sau khi người dùng quyết 10 lỗi (KNOWN-GAPS #13) |
-| R28 | frontend.md | Không Zustand/Redux/Jotai | 3 | (hiện không có) | **S**: luật trong `CC` cho `package.json` |
-| R29 | frontend.md | Chỉ `axiosInstance.ts` gọi `axios.create` | 3 | (hiện chỉ một chỗ) | **S**: test grep |
+| R28 | frontend.md | Không Zustand/Redux/Jotai hay thư viện state khác | 2 | `frontend/src/api/frontendRules.test.ts` (danh sách thư viện đã biết trong `package.json`) | Đủ; thư viện state chưa có tên trong danh sách thì lọt |
+| R29 | frontend.md | Chỉ `axiosInstance.ts` tạo axios instance hay gọi HTTP bằng axios trực tiếp | 2 | `frontendRules.test.ts` (`axiosMisuses`: theo import, kể cả tên đổi và `{ default as … }`; chỉ cho các tiện ích `isAxiosError`, `isCancel`, `CanceledError`, `AxiosError`, `AxiosHeaders`, `CancelToken` và `import type`) | Phần lớn. Lọt: `import * as ax`, `require('axios')`, gán lại biến (`const a = axios; a.get`), gọi HTTP bằng `fetch` (hiện không có lời gọi thật) |
 | R30 | frontend.md | Session qua `useAuth()`, `localStorage` chỉ trong `utils/authStorage.ts` | 3 | — | S, cần chốt `authStorage.ts` là ngoại lệ |
 | R31 | frontend.md | react-query chỉ cho data fetching; thư viện ngoài danh sách phải hỏi | 3–4 | quy trình | Không máy hoá nhỏ |
 | R32 | canvas-engine.md | Touch target ≥ 64px | 3 | (chưa xác minh test bố cục) | S–M: assert trong test hàm bố cục |
@@ -106,13 +106,15 @@ Lúc lập (PR #49) đã đối chiếu 29 dòng: mọi thứ chặn tầng 2 gh
 
 **PR đề xuất 1–3** (L8, R4, R11, R13, R24): test từ khoá hình trùng giữa hai hình khác tên; checker log kiểm SHA có trong git; ba rule ArchUnit (`publicFieldsAreConstants`, `strategiesDoNotValidateBusinessLogic`, `strategiesDoNotCallValidationChain`); R4 đã ở tầng 1 vì Spring Boot 4.1.1 gỡ `@MockBean`. Mỗi kiểm tra đã thử đỏ (chèn vi phạm) rồi xanh, chi tiết ở `docs/corrections.md` 2026-11-15.
 
+**PR đề xuất 4** (R28, R29): `frontend/src/api/frontendRules.test.ts`. Thử đỏ: thêm `zustand` vào `package.json` và một lời gọi `axios.get` vào `src/hooks/useGames.ts` → hai test đỏ, hoàn tác xanh.
+
 ## Đề xuất chờ duyệt (cỡ S, mỗi cái một PR nhỏ)
 
 Ưu tiên theo số lần lặp và rủi ro:
 1. ~~**L8** test báo từ khoá trùng giữa hai hình~~ (đã làm).
 2. ~~**R24** checker log kiểm SHA có thật~~ (đã làm).
 3. ~~**R4, R11, R13** rule ArchUnit~~ (đã làm; R4 hoá ra đã ở tầng 1 nên chỉ thêm hai rule).
-4. **R28, R29** chặn thư viện state ngoài danh sách và `axios.create` ngoài `axiosInstance.ts`.
+4. ~~**R28, R29** chặn thư viện state và gọi axios trực tiếp ngoài `axiosInstance.ts`~~ (đã làm).
 5. **L1** chặn heredoc không nháy và `$'...'` trong `BNE` (cần chốt có chặn `cat > f <<EOF` không).
 6. **L12, L13** quyền `ask` cho tạo nhánh, chặn `cd` (đổi cấu hình mọi phiên).
 7. **KNOWN-GAPS #19**: nối `agent-guard` vào frontmatter các agent chỉ đọc có `memory`, hoặc xoá.
