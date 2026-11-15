@@ -1,5 +1,6 @@
 // Kiểm định dạng ai-usage-log.md + docs/ai-usage-log-archive/ (thay phần tất định của agent log-auditor).
 // Dùng: node scripts/ai-log/check-ai-usage-log.mjs   (exit 1 nếu có LỖI; NGHI NGỜ chỉ in ra)
+import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,7 +37,7 @@ export function splitCells(line) {
 }
 
 /** rows: [{source, line}] theo thứ tự đọc. Trả về {errors, warnings} (mảng chuỗi). */
-export function checkRows(rows, { legacyMaxStt = LEGACY_MAX_STT, legacyRows = LEGACY_ROWS, knownBad = KNOWN_BAD_ROWS } = {}) {
+export function checkRows(rows, { legacyMaxStt = LEGACY_MAX_STT, legacyRows = LEGACY_ROWS, knownBad = KNOWN_BAD_ROWS, shaMissing = null } = {}) {
   const errors = [];
   const warnings = [];
   const seen = new Map();
@@ -64,6 +65,9 @@ export function checkRows(rows, { legacyMaxStt = LEGACY_MAX_STT, legacyRows = LE
     if (!/\d/.test(tool)) errors.push(`${at} — Công cụ AI "${tool}" thiếu phiên bản model`);
     if (!CONTRIBUTIONS.includes(contribution)) errors.push(`${at} — Mức độ "${contribution}" không thuộc ${CONTRIBUTIONS.join(" / ")}`);
     if (sha !== "TODO" && !SHA_CELL.test(sha)) errors.push(`${at} — SHA "${sha}" phải là TODO hoặc danh sách SHA hex`);
+    else if (shaMissing) {
+      for (const s of shaHexes(sha)) if (shaMissing(s)) errors.push(`${at} — SHA ${s} không có trong git (gõ sai, chưa đẩy, hoặc đã đổi do rebase/amend/squash: ghi lại SHA mới)`);
+    }
     if (knownBad.has(stt)) warnings.push(`${at} — lỗi đã biết, chờ sửa tay (xem KNOWN_BAD_ROWS)`);
     else if (stt > legacyMaxStt && !legacyRows.has(stt)) {
       const missing = PROMPT_PARTS.filter((p) => !prompt.includes(`**${p}`));
@@ -74,6 +78,20 @@ export function checkRows(rows, { legacyMaxStt = LEGACY_MAX_STT, legacyRows = LE
     }
   }
   return { errors, warnings };
+}
+
+// Chỉ lấy SHA trước phần chú thích trong ngoặc, để chữ trong chú thích không bị hiểu nhầm là SHA.
+const shaHexes = (cell) => cell.replace(/\(.*\)$/, "").match(/[0-9a-f]{7,40}/g) ?? [];
+
+/** Trả về hàm "SHA này không có trong git?", hoặc null nếu repo là clone nông (thiếu lịch sử thì không kết luận được). */
+export function gitShaMissing(root, rows) {
+  const git = (args, input) => execFileSync("git", args, { cwd: root, encoding: "utf8", input });
+  if (git(["rev-parse", "--is-shallow-repository"]).trim() === "true") return null;
+  const shas = [...new Set(rows.flatMap(({ line }) => shaHexes(splitCells(line)[7] ?? "")))];
+  if (!shas.length) return () => false;
+  const out = git(["cat-file", "--batch-check"], shas.map((s) => `${s}^{commit}`).join("\n") + "\n").trim().split("\n");
+  const missing = new Set(shas.filter((_, i) => / missing$| ambiguous$/.test(out[i])));
+  return (sha) => missing.has(sha);
 }
 
 /** Đọc archive (theo STT tăng dần) rồi file gốc. */
@@ -98,7 +116,10 @@ export function collectRows(root) {
 
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-  const { errors, warnings } = checkRows(collectRows(root));
+  const rows = collectRows(root);
+  const shaMissing = gitShaMissing(root, rows);
+  const { errors, warnings } = checkRows(rows, { shaMissing });
+  if (!shaMissing) warnings.push("repo là clone nông nên không kiểm SHA có trong git");
   for (const w of warnings) console.log(`[NGHI NGỜ] ${w}`);
   for (const e of errors) console.error(`[LỖI] ${e}`);
   if (errors.length) process.exit(1);
