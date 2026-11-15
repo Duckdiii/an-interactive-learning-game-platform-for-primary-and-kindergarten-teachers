@@ -75,6 +75,37 @@ class CurriculumRagConfigurationTest {
         }
     }
 
+    @Test void generatorWithAssetBinderEnabledResolvesDecoratorWithoutAmbiguity() {
+        try (var context = new AnnotationConfigApplicationContext()) {
+            context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("test", Map.of(
+                    "app.curriculum-rag.enabled", "true",
+                    "app.ai.gemini.game-generation.enabled", "true",
+                    "app.assets.binder.enabled", "true",
+                    "app.ai.gemini.api-key", "fixture-not-a-real-key")));
+            context.registerBean(DataSource.class, () -> mock(DataSource.class));
+            var mapper = new tools.jackson.databind.json.JsonMapper();
+            context.registerBean(tools.jackson.databind.json.JsonMapper.class, () -> mapper);
+            context.registerBean(com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry.class,
+                    () -> new com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry(
+                            com.aigameplatform.backend.service.testsupport.GameTestFixtures.strategies(mapper)));
+            context.register(CurriculumRagConfiguration.class,
+                    com.aigameplatform.backend.service.generation.GeminiChatConfiguration.class,
+                    com.aigameplatform.backend.service.generation.GeminiGameContentGenerator.class,
+                    com.aigameplatform.backend.service.generation.AssetBindingGameContentGenerator.class,
+                    com.aigameplatform.backend.service.asset.binding.GameAssetBinder.class,
+                    com.aigameplatform.backend.service.asset.binding.CellExtractor.class,
+                    com.aigameplatform.backend.service.asset.binding.StyleLockPolicy.class,
+                    com.aigameplatform.backend.service.asset.binding.LabelLookupResolver.class,
+                    com.aigameplatform.backend.service.asset.binding.ConceptGraphResolver.class,
+                    com.aigameplatform.backend.service.asset.concept.ConceptGraph.class,
+                    com.aigameplatform.backend.service.factory.GameAssetCatalog.class,
+                    com.aigameplatform.backend.service.asset.KeywordAssetRetriever.class);
+            assertThatCode(context::refresh).doesNotThrowAnyException();
+            assertThat(context.getBean(com.aigameplatform.backend.service.generation.GameContentGenerator.class))
+                    .isInstanceOf(com.aigameplatform.backend.service.generation.AssetBindingGameContentGenerator.class);
+        }
+    }
+
     @Test void ragConfigurationDefersCorpusDbAndProviderAccess() {
         var database = mock(DataSource.class);
         try (var context = new AnnotationConfigApplicationContext()) {

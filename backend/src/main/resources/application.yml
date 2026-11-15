@@ -78,6 +78,13 @@ app:
     # Thử nghiệm: đưa các hình có từ khóa trong yêu cầu lên đầu danh mục trong prompt.
     shortlist:
       enabled: ${ASSET_SHORTLIST_ENABLED:false}
+    # Tách bước gán hình riêng sau Gemini (bản đầu: tra nhãn, đồ thị khái niệm, khóa họ phong cách).
+    binder:
+      enabled: ${ASSET_BINDER_ENABLED:false}
+      mode: ${ASSET_BINDER_MODE:fill-empty}               # fill-empty | override
+      style-lock:
+        enabled: ${ASSET_STYLE_LOCK_ENABLED:true}
+        min-coverage: ${ASSET_STYLE_LOCK_MIN_COVERAGE:0.5}
   moderation:
     # Mặc định true: app từ chối khởi động nếu chưa có OPENAI_API_KEY, để không lỡ chạy với kiểm duyệt yếu.
     # Chỉ đặt MODERATION_REQUIRED=false khi chạy thử ở máy cá nhân (khi đó chỉ dùng danh sách từ cấm).
