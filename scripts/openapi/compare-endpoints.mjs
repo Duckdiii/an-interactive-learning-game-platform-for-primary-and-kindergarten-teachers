@@ -86,9 +86,8 @@ function javaFiles(dir) {
     e.isDirectory() ? javaFiles(join(dir, e.name)) : e.name.endsWith(".java") ? [join(dir, e.name)] : []);
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const root = resolve(process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), "..", ".."));
-  const specOps = openapiOperations(readFileSync(join(root, "docs/openapi/openapi.yaml"), "utf8"));
+/** Endpoint của mọi controller trong backend: {codeOps: [{method, path, line, file}], unreadable}. */
+export function controllerEndpoints(root) {
   const codeOps = [], unreadable = [];
   for (const file of javaFiles(join(root, "backend/src/main/java"))) {
     const source = readFileSync(file, "utf8");
@@ -98,6 +97,13 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     codeOps.push(...found.ops.map((o) => ({ ...o, file: rel })));
     unreadable.push(...found.unreadable.map((u) => ({ ...u, file: rel })));
   }
+  return { codeOps, unreadable };
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const root = resolve(process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), "..", ".."));
+  const specOps = openapiOperations(readFileSync(join(root, "docs/openapi/openapi.yaml"), "utf8"));
+  const { codeOps, unreadable } = controllerEndpoints(root);
   const { onlyCode, onlySpec, stalePlanned } = compare(specOps, codeOps);
   console.log(`openapi.yaml: ${specOps.length} operation; controller: ${codeOps.length} endpoint.`);
   console.log(`\nCó trong code, không có trong openapi.yaml (${onlyCode.length}):`);

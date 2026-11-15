@@ -105,6 +105,8 @@ jobs:
       - run: node scripts/ai-log/check-ai-usage-log.mjs
       - run: node scripts/db/check-migrations.mjs --base "origin/${{ github.base_ref }}"
       - run: node scripts/hooks/check-config.mjs --tracked
+      # Thêm/đổi endpoint mà quên cập nhật docs/FEATURE-MAP.md, hoặc trích dẫn trỏ tới file đã xoá, thì đỏ.
+      - run: node scripts/verify/check-feature-map.mjs
       # Mọi test script do git theo dõi (test mới tự được chạy; trước đây danh sách viết tay chỉ chạy 5/22 file).
       # shortcut: tạm loại extract-srs/extract-uc vì lỗi thời so với docs/srs (KNOWN-GAPS #18), bỏ loại trừ khi sửa xong.
       - run: >-

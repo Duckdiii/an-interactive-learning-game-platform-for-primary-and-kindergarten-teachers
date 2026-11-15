@@ -62,4 +62,6 @@ chỉ chạy khi đặt `RUN_LIVE_TEACHER_FLOW=true`). Chạy tay: `node scripts
 (kỳ vọng 200) vì `saveWithGame` chưa được gọi ở main; xem `docs/KNOWN-GAPS.md`.
 Giới hạn: DB trong test là H2 (Flyway tắt), nên chưa kiểm schema Supabase thật.
 
-Cập nhật file này khi thêm/xoá endpoint; số dòng có thể lệch khi file nguồn đổi.
+Cập nhật file này khi thêm/xoá endpoint; số dòng có thể lệch khi file nguồn đổi. `node scripts/verify/check-feature-map.mjs`
+(chạy ở CI) báo khi endpoint của controller thiếu trong mục "Đã có code", khi endpoint ghi ở đây không còn hoặc đã có backend,
+và khi trích dẫn `C/` `T/` `F/` `OA:` trỏ tới file không có hay vượt độ dài file; nó không kiểm nội dung dòng được trích.
