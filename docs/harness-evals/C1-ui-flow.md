@@ -55,3 +55,20 @@ Trên Postgres, `evidence` là object, `claims` và `warnings` là mảng, cả 
 - Không gọi Gemini thật trên CI (tốn quota, kết quả không cố định, xem vấn đề 6). Cần backend chạy với AI giả và trả nội dung cố định.
 - Canvas Konva không có DOM cho từng đáp án. Bấm theo toạ độ dễ hỏng vì biển số có chuyển động `BOB`: ở lần thử chạm đáp án sai, kết quả không rõ ràng. E2e nên kiểm qua HUD/DOM, hoặc cần một móc kiểm thử cho renderer (phải hỏi người dùng trước).
 - Phòng chơi, kết quả và tải tệp vẫn là mock (`VITE_USE_MOCK`), nên e2e nấc 2 chỉ phủ được bước 1–9.
+
+## C1 nấc 2: e2e trên CI (2026-11-15)
+
+Người dùng chốt: backend thật với AI giả; job chạy khi PR đổi `frontend/` hoặc `backend/src/main/`.
+
+| Thành phần | Cách làm |
+|---|---|
+| Backend | `backend/src/test/java/.../e2e/E2eBackendApplication.java`, chạy bằng `./mvnw spring-boot:test-run`: app thật, Postgres qua Testcontainers (`AbstractPostgresTest.Containers`), AI giả `flow/FakeAiConfiguration` (profile `verify-flow`), cấu hình `application-e2e.yml` (cổng 18080, tắt Gemini, RAG, OpenAI). Nằm trong `src/test` nên không có trong bản build chạy thật. Bộ lọc scan bỏ lớp test và `@TestConfiguration` (có test riêng). |
+| Frontend | Vite dev ở cổng 15173 với `VITE_API_BASE_URL` trỏ backend e2e. Cổng riêng để không đụng server dev trên máy. |
+| Test | `frontend/e2e/teacher-flow.spec.ts`: đăng ký, đăng nhập, mô tả ý tưởng ở trang chủ, chọn khối lớp, xác nhận với AI (`Trắc nghiệm` được chọn), sinh game, review `UNAVAILABLE`, sửa bằng trò chuyện ("con chó" → "con gà"), chờ tự lưu, review `STALE`, thấy game trong danh sách. Chạy: `npm run e2e` (cần Docker). |
+| CI | `.github/workflows/e2e.yml`, Chromium, không secret, không retry; hỏng thì tải lên `playwright-report`. |
+
+Khác với lúc đi tay ở nấc 1:
+- Từ ô ý tưởng ở trang chủ, app chỉ đoán môn học. Khối lớp phải chọn, nếu không nút "Để AI soạn giúp" báo cần chọn trước.
+- Game DSL (quiz) không có "Giữ bản sửa / Bỏ bản sửa" như game CPF. Bản sửa áp ngay, có nút "Hoàn tác lần sửa bằng trò chuyện", và editor tự lưu sau một nhịp.
+
+Bằng chứng: chạy lạnh như CI (`CI=true npm run e2e`, Playwright tự khởi động cả hai server) xanh trong 32 giây, sau đó cổng được trả lại và không còn container. Đỏ có chủ đích: tắt tự lưu trong `useGameEditor` thì bước sửa đỏ (DB vẫn "con chó"); hoàn tác thì xanh.

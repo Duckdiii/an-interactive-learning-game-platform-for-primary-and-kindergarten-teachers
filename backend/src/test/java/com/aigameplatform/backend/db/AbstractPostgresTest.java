@@ -40,7 +40,7 @@ public abstract class AbstractPostgresTest {
     }
 
     @TestConfiguration(proxyBeanMethods = false)
-    static class Containers {
+    public static class Containers {
         // pg17 khớp Supabase (PostgreSQL 17.6 lúc viết); pgvector vì V1/V5 dùng kiểu vector.
         @Bean
         @ServiceConnection
