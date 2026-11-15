@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.curriculum;
 import com.aigameplatform.backend.entity.enums.CurriculumReviewStatus;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.aigameplatform.backend.db.AbstractPostgresTest;
 import com.aigameplatform.backend.dto.dsl.*;
 import com.aigameplatform.backend.entity.*;
 import com.aigameplatform.backend.entity.question.QuizQuestion;
@@ -11,18 +12,13 @@ import com.aigameplatform.backend.service.curriculum.review.*;
 import com.aigameplatform.backend.service.generation.GenerationResult;
 import java.util.*;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import tools.jackson.databind.json.JsonMapper;
 
-/** Creates and removes its own synthetic fixtures; validates actual transaction rollback on PostgreSQL. */
-@EnabledIfEnvironmentVariable(named = "RUN_LIVE_REVIEW_PERSISTENCE_TEST", matches = "true")
-@SpringBootTest(properties = {"app.moderation.required=false", "app.curriculum-rag.enabled=false",
-        "app.ai.gemini.game-generation.enabled=false"})
-class GameCurriculumReviewPersistenceLiveTest {
+/** Creates and removes its own synthetic fixtures; validates jsonb types and actual transaction rollback on PostgreSQL (Testcontainers). */
+class GameCurriculumReviewPersistenceTest extends AbstractPostgresTest {
     @Autowired GameCurriculumReviewService service;
     @Autowired GameRepository games;
     @Autowired TeacherRepository teachers;
@@ -76,6 +72,21 @@ class GameCurriculumReviewPersistenceLiveTest {
         var edited = service.getForTeacher(game.getId(), teacher.getId());
         assertThat(edited.status()).isEqualTo(CurriculumReviewStatus.STALE);
         assertThat(edited.warnings().get(0).asString()).isEqualTo("GAME_CHANGED_REVIEW_STALE");
+    }
+
+    // KNOWN-GAPS #22: H2 trả ba cột này dạng chuỗi JSON (sau PUT còn mã hoá hai lần); OA yêu cầu object/mảng.
+    @Test void jsonColumnsKeepTheirJsonTypesBeforeAndAfterEdit() {
+        service.saveWithGame(game, result, teacher.getId());
+        assertJsonTypes(service.getForTeacher(game.getId(), teacher.getId()));
+        game.setTitle("Edited fixture game");
+        service.saveEditedGame(game, teacher.getId());
+        assertJsonTypes(service.getForTeacher(game.getId(), teacher.getId()));
+    }
+
+    private static void assertJsonTypes(GameCurriculumReviewService.ReviewView review) {
+        assertThat(review.evidence().isObject()).as("evidence là object").isTrue();
+        assertThat(review.claims().isArray()).as("claims là mảng").isTrue();
+        assertThat(review.warnings().isArray()).as("warnings là mảng").isTrue();
     }
 
     @Test void reviewWriteFailureRollsBackPreviouslyFlushedGame() {

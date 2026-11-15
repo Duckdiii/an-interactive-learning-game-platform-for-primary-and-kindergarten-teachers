@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-15 — Đặt `@EnabledIf` ở lớp test cha, tưởng lớp con kế thừa; ghi "máy không có Docker thì bỏ qua" khi chưa thử nhánh đó
+- Lỗi: `AbstractPostgresTest` gắn `@EnabledIf(dockerAvailableOrCi)`, nhưng annotation này không `@Inherited` nên không có tác dụng ở lớp con. Ép điều kiện thành `false` thì 2 lớp test vẫn chạy. Máy dev không có Docker sẽ đỏ thay vì bỏ qua như comment và `corrections` ghi.
+- Phát hiện nhờ: `reviewer` (đọc javap + `AnnotationUtils`), xác nhận bằng cách ép điều kiện `false` rồi chạy.
+- Nguyên nhân gốc: chỉ chạy nhánh "có Docker" (xanh) rồi coi cả hai nhánh đúng; không kiểm cơ chế kế thừa của annotation JUnit.
+- Cách chặn: đã đổi sang `ExecutionCondition` qua `@ExtendWith` (được kế thừa), chứng minh bằng ép `disabled` → 5 test skipped, hoàn tác → chạy. Quy tắc đề xuất: mọi điều kiện bật/tắt test phải thử cả nhánh tắt trước khi ghi vào comment hay tài liệu.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-14 — Lặp lần 3: viết code Java có `\` qua `node -e` trong bash, mất một lớp escape
 - Lỗi: khi tách bước curriculum-review, viết lại `AbstractTeacherFlowTest.java` bằng `node -e`; regex JWT `"eyJ[\\w-]+…"` thành `"eyJ[\w-]+…"` (không biên dịch được). Cùng loại với mục 2026-11-12 và 2026-11-13.
 - Phát hiện nhờ: tự grep dòng `JWT =` sau khi ghi, trước khi biên dịch.
