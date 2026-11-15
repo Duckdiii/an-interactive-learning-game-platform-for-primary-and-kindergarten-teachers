@@ -12,6 +12,7 @@ import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
+import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -37,21 +38,24 @@ public class GameService {
     private final JsonMapper jsonMapper;
     private final AiRequestRateLimiter rateLimiter;
     private final TransactionOperations transactions;
+    private final GameCurriculumReviewService curriculumReviews;
 
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
-            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions) {
+            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
+            GameCurriculumReviewService curriculumReviews) {
         this.games = games;
         this.teachers = teachers;
         this.handlers = handlers;
         this.jsonMapper = jsonMapper;
         this.rateLimiter = rateLimiter;
         this.transactions = transactions;
+        this.curriculumReviews = curriculumReviews;
     }
 
     /**
      * POST /games/generate: sinh bằng AI, đã qua 3 lớp kiểm duyệt, lưu ở trạng thái DRAFT. Cố ý KHÔNG bọc transaction:
-     * gọi AI có thể mất hàng chục giây, giữ kết nối suốt lúc đó sẽ cạn pool Hikari (5 kết nối); chỉ bước lưu
-     * ({@code saveAndFlush}) chạy trong transaction riêng của repository.
+     * gọi AI có thể mất hàng chục giây, giữ kết nối suốt lúc đó sẽ cạn pool Hikari (5 kết nối); chỉ bước lưu chạy trong
+     * transaction ngắn (của repository, hoặc của {@code saveWithGame} khi lưu kèm bản đối chiếu chương trình).
      */
     public ObjectNode generate(String teacherId, GenerateGameRequest request) {
         requireTeacher(teacherId);
@@ -72,7 +76,10 @@ public class GameService {
         game.setStatus(GameStatus.DRAFT);
         game.getQuestions().addAll(content.questions());
         game.setQuestionNum(content.questions().size());
-        return toResponse(games.saveAndFlush(game));
+        // Có kết quả đối chiếu chương trình (game DSL) thì lưu game và bản đối chiếu trong cùng một transaction.
+        Game saved = content.curriculum() == null ? games.saveAndFlush(game)
+                : curriculumReviews.saveWithGame(game, content.curriculum(), teacherId);
+        return toResponse(saved);
     }
 
     /** GET /games: game của giáo viên, mới sửa trước. Bộ lọc nào null thì bỏ qua. */
@@ -99,7 +106,8 @@ public class GameService {
         handlerFor(game.getGameType()).replaceContent(game, body);
         // Chỉ sửa câu hỏi thì hàng games không "bẩn" nên @UpdateTimestamp không chạy; đặt tường minh để GET /games sắp đúng.
         game.setUpdatedAt(Instant.now());
-        return toResponse(games.saveAndFlush(game));
+        // Lưu qua bước này để bản đối chiếu chương trình (nếu có) chuyển STALE: nội dung đã khác lúc đối chiếu.
+        return toResponse(curriculumReviews.saveEditedGame(game, teacherId));
     }
 
     /**

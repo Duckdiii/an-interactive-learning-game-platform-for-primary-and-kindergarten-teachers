@@ -8,8 +8,8 @@
 - `info`: dòng 3–26
 - `servers`: dòng 27–30
 - `tags`: dòng 31–71
-- `paths`: dòng 72–2080
-- `components`: dòng 2081–3980
+- `paths`: dòng 72–2119
+- `components`: dòng 2120–4063
 
 ## Operation
 
@@ -30,149 +30,151 @@
 | POST | `/games/{gameId}/publish` | publishGame | planned | 542–592 |
 | POST | `/games/{gameId}/regenerate` | regenerateGame | planned | 597–646 |
 | POST | `/games/{gameId}/revise` | reviseGame | implemented | 651–690 |
-| POST | `/games/{gameId}/questions/{questionId}/regenerate` | regenerateQuestion | planned | 696–759 |
-| POST | `/media/upload` | uploadMedia | planned | 762–818 |
-| POST | `/games/{gameId}/sessions` | createSession | planned | 823–866 |
-| GET | `/games/{gameId}/sessions` | listGameSessions | planned | 867–908 |
-| POST | `/sessions/{sessionId}/start` | startSession | planned | 913–936 |
-| POST | `/sessions/{sessionId}/pause` | pauseSession | planned | 941–961 |
-| POST | `/sessions/{sessionId}/resume` | resumeSession | planned | 966–985 |
-| POST | `/sessions/{sessionId}/close` | closeSession | planned | 990–1010 |
-| GET | `/sessions/{sessionId}` | getSession | planned | 1015–1044 |
-| GET | `/sessions/{sessionId}/results` | getSessionResults | planned | 1049–1076 |
-| GET | `/sessions/{sessionId}/participants/{participantId}/interactions` | getParticipantInteractions | planned | 1082–1113 |
-| PUT | `/sessions/{sessionId}/participants/{participantId}/team` | assignParticipantTeam | planned | 1119–1166 |
-| GET | `/sessions/by-code/{accessCode}` | getSessionByCode | planned | 1169–1204 |
-| POST | `/sessions/{sessionId}/join` | joinSession | planned | 1209–1252 |
-| PUT | `/sessions/{sessionId}/my-team` | changeMyTeam | planned | 1257–1302 |
-| GET | `/sessions/{sessionId}/questions` | getSessionQuestions | planned | 1307–1353 |
-| POST | `/sessions/{sessionId}/interactions` | submitInteraction | planned | 1358–1418 |
-| GET | `/sessions/{sessionId}/leaderboard` | getLeaderboard | planned | 1423–1455 |
-| GET | `/sessions/{sessionId}/my-result` | getMyResult | planned | 1460–1487 |
-| GET | `/games/shared/{shareCode}` | getSharedGame | planned | 1492–1518 |
-| POST | `/games/shared/{shareCode}/play` | playSharedGame | planned | 1523–1559 |
-| GET | `/admin/teachers` | adminListTeachers | planned | 1562–1607 |
-| POST | `/admin/teachers` | adminCreateTeacher | planned | 1608–1645 |
-| GET | `/admin/teachers/{teacherId}` | adminGetTeacher | planned | 1650–1668 |
-| PUT | `/admin/teachers/{teacherId}` | adminUpdateTeacher | planned | 1669–1703 |
-| POST | `/admin/teachers/{teacherId}/lock` | adminLockTeacher | planned | 1708–1731 |
-| POST | `/admin/teachers/{teacherId}/unlock` | adminUnlockTeacher | planned | 1736–1755 |
-| GET | `/admin/audit-logs` | adminListAuditLogs | planned | 1758–1820 |
-| GET | `/admin/usage` | adminGetUsage | planned | 1823–1877 |
-| GET | `/admin/system-status` | adminGetSystemStatus | planned | 1880–1905 |
-| GET | `/admin/ai-config` | adminGetAiConfig | planned | 1908–1941 |
-| POST | `/admin/ai-config/versions` | adminCreateAiConfigVersion | planned | 1944–1972 |
-| POST | `/admin/ai-config/versions/{versionId}/freeze` | adminFreezeAiConfigVersion | planned | 1977–2007 |
-| POST | `/admin/ai-config/versions/{versionId}/activate` | adminActivateAiConfigVersion | planned | 2012–2031 |
-| GET | `/admin/safety/blocked-words` | adminGetBlockedWords | planned | 2034–2050 |
-| PUT | `/admin/safety/blocked-words` | adminReplaceBlockedWords | planned | 2051–2079 |
+| GET | `/games/{gameId}/curriculum-review` | getGameCurriculumReview | implemented | 695–729 |
+| POST | `/games/{gameId}/questions/{questionId}/regenerate` | regenerateQuestion | planned | 735–798 |
+| POST | `/media/upload` | uploadMedia | planned | 801–857 |
+| POST | `/games/{gameId}/sessions` | createSession | planned | 862–905 |
+| GET | `/games/{gameId}/sessions` | listGameSessions | planned | 906–947 |
+| POST | `/sessions/{sessionId}/start` | startSession | planned | 952–975 |
+| POST | `/sessions/{sessionId}/pause` | pauseSession | planned | 980–1000 |
+| POST | `/sessions/{sessionId}/resume` | resumeSession | planned | 1005–1024 |
+| POST | `/sessions/{sessionId}/close` | closeSession | planned | 1029–1049 |
+| GET | `/sessions/{sessionId}` | getSession | planned | 1054–1083 |
+| GET | `/sessions/{sessionId}/results` | getSessionResults | planned | 1088–1115 |
+| GET | `/sessions/{sessionId}/participants/{participantId}/interactions` | getParticipantInteractions | planned | 1121–1152 |
+| PUT | `/sessions/{sessionId}/participants/{participantId}/team` | assignParticipantTeam | planned | 1158–1205 |
+| GET | `/sessions/by-code/{accessCode}` | getSessionByCode | planned | 1208–1243 |
+| POST | `/sessions/{sessionId}/join` | joinSession | planned | 1248–1291 |
+| PUT | `/sessions/{sessionId}/my-team` | changeMyTeam | planned | 1296–1341 |
+| GET | `/sessions/{sessionId}/questions` | getSessionQuestions | planned | 1346–1392 |
+| POST | `/sessions/{sessionId}/interactions` | submitInteraction | planned | 1397–1457 |
+| GET | `/sessions/{sessionId}/leaderboard` | getLeaderboard | planned | 1462–1494 |
+| GET | `/sessions/{sessionId}/my-result` | getMyResult | planned | 1499–1526 |
+| GET | `/games/shared/{shareCode}` | getSharedGame | planned | 1531–1557 |
+| POST | `/games/shared/{shareCode}/play` | playSharedGame | planned | 1562–1598 |
+| GET | `/admin/teachers` | adminListTeachers | planned | 1601–1646 |
+| POST | `/admin/teachers` | adminCreateTeacher | planned | 1647–1684 |
+| GET | `/admin/teachers/{teacherId}` | adminGetTeacher | planned | 1689–1707 |
+| PUT | `/admin/teachers/{teacherId}` | adminUpdateTeacher | planned | 1708–1742 |
+| POST | `/admin/teachers/{teacherId}/lock` | adminLockTeacher | planned | 1747–1770 |
+| POST | `/admin/teachers/{teacherId}/unlock` | adminUnlockTeacher | planned | 1775–1794 |
+| GET | `/admin/audit-logs` | adminListAuditLogs | planned | 1797–1859 |
+| GET | `/admin/usage` | adminGetUsage | planned | 1862–1916 |
+| GET | `/admin/system-status` | adminGetSystemStatus | planned | 1919–1944 |
+| GET | `/admin/ai-config` | adminGetAiConfig | planned | 1947–1980 |
+| POST | `/admin/ai-config/versions` | adminCreateAiConfigVersion | planned | 1983–2011 |
+| POST | `/admin/ai-config/versions/{versionId}/freeze` | adminFreezeAiConfigVersion | planned | 2016–2046 |
+| POST | `/admin/ai-config/versions/{versionId}/activate` | adminActivateAiConfigVersion | planned | 2051–2070 |
+| GET | `/admin/safety/blocked-words` | adminGetBlockedWords | planned | 2073–2089 |
+| PUT | `/admin/safety/blocked-words` | adminReplaceBlockedWords | planned | 2090–2118 |
 
 ## Components
 
 | Loại | Tên | Dòng |
 |---|---|---|
-| securitySchemes | `bearerAuth` | 2083–2089 |
-| securitySchemes | `participantId` | 2090–2096 |
-| securitySchemes | `refreshCookie` | 2097–2110 |
-| parameters | `GameId` | 2113–2119 |
-| parameters | `Page` | 2120–2127 |
-| parameters | `Size` | 2128–2135 |
-| parameters | `TeacherId` | 2136–2142 |
-| parameters | `VersionId` | 2143–2149 |
-| parameters | `SessionId` | 2150–2156 |
-| parameters | `ParticipantId` | 2157–2163 |
-| parameters | `ShareCode` | 2164–2172 |
-| parameters | `QuestionId` | 2173–2180 |
-| headers | `RetryAfter` | 2183–2187 |
-| headers | `SetRefreshCookie` | 2188–2193 |
-| headers | `ClearRefreshCookie` | 2194–2197 |
-| responses | `AuthSuccess` | 2200–2218 |
-| responses | `ValidationError` | 2219–2226 |
-| responses | `Unauthorized` | 2227–2234 |
-| responses | `GameSuccess` | 2235–2240 |
-| responses | `AdminTeacherSuccess` | 2241–2251 |
-| responses | `TeacherStatusSuccess` | 2252–2269 |
-| responses | `AiConfigVersionSuccess` | 2270–2280 |
-| responses | `BlockedWordsSuccess` | 2281–2291 |
-| responses | `SessionControlSuccess` | 2292–2309 |
-| responses | `Forbidden` | 2310–2316 |
-| responses | `NotFound` | 2317–2322 |
-| responses | `Conflict` | 2323–2330 |
-| responses | `UnprocessableContent` | 2331–2343 |
-| responses | `AiTimeout` | 2344–2351 |
-| responses | `RateLimited` | 2352–2360 |
-| responses | `InternalError` | 2361–2366 |
-| schemas | `ErrorCode` | 2369–2400 |
-| schemas | `ErrorBody` | 2402–2433 |
-| schemas | `ErrorResponse` | 2435–2441 |
-| schemas | `Password` | 2443–2450 |
-| schemas | `Role` | 2452–2454 |
-| schemas | `RegisterRequest` | 2456–2479 |
-| schemas | `RegisterResult` | 2481–2490 |
-| schemas | `LoginRequest` | 2492–2505 |
-| schemas | `TeacherInfo` | 2507–2523 |
-| schemas | `AuthData` | 2525–2537 |
-| schemas | `Subject` | 2539–2541 |
-| schemas | `GradeLevel` | 2543–2545 |
-| schemas | `GameType` | 2547–2563 |
-| schemas | `GameStatus` | 2565–2567 |
-| schemas | `Voice` | 2569–2580 |
-| schemas | `GenerateGameRequest` | 2582–2607 |
-| schemas | `UnderstandGameRequest` | 2609–2626 |
-| schemas | `ReviseGameRequest` | 2628–2642 |
-| schemas | `ChatTurn` | 2644–2654 |
-| schemas | `GameUnderstanding` | 2656–2708 |
-| schemas | `GameUnderstandingResponse` | 2710–2739 |
-| schemas | `GameUnderstandingResult` | 2741–2749 |
-| schemas | `GameEnvelope` | 2751–2766 |
-| schemas | `CpfGameEnvelope` | 2768–2773 |
-| schemas | `Question` | 2775–2787 |
-| schemas | `GameResponse` | 2789–2795 |
-| schemas | `CpfGameResponse` | 2797–2816 |
-| schemas | `DslGameResponse` | 2818–2895 |
-| schemas | `GameResult` | 2897–2903 |
-| schemas | `GameSummary` | 2905–2942 |
-| schemas | `PublishResult` | 2944–2960 |
-| schemas | `SessionType` | 2962–2967 |
-| schemas | `SessionStatus` | 2969–2971 |
-| schemas | `ParticipantStatus` | 2973–2978 |
-| schemas | `InteractionStatus` | 2980–2982 |
-| schemas | `GroupingStrategy` | 2984–2986 |
-| schemas | `TeamInfo` | 2988–3001 |
-| schemas | `TeamInput` | 3003–3011 |
-| schemas | `CreateSessionRequest` | 3013–3038 |
-| schemas | `CreateSessionResult` | 3040–3064 |
-| schemas | `SessionByCode` | 3066–3085 |
-| schemas | `JoinRequest` | 3087–3099 |
-| schemas | `JoinResult` | 3101–3119 |
-| schemas | `TeamAssignRequest` | 3121–3127 |
-| schemas | `StudentGameResponse` | 3129–3184 |
-| schemas | `MatchingStudentItem` | 3186–3211 |
-| schemas | `MatchingStudentQuestion` | 3213–3269 |
-| schemas | `InteractionBase` | 3271–3282 |
-| schemas | `InteractionRequest` | 3284–3411 |
-| schemas | `InteractionResult` | 3413–3443 |
-| schemas | `LeaderboardParticipant` | 3445–3462 |
-| schemas | `LeaderboardTeam` | 3464–3484 |
-| schemas | `Leaderboard` | 3486–3498 |
-| schemas | `MyResult` | 3500–3545 |
-| schemas | `SharedGameInfo` | 3547–3557 |
-| schemas | `PlayRequest` | 3559–3567 |
-| schemas | `PlayResult` | 3569–3588 |
-| schemas | `SessionListItem` | 3590–3608 |
-| schemas | `SessionDetail` | 3610–3655 |
-| schemas | `SessionResults` | 3657–3714 |
-| schemas | `ParticipantInteraction` | 3716–3739 |
-| schemas | `PageInfo` | 3741–3756 |
-| schemas | `TeacherAccountStatus` | 3758–3760 |
-| schemas | `AdminTeacher` | 3762–3780 |
-| schemas | `AdminCreateTeacherRequest` | 3782–3797 |
-| schemas | `AuditResult` | 3799–3801 |
-| schemas | `AuditLogEntry` | 3803–3826 |
-| schemas | `ServiceName` | 3828–3830 |
-| schemas | `ServiceUsage` | 3832–3863 |
-| schemas | `UsageReport` | 3865–3895 |
-| schemas | `SystemStatus` | 3897–3920 |
-| schemas | `AiConfigInput` | 3922–3943 |
-| schemas | `AiConfigVersion` | 3945–3970 |
-| schemas | `BlockedWords` | 3972–3979 |
+| securitySchemes | `bearerAuth` | 2122–2128 |
+| securitySchemes | `participantId` | 2129–2135 |
+| securitySchemes | `refreshCookie` | 2136–2149 |
+| parameters | `GameId` | 2152–2158 |
+| parameters | `Page` | 2159–2166 |
+| parameters | `Size` | 2167–2174 |
+| parameters | `TeacherId` | 2175–2181 |
+| parameters | `VersionId` | 2182–2188 |
+| parameters | `SessionId` | 2189–2195 |
+| parameters | `ParticipantId` | 2196–2202 |
+| parameters | `ShareCode` | 2203–2211 |
+| parameters | `QuestionId` | 2212–2219 |
+| headers | `RetryAfter` | 2222–2226 |
+| headers | `SetRefreshCookie` | 2227–2232 |
+| headers | `ClearRefreshCookie` | 2233–2236 |
+| responses | `AuthSuccess` | 2239–2257 |
+| responses | `ValidationError` | 2258–2265 |
+| responses | `Unauthorized` | 2266–2273 |
+| responses | `GameSuccess` | 2274–2279 |
+| responses | `AdminTeacherSuccess` | 2280–2290 |
+| responses | `TeacherStatusSuccess` | 2291–2308 |
+| responses | `AiConfigVersionSuccess` | 2309–2319 |
+| responses | `BlockedWordsSuccess` | 2320–2330 |
+| responses | `SessionControlSuccess` | 2331–2348 |
+| responses | `Forbidden` | 2349–2355 |
+| responses | `NotFound` | 2356–2361 |
+| responses | `Conflict` | 2362–2369 |
+| responses | `UnprocessableContent` | 2370–2382 |
+| responses | `AiTimeout` | 2383–2390 |
+| responses | `RateLimited` | 2391–2399 |
+| responses | `InternalError` | 2400–2405 |
+| schemas | `ErrorCode` | 2408–2439 |
+| schemas | `ErrorBody` | 2441–2472 |
+| schemas | `ErrorResponse` | 2474–2480 |
+| schemas | `Password` | 2482–2489 |
+| schemas | `Role` | 2491–2493 |
+| schemas | `RegisterRequest` | 2495–2518 |
+| schemas | `RegisterResult` | 2520–2529 |
+| schemas | `LoginRequest` | 2531–2544 |
+| schemas | `TeacherInfo` | 2546–2562 |
+| schemas | `AuthData` | 2564–2576 |
+| schemas | `Subject` | 2578–2580 |
+| schemas | `GradeLevel` | 2582–2584 |
+| schemas | `GameType` | 2586–2602 |
+| schemas | `GameStatus` | 2604–2606 |
+| schemas | `Voice` | 2608–2619 |
+| schemas | `GenerateGameRequest` | 2621–2646 |
+| schemas | `UnderstandGameRequest` | 2648–2665 |
+| schemas | `ReviseGameRequest` | 2667–2681 |
+| schemas | `ChatTurn` | 2683–2693 |
+| schemas | `GameUnderstanding` | 2695–2747 |
+| schemas | `GameUnderstandingResponse` | 2749–2778 |
+| schemas | `GameUnderstandingResult` | 2780–2788 |
+| schemas | `GameEnvelope` | 2790–2805 |
+| schemas | `CpfGameEnvelope` | 2807–2812 |
+| schemas | `Question` | 2814–2826 |
+| schemas | `GameResponse` | 2828–2834 |
+| schemas | `CpfGameResponse` | 2836–2855 |
+| schemas | `DslGameResponse` | 2857–2934 |
+| schemas | `GameResult` | 2936–2942 |
+| schemas | `GameSummary` | 2944–2981 |
+| schemas | `CurriculumReview` | 2983–3025 |
+| schemas | `PublishResult` | 3027–3043 |
+| schemas | `SessionType` | 3045–3050 |
+| schemas | `SessionStatus` | 3052–3054 |
+| schemas | `ParticipantStatus` | 3056–3061 |
+| schemas | `InteractionStatus` | 3063–3065 |
+| schemas | `GroupingStrategy` | 3067–3069 |
+| schemas | `TeamInfo` | 3071–3084 |
+| schemas | `TeamInput` | 3086–3094 |
+| schemas | `CreateSessionRequest` | 3096–3121 |
+| schemas | `CreateSessionResult` | 3123–3147 |
+| schemas | `SessionByCode` | 3149–3168 |
+| schemas | `JoinRequest` | 3170–3182 |
+| schemas | `JoinResult` | 3184–3202 |
+| schemas | `TeamAssignRequest` | 3204–3210 |
+| schemas | `StudentGameResponse` | 3212–3267 |
+| schemas | `MatchingStudentItem` | 3269–3294 |
+| schemas | `MatchingStudentQuestion` | 3296–3352 |
+| schemas | `InteractionBase` | 3354–3365 |
+| schemas | `InteractionRequest` | 3367–3494 |
+| schemas | `InteractionResult` | 3496–3526 |
+| schemas | `LeaderboardParticipant` | 3528–3545 |
+| schemas | `LeaderboardTeam` | 3547–3567 |
+| schemas | `Leaderboard` | 3569–3581 |
+| schemas | `MyResult` | 3583–3628 |
+| schemas | `SharedGameInfo` | 3630–3640 |
+| schemas | `PlayRequest` | 3642–3650 |
+| schemas | `PlayResult` | 3652–3671 |
+| schemas | `SessionListItem` | 3673–3691 |
+| schemas | `SessionDetail` | 3693–3738 |
+| schemas | `SessionResults` | 3740–3797 |
+| schemas | `ParticipantInteraction` | 3799–3822 |
+| schemas | `PageInfo` | 3824–3839 |
+| schemas | `TeacherAccountStatus` | 3841–3843 |
+| schemas | `AdminTeacher` | 3845–3863 |
+| schemas | `AdminCreateTeacherRequest` | 3865–3880 |
+| schemas | `AuditResult` | 3882–3884 |
+| schemas | `AuditLogEntry` | 3886–3909 |
+| schemas | `ServiceName` | 3911–3913 |
+| schemas | `ServiceUsage` | 3915–3946 |
+| schemas | `UsageReport` | 3948–3978 |
+| schemas | `SystemStatus` | 3980–4003 |
+| schemas | `AiConfigInput` | 4005–4026 |
+| schemas | `AiConfigVersion` | 4028–4053 |
+| schemas | `BlockedWords` | 4055–4062 |

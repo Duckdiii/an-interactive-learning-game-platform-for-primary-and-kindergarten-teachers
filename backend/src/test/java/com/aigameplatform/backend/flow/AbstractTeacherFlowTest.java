@@ -26,7 +26,7 @@ import tools.jackson.databind.node.ObjectNode;
  * Các bước của luồng chính giáo viên qua HTTP thật (cổng ngẫu nhiên): register → login → understand → generate → get →
  * put → get → revise. Mỗi bước ghi request/response (đã che bí mật) vào {@code target/verify-evidence/}.
  * Lớp con chọn cổng AI: {@link TeacherFlowVerificationTest} (AI giả, chạy trên CI), {@link TeacherFlowLiveTest} (Gemini thật).
- * Bước curriculum-review tách thành test riêng đang @Disabled ở {@link TeacherFlowVerificationTest} (xem lý do ở đó).
+ * Bước curriculum-review (và STALE sau PUT) là test riêng ở {@link TeacherFlowVerificationTest}.
  *
  * <p>Giới hạn: DB là H2 trong bộ nhớ, schema do Hibernate tạo từ entity (không chạy Flyway), nên KHÔNG kiểm schema
  * Supabase thật hay migration; Layer 3 chỉ dùng danh sách từ cấm (không gọi OpenAI Moderation).
@@ -42,7 +42,7 @@ abstract class AbstractTeacherFlowTest {
     // Đánh số chung cho cả lớp: JUnit tạo instance mới cho mỗi test, đếm theo instance sẽ ghi đè file của test khác.
     private static final AtomicInteger STEP = new AtomicInteger();
 
-    private final JsonMapper json = JsonMapper.builder().build();
+    final JsonMapper json = JsonMapper.builder().build();
     private final HttpClient http = HttpClient.newHttpClient();
 
     @LocalServerPort

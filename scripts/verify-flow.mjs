@@ -8,9 +8,10 @@ import { existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Chỉ đếm file của lớp được chạy. Test @Disabled generatedGameHasCurriculumReview (docs/KNOWN-GAPS.md) khi bật lại tự
-// đăng ký, đăng nhập, sinh game rồi gọi curriculum-review: thêm 4 file, khi đó số này là 12.
-export const EXPECTED_STEPS = 8; // register, login, understand, generate, get, put, get-after-put, revise
+// Chỉ đếm file của lớp được chạy. Luồng chính: register, login, understand, generate, get, put, get-after-put, revise (8).
+// Lớp AI giả có thêm test curriculum-review: register, login, generate, curriculum-review, get, put,
+// curriculum-review-after-put (7). Lớp live chỉ chạy luồng chính.
+export const EXPECTED_STEPS = { fake: 15, live: 8 };
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const backend = join(root, "backend");
@@ -35,8 +36,9 @@ const run = spawnSync(mvnw, ["--batch-mode", "-q", "test", `-Dtest=${testClass}`
 
 const files = existsSync(evidence) ? readdirSync(evidence).filter((f) => f.endsWith(".json")).sort() : [];
 // Maven có thể thoát 0 mà không chạy test nào (lớp bị đổi tên, @Disabled): thiếu bước thì coi là FAIL.
-const ok = run.status === 0 && files.length === EXPECTED_STEPS;
-console.log(`\nverify-flow (${live ? "LIVE Gemini" : "AI giả"}): ${ok ? "PASS" : "FAIL"} (${files.length}/${EXPECTED_STEPS} bước)`);
+const expected = live ? EXPECTED_STEPS.live : EXPECTED_STEPS.fake;
+const ok = run.status === 0 && files.length === expected;
+console.log(`\nverify-flow (${live ? "LIVE Gemini" : "AI giả"}): ${ok ? "PASS" : "FAIL"} (${files.length}/${expected} bước)`);
 for (const f of files) {
   const { step, request, status } = JSON.parse(readFileSync(join(evidence, f), "utf8"));
   console.log(`  ${f.padEnd(26)} ${String(status).padEnd(4)} ${request.method} ${request.path}  (${step})`);

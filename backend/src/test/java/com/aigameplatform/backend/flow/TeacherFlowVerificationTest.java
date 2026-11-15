@@ -2,11 +2,12 @@ package com.aigameplatform.backend.flow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Disabled;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Luồng chính giáo viên với cổng AI giả ({@link FakeAiConfiguration}): miễn phí, chạy trên CI. Chạy riêng và in nơi lưu
@@ -28,17 +29,27 @@ class TeacherFlowVerificationTest extends AbstractTeacherFlowTest {
         assertThat(revisedGame.path("questions").toString()).contains(FakeAiConfiguration.REVISED_MARKER);
     }
 
-    /** Kỳ vọng đúng của sản phẩm: sinh game xong thì giáo viên xem được bản đối chiếu chương trình. */
+    /**
+     * Sinh game xong thì giáo viên xem được bản đối chiếu chương trình; sửa game bằng PUT thì bản đó thành STALE.
+     * Profile test tắt truy xuất chương trình nên trạng thái lúc sinh là UNAVAILABLE.
+     * shortcut: không assert kiểu của {@code evidence}/{@code claims}/{@code warnings}: H2 trả cột JSON thành chuỗi, còn Postgres
+     * jsonb trả object/mảng (đã kiểm ở GameCurriculumReviewPersistenceLiveTest); kiểm kiểu khi có test Postgres thật (KNOWN-GAPS #22).
+     */
     @Test
-    @Disabled("GameCurriculumReviewService.saveWithGame không được gọi ở đâu trong code main, nên chưa có bản đối chiếu nào "
-            + "được ghi và GET /curriculum-review luôn trả 404 (docs/KNOWN-GAPS.md). Bật lại khi nối saveWithGame vào luồng sinh game.")
-    void generatedGameHasCurriculumReview() throws Exception {
+    void generatedGameHasCurriculumReviewThatGoesStaleAfterEdit() throws Exception {
         String token = registerAndLogin();
         String gameId = generateQuiz(token);
 
         Call review = call("curriculum-review", "GET", "/api/games/" + gameId + "/curriculum-review", token, null);
         assertThat(review.status()).isEqualTo(200);
         assertThat(review.body().path("data").path("gameId").asString()).isEqualTo(gameId);
-        assertThat(review.body().path("data").path("status").isString()).isTrue();
+        assertThat(review.body().path("data").path("status").asString()).isEqualTo("UNAVAILABLE");
+
+        ObjectNode edited = (ObjectNode) call("get", "GET", "/api/games/" + gameId, token, null).body().path("data").deepCopy();
+        edited.remove(List.of("gameId", "status", "updatedAt"));
+        assertThat(call("put", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(edited)).status()).isEqualTo(200);
+
+        Call stale = call("curriculum-review-after-put", "GET", "/api/games/" + gameId + "/curriculum-review", token, null);
+        assertThat(stale.body().path("data").path("status").asString()).isEqualTo("STALE");
     }
 }

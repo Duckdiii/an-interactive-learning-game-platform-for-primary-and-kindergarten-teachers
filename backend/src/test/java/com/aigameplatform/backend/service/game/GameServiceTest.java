@@ -24,6 +24,8 @@ import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
+import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
+import com.aigameplatform.backend.service.generation.GenerationResult;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +46,7 @@ class GameServiceTest {
     private final GameContentHandler dsl = mock(GameContentHandler.class);
     private final GameContentHandler cpf = mock(GameContentHandler.class);
     private final AiRequestRateLimiter limiter = mock(AiRequestRateLimiter.class);
+    private final GameCurriculumReviewService curriculumReviews = mock(GameCurriculumReviewService.class);
     private GameService service;
 
     @BeforeEach
@@ -59,7 +62,9 @@ class GameServiceTest {
             return g;
         });
         when(teachers.getReferenceById(anyString())).thenAnswer(inv -> teacher(inv.getArgument(0)));
-        service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction());
+        when(curriculumReviews.saveEditedGame(any(), anyString())).thenAnswer(inv -> inv.getArgument(0));
+        service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction(),
+                curriculumReviews);
     }
 
     private static Teacher teacher(String id) {
@@ -164,7 +169,26 @@ class GameServiceTest {
         service.update(OWNER, "g", body);
 
         verify(cpf).replaceContent(stored, body);
-        verify(games).saveAndFlush(stored);
+        // Lưu qua bước của bản đối chiếu để bản đó chuyển STALE (KNOWN-GAPS #1).
+        verify(curriculumReviews).saveEditedGame(stored, OWNER);
+        verify(games, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void generatedGameWithCurriculumResultIsSavedTogetherWithItsReview() {
+        GenerationResult result = mock(GenerationResult.class);
+        when(dsl.generate(eq(GameType.QUIZ), anyString(), any(), any()))
+                .thenReturn(new GameContentHandler.GeneratedContent("Quiz", "1.0.0", List.of(), null, result));
+        when(curriculumReviews.saveWithGame(any(), eq(result), eq(OWNER))).thenAnswer(inv -> {
+            Game g = inv.getArgument(0);
+            g.setId("game-reviewed");
+            return g;
+        });
+
+        ObjectNode response = service.generate(OWNER, request("Phép cộng trong phạm vi 10", null, GameType.QUIZ));
+
+        assertThat(response.path("gameId").asString()).isEqualTo("game-reviewed");
+        verify(games, never()).saveAndFlush(any());
     }
 
     @Test
@@ -256,7 +280,8 @@ class GameServiceTest {
     @Test
     void aFailedRevisionFreesTheTeachersSlotForTheNextOne() {
         var realLimiter = new AiRequestRateLimiter(java.time.Clock.systemUTC());
-        var withLimiter = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, realLimiter, TransactionOperations.withoutTransaction());
+        var withLimiter = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, realLimiter, TransactionOperations.withoutTransaction(),
+                curriculumReviews);
         when(games.findById("g1")).thenReturn(Optional.of(game("g1", OWNER, GameType.QUIZ)));
         when(dsl.revise(any(), any(), any())).thenThrow(new ApiException(ErrorCode.UNSAFE_CONTENT, "x"))
                 .thenReturn(MAPPER.createObjectNode().put("gameType", "QUIZ"));
