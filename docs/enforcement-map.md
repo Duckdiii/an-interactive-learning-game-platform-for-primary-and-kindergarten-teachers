@@ -1,9 +1,9 @@
 # Bản đồ luật → thứ cưỡng chế (2026-11-15)
 
-Mỗi luật rút từ `.claude/lessons-inbox.md` (44 mục), `docs/corrections.md` (29 dòng), `CLAUDE.md` và `.claude/rules/`, kèm tầng hiện tại theo "Thứ tự chặn lỗi" trong `CLAUDE.md`:
+Mỗi luật rút từ `.claude/lessons-inbox.md` (44 mục), `docs/corrections.md` (29 dòng lúc lập, nay 30), `CLAUDE.md` và `.claude/rules/`, kèm tầng hiện tại theo "Thứ tự chặn lỗi" trong `CLAUDE.md`:
 **1** kiến trúc/code, **2** lint/test/CI/hook, **3** chỉ có chữ (rule, prompt, lessons), **4** chỉ có review.
 Tầng 2 chỉ ghi khi đã thấy đoạn kiểm thật (file:dòng); "một phần" là chỉ kiểm được một nhánh của luật.
-Viết tắt: `AU` = `backend/src/test/java/com/aigameplatform/backend/ArchitectureRulesTest.java`, `CC` = `scripts/hooks/check-config.mjs`,
+Viết tắt: `AU#tênRule` = field rule trong `backend/src/test/java/com/aigameplatform/backend/ArchitectureRulesTest.java` (trích theo tên, không theo dòng, để thêm rule không làm lệch), `CC` = `scripts/hooks/check-config.mjs`,
 `CM` = `scripts/db/check-migrations.mjs`, `CI` = `.github/workflows/ci-pr.yml`, `BNE` = `scripts/hooks/block-node-eval.mjs`.
 
 Cập nhật khi: thêm mục `lessons-inbox`, thêm dòng `corrections`, hoặc đẩy một luật lên tầng khác. File này chỉ định hướng; chuyển trạng thái mục trong `lessons-inbox` cần người dùng duyệt.
@@ -12,10 +12,10 @@ Cập nhật khi: thêm mục `lessons-inbox`, thêm dòng `corrections`, hoặc
 
 | | Số luật | Tầng 1–2 | Tầng 2 một phần | Tầng 3–4 |
 |---|---|---|---|---|
-| Từ `lessons-inbox` (gộp mục trùng) | 27 | 7 | 6 | 14 |
-| Từ `CLAUDE.md` và `.claude/rules/` | 38 | 10 | 5 | 23 |
+| Từ `lessons-inbox` (gộp mục trùng) | 27 | 8 | 5 | 14 |
+| Từ `CLAUDE.md` và `.claude/rules/` | 38 | 14 | 5 | 19 |
 
-Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard`, `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa trong PR này (mục "Đã làm").
+Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard`, `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa ở PR #49 (mục "Đã làm"). Đề xuất 1–3 đã làm ở PR sau (L8, R4, R11, R13, R24).
 
 ## A. Luật từ `lessons-inbox`
 
@@ -28,7 +28,7 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | L5 | Thêm tham số constructor cho bean thì sửa cả cấu hình test liệt kê bean tay | 11-11 | 2 (CI) | `./mvnw test` đỏ | Đủ |
 | L6 | Bean trong chuỗi `@Order` không trùng giá trị | 11-13 | 2 | `AssetMeaningGameValidatorTest.java:52-54` | Đủ |
 | L7 | So nhãn tiếng Việt giữ dấu/theo ranh giới từ; hàm đoán có test âm tính | 10-14, 11-13 (3) | 2 một phần | `frontend/src/utils/assetResolver.catalog.test.ts:20,52,62` | Thói quen thêm test cho mỗi hàm mới, không có kiểm chung |
-| L8 | Từ khoá hình mới không trùng từ khoá hình khác, không dùng cụm động từ thông dụng | 11-13 (3) | 2 một phần | `assetResolver.catalog.test.ts:69` (chỉ từ đơn ngắn), `AssetRetrieverEvalTest` | **S**: test duyệt danh mục báo từ khoá trùng giữa hai hình |
+| L8 | Từ khoá hình mới không trùng từ khoá hình khác, không dùng cụm động từ thông dụng | 11-13 (3) | 2 | `assetResolver.catalog.test.ts:69` (từ đơn ngắn), test "một từ khóa không thuộc hai hình khác tên" (`:78`), `AssetRetrieverEvalTest` | Đủ cho danh mục frontend. Không kiểm: `exactKeywords` có dấu so với từ khoá đã bỏ dấu của vật khác (ví dụ "chó"/"chợ" với "cho"), vì cách khớp hai loại do backend quyết; hai hình khác nghĩa nhưng đặt cùng `name` |
 | L9 | Viết tiêu chí/checker từ dữ liệu thật, không từ giả định | 10-11, 11-14 (2) | 3 (luật) / 2 (checker đã có) | `scripts/ai-log/check-ai-usage-log.mjs` + test, `CI` | Không máy hoá được cho checker mới |
 | L10 | Agent lấy diff gồm `main...HEAD` + `git diff` + `git diff --cached` | 10-11 | 3 | `CLAUDE.md`, prompt 6 agent | S: test quét `.claude/agents/*.md` |
 | L11 | Không giả định công cụ có sẵn (`gh`, Python); agent mới chưa gọi theo tên được | 10-11 ×2, 11-11 (3) | 3 | `CLAUDE.md` mục "Học từ lỗi" | S cho phần `gh` (test grep prompt agent); hai ý còn lại là hành vi nền tảng |
@@ -56,18 +56,18 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | R1 | backend.md | `ddl-auto` luôn `validate`; migration chỉ thêm mới, version tăng | 2 | `CM:25-48`, `CI:106` | Đủ |
 | R2 | backend.md | Không cổng 6543; Hikari pool = 5 | 2 | `CC` | Đủ |
 | R3 | backend.md | `moderation.required` không tắt trong file dùng chung; `.env.example` để trống `OPENAI_API_KEY` | 2 | `CC`; `ModerationRequiredDefaultTest` | Đủ |
-| R4 | backend.md | `@MockitoBean`, không `@MockBean` | 3 | (hiện 0 chỗ dùng) | **S**: rule ArchUnit |
+| R4 | backend.md | `@MockitoBean`, không `@MockBean` | 1 | Spring Boot 4.1.1 đã gỡ `@MockBean` (jar `spring-boot-test-4.1.1` không còn `org/springframework/boot/test/mock/mockito/`), dùng là lỗi biên dịch | Đủ |
 | R5 | backend.md | Lombok, không getter/setter tay | 3 | — | Khó, giá trị thấp |
 | R6 | backend.md | Giữ cấu trúc package | 3 | — | S: rule ArchUnit kèm danh sách package |
-| R7 | design-principles | Đa hình thay `switch(gameType)` | 2 một phần | `AU:88-91` (chỉ `switch` enum; KNOWN-GAPS #10) | M cho `if`/`==` |
-| R8 | design-principles | DI qua constructor, không `new` bean | 2 | `AU:54-71` | Đủ |
-| R9 | design-principles | Không `UnsupportedOperationException` ngoài `service/strategy` | 2 | `AU:74-78` | Đủ |
-| R10 | design-principles | Controller không gọi repository; entity không phụ thuộc service | 2 | `AU:35-50` | Đủ |
-| R11 | design-principles | Không mở public field | 3 | — | **S**: rule ArchUnit (trừ `static final`) |
-| R12 | CLAUDE.md | `QuestionGame`, `GameSession`, `PlayInteractionDetail` dùng JOINED | 2 một phần | `AU:95-110`; `PlayInteractionDetail` chưa có lớp con (KNOWN-GAPS #5) | Đủ phần đã có |
-| R13 | CLAUDE.md | `GameContentStrategy` không có `validateBusinessLogic()` | 3 | — | **S**: rule ArchUnit |
+| R7 | design-principles | Đa hình thay `switch(gameType)` | 2 một phần | `AU#noSwitchOnGameType` (chỉ `switch` enum; KNOWN-GAPS #10) | M cho `if`/`==` |
+| R8 | design-principles | DI qua constructor, không `new` bean | 2 | `AU#noFieldInjection`, `#servicesAndRepositoriesAreInjectedNotConstructed` | Đủ |
+| R9 | design-principles | Không `UnsupportedOperationException` ngoài `service/strategy` | 2 | `AU#unsupportedOperationOnlyInStrategySkeletons` | Đủ |
+| R10 | design-principles | Controller không gọi repository; entity không phụ thuộc service | 2 | `AU#controllersDoNotUseRepositories`, `#repositoriesAndServicesDoNotUseControllers`, `#entitiesStayIndependent` | Đủ |
+| R11 | design-principles | Không mở public field | 2 | `AU#publicFieldsAreConstants` (public chỉ được `static final`) | Đủ |
+| R12 | CLAUDE.md | `QuestionGame`, `GameSession`, `PlayInteractionDetail` dùng JOINED | 2 một phần | `AU#domainRootsUseJoinedInheritance`, `#everyEntityHierarchyUsesJoined`; `PlayInteractionDetail` chưa có lớp con (KNOWN-GAPS #5) | Đủ phần đã có |
+| R13 | CLAUDE.md | `GameContentStrategy` không có `validateBusinessLogic()` | 2 | `AU#strategiesDoNotValidateBusinessLogic` (theo tên), `AU#strategiesDoNotCallValidationChain` (Strategy không phụ thuộc `GameValidationService`/`AbstractGameValidator`) | Đủ |
 | R14 | CLAUDE.md | Chuỗi validator không bỏ layer | 2 một phần | `GameValidationWiringTest`, `AssetMeaningGameValidatorTest:52-54` | Chưa xác minh đủ thứ tự |
-| R15 | CLAUDE.md | Chỉ LangChain4j, không Spring AI | 2 | `AU:81-85` | Đủ |
+| R15 | CLAUDE.md | Chỉ LangChain4j, không Spring AI | 2 | `AU#onlyLangChain4jForAi` | Đủ |
 | R16 | CLAUDE.md | `gameType` dạng `UPPER_SNAKE_CASE` | 3 (Java ép tên hằng) | `GameDslSchemaTest` bắt giá trị sai trong schema | S: test duyệt `GameType.values()` |
 | R17 | CLAUDE.md | Sửa DSL đồng bộ schema, record Java, TS, doc | 2 một phần | `GameDslSchemaTest` (schema ↔ Java) | M: so khoá field TS với schema |
 | R18 | CLAUDE.md | Sửa `openapi.yaml` thì làm mới INDEX | 2 | `build-index.test.mjs` ở `CI` | Đủ; `redocly lint` chưa ở CI (S, cần `npx` tải gói khi chạy) |
@@ -76,7 +76,7 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | R21 | CLAUDE.md | Không thêm dependency khi chưa hỏi | 3 | quy trình | M: CI báo khi `pom.xml`/`package.json` đổi |
 | R22 | CLAUDE.md | Test API ngoài phải mock | 2 một phần | test luồng tắt Gemini/OpenAI (`TeacherFlowVerificationTest.java:20-23`); `*LiveTest` gate bằng biến môi trường | S–M: ArchUnit cho test không dùng model thật |
 | R23 | CLAUDE.md | Ghi `ai-usage-log.md` đúng định dạng | 2 | `check-ai-usage-log.mjs`, `rotate.mjs --check` ở `CI` | Chưa kiểm "có đổi code thì có dòng log" (S, cần cơ chế bỏ qua) |
-| R24 | CLAUDE.md | SHA trong log là commit có thật | 3 | `log-auditor` | **S**: `git cat-file` trong checker (corrections 2026-11-15) |
+| R24 | CLAUDE.md | SHA trong log là commit có thật | 2 | `check-ai-usage-log.mjs` (`gitShaMissing`, `git cat-file --batch-check`) ở `CI`; clone nông thì chỉ báo nghi ngờ | Đủ. Rebase/amend/squash sau khi ghi SHA làm CI đỏ (thông báo lỗi nhắc ghi lại SHA mới); repo hiện merge bằng merge commit |
 | R25 | CLAUDE.md | Không tự commit, subagent không ghi log, agent ghi chạy trong worktree | 3 | quy trình; `agent-guard` có code nhưng chưa nối | Xem KNOWN-GAPS #19 |
 | R26 | CLAUDE.md | File agent nhắc bước đọc `.claude/rules/` | 3 | — | S: test quét `.claude/agents/*.md` |
 | R27 | CLAUDE.md | Liên kết wiki không hỏng | 3 | `check-links.mjs` (chạy tay, còn 10 lỗi) | S sau khi người dùng quyết 10 lỗi (KNOWN-GAPS #13) |
@@ -94,20 +94,24 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 
 ## C. `corrections.md`: thứ chặn còn tồn tại?
 
-Đã đối chiếu 29 dòng: mọi thứ chặn tầng 2 ghi trong bảng vẫn còn trong code (24 dòng đến 2026-11-14 do `codebase-explorer` đọc, 5 dòng mới hơn tự kiểm: nhánh chặn `ERR` trong `.githooks/pre-commit`, `KNOWN_BAD_ROWS` đã gỡ khỏi checker log, luật `check-links` giữ nguyên, prompt A1, luật mật khẩu trong `CC`). Ngoại lệ trước PR này: test của `block-node-eval` (dòng 2026-11-12…14, ReDoS, chặn nhầm commit message) có trong repo nhưng **không chạy ở CI**, nên chỉ chặn khi có người chạy tay.
+Lúc lập (PR #49) đã đối chiếu 29 dòng: mọi thứ chặn tầng 2 ghi trong bảng vẫn còn trong code (24 dòng đến 2026-11-14 do `codebase-explorer` đọc, 5 dòng mới hơn tự kiểm: nhánh chặn `ERR` trong `.githooks/pre-commit`, `KNOWN_BAD_ROWS` đã gỡ khỏi checker log, luật `check-links` giữ nguyên, prompt A1, luật mật khẩu trong `CC`). Ngoại lệ trước PR này: test của `block-node-eval` (dòng 2026-11-12…14, ReDoS, chặn nhầm commit message) có trong repo nhưng **không chạy ở CI**, nên chỉ chặn khi có người chạy tay.
 
-## Đã làm trong PR này
+## Đã làm
+
+**PR #49** (lập bản đồ):
 
 - `CI` job `docs-scripts` chạy mọi test script do git theo dõi (`git ls-files 'scripts/*.test.mjs' '.claude/hooks/*.test.mjs'`) thay cho danh sách viết tay (5/22 file). Test mới tự được chạy: lỗi kiểu "quên thêm test vào CI" không còn viết ra được.
   - Đỏ rồi xanh: cho `shouldBlock` của `BNE` luôn trả `false` → lệnh CI mới báo 4 test hỏng; hoàn tác → 290/290 pass. Với danh sách cũ, thay đổi này lọt CI.
   - Tạm loại `ai-review/extract-srs.test.mjs` và `extract-uc.test.mjs`: lỗi thời so với `docs/srs/` (KNOWN-GAPS #18).
 
+**PR đề xuất 1–3** (L8, R4, R11, R13, R24): test từ khoá hình trùng giữa hai hình khác tên; checker log kiểm SHA có trong git; ba rule ArchUnit (`publicFieldsAreConstants`, `strategiesDoNotValidateBusinessLogic`, `strategiesDoNotCallValidationChain`); R4 đã ở tầng 1 vì Spring Boot 4.1.1 gỡ `@MockBean`. Mỗi kiểm tra đã thử đỏ (chèn vi phạm) rồi xanh, chi tiết ở `docs/corrections.md` 2026-11-15.
+
 ## Đề xuất chờ duyệt (cỡ S, mỗi cái một PR nhỏ)
 
 Ưu tiên theo số lần lặp và rủi ro:
-1. **L8** test báo từ khoá trùng giữa hai hình (lặp 3 lần).
-2. **R24** checker log kiểm SHA có thật bằng `git cat-file` (ứng viên từ A1).
-3. **R4, R11, R13** ba rule ArchUnit (`@MockBean`, public field, `validateBusinessLogic`), gộp một PR.
+1. ~~**L8** test báo từ khoá trùng giữa hai hình~~ (đã làm).
+2. ~~**R24** checker log kiểm SHA có thật~~ (đã làm).
+3. ~~**R4, R11, R13** rule ArchUnit~~ (đã làm; R4 hoá ra đã ở tầng 1 nên chỉ thêm hai rule).
 4. **R28, R29** chặn thư viện state ngoài danh sách và `axios.create` ngoài `axiosInstance.ts`.
 5. **L1** chặn heredoc không nháy và `$'...'` trong `BNE` (cần chốt có chặn `cat > f <<EOF` không).
 6. **L12, L13** quyền `ask` cho tạo nhánh, chặn `cd` (đổi cấu hình mọi phiên).

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { ASSET_CATALOG, findCatalogItemsInText } from './assetResolver'
+import { ASSET_CATALOG, findCatalogItemsInText, normalizeKeyword } from './assetResolver'
 
 const first = (text: string) => findCatalogItemsInText(text)[0]?.url
 
@@ -73,6 +73,30 @@ describe('kho asset bổ sung (giai đoạn 3)', () => {
       .flatMap((item) => item.keywords.map((kw) => ({ id: item.id, kw })))
       .filter(({ kw }) => !kw.includes(' ') && kw.length <= 4 && !allowed.has(kw))
     expect(risky).toEqual([])
+  })
+
+  it('một từ khóa không thuộc hai hình khác tên (lessons-inbox 2026-11-13: "den ong sao", "sao vang")', () => {
+    // Hai bộ hình của cùng một vật (fruits/apple và fluent/food-apple) có cùng tên nên được trùng từ khóa.
+    // exactKeywords giữ dấu ("đầu" khác "dâu") nên so nguyên dạng, không bỏ dấu.
+    // shortcut: không so exactKeywords với từ khóa đã bỏ dấu của vật khác ("chó" với "cho"); cách khớp hai loại do backend quyết.
+    // Cho phép theo đúng từ khóa và đúng tập tên (đã sắp xếp), để thêm hình thứ ba vào cùng từ khóa vẫn bị báo.
+    const sameThing = new Set([
+      'ca: ca he / con ca', 'turtle: con rua / rua bien', 'con rua: con rua / rua bien', 'tree: cai cay / cay xanh',
+      'trai dat: hanh tinh / trai dat',
+    ])
+    const owners = new Map<string, Set<string>>()
+    for (const item of ASSET_CATALOG) {
+      const keys = [
+        ...[...item.keywords, ...(item.matchKeywords ?? [])].map(normalizeKeyword),
+        ...(item.exactKeywords ?? []).map((kw) => `=${kw.toLowerCase()}`),
+      ]
+      for (const kw of new Set(keys)) {
+        if (!owners.has(kw)) owners.set(kw, new Set())
+        owners.get(kw)!.add(normalizeKeyword(item.name))
+      }
+    }
+    const clashes = [...owners].filter(([, names]) => names.size > 1).map(([kw, names]) => `${kw}: ${[...names].sort().join(' / ')}`)
+    expect(clashes.filter((c) => !sameThing.has(c))).toEqual([])
   })
 
   it('mọi tệp trong danh mục có thật trong public', () => {

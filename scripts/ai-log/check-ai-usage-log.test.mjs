@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
-import { checkRows, NO_ERROR, splitCells } from "./check-ai-usage-log.mjs";
+import { checkRows, gitShaMissing, NO_ERROR, splitCells } from "./check-ai-usage-log.mjs";
 
 const PROMPT = "**Bối cảnh:** a.<br>**Mục tiêu:** b.<br>**Kiểm chứng:** c.";
 const row = (o = {}) => {
@@ -43,6 +47,31 @@ test("người thực hiện, phiên bản model, mức độ đóng góp", () =
 
 test("SHA", () => {
   only(check(row({ sha: "chưa có" })), /SHA/);
+});
+
+test("SHA đúng định dạng nhưng không có trong git là lỗi (A1: log-auditor từng phải tự bắt `deadbee`)", () => {
+  const missing = (sha) => sha === "deadbee";
+  const r = checkRows([{ source: "t", line: row({ sha: "`abc1234`, `deadbee` (điền sau)" }) }],
+    { legacyMaxStt: 0, legacyRows: new Set(), shaMissing: missing });
+  only(r, /deadbee.*không có trong git/);
+  assert.deepEqual(checkRows([{ source: "t", line: row({ sha: "`abc1234`" }) }], { legacyMaxStt: 0, legacyRows: new Set(), shaMissing: missing }).errors, []);
+  assert.deepEqual(check(row({ sha: "`deadbee`" })).errors, [], "không truyền shaMissing thì không kiểm (ví dụ clone nông)");
+});
+
+test("gitShaMissing đọc đúng output của git cat-file trên repo thật, bỏ qua chữ trong ngoặc", () => {
+  const dir = mkdtempSync(join(tmpdir(), "ailog-"));
+  try {
+    const git = (...args) => execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", ...args], { cwd: dir, encoding: "utf8" });
+    git("init", "-q");
+    git("commit", "-q", "--allow-empty", "-m", "x");
+    const real = git("rev-parse", "--short", "HEAD").trim();
+    const missing = gitShaMissing(dir, [{ line: row({ sha: `\`${real}\`, \`deadbee\` (xem abcdef0)` }) }]);
+    assert.equal(missing(real), false);
+    assert.equal(missing("deadbee"), true);
+    assert.equal(missing("abcdef0"), false, "SHA trong chú thích ngoặc không được đưa đi kiểm");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("cấu trúc câu lệnh chính và câu không có lỗi", () => {

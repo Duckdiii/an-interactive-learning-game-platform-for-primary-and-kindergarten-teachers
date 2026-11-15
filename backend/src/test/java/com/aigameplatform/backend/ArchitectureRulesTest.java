@@ -1,8 +1,10 @@
 package com.aigameplatform.backend;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -14,6 +16,9 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.aigameplatform.backend.entity.enums.GameType;
+import com.aigameplatform.backend.service.strategy.GameContentStrategy;
+import com.aigameplatform.backend.service.validation.AbstractGameValidator;
+import com.aigameplatform.backend.service.validation.GameValidationService;
 import jakarta.inject.Inject;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
@@ -88,6 +93,27 @@ class ArchitectureRulesTest {
     static final ArchRule noSwitchOnGameType = noClasses()
             .should().callMethod(GameType.class, "ordinal")
             .because("rẽ nhánh theo gameType phải bằng đa hình (Strategy/handler), không switch");
+
+    @ArchTest
+    static final ArchRule publicFieldsAreConstants = fields()
+            .that().arePublic()
+            .should().beStatic().andShould().beFinal()
+            .because("đóng gói: trạng thái đi qua getter/setter (Lombok), field public chỉ dùng cho hằng số");
+
+    // shortcut: rule theo tên chỉ chặn đúng tên CLAUDE.md cấm; đổi tên hàm thì lọt, rule bên dưới chặn đường gọi sang chuỗi validator.
+    @ArchTest
+    static final ArchRule strategiesDoNotValidateBusinessLogic = noMethods()
+            .that().areDeclaredInClassesThat().areAssignableTo(GameContentStrategy.class)
+            .should().haveName("validateBusinessLogic")
+            .because("luật nghiệp vụ thuộc GameValidationService (Chain of Responsibility), không thuộc Strategy");
+
+    // Không cấm cả package service.validation: Strategy dùng hợp lệ GameDslSchemaRegistry, AiOutputSchemas ở đó.
+    @ArchTest
+    static final ArchRule strategiesDoNotCallValidationChain = noClasses()
+            .that().areAssignableTo(GameContentStrategy.class)
+            .should().dependOnClassesThat().areAssignableTo(GameValidationService.class)
+            .orShould().dependOnClassesThat().areAssignableTo(AbstractGameValidator.class)
+            .because("Strategy chỉ dựng nội dung; kiểm duyệt đi qua GameValidationService, không gọi tắt từ Strategy");
 
     // PlayInteractionDetail chưa có lớp con nên chưa khai báo @Inheritance; quy tắc tổng quát bên dưới sẽ chặn ngay khi
     // lớp con đầu tiên xuất hiện mà gốc chưa đổi sang JOINED.
