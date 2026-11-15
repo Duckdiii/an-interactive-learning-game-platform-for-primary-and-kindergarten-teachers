@@ -5,7 +5,7 @@
 #   Testcontainers (PostgresMigrationTest, GameCurriculumReviewPersistenceTest; cần Docker của runner, kéo image
 #   pgvector/pgvector:pg17). Các test *LiveTest gọi DB/AI thật chỉ chạy khi đặt biến RUN_LIVE_*. TeacherFlowVerificationTest chạy luồng giáo
 #   viên qua HTTP với AI giả (H2, schema do Hibernate tạo), bằng chứng tải lên artifact verify-flow-evidence.
-# - frontend-build: lint (oxlint) + test (Vitest) + build (gồm type-check TypeScript).
+# - frontend-build: lint (oxlint) + ranh giới import (dependency-cruiser) + test (Vitest) + build (gồm type-check TypeScript).
 # - secret-scan: Gitleaks quét toàn bộ diff của PR, tìm secret bị commit nhầm.
 # - docs-scripts: log AI không quá dài và đúng định dạng, migration Flyway không bị sửa so với base, cấu hình dùng
 #   chung không có giá trị nguy hiểm, và docs/openapi/INDEX.md còn mới.
@@ -84,6 +84,9 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      # Ranh giới import (frontend/.dependency-cruiser.cjs): vòng import, trang chỉ từ App, tầng đáy/dữ liệu không phụ
+      # thuộc UI, games/ chỉ là renderer, không import test hay devDependency vào code chạy thật.
+      - run: npm run depcruise
       # Chỉ trên CI: giới hạn số luồng vitest (máy chạy CI ít nhân nên nhiều luồng làm test thời gian chập chờn, xem mục Nợ và rủi ro trong "docs/wiki/Kế hoạch và việc còn lại.md").
       # Chạy cục bộ vẫn dùng mặc định của vite.config.ts.
       - run: npm run test -- --maxWorkers=2

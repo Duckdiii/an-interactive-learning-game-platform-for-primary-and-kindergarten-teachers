@@ -13,7 +13,7 @@ Cập nhật khi: thêm mục `lessons-inbox`, thêm dòng `corrections`, hoặc
 | | Số luật | Tầng 1–2 | Tầng 2 một phần | Tầng 3–4 |
 |---|---|---|---|---|
 | Từ `lessons-inbox` (gộp mục trùng) | 27 | 7 | 6 | 14 |
-| Từ `CLAUDE.md` và `.claude/rules/` | 39 | 16 | 7 | 16 |
+| Từ `CLAUDE.md` và `.claude/rules/` | 40 | 17 | 7 | 16 |
 
 Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard` (đã xoá sau), `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa ở PR #49 (mục "Đã làm"). Đề xuất 1–3 ở PR #50 (L8, R4, R11, R13, R24), đề xuất 4 ở PR #52 (R28, R29), đề xuất 5 ở PR #53 (L1), đề xuất 6–7 ở PR sau (L12, xoá `agent-guard`).
 
@@ -92,6 +92,7 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | R37 | rules | Diff gồm thay đổi chưa commit | 3 | = L10 | |
 | R38 | rules | Ghi `lessons-inbox`, `corrections` khi có lỗi | 3 | quy trình | Không máy hoá |
 | R39 | CLAUDE.md (bảng định tuyến, `migration-checker`) | Entity khớp migration | 2 một phần | `PostgresMigrationTest` (Testcontainers, `ddl-auto: validate`, có chạy trên CI): bắt entity có cột/bảng mà migration không có, và sai kiểu. Chưa bắt: cột thừa trong migration, `nullable`/độ dài, an toàn dữ liệu | Phần còn lại: `migration-checker` |
+| R40 | frontend.md, canvas-engine.md | Ranh giới import frontend: không vòng, `pages/` và `player/pages/` chỉ từ `App.tsx`, tầng đáy và `api/services` (trừ `player/api`) không phụ thuộc UI, `games/` chỉ là renderer, không import test/devDependency vào code chạy thật | 2 | `frontend/.dependency-cruiser.cjs` (`npm run depcruise`, `CI` job frontend); mỗi luật đã thử đỏ bằng file vi phạm tạm | Đủ (chỉ xét import chạy thật) |
 
 ## C. `corrections.md`: thứ chặn còn tồn tại?
 
