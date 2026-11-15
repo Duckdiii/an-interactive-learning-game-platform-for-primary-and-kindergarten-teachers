@@ -689,6 +689,45 @@ paths:
         '504':
           $ref: '#/components/responses/AiTimeout'
 
+  /games/{gameId}/curriculum-review:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [Games]
+      operationId: getGameCurriculumReview
+      summary: Căn cứ chương trình của game (chỉ giáo viên)
+      description: |
+        Kết quả đối chiếu nội dung game với chương trình (GDPT 2018 / chương trình mầm non), ghi cùng lúc với game ở
+        `POST /games/generate`. Chỉ giáo viên chủ game xem được; **không** đưa vào response cho học sinh.
+
+        `status`: `REVIEWED`/`PENDING` khi đã đối chiếu, `UNAVAILABLE` khi lúc sinh không bật truy xuất chương trình,
+        `STALE` khi giáo viên đã sửa game bằng `PUT /games/{gameId}` sau khi đối chiếu (kết quả cũ không còn đúng với
+        nội dung hiện tại). Game `CUSTOM` (CPF) không qua đối chiếu nên trả 404.
+
+        404 cũng dùng cho game không tồn tại hoặc không thuộc giáo viên đang đăng nhập (không phân biệt, để không lộ
+        sự tồn tại của game người khác).
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Kết quả đối chiếu.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/CurriculumReview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /games/{gameId}/questions/{questionId}/regenerate:
     parameters:
       - $ref: '#/components/parameters/GameId'
@@ -2940,6 +2979,50 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    CurriculumReview:
+      type: object
+      description: Bản đối chiếu nội dung game với chương trình, ghi khi sinh game. Các trường phiên bản `null` khi không có.
+      required: [id, gameId, createdAt, status, evidence, claims, warnings]
+      properties:
+        id:
+          type: string
+          format: uuid
+        gameId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, REVIEWED, UNAVAILABLE, STALE]
+        evidence:
+          type: object
+          description: Căn cứ đã truy xuất (các đoạn chương trình `chunks`, phiên bản dữ liệu); khi `UNAVAILABLE` các trường là chuỗi rỗng và `chunks` là mảng rỗng.
+          additionalProperties: true
+        claims:
+          type: array
+          description: Từng khẳng định về mức bám chương trình, gắn với `chunkId` trong `evidence`.
+          items:
+            type: object
+            additionalProperties: true
+        warnings:
+          type: array
+          items:
+            type: string
+          examples: [[GAME_CHANGED_REVIEW_STALE]]
+        datasetVersion:
+          type: [string, 'null']
+        curriculumVersion:
+          type: [string, 'null']
+        embeddingModel:
+          type: [string, 'null']
+        reviewerModel:
+          type: [string, 'null']
+        curriculumLabel:
+          type: [string, 'null']
+          description: Câu tóm tắt hiển thị cho giáo viên, ví dụ "Nội dung tương ứng kết quả mong đợi của trẻ 4–5 tuổi."
 
     PublishResult:
       type: object

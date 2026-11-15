@@ -25,7 +25,7 @@ Trạng thái:
 | Lưu game đã sửa | `PUT /api/games/{gameId}` | `C/controller/GamesController.java:59` → `C/service/game/GameService.java:97` | `F/api/gamesApi.ts:47` | `T/controller/GamesControllerTest.java:132`, `T/service/game/GameServiceTest.java:159` | `OA:471` (extended-pending) | có đủ |
 | AI sửa game theo chat | `POST /api/games/{gameId}/revise` | `C/controller/GamesController.java:65` → `C/service/game/GameService.java:110` | `F/api/gamesApi.ts:85` | `T/controller/GamesControllerTest.java:147`, `T/service/game/GameServiceTest.java:222` | `OA:651` (implemented) | có đủ |
 | Xoá game | `DELETE /api/games/{gameId}` | `C/controller/GamesController.java:71` → `C/service/game/GameService.java:128` | — (không có lời gọi DELETE trong `F/`) | `T/controller/GamesControllerTest.java:141`, `T/service/game/GameServiceTest.java:192` | `OA:517` (extended-pending) | chỉ backend |
-| Đối chiếu chương trình của game | `GET /api/games/{id}/curriculum-review` | `C/controller/GameCurriculumReviewController.java:15` → `C/service/curriculum/review/GameCurriculumReviewService.java:64` | — | `T/controller/GameCurriculumReviewControllerTest.java:46`, `T/service/curriculum/GameCurriculumReviewServiceTest.java:15` | **không có trong OA** | chỉ backend |
+| Đối chiếu chương trình của game | `GET /api/games/{id}/curriculum-review` | `C/controller/GameCurriculumReviewController.java:15` → `C/service/curriculum/review/GameCurriculumReviewService.java:64` | — | `T/controller/GameCurriculumReviewControllerTest.java:46`, `T/service/curriculum/GameCurriculumReviewServiceTest.java:15`, `T/flow/TeacherFlowVerificationTest.java:37`, `T/service/game/GameServiceTest.java:178` | `OA:695` (implemented) | chỉ backend (ghi ở `C/service/game/GameService.java:81`, thành STALE ở `:110`) |
 
 ## Frontend gọi nhưng backend chưa có
 
@@ -34,19 +34,18 @@ Frontend gọi qua lớp service có công tắc mock `VITE_USE_MOCK`; tắt moc
 | Tính năng | Endpoint | Frontend gọi | Nơi bật mock | OA (`x-status`) | Trạng thái |
 |---|---|---|---|---|---|
 | Xuất bản game | `POST /api/games/{gameId}/publish` | `F/api/gamesApi.ts:120` | `F/services/publishService.ts:12` | `OA:542` (planned) | chưa có backend |
-| Sinh lại một câu hỏi | `POST /api/games/{gameId}/questions/{questionId}/regenerate` | `F/api/gamesApi.ts:67` | `F/services/aiService.ts:18` | `OA:696` (planned) | chưa có backend |
-| Tải ảnh/âm thanh | `POST /api/media/upload` | `F/api/mediaApi.ts:19` | `F/services/mediaService.ts:12` | `OA:762` (planned) | chưa có backend |
+| Sinh lại một câu hỏi | `POST /api/games/{gameId}/questions/{questionId}/regenerate` | `F/api/gamesApi.ts:67` | `F/services/aiService.ts:18` | `OA:735` (planned) | chưa có backend |
+| Tải ảnh/âm thanh | `POST /api/media/upload` | `F/api/mediaApi.ts:19` | `F/services/mediaService.ts:12` | `OA:801` (planned) | chưa có backend |
 
 ## Đối chiếu với openapi.yaml
 
-- **Có trong code, không có trong OA:** `GET /api/games/{id}/curriculum-review` (`C/controller/GameCurriculumReviewController.java:15`).
-  Response có `data.status` nhận một giá trị của `C/entity/enums/CurriculumReviewStatus.java:4` (`PENDING | REVIEWED | UNAVAILABLE | STALE`).
-  Theo CLAUDE.md, spec phải đổi trước; cần quyết định có đưa vào OA không.
+- **Có trong code, không có trong OA:** không có (`node scripts/openapi/compare-endpoints.mjs`). `curriculum-review` đã đưa vào
+  OA ngày 2026-11-15 (`OA:695`), `data.status` theo `C/entity/enums/CurriculumReviewStatus.java:4`.
 - **Có trong OA, chưa có code (đều `x-status: planned`):** `POST /auth/forgot-password` (`OA:210`), `POST /auth/reset-password`
   (`OA:261`), `POST /games/{gameId}/publish` (`OA:542`), `POST /games/{gameId}/regenerate` (`OA:597`),
-  `POST /games/{gameId}/questions/{questionId}/regenerate` (`OA:696`), `POST /media/upload` (`OA:762`), toàn bộ nhóm phiên
-  chơi `/games/{gameId}/sessions`, `/sessions/**` (`OA:823`–`OA:1487`), game chia sẻ `/games/shared/**` (`OA:1492`–`OA:1559`),
-  toàn bộ `/admin/**` (`OA:1562`–`OA:2079`). Chi tiết dòng ở `docs/openapi/INDEX.md`.
+  `POST /games/{gameId}/questions/{questionId}/regenerate` (`OA:735`), `POST /media/upload` (`OA:801`), toàn bộ nhóm phiên
+  chơi `/games/{gameId}/sessions`, `/sessions/**` (`OA:862`–`OA:1526`), game chia sẻ `/games/shared/**` (`OA:1531`–`OA:1598`),
+  toàn bộ `/admin/**` (`OA:1601`–`OA:2118`). Chi tiết dòng ở `docs/openapi/INDEX.md`.
 - **`x-status` khớp code:** mọi operation `implemented`/`extended-pending` trong OA đều có controller tương ứng ở bảng trên;
   không operation `planned` nào đã có controller.
 - **Chưa có ở backend:** WebSocket/STOMP (không có `@MessageMapping` trong `C/`), nên chơi thử chạy hoàn toàn ở frontend
@@ -58,8 +57,8 @@ Luồng giáo viên: register → login → understand → generate → get → 
 `T/flow/AbstractTeacherFlowTest.java`, chạy thật qua HTTP (cổng ngẫu nhiên) bởi `T/flow/TeacherFlowVerificationTest.java`
 (AI giả, chạy trên CI, bằng chứng tải lên artifact `verify-flow-evidence`) và `T/flow/TeacherFlowLiveTest.java` (Gemini thật,
 chỉ chạy khi đặt `RUN_LIVE_TEACHER_FLOW=true`). Chạy tay: `node scripts/verify-flow.mjs [--live]`, bằng chứng ở
-`backend/target/verify-evidence/`. Bước curriculum-review tách thành test `@Disabled` `generatedGameHasCurriculumReview`
-(kỳ vọng 200) vì `saveWithGame` chưa được gọi ở main; xem `docs/KNOWN-GAPS.md`.
+`backend/target/verify-evidence/`. Test `generatedGameHasCurriculumReviewThatGoesStaleAfterEdit` kiểm sinh game xong có bản
+đối chiếu (`UNAVAILABLE` vì profile test tắt truy xuất chương trình) và PUT xong thành `STALE`; `verify-flow` AI giả đếm 15 bước.
 Giới hạn: DB trong test là H2 (Flyway tắt), nên chưa kiểm schema Supabase thật.
 
 Cập nhật file này khi thêm/xoá endpoint; số dòng có thể lệch khi file nguồn đổi. `node scripts/verify/check-feature-map.mjs`

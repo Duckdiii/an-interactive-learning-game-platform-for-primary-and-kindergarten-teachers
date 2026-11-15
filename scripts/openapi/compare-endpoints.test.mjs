@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { compare, controllerOperations, normalize, openapiOperations } from "./compare-endpoints.mjs";
+import { compare, controllerOperations, normalize, openapiOperations, strictFailures } from "./compare-endpoints.mjs";
 
 const SPEC = [
   "servers:", "  - url: http://localhost:8080/api", "paths:",
@@ -95,7 +95,33 @@ test("chạy thật: in chênh lệch và luôn thoát 0", () => {
     assert.match(run.stdout, /Có trong code, không có trong openapi\.yaml \(1\):\n  POST \/api\/games\/\{gameId\}\/revise/);
     assert.match(run.stdout, /Có trong openapi\.yaml, không có trong code \(1\):\n  DELETE \/api\/games\/\{gameId\}  \[x-status: planned\]/);
     assert.match(run.stdout, /Không đọc được \(1\)/);
+
+    // --strict (CI): cùng dữ liệu thì đỏ vì endpoint revise thiếu trong spec và một mapping không đọc được.
+    const strict = spawnSync(process.execPath, [script, "--strict", root], { encoding: "utf8" });
+    assert.equal(strict.status, 1);
+    assert.match(strict.stderr, /POST \/api\/games\/\{gameId\}\/revise có trong code/);
+    assert.match(strict.stderr, /không đọc được/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("--strict đạt trên repo thật (CI chạy đúng lệnh này), kể cả khi --strict đứng sau đường dẫn gốc", () => {
+  const script = join(dirname(fileURLToPath(import.meta.url)), "compare-endpoints.mjs");
+  const repo = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+  const run = spawnSync(process.execPath, [script, repo, "--strict"], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr);
+  assert.match(run.stdout, /--strict: openapi\.yaml khớp controller\./);
+});
+
+test("strictFailures: planned chưa có code là bình thường; còn lại đều là lỗi", () => {
+  const op = (method, path, status) => ({ method, path, status, line: 1, file: "C.java" });
+  assert.deepEqual(strictFailures({ onlyCode: [], onlySpec: [op("POST", "/a", "planned")], stalePlanned: [] }, []), []);
+  const failures = strictFailures({
+    onlyCode: [op("GET", "/x")],
+    onlySpec: [op("GET", "/y", "implemented"), op("PUT", "/z", "extended-pending")],
+    stalePlanned: [op("POST", "/w", "planned")],
+  }, [{ file: "C.java", line: 3, text: "@GetMapping(value = X)" }]);
+  assert.equal(failures.length, 5);
+  assert.match(failures.join("\n"), /GET \/x có trong code.*\n.*GET \/y ghi implemented.*\n.*PUT \/z ghi extended-pending.*\n.*POST \/w ghi planned.*\n.*không đọc được/);
 });

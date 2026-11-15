@@ -11,6 +11,7 @@ import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.service.factory.GameDslRequest;
 import com.aigameplatform.backend.service.generation.GameGenerationService;
+import com.aigameplatform.backend.service.generation.GenerationResult;
 import com.aigameplatform.backend.service.generation.Revision;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import com.aigameplatform.backend.service.validation.GameValidationService;
@@ -45,9 +46,10 @@ public class DslGameContentHandler implements GameContentHandler {
 
     @Override
     public GeneratedContent generate(GameType type, String idea, Subject subject, GradeLevel gradeLevel) {
-        GameDsl dsl = generation.generate(type, new GameDslRequest(idea, subject, gradeLevel));
+        GenerationResult result = generation.generateResult(type, new GameDslRequest(idea, subject, gradeLevel));
+        GameDsl dsl = result.game();
         return new GeneratedContent(dsl.metadata().title(), dsl.schemaVersion(), strategies.get(type).parseToQuestions(dsl),
-                PresentationDsl.toEntity(dsl.metadata().presentation()));
+                PresentationDsl.toEntity(dsl.metadata().presentation()), result);
     }
 
     @Override

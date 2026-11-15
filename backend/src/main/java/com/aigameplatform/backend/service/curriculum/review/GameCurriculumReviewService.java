@@ -71,7 +71,7 @@ public class GameCurriculumReviewService {
                 review.getReviewerModel(), curriculumLabel(evidence));
     }
 
-    /** Future game PUT must call this transaction boundary instead of saving directly to GameRepository. */
+    /** PUT /games/{gameId} lưu mọi game qua đây (kể cả game không có bản đối chiếu) để bản đối chiếu nếu có thành STALE. */
     @Transactional
     public Game saveEditedGame(Game edited, String teacherId) {
         requireTeacher(teacherId);

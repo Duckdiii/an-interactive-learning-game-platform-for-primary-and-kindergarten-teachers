@@ -13,7 +13,7 @@ Cập nhật khi: thêm mục `lessons-inbox`, thêm dòng `corrections`, hoặc
 | | Số luật | Tầng 1–2 | Tầng 2 một phần | Tầng 3–4 |
 |---|---|---|---|---|
 | Từ `lessons-inbox` (gộp mục trùng) | 27 | 7 | 6 | 14 |
-| Từ `CLAUDE.md` và `.claude/rules/` | 38 | 16 | 5 | 17 |
+| Từ `CLAUDE.md` và `.claude/rules/` | 38 | 16 | 6 | 16 |
 
 Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, nên các hook có test (`block-node-eval`, `agent-guard` (đã xoá sau), `check-links`, `compare-endpoints`…) vẫn chỉ là tầng 2 "trên giấy". Đã sửa ở PR #49 (mục "Đã làm"). Đề xuất 1–3 ở PR #50 (L8, R4, R11, R13, R24), đề xuất 4 ở PR #52 (R28, R29), đề xuất 5 ở PR #53 (L1), đề xuất 6–7 ở PR sau (L12, xoá `agent-guard`).
 
@@ -71,7 +71,7 @@ Phát hiện lớn nhất: CI chỉ chạy 5 trong 22 file test của script, n�
 | R16 | CLAUDE.md | `gameType` dạng `UPPER_SNAKE_CASE` | 3 (Java ép tên hằng) | `GameDslSchemaTest` bắt giá trị sai trong schema | S: test duyệt `GameType.values()` |
 | R17 | CLAUDE.md | Sửa DSL đồng bộ schema, record Java, TS, doc | 2 một phần | `GameDslSchemaTest` (schema ↔ Java) | M: so khoá field TS với schema |
 | R18 | CLAUDE.md | Sửa `openapi.yaml` thì làm mới INDEX | 2 | `build-index.test.mjs` ở `CI` | Đủ; `redocly lint` chưa ở CI (S, cần `npx` tải gói khi chạy) |
-| R19 | CLAUDE.md | Code khớp contract REST | 4 | `contract-guardian` | B6: `compare-endpoints` ở CI sau việc 8 |
+| R19 | CLAUDE.md | Code khớp contract REST | 2 một phần | `scripts/openapi/compare-endpoints.mjs --strict` ở `CI` (endpoint và `x-status` hai chiều); `contract-guardian` cho field và mã lỗi | Field, kiểu, mã lỗi của từng endpoint chưa có máy kiểm |
 | R20 | CLAUDE.md | Không hardcode secret; không commit `.env`, file build | 2 | gitleaks (hook, CI), `CC` (gồm mật khẩu chữ cố định, B2) | Đủ |
 | R21 | CLAUDE.md | Không thêm dependency khi chưa hỏi | 3 | quy trình | M: CI báo khi `pom.xml`/`package.json` đổi |
 | R22 | CLAUDE.md | Test API ngoài phải mock | 2 một phần | test luồng tắt Gemini/OpenAI (`TeacherFlowVerificationTest.java:20-23`); `*LiveTest` gate bằng biến môi trường | S–M: ArchUnit cho test không dùng model thật |

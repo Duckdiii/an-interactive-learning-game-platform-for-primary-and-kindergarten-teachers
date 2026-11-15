@@ -7,6 +7,7 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.question.QuestionGame;
 import com.aigameplatform.backend.dto.understanding.ChatTurn;
+import com.aigameplatform.backend.service.generation.GenerationResult;
 import java.util.List;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -35,8 +36,15 @@ public interface GameContentHandler {
     /** Dựng {@code GameResponse} theo openapi.yaml từ game đã lưu và ba trường quản lý (gameId, status, updatedAt). */
     ObjectNode toResponse(Game game, ObjectNode management);
 
-    /** Nội dung đã sinh: tên game, phiên bản định dạng, các câu hỏi để lưu và cách trình bày (null nếu không có). */
+    /**
+     * Nội dung đã sinh: tên game, phiên bản định dạng, các câu hỏi để lưu, cách trình bày (null nếu không có) và kết quả
+     * đối chiếu chương trình để lưu cùng game ({@code null} với loại game không qua đối chiếu, như CPF).
+     */
     record GeneratedContent(String title, String schemaVersion, List<QuestionGame> questions,
-            GamePresentation presentation) {
+            GamePresentation presentation, GenerationResult curriculum) {
+
+        public GeneratedContent(String title, String schemaVersion, List<QuestionGame> questions, GamePresentation presentation) {
+            this(title, schemaVersion, questions, presentation, null);
+        }
     }
 }
