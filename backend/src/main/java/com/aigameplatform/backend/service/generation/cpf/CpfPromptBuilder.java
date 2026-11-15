@@ -40,6 +40,10 @@ public class CpfPromptBuilder {
               (ví dụ "hứng cà rốt có phép cộng bằng 12") thì làm đúng như vậy: câu hỏi "Phép cộng nào bằng 12?", nhãn là
               phép tính ("5 + 7"), chỉ đúng MỘT nhãn cho kết quả đó. Đáp án phải đúng tuyệt đối.
             - Các màn không trùng nhau và đáp án đúng phải thay đổi giữa các màn, không để mọi màn cùng một đáp án.
+            - KHÔNG hỏi đếm số lượng vật ("Có bao nhiêu quả cam?", "Đếm xem có mấy con cá?"): CPF không vẽ được nhiều bản
+              của một vật nên trẻ không có gì để đếm. Kể cả khi ý tưởng của giáo viên là đếm, giữ chủ đề vật nhưng hỏi
+              nhận biết chữ số ("Chạm vào số 3" trên nền quả cam), so sánh ("Số nào lớn hơn?"), số liền trước/liền sau,
+              hoặc bài toán ghi rõ số bằng chữ số ("Có 3 quả, thêm 2 quả...").
 
             VẬT (entities, tối đa 10 khai báo)
             - id vật: chữ thường, số, gạch dưới, bắt đầu bằng chữ (ví dụ apples, basket). Không chuỗi nào được rỗng.

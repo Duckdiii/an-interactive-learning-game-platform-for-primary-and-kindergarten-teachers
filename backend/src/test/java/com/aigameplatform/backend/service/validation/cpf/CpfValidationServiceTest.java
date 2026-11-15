@@ -513,6 +513,53 @@ class CpfValidationServiceTest {
         }), "$.answerKey.rounds[0].correctChoiceIds", "không cho kết quả 6");
     }
 
+    // ---- câu hỏi đếm (KNOWN-GAPS #23: game thật hỏi "bao nhiêu quả cam?" mà màn không có quả cam nào) ----
+
+    /** Năm câu hỏi nguyên văn từ game CPF do Gemini thật sinh ở C1 nấc 1 (game 950185e8…), cùng vài biến thể. */
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "Bé đếm xem có bao nhiêu quả cam? Chạm vào số đó nhé!",
+            "Có bao nhiêu quả bóng đang lăn trên sân vậy bé?",
+            "Bé hãy đếm xem có bao nhiêu bông hoa xinh đang nở?",
+            "Bé đếm giúp Mimi xem có mấy chiếc ô tô đang chạy?",
+            "Cuối cùng, bé hãy đếm xem có bao nhiêu viên kẹo ngọt nào?",
+            "CÓ MẤY CON CÁ ĐANG BƠI?",
+            "Có mấy con chim xuất hiện trên cành?"})
+    void rejectsCountingQuestionWhoseAnswersAreNumbers(String prompt) throws IOException {
+        assertOnlyError(mutated(RACE, g -> round(g, 0).put("prompt", prompt)), "$.content.rounds[0].prompt", "đếm vật trên màn");
+    }
+
+    @Test
+    void decomposedUnicodeCountingQuestionIsStillRejected() throws IOException {
+        String nfd = java.text.Normalizer.normalize("Bé đếm xem có bao nhiêu quả cam?", java.text.Normalizer.Form.NFD);
+        assertOnlyError(mutated(RACE, g -> round(g, 1).put("prompt", nfd)), "$.content.rounds[1].prompt", "đếm vật trên màn");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "Lan có 3 quả táo, mẹ cho thêm 2 quả. Lan có bao nhiêu quả?",
+            "3 + 3 bằng mấy?",
+            "Chạm vào số sáu",
+            "Con mèo có mấy chân?",
+            "Một tuần có bao nhiêu ngày?",
+            "Số liền sau của số năm là mấy?",
+            "Lan có ba quả táo, mẹ cho thêm hai quả. Lan có bao nhiêu quả?"})
+    void acceptsQuestionsAnswerableWithoutCountingObjects(String prompt) throws IOException {
+        assertThat(errorsOf(mutated(RACE, g -> round(g, 0).put("prompt", prompt)))).isEmpty();
+    }
+
+    @Test
+    void countingWordsWithNonNumericAnswersAreNotBlocked() throws IOException {
+        // Lựa chọn là chữ, không phải số: không thuộc lỗi "hỏi đếm mà không có gì để đếm".
+        JsonNode json = mutated(RACE, g -> {
+            round(g, 0).put("prompt", "Con vật nào có mấy cái chân dài nhất?");
+            choiceLabel(g, 0, 0, "hươu");
+            choiceLabel(g, 0, 1, "mèo");
+            choiceLabel(g, 0, 2, "gà");
+        });
+        assertThat(errorsOf(json)).extracting(ValidationError::path).doesNotContain("$.content.rounds[0].prompt");
+    }
+
     // ---- khối Đợt 5: chuyển động mới, TAP_MOVE ----
 
     @Test
