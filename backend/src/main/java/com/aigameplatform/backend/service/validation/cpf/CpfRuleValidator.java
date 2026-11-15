@@ -116,6 +116,7 @@ final class CpfRuleValidator extends AbstractGameValidator {
             if ("SORT".equals(task)) {
                 checkPlacements(answer, answerPath, choices, zones, errors);
             } else {
+                checkCountingWithoutObjects(round.path("prompt").asString(), choices.values(), path + ".prompt", errors);
                 checkCorrectChoices(answer, answerPath, task, choices, errors);
                 if (math && "PICK_ONE".equals(task) && answer.path("correctChoiceIds").size() == 1
                         && isComputeQuestion(round.path("prompt").asString(), choices.values())) {
@@ -150,6 +151,34 @@ final class CpfRuleValidator extends AbstractGameValidator {
      */
     private static boolean isComputeQuestion(String prompt, java.util.Collection<String> labels) {
         return ASKS_RESULT.matcher(prompt).find() && labels.stream().allMatch(l -> WHOLE_NUMBER.matcher(l).matches());
+    }
+
+    private static final java.util.regex.Pattern COUNT_VERB = java.util.regex.Pattern.compile("(?iu)(?<!\\p{L})đếm(?!\\p{L})");
+    private static final java.util.regex.Pattern ASKS_QUANTITY =
+            java.util.regex.Pattern.compile("(?iu)(?<!\\p{L})(bao nhiêu|mấy)(?!\\p{L})");
+    /** Từ chỉ vào màn chơi ("đang bơi", "xuất hiện"): câu hỏi về thứ đang thấy, không phải câu kiến thức. */
+    private static final java.util.regex.Pattern POINTS_AT_SCENE = java.util.regex.Pattern.compile(
+            "(?iu)(?<!\\p{L})(đang|xuất hiện|ở đây|trên màn|trong hình|nhìn thấy|thấy có)(?!\\p{L})");
+    private static final java.util.regex.Pattern ANY_DIGIT = java.util.regex.Pattern.compile("\\d");
+
+    /**
+     * CPF không vẽ được N bản của một vật (mỗi vật là một, hoặc một vật cho mỗi lựa chọn/nhóm), nên câu "có bao nhiêu
+     * quả cam đang…?" với đáp án là số thì trẻ không có gì để đếm, chỉ đoán được (KNOWN-GAPS #23). Chỉ chặn câu bảo đếm
+     * ("đếm") hoặc hỏi số lượng của thứ đang thấy trên màn; bỏ qua câu có chữ số (bài toán có lời văn, phép tính) và câu
+     * kiến thức ("Con mèo có mấy chân?", "Một tuần có bao nhiêu ngày?") vì trả lời được không cần đếm vật.
+     * shortcut: nhận diện theo từ khoá nên câu đếm viết khác ("nhìn tranh xem…") hay nhãn "3 quả" vẫn lọt; khi gặp ca
+     * thật thì thêm từ khoá và test.
+     */
+    private static void checkCountingWithoutObjects(String prompt, java.util.Collection<String> labels, String path,
+            List<ValidationError> errors) {
+        String text = Normalizer.normalize(prompt, Normalizer.Form.NFC);
+        if (labels.isEmpty() || ANY_DIGIT.matcher(text).find()) return;
+        boolean counting = COUNT_VERB.matcher(text).find()
+                || (ASKS_QUANTITY.matcher(text).find() && POINTS_AT_SCENE.matcher(text).find());
+        if (!counting || !labels.stream().allMatch(l -> WHOLE_NUMBER.matcher(l).matches())) return;
+        errors.add(new ValidationError(path, "Màn bảo trẻ đếm vật trên màn, nhưng game tự do không vẽ được nhiều bản của một"
+                + " vật nên trẻ không có gì để đếm. Viết lại câu hỏi của màn này, giữ chủ đề: nhận biết chữ số (\"Chạm vào số 3\"),"
+                + " so sánh (\"Số nào lớn hơn?\"), số liền trước/liền sau, hoặc bài toán ghi rõ số bằng chữ số (\"Có 3 quả, thêm 2 quả...\")"));
     }
 
     /** id → nhãn; báo id trùng và nhãn trùng trong cùng danh sách. */

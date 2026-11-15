@@ -155,6 +155,12 @@ JSON khớp schema ở trên.
    - Vật `bindTo` không dùng `arrangement: SINGLE` (nhiều vật không được chồng một chỗ).
 6. Toán: với môn `MATH`, màn `PICK_ONE` hỏi kết quả một phép tính (câu kết thúc bằng `= ?`) và mọi nhãn là số nguyên, code tự tính lại và đối chiếu đáp án bằng `QuizArithmeticAnswerVerifier` (`service/validation/rule`). Câu đúng/sai, so sánh, nhãn kèm đơn vị không kiểm được bằng máy nên bỏ qua (không chặn nhầm).
 7. Ngân sách: số vật hiển thị cùng lúc (sau khi nhân `bindTo`) ≤ 15; `assetId` có trong danh mục asset.
+8. Không hỏi đếm số lượng vật: CPF không vẽ được N bản của một vật (mỗi vật là một, hoặc một vật cho mỗi lựa chọn hay nhóm). Màn `PICK_ONE`/`PICK_ALL` báo lỗi ở `prompt` khi thoả cả ba điều kiện. Thứ nhất, câu bảo đếm (`đếm`) hoặc hỏi số lượng (`bao nhiêu`, `mấy`) của thứ đang thấy trên màn (`đang`, `xuất hiện`, `ở đây`, `trên màn`, `trong hình`, `nhìn thấy`, `thấy có`). Thứ hai, câu không có chữ số nào. Thứ ba, mọi nhãn là số nguyên trần. Lý do: trẻ không có gì để đếm. Câu sau không bị chặn vì trả lời được mà không cần đếm vật:
+   - câu có chữ số (bài toán có lời văn, phép tính);
+   - câu kiến thức ("Con mèo có mấy chân?");
+   - số viết bằng chữ ("Số liền sau của số năm là mấy?").
+
+   Giới hạn: nhận diện theo từ khoá, nên câu đếm diễn đạt khác hoặc nhãn kèm đơn vị ("3 quả") vẫn lọt. Prompt sinh CPF cũng dặn AI không ra câu đếm, và khi ý tưởng là đếm thì giữ chủ đề nhưng hỏi nhận biết chữ số.
 
 ### 4.3 Lớp 3: an toàn
 Như DSL v1.0.0: gom `title`, `topic`, `instruction`, `prompt`, `label` (không gom `assetId`, `id`), đối chiếu danh sách từ cấm rồi OpenAI Moderation.

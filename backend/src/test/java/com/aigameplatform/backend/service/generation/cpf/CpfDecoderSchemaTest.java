@@ -49,6 +49,16 @@ class CpfDecoderSchemaTest {
     }
 
     @Test
+    void systemPromptForbidsCountingQuestionsCpfCannotDraw() {
+        // KNOWN-GAPS #23: CPF không vẽ được N bản của một vật; Layer 2 chặn câu đếm, prompt báo trước để AI khỏi tốn lượt sinh lại.
+        var prompts = new CpfPromptBuilder(new CpfAssetCatalog(MAPPER));
+
+        String system = prompts.systemPrompt(new CpfGenerationAttempt("Đếm đồ vật từ 1 đến 5", Subject.MATH, GradeLevel.KINDERGARTEN, 1, null, List.of()));
+
+        assertThat(system).contains("KHÔNG hỏi đếm số lượng vật", "Chạm vào số 3");
+    }
+
+    @Test
     void overlongIdeaIsCutToTheContractLimit() {
         var prompts = new CpfPromptBuilder(new CpfAssetCatalog(MAPPER));
         String idea = "a".repeat(5000);
