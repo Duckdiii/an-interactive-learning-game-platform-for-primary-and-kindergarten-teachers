@@ -63,8 +63,21 @@ Giá trị thấp hoặc khó test bằng unit test (để nguyên):
 
 Lần chạy đầu có 1 `RUN_ERROR` ở `OddOneOutRule`: một tiến trình con của PIT thoát bất thường. Lần hai mutant này bị giết, nên đó là trục trặc của lần chạy, không phải lỗ hổng của test.
 
+## Sau khi lấp mutant sống (2026-11-15)
+
+Test mới:
+- `service/validation/rule/QuizArithmeticAnswerVerifierTest`: phép chia (`÷`, `/`, `chia`), chia không hết, chia cho 0, lựa chọn không phải số hay số quá lớn để đọc, nhãn null ở dạng ngược, nhãn phép chia ở dạng ngược.
+- `BusinessRuleGameValidatorTest`:
+  - id trùng của `steps` (Ordering) và của `dropZones` (DragDrop);
+  - id OddOneOut đổi chỗ (`b`, `a`);
+  - vế Matching chỉ có hình, gồm hình khác nhau thì hợp lệ và cùng hình thì trùng;
+  - bước Ordering chỉ có hình.
+
+Kết quả PIT sau khi thêm test: 294 mutant, 286 bị giết (97%), 2 không có test chạy tới, test strength 98%. Mọi lớp luật Layer 2 đạt 100%. `QuizArithmeticAnswerVerifier` đạt 40/41; mutant còn lại ở `calculate:122` (nhánh tràn số) không thể xảy ra, vì hai số tối đa 6 chữ số không làm tràn `long`, nên đó là mutant tương đương. Còn sống: 6 mutant giá trị thấp nêu ở trên (`OpenAiModerationClient`, `AiOutputSchemas`, `AiOutputValidator.validate:91`).
+
+Bài học từ chính lần lấp này: bản đầu của test OddOneOut đổi id thành `"x"` và xanh, nhưng xanh vì schema (Layer 1) chặn `"x"` ở cùng đường dẫn, không phải vì luật Layer 2. PIT vẫn báo mutant sống nên mới phát hiện; đã đổi sang đổi chỗ hai id hợp lệ.
+
 ## Bước tiếp
 
-1. Viết test lấp các mutant sống thật ở trên (đúng việc của `test-writer`), rồi chạy lại PIT.
-2. Khi điểm ổn định, cân nhắc thêm `mutationThreshold` và một job CI chạy PIT cho riêng các module này (job chậm hơn, cần người dùng chốt).
-3. Stryker cho frontend chưa làm (chưa được duyệt).
+1. Khi điểm ổn định, cân nhắc thêm `mutationThreshold` và một job CI chạy PIT cho riêng các module này (job chậm hơn, cần người dùng chốt).
+2. Stryker cho frontend chưa làm (chưa được duyệt).
