@@ -85,7 +85,7 @@ function pickReplacement(request: MockRegenerateRequest): QuestionDsl {
     const constraints = parsePedagogicalConstraints(request.feedback)
     const hasMathIntent =
       constraints.mathType !== 'COUNT' ||
-      /cộng|trừ|nhân|chia|toán|số|phép|chẵn|lẻ|so sánh|bé|lớn|\+|\-|\*|\/|x/i.test(request.feedback)
+      /cộng|trừ|nhân|chia|toán|số|phép|chẵn|lẻ|so sánh|bé|lớn|\+|-|\*|\/|x/i.test(request.feedback)
 
     if (hasMathIntent) {
       const [mq] = generateMathQuestions(constraints, 1)
