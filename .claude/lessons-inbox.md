@@ -281,6 +281,13 @@ Mẫu một mục:
 - Cách chặn: trước khi gỡ một người chặn (agent, hook, bước CI), chạy thứ thay thế với một ca vi phạm thật cho từng luật nó đang giữ; đã đẩy luật secret chữ cố định lên `check-config.mjs` (tầng 2).
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-15 — Lặp lần nữa: ghi test có `\` qua heredoc, kể cả heredoc có nháy cũng mất một lớp
+- Lỗi: khi làm đề xuất 5 (sửa chính hook chặn lỗi này), tôi nối các test mới vào file bằng `cat >> … <<'EOF'`. File ra mất một lớp `\` (`\\\\d` thành `\\d`, `\\n` thành `\n`, `\\'` thành `\'`), làm đổi nghĩa vài test.
+- Phát hiện nhờ: thông báo "file changed on disk" kèm nội dung, rồi tự Read lại.
+- Nguyên nhân gốc: tin rằng heredoc có nháy giữ nguyên nội dung. Đo lại thì công cụ Bash gộp `\\` thành `\` ngay trong chuỗi lệnh, trước bash và trước hook, kể cả trong nháy đơn (`printf '%s\n' 'x\\y'` ra `x\y`). Các bài học cũ chỉ đổ cho `node -e` và heredoc không nháy nên chưa chạm nguyên nhân này.
+- Cách chặn: nội dung có `\` (code, regex, test) thì luôn ghi bằng Write/Edit; Bash chỉ để chạy lệnh. Hook không thấy được ý định nên không chặn bằng máy được (KNOWN-GAPS #20); hook đã chặn thêm hai dạng mất `\` ở tầng bash ($'...', heredoc không nháy).
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
 
 ### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau
