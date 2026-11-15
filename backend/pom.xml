@@ -33,6 +33,8 @@
 		<springdoc.version>3.1.1</springdoc.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<archunit.version>1.5.1</archunit.version>
+		<pitest.version>1.30.2</pitest.version>
+		<pitest-junit5.version>1.2.3</pitest-junit5.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -276,6 +278,37 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- Mutation testing (PIT): đo test có bắt được lỗi cố ý chèn vào code không. Không gắn vào phase nào nên
+				`mvn test`/CI không chạy; chạy tay: `./mvnw test-compile org.pitest:pitest-maven:mutationCoverage`,
+				báo cáo ở target/pit-reports/index.html. Phạm vi: các module kiểm duyệt game (Layer 2, đầu ra AI, Layer 3). -->
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>${pitest.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-junit5-plugin</artifactId>
+						<version>${pitest-junit5.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<targetClasses>
+						<param>com.aigameplatform.backend.service.validation.rule.*</param>
+						<param>com.aigameplatform.backend.service.validation.ai.*</param>
+						<param>com.aigameplatform.backend.service.validation.safety.*</param>
+					</targetClasses>
+					<targetTests>
+						<param>com.aigameplatform.backend.service.validation.*</param>
+					</targetTests>
+					<outputFormats>
+						<param>HTML</param>
+						<param>XML</param>
+					</outputFormats>
+					<timestampedReports>false</timestampedReports>
+					<threads>4</threads>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
