@@ -83,15 +83,16 @@ export function checkRows(rows, { legacyMaxStt = LEGACY_MAX_STT, legacyRows = LE
 // Chỉ lấy SHA trước phần chú thích trong ngoặc, để chữ trong chú thích không bị hiểu nhầm là SHA.
 const shaHexes = (cell) => cell.replace(/\(.*\)$/, "").match(/[0-9a-f]{7,40}/g) ?? [];
 
-/** Trả về hàm "SHA này không có trong git?", hoặc null nếu repo là clone nông (thiếu lịch sử thì không kết luận được). */
+/**
+ * Trả về hàm "SHA này không nằm trong lịch sử của HEAD?", hoặc null nếu repo là clone nông (thiếu lịch sử thì không kết
+ * luận được). Không dùng `git cat-file`: sau rebase, commit cũ vẫn còn trong kho cục bộ dạng treo nên máy dev báo "có",
+ * trong khi bản clone mới của CI không có (lỗi thật 2026-11-15). Dòng log luôn ghi sau commit nội dung nên SHA phải là tổ tiên của HEAD.
+ */
 export function gitShaMissing(root, rows) {
-  const git = (args, input) => execFileSync("git", args, { cwd: root, encoding: "utf8", input });
+  const git = (args) => execFileSync("git", args, { cwd: root, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
   if (git(["rev-parse", "--is-shallow-repository"]).trim() === "true") return null;
-  const shas = [...new Set(rows.flatMap(({ line }) => shaHexes(splitCells(line)[7] ?? "")))];
-  if (!shas.length) return () => false;
-  const out = git(["cat-file", "--batch-check"], shas.map((s) => `${s}^{commit}`).join("\n") + "\n").trim().split("\n");
-  const missing = new Set(shas.filter((_, i) => / missing$| ambiguous$/.test(out[i])));
-  return (sha) => missing.has(sha);
+  const reachable = git(["rev-list", "HEAD"]).split("\n").filter(Boolean);
+  return (sha) => !reachable.some((full) => full.startsWith(sha));
 }
 
 /** Đọc archive (theo STT tăng dần) rồi file gốc. */

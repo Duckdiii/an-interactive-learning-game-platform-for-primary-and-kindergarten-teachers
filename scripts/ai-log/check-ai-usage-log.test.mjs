@@ -58,17 +58,25 @@ test("SHA đúng định dạng nhưng không có trong git là lỗi (A1: log-a
   assert.deepEqual(check(row({ sha: "`deadbee`" })).errors, [], "không truyền shaMissing thì không kiểm (ví dụ clone nông)");
 });
 
-test("gitShaMissing đọc đúng output của git cat-file trên repo thật, bỏ qua chữ trong ngoặc", () => {
+test("gitShaMissing: SHA phải nằm trong lịch sử HEAD; commit treo sau rebase/reset bị coi là thiếu (lỗi thật 2026-11-15)", () => {
   const dir = mkdtempSync(join(tmpdir(), "ailog-"));
   try {
     const git = (...args) => execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", ...args], { cwd: dir, encoding: "utf8" });
     git("init", "-q");
-    git("commit", "-q", "--allow-empty", "-m", "x");
-    const real = git("rev-parse", "--short", "HEAD").trim();
-    const missing = gitShaMissing(dir, [{ line: row({ sha: `\`${real}\`, \`deadbee\` (xem abcdef0)` }) }]);
-    assert.equal(missing(real), false);
+    git("commit", "-q", "--allow-empty", "-m", "a");
+    const kept = git("rev-parse", "--short", "HEAD").trim();
+    git("commit", "-q", "--allow-empty", "-m", "b");
+    const orphan = git("rev-parse", "--short", "HEAD").trim();
+    git("reset", "-q", "--hard", "HEAD~1"); // b vẫn còn trong kho object (cat-file thấy) nhưng không còn trên lịch sử
+    assert.equal(git("cat-file", "-t", orphan).trim(), "commit");
+    const missing = gitShaMissing(dir, []);
+    assert.equal(missing(kept), false);
+    assert.equal(missing(orphan), true);
     assert.equal(missing("deadbee"), true);
-    assert.equal(missing("abcdef0"), false, "SHA trong chú thích ngoặc không được đưa đi kiểm");
+    // Chữ trong ngoặc ở cuối ô không bị đưa đi kiểm (checkRows tách SHA trước khi hỏi gitShaMissing).
+    const r = checkRows([{ source: "t", line: row({ sha: `\`${kept}\` (xem abcdef0)` }) }],
+      { legacyMaxStt: 0, legacyRows: new Set(), shaMissing: missing });
+    assert.deepEqual(r.errors, []);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
