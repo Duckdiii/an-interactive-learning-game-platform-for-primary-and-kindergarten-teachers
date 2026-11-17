@@ -262,7 +262,9 @@ describe('form sửa câu MEMORY_CARD', () => {
     await openLoaded()
     fireEvent.click(screen.getByRole('button', { name: 'Chơi thử' }))
 
-    expect(await screen.findByText(/chưa hỗ trợ chơi thử/, {}, { timeout: 10_000 })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Loại game này chưa hỗ trợ chơi thử' }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
   })
 })
 

@@ -1,0 +1,15 @@
+# Profile triển khai thật: mọi giá trị hướng ra người dùng phải đến từ biến môi trường,
+# không có mặc định localhost. Thiếu biến nào thì Spring Boot dừng khởi động
+# (Could not resolve placeholder) thay vì lặng lẽ phát link http://localhost:5173/play/...
+# cho phụ huynh hoặc chặn nhầm origin của trình duyệt.
+#
+# Kích hoạt bằng SPRING_PROFILES_ACTIVE=prod.
+app:
+  cors:
+    # Danh sách origin được phép gọi API, ngăn cách bằng dấu phẩy.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  player:
+    # Origin của trang chơi (dùng khi SceneImageLoader kiểm tra ảnh cảnh).
+    browser-origin: ${PLAYER_ORIGIN}
+    # Gốc của link chia sẻ, ví dụ https://play.truong.example/play
+    share-base-url: ${PLAYER_SHARE_BASE_URL}

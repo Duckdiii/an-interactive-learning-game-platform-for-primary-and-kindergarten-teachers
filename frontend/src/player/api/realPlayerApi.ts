@@ -3,10 +3,16 @@ import type { ApiSuccessResponse } from '../../types/api'
 import type { AnswerPayload, AnswerResult, PlayerSession, PublishInfo, StudentGame } from '../../types/game-student.types'
 import type { PlayerApi } from './PlayerApi'
 
+// Mạng lớp học hay "rơi gói" (kết nối không bị từ chối mà cũng không trả lời). Không có timeout thì
+// bé ngồi nhìn spinner ở /play/:shareCode vô hạn, không hiện được màn hình lỗi + nút "Thử lại".
+// Cùng mức với lệnh đọc danh sách game của giáo viên (`GAMES_REQUEST_TIMEOUT_MS`).
+export const PLAYER_REQUEST_TIMEOUT_MS = 10_000
+
 export class RealPlayerApi implements PlayerApi {
   async getPublishInfo(shareCode: string): Promise<PublishInfo> {
     const response = await axiosInstance.get<ApiSuccessResponse<PublishInfo>>(
       `/games/shared/${encodeURIComponent(shareCode)}`,
+      { timeout: PLAYER_REQUEST_TIMEOUT_MS },
     )
 
     return response.data.data
@@ -16,6 +22,7 @@ export class RealPlayerApi implements PlayerApi {
     const response = await axiosInstance.post<ApiSuccessResponse<PlayerSession>>(
       `/games/shared/${encodeURIComponent(shareCode)}/play`,
       { nickname },
+      { timeout: PLAYER_REQUEST_TIMEOUT_MS },
     )
 
     return response.data.data
@@ -24,7 +31,7 @@ export class RealPlayerApi implements PlayerApi {
   async getGameForStudent(sessionId: string): Promise<StudentGame> {
     const response = await axiosInstance.get<ApiSuccessResponse<StudentGame>>(
       `/sessions/${encodeURIComponent(sessionId)}/questions`,
-      { headers: { 'X-Participant-Id': this.participantId(sessionId) } },
+      { headers: { 'X-Participant-Id': this.participantId(sessionId) }, timeout: PLAYER_REQUEST_TIMEOUT_MS },
     )
 
     return response.data.data
@@ -34,7 +41,7 @@ export class RealPlayerApi implements PlayerApi {
     const response = await axiosInstance.post<ApiSuccessResponse<AnswerResult>>(
       `/sessions/${encodeURIComponent(sessionId)}/interactions`,
       { questionId, timeSpentMs, ...answer },
-      { headers: { 'X-Participant-Id': this.participantId(sessionId) } },
+      { headers: { 'X-Participant-Id': this.participantId(sessionId) }, timeout: PLAYER_REQUEST_TIMEOUT_MS },
     )
 
     return response.data.data

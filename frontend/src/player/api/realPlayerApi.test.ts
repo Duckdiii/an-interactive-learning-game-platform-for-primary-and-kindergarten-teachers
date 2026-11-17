@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const calls = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }))
 vi.mock('../../api/axiosInstance', () => ({ default: { get: calls.get, post: calls.post } }))
 
-import { RealPlayerApi } from './realPlayerApi'
+import { PLAYER_REQUEST_TIMEOUT_MS, RealPlayerApi } from './realPlayerApi'
 
 describe('RealPlayerApi', () => {
   beforeEach(() => {
@@ -20,8 +20,8 @@ describe('RealPlayerApi', () => {
 
     await expect(api.getPublishInfo('ab c')).resolves.toEqual({ gameTitle: 'Animals' })
     await expect(api.createSession('abc123', 'Mia')).resolves.toEqual({ sessionId: 'session-1' })
-    expect(calls.get).toHaveBeenCalledWith('/games/shared/ab%20c')
-    expect(calls.post).toHaveBeenCalledWith('/games/shared/abc123/play', { nickname: 'Mia' })
+    expect(calls.get).toHaveBeenCalledWith('/games/shared/ab%20c', { timeout: PLAYER_REQUEST_TIMEOUT_MS })
+    expect(calls.post).toHaveBeenCalledWith('/games/shared/abc123/play', { nickname: 'Mia' }, { timeout: PLAYER_REQUEST_TIMEOUT_MS })
   })
 
   it('sends the stored participant id with question and placement requests', async () => {
@@ -33,9 +33,13 @@ describe('RealPlayerApi', () => {
     await expect(api.submitInteraction('session-1', 'q1', {
       placements: [{ blankId: 'x1', optionId: 'x2' }],
     })).resolves.toEqual({ status: 'CORRECT' })
-    expect(calls.get).toHaveBeenCalledWith('/sessions/session-1/questions', { headers: { 'X-Participant-Id': 'participant-1' } })
+    expect(calls.get).toHaveBeenCalledWith('/sessions/session-1/questions', { headers: { 'X-Participant-Id': 'participant-1' }, timeout: PLAYER_REQUEST_TIMEOUT_MS })
     expect(calls.post).toHaveBeenCalledWith('/sessions/session-1/interactions', {
       questionId: 'q1', timeSpentMs: 0, placements: [{ blankId: 'x1', optionId: 'x2' }],
-    }, { headers: { 'X-Participant-Id': 'participant-1' } })
+    }, { headers: { 'X-Participant-Id': 'participant-1' }, timeout: PLAYER_REQUEST_TIMEOUT_MS })
+  })
+
+  it('dùng chung một mức timeout 10 giây cho mọi lệnh của học sinh', () => {
+    expect(PLAYER_REQUEST_TIMEOUT_MS).toBe(10_000)
   })
 })
