@@ -52,8 +52,10 @@ public class GamePublicationService {
             GameContentStrategyRegistry strategies, SceneImageLoader imageLoader,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<GeneratedContentReviewer> reviewerProvider,
             JsonMapper mapper, @Value("${app.curriculum-rag.enabled:false}") boolean curriculumRagEnabled,
-            @Value("${app.player.browser-origin:http://localhost:5173}") String browserOrigin,
-            @Value("${app.player.share-base-url:http://localhost:5173/play}") String shareBaseUrl) {
+            // Không đặt mặc định localhost ở đây: application.yml giữ giá trị dev, application-prod.yml
+            // bắt buộc env thật để không phát cho phụ huynh link http://localhost:5173/play/... .
+            @Value("${app.player.browser-origin}") String browserOrigin,
+            @Value("${app.player.share-base-url}") String shareBaseUrl) {
         this.games = games;
         this.validation = validation;
         this.strategies = strategies;

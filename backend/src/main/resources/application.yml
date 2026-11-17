@@ -48,9 +48,13 @@ springdoc:
 
 app:
   cors:
-    allowed-origins: http://localhost:5173
+    # Nhiều origin thì ngăn bằng dấu phẩy. Profile prod bắt buộc CORS_ALLOWED_ORIGINS (application-prod.yml).
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   player:
+    # Origin của trình duyệt, dùng để tải ảnh cảnh (SceneImageLoader) và dựng link chia sẻ gửi phụ huynh.
+    # Profile prod bắt buộc PLAYER_ORIGIN + PLAYER_SHARE_BASE_URL, không có mặc định localhost.
     browser-origin: ${PLAYER_ORIGIN:http://localhost:5173}
+    share-base-url: ${PLAYER_SHARE_BASE_URL:http://localhost:5173/play}
   jwt:
     # HS256 signing key, at least 32 bytes. Provide it via the JWT_SECRET environment variable.
     secret: ${JWT_SECRET}
