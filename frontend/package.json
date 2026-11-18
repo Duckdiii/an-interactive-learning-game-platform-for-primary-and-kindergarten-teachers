@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.5.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.103.2",
     "axios": "^1.20.0",
@@ -22,6 +23,7 @@
     "react-dom": "^19.2.8",
     "react-konva": "^19.3.0",
     "react-router-dom": "^7.18.4",
+    "sockjs-client": "^1.6.1",
     "tailwindcss": "^4.3.3",
     "use-image": "^1.1.4"
   },
@@ -35,6 +37,7 @@
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
+    "@types/sockjs-client": "^1.5.4",
     "@vitejs/plugin-react": "^6.1.1",
     "jsdom": "^29.1.1",
     "oxlint": "^1.81.0",

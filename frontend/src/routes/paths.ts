@@ -14,10 +14,14 @@ export const ROUTES = {
   present: '/present/:gameId',
   // Mở phòng thi đấu từ một game; `/rooms/:sessionId` để dành cho phòng đã có phiên ở Backend.
   roomHost: '/rooms/host/:gameId',
+  // Màn hình trình chiếu Live Arena lớn trên máy chiếu / tivi
+  liveArenaPresentation: '/presentation/:sessionId',
 } as const
 
 export const presentPath = (gameId: string) => `/present/${encodeURIComponent(gameId)}`
 export const roomHostPath = (gameId: string) => `/rooms/host/${encodeURIComponent(gameId)}`
 export const roomJoinPath = (pin: string) => `/join/${encodeURIComponent(pin)}`
+export const liveArenaPresentationPath = (sessionId: string) =>
+  `/presentation/${encodeURIComponent(sessionId)}`
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
