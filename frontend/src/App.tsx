@@ -19,6 +19,7 @@ const JoinPage = lazy(() => import('./player/pages/JoinPage'))
 const PresentPage = lazy(() => import('./player/pages/PresentPage'))
 const RoomHostPage = lazy(() => import('./player/pages/RoomHostPage'))
 const RoomJoinPage = lazy(() => import('./player/pages/RoomJoinPage'))
+const PresentationScreen = lazy(() => import('./player/presentation/PresentationScreen'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
 const UiKit = lazy(() => import('./pages/dev/UiKit'))
@@ -72,6 +73,14 @@ function App() {
           element={
             <ProtectedRoute>
               <RoomHostPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.liveArenaPresentation}
+          element={
+            <ProtectedRoute>
+              <PresentationScreen />
             </ProtectedRoute>
           }
         />
