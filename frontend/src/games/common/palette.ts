@@ -92,6 +92,14 @@ export const DEFAULT_PALETTE: Palette = {
   streakInk: '#14532D',
 }
 
+/** Bảng màu chuyên biệt cho game Sắp xếp thứ tự (Ordering) theo yêu cầu thiết kế ô vị trí và bước đã khoá */
+export const ORDERING_SLOT_FILL = '#F3E5F5'
+export const ORDERING_SLOT_STROKE = '#7B1FA2'
+export const ORDERING_SLOT_INK = '#7B1FA2'
+export const ORDERING_SLOT_EMPTY_INK = '#9C27B0'
+export const ORDERING_STEP_LOCKED_FILL = '#E8F5E9'
+export const ORDERING_STEP_LOCKED_STROKE = '#2E7D32'
+
 /** `fooBar` -> `foo-bar`, cho tên biến CSS. */
 const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
 

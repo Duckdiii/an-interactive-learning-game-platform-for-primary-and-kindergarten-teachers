@@ -3,6 +3,7 @@
 !.env.example
 !.env.*.example
 application-local.yml
+.git-worktrees/
 
 # === Node / Frontend ===
 node_modules/
