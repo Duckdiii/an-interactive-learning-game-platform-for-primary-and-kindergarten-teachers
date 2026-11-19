@@ -1,11 +1,31 @@
 import { postMedia } from '../api/mediaApi'
 import type { UploadedMedia, UploadOptions } from '../api/mediaApi'
+import axiosInstance from '../api/axiosInstance'
 import { isMock } from '../config/mockMode'
 import type { MediaKind } from '../utils/mediaFile'
 import { mockSuggestImages, mockSynthesizeSpeech, mockUploadMedia } from './mock/mockMedia'
 import type { ImageSuggestion, SynthesizedSpeech, VoiceGender } from './mock/mockMedia'
 
 export type { ImageSuggestion, SynthesizedSpeech, VoiceGender }
+
+export interface PexelsImage {
+  id: number
+  url: string
+  thumbnailUrl: string
+  alt?: string
+  photographer?: string
+}
+
+/** Tìm kiếm ảnh Pexels qua backend proxy bảo vệ API key */
+export async function searchPexelsImages(query: string, perPage = 12, signal?: AbortSignal): Promise<PexelsImage[]> {
+  const trimmed = query.trim()
+  if (!trimmed) return []
+  const res = await axiosInstance.get<{ success: boolean; data: { images: PexelsImage[] } }>('/media/pexels-search', {
+    params: { query: trimmed, perPage },
+    signal,
+  })
+  return res.data?.data?.images ?? []
+}
 
 /** Tải ảnh hoặc âm thanh của giáo viên lên (UC-05 1a). Nhóm `media` đang mô phỏng thì dùng dịch vụ giả lập; ngược lại gọi POST /media/upload. */
 export function uploadMedia(file: File, kind: MediaKind, options: UploadOptions = {}): Promise<UploadedMedia> {

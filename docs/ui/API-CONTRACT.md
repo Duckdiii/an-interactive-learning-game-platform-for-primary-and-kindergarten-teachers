@@ -380,6 +380,35 @@ Frontend không thể tự làm kiểm thử 30 máy; cần Backend cung cấp m
 
 Phía Frontend khi cài `RealPlayerApi`: dùng một axios instance **riêng cho học sinh** (không có interceptor đính token và làm mới token của giáo viên, chỉ gắn `X-Participant-Id`), vì `axiosInstance` hiện tại sẽ đính token giáo viên nếu máy dùng chung còn đăng nhập và đẩy học sinh sang trang đăng nhập khi gặp 401.
 
+### 2.14 Tìm kiếm ảnh Pexels qua Backend Proxy (Workspace Editor WYSIWYG)
+
+**Vấn đề:** Giáo viên khi tinh chỉnh câu hỏi ở màn hình Workspace Editor cần đổi ảnh minh họa từ kho ảnh Pexels nếu ảnh AI sinh chưa ưng ý. Nếu Frontend gọi trực tiếp tới Pexels API sẽ làm lộ `PEXELS_API_KEY` ra Network tab của trình duyệt.
+
+**Giải pháp:** Backend cung cấp proxy endpoint bảo vệ API key:
+* **Endpoint:** `GET /media/pexels-search` (hoặc `/api/media/pexels-search`)
+* **Xác thực:** Yêu cầu giáo viên đã đăng nhập (`Authorization: Bearer <token>`).
+* **Tham số query:**
+  - `query`: chuỗi từ khóa tìm kiếm (ví dụ: `con mèo`, `hình tròn`).
+  - `perPage`: số lượng ảnh tối đa cần lấy (mặc định: `12`).
+* **Response format:**
+```json
+{
+  "success": true,
+  "data": {
+    "images": [
+      {
+        "id": 12345,
+        "url": "https://images.pexels.com/photos/12345/pexels-photo-12345.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "thumbnailUrl": "https://images.pexels.com/photos/12345/pexels-photo-12345.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=280",
+        "alt": "Con mèo dễ thương",
+        "photographer": "Pexels Artist"
+      }
+    ]
+  }
+}
+```
+* **Khả năng chịu lỗi:** Khi chưa cấu hình key `PEXELS_API_KEY` hoặc mạng Pexels lỗi, backend tự động fallback trả về danh sách ảnh mock chất lượng cao để không bao giờ làm gián đoạn trải nghiệm của giáo viên và giữ CI luôn xanh.
+
 ## 3. Tóm tắt những gì Frontend KHÔNG yêu cầu Backend
 
 - Huy hiệu, kỷ lục cá nhân, hình đại diện ở Hs-Nickname/Hs-Result: **không có trong contract**; Frontend chỉ lưu cục bộ trên máy (`localStorage`) hoặc bỏ (PLAN Q6). Không tạo tài khoản học sinh.
