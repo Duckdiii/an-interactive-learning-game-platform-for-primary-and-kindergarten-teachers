@@ -17,8 +17,11 @@ import com.aigameplatform.backend.service.generation.GameGenerationService;
 import com.aigameplatform.backend.service.generation.GenerationResult;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
+import com.aigameplatform.backend.entity.question.QuestionGame;
+import com.aigameplatform.backend.service.media.GameAudioEnricher;
 import java.security.SecureRandom;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +36,27 @@ public class GameApplicationService {
     private final GameContentStrategyRegistry strategies;
     private final ObjectProvider<CurriculumCatalog> curriculumCatalog;
     private final JsonMapper mapper;
+    private final ObjectProvider<GameAudioEnricher> audioEnrichers;
     private final SecureRandom random = new SecureRandom();
 
+    @Autowired
     public GameApplicationService(GameGenerationService generation, TeacherRepository teachers,
             GameCurriculumReviewService curriculumReviews, GameContentStrategyRegistry strategies,
-            ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper) {
+            ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper,
+            ObjectProvider<GameAudioEnricher> audioEnrichers) {
         this.generation = generation;
         this.teachers = teachers;
         this.curriculumReviews = curriculumReviews;
         this.strategies = strategies;
         this.curriculumCatalog = curriculumCatalog;
         this.mapper = mapper;
+        this.audioEnrichers = audioEnrichers;
+    }
+
+    public GameApplicationService(GameGenerationService generation, TeacherRepository teachers,
+            GameCurriculumReviewService curriculumReviews, GameContentStrategyRegistry strategies,
+            ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper) {
+        this(generation, teachers, curriculumReviews, strategies, curriculumCatalog, mapper, null);
     }
 
     @Transactional
@@ -88,7 +101,12 @@ public class GameApplicationService {
         game.setQuestionNum(dsl.questions().size());
         game.setStatus(GameStatus.DRAFT);
         game.setAuthor(teacher);
-        game.setQuestions(strategies.get(dsl.gameType()).parseToQuestions(dsl));
+        List<QuestionGame> parsedQuestions = strategies.get(dsl.gameType()).parseToQuestions(dsl);
+        GameAudioEnricher enricher = audioEnrichers != null ? audioEnrichers.getIfAvailable() : null;
+        if (enricher != null) {
+            enricher.enrichAllQuestionsWithAudio(parsedQuestions);
+        }
+        game.setQuestions(parsedQuestions);
         Game saved = curriculumReviews.saveWithGame(game, generationResult, principal.teacherId());
         return GameResponse.withEnvelope(saved, dsl, mapper);
     }
