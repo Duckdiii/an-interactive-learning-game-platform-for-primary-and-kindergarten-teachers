@@ -21,6 +21,7 @@ import com.aigameplatform.backend.entity.question.QuestionGame;
 import com.aigameplatform.backend.service.media.GameAudioEnricher;
 import java.security.SecureRandom;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ public class GameApplicationService {
     private final ObjectProvider<GameAudioEnricher> audioEnrichers;
     private final SecureRandom random = new SecureRandom();
 
+    @Autowired
     public GameApplicationService(GameGenerationService generation, TeacherRepository teachers,
             GameCurriculumReviewService curriculumReviews, GameContentStrategyRegistry strategies,
             ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper,
