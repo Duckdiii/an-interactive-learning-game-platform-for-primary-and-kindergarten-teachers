@@ -2,7 +2,9 @@ package com.aigameplatform.backend.controller;
 
 import com.aigameplatform.backend.dto.request.PlayRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
+import com.aigameplatform.backend.service.play.LeaderboardRegistry;
 import com.aigameplatform.backend.service.play.LiveArenaService;
+import com.aigameplatform.backend.service.play.ScoringService;
 import com.aigameplatform.backend.service.play.StudentPlayService;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -24,10 +26,18 @@ import tools.jackson.databind.node.ObjectNode;
 public class StudentPlayController {
     private final StudentPlayService play;
     private final LiveArenaService liveArenaService;
+    private final ScoringService scoringService;
+    private final LeaderboardRegistry leaderboardRegistry;
 
-    public StudentPlayController(StudentPlayService play, LiveArenaService liveArenaService) {
+    public StudentPlayController(
+            StudentPlayService play,
+            LiveArenaService liveArenaService,
+            ScoringService scoringService,
+            LeaderboardRegistry leaderboardRegistry) {
         this.play = play;
         this.liveArenaService = liveArenaService;
+        this.scoringService = scoringService;
+        this.leaderboardRegistry = leaderboardRegistry;
     }
 
     @GetMapping({"/api/games/shared/{shareCode}", "/games/shared/{shareCode}"})
@@ -62,6 +72,18 @@ public class StudentPlayController {
         }
         if (pid != null) {
             liveArenaService.broadcastAnswerStatus(sessionId, pid);
+
+            boolean isCorrect = Boolean.TRUE.equals(result.get("isCorrect"));
+            long timeSpentMs = body != null && body.has("timeSpentMs") ? body.get("timeSpentMs").asLong(0) : 0;
+            long timeLimitMs = 30_000L;
+            if (result.containsKey("timeLimitMs")) {
+                timeLimitMs = ((Number) result.get("timeLimitMs")).longValue();
+            }
+
+            int points = scoringService.calculateScore(isCorrect, timeSpentMs, timeLimitMs);
+            String participantName = liveArenaService.getParticipantName(sessionId, pid);
+            leaderboardRegistry.addScore(sessionId, pid, participantName, points);
+            liveArenaService.broadcastLeaderboard(sessionId);
         }
         return ApiResponse.ok(result);
     }
