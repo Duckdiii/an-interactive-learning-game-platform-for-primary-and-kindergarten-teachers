@@ -16,6 +16,8 @@ export const ROUTES = {
   roomHost: '/rooms/host/:gameId',
   // Màn hình trình chiếu Live Arena lớn trên máy chiếu / tivi
   liveArenaPresentation: '/presentation/:sessionId',
+  // Màn hình điều khiển Live Arena của giáo viên (quản lý học sinh, kick, chuyển câu)
+  liveArenaTeacherControl: '/rooms/:sessionId/control',
 } as const
 
 export const presentPath = (gameId: string) => `/present/${encodeURIComponent(gameId)}`
@@ -23,5 +25,7 @@ export const roomHostPath = (gameId: string) => `/rooms/host/${encodeURIComponen
 export const roomJoinPath = (pin: string) => `/join/${encodeURIComponent(pin)}`
 export const liveArenaPresentationPath = (sessionId: string) =>
   `/presentation/${encodeURIComponent(sessionId)}`
+export const liveArenaTeacherControlPath = (sessionId: string) =>
+  `/rooms/${encodeURIComponent(sessionId)}/control`
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
