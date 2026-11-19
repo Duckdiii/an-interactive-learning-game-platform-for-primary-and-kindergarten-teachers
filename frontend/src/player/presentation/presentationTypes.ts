@@ -7,6 +7,7 @@ export type SessionPhase = 'WAITING_ROOM' | 'QUESTION' | 'LEADERBOARD' | 'ENDED'
 export interface LiveArenaParticipant {
   id: string
   name: string
+  connected?: boolean
 }
 
 export interface LiveArenaLeaderboardEntry {
@@ -30,5 +31,6 @@ export interface LiveArenaHandlers {
   onStateChange?: (payload: { phase: SessionPhase }) => void
   onQuestion?: (payload: { question: LiveArenaQuestion }) => void
   onLeaderboard?: (payload: { entries: LiveArenaLeaderboardEntry[] }) => void
+  onAnswerStatus?: (payload: { participantId: string; answered?: boolean }) => void
   onReconnect?: () => void
 }

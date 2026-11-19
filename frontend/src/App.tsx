@@ -20,6 +20,9 @@ const PresentPage = lazy(() => import('./player/pages/PresentPage'))
 const RoomHostPage = lazy(() => import('./player/pages/RoomHostPage'))
 const RoomJoinPage = lazy(() => import('./player/pages/RoomJoinPage'))
 const PresentationScreen = lazy(() => import('./player/presentation/PresentationScreen'))
+const TeacherControlPanel = lazy(() =>
+  import('./teacher/TeacherControlPanel').then((m) => ({ default: m.TeacherControlPanel })),
+)
 const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
 const UiKit = lazy(() => import('./pages/dev/UiKit'))
@@ -81,6 +84,14 @@ function App() {
           element={
             <ProtectedRoute>
               <PresentationScreen />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.liveArenaTeacherControl}
+          element={
+            <ProtectedRoute>
+              <TeacherControlPanel />
             </ProtectedRoute>
           }
         />
