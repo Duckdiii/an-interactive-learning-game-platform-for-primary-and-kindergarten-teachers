@@ -618,7 +618,7 @@ paths:
         **Endpoint không tự lưu**: Frontend ghép câu mới vào bản đang soạn rồi lưu bằng `PUT` khi giáo
         viên bấm "Lưu bản nháp". Cách này bảo toàn chỉnh sửa tay chưa lưu ở các thẻ khác.
         Giới hạn 10 yêu cầu mỗi phút.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
