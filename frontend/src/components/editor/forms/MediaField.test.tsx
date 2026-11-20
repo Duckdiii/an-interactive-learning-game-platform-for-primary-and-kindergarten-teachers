@@ -341,4 +341,15 @@ describe('công cụ mô phỏng', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Không kết nối được máy chủ')
     expect(store.get().audioUrl).toBe('/mock/q1.wav')
   })
+
+  it('mở ImagePickerModal khi bấm Đổi ảnh từ Pexels', async () => {
+    const user = newUser()
+    renderForm({ imageUrl: 'https://old.jpg' })
+
+    const pexelsBtn = screen.getByRole('button', { name: 'Đổi ảnh từ Pexels' })
+    expect(pexelsBtn).toBeInTheDocument()
+    await user.click(pexelsBtn)
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  })
 })

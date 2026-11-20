@@ -1,14 +1,20 @@
 package com.aigameplatform.backend.service;
 
 import com.aigameplatform.backend.dto.dsl.GameDsl;
+import com.aigameplatform.backend.dto.dsl.QuestionDsl;
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateQuestionRequest;
 import com.aigameplatform.backend.dto.response.GameResponse;
+import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.Teacher;
 import com.aigameplatform.backend.entity.enums.GameStatus;
+import com.aigameplatform.backend.entity.enums.SessionStatus;
 import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
+import com.aigameplatform.backend.repository.GameRepository;
+import com.aigameplatform.backend.repository.GameSessionRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.service.curriculum.CurriculumCatalog;
@@ -16,9 +22,13 @@ import com.aigameplatform.backend.service.factory.GameDslRequest;
 import com.aigameplatform.backend.service.generation.GameGenerationService;
 import com.aigameplatform.backend.service.generation.GenerationResult;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
+import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
+import com.aigameplatform.backend.entity.question.QuestionGame;
+import com.aigameplatform.backend.service.media.GameAudioEnricher;
 import java.security.SecureRandom;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +43,40 @@ public class GameApplicationService {
     private final GameContentStrategyRegistry strategies;
     private final ObjectProvider<CurriculumCatalog> curriculumCatalog;
     private final JsonMapper mapper;
+    private final ObjectProvider<GameAudioEnricher> audioEnrichers;
+    private final GameRepository games;
+    private final GameSessionRepository sessions;
     private final SecureRandom random = new SecureRandom();
 
+    @Autowired
     public GameApplicationService(GameGenerationService generation, TeacherRepository teachers,
             GameCurriculumReviewService curriculumReviews, GameContentStrategyRegistry strategies,
-            ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper) {
+            ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper,
+            ObjectProvider<GameAudioEnricher> audioEnrichers,
+            GameRepository games,
+            GameSessionRepository sessions) {
         this.generation = generation;
         this.teachers = teachers;
         this.curriculumReviews = curriculumReviews;
         this.strategies = strategies;
         this.curriculumCatalog = curriculumCatalog;
         this.mapper = mapper;
+        this.audioEnrichers = audioEnrichers;
+        this.games = games;
+        this.sessions = sessions;
+    }
+
+    public GameApplicationService(GameGenerationService generation, TeacherRepository teachers,
+            GameCurriculumReviewService curriculumReviews, GameContentStrategyRegistry strategies,
+            ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper,
+            ObjectProvider<GameAudioEnricher> audioEnrichers) {
+        this(generation, teachers, curriculumReviews, strategies, curriculumCatalog, mapper, audioEnrichers, null, null);
+    }
+
+    public GameApplicationService(GameGenerationService generation, TeacherRepository teachers,
+            GameCurriculumReviewService curriculumReviews, GameContentStrategyRegistry strategies,
+            ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper) {
+        this(generation, teachers, curriculumReviews, strategies, curriculumCatalog, mapper, null, null, null);
     }
 
     @Transactional
@@ -88,7 +121,12 @@ public class GameApplicationService {
         game.setQuestionNum(dsl.questions().size());
         game.setStatus(GameStatus.DRAFT);
         game.setAuthor(teacher);
-        game.setQuestions(strategies.get(dsl.gameType()).parseToQuestions(dsl));
+        List<QuestionGame> parsedQuestions = strategies.get(dsl.gameType()).parseToQuestions(dsl);
+        GameAudioEnricher enricher = audioEnrichers != null ? audioEnrichers.getIfAvailable() : null;
+        if (enricher != null) {
+            enricher.enrichAllQuestionsWithAudio(parsedQuestions);
+        }
+        game.setQuestions(parsedQuestions);
         Game saved = curriculumReviews.saveWithGame(game, generationResult, principal.teacherId());
         return GameResponse.withEnvelope(saved, dsl, mapper);
     }
@@ -108,5 +146,64 @@ public class GameApplicationService {
         if (input.idea() == null || input.idea().isBlank())
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Provide idea or set randomTopic=true");
         return input.idea().trim();
+    }
+
+    @Transactional(readOnly = true)
+    public RegeneratedQuestionDto regenerateQuestion(String gameId, String questionId,
+            RegenerateQuestionRequest request, AuthenticatedTeacher principal) {
+        if (principal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "Authentication required");
+        }
+        if (games == null) {
+            throw new ApiException(ErrorCode.INTERNAL_ERROR, "Game repository is not available");
+        }
+        Game game = games.findById(gameId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Game not found"));
+
+        if (!game.getAuthor().getId().equals(principal.teacherId())) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "You do not have permission to modify this game");
+        }
+
+        if (sessions != null && sessions.existsByGame_IdAndStatus(gameId, SessionStatus.ACTIVE)) {
+            throw new ApiException(ErrorCode.CONFLICT, "Game has an active session and cannot be modified");
+        }
+
+        GameContentStrategy<?, ?> strategy = strategies.get(game.getGameType());
+        GameDsl baseGameDsl = strategy.toGameDsl(game);
+        QuestionDsl currentQuestion = baseGameDsl.questions().stream()
+                .filter(q -> q.id().equals(questionId))
+                .findFirst()
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Question " + questionId + " not found in game"));
+
+        String topic = game.getTopic() != null && !game.getTopic().isBlank() ? game.getTopic() : game.getTitle();
+        GameDslRequest dslRequest = new GameDslRequest(topic, game.getSubject(), game.getGrade(), null, null,
+                game.getVisualClozeMode(), null, null);
+
+        String feedback = request != null ? request.feedback() : null;
+        QuestionDsl candidate = generation.regenerateQuestion(game.getGameType(), dslRequest, currentQuestion,
+                feedback, questionId, baseGameDsl);
+
+        // Enrich with audio
+        GameAudioEnricher enricher = audioEnrichers != null ? audioEnrichers.getIfAvailable() : null;
+        QuestionDsl finalQuestion = candidate;
+        if (enricher != null) {
+            GameDsl tempSingleGame = strategy.assembleGame(baseGameDsl.metadata(), baseGameDsl.gameplaySettings(), List.of(candidate));
+            List<QuestionGame> entities = strategy.parseToQuestions(tempSingleGame);
+            if (!entities.isEmpty()) {
+                QuestionGame entity = entities.get(0);
+                enricher.enrichWithAudio(entity);
+                finalQuestion = strategy.toQuestionDsl(entity, questionId);
+            }
+        }
+
+        if (!finalQuestion.id().equals(questionId)) {
+            GameDsl tempSingleGame = strategy.assembleGame(baseGameDsl.metadata(), baseGameDsl.gameplaySettings(), List.of(finalQuestion));
+            List<QuestionGame> entities = strategy.parseToQuestions(tempSingleGame);
+            if (!entities.isEmpty()) {
+                finalQuestion = strategy.toQuestionDsl(entities.get(0), questionId);
+            }
+        }
+
+        return new RegeneratedQuestionDto(finalQuestion, game.getGameType());
     }
 }

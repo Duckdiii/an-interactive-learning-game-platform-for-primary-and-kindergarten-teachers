@@ -1,7 +1,9 @@
 package com.aigameplatform.backend.controller;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateQuestionRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
+import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.service.GameApplicationService;
 import com.aigameplatform.backend.service.GamePublicationService;
@@ -51,5 +53,14 @@ public class GameController {
             @RequestBody(required = false) JsonNode body,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
         return ApiResponse.ok(publication.publish(gameId, body, teacher));
+    }
+
+    @PostMapping("/{gameId}/questions/{questionId}/regenerate")
+    public ApiResponse<RegeneratedQuestionDto> regenerateQuestion(
+            @PathVariable String gameId,
+            @PathVariable String questionId,
+            @Valid @RequestBody(required = false) RegenerateQuestionRequest request,
+            @AuthenticationPrincipal AuthenticatedTeacher teacher) {
+        return ApiResponse.ok(games.regenerateQuestion(gameId, questionId, request, teacher));
     }
 }

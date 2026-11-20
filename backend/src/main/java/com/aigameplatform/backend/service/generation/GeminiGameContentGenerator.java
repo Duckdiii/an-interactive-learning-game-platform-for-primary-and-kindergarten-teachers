@@ -91,9 +91,17 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;
-        String userPrompt = attempt.isRetry()
-                ? retryPrompt(attempt)
-                : "Tạo nội dung game theo yêu cầu trong system prompt. Chỉ trả về JSON theo schema đã cung cấp.";
+        if (attempt.customInstruction() != null && !attempt.customInstruction().isBlank()) {
+            systemPrompt += "\n\n" + attempt.customInstruction();
+        }
+        String userPrompt;
+        if (attempt.isRetry()) {
+            userPrompt = retryPrompt(attempt);
+        } else if (attempt.customInstruction() != null && !attempt.customInstruction().isBlank()) {
+            userPrompt = "Tạo đúng 1 câu hỏi mới theo yêu cầu và hướng dẫn trong system prompt. Chỉ trả về JSON theo schema đã cung cấp (mảng questions chứa đúng 1 phần tử).";
+        } else {
+            userPrompt = "Tạo nội dung game theo yêu cầu trong system prompt. Chỉ trả về JSON theo schema đã cung cấp.";
+        }
         ResponseFormat schemaFormat = ResponseFormat.builder().type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder().rootElement(JsonRawSchema.builder()
                         .schema(decoderSchema(attempt.structuredSchema())).build()).build()).build();

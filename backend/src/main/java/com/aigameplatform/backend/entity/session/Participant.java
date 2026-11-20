@@ -24,6 +24,10 @@ public class Participant {
 
     private int score;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
+    private Team team;
+
     // Composition: Participant ◆ 0..* PlayInteractionDetail (tương tác). Chết theo Participant.
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "participant_id", nullable = false)

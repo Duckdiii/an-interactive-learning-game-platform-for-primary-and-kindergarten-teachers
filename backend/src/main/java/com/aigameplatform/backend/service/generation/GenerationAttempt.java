@@ -24,27 +24,43 @@ public record GenerationAttempt(
         List<ValidationError> previousErrors,
         VisualClozeImageGenerationInput imageInput,
         boolean oddImageMode,
-        boolean avmCatalogMode) {
+        boolean avmCatalogMode,
+        String customInstruction) {
+
+    public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
+            String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
+            List<ValidationError> previousErrors, VisualClozeImageGenerationInput imageInput,
+            boolean oddImageMode, boolean avmCatalogMode) {
+        this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext,
+                attemptNumber, previousOutput, previousErrors, imageInput, oddImageMode, avmCatalogMode, null);
+    }
 
     public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
             String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
             List<ValidationError> previousErrors, VisualClozeImageGenerationInput imageInput, boolean oddImageMode) {
         this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext,
-                attemptNumber, previousOutput, previousErrors, imageInput, oddImageMode, false);
+                attemptNumber, previousOutput, previousErrors, imageInput, oddImageMode, false, null);
     }
 
     public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
             String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
             List<ValidationError> previousErrors, VisualClozeImageGenerationInput imageInput) {
         this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext,
-                attemptNumber, previousOutput, previousErrors, imageInput, false, false);
+                attemptNumber, previousOutput, previousErrors, imageInput, false, false, null);
     }
 
     public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
             String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
             List<ValidationError> previousErrors) {
         this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext,
-                attemptNumber, previousOutput, previousErrors, null, false, false);
+                attemptNumber, previousOutput, previousErrors, null, false, false, null);
+    }
+
+    public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
+            String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
+            List<ValidationError> previousErrors, String customInstruction) {
+        this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext,
+                attemptNumber, previousOutput, previousErrors, null, false, false, customInstruction);
     }
 
     public boolean isRetry() {

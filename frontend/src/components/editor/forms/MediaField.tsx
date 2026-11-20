@@ -13,6 +13,7 @@ import { setMediaUrl } from './commonEditing'
 import type { MediaUrlField } from './commonEditing'
 import type { QuestionFormProps } from './formTypes'
 import OperationStatus from './OperationStatus'
+import ImagePickerModal from '../ImagePickerModal'
 import { useCancellableOperation } from '../../../hooks/useCancellableOperation'
 
 const text = viText.editor.media
@@ -70,6 +71,7 @@ export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: Med
   const [canceled, setCanceled] = useState(false)
   const [activity, setActivity] = useState<Activity>('upload')
   const [brokenUrl, setBrokenUrl] = useState<string | null>(null)
+  const [showPexelsModal, setShowPexelsModal] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const previewRef = useRef<string | null>(null)
   const checkRef = useRef(0)
@@ -273,6 +275,17 @@ export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: Med
             <Icon name="upload" className="mr-2 h-5 w-5" />
             {url ? (isImage ? text.replaceImage : text.replaceAudio) : isImage ? text.uploadImage : text.uploadAudio}
           </Button>
+          {isImage ? (
+            <Button
+              id={`${id}-pexels`}
+              type="button"
+              variant="secondary"
+              onClick={() => setShowPexelsModal(true)}
+              disabled={op.busy}
+            >
+              Đổi ảnh từ Pexels
+            </Button>
+          ) : null}
           {url ? (
             <Button type="button" variant="secondary" onClick={() => {
                 apply(undefined)
@@ -328,6 +341,15 @@ export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: Med
             disabled: op.busy,
           })
         : null}
+
+      {showPexelsModal ? (
+        <ImagePickerModal
+          onSelect={(newUrl) => {
+            apply(newUrl)
+          }}
+          onClose={() => setShowPexelsModal(false)}
+        />
+      ) : null}
     </fieldset>
   )
 }
