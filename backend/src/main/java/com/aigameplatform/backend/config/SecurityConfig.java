@@ -56,6 +56,7 @@ public class SecurityConfig {
                         "/api/sessions/*/join", "/sessions/*/join",
                         "/api/sessions/*/interactions", "/sessions/*/interactions").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/sessions/*/my-team", "/sessions/*/my-team").permitAll()
+                .requestMatchers("/api/admin/**", "/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)

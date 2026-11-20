@@ -23,6 +23,12 @@ const PresentationScreen = lazy(() => import('./player/presentation/Presentation
 const TeacherControlPanel = lazy(() =>
   import('./teacher/TeacherControlPanel').then((m) => ({ default: m.TeacherControlPanel })),
 )
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'))
+const AdminProtectedRoute = lazy(() => import('./components/AdminProtectedRoute'))
+const TeacherManagementPage = lazy(() => import('./pages/admin/TeacherManagementPage'))
+const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'))
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
+const AIConfigPage = lazy(() => import('./pages/admin/AIConfigPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
 const UiKit = lazy(() => import('./pages/dev/UiKit'))
@@ -108,6 +114,22 @@ function App() {
           <Route path={ROUTES.workspace} element={<MyGamesPage />} />
           <Route path={ROUTES.workspaceEditor} element={<WorkspaceEditor />} />
           <Route path={ROUTES.results} element={<ResultsPage />} />
+        </Route>
+
+        {/* Phân hệ Quản trị viên (Admin Portal - FR-12, FR-13, FR-14) */}
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to={ROUTES.adminTeachers} replace />} />
+          <Route path="teachers" element={<TeacherManagementPage />} />
+          <Route path="audit-logs" element={<AuditLogPage />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="ai-config" element={<AIConfigPage />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

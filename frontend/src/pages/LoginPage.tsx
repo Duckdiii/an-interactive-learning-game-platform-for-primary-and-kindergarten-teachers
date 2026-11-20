@@ -47,7 +47,11 @@ export default function LoginPage() {
     try {
       const { teacher, accessToken, refreshToken } = await loginTeacher(form)
       login(teacher, accessToken, refreshToken)
-      navigate(ROUTES.dashboard, { replace: true })
+      if (teacher.role === 'ROLE_ADMIN') {
+        navigate(ROUTES.adminTeachers, { replace: true })
+      } else {
+        navigate(ROUTES.dashboard, { replace: true })
+      }
     } catch (error) {
       const isAuthFailure =
         axios.isAxiosError(error) && error.response?.status === 401

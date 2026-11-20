@@ -1474,7 +1474,7 @@ paths:
       operationId: adminListTeachers
       summary: Danh sách giáo viên (UC-13)
       description: '`search` khớp tên hoặc email. Phân trang.'
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1523,7 +1523,7 @@ paths:
         Email trùng trả 400 "Email này đã tồn tại trong hệ thống." (UC-13 4a). Dữ liệu sai trả 400 kèm
         `error.details.fields` để Frontend đánh dấu trường lỗi (UC-13 4b). Lỗi lưu trả 500 và giữ nguyên
         trạng thái (UC-13 4c).
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1561,7 +1561,7 @@ paths:
       tags: [Admin]
       operationId: adminGetTeacher
       summary: Chi tiết một giáo viên
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1581,7 +1581,7 @@ paths:
       operationId: adminUpdateTeacher
       summary: Sửa thông tin giáo viên
       description: Chỉ sửa `fullName`, `school`; không đổi email.
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1622,7 +1622,7 @@ paths:
       description: |
         `status` thành `LOCKED` và thu hồi mọi refresh token. Gọi lại vẫn trả 200. Không cho quản trị
         viên tự khoá chính mình (400, đề xuất).
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1648,7 +1648,7 @@ paths:
       operationId: adminUnlockTeacher
       summary: Mở khoá tài khoản giáo viên
       description: '`status` thành `ACTIVE`. Gọi lại vẫn trả 200.'
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1672,7 +1672,7 @@ paths:
       description: |
         Chỉ ghi người dùng đăng nhập (giáo viên, quản trị viên); không ghi IP hay thiết bị của học sinh.
         Mọi endpoint `/admin` cũng được ghi vào Audit Log.
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1738,7 +1738,7 @@ paths:
         Một dịch vụ lỗi vẫn trả dữ liệu các dịch vụ khác (UC-12 2a). `costSource: UNAVAILABLE` thì `cost`
         là `null`; Frontend hiển thị "Chưa có dữ liệu chi phí", không tự đưa giá trị giả định (UC-12 3b).
         Đợt (b) phụ thuộc số liệu sử dụng dịch vụ.
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1791,7 +1791,7 @@ paths:
       tags: [Admin]
       operationId: adminGetSystemStatus
       summary: Sức khoẻ máy chủ (NFR-03)
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1819,7 +1819,7 @@ paths:
       tags: [Admin]
       operationId: adminGetAiConfig
       summary: Phiên bản cấu hình AI đang áp dụng và lịch sử (UC-14)
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1859,7 +1859,7 @@ paths:
         Mỗi lần lưu tạo một phiên bản mới (không sửa phiên bản cũ), kèm mã SHA-256 do server tính
         (NFR-05). Giá trị sai trả 400 "Giá trị cấu hình không hợp lệ. Vui lòng kiểm tra lại các tham
         số..." kèm `error.details.fields`, giữ nguyên cấu hình đang áp dụng (UC-14 4a).
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1890,7 +1890,7 @@ paths:
       summary: Đóng băng một phiên bản làm bản chuẩn
       description: |
         Phiên bản đã đóng băng không sửa được; thay đổi tiếp theo phải tạo phiên bản mới kế thừa.
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1924,7 +1924,7 @@ paths:
       operationId: adminActivateAiConfigVersion
       summary: Khôi phục phiên bản làm bản đang áp dụng
       description: Các lời gọi AI sau đó dùng phiên bản đang áp dụng.
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1945,7 +1945,7 @@ paths:
       tags: [Admin]
       operationId: adminGetBlockedWords
       summary: Danh sách từ cấm an toàn học đường (FLD-25)
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1966,7 +1966,7 @@ paths:
         Backend nạp lại bộ nhớ (hot reload), không cần khởi động lại. Từ trong danh sách còn áp dụng cho
         nickname và nội dung do giáo viên nhập. Đợt (b) cần chuyển danh sách từ tệp tĩnh sang nơi lưu
         có thể sửa lúc chạy.
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -2294,6 +2294,7 @@ components:
         | `ACCOUNT_LOCKED` | 403 | chưa cài | Tài khoản bị quản trị viên khoá |
         | `LOGIN_TEMPORARILY_LOCKED` | 429 | chưa cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
         | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |
+        | `SERVICE_UNAVAILABLE` | 503 | đã cài | Dịch vụ tạm thời không khả dụng (chạm trần chi phí AI, circuit breaker) |
       enum:
         - VALIDATION_ERROR
         - UNAUTHORIZED
@@ -2308,6 +2309,7 @@ components:
         - ACCOUNT_LOCKED
         - LOGIN_TEMPORARILY_LOCKED
         - CONTENT_NOT_AGE_APPROPRIATE
+        - SERVICE_UNAVAILABLE
 
     ErrorBody:
       type: object

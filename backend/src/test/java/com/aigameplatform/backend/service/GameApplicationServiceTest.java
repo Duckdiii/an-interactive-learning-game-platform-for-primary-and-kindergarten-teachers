@@ -120,6 +120,32 @@ class GameApplicationServiceTest {
                 .hasMessageContaining("optionImages");
     }
 
+    @Test
+    void generate_throwsServiceUnavailable_whenCostCapExceeded() {
+        var generation = mock(GameGenerationService.class);
+        var teachers = mock(TeacherRepository.class);
+        var reviews = mock(GameCurriculumReviewService.class);
+        var strategies = mock(GameContentStrategyRegistry.class);
+        var costMonitoring = mock(com.aigameplatform.backend.service.admin.CostMonitoringService.class);
+        when(costMonitoring.isCostCapExceeded()).thenReturn(true);
+        var costProvider = mock(ObjectProvider.class);
+        when(costProvider.getIfAvailable()).thenReturn(costMonitoring);
+
+        var service = new GameApplicationService(
+                generation, teachers, reviews, strategies, null, null, null, null, null, costProvider
+        );
+
+        var request = new GenerateGameRequest(
+                Subject.VIETNAMESE, GradeLevel.GRADE_1, "Động vật và các loài thực vật quanh em", false,
+                GameType.ODD_ONE_OUT, VisualClozeMode.TEXT, null, null, null
+        );
+        var principal = new AuthenticatedTeacher("teacher-1", "t@school.vn", "sess-1");
+
+        assertThatThrownBy(() -> service.generate(request, principal))
+                .isInstanceOf(com.aigameplatform.backend.exception.ApiException.class)
+                .hasMessageContaining("chạm trần chi phí");
+    }
+
     private static VisualClozeGameDsl imageDsl() {
         var question = new VisualClozeQuestionDsl("q1", 45, 100, null, null, null, null, null, null, null,
                 "Find animals", "https://scene.example/scene.png", 800, 600,

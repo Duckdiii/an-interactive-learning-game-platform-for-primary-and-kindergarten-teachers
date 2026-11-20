@@ -46,6 +46,7 @@ public class GameApplicationService {
     private final ObjectProvider<GameAudioEnricher> audioEnrichers;
     private final GameRepository games;
     private final GameSessionRepository sessions;
+    private final ObjectProvider<com.aigameplatform.backend.service.admin.CostMonitoringService> costMonitoring;
     private final SecureRandom random = new SecureRandom();
 
     @Autowired
@@ -54,7 +55,8 @@ public class GameApplicationService {
             ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper,
             ObjectProvider<GameAudioEnricher> audioEnrichers,
             GameRepository games,
-            GameSessionRepository sessions) {
+            GameSessionRepository sessions,
+            ObjectProvider<com.aigameplatform.backend.service.admin.CostMonitoringService> costMonitoring) {
         this.generation = generation;
         this.teachers = teachers;
         this.curriculumReviews = curriculumReviews;
@@ -64,6 +66,16 @@ public class GameApplicationService {
         this.audioEnrichers = audioEnrichers;
         this.games = games;
         this.sessions = sessions;
+        this.costMonitoring = costMonitoring;
+    }
+
+    public GameApplicationService(GameGenerationService generation, TeacherRepository teachers,
+            GameCurriculumReviewService curriculumReviews, GameContentStrategyRegistry strategies,
+            ObjectProvider<CurriculumCatalog> curriculumCatalog, JsonMapper mapper,
+            ObjectProvider<GameAudioEnricher> audioEnrichers,
+            GameRepository games,
+            GameSessionRepository sessions) {
+        this(generation, teachers, curriculumReviews, strategies, curriculumCatalog, mapper, audioEnrichers, games, sessions, null);
     }
 
     public GameApplicationService(GameGenerationService generation, TeacherRepository teachers,
@@ -82,6 +94,13 @@ public class GameApplicationService {
     @Transactional
     public ObjectNode generate(GenerateGameRequest input, AuthenticatedTeacher principal) {
         if (principal == null) throw new ApiException(ErrorCode.UNAUTHORIZED, "Authentication required");
+        if (costMonitoring != null && costMonitoring.getIfAvailable() != null) {
+            com.aigameplatform.backend.service.admin.CostMonitoringService cms = costMonitoring.getIfAvailable();
+            if (cms.isCostCapExceeded()) {
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE,
+                        "Hệ thống AI tạm thời ngưng nhận yêu cầu sinh game do đã chạm trần chi phí tháng. Vui lòng liên hệ Quản trị viên.");
+            }
+        }
         Teacher teacher = teachers.findById(principal.teacherId())
                 .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED, "Teacher account is unavailable"));
         String topic = topicFor(input);

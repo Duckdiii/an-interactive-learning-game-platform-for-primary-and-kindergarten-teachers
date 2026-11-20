@@ -18,6 +18,11 @@ export const ROUTES = {
   liveArenaPresentation: '/presentation/:sessionId',
   // Màn hình điều khiển Live Arena của giáo viên (quản lý học sinh, kick, chuyển câu)
   liveArenaTeacherControl: '/rooms/:sessionId/control',
+  // Phân hệ Quản trị viên (Admin Portal)
+  adminDashboard: '/admin/dashboard',
+  adminTeachers: '/admin/teachers',
+  adminAuditLogs: '/admin/audit-logs',
+  adminAiConfig: '/admin/ai-config',
 } as const
 
 export const presentPath = (gameId: string) => `/present/${encodeURIComponent(gameId)}`

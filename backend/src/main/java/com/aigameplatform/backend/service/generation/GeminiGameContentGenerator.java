@@ -1,14 +1,16 @@
 package com.aigameplatform.backend.service.generation;
 
+import com.aigameplatform.backend.dto.admin.AiConfigVersionDto;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.service.admin.AiConfigService;
+import com.aigameplatform.backend.service.curriculum.CurriculumConstraints;
+import com.aigameplatform.backend.service.curriculum.CurriculumTopicParser;
 import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
-import com.aigameplatform.backend.service.curriculum.CurriculumTopicParser;
-import com.aigameplatform.backend.service.curriculum.CurriculumConstraints;
-import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -17,10 +19,11 @@ import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import java.util.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import java.util.Base64;
 
 /** Gemini adapter that delegates content instructions and schema to the selected game strategy. */
 @Component
@@ -40,12 +43,23 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
 
     private final ChatModel model;
     private final GameContentStrategyRegistry strategies;
+    private final AiConfigService aiConfigService;
     private final CurriculumTopicParser topicParser = new CurriculumTopicParser();
 
-    public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
+    public GeminiGameContentGenerator(
+            @Qualifier("gameGenerationChatModel") ChatModel model,
             GameContentStrategyRegistry strategies) {
+        this(model, strategies, null);
+    }
+
+    @Autowired
+    public GeminiGameContentGenerator(
+            @Qualifier("gameGenerationChatModel") ChatModel model,
+            GameContentStrategyRegistry strategies,
+            @Autowired(required = false) AiConfigService aiConfigService) {
         this.model = model;
         this.strategies = strategies;
+        this.aiConfigService = aiConfigService;
     }
 
     @Override
@@ -105,7 +119,19 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         ResponseFormat schemaFormat = ResponseFormat.builder().type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder().rootElement(JsonRawSchema.builder()
                         .schema(decoderSchema(attempt.structuredSchema())).build()).build()).build();
-        ChatRequestParameters parameters = ChatRequestParameters.builder().responseFormat(schemaFormat).build();
+        var paramBuilder = ChatRequestParameters.builder().responseFormat(schemaFormat);
+        if (aiConfigService != null) {
+            AiConfigVersionDto activeConfig = aiConfigService.getActiveConfig();
+            if (activeConfig != null) {
+                if (activeConfig.temperature() != null) {
+                    paramBuilder.temperature(activeConfig.temperature());
+                }
+                if (activeConfig.maxTokens() != null) {
+                    paramBuilder.maxOutputTokens(activeConfig.maxTokens());
+                }
+            }
+        }
+        ChatRequestParameters parameters = paramBuilder.build();
         try {
             UserMessage userMessage = attempt.imageInput() == null ? UserMessage.from(userPrompt)
                     : UserMessage.from(userPrompt, ImageContent.from(
