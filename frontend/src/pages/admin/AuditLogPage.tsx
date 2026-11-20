@@ -47,7 +47,7 @@ export default function AuditLogPage() {
       <div>
         <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Nhật ký Audit Log</h2>
         <p className="text-sm text-slate-500 mt-1">
-          Ghi nhận và truy vết tự động toàn bộ thao tác quản trị và các hành động quan trọng (FLD-28)
+          Ghi nhận và truy vết tự động toàn bộ thao tác quản trị và các hành động quan trọng
         </p>
       </div>
 
