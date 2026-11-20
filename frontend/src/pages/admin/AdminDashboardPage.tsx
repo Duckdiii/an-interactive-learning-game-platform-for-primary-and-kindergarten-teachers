@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
             Giám sát Hạ tầng & Chi phí AI
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Theo dõi ngân sách, số lượng yêu cầu, sức khoẻ máy chủ và hạn ngạch các dịch vụ bên ngoài (FR-12 / UC-12)
+            Theo dõi ngân sách, số lượng yêu cầu, sức khoẻ máy chủ và hạn ngạch các dịch vụ bên ngoài
           </p>
         </div>
 

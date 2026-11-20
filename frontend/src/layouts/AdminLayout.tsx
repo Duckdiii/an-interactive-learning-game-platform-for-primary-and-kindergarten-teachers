@@ -17,25 +17,21 @@ export default function AdminLayout() {
       to: ROUTES.adminDashboard,
       label: 'Giám sát & Chi phí',
       iconName: 'chart' as const,
-      badge: 'FR-12',
     },
     {
       to: ROUTES.adminTeachers,
       label: 'Quản lý giáo viên',
       iconName: 'user' as const,
-      badge: 'FR-13',
     },
     {
       to: ROUTES.adminAiConfig,
       label: 'Cài đặt bộ não AI',
       iconName: 'sparkles' as const,
-      badge: 'FR-14',
     },
     {
       to: ROUTES.adminAuditLogs,
       label: 'Nhật ký Audit Log',
       iconName: 'clock' as const,
-      badge: 'Log',
     },
   ]
 
@@ -66,7 +62,7 @@ export default function AdminLayout() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-colors ${
+                  `flex items-center px-3.5 py-2.5 rounded-xl font-medium text-sm transition-colors ${
                     isActive
                       ? 'bg-indigo-50 text-indigo-700 font-semibold'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -77,9 +73,6 @@ export default function AdminLayout() {
                   <Icon name={item.iconName} className="w-5 h-5" />
                   <span>{item.label}</span>
                 </div>
-                <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                  {item.badge}
-                </span>
               </NavLink>
             ))}
           </nav>

@@ -153,7 +153,7 @@ export default function TeacherManagementPage() {
         <div>
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Quản lý Giáo viên</h2>
           <p className="text-sm text-slate-500 mt-1">
-            Theo dõi, phân quyền, cấp mới và điều phối trạng thái tài khoản giáo viên (FR-13 / UC-13)
+            Theo dõi, phân quyền, cấp mới và điều phối trạng thái tài khoản giáo viên
           </p>
         </div>
         <Button

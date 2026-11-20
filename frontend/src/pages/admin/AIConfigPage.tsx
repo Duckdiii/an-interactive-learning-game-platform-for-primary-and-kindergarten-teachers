@@ -160,7 +160,7 @@ export default function AIConfigPage() {
         <div>
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Cấu hình Tham số AI & Prompt Studio</h2>
           <p className="text-sm text-slate-500 mt-1">
-            Quản lý System Instruction, tham số sinh game (Temperature, Max Tokens) và Từ cấm an toàn học đường (FR-14 / UC-14)
+            Quản lý System Instruction, tham số sinh game (Temperature, Max Tokens) và Từ cấm an toàn học đường
           </p>
         </div>
         <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold self-start md:self-auto">
