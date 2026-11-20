@@ -742,7 +742,7 @@ paths:
           trẻ nhỏ) và `teams` (từ 2 đến 6 đội; bỏ qua thì tạo "Đội 1", "Đội 2" với màu mặc định).
         - `accessCode` là mã PIN 6 chữ số hiển thị lớn trên màn Presentation, duy nhất trong các phiên
           chưa kết thúc. `joinUrl` để Frontend vẽ QR bằng `qrcode.react`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -781,7 +781,7 @@ paths:
         Dùng để tìm và kết thúc phiên bị bỏ quên (nếu không, game bị khoá sửa/xoá) và xem lại các phiên
         cũ. Phiên `SELF` có `accessCode: null`. Gợi ý: phiên chưa kết thúc quá một khoảng cấu hình
         (ví dụ 6 giờ) tự chuyển `CLOSED`; cần mốc thời gian tạo phiên trong entity nếu làm.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       parameters:
@@ -827,7 +827,7 @@ paths:
         Phiên `TEAM`: mọi participant phải đã có đội; `RANDOM` thì server chia đội lúc này (cân bằng số
         người) rồi phát sự kiện. Chưa đủ điều kiện trả 409 "Còn học sinh chưa được xếp đội".
         Gọi lại khi đã ở trạng thái đích vẫn trả 200. Chỉ áp dụng cho phiên `SOLO`/`TEAM`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -852,7 +852,7 @@ paths:
       operationId: pauseSession
       summary: Tạm dừng phiên (ACTIVE sang PAUSED)
       description: Giữ nguyên tiến trình của mọi người. Gọi lại khi đã ở trạng thái đích vẫn trả 200.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -876,7 +876,7 @@ paths:
       tags: [Sessions]
       operationId: resumeSession
       summary: Tiếp tục phiên (PAUSED sang ACTIVE)
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -901,7 +901,7 @@ paths:
       operationId: closeSession
       summary: Kết thúc phiên (bất kỳ trạng thái sang CLOSED)
       description: Participant chưa hoàn thành chuyển `ENDED`; kết quả hiện có được giữ lại.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -928,7 +928,7 @@ paths:
       description: |
         Dùng để khôi phục màn hình khi tải lại trang (theo dõi trạng thái và tiến trình từng học sinh,
         UC-09 bước 4); cập nhật sau đó đi qua WebSocket. Chỉ giáo viên mới thấy `participantId`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -960,7 +960,7 @@ paths:
       operationId: getSessionResults
       summary: Kết quả cả phiên (giáo viên)
       description: Gọi được cả khi phiên còn chạy. `participants` sắp xếp theo `score` giảm dần.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -995,7 +995,7 @@ paths:
       description: |
         Phục vụ chế độ `review` của renderer. `answer` và `correctAnswer` có cùng tên trường với bảng
         dạng trả lời ở `POST /sessions/{sessionId}/interactions`. Đề xuất, chưa được xác nhận riêng.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -1032,7 +1032,7 @@ paths:
       description: |
         Dùng cho `MANUAL_ASSIGN`, và để giáo viên chỉnh lại bất kỳ lúc nào khi phiên còn `WAITING`.
         409 khi phiên đã bắt đầu.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -1083,7 +1083,7 @@ paths:
         Phiên đã `CLOSED` vẫn trả 200 với `status: CLOSED` để báo "phiên đã kết thúc". Mã không tồn tại
         trả 404 (UC-09 2c). Chỉ đếm lượt tra **mã sai**, tối đa 10 lần mỗi phút mỗi IP (chống dò mã
         PIN); bộ đếm chỉ giữ trong bộ nhớ, không lưu IP (NFR-02).
-      x-status: planned
+      x-status: implemented
       security: []
       parameters:
         - name: accessCode
@@ -1129,7 +1129,7 @@ paths:
         giới hạn bởi `maxParticipants`. Từ đây về sau mỗi request của học sinh gửi `X-Participant-Id`;
         Frontend lưu `participantId` (ví dụ `sessionStorage`) để tiếp tục nếu tải lại trang hoặc mất
         kết nối (UC-09 4b).
-      x-status: planned
+      x-status: implemented
       security: []
       requestBody:
         required: true
@@ -1170,7 +1170,7 @@ paths:
       description: |
         Đổi đội trước khi phiên bắt đầu, chỉ khi `groupingStrategy` là `FREE_CHOICE`
         (403 nếu strategy khác).
-      x-status: planned
+      x-status: implemented
       security:
         - participantId: []
       requestBody:
@@ -1339,7 +1339,7 @@ paths:
         nối lại; cập nhật liên tục đi qua WebSocket. Xếp theo `score` giảm dần, hoà điểm thì tổng
         `timeSpentMs` nhỏ hơn xếp trên. Điểm đội là **điểm trung bình của các thành viên**.
         Dữ liệu dành cho học sinh không chứa `participantId`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
         - participantId: []
@@ -1374,7 +1374,7 @@ paths:
       description: |
         Dùng cho màn tổng kết (UC-08 bước 6, UC-09 bước 6). `rank` là `null` ở phiên `SELF`; `team` là
         `null` ở phiên không phải `TEAM`. Lời khích lệ hiển thị do Frontend chọn theo tỉ lệ đúng.
-      x-status: planned
+      x-status: implemented
       security:
         - participantId: []
       responses:
