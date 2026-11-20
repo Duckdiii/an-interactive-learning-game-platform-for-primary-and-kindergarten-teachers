@@ -2,29 +2,45 @@ package com.aigameplatform.backend.repository;
 
 import com.aigameplatform.backend.entity.AuditLog;
 import com.aigameplatform.backend.entity.enums.AuditResult;
+import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface AuditLogRepository extends JpaRepository<AuditLog, String> {
+public interface AuditLogRepository extends JpaRepository<AuditLog, String>, JpaSpecificationExecutor<AuditLog> {
 
-    @Query("""
-        SELECT a FROM AuditLog a
-        WHERE (:actorId IS NULL OR a.actorId = :actorId)
-          AND (:action IS NULL OR LOWER(a.action) LIKE LOWER(CONCAT('%', :action, '%')))
-          AND (:result IS NULL OR a.result = :result)
-          AND (CAST(:from AS timestamp) IS NULL OR a.timestamp >= :from)
-          AND (CAST(:to AS timestamp) IS NULL OR a.timestamp <= :to)
-        ORDER BY a.timestamp DESC
-    """)
-    Page<AuditLog> searchLogs(
-            @Param("actorId") String actorId,
-            @Param("action") String action,
-            @Param("result") AuditResult result,
-            @Param("from") LocalDateTime from,
-            @Param("to") LocalDateTime to,
-            Pageable pageable);
+    default Page<AuditLog> searchLogs(
+            String actorId,
+            String action,
+            AuditResult result,
+            LocalDateTime from,
+            LocalDateTime to,
+            Pageable pageable) {
+        Specification<AuditLog> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (actorId != null && !actorId.isBlank()) {
+                predicates.add(cb.equal(root.get("actorId"), actorId.trim()));
+            }
+            if (action != null && !action.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("action")), "%" + action.trim().toLowerCase() + "%"));
+            }
+            if (result != null) {
+                predicates.add(cb.equal(root.get("result"), result));
+            }
+            if (from != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("timestamp"), from));
+            }
+            if (to != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("timestamp"), to));
+            }
+            query.orderBy(cb.desc(root.get("timestamp")));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return findAll(spec, pageable);
+    }
 }
