@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.response.RegisterResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
 import com.aigameplatform.backend.entity.RefreshToken;
 import com.aigameplatform.backend.entity.Teacher;
+import com.aigameplatform.backend.entity.enums.TeacherAccountStatus;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.RefreshTokenRepository;
@@ -87,6 +88,9 @@ public class AuthService {
         if (teacher == null || !matches) {
             throw new ApiException(ErrorCode.UNAUTHORIZED, INVALID_CREDENTIALS);
         }
+        if (teacher.getStatus() == TeacherAccountStatus.LOCKED) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "Tài khoản của bạn đã bị khoá bởi Quản trị viên");
+        }
         return issueTokens(teacher, UUID.randomUUID().toString());
     }
 
@@ -144,11 +148,11 @@ public class AuthService {
         token.setExpiresAt(now.plusHours(refreshTtlHours));
         refreshTokenRepository.save(token);
 
-        String accessToken = jwtService.generateAccessToken(teacher.getId(), teacher.getEmail(), familyId);
+        String accessToken = jwtService.generateAccessToken(teacher.getId(), teacher.getEmail(), familyId, teacher.getRole().name());
         AuthResponse response = new AuthResponse(
                 accessToken,
                 jwtService.getAccessTokenTtlSeconds(),
-                new TeacherInfo(teacher.getId(), teacher.getFullName(), teacher.getEmail()));
+                new TeacherInfo(teacher.getId(), teacher.getFullName(), teacher.getEmail(), teacher.getRole()));
         return new AuthResult(response, rawRefreshToken);
     }
 

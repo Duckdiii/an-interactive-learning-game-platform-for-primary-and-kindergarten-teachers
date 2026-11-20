@@ -618,7 +618,7 @@ paths:
         **Endpoint không tự lưu**: Frontend ghép câu mới vào bản đang soạn rồi lưu bằng `PUT` khi giáo
         viên bấm "Lưu bản nháp". Cách này bảo toàn chỉnh sửa tay chưa lưu ở các thẻ khác.
         Giới hạn 10 yêu cầu mỗi phút.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -742,7 +742,7 @@ paths:
           trẻ nhỏ) và `teams` (từ 2 đến 6 đội; bỏ qua thì tạo "Đội 1", "Đội 2" với màu mặc định).
         - `accessCode` là mã PIN 6 chữ số hiển thị lớn trên màn Presentation, duy nhất trong các phiên
           chưa kết thúc. `joinUrl` để Frontend vẽ QR bằng `qrcode.react`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -781,7 +781,7 @@ paths:
         Dùng để tìm và kết thúc phiên bị bỏ quên (nếu không, game bị khoá sửa/xoá) và xem lại các phiên
         cũ. Phiên `SELF` có `accessCode: null`. Gợi ý: phiên chưa kết thúc quá một khoảng cấu hình
         (ví dụ 6 giờ) tự chuyển `CLOSED`; cần mốc thời gian tạo phiên trong entity nếu làm.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       parameters:
@@ -827,7 +827,7 @@ paths:
         Phiên `TEAM`: mọi participant phải đã có đội; `RANDOM` thì server chia đội lúc này (cân bằng số
         người) rồi phát sự kiện. Chưa đủ điều kiện trả 409 "Còn học sinh chưa được xếp đội".
         Gọi lại khi đã ở trạng thái đích vẫn trả 200. Chỉ áp dụng cho phiên `SOLO`/`TEAM`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -852,7 +852,7 @@ paths:
       operationId: pauseSession
       summary: Tạm dừng phiên (ACTIVE sang PAUSED)
       description: Giữ nguyên tiến trình của mọi người. Gọi lại khi đã ở trạng thái đích vẫn trả 200.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -876,7 +876,7 @@ paths:
       tags: [Sessions]
       operationId: resumeSession
       summary: Tiếp tục phiên (PAUSED sang ACTIVE)
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -901,7 +901,7 @@ paths:
       operationId: closeSession
       summary: Kết thúc phiên (bất kỳ trạng thái sang CLOSED)
       description: Participant chưa hoàn thành chuyển `ENDED`; kết quả hiện có được giữ lại.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -928,7 +928,7 @@ paths:
       description: |
         Dùng để khôi phục màn hình khi tải lại trang (theo dõi trạng thái và tiến trình từng học sinh,
         UC-09 bước 4); cập nhật sau đó đi qua WebSocket. Chỉ giáo viên mới thấy `participantId`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -960,7 +960,7 @@ paths:
       operationId: getSessionResults
       summary: Kết quả cả phiên (giáo viên)
       description: Gọi được cả khi phiên còn chạy. `participants` sắp xếp theo `score` giảm dần.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -995,7 +995,7 @@ paths:
       description: |
         Phục vụ chế độ `review` của renderer. `answer` và `correctAnswer` có cùng tên trường với bảng
         dạng trả lời ở `POST /sessions/{sessionId}/interactions`. Đề xuất, chưa được xác nhận riêng.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       responses:
@@ -1032,7 +1032,7 @@ paths:
       description: |
         Dùng cho `MANUAL_ASSIGN`, và để giáo viên chỉnh lại bất kỳ lúc nào khi phiên còn `WAITING`.
         409 khi phiên đã bắt đầu.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -1083,7 +1083,7 @@ paths:
         Phiên đã `CLOSED` vẫn trả 200 với `status: CLOSED` để báo "phiên đã kết thúc". Mã không tồn tại
         trả 404 (UC-09 2c). Chỉ đếm lượt tra **mã sai**, tối đa 10 lần mỗi phút mỗi IP (chống dò mã
         PIN); bộ đếm chỉ giữ trong bộ nhớ, không lưu IP (NFR-02).
-      x-status: planned
+      x-status: implemented
       security: []
       parameters:
         - name: accessCode
@@ -1129,7 +1129,7 @@ paths:
         giới hạn bởi `maxParticipants`. Từ đây về sau mỗi request của học sinh gửi `X-Participant-Id`;
         Frontend lưu `participantId` (ví dụ `sessionStorage`) để tiếp tục nếu tải lại trang hoặc mất
         kết nối (UC-09 4b).
-      x-status: planned
+      x-status: implemented
       security: []
       requestBody:
         required: true
@@ -1170,7 +1170,7 @@ paths:
       description: |
         Đổi đội trước khi phiên bắt đầu, chỉ khi `groupingStrategy` là `FREE_CHOICE`
         (403 nếu strategy khác).
-      x-status: planned
+      x-status: implemented
       security:
         - participantId: []
       requestBody:
@@ -1339,7 +1339,7 @@ paths:
         nối lại; cập nhật liên tục đi qua WebSocket. Xếp theo `score` giảm dần, hoà điểm thì tổng
         `timeSpentMs` nhỏ hơn xếp trên. Điểm đội là **điểm trung bình của các thành viên**.
         Dữ liệu dành cho học sinh không chứa `participantId`.
-      x-status: planned
+      x-status: implemented
       security:
         - bearerAuth: []
         - participantId: []
@@ -1374,7 +1374,7 @@ paths:
       description: |
         Dùng cho màn tổng kết (UC-08 bước 6, UC-09 bước 6). `rank` là `null` ở phiên `SELF`; `team` là
         `null` ở phiên không phải `TEAM`. Lời khích lệ hiển thị do Frontend chọn theo tỉ lệ đúng.
-      x-status: planned
+      x-status: implemented
       security:
         - participantId: []
       responses:
@@ -1474,7 +1474,7 @@ paths:
       operationId: adminListTeachers
       summary: Danh sách giáo viên (UC-13)
       description: '`search` khớp tên hoặc email. Phân trang.'
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1523,7 +1523,7 @@ paths:
         Email trùng trả 400 "Email này đã tồn tại trong hệ thống." (UC-13 4a). Dữ liệu sai trả 400 kèm
         `error.details.fields` để Frontend đánh dấu trường lỗi (UC-13 4b). Lỗi lưu trả 500 và giữ nguyên
         trạng thái (UC-13 4c).
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1561,7 +1561,7 @@ paths:
       tags: [Admin]
       operationId: adminGetTeacher
       summary: Chi tiết một giáo viên
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1581,7 +1581,7 @@ paths:
       operationId: adminUpdateTeacher
       summary: Sửa thông tin giáo viên
       description: Chỉ sửa `fullName`, `school`; không đổi email.
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1622,7 +1622,7 @@ paths:
       description: |
         `status` thành `LOCKED` và thu hồi mọi refresh token. Gọi lại vẫn trả 200. Không cho quản trị
         viên tự khoá chính mình (400, đề xuất).
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1648,7 +1648,7 @@ paths:
       operationId: adminUnlockTeacher
       summary: Mở khoá tài khoản giáo viên
       description: '`status` thành `ACTIVE`. Gọi lại vẫn trả 200.'
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1672,7 +1672,7 @@ paths:
       description: |
         Chỉ ghi người dùng đăng nhập (giáo viên, quản trị viên); không ghi IP hay thiết bị của học sinh.
         Mọi endpoint `/admin` cũng được ghi vào Audit Log.
-      x-status: planned
+      x-status: implemented
       x-phase: a
       security:
         - bearerAuth: []
@@ -1738,7 +1738,7 @@ paths:
         Một dịch vụ lỗi vẫn trả dữ liệu các dịch vụ khác (UC-12 2a). `costSource: UNAVAILABLE` thì `cost`
         là `null`; Frontend hiển thị "Chưa có dữ liệu chi phí", không tự đưa giá trị giả định (UC-12 3b).
         Đợt (b) phụ thuộc số liệu sử dụng dịch vụ.
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1791,7 +1791,7 @@ paths:
       tags: [Admin]
       operationId: adminGetSystemStatus
       summary: Sức khoẻ máy chủ (NFR-03)
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1819,7 +1819,7 @@ paths:
       tags: [Admin]
       operationId: adminGetAiConfig
       summary: Phiên bản cấu hình AI đang áp dụng và lịch sử (UC-14)
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1859,7 +1859,7 @@ paths:
         Mỗi lần lưu tạo một phiên bản mới (không sửa phiên bản cũ), kèm mã SHA-256 do server tính
         (NFR-05). Giá trị sai trả 400 "Giá trị cấu hình không hợp lệ. Vui lòng kiểm tra lại các tham
         số..." kèm `error.details.fields`, giữ nguyên cấu hình đang áp dụng (UC-14 4a).
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1890,7 +1890,7 @@ paths:
       summary: Đóng băng một phiên bản làm bản chuẩn
       description: |
         Phiên bản đã đóng băng không sửa được; thay đổi tiếp theo phải tạo phiên bản mới kế thừa.
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1924,7 +1924,7 @@ paths:
       operationId: adminActivateAiConfigVersion
       summary: Khôi phục phiên bản làm bản đang áp dụng
       description: Các lời gọi AI sau đó dùng phiên bản đang áp dụng.
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1945,7 +1945,7 @@ paths:
       tags: [Admin]
       operationId: adminGetBlockedWords
       summary: Danh sách từ cấm an toàn học đường (FLD-25)
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -1966,7 +1966,7 @@ paths:
         Backend nạp lại bộ nhớ (hot reload), không cần khởi động lại. Từ trong danh sách còn áp dụng cho
         nickname và nội dung do giáo viên nhập. Đợt (b) cần chuyển danh sách từ tệp tĩnh sang nơi lưu
         có thể sửa lúc chạy.
-      x-status: planned
+      x-status: implemented
       x-phase: b
       security:
         - bearerAuth: []
@@ -2294,6 +2294,7 @@ components:
         | `ACCOUNT_LOCKED` | 403 | chưa cài | Tài khoản bị quản trị viên khoá |
         | `LOGIN_TEMPORARILY_LOCKED` | 429 | chưa cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
         | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |
+        | `SERVICE_UNAVAILABLE` | 503 | đã cài | Dịch vụ tạm thời không khả dụng (chạm trần chi phí AI, circuit breaker) |
       enum:
         - VALIDATION_ERROR
         - UNAUTHORIZED
@@ -2308,6 +2309,7 @@ components:
         - ACCOUNT_LOCKED
         - LOGIN_TEMPORARILY_LOCKED
         - CONTENT_NOT_AGE_APPROPRIATE
+        - SERVICE_UNAVAILABLE
 
     ErrorBody:
       type: object

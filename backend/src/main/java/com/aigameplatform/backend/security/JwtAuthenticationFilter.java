@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -32,8 +33,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 AuthenticatedTeacher teacher = jwtService.parseAccessToken(header.substring(BEARER_PREFIX.length()));
+                var authorities = List.of(new SimpleGrantedAuthority(teacher.role()));
                 UsernamePasswordAuthenticationToken authentication =
-                        UsernamePasswordAuthenticationToken.authenticated(teacher, null, List.of());
+                        UsernamePasswordAuthenticationToken.authenticated(teacher, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException | IllegalArgumentException e) {
                 // Token không hợp lệ: không đặt Authentication, để entry point trả 401.

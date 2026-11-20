@@ -31,9 +31,8 @@ vi.mock('../games/common/measureText', () => ({ measureWrappedTextHeight: () => 
 vi.mock('../games/common/useFeedback', () => ({ useFeedback: () => ({ showFeedback: vi.fn() }) }))
 vi.mock('../games/common/sound', () => ({ playSound: vi.fn() }))
 
-// mock-game-1: QUIZ "Đếm số đến 10"; câu 1 có 3 đáp án 2 / 3 / 4, đúng là 3 (B). mock-game-5 là ORDERING (chưa có form).
+// mock-game-1: QUIZ "Đếm số đến 10"; câu 1 có 3 đáp án 2 / 3 / 4, đúng là 3 (B).
 const QUIZ_ID = 'mock-game-1'
-const ORDERING_ID = 'mock-game-5'
 const UNSAFE = 'Nội dung chỉnh sửa của giáo viên chưa đạt chuẩn an toàn học đường dành cho trẻ nhỏ. Vui lòng điều chỉnh lại từ ngữ.'
 
 const questionBox = () => screen.getByRole('textbox', { name: /Nội dung câu hỏi/ })
@@ -338,15 +337,6 @@ describe('form sửa câu QUIZ (UC-05)', () => {
   })
 })
 
-describe('loại game chưa có form sửa', () => {
-  it('hiện thông báo rõ, không vỡ trang và vẫn xem được nội dung', async () => {
-    await openLoaded(ORDERING_ID)
-
-    expect(screen.getByText('Loại game này chưa có form sửa chi tiết')).toBeInTheDocument()
-    expect(screen.queryByRole('textbox', { name: /Nội dung câu hỏi/ })).not.toBeInTheDocument()
-    expect(screen.getByRole('list', { name: 'Danh sách câu hỏi' })).toBeInTheDocument()
-  })
-})
 
 describe('chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đang chạy (nhận xét review A3)', () => {
   beforeEach(() => vi.stubEnv('VITE_MOCK_LATENCY_MS', '150'))

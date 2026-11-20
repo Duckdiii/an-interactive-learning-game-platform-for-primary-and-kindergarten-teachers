@@ -46,8 +46,17 @@ public class SecurityConfig {
                 // Logout không nằm trong danh sách này: phải có access token hợp lệ.
                 .requestMatchers(HttpMethod.POST,
                         "/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/interactions").permitAll()
+                .requestMatchers("/ws/live-arena/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/games/shared/*",
+                        "/api/sessions/*/questions", "/sessions/*/questions",
+                        "/api/sessions/by-code/*", "/sessions/by-code/*",
+                        "/api/sessions/*/leaderboard", "/sessions/*/leaderboard",
+                        "/api/sessions/*/my-result", "/sessions/*/my-result").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/games/shared/*/play",
+                        "/api/sessions/*/join", "/sessions/*/join",
+                        "/api/sessions/*/interactions", "/sessions/*/interactions").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/sessions/*/my-team", "/sessions/*/my-team").permitAll()
+                .requestMatchers("/api/admin/**", "/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)
