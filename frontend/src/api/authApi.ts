@@ -40,9 +40,12 @@ export async function loginTeacher(payload: LoginPayload) {
   return response.data.data
 }
 
+// Mạng treo (không lỗi hẳn) thì bỏ chờ, để AuthContext vẫn xóa phiên trên máy dùng chung.
+export const LOGOUT_TIMEOUT_MS = 5_000
+
 // Thu hồi refresh token của phiên hiện tại; Backend trả 204 kèm Set-Cookie xóa cookie.
 export async function logoutTeacher() {
-  await axiosInstance.post('/auth/logout')
+  await axiosInstance.post('/auth/logout', undefined, { timeout: LOGOUT_TIMEOUT_MS })
 }
 
 // Phản hồi luôn giống nhau dù email có tồn tại hay không (Backend chống dò tài khoản).

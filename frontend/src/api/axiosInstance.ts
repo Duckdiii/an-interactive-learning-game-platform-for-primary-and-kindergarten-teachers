@@ -13,6 +13,9 @@ const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api'
 // và gửi lại cookie đó (Path=/api/auth) khi làm mới/đăng xuất.
 const axiosInstance = axios.create({ baseURL, withCredentials: true })
 
+// Refresh treo thì mọi request đang chờ nó (kể cả đăng xuất) treo theo; hết giờ thì các request đó bị từ chối.
+export const REFRESH_TIMEOUT_MS = 10_000
+
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
 }
@@ -112,7 +115,7 @@ axiosInstance.interceptors.response.use(
       const response = await axios.post<RefreshResponse>(
         `${baseURL}/auth/refresh`,
         undefined,
-        { withCredentials: true },
+        { withCredentials: true, timeout: REFRESH_TIMEOUT_MS },
       )
       const { accessToken } = response.data.data
 
