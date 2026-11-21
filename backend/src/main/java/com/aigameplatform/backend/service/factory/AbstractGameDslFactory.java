@@ -10,6 +10,7 @@ import com.aigameplatform.backend.dto.dsl.ai.AiPresentation;
 import com.aigameplatform.backend.dto.dsl.ai.AiQuestion;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
+import com.aigameplatform.backend.service.generation.VisualClozeImageGenerationInput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.random.RandomGenerator;
@@ -56,6 +57,10 @@ public abstract class AbstractGameDslFactory<O extends AiGameOutput, A extends A
     }
 
     public final G create(AiGameOutput output, GameDslRequest request) {
+        return create(output, request, null);
+    }
+
+    public final G create(AiGameOutput output, GameDslRequest request, VisualClozeImageGenerationInput imageInput) {
         if (!outputClass.isInstance(output)) {
             throw new IllegalArgumentException("Loại game " + supportedType + " cần kết quả AI kiểu "
                     + outputClass.getSimpleName() + ", nhưng nhận được "
@@ -67,19 +72,28 @@ public abstract class AbstractGameDslFactory<O extends AiGameOutput, A extends A
 
         List<Q> questions = new ArrayList<>();
         for (int i = 0; i < aiQuestions.size(); i++) {
-            questions.add(createQuestion(aiQuestions.get(i), new QuestionBase(Ids.numbered("q", i), timeLimit, points)));
+            questions.add(createQuestion(aiQuestions.get(i), new QuestionBase(Ids.numbered("q", i), timeLimit, points), imageInput));
         }
         GameMetadata metadata = new GameMetadata(
                 titleOf(output.title(), request.topic()), request.subject(), request.gradeLevel(),
                 truncate(request.topic().strip(), MAX_TOPIC_LENGTH), presentationOf(output.presentation()));
-        return assemble(metadata, new GameplaySettings(GameDefaults.hitboxScale(request.gradeLevel())), questions);
+        return assemble(metadata, new GameplaySettings(GameDefaults.hitboxScale(request.gradeLevel())), questions, imageInput);
     }
 
     protected abstract List<A> aiQuestionsOf(O output);
 
     protected abstract Q createQuestion(A aiQuestion, QuestionBase base);
 
+    protected Q createQuestion(A aiQuestion, QuestionBase base, VisualClozeImageGenerationInput imageInput) {
+        return createQuestion(aiQuestion, base);
+    }
+
     protected abstract G assemble(GameMetadata metadata, GameplaySettings settings, List<Q> questions);
+
+    protected G assemble(GameMetadata metadata, GameplaySettings settings, List<Q> questions,
+            VisualClozeImageGenerationInput imageInput) {
+        return assemble(metadata, settings, questions);
+    }
 
     protected final String schemaVersion() {
         return GameDslSchemaRegistry.SUPPORTED_VERSION;

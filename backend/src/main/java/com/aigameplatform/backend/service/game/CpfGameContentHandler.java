@@ -1,6 +1,8 @@
 package com.aigameplatform.backend.service.game;
 
+import com.aigameplatform.backend.dto.request.GenerateGameRequest;
 import com.aigameplatform.backend.dto.understanding.ChatTurn;
+import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
@@ -43,8 +45,11 @@ public class CpfGameContentHandler implements GameContentHandler {
     }
 
     @Override
-    public GeneratedContent generate(GameType type, String idea, Subject subject, GradeLevel gradeLevel) {
-        JsonNode cpf = generation.generate(idea, subject, gradeLevel);
+    public GeneratedContent generate(GameType type, String idea, GenerateGameRequest request) {
+        if (request.effectiveMode() != VisualClozeMode.TEXT) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Trò chơi ngoài danh mục chưa hỗ trợ chế độ hình ảnh");
+        }
+        JsonNode cpf = generation.generate(idea, request.subject(), request.gradeLevel());
         return new GeneratedContent(cpf.path("metadata").path("title").asString(), SCHEMA_VERSION, List.of(question(cpf)), null);
     }
 

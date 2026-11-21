@@ -46,13 +46,14 @@ class GamesControllerTest {
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     @Mock private GameService games;
+    @Mock private com.aigameplatform.backend.service.GamePublicationService publication;
     private MockMvc mvc;
 
     @BeforeEach
     void setUp() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
-        mvc = MockMvcBuilders.standaloneSetup(new GamesController(games))
+        mvc = MockMvcBuilders.standaloneSetup(new GamesController(games, publication))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setValidator(validator)
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver()).build();

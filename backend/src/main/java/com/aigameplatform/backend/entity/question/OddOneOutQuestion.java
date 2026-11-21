@@ -21,4 +21,12 @@ public class OddOneOutQuestion extends QuestionGame {
     private List<String> items = new ArrayList<>();
     
     private String oddOneOutId;
+
+    @Column(name = "question_text", length = 255)
+    private String questionText;
+
+    @ElementCollection
+    @CollectionTable(name = "odd_one_out_image_items", joinColumns = @JoinColumn(name = "question_id"))
+    @OrderColumn(name = "item_order")
+    private List<com.aigameplatform.backend.entity.question.embedded.OddOneOutImageItem> imageItems = new ArrayList<>();
 }

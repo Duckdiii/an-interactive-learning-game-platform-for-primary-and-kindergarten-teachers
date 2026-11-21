@@ -29,7 +29,9 @@ public class GeminiChatConfiguration {
     GeneratedContentReviewer generatedContentReviewer(
             @org.springframework.beans.factory.annotation.Qualifier("gameGenerationChatModel") ChatModel gameGenerationChatModel,
             tools.jackson.databind.json.JsonMapper mapper,
-            @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName) {
-        return new GeminiGeneratedContentReviewer(gameGenerationChatModel, mapper, modelName);
+            @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName,
+            com.aigameplatform.backend.service.validation.rule.OddOneOutRule oddOneOutRule,
+            com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        return new GeminiGeneratedContentReviewer(gameGenerationChatModel, mapper, modelName, oddOneOutRule, notoCatalog);
     }
 }

@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../App'
 import { setMockScenario } from '../../services/mock/mockRuntime'
+import { RealPlayerApi } from '../api/realPlayerApi'
 
 // Render qua App để kiểm cả việc /play/:shareCode là route công khai (không bị đẩy sang trang đăng nhập).
 function openPlay(path: string) {
@@ -82,11 +83,10 @@ describe('PlayPage (/play/:shareCode)', () => {
     expect(await screen.findByRole('button', { name: 'Bắt đầu' })).toBeInTheDocument()
   })
 
-  it('Backend chưa hỗ trợ (VITE_PLAYER_API=real): báo lỗi nhẹ nhàng và có nút thử lại', async () => {
+  it('VITE_PLAYER_API=real: chọn RealPlayerApi (nhánh "Backend chưa hỗ trợ" đã bị gỡ)', async () => {
     vi.stubEnv('VITE_PLAYER_API', 'real')
-    openPlay('/play/MOCK00')
 
-    expect(await screen.findByRole('heading', { name: 'Ôi, chưa mở được trò chơi' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Thử lại' })).toBeInTheDocument()
+    const { getPlayerApi } = await import('../api')
+    await expect(getPlayerApi()).resolves.toBeInstanceOf(RealPlayerApi)
   })
 })

@@ -29,7 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
  */
 @SpringJUnitConfig({GameDslSchemaRegistry.class, SchemaGameValidator.class, BusinessRuleGameValidator.class,
         SafetyGameValidator.class, com.aigameplatform.backend.service.validation.ContentSafetyCheck.class, BlockedWordList.class, OpenAiModerationClient.class, GameValidationService.class,
-        QuizRule.class, AudioVisualMatchRule.class, OddOneOutRule.class, WordScrambleRule.class, MatchingRule.class,
+        QuizRule.class, AudioVisualMatchRule.class, OddOneOutRule.class, com.aigameplatform.backend.service.media.NotoEmojiCatalog.class, WordScrambleRule.class, MatchingRule.class,
         MemoryCardRule.class, DragDropRule.class, OrderingRule.class, VisualClozeRule.class})
 @ImportAutoConfiguration(JacksonAutoConfiguration.class)
 @TestPropertySource(properties = {

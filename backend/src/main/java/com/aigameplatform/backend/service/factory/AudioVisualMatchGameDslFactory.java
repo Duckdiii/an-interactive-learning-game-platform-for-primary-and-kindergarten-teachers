@@ -17,8 +17,11 @@ import org.springframework.stereotype.Component;
 public class AudioVisualMatchGameDslFactory extends AbstractGameDslFactory<AudioVisualMatchAiOutput,
         AudioVisualMatchAiQuestion, AudioVisualMatchQuestionDsl, AudioVisualMatchGameDsl> {
 
-    public AudioVisualMatchGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog;
+
+    public AudioVisualMatchGameDslFactory(RandomGenerator random, GameAssetCatalog assets, com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
         super(GameType.AUDIO_VISUAL_MATCH, AudioVisualMatchAiOutput.class, random, assets);
+        this.notoCatalog = notoCatalog;
     }
 
     @Override
@@ -41,5 +44,32 @@ public class AudioVisualMatchGameDslFactory extends AbstractGameDslFactory<Audio
 
     private ImageChoiceDsl image(AiImage ai) {
         return new ImageChoiceDsl(ai.visualPrompt(), imageOf(ai.asset()));
+    }
+
+    public AudioVisualMatchGameDsl createCatalog(com.aigameplatform.backend.dto.dsl.ai.AiGameOutput output,
+            GameDslRequest request) {
+        if (!(output instanceof AudioVisualMatchAiOutput avm)) throw new IllegalArgumentException("AVM output required");
+        var catalog = notoCatalog;
+        var questions = new java.util.ArrayList<AudioVisualMatchQuestionDsl>();
+        for (int i = 0; i < avm.questions().size(); i++) {
+            var question = avm.questions().get(i);
+            var correct = catalog.find(question.correct().visualPrompt()).orElseThrow();
+            var distractors = question.distractors().stream().map(choice -> {
+                var asset = catalog.find(choice.visualPrompt()).orElseThrow();
+                return new ImageChoiceDsl(asset.label(), asset.imageUrl());
+            }).toList();
+            questions.add(new AudioVisualMatchQuestionDsl(Ids.numbered("q", i),
+                    GameDefaults.timeLimitSeconds(GameType.AUDIO_VISUAL_MATCH, request.gradeLevel()),
+                    GameDefaults.points(GameType.AUDIO_VISUAL_MATCH), question.audioText(), null, null, null,
+                    new ImageChoiceDsl(correct.label(), correct.imageUrl()), distractors));
+        }
+        String topic = request.topic().strip();
+        String title = topic.codePointCount(0, topic.length()) <= 100 ? topic
+                : topic.substring(0, topic.offsetByCodePoints(0, 100)).strip();
+        String limitedTopic = topic.codePointCount(0, topic.length()) <= 200 ? topic
+                : topic.substring(0, topic.offsetByCodePoints(0, 200)).strip();
+        return new AudioVisualMatchGameDsl(schemaVersion(), supportedType(),
+                new GameMetadata(title, request.subject(), request.gradeLevel(), limitedTopic),
+                new GameplaySettings(GameDefaults.hitboxScale(request.gradeLevel())), questions);
     }
 }

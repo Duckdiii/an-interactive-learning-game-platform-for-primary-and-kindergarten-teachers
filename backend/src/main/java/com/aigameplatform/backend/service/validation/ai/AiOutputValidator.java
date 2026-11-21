@@ -50,6 +50,8 @@ public class AiOutputValidator {
             GameType.VISUAL_CLOZE, VisualClozeAiOutput.class);
 
     private final Map<GameType, Schema> schemas = new EnumMap<>(GameType.class);
+    private final Schema visualClozeImageSchema;
+    private final Schema oddImageSchema;
     private final JsonMapper jsonMapper;
 
     public AiOutputValidator(JsonMapper jsonMapper) {
@@ -60,9 +62,15 @@ public class AiOutputValidator {
         for (GameType type : GameType.dslTypes()) {
             schemas.put(type, registry.getSchema(AiOutputSchemas.rawJson(type), InputFormat.JSON));
         }
+        visualClozeImageSchema = registry.getSchema(AiOutputSchemas.visualClozeImageRawJson(), InputFormat.JSON);
+        oddImageSchema = registry.getSchema(AiOutputSchemas.oddImageRawJson(), InputFormat.JSON);
     }
 
     public AiOutputReport validate(GameType type, String rawJson) {
+        return validate(type, rawJson, false);
+    }
+
+    public AiOutputReport validate(GameType type, String rawJson, boolean imageMode) {
         if (rawJson == null || rawJson.isBlank()) {
             return failed("Không có nội dung JSON");
         }
@@ -73,7 +81,10 @@ public class AiOutputValidator {
             return failed("Không phải JSON hợp lệ: " + e.getOriginalMessage());
         }
 
-        Schema schema = schemas.get(type);
+        if (imageMode && type != GameType.VISUAL_CLOZE && type != GameType.ODD_ONE_OUT) {
+            return failed("Image mode is not supported for this game type");
+        }
+        Schema schema = imageMode ? (type == GameType.ODD_ONE_OUT ? oddImageSchema : visualClozeImageSchema) : schemas.get(type);
         if (schema == null) {
             return failed("Loại game " + type + " không có dạng đầu ra AI theo DSL v1.0.0");
         }

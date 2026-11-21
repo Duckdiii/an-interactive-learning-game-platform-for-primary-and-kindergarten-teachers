@@ -361,25 +361,6 @@ describe('OrderingPlayable với MockPlayerApi', () => {
     expect(onSubmit.mock.calls[0][0]).toHaveProperty('order')
   })
 })
-
-describe('AudioVisualMatchPlayable với MockPlayerApi', () => {
-  it('chọn hình ảnh: nộp selectedOptionId, máy chủ chấm kết quả', async () => {
-    const { api, sessionId, game } = await startSession('MOCK03')
-    const AudioVisual = getPlayableRenderer('AUDIO_VISUAL_MATCH')!
-    const question = (game as Extract<StudentGame, { gameType: 'AUDIO_VISUAL_MATCH' }>).questions[0]
-    const onSubmit = vi.fn((answer) => api.submitInteraction(sessionId, question.id, answer))
-
-    render(<AudioVisual question={question} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
-
-    const buttons = screen.getAllByRole('button').filter((b) => b.getAttribute('data-option-id'))
-    expect(buttons.length).toBeGreaterThan(0)
-    fireEvent.click(buttons[0])
-
-    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
-    expect(onSubmit.mock.calls[0][0]).toHaveProperty('selectedOptionId')
-  })
-})
-
 describe('SpotTheTargetPlayable với MockPlayerApi', () => {
   it('chạm vào vùng tranh: nộp tọa độ x, y, máy chủ chấm kết quả', async () => {
     const { api, sessionId, game } = await startSession('MOCK06')

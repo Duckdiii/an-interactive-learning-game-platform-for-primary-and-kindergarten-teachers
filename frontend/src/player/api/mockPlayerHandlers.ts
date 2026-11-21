@@ -44,7 +44,8 @@ export const MOCK_HANDLERS: Record<GameType, AnyHandler> = {
   }),
 
   ODD_ONE_OUT: define<'ODD_ONE_OUT'>({
-    toStudent: ({ oddOneOutId: _drop, items, ...rest }, seed) => ({ ...rest, items: seededShuffle(items, seed) }),
+    toStudent: ({ oddOneOutId: _drop, items, ...rest }, seed) => ({ ...rest,
+      ...(rest.questionText ? { renderMode: 'IMAGE' as const } : {}), items: seededShuffle(items, seed) }),
     correct: (q) => ({ selectedItemId: q.oddOneOutId }),
     isCorrect: (q, _seed, a) => a.selectedItemId === q.oddOneOutId,
   }),
@@ -116,9 +117,29 @@ export const MOCK_HANDLERS: Record<GameType, AnyHandler> = {
   }),
 
   VISUAL_CLOZE: define<'VISUAL_CLOZE'>({
-    toStudent: ({ correctAnswer, distractors, ...rest }, seed) => ({ ...rest, options: seededShuffle([correctAnswer, ...distractors], seed) }),
-    correct: (q) => ({ answer: q.correctAnswer }),
-    isCorrect: (q, _seed, a) => normalize(a.answer) === normalize(q.correctAnswer),
+    toStudent: (q, seed) => {
+      if ('sceneImageUrl' in q) {
+        const blanks = q.blanks.map(({ correctOptionId: _drop, ...blank }) => blank)
+
+        return { ...q, blanks, options: seededShuffle(q.options, seed) }
+      }
+
+      const { correctAnswer, distractors, ...rest } = q
+
+      return { ...rest, options: seededShuffle([correctAnswer, ...distractors], seed) }
+    },
+    correct: (q) => 'sceneImageUrl' in q
+      ? { placements: q.blanks.map((blank) => ({ blankId: blank.id, optionId: blank.correctOptionId })) }
+      : { answer: q.correctAnswer },
+    isCorrect: (q, _seed, a) => {
+      if ('sceneImageUrl' in q) {
+        return 'placements' in a && q.blanks.length === a.placements.length && q.blanks.every((blank) =>
+          a.placements.some((placement) => placement.blankId === blank.id && placement.optionId === blank.correctOptionId),
+        )
+      }
+
+      return 'answer' in a && normalize(a.answer) === normalize(q.correctAnswer)
+    },
   }),
 }
 

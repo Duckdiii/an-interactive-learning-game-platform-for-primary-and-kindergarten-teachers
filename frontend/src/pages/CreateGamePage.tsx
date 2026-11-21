@@ -5,6 +5,9 @@ import Button from '../components/Button'
 import CreateGamesProgress from '../components/create/CreateGamesProgress'
 import CreateProgressPanel from '../components/create/CreateProgressPanel'
 import GameTypeSuggestionStep from '../components/create/GameTypeSuggestionStep'
+import VisualClozeSetupForm from '../components/create/VisualClozeSetupForm'
+import OddOneOutSetupForm from '../components/create/OddOneOutSetupForm'
+import type { VisualClozeImageOptionInput } from '../components/create/VisualClozeSetupForm'
 import IdeaSuggestions from '../components/create/IdeaSuggestions'
 import LessonContextPicker from '../components/create/LessonContextPicker'
 import RequestChat from '../components/create/RequestChat'
@@ -68,6 +71,15 @@ export default function CreateGamePage() {
   const [step, setStep] = useState<Step>('describe')
   const [mode, setMode] = useState<Mode>('idea')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [visualClozeSetupOpen, setVisualClozeSetupOpen] = useState(false)
+  const [oddSetupOpen, setOddSetupOpen] = useState(false)
+  const [oddOneOutMode, setOddOneOutMode] = useState<'TEXT' | 'IMAGE'>('TEXT')
+  const [visualClozeMode, setVisualClozeMode] = useState<'TEXT' | 'IMAGE'>('TEXT')
+  const [sceneImageUrl, setSceneImageUrl] = useState('')
+  const [optionImages, setOptionImages] = useState<VisualClozeImageOptionInput[]>([
+    { imageUrl: '', visualPrompt: '' },
+    { imageUrl: '', visualPrompt: '' },
+  ])
   const navigate = useNavigate()
   const creation = useCreateGames()
   const progressRef = useRef<HTMLDivElement>(null)
@@ -238,6 +250,10 @@ export default function CreateGamePage() {
       voiceGender: voice.voiceGender,
       hasFile: file !== null,
       theme: deduceThemeFromText(lastInput.current.idea).theme,
+      visualClozeMode,
+      oddOneOutMode,
+      sceneImageUrl,
+      optionImages,
     }
     setCreatingInput({ idea: form.idea, gradeLevel: form.gradeLevel })
     const running = creation.create(types.map((type) => buildGenerateRequest(form, mode, type)))
@@ -498,12 +514,48 @@ export default function CreateGamePage() {
               }
               onUse={(type) => {
                 setSelectedTypes([type])
-                void createSelected([type])
+                if (type === 'VISUAL_CLOZE') {
+                  setVisualClozeSetupOpen(true)
+                  setOddSetupOpen(false)
+                  setVisualClozeMode('TEXT')
+                } else if (type === 'ODD_ONE_OUT') {
+                  setVisualClozeSetupOpen(false)
+                  setOddSetupOpen(true)
+                  setOddOneOutMode('TEXT')
+                } else {
+                  setVisualClozeSetupOpen(false)
+                  setOddSetupOpen(false)
+                  void createSelected([type])
+                }
               }}
               onBack={backToDescribe}
               onRetry={retrySuggestions}
             />
           )}
+
+          {step === 'suggest' && visualClozeSetupOpen ? (
+            <VisualClozeSetupForm
+              mode={visualClozeMode}
+              sceneImageUrl={sceneImageUrl}
+              optionImages={optionImages}
+              onModeChange={setVisualClozeMode}
+              onSceneImageUrlChange={setSceneImageUrl}
+              onOptionImagesChange={setOptionImages}
+              onCreate={() => {
+                setVisualClozeSetupOpen(false)
+                void createSelected(['VISUAL_CLOZE'])
+              }}
+              onCancel={() => {
+                setVisualClozeSetupOpen(false)
+                setSelectedTypes([])
+              }}
+            />
+          ) : null}
+
+          {step === 'suggest' && oddSetupOpen ? <OddOneOutSetupForm mode={oddOneOutMode}
+            onModeChange={setOddOneOutMode}
+            onCreate={() => { setOddSetupOpen(false); void createSelected(['ODD_ONE_OUT']) }}
+            onCancel={() => { setOddSetupOpen(false); setSelectedTypes([]) }} /> : null}
 
           {step === 'suggest' && file !== null ? (
             <p className="flex items-start gap-2 text-sm text-ink-soft">
@@ -512,7 +564,7 @@ export default function CreateGamePage() {
             </p>
           ) : null}
 
-          {step !== 'describe' ? (
+          {step !== 'describe' && !visualClozeSetupOpen && !oddSetupOpen ? (
             <CreateGamesProgress
               ref={progressRef}
               types={selectedTypes}

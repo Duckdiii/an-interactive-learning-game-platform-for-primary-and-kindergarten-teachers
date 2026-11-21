@@ -47,6 +47,9 @@ class GameServiceTest {
     private final GameContentHandler cpf = mock(GameContentHandler.class);
     private final AiRequestRateLimiter limiter = mock(AiRequestRateLimiter.class);
     private final GameCurriculumReviewService curriculumReviews = mock(GameCurriculumReviewService.class);
+    @SuppressWarnings("unchecked")
+    private final org.springframework.beans.factory.ObjectProvider<com.aigameplatform.backend.service.curriculum.CurriculumCatalog> catalogs =
+            mock(org.springframework.beans.factory.ObjectProvider.class);
     private GameService service;
 
     @BeforeEach
@@ -64,7 +67,7 @@ class GameServiceTest {
         when(teachers.getReferenceById(anyString())).thenAnswer(inv -> teacher(inv.getArgument(0)));
         when(curriculumReviews.saveEditedGame(any(), anyString())).thenAnswer(inv -> inv.getArgument(0));
         service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews);
+                curriculumReviews, catalogs, new java.util.Random(7));
     }
 
     private static Teacher teacher(String id) {
@@ -92,7 +95,7 @@ class GameServiceTest {
 
     @Test
     void generatedGameIsSavedAsDraftOwnedByTheTeacherViaTheMatchingHandler() {
-        when(cpf.generate(eq(GameType.CUSTOM), anyString(), any(), any())).thenReturn(
+        when(cpf.generate(eq(GameType.CUSTOM), anyString(), any())).thenReturn(
                 new GameContentHandler.GeneratedContent("Hứng táo", "2.0.0", List.of(new CpfQuestion()), null));
 
         ObjectNode response = service.generate(OWNER, request("Bé kéo giỏ hứng táo số chẵn", null, GameType.CUSTOM));
@@ -107,7 +110,7 @@ class GameServiceTest {
         assertThat(response.path("gameId").asString()).isEqualTo("game-new");
         assertThat(response.path("status").asString()).isEqualTo("DRAFT");
         assertThat(response.path("updatedAt").asString()).isEqualTo("2026-11-07T00:00:00Z");
-        verify(dsl, never()).generate(any(), any(), any(), any());
+        verify(dsl, never()).generate(any(), any(), any());
     }
 
     @Test
@@ -118,12 +121,32 @@ class GameServiceTest {
 
     @Test
     void randomTopicGivesTheDslHandlerAGeneratedTopic() {
-        when(dsl.generate(eq(GameType.QUIZ), anyString(), any(), any()))
+        when(dsl.generate(eq(GameType.QUIZ), anyString(), any()))
                 .thenReturn(new GameContentHandler.GeneratedContent("Quiz", "1.0.0", List.of(), null));
 
         service.generate(OWNER, request(null, true, null));
 
-        verify(dsl).generate(GameType.QUIZ, GameService.RANDOM_TOPIC, Subject.MATH, GradeLevel.GRADE_1);
+        verify(dsl).generate(eq(GameType.QUIZ), eq(GameService.RANDOM_TOPIC), any());
+    }
+
+    @Test
+    void randomTopicPicksAReviewedCurriculumOutcomeWhenTheCatalogIsAvailable() {
+        var catalog = mock(com.aigameplatform.backend.service.curriculum.CurriculumCatalog.class);
+        var dataset = mock(com.aigameplatform.backend.service.curriculum.CurriculumDataset.class);
+        var outcome = mock(com.aigameplatform.backend.service.curriculum.CurriculumChunk.class);
+        when(outcome.topic()).thenReturn("Đếm đến 10");
+        var control = mock(com.aigameplatform.backend.service.curriculum.CurriculumChunk.class);
+        when(control.control()).thenReturn(true);
+        when(control.topic()).thenReturn("Đoạn kiểm soát");
+        when(catalogs.getIfAvailable()).thenReturn(catalog);
+        when(catalog.requireDataset(Subject.MATH, GradeLevel.GRADE_1)).thenReturn(dataset);
+        when(dataset.chunks()).thenReturn(List.of(control, outcome));
+        when(dsl.generate(eq(GameType.QUIZ), anyString(), any()))
+                .thenReturn(new GameContentHandler.GeneratedContent("Quiz", "1.0.0", List.of(), null));
+
+        service.generate(OWNER, request(null, true, null));
+
+        verify(dsl).generate(eq(GameType.QUIZ), eq("Đếm đến 10"), any());
     }
 
     @Test
@@ -177,7 +200,7 @@ class GameServiceTest {
     @Test
     void generatedGameWithCurriculumResultIsSavedTogetherWithItsReview() {
         GenerationResult result = mock(GenerationResult.class);
-        when(dsl.generate(eq(GameType.QUIZ), anyString(), any(), any()))
+        when(dsl.generate(eq(GameType.QUIZ), anyString(), any()))
                 .thenReturn(new GameContentHandler.GeneratedContent("Quiz", "1.0.0", List.of(), null, result));
         when(curriculumReviews.saveWithGame(any(), eq(result), eq(OWNER))).thenAnswer(inv -> {
             Game g = inv.getArgument(0);
@@ -281,7 +304,7 @@ class GameServiceTest {
     void aFailedRevisionFreesTheTeachersSlotForTheNextOne() {
         var realLimiter = new AiRequestRateLimiter(java.time.Clock.systemUTC());
         var withLimiter = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, realLimiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews);
+                curriculumReviews, catalogs, new java.util.Random(7));
         when(games.findById("g1")).thenReturn(Optional.of(game("g1", OWNER, GameType.QUIZ)));
         when(dsl.revise(any(), any(), any())).thenThrow(new ApiException(ErrorCode.UNSAFE_CONTENT, "x"))
                 .thenReturn(MAPPER.createObjectNode().put("gameType", "QUIZ"));

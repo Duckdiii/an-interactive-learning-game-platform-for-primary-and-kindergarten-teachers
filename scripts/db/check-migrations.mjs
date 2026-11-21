@@ -10,6 +10,14 @@ import { fileURLToPath } from "node:url";
 export const MIGRATION_DIR = "backend/src/main/resources/db/migration";
 export const RESOURCES_DIR = "backend/src/main/resources";
 const NAME = /^V(\d+)__[a-z0-9_]+\.sql$/;
+
+// Ngoại lệ một lần khi gộp dev vào main (2026-11-21, docs/corrections.md): DB dùng chung đã áp V7–V9 của dev, còn V7–V9
+// của main chưa từng chạy nên được xoá và viết lại thành V17–V19. Chỉ đúng các tên này; không thêm tên mới vào đây.
+export const ONE_TIME_RENUMBER = {
+  removed: new Set(["V7__visual_cloze_image_mode.sql", "V8__self_play_answer_state.sql",
+    "V9__allow_in_progress_interactions.sql"]),
+  addedBelowBase: new Set(["V7__cpf_custom_game.sql", "V8__game_updated_at.sql", "V9__game_presentation.sql"]),
+};
 const versionOf = (file) => Number(NAME.exec(file)?.[1]);
 const base = (path) => path.split("/").pop();
 
@@ -22,6 +30,8 @@ export function checkMigrations({ baseFiles, currentFiles, changes, configs }) {
   const inBase = new Set(baseFiles);
   for (const { status, path, oldPath } of changes) {
     const touched = oldPath ? base(oldPath) : base(path);
+    // Xoá hoặc git nhận là đổi tên (V9 → V19 giống nhau một phần) đều là bỏ file cũ của main.
+    if ((status === "D" || status === "R") && ONE_TIME_RENUMBER.removed.has(touched)) continue;
     if (status !== "A" && inBase.has(touched)) {
       const verb = { M: "bị sửa", D: "bị xoá", R: "bị đổi tên" }[status[0]] ?? `thay đổi (${status})`;
       errors.push(`${touched} đã có ở base nhưng ${verb}: chỉ được thêm migration mới`);
@@ -35,7 +45,7 @@ export function checkMigrations({ baseFiles, currentFiles, changes, configs }) {
     seen.set(v, f);
   }
   const baseMax = Math.max(0, ...baseFiles.filter((f) => NAME.test(f)).map(versionOf));
-  for (const f of currentFiles.filter((f) => NAME.test(f) && !inBase.has(f))) {
+  for (const f of currentFiles.filter((f) => NAME.test(f) && !inBase.has(f) && !ONE_TIME_RENUMBER.addedBelowBase.has(f))) {
     if (versionOf(f) <= baseMax) errors.push(`${f}: migration mới phải có version > V${baseMax} (lớn nhất ở base)`);
   }
   for (const [name, text] of Object.entries(configs)) {

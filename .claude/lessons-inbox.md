@@ -17,6 +17,20 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-21 — Đề xuất đánh số lại migration mà quên migration đã áp trên DB nhưng không có ở nhánh đích
+- Lỗi: phương án A (main V7–V9 → V17–V19) được đưa cho người dùng chọn mà không nói rằng DB dùng chung đã áp V12–V16 của các nhánh feature chưa vào `dev`/`main`. Khi nhánh có V17 trở lên mà thiếu file V12–V16, Flyway coi V12–V16 là "missing" (mặc định chỉ bỏ qua `*:future`), nên backend không khởi động được với DB dùng chung cho tới khi các nhánh đó được merge hoặc đặt `ignore-migration-patterns`. Thêm nữa, đề xuất ban đầu không lường trước việc phải gộp hai bản cài đặt `/api/games` song song.
+- Phát hiện nhờ: tự rà lại khi viết V17–V19 trong lúc merge.
+- Nguyên nhân gốc: chỉ so file migration của hai nhánh với nhau, không so cả danh sách version trên DB với file của nhánh đích sau khi merge; chỉ xem phần migration mà không ước lượng toàn bộ xung đột merge (`git merge-tree`) trước khi đề xuất.
+- Cách chặn: đề xuất: trước khi đề xuất đổi số migration, đối chiếu `flyway_schema_history` với file của nhánh đích (máy làm được: script so sánh danh sách version DB và repo, báo cả "missing" lẫn "future"); trước khi hứa một merge, chạy `git merge-tree --write-tree` để biết khối lượng xung đột.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-21 — Thay chuỗi bằng regex qua script, ghi `\&\&` thay vì `&&` vào code TSX
+- Lỗi: dùng `scripts/tmp/regex-replace.mjs` với chuỗi thay có `\&\&`; JavaScript `replace` giữ nguyên dấu `\`, làm `CreateGamePage.tsx` và `mockGames.ts` có `\&\&`. Lặp hai lần trong cùng phiên.
+- Phát hiện nhờ: `tsc` (lỗi "Invalid character") và tự đọc lại đoạn đã thay.
+- Nguyên nhân gốc: viết chuỗi thay theo thói quen escape của sed; `$` mới là ký tự đặc biệt trong chuỗi thay của JS, `&` thì không.
+- Cách chặn: đã sửa và kiểm bằng `tsc`; đề xuất dùng Edit cho thay đổi có toán tử/ký tự đặc biệt, script regex chỉ cho mẫu không có `\`.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-15 — Đặt `@EnabledIf` ở lớp test cha, tưởng lớp con kế thừa; ghi "máy không có Docker thì bỏ qua" khi chưa thử nhánh đó
 - Lỗi: `AbstractPostgresTest` gắn `@EnabledIf(dockerAvailableOrCi)`, nhưng annotation này không `@Inherited` nên không có tác dụng ở lớp con. Ép điều kiện thành `false` thì 2 lớp test vẫn chạy. Máy dev không có Docker sẽ đỏ thay vì bỏ qua như comment và `corrections` ghi.
 - Phát hiện nhờ: `reviewer` (đọc javap + `AnnotationUtils`), xác nhận bằng cách ép điều kiện `false` rồi chạy.

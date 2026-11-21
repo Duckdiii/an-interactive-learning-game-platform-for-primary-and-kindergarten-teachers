@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useReducer, useRef } from 'react'
 import { viText } from '../../constants/viText'
 import type { GameDsl } from '../../types/game-dsl.types'
-import { summarizeQuestions } from '../../utils/questionSummary'
 import { resolveUiProfile } from '../../player/profile/resolveUiProfile'
 import { UiProfileProvider } from '../../player/profile/UiProfileContext'
+import { summarizeQuestions } from '../../utils/questionSummary'
 import { resolveTheme } from '../../player/theme/resolveTheme'
 import { ThemeProvider } from '../../player/theme/ThemeContext'
 import { PresentationProvider } from '../../player/theme/PresentationContext'
@@ -101,6 +101,7 @@ export default function PlayTestPanel({ game, seed, onExit }: PlayTestPanelProps
             <div key={`${state.index}-${state.attempt}`} className="question-in relative z-10 rounded-2xl bg-white/95 p-3 sm:p-4 shadow-sm backdrop-blur-xs">
               <Player
                 question={question}
+                subject={game.metadata.subject}
                 onResult={(isCorrect) => dispatch({ type: 'answered', isCorrect })}
               />
             </div>

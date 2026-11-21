@@ -44,7 +44,7 @@ const rejectedMessage = (error: unknown) => {
 }
 
 // Phiên đã lưu mà máy chủ không còn (hết hạn, đã xóa): bỏ phiên cũ và tạo phiên mới.
-const isSessionGone = (error: unknown) => axios.isAxiosError(error) && [404, 410].includes(error.response?.status ?? 0)
+const isSessionGone = (error: unknown) => axios.isAxiosError(error) && [404, 409, 410].includes(error.response?.status ?? 0)
 
 // Chỉ sessionId được dùng sau khi vào chơi; các trường còn lại của PlayerSession không cần lưu.
 const sessionFromStored = (stored: StoredSession): PlayerSession => ({ ...stored, sessionType: 'SELF', status: 'ACTIVE', expiresAt: '' })
@@ -62,7 +62,7 @@ export default function PlayController({ shareCode, info }: PlayControllerProps)
   const [startError, setStartError] = useState<unknown>(null)
   const [draft, setDraft] = useState('')
   const [nicknameError, setNicknameError] = useState<string | null>(null)
-  const [autoRead, setAutoRead] = useState(profile.audio.autoReadPrompt)
+  const [autoRead, setAutoRead] = useState(profile.audio.autoReadPrompt || info.gameType === 'AUDIO_VISUAL_MATCH')
   const [tapPending, setTapPending] = useState(false)
   // "Người lớn: vẫn chơi màn dọc": bỏ màn nhắc xoay máy cho tới hết lượt chơi.
   const [stayPortrait, setStayPortrait] = useState(false)
@@ -244,6 +244,8 @@ export default function PlayController({ shareCode, info }: PlayControllerProps)
         <>
         {needsRotate ? <RotatePrompt onStayPortrait={() => setStayPortrait(true)} /> : null}
         <QuestionStage
+          gameType={info.gameType}
+          subject={info.metadata.subject}
           covered={needsRotate}
           key={question.id}
           api={api}

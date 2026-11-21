@@ -96,6 +96,7 @@ class AssetBindingGameContentGeneratorTest {
             context.registerBean(GameContentStrategyRegistry.class,
                     () -> new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
             context.registerBean(GameAssetCatalog.class, () -> CATALOG);
+            context.registerBean(com.aigameplatform.backend.service.media.NotoEmojiCatalog.class);
             context.registerBean(com.aigameplatform.backend.service.asset.AssetRetriever.class, () -> mock(com.aigameplatform.backend.service.asset.AssetRetriever.class));
             context.registerBean(AssetBinder.class, () -> binder);
 
@@ -123,6 +124,7 @@ class AssetBindingGameContentGeneratorTest {
             context.registerBean(GameContentStrategyRegistry.class,
                     () -> new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
             context.registerBean(GameAssetCatalog.class, () -> CATALOG);
+            context.registerBean(com.aigameplatform.backend.service.media.NotoEmojiCatalog.class);
             context.registerBean(com.aigameplatform.backend.service.asset.AssetRetriever.class, () -> mock(com.aigameplatform.backend.service.asset.AssetRetriever.class));
             context.registerBean(AssetBinder.class, () -> binder);
 

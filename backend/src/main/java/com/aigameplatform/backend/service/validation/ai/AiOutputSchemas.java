@@ -19,6 +19,9 @@ public final class AiOutputSchemas {
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
     private static final Map<GameType, String> RAW = new ConcurrentHashMap<>();
     private static final Map<GameType, String> FOR_LLM = new ConcurrentHashMap<>();
+    private static volatile String VISUAL_CLOZE_IMAGE_RAW;
+    private static volatile String VISUAL_CLOZE_IMAGE_FOR_LLM;
+    private static volatile String ODD_IMAGE_RAW;
 
     private AiOutputSchemas() {
     }
@@ -36,6 +39,63 @@ public final class AiOutputSchemas {
             schema.remove("title");
             return MAPPER.writeValueAsString(schema);
         });
+    }
+
+    public static String visualClozeImageRawJson() {
+        if (VISUAL_CLOZE_IMAGE_RAW == null) {
+            synchronized (AiOutputSchemas.class) {
+                if (VISUAL_CLOZE_IMAGE_RAW == null) {
+                    VISUAL_CLOZE_IMAGE_RAW = loadImageSchema();
+                }
+            }
+        }
+        return VISUAL_CLOZE_IMAGE_RAW;
+    }
+
+    public static String visualClozeImageForLlm() {
+        if (VISUAL_CLOZE_IMAGE_FOR_LLM == null) {
+            synchronized (AiOutputSchemas.class) {
+                if (VISUAL_CLOZE_IMAGE_FOR_LLM == null) {
+                    ObjectNode schema = (ObjectNode) MAPPER.readTree(visualClozeImageRawJson());
+                    schema.remove("$schema");
+                    schema.remove("title");
+                    VISUAL_CLOZE_IMAGE_FOR_LLM = MAPPER.writeValueAsString(schema);
+                }
+            }
+        }
+        return VISUAL_CLOZE_IMAGE_FOR_LLM;
+    }
+
+    public static String oddImageRawJson() {
+        if (ODD_IMAGE_RAW == null) {
+            synchronized (AiOutputSchemas.class) {
+                if (ODD_IMAGE_RAW == null) {
+                    try (InputStream in = AiOutputSchemas.class.getResourceAsStream(
+                            "/schema/game-ai-output/1.1.0/odd-one-out-image.schema.json")) {
+                        if (in == null) throw new IllegalStateException("Missing Odd One Out IMAGE AI schema");
+                        ODD_IMAGE_RAW = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                    } catch (IOException e) { throw new UncheckedIOException(e); }
+                }
+            }
+        }
+        return ODD_IMAGE_RAW;
+    }
+
+    public static String oddImageForLlm() {
+        ObjectNode schema = (ObjectNode) MAPPER.readTree(oddImageRawJson());
+        schema.remove("$schema");
+        schema.remove("title");
+        return MAPPER.writeValueAsString(schema);
+    }
+
+    private static String loadImageSchema() {
+        String resource = "/schema/game-ai-output/1.1.0/visual-cloze-image.schema.json";
+        try (InputStream in = AiOutputSchemas.class.getResourceAsStream(resource)) {
+            if (in == null) throw new IllegalStateException("Missing AI output schema: " + resource);
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not read AI output schema: " + resource, e);
+        }
     }
 
     private static String load(GameType type) {

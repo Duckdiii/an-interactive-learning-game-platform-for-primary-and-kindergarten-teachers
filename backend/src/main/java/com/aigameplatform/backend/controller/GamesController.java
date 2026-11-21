@@ -8,9 +8,11 @@ import com.aigameplatform.backend.entity.enums.GameStatus;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
+import com.aigameplatform.backend.service.GamePublicationService;
 import com.aigameplatform.backend.service.game.GameService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,15 +26,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.JsonNode;
 
-/** Nhóm Games theo docs/openapi/openapi.yaml (generate, list, get, update, delete); chỉ điều phối, nghiệp vụ ở {@link GameService}. */
+/**
+ * Nhóm Games theo docs/openapi/openapi.yaml (generate, list, get, update, publish, revise, delete); chỉ điều phối, nghiệp vụ
+ * ở {@link GameService} và {@link GamePublicationService}.
+ */
 @RestController
 @RequestMapping("/api/games")
 public class GamesController {
 
     private final GameService games;
+    private final GamePublicationService publication;
 
-    public GamesController(GameService games) {
+    public GamesController(GameService games, GamePublicationService publication) {
         this.games = games;
+        this.publication = publication;
     }
 
     @PostMapping("/generate")
@@ -60,6 +67,12 @@ public class GamesController {
     public ResponseEntity<ApiResponse<JsonNode>> update(@PathVariable String gameId, @RequestBody JsonNode body,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
         return ResponseEntity.ok(ApiResponse.ok(games.update(teacherId(teacher), gameId, body)));
+    }
+
+    @PostMapping("/{gameId}/publish")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> publish(@PathVariable String gameId,
+            @RequestBody(required = false) JsonNode body, @AuthenticationPrincipal AuthenticatedTeacher teacher) {
+        return ResponseEntity.ok(ApiResponse.ok(publication.publish(gameId, body, teacher)));
     }
 
     @PostMapping("/{gameId}/revise")

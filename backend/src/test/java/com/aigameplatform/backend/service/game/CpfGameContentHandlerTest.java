@@ -35,6 +35,20 @@ class CpfGameContentHandlerTest {
             new ContentSafetyCheck(new BlockedWordList(List.of("cứt")), mock(ContentModerationClient.class), false), MAPPER);
     private final CpfGameContentHandler handler = new CpfGameContentHandler(generation, validation, MAPPER);
 
+    private static com.aigameplatform.backend.dto.request.GenerateGameRequest request(String idea) {
+        return new com.aigameplatform.backend.dto.request.GenerateGameRequest(Subject.MATH, GradeLevel.GRADE_1, idea, null,
+                GameType.CUSTOM, null);
+    }
+
+    @Test
+    void imageModeIsRejectedForCustomGames() {
+        var image = new com.aigameplatform.backend.dto.request.GenerateGameRequest(Subject.MATH, GradeLevel.GRADE_1,
+                "Hứng táo rơi đúng số", null, GameType.CUSTOM,
+                com.aigameplatform.backend.entity.enums.VisualClozeMode.IMAGE, null, null, null);
+        assertThatThrownBy(() -> handler.generate(GameType.CUSTOM, "Hứng táo rơi đúng số", image))
+                .isInstanceOf(ApiException.class).hasMessageContaining("chế độ hình ảnh");
+    }
+
     private static ObjectNode example(String name) throws Exception {
         try (InputStream in = CpfGameContentHandlerTest.class.getResourceAsStream("/cpf-examples/" + name + ".json")) {
             return (ObjectNode) MAPPER.readTree(in);
@@ -44,7 +58,7 @@ class CpfGameContentHandlerTest {
     private Game storedGame() throws Exception {
         Game game = new Game();
         game.setGameType(GameType.CUSTOM);
-        game.getQuestions().addAll(handler.generate(GameType.CUSTOM, "x", Subject.MATH, GradeLevel.GRADE_1).questions());
+        game.getQuestions().addAll(handler.generate(GameType.CUSTOM, "x", request("x")).questions());
         return game;
     }
 
@@ -58,7 +72,7 @@ class CpfGameContentHandlerTest {
     void generatedGameIsOneCpfQuestionHoldingTheWholeJson() throws Exception {
         when(generation.generate("ý tưởng", Subject.MATH, GradeLevel.GRADE_1)).thenReturn(example("catch-even-apples"));
 
-        var content = handler.generate(GameType.CUSTOM, "ý tưởng", Subject.MATH, GradeLevel.GRADE_1);
+        var content = handler.generate(GameType.CUSTOM, "ý tưởng", request("ý tưởng"));
 
         assertThat(content.title()).isEqualTo("Hứng táo số chẵn");
         assertThat(content.schemaVersion()).isEqualTo("2.0.0");

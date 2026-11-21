@@ -15,6 +15,10 @@ import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
 import java.time.Instant;
 import java.util.List;
+import java.util.random.RandomGenerator;
+import com.aigameplatform.backend.service.curriculum.CurriculumCatalog;
+import com.aigameplatform.backend.service.curriculum.CurriculumChunk;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,10 +43,15 @@ public class GameService {
     private final AiRequestRateLimiter rateLimiter;
     private final TransactionOperations transactions;
     private final GameCurriculumReviewService curriculumReviews;
+    private final ObjectProvider<CurriculumCatalog> curriculumCatalog;
+    private final RandomGenerator random;
 
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
-            GameCurriculumReviewService curriculumReviews) {
+            GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
+            RandomGenerator random) {
+        this.curriculumCatalog = curriculumCatalog;
+        this.random = random;
         this.games = games;
         this.teachers = teachers;
         this.handlers = handlers;
@@ -63,12 +72,15 @@ public class GameService {
         String idea = ideaOf(request, type);
 
         GameContentHandler handler = handlerFor(type);
-        GameContentHandler.GeneratedContent content = handler.generate(type, idea, request.subject(), request.gradeLevel());
+        GameContentHandler.GeneratedContent content = handler.generate(type, idea, request);
 
         Game game = new Game();
         game.setAuthor(teachers.getReferenceById(teacherId));
         game.setGameType(type);
         game.setTitle(content.title());
+        game.setTopic(content.topic());
+        game.setVisualClozeMode(content.visualClozeMode());
+        game.setOddOneOutMode(content.oddOneOutMode());
         game.setSubject(request.subject());
         game.setGrade(request.gradeLevel());
         game.setPresentation(content.presentation());
@@ -166,13 +178,28 @@ public class GameService {
                 .orElseThrow(() -> new IllegalStateException("Không có handler cho loại game " + type));
     }
 
-    private static String ideaOf(GenerateGameRequest request, GameType type) {
+    private String ideaOf(GenerateGameRequest request, GameType type) {
         if (request.hasIdea()) return request.idea().trim();
         if (type == GameType.CUSTOM) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Trò chơi ngoài danh mục cần mô tả ý tưởng");
         }
-        if (request.wantsRandomTopic()) return RANDOM_TOPIC;
+        if (request.wantsRandomTopic()) return randomTopic(request);
         throw new ApiException(ErrorCode.VALIDATION_ERROR, "Vui lòng nhập ý tưởng hoặc tải giáo án");
+    }
+
+    /**
+     * Có danh mục chương trình (bật RAG) thì chọn ngẫu nhiên một yêu cầu cần đạt của đúng môn/lớp, để bước truy hồi có căn
+     * cứ thật; không có thì dùng câu chung, AI tự chọn chủ đề.
+     */
+    private String randomTopic(GenerateGameRequest request) {
+        CurriculumCatalog catalog = curriculumCatalog.getIfAvailable();
+        if (catalog == null) return RANDOM_TOPIC;
+        List<CurriculumChunk> outcomes = catalog.requireDataset(request.subject(), request.gradeLevel()).chunks().stream()
+                .filter(chunk -> !chunk.control()).toList();
+        if (outcomes.isEmpty()) {
+            throw new ApiException(ErrorCode.CURRICULUM_EVIDENCE_NOT_FOUND, "Chưa có yêu cầu cần đạt nào cho môn và lớp đã chọn");
+        }
+        return outcomes.get(random.nextInt(outcomes.size())).topic();
     }
 
     private static void requireTeacher(String teacherId) {

@@ -53,8 +53,15 @@ export interface StudentAudioVisualMatchQuestion extends QuestionBase {
   options: StudentImageOption[]
 }
 
+/** IMAGE is a frontend/dev-mock view model only; the published text DSL is unchanged. */
+export interface StudentOddOneOutItem extends TextChoice {
+  imageUrl?: string
+}
+
 export interface StudentOddOneOutQuestion extends QuestionBase {
-  items: TextChoice[]
+  renderMode?: 'IMAGE'
+  questionText?: string
+  items: StudentOddOneOutItem[]
 }
 
 export interface StudentSpotTheTargetQuestion extends QuestionBase {
@@ -87,6 +94,37 @@ export interface StudentVisualClozeQuestion extends QuestionBase {
   options: string[]
 }
 
+export interface StudentVisualClozeImagePlacement {
+  blankId: string
+  optionId: string
+}
+
+export interface StudentVisualClozeImageOption {
+  id: string
+  visualPrompt: string
+  imageUrl?: string
+}
+
+export interface StudentVisualClozeImageBlank {
+  id: string
+  /** Pixel-center in the original scene image. */
+  x: number
+  y: number
+}
+
+export interface StudentVisualClozeImageQuestion extends QuestionBase {
+  questionText: string
+  sceneImageUrl: string
+  sceneWidth: number
+  sceneHeight: number
+  blanks: StudentVisualClozeImageBlank[]
+  options: StudentVisualClozeImageOption[]
+  /** Session-specific placements the server has already confirmed correct. */
+  acceptedPlacements?: StudentVisualClozeImagePlacement[]
+  /** Accumulated active time for an in-progress question, restored from the server. */
+  elapsedTimeMs?: number
+}
+
 export interface StudentQuestionByType {
   QUIZ: StudentQuizQuestion
   AUDIO_VISUAL_MATCH: StudentAudioVisualMatchQuestion
@@ -97,12 +135,13 @@ export interface StudentQuestionByType {
   MEMORY_CARD: StudentMemoryCardQuestion
   DRAG_DROP: StudentDragDropQuestion
   ORDERING: StudentOrderingQuestion
-  VISUAL_CLOZE: StudentVisualClozeQuestion
+  VISUAL_CLOZE: StudentVisualClozeQuestion | StudentVisualClozeImageQuestion
 }
 
-interface StudentEnvelope<T extends GameType> {
-  schemaVersion: '1.0.0'
+type StudentEnvelope<T extends GameType> = {
+  schemaVersion: T extends 'VISUAL_CLOZE' | 'ODD_ONE_OUT' ? '1.0.0' | '1.1.0' : '1.0.0'
   gameType: T
+  mode?: T extends 'VISUAL_CLOZE' | 'ODD_ONE_OUT' ? 'TEXT' | 'IMAGE' : never
   metadata: GameMetadata
   gameplaySettings: GameplaySettings
   questions: StudentQuestionByType[T][]
@@ -125,7 +164,7 @@ export interface AnswerByType {
   MEMORY_CARD: { matchedPairIds: string[]; flips: number }
   DRAG_DROP: { placements: { itemId: string; zoneId: string }[] }
   ORDERING: { order: string[] }
-  VISUAL_CLOZE: { answer: string }
+  VISUAL_CLOZE: { answer: string } | { placements: StudentVisualClozeImagePlacement[] }
 }
 
 /** Hết giờ hoặc bỏ qua: không có trường trả lời. */
@@ -135,7 +174,7 @@ export interface NoAnswer {
 
 export type AnswerPayload = AnswerByType[GameType] | NoAnswer
 
-export type InteractionStatus = 'CORRECT' | 'INCORRECT' | 'TIMEOUT' | 'SKIPPED'
+export type InteractionStatus = 'CORRECT' | 'INCORRECT' | 'TIMEOUT' | 'SKIPPED' | 'IN_PROGRESS'
 
 export interface AnswerResult {
   status: InteractionStatus
@@ -144,6 +183,10 @@ export interface AnswerResult {
   totalScore: number
   /** Chỉ có SAU khi chấm; cùng tên trường với phần trả lời (SPOT_THE_TARGET: vùng đúng `{x, y, radius}`). */
   correctAnswer: Record<string, unknown> | null
+  /** True when this image placement may be corrected and retried within the same question. */
+  retryable?: boolean
+  /** Per-placement verdict for IMAGE mode; does not include the answer mapping. */
+  placementCorrect?: boolean
   /** Lời giải thích (FLD-13); `null` cho đến khi DSL có trường này. */
   explanation?: string | null
 }

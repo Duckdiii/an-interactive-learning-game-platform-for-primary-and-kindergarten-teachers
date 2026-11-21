@@ -1,7 +1,12 @@
 package com.aigameplatform.backend.service.game;
 
 import com.aigameplatform.backend.dto.dsl.GameDsl;
+import com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl;
+import com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl;
+import com.aigameplatform.backend.dto.request.GenerateGameRequest;
 import com.aigameplatform.backend.dto.understanding.ChatTurn;
+import com.aigameplatform.backend.entity.enums.OddOneOutMode;
+import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.dto.dsl.PresentationDsl;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
@@ -45,11 +50,45 @@ public class DslGameContentHandler implements GameContentHandler {
     }
 
     @Override
-    public GeneratedContent generate(GameType type, String idea, Subject subject, GradeLevel gradeLevel) {
-        GenerationResult result = generation.generateResult(type, new GameDslRequest(idea, subject, gradeLevel));
+    public GeneratedContent generate(GameType type, String idea, GenerateGameRequest input) {
+        VisualClozeMode mode = input.effectiveMode();
+        requireSupportedImageMode(type, mode, input);
+        GenerationResult result = generation.generateResult(type, new GameDslRequest(idea, input.subject(),
+                input.gradeLevel(), null, null, mode, input.sceneImageUrl(), input.optionImages()));
         GameDsl dsl = result.game();
         return new GeneratedContent(dsl.metadata().title(), dsl.schemaVersion(), strategies.get(type).parseToQuestions(dsl),
-                PresentationDsl.toEntity(dsl.metadata().presentation()), result);
+                PresentationDsl.toEntity(dsl.metadata().presentation()), result, dsl.metadata().topic(),
+                visualClozeModeOf(dsl), oddOneOutModeOf(dsl));
+    }
+
+    /** Chế độ IMAGE chỉ có ở VISUAL_CLOZE (cần ảnh cảnh và 2–8 ảnh lựa chọn), ODD_ONE_OUT và AUDIO_VISUAL_MATCH. */
+    private static void requireSupportedImageMode(GameType type, VisualClozeMode mode, GenerateGameRequest input) {
+        if (mode == VisualClozeMode.TEXT) return;
+        if (type != GameType.VISUAL_CLOZE && type != GameType.ODD_ONE_OUT && type != GameType.AUDIO_VISUAL_MATCH) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Loại trò chơi này chưa hỗ trợ chế độ hình ảnh");
+        }
+        if (type != GameType.VISUAL_CLOZE) return;
+        if (input.sceneImageUrl() == null || input.sceneImageUrl().isBlank()) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chế độ hình ảnh cần sceneImageUrl");
+        }
+        List<GenerateGameRequest.OptionImage> options = input.optionImages();
+        if (options == null || options.size() < 2 || options.size() > 8 || options.stream().anyMatch(option -> option == null
+                || option.imageUrl() == null || option.imageUrl().isBlank()
+                || option.visualPrompt() == null || option.visualPrompt().isBlank())) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chế độ hình ảnh cần 2 đến 8 ảnh lựa chọn do giáo viên cung cấp");
+        }
+        if (options.stream().map(GenerateGameRequest.OptionImage::imageUrl).distinct().count() != options.size()) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Các ảnh lựa chọn phải có imageUrl khác nhau");
+        }
+    }
+
+    private static VisualClozeMode visualClozeModeOf(GameDsl dsl) {
+        return dsl instanceof VisualClozeGameDsl visual && visual.effectiveMode() == VisualClozeMode.IMAGE
+                ? VisualClozeMode.IMAGE : null;
+    }
+
+    private static OddOneOutMode oddOneOutModeOf(GameDsl dsl) {
+        return dsl instanceof OddOneOutGameDsl odd && odd.effectiveMode() == OddOneOutMode.IMAGE ? OddOneOutMode.IMAGE : null;
     }
 
     @Override
@@ -61,8 +100,12 @@ public class DslGameContentHandler implements GameContentHandler {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Không đổi được loại game (" + game.getGameType() + ")");
         }
         game.setTitle(dsl.metadata().title());
+        game.setTopic(dsl.metadata().topic());
         game.setSubject(dsl.metadata().subject());
         game.setGrade(dsl.metadata().gradeLevel());
+        game.setSchemaVersion(dsl.schemaVersion());
+        game.setVisualClozeMode(visualClozeModeOf(dsl));
+        game.setOddOneOutMode(oddOneOutModeOf(dsl));
         game.setPresentation(PresentationDsl.toEntity(dsl.metadata().presentation()));
         game.getQuestions().clear();
         game.getQuestions().addAll(strategies.get(dsl.gameType()).parseToQuestions(dsl));
@@ -73,6 +116,10 @@ public class DslGameContentHandler implements GameContentHandler {
     public ObjectNode revise(ObjectNode current, String instruction, List<ChatTurn> history) {
         ObjectNode content = current.deepCopy();
         content.remove(GameReports.MANAGEMENT_FIELDS);
+        // Bộ sinh lại chỉ có dạng chữ: cho AI sửa game ảnh sẽ trả game chữ và mất ảnh cảnh, ô trống (KNOWN-GAPS #27).
+        if ("IMAGE".equals(content.path("mode").asString(null))) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chưa hỗ trợ sửa bằng trò chuyện cho trò chơi chế độ hình ảnh");
+        }
         GameType type = GameType.valueOf(content.path("gameType").asString());
         JsonNode metadata = content.path("metadata");
         Revision revision = new Revision(jsonMapper.writeValueAsString(content), instruction, history, Revision.DSL_FORMAT);
