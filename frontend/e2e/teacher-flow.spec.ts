@@ -6,7 +6,7 @@ const API = 'http://localhost:18080/api'
 
 // Mật khẩu sinh mỗi lần chạy, theo quy tắc đăng ký (8–72 ký tự, hoa, thường, số, ký tự đặc biệt); không lưu ở đâu.
 function newTeacher() {
-  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const id = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}`
   return { name: 'Giao vien E2E', email: `e2e-${id}@example.test`, password: `E2e-${id}-Aa1!` }
 }
 
