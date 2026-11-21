@@ -32,7 +32,7 @@ interface PendingRequest {
 let isRefreshing = false
 let pendingQueue: PendingRequest[] = []
 
-const publicAuthEndpoints = ['/auth/login', '/auth/register']
+const publicAuthEndpoints = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password']
 
 function isPublicAuthRequest(config: InternalAxiosRequestConfig) {
   return publicAuthEndpoints.some((endpoint) => config.url?.endsWith(endpoint))

@@ -2,7 +2,7 @@
 // trường rememberMe của LoginRequest (rememberMe), trường cấp dạy của RegisterRequest (teachingLevel).
 // Khi tắt, phần giao diện tương ứng không hiện; khi bật cũng chưa gửi thêm trường nào lên API (xem LoginPage/RegisterPage).
 export const AUTH_FEATURES = {
-  forgotPassword: false,
+  forgotPassword: true,
   rememberMe: false,
   teachingLevel: false,
 } as const
