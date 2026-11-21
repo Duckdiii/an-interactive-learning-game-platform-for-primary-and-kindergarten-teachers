@@ -38,37 +38,9 @@ test("parseNameStatus đọc được đổi tên", () => {
     [{ status: "M", path: "a.sql" }, { status: "R", oldPath: "b.sql", path: "c.sql" }]);
 });
 
-test("ngoại lệ đổi số một lần khi gộp dev vào main chỉ áp cho đúng các tên đã ghi", () => {
-  const mainBase = ["V6__game_curriculum_reviews.sql", "V7__visual_cloze_image_mode.sql", "V8__self_play_answer_state.sql",
-    "V9__allow_in_progress_interactions.sql", "V11__game_topic.sql"];
-  const merged = ["V6__game_curriculum_reviews.sql", "V7__cpf_custom_game.sql", "V8__game_updated_at.sql",
-    "V9__game_presentation.sql", "V11__game_topic.sql", "V17__visual_cloze_image_mode.sql"];
-  const removed = mainBase.slice(1, 4).map((f) => ({ status: "D", path: `x/${f}` }));
-  const added = [...merged.slice(1, 4), merged[5]].map((f) => ({ status: "A", path: `x/${f}` }));
-  assert.deepEqual(run({ baseFiles: mainBase, currentFiles: merged, changes: [...removed, ...added] }), []);
-  // git diff -M có thể thấy V9 → V19 là đổi tên.
-  const renamed = [{ status: "R", oldPath: "x/V9__allow_in_progress_interactions.sql", path: "x/V19__allow_in_progress_interactions.sql" }];
-  assert.deepEqual(run({ baseFiles: mainBase, currentFiles: [...merged, "V19__allow_in_progress_interactions.sql"],
-    changes: [...removed.slice(0, 2), ...added, ...renamed] }), []);
-  only(run({ baseFiles: mainBase, currentFiles: [...mainBase.filter((f) => f !== "V11__game_topic.sql"), "V12__topic.sql"],
-    changes: [{ status: "R", oldPath: "x/V11__game_topic.sql", path: "x/V12__topic.sql" }] }), /V11__game_topic.*đổi tên/);
-
-  // Tên khác vẫn bị chặn như thường: xoá migration khác của base, thêm migration khác chèn lùi.
-  only(run({ baseFiles: mainBase, currentFiles: mainBase.filter((f) => f !== "V11__game_topic.sql"),
-    changes: [{ status: "D", path: "x/V11__game_topic.sql" }] }), /V11__game_topic.*bị xoá/);
-  only(run({ baseFiles: mainBase, currentFiles: [...mainBase, "V10__backfill.sql"] }), /V10__backfill.*> V11/);
-  // Sửa (không phải xoá) file trong danh sách vẫn bị chặn.
-  only(run({ baseFiles: mainBase, currentFiles: mainBase, changes: [{ status: "M", path: "x/V7__visual_cloze_image_mode.sql" }] }),
-    /V7__visual_cloze_image_mode.*bị sửa/);
-});
-
-test("ngoại lệ một lần: base có V21 thì V17–V19 vẫn qua, V21 chỉ được sửa chứ không được xoá", () => {
-  const base = ["V11__game_topic.sql", "V20__password_reset_tokens.sql", "V21__teacher_login_security.sql"];
-  const merged = [...base, "V17__visual_cloze_image_mode.sql", "V18__self_play_answer_state.sql",
-    "V19__allow_in_progress_interactions.sql"];
-  assert.deepEqual(run({ baseFiles: base, currentFiles: merged,
-    changes: [{ status: "M", path: "x/V21__teacher_login_security.sql" }] }), []);
-  only(run({ baseFiles: base, currentFiles: base.slice(0, 2), changes: [{ status: "D", path: "x/V21__teacher_login_security.sql" }] }),
-    /V21__teacher_login_security.*bị xoá/);
-  only(run({ baseFiles: base, currentFiles: [...base, "V16__other.sql"] }), /V16__other.*> V21/);
+test("hết ngoại lệ một lần sau khi gộp dev vào main: sửa V21 và thêm migration dưới base đều bị chặn", () => {
+  const base = ["V19__allow_in_progress_interactions.sql", "V20__password_reset_tokens.sql", "V21__teacher_login_security.sql"];
+  only(run({ baseFiles: base, currentFiles: base, changes: [{ status: "M", path: "x/V21__teacher_login_security.sql" }] }),
+    /V21__teacher_login_security.*bị sửa/);
+  only(run({ baseFiles: base, currentFiles: [...base, "V17__visual_cloze_image_mode.sql"] }), /V17__visual_cloze_image_mode.*> V21/);
 });
