@@ -16,6 +16,7 @@ import com.aigameplatform.backend.entity.RefreshToken;
 import com.aigameplatform.backend.entity.Teacher;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.entity.enums.TeacherStatus;
+import com.aigameplatform.backend.entity.enums.UserRole;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.exception.LoginTemporarilyLockedException;
 import com.aigameplatform.backend.repository.RefreshTokenRepository;
@@ -160,6 +161,18 @@ class AuthServiceTest {
         assertThat(claims.sessionId()).isEqualTo(saved.getFamilyId());
         assertThat(result.response().expiresIn()).isEqualTo(900);
         assertThat(result.response().teacher().email()).isEqualTo("a@school.edu.vn");
+        assertThat(result.response().teacher().role()).isEqualTo(UserRole.ROLE_TEACHER);
+    }
+
+    @Test
+    void loginReturnsTheRoleStoredOnTheTeacher() {
+        Teacher admin = teacherWithPassword("Abcdef1!");
+        admin.setRole(UserRole.ROLE_ADMIN);
+        when(teacherRepository.findByEmail("a@school.edu.vn")).thenReturn(Optional.of(admin));
+
+        AuthResult result = service.login(new LoginRequest("a@school.edu.vn", "Abcdef1!"));
+
+        assertThat(result.response().teacher().role()).isEqualTo(UserRole.ROLE_ADMIN);
     }
 
     @Test
@@ -406,6 +419,24 @@ class AuthServiceTest {
         assertThat(rotated.rememberMe()).isTrue();
         verify(refreshTokenRepository, org.mockito.Mockito.times(2)).save(saved.capture());
         assertThat(saved.getValue().getExpiresAt()).isEqualTo(nowUtc().plusDays(30));
+    }
+
+    @Test
+    void rotatedRememberMeTokenReportsOnlyTheTimeItHasLeft() {
+        when(teacherRepository.findByEmail(anyString())).thenReturn(Optional.of(teacherWithPassword("Abcdef1!")));
+        AuthResult result = service.login(new LoginRequest("a@school.edu.vn", "Abcdef1!", true));
+        assertThat(result.refreshTtl()).isEqualTo(java.time.Duration.ofDays(30));
+
+        ArgumentCaptor<RefreshToken> saved = ArgumentCaptor.forClass(RefreshToken.class);
+        verify(refreshTokenRepository).save(saved.capture());
+        RefreshToken stored = saved.getValue();
+        stored.setExpiresAt(nowUtc().plusDays(10));
+        when(refreshTokenRepository.findFamilyIdByTokenHash(stored.getTokenHash())).thenReturn(Optional.of(stored.getFamilyId()));
+        when(refreshTokenRepository.findByTokenHash(stored.getTokenHash())).thenReturn(Optional.of(stored));
+
+        AuthResult rotated = service.refresh(result.refreshToken());
+
+        assertThat(rotated.refreshTtl()).isEqualTo(java.time.Duration.ofDays(10));
     }
 
     @Test

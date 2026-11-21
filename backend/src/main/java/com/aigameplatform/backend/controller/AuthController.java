@@ -84,7 +84,7 @@ public class AuthController {
 
     private ResponseEntity<ApiResponse<AuthResponse>> withRefreshCookie(AuthResult result) {
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookieFactory.create(result.refreshToken(), result.rememberMe()).toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookieFactory.create(result.refreshToken(), result.refreshTtl()).toString())
                 .cacheControl(CacheControl.noStore())
                 .body(ApiResponse.ok(result.response()));
     }

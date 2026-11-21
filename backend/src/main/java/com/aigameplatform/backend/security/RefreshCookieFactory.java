@@ -16,31 +16,21 @@ public class RefreshCookieFactory {
     private final String path;
     private final String sameSite;
     private final boolean secure;
-    private final Duration maxAge;
-    private final Duration rememberMeMaxAge;
 
     public RefreshCookieFactory(
             @Value("${app.auth.refresh-cookie.name}") String name,
             @Value("${app.auth.refresh-cookie.path}") String path,
             @Value("${app.auth.refresh-cookie.same-site}") String sameSite,
-            @Value("${app.auth.refresh-cookie.secure}") boolean secure,
-            @Value("${app.jwt.refresh-token-ttl-hours}") long refreshTtlHours,
-            @Value("${app.jwt.remember-me-refresh-token-ttl-days}") long rememberMeTtlDays) {
+            @Value("${app.auth.refresh-cookie.secure}") boolean secure) {
         this.name = name;
         this.path = path;
         this.sameSite = sameSite;
         this.secure = secure;
-        this.maxAge = Duration.ofHours(refreshTtlHours);
-        this.rememberMeMaxAge = Duration.ofDays(rememberMeTtlDays);
     }
 
-    public ResponseCookie create(String refreshToken) {
-        return create(refreshToken, false);
-    }
-
-    // Cookie sống bằng đúng thời hạn của refresh token bên trong: 30 ngày nếu "ghi nhớ đăng nhập".
-    public ResponseCookie create(String refreshToken, boolean rememberMe) {
-        return build(refreshToken, rememberMe ? rememberMeMaxAge : maxAge);
+    // Cookie sống bằng đúng thời gian còn lại của refresh token bên trong (xoay vòng không gia hạn hạn tuyệt đối).
+    public ResponseCookie create(String refreshToken, Duration remainingTtl) {
+        return build(refreshToken, remainingTtl);
     }
 
     public ResponseCookie clear() {

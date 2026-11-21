@@ -1,9 +1,9 @@
-// Theo TeacherInfo (teacherId, fullName, email; spec còn có `role` kiểu ROLE_TEACHER | ROLE_ADMIN, backend chưa trả).
+// Theo TeacherInfo (teacherId, fullName, email, role: ROLE_TEACHER | ROLE_ADMIN).
 export interface AuthUser {
   teacherId?: string
   fullName?: string
   email: string
-  role?: string
+  role?: 'ROLE_TEACHER' | 'ROLE_ADMIN'
   [key: string]: unknown
 }
 
