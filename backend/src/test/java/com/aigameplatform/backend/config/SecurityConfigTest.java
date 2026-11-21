@@ -20,6 +20,7 @@ import com.aigameplatform.backend.security.RefreshCookieFactory;
 import com.aigameplatform.backend.security.RestSecurityErrorHandler;
 import com.aigameplatform.backend.service.AuthResult;
 import com.aigameplatform.backend.service.AuthService;
+import com.aigameplatform.backend.service.PasswordResetService;
 import jakarta.servlet.http.Cookie;
 import java.time.Clock;
 import java.time.Instant;
@@ -57,6 +58,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private PasswordResetService passwordResetService;
 
     private static String validAccessToken() {
         return new JwtService(SECRET, 15, Clock.systemUTC())
@@ -128,6 +132,24 @@ class SecurityConfigTest {
         mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(LOGIN_BODY))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.accessToken").value("access-jwt"));
+    }
+
+    @Test
+    void forgotPasswordIsPublic() throws Exception {
+        when(passwordResetService.forgotPassword("a@school.edu.vn")).thenReturn("ok");
+
+        mockMvc.perform(post("/api/auth/forgot-password").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"a@school.edu.vn\"}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void resetPasswordIsPublic() throws Exception {
+        mockMvc.perform(post("/api/auth/reset-password").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"token\":\"raw-token\",\"newPassword\":\"NewPass1!\"}"))
+                .andExpect(status().isNoContent());
+
+        verify(passwordResetService).resetPassword("raw-token", "NewPass1!");
     }
 
     @Test

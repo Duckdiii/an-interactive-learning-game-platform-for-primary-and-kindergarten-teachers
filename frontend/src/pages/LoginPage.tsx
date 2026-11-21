@@ -107,13 +107,12 @@ export default function LoginPage() {
           label="Mật khẩu"
           aside={
             AUTH_FEATURES.forgotPassword ? (
-              // Chưa có route/màn "quên mật khẩu" (API planned); đổi sang Link khi có.
-              <a
-                href="/forgot-password"
+              <Link
+                to={ROUTES.forgotPassword}
                 className="inline-flex min-h-11 items-center text-sm font-extrabold text-brand-strong underline"
               >
                 {viText.auth.forgotPassword}
-              </a>
+              </Link>
             ) : undefined
           }
         >

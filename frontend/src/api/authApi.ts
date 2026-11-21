@@ -36,3 +36,18 @@ export async function loginTeacher(payload: LoginPayload) {
 
   return response.data.data
 }
+
+// Phản hồi luôn giống nhau dù email có tồn tại hay không (Backend chống dò tài khoản).
+export async function requestPasswordReset(email: string) {
+  const response = await axiosInstance.post<ApiSuccessResponse<{ message: string }>>(
+    '/auth/forgot-password',
+    { email },
+  )
+
+  return response.data.data.message
+}
+
+// Thành công: Backend trả 204 và đăng xuất mọi phiên cũ của tài khoản.
+export async function resetPassword(token: string, newPassword: string) {
+  await axiosInstance.post('/auth/reset-password', { token, newPassword })
+}

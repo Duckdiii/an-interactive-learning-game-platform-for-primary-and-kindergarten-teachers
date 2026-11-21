@@ -152,7 +152,8 @@ public class AuthService {
         return new AuthResult(response, rawRefreshToken);
     }
 
-    private static String normalizeEmail(String email) {
+    // Dùng chung với PasswordResetService để email được so khớp giống hệt lúc đăng ký/đăng nhập.
+    static String normalizeEmail(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 

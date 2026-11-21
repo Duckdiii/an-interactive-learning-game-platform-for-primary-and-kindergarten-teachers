@@ -14,6 +14,8 @@ const ResultsPage = lazy(() => import('./pages/ResultsPage'))
 const WorkspaceEditor = lazy(() => import('./pages/WorkspaceEditor'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const PlayPage = lazy(() => import('./player/pages/PlayPage'))
 const JoinPage = lazy(() => import('./player/pages/JoinPage'))
 const PresentPage = lazy(() => import('./player/pages/PresentPage'))
@@ -52,6 +54,8 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path={ROUTES.login} element={<LoginPage />} />
           <Route path={ROUTES.register} element={<RegisterPage />} />
+          <Route path={ROUTES.forgotPassword} element={<ForgotPasswordPage />} />
+          <Route path={ROUTES.resetPassword} element={<ResetPasswordPage />} />
         </Route>
 
         {/* Học sinh vào bằng mã, không cần tài khoản: nằm ngoài ProtectedRoute. */}
