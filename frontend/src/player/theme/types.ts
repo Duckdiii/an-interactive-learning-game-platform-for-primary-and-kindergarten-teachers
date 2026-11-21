@@ -11,6 +11,10 @@ export interface Theme {
   name: string
   /** Hình nhân vật; `null` là dùng biểu tượng nền tảng. */
   mascotBase: string | null
+  /** URL SVG vector linh vật chuẩn K-5 (Stage 2.5 Asset Engine). */
+  mascotAvatar?: string
+  /** URL SVG vector ảnh nền thế giới game (Stage 2.5 Asset Engine). */
+  bgUrl?: string
   /** Biểu tượng tiến độ cho khung Bé: đã qua / chưa tới. */
   progress: { filled: string; empty: string }
 }

@@ -86,7 +86,7 @@ const memory: MemoryCardGame = {
   gameplaySettings: settings(),
   questions: [
     { ...q(1), audioText: 'Tìm hai thẻ giống nhau', pairs: [{ pairId: 'p1', content: { text: 'cat' } }, { pairId: 'p2', content: { text: 'dog' } }, { pairId: 'p3', content: { text: 'bird' } }] },
-    { ...q(2), audioText: 'Tìm hai thẻ giống nhau', pairs: [{ pairId: 'p1', content: { text: 'fish' } }, { pairId: 'p2', content: { text: 'duck' } }, { pairId: 'p3', content: { text: 'cow' } }, { pairId: 'p4', content: { text: 'pig' } }] },
+    { ...q(2), audioText: 'Tìm hai thẻ giống nhau', pairs: [{ pairId: 'p1', content: { text: 'fish', imageUrl: '/assets/animals/fish.svg' } }, { pairId: 'p2', content: { text: 'duck', imageUrl: '/assets/animals/duck.svg' } }, { pairId: 'p3', content: { text: 'cow' } }, { pairId: 'p4', content: { text: 'pig' } }] },
     { ...q(3), audioText: 'Tìm hai thẻ giống nhau', pairs: [{ pairId: 'p1', content: { text: 'red' } }, { pairId: 'p2', content: { text: 'blue' } }] },
   ],
 }
@@ -140,6 +140,80 @@ const cloze: VisualClozeGame = {
 }
 
 /** Nội dung 10 game mẫu, đúng thứ tự của `mockGames.ts`. */
+export const mathMatching: MatchingGame = {
+  schemaVersion: '1.0.0',
+  gameType: 'MATCHING',
+  metadata: { title: 'Đếm số lượng đồ vật quen thuộc', subject: 'MATH', gradeLevel: 'KINDERGARTEN', topic: 'Đếm số lượng đồ vật quen thuộc từ 1 đến 5' },
+  gameplaySettings: settings(),
+  questions: [
+    {
+      ...q(1),
+      audioText: 'Bé hãy nối số lượng đồ vật với chữ số tương ứng nhé',
+      pairs: [
+        { pairId: 'p1', left: { text: '1 quả táo', imageUrl: '/assets/fruits/apple.svg' }, right: { text: 'Số 1', imageUrl: '/assets/numbers/number-1.svg' } },
+        { pairId: 'p2', left: { text: '2 bông hoa', imageUrl: '/assets/objects/flower.svg' }, right: { text: 'Số 2', imageUrl: '/assets/numbers/number-2.svg' } },
+        { pairId: 'p3', left: { text: '3 ngôi sao', imageUrl: '/assets/objects/star.svg' }, right: { text: 'Số 3', imageUrl: '/assets/numbers/number-3.svg' } },
+      ],
+    },
+    {
+      ...q(2),
+      audioText: 'Bé hãy nối số lượng con vật với chữ số tương ứng',
+      pairs: [
+        { pairId: 'p1', left: { text: '4 con cá', imageUrl: '/assets/animals/fish.svg' }, right: { text: 'Số 4', imageUrl: '/assets/numbers/number-4.svg' } },
+        { pairId: 'p2', left: { text: '5 quả bóng', imageUrl: '/assets/objects/ball.svg' }, right: { text: 'Số 5', imageUrl: '/assets/numbers/number-5.svg' } },
+        { pairId: 'p3', left: { text: '3 chú mèo', imageUrl: '/assets/animals/cat.svg' }, right: { text: 'Số 3', imageUrl: '/assets/numbers/number-3.svg' } },
+      ],
+    },
+    {
+      ...q(3),
+      audioText: 'Bé đếm và nối thật nhanh nào',
+      pairs: [
+        { pairId: 'p1', left: { text: '1 chú thỏ', imageUrl: '/assets/animals/rabbit.svg' }, right: { text: 'Số 1', imageUrl: '/assets/numbers/number-1.svg' } },
+        { pairId: 'p2', left: { text: '2 chiếc lá', imageUrl: '/assets/objects/flower.svg' }, right: { text: 'Số 2', imageUrl: '/assets/numbers/number-2.svg' } },
+        { pairId: 'p3', left: { text: '4 cây kẹo', imageUrl: '/assets/objects/candy.svg' }, right: { text: 'Số 4', imageUrl: '/assets/numbers/number-4.svg' } },
+        { pairId: 'p4', left: { text: '5 con vịt', imageUrl: '/assets/animals/duck.svg' }, right: { text: 'Số 5', imageUrl: '/assets/numbers/number-5.svg' } },
+      ],
+    },
+  ],
+}
+
+export const mathMemory: MemoryCardGame = {
+  schemaVersion: '1.0.0',
+  gameType: 'MEMORY_CARD',
+  metadata: { title: 'Lật thẻ tìm cặp số tương ứng', subject: 'MATH', gradeLevel: 'KINDERGARTEN', topic: 'Ghi nhớ và tìm cặp số từ 1 đến 10' },
+  gameplaySettings: settings(),
+  questions: [
+    {
+      ...q(1),
+      audioText: 'Bé hãy lật tìm hai thẻ số giống nhau nhé',
+      pairs: [
+        { pairId: 'p1', content: { text: 'Số 1', imageUrl: '/assets/numbers/number-1.svg' } },
+        { pairId: 'p2', content: { text: 'Số 2', imageUrl: '/assets/numbers/number-2.svg' } },
+        { pairId: 'p3', content: { text: 'Số 3', imageUrl: '/assets/numbers/number-3.svg' } },
+      ],
+    },
+    {
+      ...q(2),
+      audioText: 'Tìm hai thẻ số giống nhau nào',
+      pairs: [
+        { pairId: 'p1', content: { text: 'Số 4', imageUrl: '/assets/numbers/number-4.svg' } },
+        { pairId: 'p2', content: { text: 'Số 5', imageUrl: '/assets/numbers/number-5.svg' } },
+        { pairId: 'p3', content: { text: 'Số 6', imageUrl: '/assets/numbers/number-6.svg' } },
+        { pairId: 'p4', content: { text: 'Số 7', imageUrl: '/assets/numbers/number-7.svg' } },
+      ],
+    },
+    {
+      ...q(3),
+      audioText: 'Bé đếm và lật thẻ thật nhanh nhé',
+      pairs: [
+        { pairId: 'p1', content: { text: 'Số 8', imageUrl: '/assets/numbers/number-8.svg' } },
+        { pairId: 'p2', content: { text: 'Số 9', imageUrl: '/assets/numbers/number-9.svg' } },
+        { pairId: 'p3', content: { text: 'Số 10', imageUrl: '/assets/numbers/number-10.svg' } },
+      ],
+    },
+  ],
+}
+
 export function buildMockGameContents(): GameDsl[] {
   return structuredClone([quiz, matching, dragDrop, audioVisual, ordering, memory, spot, wordScramble, oddOneOut, cloze])
 }

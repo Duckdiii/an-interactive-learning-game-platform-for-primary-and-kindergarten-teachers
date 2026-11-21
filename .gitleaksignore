@@ -1,0 +1,6 @@
+# Báo nhầm của gitleaks khi quét toàn bộ lịch sử (2026-11-14): khoá ký JWT giả "0123456789…" chỉ dùng trong test,
+# code chính đọc JWT_SECRET từ biến môi trường. Định dạng: commit:file:rule:dòng (xem docs/KNOWN-GAPS.md #12).
+5ec2266647287fe70b28339d0abf00c20b7892c9:backend/src/test/java/com/aigameplatform/backend/security/JwtServiceTest.java:generic-api-key:14
+a668384e6cbe12bc8aa0b5a89802f6ebde1fbb5a:backend/src/test/java/com/aigameplatform/backend/config/SecurityConfigTest.java:generic-api-key:40
+a668384e6cbe12bc8aa0b5a89802f6ebde1fbb5a:backend/src/test/java/com/aigameplatform/backend/config/SecurityConfigTest.java:generic-api-key:51
+8ef337da14d2520aeba52850b691bfb0bca0309b:backend/src/test/java/com/aigameplatform/backend/service/AuthServiceTest.java:generic-api-key:42

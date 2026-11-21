@@ -17,6 +17,153 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-21 — Viết migration mới mà không đối chiếu cột do migration chưa merge đã thêm trên DB dùng chung
+- Lỗi: V21 (`main`, FR-15) `add column status` vào `teachers`, trong khi V14 của `feature/admin-portal` đã áp trên DB dùng chung và đã thêm cột này; backend bản gộp dev+main dừng khi migrate V21 (V20 đã áp trước đó). Trên DB mới, khi admin-portal merge, V14 chạy trước V21 nên cũng lỗi y hệt.
+- Phát hiện nhờ: chạy backend với DB dùng chung trong lúc thử đầu-cuối.
+- Nguyên nhân gốc: chỉ chọn số version tránh V12–V16 (ghi cả trong chú thích V20) mà không đọc nội dung V12–V16 của các nhánh feature để xem chúng đụng bảng/cột nào.
+- Cách chặn: đề xuất: script so `information_schema.columns` của DB dùng chung (hoặc nội dung migration ở mọi nhánh `origin/feature/*`) với các `add column`/`create table` trong migration mới, báo trùng; tạm thời viết DDL thêm cột bằng `IF NOT EXISTS` khi bảng có thể bị nhánh khác sửa.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-21 — Đề xuất đánh số lại migration mà quên migration đã áp trên DB nhưng không có ở nhánh đích
+- Lỗi: phương án A (main V7–V9 → V17–V19) được đưa cho người dùng chọn mà không nói rằng DB dùng chung đã áp V12–V16 của các nhánh feature chưa vào `dev`/`main`. Khi nhánh có V17 trở lên mà thiếu file V12–V16, Flyway coi V12–V16 là "missing" (mặc định chỉ bỏ qua `*:future`), nên backend không khởi động được với DB dùng chung cho tới khi các nhánh đó được merge hoặc đặt `ignore-migration-patterns`. Thêm nữa, đề xuất ban đầu không lường trước việc phải gộp hai bản cài đặt `/api/games` song song.
+- Phát hiện nhờ: tự rà lại khi viết V17–V19 trong lúc merge.
+- Nguyên nhân gốc: chỉ so file migration của hai nhánh với nhau, không so cả danh sách version trên DB với file của nhánh đích sau khi merge; chỉ xem phần migration mà không ước lượng toàn bộ xung đột merge (`git merge-tree`) trước khi đề xuất.
+- Cách chặn: đề xuất: trước khi đề xuất đổi số migration, đối chiếu `flyway_schema_history` với file của nhánh đích (máy làm được: script so sánh danh sách version DB và repo, báo cả "missing" lẫn "future"); trước khi hứa một merge, chạy `git merge-tree --write-tree` để biết khối lượng xung đột.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-21 — Thay chuỗi bằng regex qua script, ghi `\&\&` thay vì `&&` vào code TSX
+- Lỗi: dùng `scripts/tmp/regex-replace.mjs` với chuỗi thay có `\&\&`; JavaScript `replace` giữ nguyên dấu `\`, làm `CreateGamePage.tsx` và `mockGames.ts` có `\&\&`. Lặp hai lần trong cùng phiên.
+- Phát hiện nhờ: `tsc` (lỗi "Invalid character") và tự đọc lại đoạn đã thay.
+- Nguyên nhân gốc: viết chuỗi thay theo thói quen escape của sed; `$` mới là ký tự đặc biệt trong chuỗi thay của JS, `&` thì không.
+- Cách chặn: đã sửa và kiểm bằng `tsc`; đề xuất dùng Edit cho thay đổi có toán tử/ký tự đặc biệt, script regex chỉ cho mẫu không có `\`.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-15 — Đặt `@EnabledIf` ở lớp test cha, tưởng lớp con kế thừa; ghi "máy không có Docker thì bỏ qua" khi chưa thử nhánh đó
+- Lỗi: `AbstractPostgresTest` gắn `@EnabledIf(dockerAvailableOrCi)`, nhưng annotation này không `@Inherited` nên không có tác dụng ở lớp con. Ép điều kiện thành `false` thì 2 lớp test vẫn chạy. Máy dev không có Docker sẽ đỏ thay vì bỏ qua như comment và `corrections` ghi.
+- Phát hiện nhờ: `reviewer` (đọc javap + `AnnotationUtils`), xác nhận bằng cách ép điều kiện `false` rồi chạy.
+- Nguyên nhân gốc: chỉ chạy nhánh "có Docker" (xanh) rồi coi cả hai nhánh đúng; không kiểm cơ chế kế thừa của annotation JUnit.
+- Cách chặn: đã đổi sang `ExecutionCondition` qua `@ExtendWith` (được kế thừa), chứng minh bằng ép `disabled` → 5 test skipped, hoàn tác → chạy. Quy tắc đề xuất: mọi điều kiện bật/tắt test phải thử cả nhánh tắt trước khi ghi vào comment hay tài liệu.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Lặp lần 3: viết code Java có `\` qua `node -e` trong bash, mất một lớp escape
+- Lỗi: khi tách bước curriculum-review, viết lại `AbstractTeacherFlowTest.java` bằng `node -e`; regex JWT `"eyJ[\\w-]+…"` thành `"eyJ[\w-]+…"` (không biên dịch được). Cùng loại với mục 2026-11-12 và 2026-11-13.
+- Phát hiện nhờ: tự grep dòng `JWT =` sau khi ghi, trước khi biên dịch.
+- Nguyên nhân gốc: vẫn chọn `node -e` cho thay đổi lớn vì tiện, dù hai mục trước đã ghi; tầng 3 (ghi chú) không đủ để chặn.
+- Cách chặn: đã ghi vào `docs/corrections.md` là ứng viên đẩy lên tầng cao hơn; đề xuất (chờ duyệt) dùng Write/Edit cho mọi file nguồn có ký tự `\`, không sinh mã nguồn qua `node -e`/heredoc.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — "Chứng minh test bắt lỗi" bằng một thay đổi làm hỏng biên dịch, và tin file bằng chứng cũ
+- Lỗi: để chứng minh test luồng bắt được lỗi, đổi tên component của record `AuthResponse`; build lỗi biên dịch nên test không chạy, exit 1 bị coi là "test fail", và 8 file bằng chứng của lần trước vẫn còn trông như kết quả mới.
+- Phát hiện nhờ: tự thấy vẫn đủ 8 file dù lẽ ra phải dừng ở bước login, rồi đọc log thấy `COMPILATION ERROR`.
+- Nguyên nhân gốc: chỉ nhìn exit code; không kiểm test có thật sự chạy tới assert hay không; công cụ ghi bằng chứng không xoá kết quả cũ.
+- Cách chặn: mỗi lần cố ý làm hỏng phải trích được đúng dòng assert fail (không phải lỗi biên dịch); thay đổi để chứng minh phải biên dịch được (ví dụ đổi tên trên JSON bằng annotation); script bằng chứng xoá kết quả cũ trước khi chạy và FAIL khi thiếu bước (đã làm trong `verify-flow.mjs`).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Lặp lại: thay chuỗi bằng script Node trên file CRLF, khớp 0 chỗ
+- Lỗi: script `node -e` thay 5 chỗ trong `PlayFlow.test.tsx` dừng ngay vì khớp 0 chỗ (file CRLF), cùng loại lỗi đã ghi ngày 2026-11-11. Lần này có kiểm số lần khớp nên không sửa thiếu âm thầm.
+- Phát hiện nhờ: script tự ném lỗi "found 0x".
+- Nguyên nhân gốc: dùng chuỗi nhiều dòng có `\n` trên file không biết kiểu xuống dòng.
+- Cách chặn: sửa nhiều dòng trong file của repo thì dùng Edit (chịu được CRLF); nếu dùng script thì kiểm số lần khớp như lần này.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Viết checker tất định chỉ từ định nghĩa agent, chưa đối chiếu với kết quả agent trên dữ liệu thật
+- Lỗi: `check-ai-usage-log.mjs` qua hết dữ liệu thật trong khi `log-auditor` tìm ra 2 lỗi thật (STT 169 dùng câu "Không ghi nhận…", STT 186 có cột Lỗi là `TODO`); rule switch ArchUnit bản đầu không bắt được vi phạm nào; rule "không new service" bản mở rộng chặn nhầm `this(...)`.
+- Phát hiện nhờ: `log-auditor` chạy song song; bước cố ý vi phạm từng rule; chạy lại toàn bộ ArchUnit.
+- Nguyên nhân gốc: coi checker "qua dữ liệu thật" là đủ, trong khi qua có thể vì checker lỏng; chỉ thử ca vi phạm cho phần mình nghĩ ra.
+- Cách chặn: khi thay một agent bằng checker, chạy agent đó một lần trên cùng dữ liệu và biến mỗi lỗi agent tìm ra thành một ca test của checker trước khi coi là thay được; mỗi rule phải có ca vi phạm thật làm đỏ (đã làm cho ArchUnit trong GĐ1).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Đổi tên bằng sed chỉ theo tên đầy đủ, sót chỗ dùng tên ngắn; ghi file chưa Read nên chạy thử bằng bản cũ
+- Lỗi: (1) đổi `CurriculumEvidenceReview.Status` bằng sed, sót field `private Status status;` trong entity dùng import tên ngắn, build lỗi biên dịch. (2) `Write` hook pre-commit bị từ chối vì chưa Read, nhưng lệnh chạy thử nối sau vẫn chạy với hook cũ và in "exit=0"; thêm `git update-index --chmod` lỡ stage file.
+- Phát hiện nhờ: lỗi biên dịch của Maven; đọc lại output thấy không có dòng [CHẶN].
+- Nguyên nhân gốc: sed theo chuỗi thay vì theo symbol; gộp bước ghi file và bước kiểm vào cùng một lượt mà không kiểm bước ghi đã thành công.
+- Cách chặn: đổi tên kiểu/symbol thì sau sed grep cả tên ngắn (`\bStatus\b` trong file có import cũ) và chạy `test-compile` ngay; không chạy bước chứng minh trong cùng lượt với lệnh ghi file có thể thất bại; không dùng lệnh git ghi index khi người dùng cấm commit.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-13 — Sửa file trong lúc subagent kiểm tra đang chạy test, và lại so chữ tiếng Việt sau khi bỏ dấu
+- Lỗi: (1) chạy script đồng bộ từ khóa (sửa `assetResolver.ts` và JSON) khi `test-verifier` đang chạy `npm test`, làm nó báo fail giả ở `gameAssetCatalog.test.ts` và tốn một lượt chạy lại. (2) script đo biến thể gom khái niệm bằng chữ đã bỏ dấu, ra 5 cặp nhầm ("bò" với "bố"), cùng loại lỗi đã ghi hai lần trong hộp này.
+- Phát hiện nhờ: `test-verifier` (diff đúng ở các dòng vừa sửa) và tự xem danh sách cặp.
+- Nguyên nhân gốc: coi việc sửa dữ liệu là độc lập với lượt kiểm tra đang chạy; dùng hàm bỏ dấu cho mọi phép so chữ theo thói quen.
+- Cách chặn: khi có agent kiểm tra đang chạy thì không sửa file trong phạm vi nó kiểm, hoặc dừng và chạy lại sau khi sửa; so tên, nhãn tiếng Việt luôn giữ dấu, chỉ bỏ dấu khi có lý do và kèm danh sách cặp để soát.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-13 — Lặp lại lỗi từ khóa dễ khớp nhầm khi thêm hình tự vẽ, và quên kiểm từ khóa đã có
+- Lỗi: thêm 16 hình tự vẽ với từ khóa "mam co" (khớp "mầm cỏ"), "sao vang" đứng riêng (cướp "ngôi sao vàng"), và "den ong sao" trùng từ khóa đang nằm ở đèn lồng cũ nên hình mới đứng sau. Cùng loại lỗi đã ghi ở mục cùng ngày về từ khóa cụm có dấu.
+- Phát hiện nhờ: bộ đo offline (206/207) và `reviewer`.
+- Nguyên nhân gốc: chỉ thử từ khóa với câu đúng nghĩa, không grep từ khóa đã có trong `ASSET_CATALOG` và không thử câu thường; bài học trước chưa thành kiểm tra tự động.
+- Cách chặn: trước khi thêm hình, grep từng từ khóa mới trong `assetResolver.ts` để biết hình nào đang giữ; mỗi hình mới có từ khóa có dấu phải kèm ít nhất một dòng âm có nghĩa trong `retrieval-eval.csv`; cân nhắc test đọc `ASSET_CATALOG` và báo từ khóa trùng giữa hai hình.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-13 — Thêm từ khóa hình bằng cụm có dấu của động từ, tính từ thông dụng mà không thử câu thường
+- Lỗi: khi thêm 52 hình Fluent, đặt từ khóa cho "chạy" là cụm "đang chạy", cho "tập thể dục" có "khởi động", cho "gió" là "gio thoi", cho "cấm lửa" là "cam lua". Cụm nhiều chữ không bị giới hạn "từ đơn ngắn", nên "con chó đang chạy" và "khởi động máy" kéo hình người, "giờ thôi" ra hình gió. Đồng thời viết wiki nói đã bỏ "khởi động" khi code còn giữ.
+- Phát hiện nhờ: `reviewer` (suy luận từ `KeywordAssetRetriever`).
+- Nguyên nhân gốc: chỉ thử từ khóa với câu đúng nghĩa, không thử câu thường chứa cùng từ; viết tài liệu từ ý định chứ không đối chiếu code.
+- Cách chặn: mỗi hình mới có từ khóa là động từ hoặc tính từ thông dụng (đang chạy, khởi động, nguy hiểm) thì chỉ dùng tên riêng của vật, hoặc thêm ít nhất một dòng âm vào `retrieval-eval.csv` trước khi kết luận; đối chiếu wiki với code bằng grep trước khi báo.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-13 — Lặp lại lỗi mất lớp escape khi ghi script bằng heredoc, và sơ đồ thiếu bước có trong ví dụ
+- Lỗi: (1) viết script Node qua heredoc có biểu thức chính quy chứa dấu gạch chéo ngược; một lớp escape bị mất, script lỗi cú pháp, rồi sửa bằng `sed` cũng không khớp; chỉ xong khi dùng công cụ Edit. Đây là lỗi đã ghi ở mục 2026-11-12. (2) sơ đồ pipeline đầu tiên vẽ vector rồi đồ thị nhưng bỏ bước tra bảng nhãn, dù ví dụ minh họa đã có bước đó.
+- Phát hiện nhờ: (1) lỗi cú pháp khi chạy; (2) người dùng hỏi "ô này nằm ở đâu trong sơ đồ".
+- Nguyên nhân gốc: (1) quên áp dụng bài học đang chờ duyệt; (2) vẽ sơ đồ từ trí nhớ về thiết kế thay vì đối chiếu từng bước với ví dụ đã đưa.
+- Cách chặn: (1) đoạn code có dấu gạch chéo ngược thì dùng Write/Edit, không dùng heredoc lồng chuỗi; (2) trước khi đưa sơ đồ, đối chiếu từng bước trong ví dụ đã nói với các hộp trong sơ đồ, thiếu bước nào thì thêm.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-12 — Viết code có dấu `\` qua `node -e` trong bash: mất một lớp escape
+- Lỗi: hai lần ghi biểu thức chính quy qua `node -e '...'` (chuỗi JS lồng trong lệnh bash): `\\s` trong TypeScript (`optionVisual.wordCardText`) thành `s`, và `\\p{L}` trong Java (`QuizRule`) thành `\p{L}` (lỗi biên dịch). Lần TypeScript chạy được nhưng sai nghĩa, chỉ test mới bắt được.
+- Phát hiện nhờ: test vừa viết (`optionVisual.test.ts`) và grep lại đoạn vừa ghi.
+- Nguyên nhân gốc: chuỗi đi qua hai lớp (bash rồi chuỗi JS) nên mỗi `\` bị ăn một lần; dùng `node -e` cho tiện thay vì Edit.
+- Cách chặn: đoạn code có `\` (regex, escape) thì luôn dùng công cụ Edit/Write, không ghi qua `node -e`/heredoc lồng chuỗi JS; nếu buộc dùng script thì đặt script trong file riêng (Write) và grep lại dòng vừa ghi.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-11 — Thay chuỗi bằng script Node trên file CRLF, không kiểm kết quả nên mất một chỗ sửa
+- Lỗi: dùng `node -e` với `s.replace("...\n...")` để sửa `QuizRenderer.tsx` và `quizLayout.ts`. Hai file dùng CRLF nên chuỗi có `\n` không khớp, `replace` lặng lẽ không làm gì; script không in MISS. Kết quả `computeQuizLayout` không nhận `optionLayout`, canvas tính chiều cao theo lưới cũ trong khi ô đã lệch xuống. Test bố cục vẫn xanh vì test tự truyền `optionLayout`.
+- Phát hiện nhờ: `reviewer` (đọc chỗ gọi thật trong renderer); `tsc` chỉ bắt được một nửa (biến không dùng ở `quizLayout.ts`).
+- Nguyên nhân gốc: tin script đã chạy mà không kiểm từng chỗ thay; repo trộn LF và CRLF.
+- Cách chặn: sửa nhiều dòng thì dùng công cụ Edit (báo lỗi khi không khớp); nếu dùng script thì chuẩn hóa CRLF trước và in MISS cho mọi chỗ không khớp, rồi grep lại kết quả. Test bố cục phải có ít nhất một ca đi qua component thật hoặc assert chỗ gọi.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-11 — Thêm phụ thuộc constructor mà quên context Spring liệt kê bean tay; viết luật prompt trái thứ tự Structured Outputs
+- Lỗi: thêm `GameAssetCatalog` vào constructor của 10 factory và `GeminiGameContentGenerator`, chỉ sửa chỗ `new` trong test, quên `GameCreationPipelineTest` (`@SpringJUnitConfig` liệt kê class) và `CurriculumRagConfigurationTest` (`context.register(...)`): 12 test đỏ. Cùng lượt, thêm luật "đặt title sau cùng" trong prompt dù schema đặt `title` đầu `properties` và Structured Outputs sinh theo thứ tự đó.
+- Phát hiện nhờ: `test-verifier`, `ai-prompt-evaluator`.
+- Nguyên nhân gốc: chỉ grep `new XFactory(` mà không grep tên class trong cấu hình Spring của test; viết luật cho mô hình mà không đối chiếu với cách giải mã có ràng buộc schema.
+- Cách chặn: thêm tham số constructor cho `@Component` thì grep cả `XFactory.class` trong `src/test`; luật về thứ tự sinh phải khớp thứ tự `properties` của schema đầu ra (hoặc không viết).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-11 — Nối `git rm` sau lệnh `python` bằng `&&`, máy không có Python nên file bị xóa ngoài ý muốn
+- Lỗi: chạy `python - <<EOF ... EOF && git rm ThemedQuizCanvas.tsx` để sửa `LivePreview.tsx` rồi mới xóa file. Python trên máy này chỉ là lối tắt mở Microsoft Store, in "Python was not found" nhưng trả mã 0, nên `git rm` vẫn chạy và đưa việc xóa vào index trong khi `LivePreview.tsx` chưa được sửa. Một luật mới thêm vào prompt cũng mâu thuẫn với dòng ngay trên ("Chỉ dùng từ tiếng Việt có thật" so với cho phép từ tiếng Anh).
+- Phát hiện nhờ: lần `git rm` sau báo không thấy file, `git status` hiện `D ` trong index; luật mâu thuẫn do `reviewer` và `ai-prompt-evaluator` báo.
+- Nguyên nhân gốc: giả định có Python và tin `&&` sẽ chặn lệnh sau; thêm luật mới mà không đọc lại cả khối luật xung quanh.
+- Cách chặn: máy này không có Python, sửa file bằng Edit hoặc sed; không nối lệnh xóa/ghi git sau một lệnh chưa chắc chạy được, chạy riêng sau khi kiểm kết quả. Thêm luật vào prompt thì đọc lại toàn khối và có test `doesNotContain` câu mâu thuẫn.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-09 — Thêm `description` vào schema đầu ra AI, không chạy test kiểm từ khóa của schema
+- Lỗi: khi thêm trường `title` vào 10 schema `game-ai-output`, có kèm `"description"`; `AiOutputSchemasTest.llmSchemaUsesOnlyKeywordsAnLlmAccepts` chỉ cho từ khóa LLM chấp nhận nên 10 test đỏ. Bộ test con mình chọn chạy không có `AiOutputSchemasTest`. Cùng lượt, các luật Lớp 2 mới bản đầu chặn nhầm bài hợp lệ ("A" ↔ "a", điền khuyết đáp án 1 chữ cái, Đúng/Sai cùng đáp án, "lớn hơn hoặc bằng 10").
+- Phát hiện nhờ: `test-verifier` (chạy toàn bộ), `ai-prompt-evaluator`, `reviewer`.
+- Nguyên nhân gốc: chọn test theo tên lớp mình nhớ thay vì theo thư mục/gói bị đổi; viết luật chặn từ một ca lỗi mà không liệt kê ca hợp lệ gần giống.
+- Cách chặn: sửa file trong `schema/` thì chạy cả gói `service/validation/ai`; mỗi luật Lớp 2 mới phải có ít nhất một test ca hợp lệ gần giống không bị chặn (có thể thành mục kiểm của `reviewer`).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-07 — Test schema "chặn biến thể sai" xanh vì lý do khác lý do muốn kiểm
+- Lỗi: trong `CpfGameSchemaTest`, các biến thể sai chỉ assert `isNotEmpty()`; ba biến thể bị chặn nhờ ràng buộc khác (thêm 1 zone vấp `minItems: 2` thay vì luật "không có zones ở màn PICK"; CHECK lồng thiếu `onWrong` nên vấp `required`). Xóa đúng ràng buộc cần bảo vệ thì test vẫn xanh. Lặp lại mẫu lỗi của mục 2026-10-14 "Test hồi quy qua cả khi chưa có bản sửa".
+- Phát hiện nhờ: `reviewer` (2 lượt), `backend-architect-reviewer`.
+- Nguyên nhân gốc: viết biến thể sai mà không kiểm biến thể đó chỉ sai đúng một chỗ.
+- Cách chặn: mỗi test biến thể sai phải assert vị trí lỗi (`getInstanceLocation`) hoặc từ khóa, và biến thể phải hợp lệ ở mọi chỗ khác (đủ số phần tử tối thiểu, đủ trường bắt buộc). Có thể đưa thành mục kiểm của `reviewer` cho mọi test schema.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-07 — Thiết kế luật kết thúc game không xét trường hợp trẻ trả lời sai
+- Lỗi: bản nháp CPF v2 đầu tiên có `finish: PROGRESS_REACHED_GOAL` (đích = số màn) trong khi màn PICK_ONE kết thúc sau một lần chọn; trẻ sai một màn thì xe không bao giờ tới đích, game treo. Màn PICK_ALL dạng hứng quả cũng không nói vật rơi mất có sinh lại không.
+- Phát hiện nhờ: `reviewer`.
+- Nguyên nhân gốc: chỉ kiểm ví dụ theo đường chơi đúng, không lần theo đường trẻ chọn sai.
+- Cách chặn: khi thiết kế luật chơi/runtime, liệt kê cả đường sai cho từng loại màn và chứng minh game luôn đi tới cuối; ở Pha 1 có test runtime giả lập trẻ chọn sai mọi lần.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-07 — Decoder phẳng cho hành động CPF làm Gemini sai cả 3 lần thử
+- Lỗi: schema decoder `cpf-game.ai-decoder.schema.json` gộp mọi loại hành động thành một object phẳng (bỏ `oneOf`). Chạy thật, Gemini điền `add` cho EFFECT/SOUND và bỏ `at` của EFFECT ở mọi lần thử; vòng tự sửa không sửa được, có lần còn sinh 98 luật. Test offline không phát hiện vì chỉ dùng ví dụ viết tay đúng hình dạng.
+- Phát hiện nhờ: chạy thật trên trình duyệt với Gemini (log lỗi chi tiết).
+- Nguyên nhân gốc: thiết kế decoder chỉ kiểm "schema chặt vẫn bắt lỗi", không lường hình dạng đầu ra thực tế của decoder phẳng; log retry chỉ ghi số lỗi nên khó chẩn đoán.
+- Cách chặn: khi nới schema cho decoder, liệt kê trường nào decoder sẽ cho phép mà schema chặt cấm và chuẩn hóa sẵn ở lớp sinh (đã làm: `keepFieldsOfType`, có test đối chiếu với schema); chạy thử thật một lần trước khi coi pipeline sinh là xong; log retry kèm vài lỗi đầu.
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-01 — Chỉ chạy test thư mục đang sửa nên sót luật kiểm toàn repo
 - Lỗi: ba bước P5 chỉ chạy `src/player/room`, nên không thấy `tokens.test.tsx` cấm mã màu hex trong `src/player`; màu viết cứng trong 5 file tới bước thứ tư mới lộ.
 - Phát hiện nhờ: `test-verifier` chạy toàn bộ test.
@@ -127,7 +274,56 @@ Mẫu một mục:
 - Cách chặn: phần chặn quyền dùng danh sách cho phép; mặc định là chặn; mọi code an ninh phải có người khác thử vượt qua.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-14 — Đếm số lỗi từ output đã cắt bằng `tail`
+- Lỗi: ghi KNOWN-GAPS #13 là "2 liên kết hỏng" vì chạy `node scripts/wiki/check-links.mjs 2>&1 | tail -2` rồi lấy 2 dòng hiện ra làm tổng; thực tế 36 dòng (từ GĐ1 tới nay không đổi).
+- Phát hiện nhờ: `test-verifier` chạy đủ output (36 dòng), người dùng hỏi vì sao từ 2 lên 36.
+- Nguyên nhân gốc: dùng `tail` để rút gọn output cho đỡ dài, rồi quên rằng output đã bị cắt khi ghi số liệu.
+- Cách chặn: số liệu ghi vào tài liệu phải lấy từ lệnh đếm (`| wc -l`, `grep -c`) hoặc từ dòng tổng của script, không từ output đã cắt bằng `head`/`tail`; đề xuất (chờ duyệt) cho `check-links.mjs` tự in tổng số dòng lỗi.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Chứng minh nhánh chặn của hook bằng công cụ giả có output khác công cụ thật
+- Lỗi: nhánh fail-closed theo dòng `ERR` trong `.githooks/pre-commit` dùng regex `(^|[^A-Za-z])ERR(...)`; gitleaks thật in mã màu ANSI (`\033[31mERR`) cả khi bị gom vào biến, nên regex không bao giờ khớp. Tôi "chứng minh" bằng một gitleaks giả in `ERR` không màu, nên test xanh mà nhánh vô hiệu.
+- Phát hiện nhờ: `reviewer` đo output thật bằng `od -c`.
+- Nguyên nhân gốc: viết công cụ giả theo hình dung về output, không đối chiếu byte với output thật trước.
+- Cách chặn: khi giả lập một công cụ ngoài để thử nhánh lỗi, lấy output thật (đo bằng `od`) làm mẫu, hoặc dùng công cụ thật với điều kiện lỗi thật (wrapper gỡ biến môi trường như đã làm); đã sửa hook (`--no-color`, bỏ mã ANSI, neo ERR sau giờ) và chứng minh lại bằng gitleaks thật có màu.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Phân loại "checker báo sai" mà không đọc quy ước liên kết của kho
+- Lỗi: khi phân loại 36 dòng của `check-links`, tôi kết luận 20 liên kết `[[docs/rag-spike/…]]` là "checker báo sai tiền tố `docs/`" chỉ vì file đích có trên đĩa; ghi vào KNOWN-GAPS #13 và người dùng giao việc "sửa checker" dựa trên đó. Quy ước ở `docs/wiki/README.md` là vault Obsidian là `docs/`, đường dẫn tính từ vault, nên 20 liên kết này hỏng thật và checker đúng.
+- Phát hiện nhờ: tự đọc `docs/wiki/README.md` trước khi sửa checker ở lô harness #1.
+- Nguyên nhân gốc: kiểm "file đích có tồn tại không" thay vì "liên kết có mở được theo quy ước của công cụ đọc nó không".
+- Cách chặn: trước khi kết luận một checker báo sai, đọc quy ước mà checker đang áp dụng (README, cấu hình); đã sửa 20 liên kết thay vì nới checker.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-14 — Sửa lỗi bằng một công tắc rộng hơn lỗi (GIT_ATTR_NOSYSTEM)
+- Lỗi: để chữa `astextplain` lỗi với `.docx` trong hook pre-commit (PR #42), tôi đặt `GIT_ATTR_NOSYSTEM=1`, tắt toàn bộ gitattributes cấp hệ thống, nên hook mất luôn textconv đang chạy đúng cho `.odt`, `.ods`, `.pdf`; chỉ kiểm ca `.docx` và ca bình thường, không kiểm các loại file khác mà công tắc cũng chạm tới.
+- Phát hiện nhờ: `/pstack:interrogate` ở A2 (adversary tái hiện bằng `.odt` chứa token giả: hook cũ bắt được, hook mới quét 0 byte).
+- Nguyên nhân gốc: chọn sửa ở mức "tắt cả nhóm cấu hình" thay vì đúng thứ đang hỏng, và không liệt kê những gì công tắc đó ảnh hưởng.
+- Cách chặn: trước khi dùng một công tắc toàn cục (biến môi trường, cờ tắt cấu hình), liệt kê mọi thứ nó chạm tới (ở đây: `git check-attr diff` cho các đuôi file trong gitattributes hệ thống) và kiểm ít nhất một ca của mỗi nhóm; ghi ở KNOWN-GAPS #15.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-15 — Bỏ người chặn một luật vì tin công cụ khác "chắc đã phủ"
+- Lỗi: ở B2, tôi bỏ `pre-commit-checker` khỏi mọi commit và ghi "secret hardcode → gitleaks" mà không chạy gitleaks với dạng secret mà agent cũ kiểm (mật khẩu chữ thường trong yml, connection string có mật khẩu). gitleaks bỏ sót cả hai. Tôi cũng viết "chạy `check-config.mjs` trước khi đưa commit message" trong khi script chỉ đọc phần đã stage, còn agent không stage.
+- Phát hiện nhờ: `reviewer` (prompt mới sau A1) khi review diff B2.
+- Nguyên nhân gốc: đối chiếu luật → thứ chặn bằng tên công cụ, không bằng một ca vi phạm thật cho từng luật; không đọc chế độ mặc định (staged) của script trước khi đặt nó vào quy trình.
+- Cách chặn: trước khi gỡ một người chặn (agent, hook, bước CI), chạy thứ thay thế với một ca vi phạm thật cho từng luật nó đang giữ; đã đẩy luật secret chữ cố định lên `check-config.mjs` (tầng 2).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-15 — Lặp lần nữa: ghi test có `\` qua heredoc, kể cả heredoc có nháy cũng mất một lớp
+- Lỗi: khi làm đề xuất 5 (sửa chính hook chặn lỗi này), tôi nối các test mới vào file bằng `cat >> … <<'EOF'`. File ra mất một lớp `\` (`\\\\d` thành `\\d`, `\\n` thành `\n`, `\\'` thành `\'`), làm đổi nghĩa vài test.
+- Phát hiện nhờ: thông báo "file changed on disk" kèm nội dung, rồi tự Read lại.
+- Nguyên nhân gốc: tin rằng heredoc có nháy giữ nguyên nội dung. Đo lại thì công cụ Bash gộp `\\` thành `\` ngay trong chuỗi lệnh, trước bash và trước hook, kể cả trong nháy đơn (`printf '%s\n' 'x\\y'` ra `x\y`). Các bài học cũ chỉ đổ cho `node -e` và heredoc không nháy nên chưa chạm nguyên nhân này.
+- Cách chặn: nội dung có `\` (code, regex, test) thì luôn ghi bằng Write/Edit; Bash chỉ để chạy lệnh. Hook không thấy được ý định nên không chặn bằng máy được (KNOWN-GAPS #20); hook đã chặn thêm hai dạng mất `\` ở tầng bash ($'...', heredoc không nháy).
+- Trạng thái: CHỜ DUYỆT
+
 ## Đã xử lý
+
+### 2026-11-13 — Dùng chung một hàm khớp cho hai việc có yêu cầu độ chính xác khác nhau
+- Lỗi: `KeywordAssetRetriever.match` được thêm luật "từ khóa ngắn chỉ khớp ở chữ ≤3 từ" để câu thường không ra hình giả, rồi `AssetMeaningGameValidator` dùng lại chính hàm đó trên chuỗi dài (nối visualPrompt, text, label). Hình đã gắn không được tính là "được nhắc" nên validator báo lỗi sai khi chữ dài có từ khóa ngắn của hình đó. Ngoài ra thêm validator `@Order(2)` trùng với `BusinessRuleGameValidator`.
+- Phát hiện nhờ: `reviewer` và `backend-architect-reviewer` (đọc code, không phải test).
+- Nguyên nhân gốc: sửa hàm dùng chung (bước 3) mà không rà lại chỗ gọi đã viết ở bước trước; bộ đo chỉ có ca ≤3 từ nên không bắt được; không kiểm `@Order` của các bean cùng chuỗi.
+- Cách chặn: khi đổi hành vi của hàm dùng chung thì grep mọi chỗ gọi và thêm test ca chữ dài; thêm bean vào chuỗi `@Order` thì kiểm giá trị đang có (đã thêm test khóa thứ tự trong `AssetMeaningGameValidatorTest`).
+- Trạng thái: ĐÃ ÁP DỤNG (test khóa thứ tự trong AssetMeaningGameValidatorTest, test ca chữ dài; quy tắc trong CLAUDE.md)
 
 ### 2026-10-11 — Agent kiểm tra diff bỏ sót thay đổi chưa commit
 - Lỗi: `contract-guardian` chỉ so `main...HEAD`, nên không thấy sửa đổi chưa commit; cùng mẫu còn ở `migration-checker` (kiểm migration cũ bị sửa) và `doc-syncer`.
@@ -156,3 +352,10 @@ Mẫu một mục:
 - Nguyên nhân gốc: agent chỉ được nạp lúc bắt đầu phiên.
 - Cách chặn: trong phiên vừa tạo agent, thử bằng `general-purpose` kèm thân file agent; chỉ kết luận "gọi được theo tên" ở phiên mới.
 - Trạng thái: ĐÃ ÁP DỤNG (ghi chú trong CLAUDE.md).
+
+### 2026-11-08 — Ô nhãn game tự do cố định 64px cắt mất chữ
+- Lỗi: `LabelBadge` trong `CpfRenderer.tsx` dùng bề rộng cố định 64px cho nhãn ≤3 ký tự; chữ đậm cỡ 36 của "bàn" rộng hơn nên hiện thành "b…".
+- Phát hiện nhờ: chạy thật kịch bản 006 (nhóm A) trên trình duyệt.
+- Nguyên nhân gốc: chọn kích thước theo số ký tự mà không đo/ước lượng bề rộng chữ, chỉ kiểm bằng mắt với nhãn số ("6").
+- Cách chặn: kích thước khung chữ trên canvas phải tính từ độ dài chữ và cỡ chữ (hoặc đo bằng Konva), kiểm với nhãn có dấu và chữ rộng; có thể thêm test hàm thuần cho bề rộng nhãn.
+- Trạng thái: CHỜ DUYỆT

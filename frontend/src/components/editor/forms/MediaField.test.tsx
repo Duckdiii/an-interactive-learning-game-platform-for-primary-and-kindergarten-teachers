@@ -90,6 +90,23 @@ describe('tải ảnh (UC-05 luồng 1a)', () => {
     expect(screen.getByText('Chưa có ảnh')).toBeInTheDocument()
   })
 
+  it('bấm vào ảnh đang có thì mở ảnh lớn; Đóng hoặc Esc thì đóng', async () => {
+    const user = newUser()
+
+    renderForm({ imageUrl: '/assets/animals/cat.svg' })
+    await user.click(screen.getByRole('button', { name: 'Xem ảnh lớn' }))
+
+    const dialog = screen.getByRole('dialog', { name: 'Ảnh minh họa' })
+    expect(dialog.querySelector('img')).toHaveAttribute('src', '/assets/animals/cat.svg')
+
+    await user.click(screen.getByRole('button', { name: 'Đóng' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Xem ảnh lớn' }))
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
   it('mỗi ô chỉ nhận đúng loại: ảnh vào ô ảnh (ảnh JPG, WebP cũng được), MP3 vào ô âm thanh', async () => {
     const user = newUser()
 

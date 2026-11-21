@@ -36,6 +36,12 @@ describe('resolveTheme', () => {
     expect(resolveTheme({ themeId: 'constructor', subject: 'MATH' }).id).toBe('bee')
   })
 
+  it('tự động bóc tách ngữ nghĩa từ topic khi không chỉ định themeId', () => {
+    expect(resolveTheme({ topic: 'Bé nối các sinh vật biển: cá hề, rùa biển' }).id).toBe('ocean')
+    expect(resolveTheme({ topic: 'Đếm các con vật trong nông trại: gà, bò, cừu' }).id).toBe('farm')
+    expect(resolveTheme({ topic: 'Khám phá vũ trụ và các hành tinh' }).id).toBe('space')
+  })
+
   it('luật nêu cả loại game lẫn môn thì cả hai phải khớp, và luật đặt trước thắng', () => {
     const rules: ThemeRule[] = [{ gameType: 'MEMORY_CARD', subject: 'MATH', themeId: 'owl' }, ...THEME_RULES]
 

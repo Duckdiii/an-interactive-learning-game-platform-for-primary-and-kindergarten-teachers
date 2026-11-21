@@ -40,7 +40,8 @@ public class SchemaGameValidator extends AbstractGameValidator {
         }
 
         GameType type = gameTypeOf(json);
-        if (type == null) {
+        // CUSTOM là game CPF, không có schema DSL: coi như loại không hỗ trợ ở chuỗi DSL.
+        if (type == null || schemaRegistry.schemaFor(type) == null) {
             return List.of(new ValidationError("$.gameType", "gameType thiếu hoặc không thuộc các loại game được hỗ trợ"));
         }
 

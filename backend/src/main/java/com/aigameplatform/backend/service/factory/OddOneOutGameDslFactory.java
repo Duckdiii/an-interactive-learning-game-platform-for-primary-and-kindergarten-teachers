@@ -17,8 +17,11 @@ import org.springframework.stereotype.Component;
 public class OddOneOutGameDslFactory extends
         AbstractGameDslFactory<OddOneOutAiOutput, OddOneOutAiQuestion, OddOneOutQuestionDsl, OddOneOutGameDsl> {
 
-    public OddOneOutGameDslFactory(RandomGenerator random) {
-        super(GameType.ODD_ONE_OUT, OddOneOutAiOutput.class, random);
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog;
+
+    public OddOneOutGameDslFactory(RandomGenerator random, GameAssetCatalog assets, com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        super(GameType.ODD_ONE_OUT, OddOneOutAiOutput.class, random, assets);
+        this.notoCatalog = notoCatalog;
     }
 
     @Override
@@ -52,7 +55,7 @@ public class OddOneOutGameDslFactory extends
     public OddOneOutGameDsl createImage(com.aigameplatform.backend.dto.dsl.ai.AiGameOutput output,
             GameDslRequest request) {
         if (!(output instanceof OddOneOutAiOutput odd)) throw new IllegalArgumentException("Odd IMAGE output required");
-        var catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog();
+        var catalog = notoCatalog;
         var questions = new ArrayList<OddOneOutQuestionDsl>();
         for (int number = 0; number < odd.questions().size(); number++) {
             var source = odd.questions().get(number);

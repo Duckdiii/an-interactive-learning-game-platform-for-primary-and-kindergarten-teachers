@@ -42,12 +42,12 @@ class OddOneOutImageValidationTest {
     void imageRuleRejectsInventedAssetAndMismatchedUrl() {
         var context = new GameValidationContext(input());
         assertThat(validator.validate(context)).isEmpty();
-        assertThat(new OddOneOutRule().check(context.getGame())).isEmpty();
+        assertThat(new OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()).check(context.getGame())).isEmpty();
         var bad = input();
         ((ObjectNode) bad.path("questions").get(0).path("items").get(0)).put("assetId", "invented");
         var badContext = new GameValidationContext(bad);
         assertThat(validator.validate(badContext)).isEmpty();
-        assertThat(new OddOneOutRule().check(badContext.getGame())).isNotEmpty();
+        assertThat(new OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()).check(badContext.getGame())).isNotEmpty();
     }
 
     @Test
@@ -56,6 +56,6 @@ class OddOneOutImageValidationTest {
         ((ObjectNode) bad.path("questions").get(0)).put("oddOneOutId", "a");
         var context = new GameValidationContext(bad);
         assertThat(validator.validate(context)).isEmpty();
-        assertThat(new OddOneOutRule().check(context.getGame())).isNotEmpty();
+        assertThat(new OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()).check(context.getGame())).isNotEmpty();
     }
 }

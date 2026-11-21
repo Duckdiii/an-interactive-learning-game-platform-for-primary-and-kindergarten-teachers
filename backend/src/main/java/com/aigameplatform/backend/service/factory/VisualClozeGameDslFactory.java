@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 public class VisualClozeGameDslFactory extends AbstractGameDslFactory<VisualClozeAiOutput, VisualClozeAiQuestion,
         VisualClozeQuestionDsl, VisualClozeGameDsl> {
 
-    public VisualClozeGameDslFactory(RandomGenerator random) {
-        super(GameType.VISUAL_CLOZE, VisualClozeAiOutput.class, random);
+    public VisualClozeGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.VISUAL_CLOZE, VisualClozeAiOutput.class, random, assets);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class VisualClozeGameDslFactory extends AbstractGameDslFactory<VisualCloz
     @Override
     protected VisualClozeQuestionDsl createQuestion(VisualClozeAiQuestion ai, QuestionBase base) {
         return new VisualClozeQuestionDsl(base.id(), base.timeLimitSeconds(), base.points(), ai.audioText(), null,
-                ai.visualPrompt(), null, ai.sentenceTemplate(), ai.correctAnswer(), ai.distractors());
+                ai.visualPrompt(), imageOf(ai.asset()), ai.sentenceTemplate(), ai.correctAnswer(), ai.distractors());
     }
 
     @Override

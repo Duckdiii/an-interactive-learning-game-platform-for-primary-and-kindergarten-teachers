@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import type Konva from 'konva'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import VisualClozeImageRenderer from './VisualClozeImageRenderer'
-import { visualClozeImageDemo } from './visualClozeImageDemo'
+import { visualClozeImageDemo } from '../../services/mock/visualClozeImageDemo'
 
 const effects = vi.hoisted(() => ({ imageStatus: 'loaded' as 'loading' | 'failed' | 'loaded', correct: vi.fn(), wrong: vi.fn() }))
 

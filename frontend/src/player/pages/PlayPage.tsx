@@ -12,6 +12,8 @@ import { resolveUiProfile } from '../profile/resolveUiProfile'
 import { UiProfileProvider } from '../profile/UiProfileContext'
 import { resolveTheme } from '../theme/resolveTheme'
 import { ThemeProvider } from '../theme/ThemeContext'
+import { PresentationProvider } from '../theme/PresentationContext'
+import { resolvePresentation } from '../../utils/presentation'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 import PlayController from '../play/PlayController'
 
@@ -36,13 +38,18 @@ export default function PlayPage() {
     return <ErrorScreen kind={kind} code={errorCodeOf(info.error)} onRetry={kind === 'network' ? () => void info.refetch() : undefined} busy={info.isFetching} />
   }
 
-  const theme = resolveTheme({ themeId: info.data.themeId, gameType: info.data.gameType, subject: info.data.metadata.subject })
+  if (!info.data) return <PlayerLoading />
+
+  const theme = resolveTheme({ themeId: info.data.themeId, gameType: info.data.gameType, subject: info.data.metadata.subject, topic: info.data.metadata.topic })
 
   return (
     <UiProfileProvider profile={profile}>
       <ThemeProvider theme={theme}>
         {/* key: đổi mã trên cùng route thì dựng lại, không giữ biệt danh/tiến độ của game trước. */}
-        <PlayController key={shareCode} shareCode={shareCode} info={info.data} />
+        {/* Thông tin công khai chưa có presentation (REST): chọn cố định theo tên game, giống mọi màn khác. */}
+        <PresentationProvider presentation={resolvePresentation(undefined, theme.id, info.data.gameTitle)}>
+          <PlayController key={shareCode} shareCode={shareCode} info={info.data} />
+        </PresentationProvider>
       </ThemeProvider>
     </UiProfileProvider>
   )

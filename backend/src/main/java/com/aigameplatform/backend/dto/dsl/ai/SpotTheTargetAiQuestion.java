@@ -7,5 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record SpotTheTargetAiQuestion(
         String visualPrompt,
         String targetDescription,
-        String audioText) implements AiQuestion {
+        String audioText,
+        String asset) implements AiQuestion {
 }

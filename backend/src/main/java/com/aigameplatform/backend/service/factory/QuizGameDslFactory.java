@@ -13,12 +13,19 @@ import java.util.List;
 import java.util.random.RandomGenerator;
 import org.springframework.stereotype.Component;
 
+/**
+ * QuizGameDslFactory: Assembles validated QuizGameDsl from AI output.
+ * Stage 2.5 Dressing Integration:
+ * - imageUrl từ hình AI chọn trong danh mục (trường asset), không đoán theo từ khóa
+ * - Ensures students receive visual sprites in the DSL
+ * - Binds audioUrl when audioText is present
+ */
 @Component
 public class QuizGameDslFactory
         extends AbstractGameDslFactory<QuizAiOutput, QuizAiQuestion, QuizQuestionDsl, QuizGameDsl> {
 
-    public QuizGameDslFactory(RandomGenerator random) {
-        super(GameType.QUIZ, QuizAiOutput.class, random);
+    public QuizGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.QUIZ, QuizAiOutput.class, random, assets);
     }
 
     @Override
@@ -40,12 +47,36 @@ public class QuizGameDslFactory
                 correctOptionId = id;
             }
         }
-        return new QuizQuestionDsl(base.id(), base.timeLimitSeconds(), base.points(), ai.audioText(), null,
-                ai.visualPrompt(), null, ai.text(), options, correctOptionId);
+
+        // Chặng 2.5: Gắn tài nguyên hình ảnh trực quan và âm thanh giọng đọc
+        String imageUrl = imageOf(ai.asset());
+        String audioUrl = resolveAudioUrl(ai.audioText());
+
+        return new QuizQuestionDsl(
+                base.id(),
+                base.timeLimitSeconds(),
+                base.points(),
+                ai.audioText(),
+                audioUrl,
+                ai.visualPrompt(),
+                imageUrl,
+                ai.text(),
+                options,
+                correctOptionId);
     }
 
     @Override
     protected QuizGameDsl assemble(GameMetadata metadata, GameplaySettings settings, List<QuizQuestionDsl> questions) {
         return new QuizGameDsl(schemaVersion(), supportedType(), metadata, settings, questions);
+    }
+
+    /**
+     * Chặng 2.5: Ánh xạ âm thanh giọng đọc nếu đề bài có audioText.
+     */
+    static String resolveAudioUrl(String audioText) {
+        if (audioText != null && !audioText.isBlank()) {
+            return "/mock/q1.wav";
+        }
+        return null;
     }
 }

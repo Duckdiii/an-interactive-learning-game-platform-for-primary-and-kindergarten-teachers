@@ -44,35 +44,14 @@ Claude Code tự nạp các file này khi đọc file khớp `paths`. Lập kế
 ## Contract đã freeze — mọi thay đổi field/endpoint phải đồng bộ cả Backend, Frontend và doc
 
 - JSON DSL Schema v1.0.0 (cấu trúc field `QuestionGame` cho từng loại game). Đặc tả: `docs/game-json-dsl-v1.0.0.md`; JSON Schema: `backend/src/main/resources/schema/game-dsl/1.0.0/*.schema.json` (mỗi loại game một file, tự chứa); record Java: `dto/dsl`. Kiểu TypeScript: `frontend/src/types/game-dsl.types.ts`. Sửa DSL phải sửa đồng bộ cả bốn nơi và cập nhật test `GameDslSchemaTest`. "Dạng đầu ra của AI" (đơn giản hơn, dùng làm Structured Outputs): schema `backend/src/main/resources/schema/game-ai-output/1.0.0/*.schema.json`, record `dto/dsl/ai`, kiểm tra bằng `service/validation/ai/AiOutputValidator`; sửa thì cập nhật test `AiOutputValidatorTest`.
-- REST API Contract v1.1.0 (endpoint, response envelope `{success, data}` / `{success, error}`, error code). Nguồn sự thật: `docs/openapi/openapi.yaml` (OpenAPI 3.1, thiết kế trước, code theo sau). Mỗi operation có `x-status`: `implemented` (đã cài), `extended-pending` (đã có nhưng phần mở rộng chưa cài), `planned` (chưa cài, code theo đúng spec). Sửa endpoint/field/mã lỗi phải sửa file này trước, rồi kiểm tra bằng `npx @redocly/cli lint docs/openapi/openapi.yaml` (chỉ để kiểm tra cú pháp spec, không phải để xem). Xem API trực tiếp: chạy Backend rồi mở `http://localhost:8080/swagger-ui.html` (springdoc, sinh từ controller đã cài nên chỉ thấy endpoint đã có code, có nút Try it; tắt khi triển khai bằng `SWAGGER_ENABLED=false`). Code Frontend auth hiện còn theo contract cũ (refreshToken trong body, `AuthUser.id`), cần chuyển sang cookie và `teacherId`.
+- REST API Contract v1.1.0 (endpoint, response envelope `{success, data}` / `{success, error}`, error code). Nguồn sự thật: `docs/openapi/openapi.yaml` (OpenAPI 3.1, thiết kế trước, code theo sau). Mỗi operation có `x-status`: `implemented` (đã cài), `extended-pending` (đã có nhưng phần mở rộng chưa cài), `planned` (chưa cài, code theo đúng spec). Sửa endpoint/field/mã lỗi phải sửa file này trước, rồi kiểm tra bằng `npx @redocly/cli lint docs/openapi/openapi.yaml` (chỉ để kiểm tra cú pháp spec, không phải để xem). **Đọc spec lớn (~4000 dòng): mở `docs/openapi/INDEX.md` trước** (operation/schema nằm ở dòng nào), rồi `Read` đúng đoạn bằng `offset`/`limit`; không nạp cả file. Sửa `openapi.yaml` xong chạy `node scripts/openapi/build-index.mjs` để làm mới INDEX (test `build-index.test.mjs` sẽ đỏ nếu quên). Xem API trực tiếp: chạy Backend rồi mở `http://localhost:8080/swagger-ui.html` (springdoc, sinh từ controller đã cài nên chỉ thấy endpoint đã có code, có nút Try it; tắt khi triển khai bằng `SWAGGER_ENABLED=false`). Code Frontend auth hiện còn theo contract cũ (refreshToken trong body, `AuthUser.id`), cần chuyển sang cookie và `teacherId`.
 - WebSocket Message Format v1.0.0 (`/topic/session/{sessionId}/...`, `/app/session/{sessionId}/...`)
 
 Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi.yaml`; tài liệu WebSocket Message Format riêng chưa viết (TODO, tạm xem tag `Realtime` trong `openapi.yaml`). Trước khi sinh code liên quan đến field JSON, endpoint mới hay message WebSocket mới, đọc đúng doc tương ứng; không tự đặt tên field/endpoint khác đi.
 
 ## Nguyên tắc thiết kế: OOP, SOLID, GRASP
 
-Áp dụng cho cả code mới lẫn khi sửa code cũ. Khi có nguyên tắc mâu thuẫn với "Kiến trúc domain đã chốt", ưu tiên kiến trúc đã chốt và báo user.
-
-**OOP**
-- **Đóng gói**: field `private` (hoặc `protected` nếu class diagram ghi `#`), truy cập qua getter/setter hoặc method nghiệp vụ. Không mở public field.
-- **Kế thừa** chỉ khi quan hệ là "is-a" thật (ví dụ `QuizQuestion` là một `QuestionGame`). Ưu tiên composition khi chỉ để tái sử dụng code.
-- **Đa hình**: gọi qua kiểu cha/interface, không dùng chuỗi `if/switch` theo `gameType` để rẽ nhánh hành vi. Thêm game type mới phải là thêm class mới, không sửa nhiều chỗ.
-- **Trừu tượng**: `abstract`/interface cho khái niệm chung; lớp bên ngoài chỉ phụ thuộc vào phần public là "hợp đồng".
-
-**SOLID**
-- **S** (Single Responsibility): mỗi class một lý do để thay đổi. Controller chỉ nhận request/trả response, logic nghiệp vụ ở `service`, truy cập dữ liệu ở `repository`. Entity không chứa logic gọi API ngoài hay validate JSON.
-- **O** (Open/Closed): mở rộng bằng class mới (Strategy, Factory, Validator mới), không sửa code đã chạy ổn để thêm case.
-- **L** (Liskov): class con thay được class cha mà không đổi ý nghĩa. Không override để ném `UnsupportedOperationException` (ngoại lệ duy nhất: khung `TODO` tạm thời đã ghi rõ trong `service/strategy`).
-- **I** (Interface Segregation): interface nhỏ, đúng vai trò; không ép class cài method không dùng.
-- **D** (Dependency Inversion): phụ thuộc vào abstraction, inject qua constructor (Spring DI). Không `new` service/repository trong code nghiệp vụ; API ngoài (Gemini, TTS, Moderation) đi qua interface để mock được khi test.
-
-**GRASP**
-- **Information Expert**: đặt hành vi ở class đang giữ dữ liệu cần thiết.
-- **Creator**: class nào chứa/sở hữu đối tượng thì chịu trách nhiệm tạo nó (khớp với composition trong class diagram, và các Factory đã chốt).
-- **Controller**: lớp REST controller/WebSocket handler chỉ điều phối, ủy quyền cho service.
-- **Low Coupling / High Cohesion**: ít phụ thuộc chéo giữa package, mỗi class gắn với một mục đích rõ.
-- **Polymorphism, Pure Fabrication, Indirection, Protected Variations**: dùng Strategy, Factory, Registry đã chốt để cô lập điểm thay đổi (loại game, nhà cung cấp AI).
-- Không thêm tầng trừu tượng "phòng xa" khi chưa có nhu cầu thật; chỉ tách khi thấy lặp lại hoặc điểm thay đổi rõ ràng.
+Chi tiết ở `.claude/rules/design-principles.md` (tự nạp khi đụng `backend/**`, `frontend/src/**`; lập kế hoạch hoặc review thì đọc trước). Tóm tắt: đóng gói, đa hình thay cho `switch(gameType)`, mở rộng bằng class mới, DI qua constructor, API ngoài đi qua interface. Nguyên tắc mâu thuẫn với "Kiến trúc domain đã chốt" thì ưu tiên kiến trúc đã chốt và báo user.
 
 ## Testing & ngôn ngữ
 
@@ -86,6 +65,7 @@ Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi
 - Cột "Câu lệnh chính": trình bày theo cấu trúc Bối cảnh / Mục tiêu / Ràng buộc và quyết định của user / Cách làm việc / Kiểm chứng, dựa đúng trên những gì user đã yêu cầu (không thêm thắt, không bịa yêu cầu); xuống dòng trong ô bằng `<br>`.
 - Cột "Lỗi / Ảo giác AI & Cách xử lý": chỉ ghi lỗi của chính bạn (sai, ảo giác, bỏ sót, giả định sai) rồi tự sửa. Không ghi lỗi của user hay việc chưa làm được. Không có lỗi thì ghi "Không có lỗi của AI được ghi nhận ở phần này." và không bịa lỗi.
 - Cột "Người thực hiện": ghi tên người đang ra lệnh cho agent, lấy từ `git config user.name` (chạy lệnh này để biết, không tự đoán). Cột "Sinh viên tinh chỉnh / Tối ưu" để user tự điền (ghi `TODO`).
+- `ai-usage-log.md` chỉ giữ khoảng 25 dòng mới nhất (dòng cũ tự chuyển sang `docs/ai-usage-log-archive/` bằng `scripts/ai-log/rotate.mjs`: hook Stop của Claude Code, git pre-commit `.githooks/` cho mọi agent, và CI chặn nếu quá 60 dòng). Không đọc cả file: lấy STT cuối bằng `tail`/Grep rồi chèn dòng mới trước phần "Case study". Cột "Mã Commit SHA" của dòng đã vào archive cập nhật trong file archive tương ứng.
 - Không tự commit. Cột "Mã Commit SHA" ghi `TODO` để user cập nhật sau khi commit; nhắc user làm việc này trong câu báo cáo cuối.
 
 ## Trước mỗi task: chọn công cụ
@@ -117,7 +97,9 @@ Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/c
 | Khi nào | Chạy |
 |---|---|
 | Có sửa code (`backend/**`, `frontend/src/**`) | `reviewer` + `test-verifier` |
-| Mọi commit | `pre-commit-checker` (sau cùng) |
+| Mọi commit | Không cần agent: hook `.githooks/pre-commit` (`check-config.mjs` với file đã stage, gitleaks) và CI (`check-config --tracked`, `check-migrations.mjs`, `check-ai-usage-log.mjs`, gitleaks) chặn phần kiểm tra tất định |
+
+Bảng chỉ còn agent cho việc cần phán đoán; luật nào đã có script/CI chặn thì không gọi agent cho luật đó (đối chiếu luật → script ở `docs/harness-evals/B2-routing.md`).
 
 **Chạy thêm khi đụng phần liên quan:**
 
@@ -125,10 +107,11 @@ Bản giao việc cho agent thực thi phải có: mục tiêu, phạm vi file/c
 |---|---|
 | `backend/**/*.java` | `backend-architect-reviewer` |
 | `dto/dsl`, `schema/game-dsl`, `schema/game-ai-output`, `game-dsl.types.ts`, `docs/openapi/openapi.yaml`, controller/DTO REST | `contract-guardian` |
-| `backend/src/main/resources/db/migration/`, `entity/`, `application*.yml` | `migration-checker` |
-| `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` (bổ sung, không thay `pre-commit-checker`) |
+| `backend/src/main/resources/db/migration/`, `entity/` | `migration-checker` (entity khớp migration, an toàn dữ liệu; tên/version/`ddl-auto` đã do `check-migrations.mjs`) |
+| `security/`, `config/SecurityConfig`, controller/endpoint mới, WebSocket, đăng nhập/token ở frontend, trước khi triển khai | `security-auditor` |
 | `service/generation`, prompt, `schema/game-ai-output`, `dto/dsl/ai` | `ai-prompt-evaluator` (offline) |
-| `ai-usage-log.md` | `log-auditor` |
+| `ai-usage-log.md` | `log-auditor` (đối chiếu với git: SHA có thật, Phạm vi khớp `git show --stat`; định dạng đã do checker) |
+| Thêm file nhị phân/lớn, sửa `.gitignore`, hoặc máy chưa cài gitleaks | `pre-commit-checker` (file lớn bất thường, file lọt `.gitignore`; script chưa kiểm) |
 | `frontend/src/games/**` (renderer mới hoặc đổi bố cục) | `canvas-ux-checker` và `mutation-checker` NẾU người dùng yêu cầu |
 | Bắt đầu một tính năng cần hiểu code hiện có | `codebase-explorer` (có thể chạy song song nhiều câu hỏi) |
 | Sắp sửa field DSL/endpoint/entity/game type và cần biết đụng tới đâu | `impact-analyzer`, rồi lập kế hoạch |
@@ -149,7 +132,7 @@ Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.m
 | Luồng đầy đủ của một ca sử dụng | `docs/srs/UC-xx.md` |
 | Yêu cầu chức năng, phi chức năng | `docs/srs/FR-summary.md`, `docs/srs/NFR.md` |
 | Trường FLD, KPI | `docs/srs/FLD.md`, `docs/srs/KPI.md` |
-| Các mục SRS khác | `docs/SRS-full.md`; hình trong SRS ở `docs/SRS.docx` |
+| Các mục SRS khác | `docs/srs/SRS-full.md`; hình trong SRS ở `docs/SRS.docx` |
 | Sơ đồ kiến trúc, use case, class, tuần tự | `docs/wiki/Sơ đồ hệ thống.md`, `docs/diagrams/` (chỉ lấy nhãn, không đọc nguyên file `.drawio`) |
 | Định hướng đề tài | `docs/Dinh_huong_de_tai.md` |
 | Field DSL | `docs/game-json-dsl-v1.0.0.md` |
@@ -163,12 +146,24 @@ Quy tắc đã duyệt (mỗi quy tắc rút từ một lỗi thật, chi tiết
 - Viết tiêu chí cho agent kiểm tra từ nội dung file thật, không từ giả định; chạy thử trên dữ liệu thật trước khi coi agent là xong.
 - Máy không có `gh`; thao tác GitHub dùng công cụ `mcp__github__*`. Kiểm tra công cụ có sẵn trước khi đưa vào prompt agent.
 - Agent vừa tạo chưa gọi theo tên được trong cùng phiên (chỉ nạp lúc bắt đầu phiên); thử bằng `general-purpose` kèm thân file agent.
+- Đổi hành vi một hàm dùng chung thì grep mọi chỗ gọi và thêm test cho chỗ gọi đó; thêm bean vào chuỗi theo `@Order` thì kiểm giá trị đang có, không để trùng.
 
-Quy trình: khi gặp lỗi của chính mình (test/build fail do mình gây ra, bị người dùng sửa lại, subagent báo lệch), thêm một mục theo mẫu vào phần "Chờ duyệt" của `.claude/lessons-inbox.md` trước khi báo hoàn thành. Không tự chuyển vào `CLAUDE.md` hay prompt agent; người dùng duyệt trước. Khi lỗi có thể kiểm tra tự động, ưu tiên biến thành mục kiểm tra trong prompt agent hoặc test thay vì chỉ thêm chữ vào file này. Chỉ ghi lỗi có hậu quả hoặc lặp lại, không ghi typo/format.
+Quy trình: khi gặp lỗi của chính mình (test/build fail do mình gây ra, bị người dùng sửa lại, subagent báo lệch), thêm một mục theo mẫu vào phần "Chờ duyệt" của `.claude/lessons-inbox.md` trước khi báo hoàn thành. Không tự chuyển vào `CLAUDE.md` hay prompt agent; người dùng duyệt trước. Khi lỗi có thể kiểm tra tự động, ưu tiên biến thành test hoặc kiểm tra CI thay vì thêm chữ vào file này hay vào prompt agent. Chỉ ghi lỗi có hậu quả hoặc lặp lại, không ghi typo/format.
+
+### Thứ tự chặn lỗi (correction hierarchy)
+
+Khi sửa một lỗi có hậu quả hoặc lặp lại (của code hay của agent), trước khi sửa hãy hỏi: tầng mạnh nhất nào chặn được lỗi này lần sau? Chọn tầng cao nhất làm được, theo thứ tự:
+
+1. **Kiến trúc/code**: làm cho không viết sai được (đổi kiểu, chuyển package, bỏ đường đi sai).
+2. **Lint, test, CI**: máy chặn tự động (ArchUnit, unit test, script trong `scripts/`, job CI). Phải chứng minh bằng một lần cố ý vi phạm thấy đỏ rồi hoàn tác thấy xanh.
+3. **Rules, skills, `lessons-inbox`**: chỉ khi không viết được kiểm tra máy.
+4. **Review bằng agent hoặc người**: chỉ cho phần cần phán đoán; agent tìm ra lỗi thì hỏi lại câu trên để đẩy lên tầng 1–2.
+
+Mỗi lần sửa như vậy, thêm một dòng vào `docs/corrections.md` (lỗi, ai phát hiện, đã chặn ở tầng nào, bằng chứng). Lỗi ở tầng 3–4 lặp từ lần thứ hai là ứng viên đẩy lên tầng 1–2; khoảng trống chưa sửa ghi ở `docs/KNOWN-GAPS.md`.
 
 ## Trước khi báo hoàn thành
 
 - Backend: build thử bằng `./mvnw clean install -DskipTests` (hoặc chạy test nếu có DB thật) trước khi báo xong.
 - Frontend: chạy `npm run build` (type-check + build) và/hoặc mở thử bằng dev server trước khi báo xong.
-- Chạy song song các agent theo bảng định tuyến; đợi tất cả xong rồi mới sửa theo kết quả, sau đó chạy lại `test-verifier`. Ngay trước khi đưa commit message, chạy `pre-commit-checker`. Khi sửa `ai-usage-log.md`, chạy `log-auditor`.
+- Chạy song song các agent theo bảng định tuyến; đợi tất cả xong rồi mới sửa theo kết quả, sau đó chạy lại `test-verifier`. Khi commit, hook tự chạy `check-config.mjs` và gitleaks trên phần đã stage (script không tham số chỉ đọc phần đã stage, chưa stage thì im lặng); chỉ gọi `pre-commit-checker` trong các trường hợp ở bảng định tuyến. Khi sửa `ai-usage-log.md`, chạy checker log rồi `log-auditor`.
 - Cuối mỗi tác vụ có làm việc thật (sửa file, chạy agent, dùng trình duyệt...), chạy `node scripts/tool-usage/summarize.mjs --current` và dán dòng kết quả "Công cụ đã dùng: Skill ... · MCP ... · Subagent ... · Tool ..." vào câu báo cáo cuối. Số liệu đọc từ transcript, không tự khai từ trí nhớ; có thể thiếu vài lệnh gọi cuối cùng vì transcript ghi chậm (nêu rõ nếu thấy lệch). Không dùng skill nào thì ghi `Skill: (không)`. Câu hỏi chỉ trò chuyện thì không cần dòng này.
