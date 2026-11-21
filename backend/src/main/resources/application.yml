@@ -74,6 +74,8 @@ app:
     secret: ${JWT_SECRET}
     access-token-ttl-minutes: 15
     refresh-token-ttl-hours: 24
+    # "Ghi nhớ đăng nhập" (UC-15 luồng 3a): refresh token và cookie sống 30 ngày.
+    remember-me-refresh-token-ttl-days: 30
   auth:
     refresh-cookie:
       name: refresh_token

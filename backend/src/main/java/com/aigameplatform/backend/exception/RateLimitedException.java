@@ -6,7 +6,12 @@ public class RateLimitedException extends ApiException {
     private final long retryAfterSeconds;
 
     public RateLimitedException(String message, long retryAfterSeconds) {
-        super(ErrorCode.RATE_LIMITED, message);
+        this(ErrorCode.RATE_LIMITED, message, retryAfterSeconds);
+    }
+
+    // Cho các mã 429 khác (ví dụ LOGIN_TEMPORARILY_LOCKED) dùng chung cách trả header Retry-After.
+    protected RateLimitedException(ErrorCode errorCode, String message, long retryAfterSeconds) {
+        super(errorCode, message);
         this.retryAfterSeconds = retryAfterSeconds;
     }
 

@@ -28,9 +28,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RateLimitedException.class)
     public ResponseEntity<ApiResponse<Void>> handleRateLimited(RateLimitedException ex) {
-        return ResponseEntity.status(ErrorCode.RATE_LIMITED.getStatus())
+        ErrorCode code = ex.getErrorCode();
+        return ResponseEntity.status(code.getStatus())
                 .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
-                .body(ApiResponse.fail(ErrorCode.RATE_LIMITED.name(), ex.getMessage()));
+                .body(ApiResponse.fail(code.name(), ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

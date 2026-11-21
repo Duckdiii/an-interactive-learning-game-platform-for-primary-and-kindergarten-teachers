@@ -11,6 +11,8 @@ export interface RegisterPayload {
 export interface LoginPayload {
   email: string
   password: string
+  // Không gửi hoặc false: refresh token 24 giờ; true: 30 ngày.
+  rememberMe?: boolean
 }
 
 // Refresh token không nằm trong body: Backend đặt vào cookie HttpOnly qua Set-Cookie.
