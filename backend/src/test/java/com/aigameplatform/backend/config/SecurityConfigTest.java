@@ -42,6 +42,7 @@ import org.springframework.test.web.servlet.MockMvc;
         "app.jwt.secret=0123456789abcdef0123456789abcdef-test-secret",
         "app.jwt.access-token-ttl-minutes=15",
         "app.jwt.refresh-token-ttl-hours=24",
+        "app.jwt.remember-me-refresh-token-ttl-days=30",
         "app.cors.allowed-origins=http://localhost:5173",
         "app.auth.refresh-cookie.name=refresh_token",
         "app.auth.refresh-cookie.path=/api/auth",

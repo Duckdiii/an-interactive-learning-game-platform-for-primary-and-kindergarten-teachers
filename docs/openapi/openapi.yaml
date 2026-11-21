@@ -119,8 +119,9 @@ paths:
         > **Sẽ đổi ở Frontend:** code Frontend hiện còn theo contract v1.0.0 (đọc `refreshToken`
         > từ body và dùng `AuthUser.id`). Cần chuyển sang cookie và `teacherId`.
 
-        Phần mở rộng chưa cài: `rememberMe`, `role` trong `teacher`, lỗi `ACCOUNT_LOCKED`,
-        `LOGIN_TEMPORARILY_LOCKED`.
+        Đã cài: `rememberMe` (token xoay vòng giữ nguyên thời hạn 30 ngày), `ACCOUNT_LOCKED`,
+        `LOGIN_TEMPORARILY_LOCKED` (lần sai thứ 5 liên tiếp bật khoá 15 phút; đăng nhập đúng hoặc đặt lại
+        mật khẩu thì xoá bộ đếm). Phần mở rộng chưa cài: `role` trong `teacher`.
       x-status: extended-pending
       security: []
       requestBody:
@@ -268,8 +269,8 @@ paths:
         Thành công thì thu hồi mọi refresh token của tài khoản và xoá bộ đếm đăng nhập sai.
         Lỗi 400 khi liên kết hết hạn/không hợp lệ, hoặc mật khẩu mới không đạt yêu cầu.
 
-        Đã cài: thu hồi refresh token, vô hiệu mọi liên kết đặt lại khác của tài khoản. Bộ đếm đăng nhập sai
-        chưa có (sẽ có cùng `LOGIN_TEMPORARILY_LOCKED`), nên chưa có gì để xoá.
+        Đã cài: thu hồi refresh token, vô hiệu mọi liên kết đặt lại khác của tài khoản, xoá bộ đếm đăng nhập
+        sai và gỡ khoá tạm (`LOGIN_TEMPORARILY_LOCKED`).
       x-status: implemented
       security: []
       requestBody:
@@ -2296,8 +2297,8 @@ components:
         | `INTERNAL_ERROR` | 500 | đã cài | Lỗi không xác định |
         | `CONFLICT` | 409 | chưa cài | Xung đột trạng thái nghiệp vụ |
         | `RATE_LIMITED` | 429 | đã cài (`/auth/forgot-password`) | Vượt giới hạn tần suất; kèm `Retry-After` |
-        | `ACCOUNT_LOCKED` | 403 | chưa cài | Tài khoản bị quản trị viên khoá |
-        | `LOGIN_TEMPORARILY_LOCKED` | 429 | chưa cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
+        | `ACCOUNT_LOCKED` | 403 | đã cài | Tài khoản bị quản trị viên khoá |
+        | `LOGIN_TEMPORARILY_LOCKED` | 429 | đã cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
         | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |
       enum:
         - VALIDATION_ERROR
