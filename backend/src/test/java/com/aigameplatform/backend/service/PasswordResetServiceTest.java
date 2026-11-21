@@ -78,6 +78,9 @@ class PasswordResetServiceTest {
         teacher.setFullName("Nguyễn Thị Lan");
         teacher.setEmail("lan@school.edu.vn");
         teacher.setPasswordHash("old-hash");
+        // Đang bị khóa tạm vì đăng nhập sai: đặt lại mật khẩu phải gỡ khóa và xóa bộ đếm.
+        teacher.setFailedLoginAttempts(3);
+        teacher.setLoginLockedUntil(NOW_UTC.plusMinutes(10));
         return teacher;
     }
 
@@ -169,6 +172,8 @@ class PasswordResetServiceTest {
         service.resetPassword("raw-token", "NewPass1!");
 
         assertThat(passwordEncoder.matches("NewPass1!", token.getTeacher().getPasswordHash())).isTrue();
+        assertThat(token.getTeacher().getLoginLockedUntil()).isNull();
+        assertThat(token.getTeacher().getFailedLoginAttempts()).isZero();
         assertThat(token.getUsedAt()).isEqualTo(NOW_UTC);
         verify(resetTokenRepository).markAllUnusedAsUsed("teacher-1", NOW_UTC);
         // Khóa family trước rồi mới thu hồi, cùng thứ tự với refresh()/logout().

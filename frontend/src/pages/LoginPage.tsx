@@ -18,6 +18,7 @@ import { parseApiError } from '../utils/apiError'
 interface LoginForm {
   email: string
   password: string
+  rememberMe: boolean
 }
 
 interface LoginLocationState {
@@ -27,6 +28,7 @@ interface LoginLocationState {
 const initialForm: LoginForm = {
   email: '',
   password: '',
+  rememberMe: false,
 }
 
 export default function LoginPage() {
@@ -130,12 +132,15 @@ export default function LoginPage() {
         </FormField>
 
         {AUTH_FEATURES.rememberMe ? (
-          // Chưa gửi lên API: LoginRequest.rememberMe chưa được Backend cài.
+          // Mặc định không chọn: máy ở trường thường dùng chung, chỉ giữ đăng nhập 30 ngày khi cô chủ động chọn.
           <label className="flex min-h-11 items-center gap-3 text-sm font-bold">
             <input
               type="checkbox"
               name="rememberMe"
-              defaultChecked
+              checked={form.rememberMe}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, rememberMe: event.target.checked }))
+              }
               className="h-5 w-5 accent-brand"
             />
             {viText.auth.rememberMe}

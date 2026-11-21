@@ -15,7 +15,9 @@ import com.aigameplatform.backend.dto.response.RegisterResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
+import com.aigameplatform.backend.dto.request.LoginRequest;
 import com.aigameplatform.backend.exception.GlobalExceptionHandler;
+import com.aigameplatform.backend.exception.LoginTemporarilyLockedException;
 import com.aigameplatform.backend.exception.RateLimitedException;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.security.RefreshCookieFactory;
@@ -53,7 +55,7 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        RefreshCookieFactory cookieFactory = new RefreshCookieFactory("refresh_token", "/api/auth", "Strict", true, 24);
+        RefreshCookieFactory cookieFactory = new RefreshCookieFactory("refresh_token", "/api/auth", "Strict", true, 24, 30);
         mockMvc = MockMvcBuilders.standaloneSetup(new AuthController(authService, passwordResetService, cookieFactory))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
@@ -69,6 +71,39 @@ class AuthControllerTest {
         return new AuthResult(
                 new AuthResponse("access-jwt", 900, new TeacherInfo("teacher-1", "Nguyễn Văn A", "a@school.edu.vn")),
                 refreshToken);
+    }
+
+    @Test
+    void loginWithRememberMeSetsA30DayCookieAndPassesTheFlagThrough() throws Exception {
+        AuthResult remembered = new AuthResult(authResult("raw").response(), "raw", true);
+        when(authService.login(any())).thenReturn(remembered);
+
+        mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"a@school.edu.vn\",\"password\":\"Abcdef1!\",\"rememberMe\":true}"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=2592000")));
+        verify(authService).login(org.mockito.ArgumentMatchers.argThat(LoginRequest::rememberMeOrDefault));
+    }
+
+    @Test
+    void loginForALockedAccountReturns403AccountLocked() throws Exception {
+        when(authService.login(any())).thenThrow(new ApiException(ErrorCode.ACCOUNT_LOCKED, "khóa"));
+
+        mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"a@school.edu.vn\",\"password\":\"Abcdef1!\"}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("ACCOUNT_LOCKED"));
+    }
+
+    @Test
+    void loginTemporarilyLockedReturns429WithRetryAfter() throws Exception {
+        when(authService.login(any())).thenThrow(new LoginTemporarilyLockedException("khóa tạm", 840));
+
+        mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"a@school.edu.vn\",\"password\":\"Abcdef1!\"}"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Retry-After", "840"))
+                .andExpect(jsonPath("$.error.code").value("LOGIN_TEMPORARILY_LOCKED"));
     }
 
     @Test

@@ -78,6 +78,7 @@ public class PasswordResetService {
 
         Teacher teacher = token.getTeacher();
         teacher.setPasswordHash(passwordEncoder.encode(newPassword));
+        teacher.resetLoginFailures();
         token.markUsed(now);
         resetTokenRepository.markAllUnusedAsUsed(teacher.getId(), now);
         revokeAllSessions(teacher.getId(), now);
