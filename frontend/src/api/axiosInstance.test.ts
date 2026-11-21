@@ -3,7 +3,7 @@ import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { storeSession } from '../utils/authStorage'
 import { logoutTeacher } from './authApi'
-import axiosInstance from './axiosInstance'
+import axiosInstance, { REFRESH_TIMEOUT_MS } from './axiosInstance'
 
 // Adapter giả: request đầu tiên tới API được bảo vệ trả 401 (access token hết hạn), các lần sau trả 200.
 const seenAuthHeaders: Array<string | undefined> = []
@@ -48,7 +48,7 @@ describe('làm mới access token bằng cookie refresh_token', () => {
     const [url, body, config] = refresh.mock.calls[0]
     expect(url).toMatch(/\/auth\/refresh$/)
     expect(body).toBeUndefined()
-    expect(config).toEqual({ withCredentials: true })
+    expect(config).toEqual({ withCredentials: true, timeout: REFRESH_TIMEOUT_MS })
     expect(seenAuthHeaders).toEqual(['Bearer old-access', 'Bearer new-access'])
     expect(localStorage.getItem('accessToken')).toBe('new-access')
     // Khóa refreshToken của contract cũ không được ghi lại.
