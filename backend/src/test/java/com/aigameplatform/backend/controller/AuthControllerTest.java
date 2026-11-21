@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.aigameplatform.backend.dto.response.AuthResponse;
 import com.aigameplatform.backend.dto.response.RegisterResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
+import com.aigameplatform.backend.entity.enums.UserRole;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.dto.request.LoginRequest;
@@ -55,7 +56,7 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        RefreshCookieFactory cookieFactory = new RefreshCookieFactory("refresh_token", "/api/auth", "Strict", true, 24, 30);
+        RefreshCookieFactory cookieFactory = new RefreshCookieFactory("refresh_token", "/api/auth", "Strict", true);
         mockMvc = MockMvcBuilders.standaloneSetup(new AuthController(authService, passwordResetService, cookieFactory))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
@@ -69,18 +70,19 @@ class AuthControllerTest {
 
     private static AuthResult authResult(String refreshToken) {
         return new AuthResult(
-                new AuthResponse("access-jwt", 900, new TeacherInfo("teacher-1", "Nguyễn Văn A", "a@school.edu.vn")),
-                refreshToken);
+                new AuthResponse("access-jwt", 900, new TeacherInfo("teacher-1", "Nguyễn Văn A", "a@school.edu.vn", UserRole.ROLE_TEACHER)),
+                refreshToken, false, java.time.Duration.ofHours(24));
     }
 
     @Test
     void loginWithRememberMeSetsA30DayCookieAndPassesTheFlagThrough() throws Exception {
-        AuthResult remembered = new AuthResult(authResult("raw").response(), "raw", true);
+        AuthResult remembered = new AuthResult(authResult("raw").response(), "raw", true, java.time.Duration.ofDays(30));
         when(authService.login(any())).thenReturn(remembered);
 
         mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"a@school.edu.vn\",\"password\":\"Abcdef1!\",\"rememberMe\":true}"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.teacher.role").value("ROLE_TEACHER"))
                 .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=2592000")));
         verify(authService).login(org.mockito.ArgumentMatchers.argThat(LoginRequest::rememberMeOrDefault));
     }
@@ -177,6 +179,17 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.data.accessToken").value("access-jwt"))
                 .andExpect(header().string("Set-Cookie",
                         org.hamcrest.Matchers.containsString("refresh_token=new-refresh")));
+    }
+
+    @Test
+    void refreshCookieLivesOnlyAsLongAsTheRotatedTokenHasLeft() throws Exception {
+        AuthResult rotated = new AuthResult(authResult("new-refresh").response(), "new-refresh", true,
+                java.time.Duration.ofDays(10));
+        when(authService.refresh("old-refresh")).thenReturn(rotated);
+
+        mockMvc.perform(post("/api/auth/refresh").cookie(new Cookie("refresh_token", "old-refresh")))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=864000")));
     }
 
     @Test

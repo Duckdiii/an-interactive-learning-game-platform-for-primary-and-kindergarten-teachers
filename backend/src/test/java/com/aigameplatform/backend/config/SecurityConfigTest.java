@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.aigameplatform.backend.controller.AuthController;
 import com.aigameplatform.backend.dto.response.AuthResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
+import com.aigameplatform.backend.entity.enums.UserRole;
 import com.aigameplatform.backend.exception.GlobalExceptionHandler;
 import com.aigameplatform.backend.security.JwtService;
 import com.aigameplatform.backend.security.RefreshCookieFactory;
@@ -75,8 +76,8 @@ class SecurityConfigTest {
 
     private static AuthResult authResult() {
         return new AuthResult(
-                new AuthResponse("access-jwt", 900, new TeacherInfo("teacher-1", "Nguyễn Văn A", "a@school.edu.vn")),
-                "raw-refresh-token");
+                new AuthResponse("access-jwt", 900, new TeacherInfo("teacher-1", "Nguyễn Văn A", "a@school.edu.vn", UserRole.ROLE_TEACHER)),
+                "raw-refresh-token", false, java.time.Duration.ofHours(24));
     }
 
     @Test
