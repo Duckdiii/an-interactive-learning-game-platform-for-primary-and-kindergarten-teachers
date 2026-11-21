@@ -9,5 +9,11 @@ public record GameMetadata(
         String title,
         Subject subject,
         GradeLevel gradeLevel,
-        String topic) {
+        String topic,
+        PresentationDsl presentation) {
+
+    /** Game chưa có cách trình bày riêng: frontend tự chọn. */
+    public GameMetadata(String title, Subject subject, GradeLevel gradeLevel, String topic) {
+        this(title, subject, gradeLevel, topic, null);
+    }
 }

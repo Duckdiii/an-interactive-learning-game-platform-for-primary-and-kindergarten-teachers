@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/block-node-eval.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/ai-log/rotate.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "ask": [
+      "Bash(git checkout -b *)",
+      "Bash(git checkout -B *)",
+      "Bash(git switch -c *)",
+      "Bash(git switch -C *)",
+      "Bash(git switch --create *)",
+      "Bash(git switch --force-create *)",
+      "Bash(git checkout --orphan *)",
+      "Bash(git -C * checkout -b *)",
+      "Bash(git -C * switch -c *)"
+    ],
+    "deny": [
+      "Read(./backend/src/main/resources/curriculum/spike/**)",
+      "Read(./docs/rag-spike/evidence/**)",
+      "Read(./docs/transcript.md)",
+      "Read(./docs/Pasted image*.png)",
+      "Read(./frontend/package-lock.json)",
+      "Read(./.codegraph/**)"
+    ]
+  }
+}

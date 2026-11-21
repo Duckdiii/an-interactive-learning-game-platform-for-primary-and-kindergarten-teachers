@@ -32,7 +32,17 @@
         "title": { "type": "string", "minLength": 1, "maxLength": 100 },
         "subject": { "type": "string", "enum": ["MATH", "VIETNAMESE", "ENGLISH"] },
         "gradeLevel": { "type": "string", "enum": ["KINDERGARTEN", "GRADE_1", "GRADE_2", "GRADE_3", "GRADE_4", "GRADE_5"] },
-        "topic": { "type": "string", "minLength": 1, "maxLength": 200 }
+        "topic": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "presentation": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Cách trình bày (tùy chọn): thế giới, vật mang đáp án, bố cục. Thiếu thì frontend tự chọn.",
+          "properties": {
+            "world": { "type": "string", "enum": ["farm", "ocean", "jungle", "space"] },
+            "carrier": { "type": "string", "enum": ["balloon", "bubble", "planet", "fruit", "card", "fish", "flower"] },
+            "layout": { "type": "string", "enum": ["scatter", "row", "arc"] }
+          }
+        }
       }
     },
     "gameplaySettings": {

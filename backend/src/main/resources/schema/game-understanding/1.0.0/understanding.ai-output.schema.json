@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "reply": { "type": "string" },
+    "question": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "quickReplies": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["text", "quickReplies"]
+    },
+    "understanding": {
+      "type": "object",
+      "properties": {
+        "learningGoal": { "type": "string" },
+        "childAction": { "type": "string" },
+        "content": { "type": "array", "items": { "type": "string" } },
+        "setting": { "type": "string" },
+        "gameType": {
+          "type": "string",
+          "enum": ["QUIZ", "AUDIO_VISUAL_MATCH", "ODD_ONE_OUT", "SPOT_THE_TARGET", "WORD_SCRAMBLE", "MATCHING",
+            "MEMORY_CARD", "DRAG_DROP", "ORDERING", "VISUAL_CLOZE", "CUSTOM"]
+        },
+        "alternativeGameTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["QUIZ", "AUDIO_VISUAL_MATCH", "ODD_ONE_OUT", "SPOT_THE_TARGET", "WORD_SCRAMBLE", "MATCHING",
+              "MEMORY_CARD", "DRAG_DROP", "ORDERING", "VISUAL_CLOZE", "CUSTOM"]
+          }
+        },
+        "unsupported": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "need": { "type": "string" }, "fallback": { "type": "string" } },
+            "required": ["need", "fallback"]
+          }
+        },
+        "assumptions": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["learningGoal", "childAction", "content", "setting", "gameType", "alternativeGameTypes", "unsupported",
+        "assumptions"]
+    }
+  },
+  "required": ["reply", "question", "understanding"]
+}

@@ -20,6 +20,7 @@ export interface GenerateForm {
   voiceRegion: string
   voiceGender: string
   hasFile: boolean
+  theme?: string
   visualClozeMode?: 'TEXT' | 'IMAGE'
   oddOneOutMode?: 'TEXT' | 'IMAGE'
   sceneImageUrl?: string
@@ -39,6 +40,7 @@ export interface GenerateGameRequest {
   /** Caller-supplied option assets; required when gameType=VISUAL_CLOZE and mode=IMAGE. */
   optionImages?: { imageUrl: string; visualPrompt: string }[]
   voice: { region: string; gender: string }
+  theme?: string
 }
 
 export type GenerateProblem = 'needIdea'
@@ -66,6 +68,9 @@ export function buildGenerateRequest(
 
   if (form.subject) request.subject = form.subject
   if (form.gradeLevel) request.gradeLevel = form.gradeLevel
+  if (gameType) request.gameType = gameType
+  if (form.theme && form.theme !== 'AUTO') request.theme = form.theme
+
   if (mode === 'random') request.randomTopic = true
   else if (hasValidIdea(form.idea)) request.idea = form.idea.trim()
 

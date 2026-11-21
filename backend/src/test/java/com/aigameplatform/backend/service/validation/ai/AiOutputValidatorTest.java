@@ -63,7 +63,7 @@ class AiOutputValidatorTest {
     // ---- ví dụ hợp lệ ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExampleIsValidAndReadIntoTheRightRecord(GameType type) throws IOException {
         AiOutputReport report = validator.validate(type, exampleText(type));
 
@@ -86,9 +86,9 @@ class AiOutputValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void anExampleIsRejectedByTheSchemaOfAnotherGameType(GameType type) throws IOException {
-        GameType other = GameType.values()[(type.ordinal() + 1) % GameType.values().length];
+        GameType other = GameType.dslTypes()[(type.ordinal() + 1) % GameType.dslTypes().length];
 
         assertThat(validator.validate(other, exampleText(type)).valid()).isFalse();
     }
@@ -158,6 +158,32 @@ class AiOutputValidatorTest {
         question(json, 0).put("text", "x".repeat(201));
 
         assertThat(validate(GameType.QUIZ, json).valid()).isFalse();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
+    void acceptsAnOptionalShortTitleAndRejectsAnOverlongOne(GameType type) throws IOException {
+        ObjectNode root = (ObjectNode) MAPPER.readTree(exampleText(type));
+        root.put("title", "Bé đếm vịt");
+        var report = validator.validate(type, root.toString());
+        assertThat(report.valid()).isTrue();
+        assertThat(report.output().title()).isEqualTo("Bé đếm vịt");
+
+        root.put("title", "x".repeat(61));
+        assertThat(validator.validate(type, root.toString()).valid()).isFalse();
+    }
+
+    @Test
+    void acceptsAnOptionalAssetNextToVisualPromptAndRejectsAnEmptyOrOverlongOne() {
+        String template = """
+                {"questions": [{"pairs": [
+                  {"left": {"text": "bóng bay"}, "right": {"text": "balloon", "visualPrompt": "quả bóng bay", "asset": %s}},
+                  {"left": {"text": "mèo"}, "right": {"text": "cat"}},
+                  {"left": {"text": "cá"}, "right": {"text": "fish"}}]}]}""";
+
+        assertThat(validator.validate(GameType.MATCHING, template.formatted("\"fluent-object-balloon\"")).valid()).isTrue();
+        assertThat(validator.validate(GameType.MATCHING, template.formatted("\"\"")).valid()).isFalse();
+        assertThat(validator.validate(GameType.MATCHING, template.formatted("\"" + "x".repeat(61) + "\"")).valid()).isFalse();
     }
 
     @Test

@@ -1,6 +1,6 @@
 # Kiến trúc và công nghệ
 
-Nguồn: `docs/SRS-full.md` mục 2.3, 2.7, 4.3, 3.2; `docs/Dinh_huong_de_tai.md` mục 5.2, 8. Kiến trúc đã chốt để code theo nằm ở `CLAUDE.md`.
+Nguồn: `docs/srs/SRS-full.md` mục 2.3, 2.7, 4.3, 3.2; `docs/Dinh_huong_de_tai.md` mục 5.2, 8. Kiến trúc đã chốt để code theo nằm ở `CLAUDE.md`.
 Cập nhật: 2026-10-31
 
 ## Tổng quan

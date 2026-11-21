@@ -8,7 +8,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { ROUTES } from '../../routes/paths'
 import PlayerLoading from '../components/PlayerLoading'
 import { playSound } from '../../games/common/sound'
-import type { GameResponse } from '../../types/game-response.types'
+import { isCpfGameResponse, type GameResponse } from '../../types/game-response.types'
 import PresentLobby from '../present/PresentLobby'
 import PresentPlay from '../present/PresentPlay'
 import { useFullscreen } from '../present/useFullscreen'
@@ -18,6 +18,8 @@ import { UiProfileProvider } from '../profile/UiProfileContext'
 import PresentShell from '../shells/PresentShell'
 import { resolveTheme } from '../theme/resolveTheme'
 import { ThemeProvider } from '../theme/ThemeContext'
+import { PresentationProvider } from '../theme/PresentationContext'
+import { resolvePresentation } from '../../utils/presentation'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 
 const text = viText.present
@@ -77,9 +79,15 @@ export default function PresentPage() {
   const { gameId = '' } = useParams()
   const query = useGame(gameId)
   const navigate = useNavigate()
-  const game = query.data
+  const isCpf = query.data !== undefined && isCpfGameResponse(query.data)
+  // Trình chiếu chạy renderer DSL; game tự do (CPF) chưa trình chiếu được.
+  const game = query.data && !isCpfGameResponse(query.data) ? query.data : undefined
   const profile = resolveUiProfile({ gradeLevel: game?.metadata.gradeLevel })
-  const theme = resolveTheme({ themeId: null, gameType: game?.gameType, subject: game?.metadata.subject })
+  const theme = resolveTheme({
+    themeId: game?.metadata.presentation?.world ?? null,
+    gameType: game?.gameType,
+    subject: game?.metadata.subject,
+  })
 
   usePlayerRootStyle(profile)
 
@@ -96,11 +104,13 @@ export default function PresentPage() {
     <UiProfileProvider profile={profile}>
       <ThemeProvider theme={theme}>
         {game ? (
-          <PresentSession game={game} end={end} onLeave={leave} />
+          <PresentationProvider presentation={resolvePresentation(game.metadata.presentation, theme.id, game.metadata.title)}>
+            <PresentSession game={game} end={end} onLeave={leave} />
+          </PresentationProvider>
         ) : (
           <PresentShell controls={end}>
             <div className="m-auto max-w-xl space-y-6 text-center">
-              <h1 className="text-4xl font-extrabold">{isMissing(query.error) ? text.notFound : text.loadFailed}</h1>
+              <h1 className="text-4xl font-extrabold">{isCpf ? text.cpfUnsupported : isMissing(query.error) ? text.notFound : text.loadFailed}</h1>
               {isMissing(query.error) ? (
                 <Link to={ROUTES.workspace} className="inline-flex min-h-14 items-center text-xl font-bold underline">
                   {text.backToShelf}

@@ -1,5 +1,6 @@
 import { AUDIO_BUTTON_HEIGHT, ILLUSTRATION_SIZE, STAGE_WIDTH } from '../common/mediaLayout'
 import { optionGridHeight } from '../common/optionGrid'
+import type { PresentationLayout } from '../../types/game-dsl.types'
 
 export const QUESTION_FONT_SIZE = 32
 export const QUESTION_TEXT_WIDTH = STAGE_WIDTH - 80
@@ -25,6 +26,8 @@ export interface QuizLayoutInput {
    * vắng thì quay về phép ước lượng theo `questionLength`.
    */
   measuredQuestionHeight?: number | null
+  /** Bố cục lưới đáp án; vắng thì lưới 2 cột cũ. */
+  optionLayout?: PresentationLayout
 }
 
 export interface QuizLayout {
@@ -47,6 +50,7 @@ export function computeQuizLayout({
   optionCount,
   questionLength,
   measuredQuestionHeight,
+  optionLayout = 'row',
 }: QuizLayoutInput): QuizLayout {
   let y = TOP_PADDING
 
@@ -74,7 +78,7 @@ export function computeQuizLayout({
   }
 
   const optionsOriginY = y
-  const stageHeight = optionsOriginY + optionGridHeight(optionCount) + BOTTOM_PADDING
+  const stageHeight = optionsOriginY + optionGridHeight(optionCount, optionLayout) + BOTTOM_PADDING
 
   return { illustrationY, questionY, questionHeight, audioButtonY, optionsOriginY, stageHeight }
 }

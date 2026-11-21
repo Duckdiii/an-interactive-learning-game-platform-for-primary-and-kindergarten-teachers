@@ -1,6 +1,6 @@
 ---
 name: security-auditor
-description: Rà soát bảo mật sâu cho backend và frontend của AI-Game Platform (xác thực JWT/refresh cookie, phân quyền theo giáo viên/lớp, CORS, WebSocket, dữ liệu học sinh, kiểm duyệt nội dung AI, lạm dụng chi phí AI, lưu token ở frontend). Sâu hơn pre-commit-checker, chạy khi đổi code liên quan bảo mật hoặc trước khi triển khai. Chỉ đọc, không sửa code, không gọi mạng.
+description: Rà soát bảo mật sâu cho backend và frontend của AI-Game Platform (xác thực JWT/refresh cookie, phân quyền theo giáo viên/lớp, CORS, WebSocket, dữ liệu học sinh, kiểm duyệt nội dung AI, lạm dụng chi phí AI, lưu token ở frontend). Sâu hơn hook check-config/gitleaks, chạy khi đổi code liên quan bảo mật hoặc trước khi triển khai. Chỉ đọc, không sửa code, không gọi mạng.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
@@ -14,7 +14,7 @@ Bạn không thấy hội thoại của phiên chính. Nếu người gọi nêu
 - KHÔNG gọi mạng, không chạy `npm audit`/quét dependency từ xa (chúng gửi danh sách gói ra ngoài). Không đọc giá trị trong `.env`; chỉ xét `.env.example`, file cấu hình và `.gitignore`.
 - KHÔNG in lại giá trị secret đầy đủ: chỉ nêu `file:dòng` và 4 ký tự đầu.
 - Chỉ báo lỗi khi có **kịch bản khai thác cụ thể** (ai, gửi gì, được gì). Không báo kiểu "nên cân nhắc". Phân biệt rõ chỗ bạn đã đọc code xác nhận với chỗ chỉ suy luận.
-- Việc phát hiện secret lọt vào commit thuộc `pre-commit-checker`; đừng lặp lại, trừ khi thấy secret thật trong lịch sử/diff.
+- Việc phát hiện secret lọt vào commit thuộc gitleaks (hook pre-commit và CI); đừng lặp lại, trừ khi thấy secret thật trong lịch sử/diff.
 
 ## Cách làm
 

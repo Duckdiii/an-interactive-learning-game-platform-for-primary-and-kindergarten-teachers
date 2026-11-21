@@ -4,7 +4,6 @@ import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameStatus;
 import com.aigameplatform.backend.entity.enums.VisualClozeMode;
-import com.aigameplatform.backend.dto.response.GameResponse;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.GameRepository;
@@ -47,6 +46,7 @@ public class GamePublicationService {
     private final String browserOrigin;
     private final SecureRandom random = new SecureRandom();
     private final String shareBaseUrl;
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog;
 
     public GamePublicationService(GameRepository games, GameValidationService validation,
             GameContentStrategyRegistry strategies, SceneImageLoader imageLoader,
@@ -55,7 +55,9 @@ public class GamePublicationService {
             // Không đặt mặc định localhost ở đây: application.yml giữ giá trị dev, application-prod.yml
             // bắt buộc env thật để không phát cho phụ huynh link http://localhost:5173/play/... .
             @Value("${app.player.browser-origin}") String browserOrigin,
-            @Value("${app.player.share-base-url}") String shareBaseUrl) {
+            @Value("${app.player.share-base-url}") String shareBaseUrl,
+            com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        this.notoCatalog = notoCatalog;
         this.games = games;
         this.validation = validation;
         this.strategies = strategies;
@@ -68,55 +70,14 @@ public class GamePublicationService {
         this.shareBaseUrl = shareBaseUrl.replaceAll("/+$", "");
     }
 
-    @Transactional(readOnly = true)
-    public tools.jackson.databind.node.ObjectNode getGame(String gameId, AuthenticatedTeacher principal) {
-        if (principal == null) throw new ApiException(ErrorCode.UNAUTHORIZED, "Authentication required");
-        Game game = games.findByIdAndAuthor_Id(gameId, principal.teacherId())
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Game not found"));
-        return GameResponse.from(game, strategies, mapper);
-    }
-
-    @Transactional
-    public tools.jackson.databind.node.ObjectNode saveDraft(String gameId, JsonNode body, AuthenticatedTeacher principal) {
-        if (principal == null) throw new ApiException(ErrorCode.UNAUTHORIZED, "Authentication required");
-        Game game = games.findByIdAndAuthor_Id(gameId, principal.teacherId())
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Game not found"));
-        if (game.getStatus() != GameStatus.DRAFT)
-            throw new ApiException(ErrorCode.CONFLICT, "Only DRAFT games can be edited in this task");
-        if (body == null || !body.isObject())
-            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Game DSL must be an object");
-        boolean edited = !body.equals(mapper.valueToTree(strategies.get(game.getGameType()).toGameDsl(game)));
-        ValidationReport report = validation.validate(body);
-        if (!report.valid()) throw new ApiException(ErrorCode.VALIDATION_ERROR,
-                report.errors().stream().map(e -> e.path() + " " + e.message()).findFirst().orElse("Invalid game DSL"));
-        GameDsl dsl = report.game();
-        if (dsl.gameType() != game.getGameType())
-            throw new ApiException(ErrorCode.VALIDATION_ERROR, "gameType cannot change during edit");
-        if (dsl instanceof com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl visual) {
-            game.setVisualClozeMode(visual.effectiveMode() == VisualClozeMode.IMAGE ? VisualClozeMode.IMAGE : null);
-        }
-        if (dsl instanceof com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl odd)
-            game.setOddOneOutMode(odd.effectiveMode() == com.aigameplatform.backend.entity.enums.OddOneOutMode.IMAGE
-                    ? com.aigameplatform.backend.entity.enums.OddOneOutMode.IMAGE : null);
-        game.setTitle(dsl.metadata().title());
-        game.setTopic(dsl.metadata().topic());
-        game.setSubject(dsl.metadata().subject());
-        game.setGrade(dsl.metadata().gradeLevel());
-        game.setSchemaVersion(dsl.schemaVersion());
-        game.setQuestionNum(dsl.questions().size());
-        var replacementQuestions = strategies.get(dsl.gameType()).parseToQuestions(dsl);
-        game.getQuestions().clear();
-        game.getQuestions().addAll(replacementQuestions);
-        Game saved = edited ? curriculumReviews.saveEditedGame(game, principal.teacherId()) : games.saveAndFlush(game);
-        return GameResponse.withEnvelope(saved, dsl, mapper);
-    }
-
     @Transactional
     public Map<String, Object> publish(String gameId, JsonNode body, AuthenticatedTeacher principal) {
         if (principal == null) throw new ApiException(ErrorCode.UNAUTHORIZED, "Authentication required");
         Game game = games.findByIdAndAuthor_Id(gameId, principal.teacherId())
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Game not found"));
         if (game.getStatus() == GameStatus.PUBLISHED) return publishResult(game);
+        if (game.getGameType() == com.aigameplatform.backend.entity.enums.GameType.CUSTOM)
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chưa hỗ trợ xuất bản trò chơi ngoài danh mục");
         JsonNode candidate = body == null
                 ? mapper.valueToTree(strategies.get(game.getGameType()).toGameDsl(game))
                 : body;
@@ -192,7 +153,7 @@ public class GamePublicationService {
             var choices = new java.util.ArrayList<com.aigameplatform.backend.dto.dsl.ImageChoiceDsl>();
             var questionUrls = new java.util.HashSet<String>();
             var questionConcepts = new java.util.HashSet<String>();
-            var catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog();
+            var catalog = notoCatalog;
             choices.add(question.correct());
             choices.addAll(question.distractors());
             for (var choice : choices) {

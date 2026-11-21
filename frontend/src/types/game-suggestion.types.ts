@@ -1,6 +1,8 @@
 // Một loại game mà AI đề xuất cho ý tưởng của giáo viên. `type` là giá trị enum GameType của API.
 export interface GameTypeSuggestion {
   type: string
+  title?: string
+  track?: string
   // Vì sao loại này hợp với MỤC TIÊU HỌC của ý tưởng (một câu, có ví dụ cụ thể).
   reason: string
   // Cách chơi, một dòng.

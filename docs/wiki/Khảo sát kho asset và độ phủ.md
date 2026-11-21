@@ -1,0 +1,399 @@
+# Khảo sát kho asset và độ phủ
+
+> **Nguồn**: số đo của phiên chính ngày 2026-11-12 trên thư mục asset đã tải (ngoài repo), `frontend/src/utils/assetResolver.ts`, `docs/Kịch bản/Kịch bản tạo game/100 kịch bản tạo game.md`, và danh sách thư mục của repo `microsoft/fluentui-emoji` trên GitHub (chỉ đọc tên thư mục).
+> **Cập nhật**: 2026-11-12
+> **Liên kết liên quan**: [[Tìm và chọn assets phù hợp cho game]], [[Tiêu chuẩn Đồ họa và Asset Pipeline]], [[Trải nghiệm cho trẻ]]
+
+Kết quả giai đoạn 1 (phân loại gói) và giai đoạn 2 (đo độ phủ) của nhóm "thiếu asset". Mục đích: biết kho hiện tại và các gói đã tải lấp được bao nhiêu nhu cầu thật, trước khi tải thêm hay gắn nhãn hàng loạt. Đây là **số đo thô bằng script**, đọc kỹ mục "Giới hạn" trước khi dùng số liệu.
+
+## 1. Giai đoạn 1: Phân loại gói đã tải
+
+Thư mục đã tải có **27.667 file** (21.049 PNG, 5.358 SVG, 653 file âm thanh) trong 69 thư mục gói (68 gói Kenney và một gói điều khiển cảm ứng `mobile-controls-1`). Phần lớn không phải hình minh họa cho nội dung học.
+
+| Loại | Gói (số hình) | Dùng được cho minh họa nội dung? |
+|---|---|---|
+| **Minh họa, tên file rõ nghĩa** | `animal-pack-remastered` (31 con vật, 8 kiểu: tròn, vuông, có viền hay không), `cube-pets` (24 con vật), `fish-pack_2` (cá nhiều màu, có cả nền), `flag-pack` (232 lá cờ, tên theo mã ISO: `VN.png`, `TH.png`), `pixel-vehicle-pack` (80: xe, nhân vật, đồ vật, pixel), `shape-characters` (213 nhân vật ghép mặt), `medals` (32), `boardgame-pack` và `board-game-icons` (xúc xắc, quân cờ) | **Có**, đây là nhóm đi tiếp |
+| **Minh họa, tên file vô nghĩa** | `generic-items` (332, tên `genericItem_color_137`), `pixel-platformer-food-expansion` (116 hình đồ ăn, tên `tile_0032`), `tiny-*`, `pico-8-city`, `pixel-platformer`, `rpg-base`, `roguelike-characters`, `ui-pack-pixel-adventure` | Chưa: cần mô hình nhìn hình để gắn nhãn, tốn công. Tạm bỏ |
+| **Nền, cảnh, ô lát** | `background-elements` (và bản remastered), `sketch-desert`, `isometric-*`, `road-textures`, `skyboxes` (và bản không gian), `planets` (`planet00`...), `pattern-pack-*`, `platformer-bricks`, `block-pack`, `toy-brick-pack`, `new-platformer-pack`, `platformer-pack-remastered`, `simplified-platformer-pack` | Dùng cho nền và trang trí, không dùng làm hình đáp án |
+| **Hiệu ứng** | `splat-pack`, `yellow-paint-pack`, `light-masks`, `googly-eyes` | Trang trí |
+| **Giao diện và điều khiển** | `crosshair-pack`, `cursor-pack`, `cursor-pixel-pack`, `input-prompts` (2 gói), `mobile-controls`, `ui-pack` (và các bản mở rộng), `pixel-ui-pack`, `puzzle-pack-1`, `board-game-info`, `development-essentials`, `kenney-fonts` | **Loại** (khoảng 14.000 file) |
+| **Không phù hợp lứa tuổi** | `desert-shooter-pack`, `tower-defense`, `tiny-battle` (đồ họa bắn súng, chiến đấu) | **Loại** |
+| **Âm thanh** | `casino-audio`, `digital-audio`, `impact-sounds`, `interface-sounds`, `music-jingles`, `rpg-audio`, `ui-audio`, `voiceover-pack-fighter` | Ngoài phạm vi bước này |
+
+**Kết luận giai đoạn 1.** Gói minh họa có nghĩa rõ **chỉ khoảng vài trăm hình có dùng được** (con vật, cờ, một ít xe và đồ vật), không phải 27 nghìn. Phần còn lại là giao diện, nền, ô lát và hiệu ứng.
+
+**Giấy phép.** **Giấy phép (đã đọc file giấy phép của cả 69 gói):** 68 gói ghi CC0 (Creative Commons Zero), dùng được cho mục đích cá nhân, giáo dục và thương mại, ghi nguồn Kenney chỉ khuyến khích, không bắt buộc. 1 gói là ngoại lệ: `isometric-roads` dùng `readme.txt` cũ ("dùng được cho dự án cá nhân và thương mại, ghi nguồn là tùy chọn"), không ghi chữ CC0; gói này thuộc nhóm nền nên không ảnh hưởng. Gói `mobile-controls-1` không phải của Kenney theo tên thư mục nhưng có `License.txt` ghi CC0. Chưa kiểm xem tác giả khác ngoài Kenney có trong từng gói không.
+
+## 2. Giai đoạn 2: Đo độ phủ
+
+### 2.1 Cách đo
+
+1. Rút **87 danh từ cần hình** từ các kịch bản có nội dung cần minh họa trong 100 kịch bản (con vật, bộ phận cơ thể, đồ ăn, phương tiện, đồ vật, thiên nhiên, hành tinh, nghề nghiệp, quần áo, cờ, hoạt động). Danh sách do phiên chính chọn tay, kèm số kịch bản.
+2. Đối chiếu từng từ với `ASSET_CATALOG` (bỏ nhóm chủ đề nền, còn **96 hình**: 10 số, 14 trái cây, 25 con vật, 47 đồ vật) bằng khớp **chặt** theo từ khóa.
+3. Với từ chưa có, tìm theo tên file trong các gói Kenney có tên rõ nghĩa.
+4. Đối chiếu với danh sách thư mục của bộ Fluent Emoji đầy đủ trên GitHub (đọc nửa đầu theo thứ tự chữ cái, nửa sau kiểm từng tên, xem giới hạn).
+
+### 2.2 Kết quả (87 từ)
+
+| Tình trạng | Số từ |
+|---|---|
+| **Đã có** trong danh mục hiện tại | 31 |
+| **Chưa có, nhưng có trong gói đã tải** | 12 |
+| **Thiếu** cả hai | 44 |
+
+Gần **một nửa nhu cầu (44 trên 87) không có ở đâu trong những gì đang có**. Kenney giúp được chủ yếu ở nhóm con vật và cờ.
+
+**Theo nhóm:**
+
+| Nhóm | Đã có | Có trong gói đã tải | Thiếu |
+|---|---|---|---|
+| Con vật (16) | 10 | voi, gà, bò, lợn, khỉ, hươu cao cổ (từ `animal-pack` hoặc `cube-pets`) | 0 |
+| Bộ phận cơ thể (10) | 6 | 0 | đầu, vai, đầu gối, ngón chân |
+| Đồ ăn (12) | 3 (táo, chuối, cam) | 0 | cà rốt, phô mai, bánh chưng, rau muống, cà tím, bánh rán, pizza, bánh trung thu, mâm ngũ quả |
+| Phương tiện (7) | 2 | xe tải | xe máy, xe ba gác, tàu hỏa, xe đua |
+| Đồ vật (13) | 5 | xúc xắc | trống, cân, khối gỗ, bàn phím, màn hình, loa, nốt nhạc |
+| Thiên nhiên (8) | 4 | 0 | cây lúa, hoa đào, mưa, nước đá |
+| Không gian (5) | 0 | 0 | sao Thủy, sao Kim, Trái Đất, sao Hỏa, phi hành gia |
+| Nghề nghiệp (5) | 0 | công an (`pixel-vehicle-pack`, là xe cảnh sát) | bác sĩ, lính cứu hỏa, nông dân, cô giáo |
+| Quần áo (3) | 0 | 0 | áo ấm, mũ len, găng tay |
+| Cờ (2) | 0 | cờ Việt Nam, cờ Thái Lan (`flag-pack`) | 0 |
+| Hoạt động hằng ngày (3) | 0 | 0 | đánh răng, ăn sáng, thức dậy |
+
+### 2.3 Fluent Emoji đầy đủ có lấp được chỗ thiếu không
+
+Đã đối chiếu 44 từ thiếu với bộ Fluent Emoji đầy đủ trên GitHub: đọc danh sách thư mục nửa đầu (A đến "Person fencing"), rồi kiểm từng tên cho các từ còn lại ở nửa sau (Pizza, Police officer, Teacher, Racing car, Toothbrush, Sheaf of rice, Scarf, Snowman, Shower, Rocket, Ringed planet, Student, Tractor, Rainbow, Police car: **cả 15 đều tồn tại**). Mỗi biểu tượng có 4 kiểu (3D, Color, Flat, High Contrast); biểu tượng người có thêm các tông da.
+
+| Mức | Số từ | Từ |
+|---|---|---|
+| **Có đúng hình** | 26 | cà rốt, phô mai, cà tím, pizza, bánh trung thu, xe máy, tàu hỏa, xe đua, trống, cân, bàn phím, màn hình (Desktop computer), loa, nốt nhạc, mưa, nước đá, Trái Đất (quả địa cầu), phi hành gia, bác sĩ (Health worker), nông dân, lính cứu hỏa, cô giáo (Teacher), áo ấm (Coat), găng tay, đánh răng (Toothbrush), ma |
+| **Có hình gần đúng** | 6 | xe ba gác (Auto rickshaw), khối gỗ (Brick), cây lúa (Sheaf of rice là bó lúa), hoa đào (Cherry blossom), ăn sáng (Pancakes, Bread), thức dậy (Bed, Alarm clock) |
+| **Không có** | 12 | bánh chưng, bánh rán, rau muống, mâm ngũ quả, mũ len, sao Thủy, sao Kim, sao Hỏa, và 4 bộ phận cơ thể: **đầu, vai, đầu gối, ngón chân** |
+
+Ghi chú:
+- **Lỗi của kịch bản 004 (nối từ với bộ phận cơ thể) không lấp được chỉ bằng Fluent Emoji.** Bộ emoji chỉ có tai, mắt, mũi, miệng, chân, tay, răng, không có đầu, vai, đầu gối, ngón chân. Cần vẽ riêng, nguồn khác, hoặc để thẻ chữ.
+- **Hành tinh:** Fluent chỉ có Ringed planet (sao Thổ). Gói Kenney `planets` có các quả cầu màu `planet00`...`planet09` nhưng không đặt tên; có thể dùng làm hình rồi gắn nhãn tên.
+- **Món Việt** (bánh chưng, bánh rán, rau muống, mâm ngũ quả) không có ở nguồn nào đã khảo sát.
+- Con ma (kịch bản 084) có hình nhưng là chủ đề nhạy cảm, không nên đưa vào kho cho trẻ.
+
+## 3. Phát hiện kèm theo: bỏ dấu làm nhiều từ trùng nhau (đã sửa nhận định ngày 2026-11-12)
+
+**Nhận định ban đầu của mục này là sai và đã được sửa.** Bản đầu viết rằng "đầu" khớp nhầm hình dâu tây do `normalizeKeyword` bỏ dấu. Kiểm lại thì **không đúng**: các từ khóa của dâu tây là "dau tay", "qua dau", "trai dau", không có "dau" trơ trọi, và bộ khớp so nguyên từ nên văn bản "đầu" không khớp dâu tây. Kết quả "đầu khớp dâu tây" xuất phát từ **luật khớp trong script đo của tôi** (cho phép tiền tố "quả", "trái"), không phải từ `assetResolver`. Lỗi nằm ở script, không ở code sản phẩm.
+
+Phần có thật: `normalizeKeyword` bỏ dấu và đổi "đ" thành "d", nên **"đầu", "dâu", "đau" đều thành "dau"**, "vai"/"vải"/"vài" thành "vai", "trong"/"trống"/"trồng" thành "trong". Hệ quả: **không thể dùng từ khóa trơ trọi cho những từ này** (hình sẽ gắn nhầm vào mọi câu chứa từ trùng âm). Đã áp dụng ở giai đoạn 3: hình cái đầu chỉ nhận "cái đầu", "đầu người", "head"; trống chỉ nhận "cái trống", "drum"; vai chỉ nhận "đôi vai", "bó vai". Vì vậy chữ "đầu" đứng một mình **không** tự ra hình cái đầu (mơ hồ giữa đầu, dâu, đau); trường hợp thường gặp là từ tiếng Anh "head" (kịch bản 004) đã được gắn hình.
+
+Phát hiện có sẵn từ trước (không do giai đoạn 3): từ khóa trơ trọi "khi" của `jungle-monkey` khiến mọi văn bản chứa "khi" ("khi nào em về") bị gắn hình con khỉ. Chưa sửa.
+
+## 4. Giới hạn của số đo
+
+- **Danh sách 87 từ là do người viết chọn tay**, không phải trích tự động đầy đủ. 100 kịch bản là bộ thử hệ thống, khoảng nửa số kịch bản kiểm lỗi hoặc tình huống đặc biệt nên không cần hình. Số 87 phản ánh các chủ đề của riêng bộ này, chưa phải toàn bộ chương trình mầm non đến lớp 5.
+- **Khớp theo từ khóa** có thể sót đồng nghĩa (đếm thiếu "đã có") và có thể khớp nhầm (đếm thừa). Đã siết luật khớp để giảm nhầm, và đã gỡ một khớp nhầm đã biết ("đầu"), nhưng chưa kiểm từng dòng.
+- **Gói Kenney được đối chiếu theo tên file tiếng Anh** (ví dụ `elephant`); tên file cạnh nhau cùng gói có thể là vật khác nghĩa ("police" là xe, không phải người).
+- **Không đọc được toàn bộ danh sách Fluent Emoji**: danh sách thư mục bị cắt ở chữ P, còn API GitHub gọi không đăng nhập bị từ chối (403), nên nửa sau chỉ kiểm bằng từng tên cụ thể (15 tên). Một biểu tượng khác ở nửa sau có thể có mà chưa được tìm.
+- **"Có đúng hình" theo tên emoji, chưa xem hình**: một số hình có thể kém rõ ở cỡ nhỏ hoặc không hợp lứa tuổi (ví dụ Health worker là người trong áo blouse chứ không có ống nghe).
+- Đã xem hình mẫu các gói (mục 6) nhưng chỉ vài hình mỗi gói, ở cỡ thu nhỏ. Chưa xem hình trong game thật. Đã đọc giấy phép từng gói (mục 1).
+
+## 5. Việc tiếp theo
+
+1. ~~Đọc nốt Fluent Emoji~~: đã làm ở mục 2.3. Nếu cần chắc hơn, tải về một bản sao repo Fluent Emoji (cần bạn đồng ý) để tìm theo tên trên máy.
+2. ~~Xem thử hình~~: đã làm ở mục 6. Còn lại: thử đặt vài hình vào một màn chơi thật để quyết định phong cách (mục 6.3).
+2b. **Xem thử hình (bản gốc)** vài gói minh họa (đặc biệt `animal-pack` kiểu tròn, `cube-pets`) cạnh Fluent hiện có để chọn phong cách (xem câu hỏi mở ở [[Tìm và chọn assets phù hợp cho game]]).
+3. **Quyết định cách lấp khoảng trống không có nguồn**: bộ phận cơ thể (đầu, vai, đầu gối, ngón chân), món Việt, hoạt động hằng ngày: vẽ riêng, nguồn khác, hay dùng thẻ chữ khi thiếu hình.
+4. ~~Sửa lỗi khớp "đầu" và "dâu"~~: không có lỗi này ở code (xem mục 3); cân nhắc sửa từ khóa "khi" trơ trọi của `jungle-monkey`.
+5. Mở rộng danh sách từ cần hình theo chương trình học thay vì chỉ theo 100 kịch bản, trước khi quyết định tải thêm.
+
+## 6. Xem hình các gói (so phong cách)
+
+Đã dựng ảnh tổng hợp các hình mẫu (con vật, cờ, cá, hành tinh, xe, huy chương, xúc xắc) của các gói Kenney có tên rõ nghĩa, và so với các hình Fluent đang dùng trong `frontend/public/assets/fluent`. Ảnh chỉ nằm ở thư mục tạm, không đưa vào repo.
+
+### 6.1 Nhận xét từng gói
+
+| Gói | Nhận xét về hình | Hợp game cho trẻ? |
+|---|---|---|
+| `animal-pack`, kiểu Round | Mặt tròn, mắt to, màu phẳng đậm, hình khối đơn giản; nhất quán trong cả bộ 31 con. Rõ ở cỡ nhỏ | **Rất hợp** |
+| `animal-pack`, Round (outline) | Như trên, thêm viền sẫm mảnh quanh hình, gần phong cách "Candy Vector" đang dùng cho trái cây và con vật cũ hơn | **Rất hợp**, dễ hòa với phần có viền đậm |
+| `animal-pack`, Square | Cùng nhân vật nhưng thân vuông | Hợp, ít cần |
+| `cube-pets` | Dạng khối 3D nhỏ, mềm nhưng chi tiết nhỏ, tương phản yếu, khác phong cách phẳng | Kém hơn, dễ lệch phong cách |
+| `flag-pack` | Cờ rõ ràng, chính xác, đủ 232 nước | **Hợp** (cờ Việt Nam, Thái Lan đã kiểm có) |
+| `fish-pack` | Cá nhiều màu, phẳng, rõ; cùng gia đình với animal-pack | Hợp |
+| `planets` | Quả cầu hành tinh có họa tiết, đẹp, không đặt tên | **Hợp** làm hình sao Thủy, Kim, Hỏa nếu tự gắn nhãn |
+| `pixel-vehicle-pack` | Pixel art răng cưa | Lệch phong cách với phần còn lại, nên bỏ |
+| `medals` | Huy chương rõ, dùng cho phần thưởng | Hợp |
+| `shape-characters` | Thân hình khối đơn sắc, ghép với mặt | Dùng làm nhân vật, không phải hình đáp án |
+| Fluent đang dùng | Biểu tượng emoji nhỏ, nhiều chi tiết, nét mảnh, màu dịu | Hợp cho vật thể thường gặp, khác phong cách với animal-pack |
+
+### 6.2 Điều rút ra
+
+- **Kho đang có ít nhất 3 họ phong cách**: Fluent Emoji (mảnh, nhiều chi tiết), "Candy Vector" của các hình con vật, trái cây, số (viền đậm, thấy trong ảnh chụp thử nghiệm lần 3), và nếu thêm Kenney sẽ là họ thứ ba hoặc thứ tư. Một game trộn các họ này sẽ thiếu nhất quán.
+- **`animal-pack` Round (outline) gần với Candy Vector hơn Fluent**, và hình rõ hơn Fluent ở cỡ nhỏ. Nếu muốn một phong cách đồng nhất cho trẻ nhỏ thì đây là ứng viên tốt cho nhóm **con vật**.
+- **Fluent vẫn là nguồn rộng nhất cho vật thể thường gặp** (26 từ thiếu có đúng hình, xem mục 2.3), nên không thể thay bằng Kenney.
+- **Điều chỉnh khuyến nghị trước đây** ("Fluent làm chính, Kenney bổ sung"): sau khi xem hình, đề xuất tinh chỉnh thành **hai họ theo chủ đề**: con vật dùng Kenney `animal-pack` (và cá, hành tinh, cờ, huy chương), vật thể thường gặp dùng Fluent. Mỗi game khóa **một họ** theo chủ đề chính; game trộn cả hai thì cần xử lý hòa nhất quán (xem 6.3).
+
+### 6.3 Cách hòa các họ phong cách (chưa thử)
+
+Ý tưởng cần thử trước khi tin: đặt cho **mọi hình** một lớp nhận diện chung khi vẽ, như viền trắng quanh hình và bóng đổ nhẹ ("miếng dán"), để hình từ nguồn khác nhau trông cùng một bộ. Lớp này làm một lần ở phần vẽ hình, không phải sửa từng hình. Chưa thử, chưa biết có đủ để che sự khác biệt giữa nét mảnh của Fluent và nét đậm của Kenney không.
+
+### 6.4 Giới hạn
+
+- Ảnh so sánh chỉ gồm vài hình mỗi gói, ở cỡ thu nhỏ; hình Fluent là SVG được vẽ ở kích thước gốc nhỏ nên trông nhỏ hơn thực tế trong game.
+- Chưa đặt hình vào một màn chơi thật nên chưa biết độ rõ ở cỡ thật, trên nền thật.
+- Chưa xem các gói khác (ví dụ `toy-brick-pack`, `platformer-pack-remastered`).
+
+### 6.5 Thử trong game thật (2026-11-12)
+
+Đặt thử 6 hình vào màn Nối cặp ở trang thử `/dev/canvas-sandbox` (chỉ chạy khi phát triển, không cần đăng nhập): ba con vật Kenney `animal-pack` kiểu Round (outline) (gấu, lợn, voi), hai hình Fluent đang dùng (bánh mì, xe buýt), một hình "Candy Vector" của repo (con vịt). Việc thử chỉ thay tạm dữ liệu mẫu của trang thử và đã hoàn lại; không đổi code sản phẩm.
+
+Nhận xét ở cỡ thẻ thật (hình nhỏ cạnh chữ):
+
+- **Trộn ba họ trong cùng một màn nhìn vẫn chấp nhận được**, vì mỗi hình đứng riêng trong ô riêng. Chưa thấy lệch đến mức làm hỏng màn chơi.
+- **Hình lệch nhất là con vịt Candy Vector**: viền đen dày, nhìn nghiêng, màu sẫm. Hai họ còn lại (Kenney mặt tròn, Fluent mềm) hòa với nhau tốt hơn. Nghĩa là **họ cần cân nhắc bỏ dần là họ cũ có viền dày**, không phải Fluent.
+- **Con vật Kenney nổi bật hơn vật thể Fluent**: mặt to, mắt to, màu đậm chiếm gần hết ô, trong khi bánh mì và xe buýt nhỏ và nhạt hơn. Trong game nối con vật với đồ vật, trẻ có thể bị hút về phía con vật. Cần kiểm tra thêm nếu trộn hai nhóm trong một màn.
+- Mọi hình tải và hiện đúng; ảnh PNG Kenney và SVG Fluent dùng chung được qua `imageUrl` mà không cần sửa code.
+
+Chưa thử: màn Trắc nghiệm với hình minh họa lớn của câu hỏi (khác biệt phong cách sẽ rõ hơn ở cỡ lớn), nền khác (đại dương, vũ trụ), và lớp "miếng dán" chung ở 6.3. Mới là một màn, một cỡ thẻ.
+
+### 6.6 Thử Trắc nghiệm (2026-11-12, chưa xong)
+
+Đặt thử câu "Đây là con gì?" với hình minh họa lớn là con voi Kenney, ba đáp án là hình voi Kenney, vịt Candy Vector, xe buýt Fluent (trộn họ). Đã hoàn lại thay đổi tạm.
+
+- **Hình trong bong bóng đáp án nhỏ** (khoảng 56px trên bong bóng 160px) nên khác biệt phong cách giữa ba họ **ít lộ**; chữ trên nhãn mới là phần nổi bật.
+- **Hình minh họa lớn của câu hỏi** mới là chỗ phong cách lộ rõ. Con voi Kenney màu xám nhạt trên nền trời xanh nhạt, **độ tương phản vừa phải**, kém nổi hơn các con vật màu đậm (lợn, bò, gấu).
+- **Chưa thử:** câu thứ hai cùng một họ (bấm chuyển bộ câu hỏi chưa đổi được trong phiên này), nền đại dương và vũ trụ, lớp "miếng dán" chung.
+
+## 7. Quyết định và việc đã làm sau khảo sát (2026-11-12)
+
+**Bạn đã chốt:**
+- Phong cách theo **hai họ theo chủ đề**: con vật dùng Kenney `animal-pack`, vật thể dùng Fluent Emoji kiểu Flat; mỗi game khóa một họ.
+- Tải Fluent Emoji về máy để lấy các từ đã xác nhận.
+- 12 từ không có nguồn nào: tự vẽ, mỗi từ vẽ theo họ của hình đứng cạnh nó (đề xuất của phiên chính, đã được chốt).
+
+**Đã làm:**
+- **Tải 32 biểu tượng Fluent kiểu Flat** (180KB, nguồn `microsoft/fluentui-emoji`, giấy phép MIT) vào `D:\Data\tlcn_kltn\game\fluent_download\flat`. Gồm 25 từ có đúng hình và 7 hình gần đúng. **Không tải biểu tượng con ma** (chủ đề nhạy cảm). Bản gốc tải về nằm ở thư mục trên; **các hình đã được đưa vào repo ở giai đoạn 3 (mục 8)**.
+- **Tự vẽ 9 hình SVG** vào `D:\Data\tlcn_kltn\game\custom_drawn`, bản gốc ở thư mục trên; **đã đưa vào repo ở giai đoạn 3 (mục 8)**:
+  - Fluent Flat đơn giản (màu phẳng, ít chi tiết, không viền): bánh chưng, bánh rán, rau muống, mâm ngũ quả, mũ len.
+  - Kenney (bé hoạt hình tròn trịa, viền sẫm mảnh): đầu, vai, đầu gối, ngón chân, vẽ thành 4 biến thể của cùng một bé, mỗi biến thể có vòng cam đứt nét quanh đúng bộ phận.
+- **Ba hành tinh** (sao Thủy, Kim, Hỏa) không vẽ: dùng gói Kenney `planets` rồi gắn nhãn tên.
+
+**Đánh giá hình vừa vẽ** (đặt cạnh Fluent và Kenney, cỡ lớn và cỡ thẻ 48px):
+- Mâm ngũ quả, mũ len, rau muống hòa khá tốt với Fluent bên cạnh; bánh chưng nhận ra được.
+- **Bánh rán còn yếu**: nhìn giống bánh bao hoặc bánh mì kẹp hơn là bánh rán Doraemon.
+- Bé hoạt hình rõ ở cỡ lớn; ở cỡ 48px các vòng đánh dấu bộ phận nhỏ nên khó nhìn, nhất là vai.
+- Bé có phong cách gần Kenney nhưng đơn giản hơn gấu và lợn của Kenney (không có mắt to và đổ màu đậm kín khung).
+- **Đây là hình vẽ bằng mã SVG đơn giản, chưa ngang họa sĩ.** Cần người duyệt từng hình trước khi đưa vào kho, và cần thử trong màn chơi thật.
+
+**Việc tiếp theo (đã làm):** giai đoạn 3, xem mục 8.
+
+**Cập nhật bánh rán (2026-11-12):** đã vẽ lại. Bản đầu nhìn nghiêng giống bánh bao hoặc bánh mì kẹp; bản mới nhìn từ trên xuống, mép nhạt, giữa nâu vàng, cắn mất một miếng lộ nhân đậu đỏ. Giờ đọc được là bánh tròn có nhân, không còn giống bánh mì kẹp, nhưng vẫn **giống bánh quy hoặc bánh kếp có vết cắn** hơn là bánh rán Doraemon đúng nghĩa (không có hai lớp bánh kẹp nhân). Cần người duyệt xem có chấp nhận không.
+
+**Đã chấp nhận (2026-11-12):** người dùng chấp nhận bánh rán bản vẽ lại. Cả 9 hình tự vẽ coi là đạt để đưa vào giai đoạn 3.
+
+## 8. Giai đoạn 3: đã đưa hình vào kho (2026-11-12, nhánh `dev`)
+
+**Đã làm (52 mục mới trong `ASSET_CATALOG`):**
+- 32 hình Fluent Flat (đồ ăn, phương tiện, đồ vật, thời tiết, nghề nghiệp, quần áo), chép vào `frontend/public/assets/fluent/`.
+- 9 hình tự vẽ vào `frontend/public/assets/custom/` (4 bộ phận cơ thể, bánh chưng, bánh rán, rau muống, mâm ngũ quả, mũ len).
+- 6 con vật Kenney (voi, hươu cao cổ, khỉ, bò, gà, lợn), 2 lá cờ (Việt Nam, Thái Lan), 3 hành tinh, vào `frontend/public/assets/kenney/`.
+- `backend/src/main/resources/assets/game-asset-catalog.json` sinh lại từ `ASSET_CATALOG` (bỏ nhóm chủ đề): **96 lên 148 hình**; giữ nhãn đã sửa tay của `obj-ball`.
+- `frontend/public/assets/LICENSES.md` bổ sung nguồn và giấy phép các thư mục mới.
+
+**Quy tắc từ khóa đã áp dụng:** không dùng từ khóa trơ trọi dễ trùng âm khi bỏ dấu ("trong", "vai", "khi", "bo", "ga", "lon", "gach", "mua", "lua", "dau", "giao vien"). Vì vậy "sao Thủy", "sao Kim", "sao Hỏa" khớp hành tinh chứ không phải ngôi sao, "head" ra hình cái đầu, "găng tay" ra găng tay chứ không phải bàn tay.
+
+**Kiểm chứng:** có test mới ở `assetResolver.catalog.test.ts` (hành tinh, cơ thể, găng tay, từ trùng âm, mọi tệp có thật). Backend `GameAssetCatalogTest` (tệp nào trong danh mục cũng có thật) qua; frontend build qua.
+
+**Sửa sau khi `reviewer` kiểm (cùng ngày):**
+- Từ khóa 'hen' của con gà trùng "hẹn" ("hẹn gặp bạn" ra hình gà): đã bỏ. Từ khóa 'voi', 'heo' bị lặp ở mục mới: đã bỏ.
+- **6 con vật Kenney giờ có danh sách từ khóa rỗng**: các mục chủ đề có sẵn (OpenMoji) đã chiếm từ khóa "con bò", "con gà"... nên bản Kenney không bao giờ được chọn qua từ khóa. Chúng chỉ dùng qua **đường AI** (danh mục backend không có nhóm chủ đề, AI chọn theo id). Frontend khi tự đoán hình vẫn dùng bản chủ đề cũ.
+- Test mới bắt từ khóa đơn ngắn ở hình mới và ca "hẹn gặp bạn"; đổi tên và sửa đường dẫn tệp test cho chạy được từ mọi thư mục.
+- Ba hình hành tinh thu nhỏ từ 1280px xuống 256px (khoảng 300KB còn 60 đến 80KB mỗi hình).
+- Còn trùng từ khóa với mục có sẵn nhưng vô hại: `fluent-food-carrot` với `farm-carrot`, `fluent-object-earth` với `space-planet`.
+
+**Hạn chế đã biết:**
+- Các hình **gần đúng** gắn từ khóa gần nghĩa: xe ba gác dùng xe lam ba bánh, khối gỗ dùng viên gạch, cây lúa dùng bó lúa, hoa đào dùng hoa anh đào, ăn sáng dùng bánh kếp, thức dậy dùng đồng hồ báo thức.
+- Hình **hành tinh** là quả cầu họa tiết, đặt tên theo màu gần đúng (sao Thủy xám xanh, sao Kim nâu vàng, sao Hỏa đỏ cam), không phải ảnh thật.
+- Từ khóa tiếng Việt trơ trọi vẫn có thể gắn nhầm ở các mục có sẵn (ví dụ "khi" của con khỉ); chưa sửa.
+- Chưa có **bước truy xuất danh sách ngắn** (giai đoạn 4): prompt vẫn đưa cả danh mục vào, nay là 148 dòng.
+- Chưa chạy lại kịch bản thật (giai đoạn 5), chưa xem hình mới trong màn chơi thật sau khi vào danh mục.
+
+## 9. Giai đoạn 5: chạy lại kịch bản thật (2026-11-13)
+
+Chạy kịch bản 001, 003, 004 qua giao diện thật sau giai đoạn 3. Kết quả chi tiết ở `Thử nghiệm lần 4/kết quả.md` trong thư mục từng kịch bản (`docs/Kịch bản/Kịch bản tạo game/`). Thư mục `docs/Kịch bản/Kịch bản tạo game/` bị `.gitignore` chặn nên **các kết quả này chỉ lưu cục bộ trên máy chạy, không nằm trong repo** (các liên kết tới `Thử nghiệm lần 4`, `5`, `6` trong trang này chỉ dùng được trên máy đó).
+
+**Điều kiện chạy (không so sánh trực tiếp được với lần 3):**
+- Mô hình `gemini-3-flash-preview` (dùng ở lần 3) trả **503 UNAVAILABLE "high demand"** suốt buổi chạy; backend đặt `maxRetries(0)` nên báo lỗi ngay, giáo viên thấy "Trợ lý AI trả lời quá lâu".
+- `gemini-3.5-flash` chậm (12 đến 52 giây) và hết giờ chờ ở bước sinh game. `gemini-2.5-flash` đã bị Google ngừng cấp cho tài khoản mới (404).
+- Kết quả dưới đây dùng **`gemini-3.1-flash-lite`** (nhanh và ổn định, nhưng nhẹ hơn): một số lỗi chọn hình có thể do mô hình, chưa kiểm với mô hình lần 3.
+
+| KB | Kết quả | Đánh giá |
+|---|---|---|
+| 004 Bộ phận cơ thể | AI chọn đúng cả 6 hình, gồm 4 hình tự vẽ mới (đầu, vai, đầu gối, ngón chân) | **Đ** |
+| 001 Đếm vịt | Mô tả "3 con vịt" nhưng hình là **thẻ số 3**: không có gì để đếm, hình lộ đáp án | **G** (kém lần 3) |
+| 003 Vần an, ăn, ân | Hết hình đoán bừa, lựa chọn thiếu hình hiện thẻ chữ; nhưng "bàn" ra quyển sách, "khăn" ra cái ô, từ vô nghĩa gắn hình cái kéo | **S** |
+
+**Ba vấn đề rút ra:**
+1. **AI chọn hình số thay vì hình vật** ở câu đếm. Hướng xử lý: dặn trong prompt, thêm luật Lớp 2 bắt hình thẻ số trùng đáp án.
+2. **AI chọn hình gần giống thay vì bỏ trống** khi kho thiếu hình đúng nghĩa (bàn, khăn). Hướng xử lý: bổ sung hình thiếu, siết luật bỏ trống, bỏ từ vô nghĩa khỏi lựa chọn.
+3. **Hình tự vẽ "đầu" và "vai" khó phân biệt ở cỡ thẻ**: chỉ khác vòng đánh dấu nhỏ. Lỗi do hình vẽ, không do AI. Hướng xử lý: phóng to, làm đậm vòng, hoặc cắt cận cảnh.
+
+Hai vấn đề đầu chính là loại vấn đề giai đoạn 4 nhắm tới (AI chọn hình), nhưng với 148 hình thì không phải do prompt quá dài mà do **AI không tuân luật chọn hình**; bộ lọc danh sách ngắn sẽ không tự sửa chúng.
+
+**Chưa làm:** chạy lại với `gemini-3-flash-preview` khi hết quá tải; xem hết các câu và màn kết quả; chạy kịch bản 002 và 007 đến 012.
+
+## 10. Sửa lỗi hình sau thử nghiệm lần 4 (2026-11-13)
+
+Ba lỗi lộ ra ở mục 9 đã được sửa và chạy lại trên game thật (`Thử nghiệm lần 5` cho kịch bản 1, 3, 4; `Thử nghiệm lần 6` cho kịch bản 1). Vẫn dùng `gemini-3.1-flash-lite`, nên không so sánh trực tiếp được với lần 3.
+
+| Lỗi | Cách sửa | Kết quả trên game thật |
+|---|---|---|
+| AI chọn thẻ số cho "3 con vịt" (lộ đáp án) | Dặn trong prompt `ASSET_RULES`; luật Lớp 2 trong `QuizRule` bắt thẻ số trùng đáp án khi mô tả là vật cần đếm | Lần 5: hình là con vịt |
+| Câu đếm vẽ 1 con, đáp án lệch ("Hai con vịt" đáp án 3) | Màn chơi nhận số viết bằng chữ; luật Lớp 2 bắt mô tả hình khác đáp án; dặn AI viết mô tả bằng chữ số | Lần 6: vẽ đủ 3 con, 5 câu đều đúng |
+| Game vần: bàn ra quyển sách, từ vô nghĩa ra cái kéo, thẻ chữ ghi "Từ c... (cân)" | Thêm hình cái bàn (tự vẽ), cái khăn, đàn ghi-ta; siết luật "không chọn hình khác nghĩa"; dặn từ phải có thật; thẻ chữ hiểu kiểu "Từ c... (cân)" | Lần 5: bàn, khăn, cân, đàn, chân đều đúng hình; còn 3 hình nhiễu sai nghĩa (nhẫn, lăn, lan) |
+| Hình đầu và vai giống nhau ở cỡ nhỏ | Vẽ lại: làm mờ phần còn lại của bé, chỉ bộ phận được đánh dấu giữ màu, vòng đậm hơn | Lần 5: phân biệt được đầu, vai, đầu gối ở cỡ thẻ thật |
+
+**Đánh giá cuối:** kịch bản 1 và 4 đạt, kịch bản 3 đạt kèm vài hình nhiễu chưa đúng nghĩa.
+
+**Hạn chế:**
+- Mỗi kịch bản mới chạy **một lần** với một mô hình nhẹ; chưa chạy lại với `gemini-3-flash-preview` (mô hình của lần 3) khi hết quá tải.
+- Chưa có luật máy bắt "hình khác nghĩa với từ" (chỉ có trong prompt); kho thiếu hình nhẫn, lan.
+- Game vần chỉ có hình, không hiện chữ; chưa kiểm với trẻ lớp 1 có gọi đúng tên hình không.
+- Các luật đếm chỉ áp dụng cho Trắc nghiệm.
+
+## 11. Giai đoạn 4, mức B, bước 1: một nguồn duy nhất cho danh mục (2026-11-13)
+
+Bạn đã chốt làm thẳng mức B (bỏ mức A, vì mốc so sánh đã có sẵn là `Thử nghiệm lần 5` và `6` với cả 151 hình trong prompt) và làm theo từng bước có điểm dừng đánh giá. Kế hoạch 5 bước: (1) nguồn duy nhất cho danh mục, (2) bộ khớp tiếng Việt bằng Java, (3) bài đo offline, (4) dùng làm luật kiểm hình khác nghĩa, (5) dùng làm danh sách ngắn trong prompt; bước 4 và 5 đặt sau cờ cấu hình.
+
+**Đã làm ở bước 1:**
+- `ASSET_CATALOG` (`frontend/src/utils/assetResolver.ts`) giữ làm **nguồn duy nhất**. Thêm trường tùy chọn `promptLabel` cho nhãn riêng đưa vào prompt (thay chỗ nhãn `obj-ball` trước đây sửa tay trong JSON).
+- Module mới `frontend/src/utils/gameAssetCatalog.ts` biến `ASSET_CATALOG` thành danh mục backend, thêm **nhóm nghĩa** (`group`: number, food, animal, body, plant, weather, people, clothes, flag, space, scene, vehicle, school, music, furniture, object) và **họ phong cách** (`family`: openmoji, fluent, kenney, custom), kèm từ khóa không dấu. Nhóm nghĩa suy từ tiền tố id, trừ các hình tiền tố nói sai nghĩa (mặt trời, mây, cây, trái đất, xe, đồ học tập...) có bảng `GROUP_BY_MEANING` ưu tiên; hình mới có tiền tố lạ thì báo lỗi, buộc phải phân nhóm. Sau khi sửa theo `reviewer`, nhóm `object` giảm từ 51 xuống 26 hình, các hình còn lại nằm đúng nhóm nghĩa.
+- Script `scripts/assets/build-game-asset-catalog.mjs` sinh `backend/src/main/resources/assets/game-asset-catalog.json` (có chế độ `--check`). Script nạp thẳng các tệp `.ts` bằng Node, không cần cài thêm gì.
+- Test `gameAssetCatalog.test.ts` (6 test): JSON trên đĩa phải khớp từng chữ với bản sinh ra, nên sửa `ASSET_CATALOG` mà quên sinh lại thì test đỏ.
+- JSON vẫn 151 hình; **id, nhãn, đường dẫn của mọi mục không đổi**, chỉ thêm trường mới. Phân bố: 31 con vật, 24 đồ ăn, 12 bộ phận cơ thể, 9 phương tiện, 8 cây cối, 5 đồ học tập, 26 đồ vật khác; 103 hình Fluent, 27 OpenMoji, 11 Kenney, 10 tự vẽ.
+
+**Chưa làm và cần xử lý ở bước 2:**
+- Sáu con vật Kenney (voi, hươu cao cổ, khỉ, bò, gà, lợn) đang có **danh sách từ khóa rỗng** (đặt ở lần sửa trước để khỏi trùng với mục chủ đề cùng nghĩa trong bộ khớp của frontend). Bộ khớp ở backend sẽ cần từ khóa cho chúng, nên phải tách "từ khóa cho frontend" khỏi "từ khóa cho backend" hoặc đặt thứ tự ưu tiên rõ ràng.
+- Backend (`GameAssetCatalog.java`) chưa đọc `group`, `family`, `keywords`; bước 2 sẽ đọc.
+
+## 12. Giai đoạn 4, mức B, bước 2 đến 5: bộ khớp, đo, luật và shortlist (2026-11-13)
+
+Tất cả nằm trên nhánh `dev`, **chưa commit**. Hai tính năng cuối đều sau cờ và mặc định tắt.
+
+**Bước 2, bộ khớp từ khóa** (`service/asset/`: `VietnameseText`, `AssetRetriever`, `KeywordAssetRetriever`, `AssetMatch`)
+- Khớp theo từ nguyên, lấy từ khóa dài nhất của mỗi hình, sắp theo độ dài. Nhãn hiển thị (không có ngoặc) cũng là từ khóa.
+- Bỏ dấu làm nhiều từ trùng nhau (bàn, bạn, bản, bận cùng thành "ban"; đầu, dâu, đau thành "dau"). Vì vậy danh mục có thêm `exactKeywords` (có dấu, chỉ cho 10 hình) và bộ khớp có lớp khớp phân biệt dấu (`VietnameseText.fold`).
+- `GameAssetCatalog` đã đọc `group`, `family`, `keywords`, `exactKeywords`; thêm `find`, `findByUrl`, `entries`.
+
+**Bước 3, đo offline** (`retrieval-eval.csv` khoảng 145 dòng, `AssetRetrieverEvalTest`)
+- Bộ đo gồm 87 danh từ của 100 kịch bản, mô tả hình thật của các lần thử, và câu thường có từ trùng âm khi bỏ dấu (phải không ra hình).
+- Lần đo đầu: ra đúng hình **112/112** nhưng câu thường chỉ sạch **64%** vì từ ngắn đa nghĩa khớp bừa (cho ra chó, ca ra cá, chỗ trống ra cái trống, đầu trong "bắt đầu").
+- Sửa: từ khóa một chữ dài tối đa 5 ký tự chỉ khớp khi chữ có tối đa 3 từ. Kết quả: đúng 112/112, sạch **26/26**.
+- Giới hạn còn lại, chỉ báo cáo (đánh `~` trong CSV): "khó khăn" ra cái khăn, "cân bằng" ra cái cân, "đàn gà con" ra đàn ghi-ta, "3 + 5" ra số 3 và số 5, "trái tim biết yêu thương" ra trái tim, "vai trò" ra đôi vai.
+
+**Bước 4, luật Layer 2 "hình sai nghĩa"** (`AssetMeaningGameValidator`, bật bằng `ASSET_MEANING_CHECK_ENABLED=true`)
+- Duyệt JSON, với mỗi phần tử có `imageUrl` thuộc danh mục thì so với chữ mô tả (`visualPrompt`, `text`, `label`). Báo lỗi khi chữ nhắc rõ một hình khác mà không nhắc hình đang gắn; chữ không nhắc hình nào thì cho qua.
+- Là một lớp thêm trong chuỗi Layer 2, không sửa `BusinessRuleGameValidator`.
+
+**Bước 5, shortlist trong prompt** (`GeminiGameContentGenerator`, bật bằng `ASSET_SHORTLIST_ENABLED=true`)
+- Hình có từ khóa trong yêu cầu của giáo viên (tối đa 12) đặt lên đầu danh mục, dưới tiêu đề "HÌNH LIÊN QUAN TỚI YÊU CẦU".
+
+**Chạy thật** (`gemini-3.1-flash-lite`, mỗi kịch bản một lần, hay gặp 503 nên phải chạy lại)
+
+| Lần | Cờ | Kịch bản 1 (đếm vịt) | Kịch bản 4 (cơ thể) | Kịch bản 3 (vần) |
+|---|---|---|---|---|
+| Thử nghiệm lần 7 | luật hình | 5 câu đều hình vịt | 6 hình đúng | "con gián" ra rắn, "cần câu" ra cây cung |
+| Thử nghiệm lần 8 | luật hình và shortlist | 5 câu đều hình vịt | 6 hình đúng | không còn hình sai nghĩa; "sân" ra hình con đường (gần nghĩa) |
+
+**Kết luận thật thà**
+- Luật hình **chưa lần nào báo lỗi** khi chạy thật. Hai hình sai ở lần 7 vượt qua vì chữ "con gián", "cần câu" không có từ khóa nào, nên luật coi là "không biết". Muốn bắt ca này phải thêm hình vào kho hoặc từ khóa.
+- Kịch bản 3 ở lần 8 sạch có thể chỉ vì AI chọn từ khác. Yêu cầu của kịch bản ("Ôn vần an, ăn, ân...") không chứa từ khóa hình nào nên shortlist rỗng ở đó. **Tác dụng riêng của shortlist chưa chứng minh được**; chỉ kịch bản 1 và 4 có từ khóa trong yêu cầu.
+- Sau review (reviewer, kiến trúc, test-verifier, migration-checker) đã sửa: validator dùng `AssetRetriever.mentions` (không áp luật chữ ngắn) vì chữ mô tả được nối thành chuỗi dài; luật hình đổi `@Order(3)` và Layer 3 thành `@Order(4)` để thứ tự không phụ thuộc tên class; bỏ constructor kép của `GeminiGameContentGenerator`. Còn ghi nhận: luật hình nằm trong chuỗi chung nên cũng chặn khi giáo viên tự sửa và lưu game (chỉ khi bật cờ); `GameAssetCatalog` nên chuyển sang `service/asset` sau này.
+- Việc nên làm tiếp nếu muốn kết luận: chạy mỗi cấu hình (không cờ, luật, luật + shortlist) nhiều lần trên cùng bộ kịch bản; thêm hình gián, cần câu, nhẫn, lan; xét `reviewer` cho toàn bộ bước 2 đến 5.
+
+## 13. Thêm 7 hình còn thiếu sau thử nghiệm lần 7 (2026-11-13)
+
+Lần 7 kịch bản 3 có hai hình sai nghĩa vì kho thiếu hình đúng (AI chọn gần nghĩa: gián ra rắn, cần câu ra cây cung). Đã thêm 7 hình, kho từ 151 lên **158**:
+
+| Từ | Id | Nguồn |
+|---|---|---|
+| gián | `fluent-animal-cockroach` | Fluent Flat (cockroach) |
+| cần câu | `fluent-object-fishing-pole` | Fluent Flat (fishing pole) |
+| nhẫn | `fluent-object-ring` | Fluent Flat (ring) |
+| xe tải | `fluent-object-truck` (nhóm vehicle) | Fluent Flat (delivery truck) |
+| xúc xắc | `fluent-object-dice` | Fluent Flat (game die) |
+| công an | `fluent-people-police` | Fluent Flat (police officer), hình cảnh sát chung theo quyết định của người dùng |
+| lan | `custom-plant-orchid` | tự vẽ theo phong cách Fluent Flat (không có emoji hoa lan); bản gốc ở `D:Data	lcn_kltngamecustom_drawn` |
+
+- Nguồn `microsoft/fluentui-emoji`, giấy phép MIT. Bản gốc tải về ở `D:Data	lcn_kltngameluent_downloadlat2` (có thêm `articulated_lorry` không dùng).
+- Từ khóa có dấu cho từ trùng âm khi bỏ dấu: `gián`, `cần câu`, `nhẫn`, `lan` (tránh khớp "giận", "nhân", "lăn"). Các từ khóa không dấu `xe tai`, `xuc xac`, `cong an`, `hoa lan` khớp nguyên cụm nên không cần.
+- Bộ đo `retrieval-eval.csv`: 5 ca trước đây đặt "không ra hình" (xe tải, công an, xúc xắc, nhẫn, lan) chuyển sang id đúng, thêm gián, cần câu, chiếc nhẫn, hoa lan và 3 câu thường dễ nhầm (em giận bạn, nhân vật trong truyện, bé lăn tròn xuống dốc). Kết quả: đúng **122/122**, câu thường sạch **25/25**.
+- Chưa kiểm: chưa chạy lại kịch bản thật với 7 hình mới (kịch bản 3 lần 7 có thể ra hình gián, cần câu đúng); hình hoa lan tự vẽ mới xem ở cỡ lớn và 48px, chưa xem trong game. Hình "gián" có thể hơi khó chịu với một số trẻ.
+
+## 14. Đo nhu cầu theo kịch bản và chuẩn mầm non, nhập 11 con vật (2026-11-13)
+
+**Cách đo.** Rút 146 mục cần hình từ hai nguồn: 100 kịch bản (`docs/Kịch bản/Kịch bản tạo game/100 kịch bản tạo game.md`) và chuẩn đầu ra mầm non trong `backend/src/main/resources/curriculum/kindergarten/chunks.jsonl`. Trong đó 115 mục **nêu rõ** trong nguồn, 31 mục **người viết suy ra** từ chủ đề (ví dụ "động vật sống dưới nước" suy ra cá heo, cá mập). Thêm 7 mục không cần ảnh vì vẽ bằng code (hình học, màu, dấu so sánh, phân số, đồng hồ kim, mê cung). Đối chiếu bằng script khớp từ khóa với danh mục (sau khi soát tay các khớp nhầm do bỏ dấu: ông/ong, bà/ba lô, gió/giỏ, hổ/ho).
+
+**Kết quả lúc đo (danh mục 158 hình): đã có 82/146.**
+
+| Nhóm | Tổng | Đã có |
+|---|---|---|
+| Nêu rõ trong nguồn | 115 | 72 |
+| Suy ra | 31 | 10 |
+
+| Chủ đề | Đã có/tổng | Chủ đề | Đã có/tổng |
+|---|---|---|---|
+| Không gian | 4/4 | Đồ học tập | 2/2 |
+| Cơ thể | 7/8 | Phương tiện | 8/10 |
+| Đồ ăn | 11/16 | Quần áo | 4/6 |
+| Đồ vật | 15/24 | Con vật | 13/22 |
+| Cây | 4/8 | Nghề, người | 6/13 |
+| Thiên nhiên | 4/11 | Lễ hội | 1/2 |
+| Ký hiệu | 1/5 | Hành động | 1/5 |
+| **Nơi chốn** | **0/6** | **Địa danh** | **0/2** |
+
+Thiếu 64 mục. Gợi ý nguồn bổ sung (nhận định của người viết, chưa kiểm): 2 mục có trong gói Kenney đã tải (cá voi, cá sấu); 45 mục có thể lấy từ Fluent Emoji (gia đình, hành động, ký hiệu, thí nghiệm, thời tiết, nghề...); 17 mục phải tự vẽ vì không nguồn quốc tế nào có (rau mồng tơi, rau dền, đèn ông sao, mâm cỗ Trung thu, cây bàng, Vịnh Hạ Long, Hồ Gươm, chợ quê...). Nơi chốn và địa danh là cảnh, có thể cần hình nền thay vì biểu tượng.
+
+**Giới hạn.** Danh sách 146 mục do người viết chọn tay; 31 mục suy ra không phải nhu cầu nêu rõ. Dữ liệu toán lớp 2 đến 5, tiếng Việt, tiếng Anh nằm trong `backend/src/main/resources/curriculum/spike/` bị chặn bởi cài đặt quyền nên chưa đo. Một số mục tính "đã có" chỉ ở mức gần đúng (xe ba gác, khối gỗ, và mục gộp thức dậy, đánh răng, ăn sáng chỉ có hình bàn chải).
+
+**Đã nhập từ kho đã tải.** 11 con vật của gói Animal Pack (kiểu Round outline) chưa có trong danh mục: gà con, cá sấu, khỉ đột, hà mã, nai sừng tấm, kỳ lân biển, vẹt, tê giác, con lười, hải mã, cá voi. Làm đúng theo 6 con Kenney trước: `keywords` rỗng ở frontend, từ khóa nằm ở `matchKeywords` cho bộ khớp backend; `con vẹt` và `con lười` có thêm từ khóa có dấu. Danh mục từ 158 lên **169 hình**, JSON sinh lại bằng `scripts/assets/build-game-asset-catalog.mjs`. Bộ đo `retrieval-eval.csv`: đúng 133/133, câu thường sạch 27/27; câu "đàn gà con" nay ra gà con trước đàn ghi-ta.
+
+**Chưa làm.** Chưa chạy lại kịch bản thật; chưa xem 11 hình trong màn chơi. Các mục thiếu còn lại xem mục 15.
+
+## 15. Tải thêm 52 biểu tượng Fluent và nhập vào danh mục (2026-11-13)
+
+**Tải.** Người dùng duyệt danh sách 52 biểu tượng trước khi tải. Nguồn: `microsoft/fluentui-emoji`, kiểu Flat, giấy phép MIT, tải từng tệp SVG (không tải cả repo). Lưu ngoài repo ở `D:\Data\tlcn_kltn\game\fluent_download\flat3`. Dung lượng thật 164 KB (167.803 byte); con số 70 KB báo trước là sai vì lấy từ phản hồi HEAD, vốn là kích thước nén. Cả 52 tệp là SVG, không có script hay mã chủ động. Con cừu lấy theo tên `Ewe` (không có `Sheep`).
+
+**Nhập vào danh mục.** Danh mục từ 169 lên **221 hình**; tệp chép vào `frontend/public/assets/fluent/`. Làm theo cách của các con vật Kenney: `keywords` rỗng, chỉ backend khớp qua `matchKeywords` và `exactKeywords`, nên bộ khớp frontend không đổi. Các điểm cần nhớ khi thêm từ khóa:
+- Từ trùng âm khi bỏ dấu dùng từ khóa **có dấu**: bố, mẹ, ông, bà, hổ, cừu, tuyết, gió, rùa, tôm, ghế, cốc, muối, váy...
+- Nhãn không có ngoặc cũng thành từ khóa, nên nhóm gia đình đặt nhãn có ngoặc ("Ông (ông nội, ông ngoại)") để "ông" không thành `ong` (con ong).
+- Bỏ các từ khóa không dấu dễ trùng câu thường: "đang chạy" (đang cháy), "ba nói" (bà), "co be" (có bé), "khởi động", "tuyet", "muoi" (mười).
+- 10 hình ghi đè nhóm nghĩa trong `GROUP_BY_MEANING` (xe cứu thương, trực thăng, xe cứu hỏa, tàu thủy, máy kéo vào phương tiện; ghế vào đồ nội thất; micro vào âm nhạc; trường học, siêu thị, công viên vào cảnh).
+
+**Kết quả đo.** Bộ đo `retrieval-eval.csv`: đúng **188/188**, câu thường sạch **33/33**. Thêm 6 câu thường mới để kiểm bẫy trùng âm (tuyệt vời, rửa tay, cứu người, tất cả, ba nói, khởi động máy). `reviewer` chỉ ra 5 từ khóa dễ khớp nhầm câu thường (cụm có dấu "đang chạy" và "khởi động" kéo hình người cho cả "con chó đang chạy" và "khởi động máy", "gio thoi" trùng "giờ thôi", "cam lua" trùng "cám lúa"); đã bỏ các cụm đó (giữ "cấm lửa" ở dạng có dấu) và thêm dòng đo bảo vệ.
+
+**Xem hình.** Dựng trang xem trước 52 hình bằng Edge chạy ngầm: cùng một phong cách, hiển thị đúng. Một số hình chỉ gần đúng: "Cốc nước" là cốc có ống hút mang đi; "Gió thổi" là khuôn mặt thổi gió; "Công viên" là phong cảnh núi và hồ (Fluent "National park"); "Cái lưỡi" là cái miệng thè lưỡi. Chưa xem trong màn chơi thật.
+
+**Độ phủ nhu cầu sau đợt này (chạy lại script mục 14).** Khoảng **123/146** (tính tay "giày" vì script chưa nhận nhãn "Đôi giày"). Còn thiếu khoảng 23 mục:
+- 17 mục tự vẽ: rau mồng tơi, rau dền, mâm cỗ Trung thu, cây bàng, bình tưới nước, quả cân, đèn ông sao, đồ chơi Trung thu, cốc đong, búp bê, sao vàng, Vịnh Hạ Long, Hồ Gươm và Chùa Một Cột, lối ra vào, chợ quê, tiệm bánh, ao đồng ruộng.
+- Khoảng 6 mục không có ở Fluent: đường, hạt giống (chỉ có cây non), hơi nước, đồ dùng gia đình (chén, thìa, nồi), hát, nhảy.
+
+**Chưa làm.** Chưa chạy lại kịch bản thật; chưa đọc dữ liệu `spike/` (toán 2 đến 5, tiếng Việt, tiếng Anh) nên nhu cầu của các môn này chưa đo.
+
+## 16. Vẽ 16 hình còn thiếu (2026-11-13)
+
+**Phạm vi.** Mục 15 còn 17 mục phải tự vẽ. Vẽ 16 SVG; mục "sao vàng, quốc khánh" không vẽ vì đã có hình cờ Việt Nam, chỉ thêm từ khóa `cờ đỏ sao vàng` cho `kenney-flag-vn`. Từ khóa `sao vàng` đứng riêng đã bỏ sau review vì cướp "ngôi sao vàng" (phần thưởng quen thuộc với trẻ). Với mục gộp nhiều vật, chọn một đại diện: "đồ chơi Trung thu (mặt nạ, trống ếch)" vẽ mặt nạ; "Hồ Gươm, Chùa Một Cột" vẽ Chùa Một Cột; "ao, đồng ruộng" vẽ ao; "cốc đong, bình đong" vẽ cốc đong. Chưa vẽ: Hồ Gươm (Tháp Rùa), trống ếch, đồng ruộng.
+
+**Phong cách.** Khung 32x32, màu phẳng bảng Material, không viền, giống 11 hình tự vẽ trước. Bản gốc nằm ở thư mục `custom_drawn` ngoài repo, chép vào `frontend/public/assets/custom/`.
+
+| Nhóm | Hình (id `custom-...`) |
+|---|---|
+| Đồ ăn | rau mồng tơi, rau dền, mâm cỗ Trung thu |
+| Cây | cây bàng |
+| Đồ vật | bình tưới nước, quả cân, đèn ông sao, mặt nạ Trung thu, cốc đong, búp bê, biển lối ra |
+| Cảnh (nhóm `scene`) | Vịnh Hạ Long, Chùa Một Cột, chợ quê, tiệm bánh, cái ao |
+
+**Từ khóa.** Cùng cách với các đợt trước: `keywords` rỗng, chỉ backend khớp. Ngoại lệ: `đèn ông sao` có `keywords: ['den ong sao']` và bỏ từ khóa đó khỏi đèn lồng cũ (trước đây đèn lồng giữ từ khóa này để xấp xỉ), để cả frontend lẫn backend ra hình mới. Bẫy trùng âm khi bỏ dấu dùng từ khóa có dấu hoặc nhãn có ngoặc: "ao" khác "áo", "chợ" khác "chờ", "quả cân" khác "quá cần", "chùa" khác "chưa", "bàng". Thêm quy tắc `custom-scene-` vào nhóm `scene` ở `GROUP_BY_ID`.
+
+**Kết quả đo.** Danh mục **237 hình**. Bộ đo `retrieval-eval.csv`: đúng **207/207**, câu thường sạch **37/37**. Thêm các câu thường kiểm bẫy trùng âm: "cái áo mới", "quá cần thiết", "bảng đen", "mầm cỏ xanh", cùng ca dương "ngôi sao vàng" (không bị cờ cướp). Hai giới hạn đã biết ghi dạng `~`: "ao ước" vẫn ra cái ao (từ "ao" đứng riêng), "chờ đợi mãi" ra con chó (từ khóa "cho" bỏ dấu của con chó có sẵn). Lần đo đầu ra 206/207 vì đèn lồng cũ giữ từ khóa "đèn ông sao"; đã chuyển từ khóa. `reviewer` còn chỉ ra "mam co" bỏ dấu khớp "mầm cỏ", đã chuyển sang từ khóa có dấu "mâm cỗ". Độ phủ nhu cầu theo script mục 14: khoảng **138/146**.
+
+**Xem hình.** Dựng trang xem trước 16 hình ở cỡ lớn và cỡ thẻ 40px bằng Edge chạy ngầm. Cây bàng vẽ lại một lần vì bản đầu các tầng dính nhau, giống cây thông. Đây là hình vẽ bằng mã SVG đơn giản, chưa ngang họa sĩ: cây bàng vẫn hơi giống cây thông tầng, cái bình tưới có tay cầm trông như túi xách. Cần người duyệt từng hình trước khi coi là đạt.
+
+**Còn thiếu (khoảng 8 mục).** Đường, hạt giống (chỉ có cây non), hơi nước, đồ dùng gia đình (chén, thìa, nồi), chạy và nhảy, hát, khởi động thể dục (có hình tập thể dục nhưng từ khóa "khởi động" đã bỏ vì khớp nhầm câu thường), Hồ Gươm.
+
+**Chưa làm.** Chưa xem 16 hình trong màn chơi thật; chưa chạy lại kịch bản thật.

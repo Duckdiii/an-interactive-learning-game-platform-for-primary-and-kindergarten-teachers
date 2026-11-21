@@ -21,7 +21,7 @@ class GameContentStrategyTest {
     @Test
     void thereIsExactlyOneStrategyPerGameType() {
         assertThat(STRATEGIES).extracting(GameContentStrategy::getSupportedType)
-                .containsExactlyInAnyOrder(GameType.values());
+                .containsExactlyInAnyOrder(GameType.dslTypes());
     }
 
     @Test
@@ -44,6 +44,37 @@ class GameContentStrategyTest {
         assertThat(question.get("required")).extracting(JsonNode::asString).containsExactly("text", "options", "correctIndex");
         assertThat(question.get("properties").has("id")).isFalse();
         assertThat(question.get("additionalProperties").asBoolean()).isFalse();
+    }
+
+    @Test
+    void everyTypeWithAVisualPromptAlsoOffersAnAssetFromTheCatalogExceptOddOneOut() {
+        for (GameContentStrategy strategy : STRATEGIES) {
+            assertThat(strategy.hasAssetField()).as(strategy.getSupportedType().name())
+                    .isEqualTo(strategy.getSupportedType() != GameType.ODD_ONE_OUT);
+        }
+    }
+
+    @Test
+    void thePromptOffersEveryAllowedPresentationValue() {
+        String prompt = new QuizGameStrategy(MAPPER).buildPrompt("biển", com.aigameplatform.backend.entity.enums.Subject.MATH,
+                com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_1, null);
+
+        java.util.stream.Stream.of(com.aigameplatform.backend.dto.dsl.PresentationDsl.WORLDS,
+                        com.aigameplatform.backend.dto.dsl.PresentationDsl.CARRIERS, com.aigameplatform.backend.dto.dsl.PresentationDsl.LAYOUTS)
+                .flatMap(java.util.List::stream).forEach(value -> assertThat(prompt).as(value).contains(value));
+    }
+
+    @Test
+    void everyPromptAsksForVietnameseTitleAndInstructionsEvenForEnglish() {
+        for (GameContentStrategy strategy : STRATEGIES) {
+            String prompt = strategy.buildPrompt("colors song: red, blue",
+                    com.aigameplatform.backend.entity.enums.Subject.ENGLISH,
+                    com.aigameplatform.backend.entity.enums.GradeLevel.KINDERGARTEN, null);
+
+            assertThat(prompt).as(strategy.getSupportedType().name())
+                    .contains("title, câu hỏi, lời dẫn", "luôn viết bằng tiếng Việt", "Riêng môn Tiếng Anh")
+                    .doesNotContain("Chỉ dùng từ tiếng Việt có thật");
+        }
     }
 
     @Test

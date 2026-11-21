@@ -1,5 +1,5 @@
 import type { GameTypeSuggestion, SuggestGameTypesInput } from '../types/game-suggestion.types'
-import { hasPhrase, toMatchText } from '../utils/phraseMatch'
+import { hasPhrase, mentionsAny, toMatchText } from '../utils/phraseMatch'
 
 // LUÔN LÀ MÔ PHỎNG: contract (`openapi.yaml`) chưa có endpoint đề xuất loại game, nên hàm này không đi qua cờ `ai` và nhãn
 // "Dữ liệu mô phỏng" ở bước đề xuất luôn hiện. Khi backend có endpoint, thêm nhánh gọi thật dưới cờ `ai`.
@@ -143,6 +143,95 @@ function contextBonus(type: string, input: SuggestGameTypesInput) {
 
 const round = (value: number) => Math.round(Math.min(1, value) * 100) / 100
 
+export interface PedagogicalGamePlan {
+  title: string
+  description: string
+  reason: string
+}
+
+// Từ khóa nhận diện game vận động: [có dấu, không dấu]. Bộ không dấu chỉ gồm cụm đủ rõ ("ban" một mình có thể là "bàn",
+// "nhat" là "nhất"). Không dùng "quả" (kết quả), "mục tiêu" (mục tiêu bài học) hay "cùng". Có cả từ tiếng Anh.
+type Keywords = readonly [readonly string[], readonly string[]]
+const ENGLISH_CATCH = ['catch', 'falling']
+const ENGLISH_SHOOT = ['shoot', 'slingshot', 'archery', 'arrow']
+const ENGLISH_POP = ['pop', 'balloon', 'balloons']
+const CATCH_WORDS: Keywords = [
+  ['hứng', 'rơi', 'nhặt', 'táo', 'trái cây', 'hoa quả', ...ENGLISH_CATCH],
+  ['hung qua', 'hung tao', 'nhat qua', 'qua tao', 'trai cay', 'hoa qua', 'roi xuong', ...ENGLISH_CATCH],
+]
+const SHOOT_WORDS: Keywords = [
+  ['bắn', 'ná', 'kéo ná', 'cung tên', ...ENGLISH_SHOOT],
+  ['keo na', 'ban na', 'ban cung', 'cung ten', 'ban trung', ...ENGLISH_SHOOT],
+]
+const TAP_WORDS: Keywords = [
+  ['bong bóng', 'bóng bay', 'đập', 'chạm', 'bấm bóng', ...ENGLISH_POP],
+  ['bong bong', 'bong bay', 'bam bong', 'cham bong', 'dap bong', ...ENGLISH_POP],
+]
+// Bộ quyết định chuyển sang game tự do chỉ gồm ĐỘNG TỪ vận động: "đếm táo", "nối trái cây", "count the balloons" không phải game vận động.
+const PHYSICS_ROUTE_WORDS: Keywords = [
+  ['hứng', 'nhặt', 'rơi', 'bắn', 'ná', 'kéo ná', 'cung tên', 'bong bóng', 'vật lý', 'tương tác động', 'cpf', 'catch', 'shoot', 'slingshot', 'pop'],
+  ['hung qua', 'hung tao', 'nhat qua', 'roi xuong', 'keo na', 'ban na', 'ban cung', 'cung ten', 'ban trung', 'bong bong', 'vat ly',
+    'tuong tac dong', 'cpf', 'catch', 'shoot', 'slingshot', 'pop'],
+]
+
+/**
+ * Agent Planner: Suy luận Tựa game sư phạm và Mô tả cách chơi từ prompt tự do của giáo viên.
+ * Hoàn toàn loại bỏ thuật ngữ kỹ thuật, tập trung vào luật chơi, phản xạ và mục tiêu học tập.
+ */
+export function inferPedagogicalGamePlan(idea: string): PedagogicalGamePlan {
+  if (!idea || !idea.trim()) {
+    return {
+      title: 'Trò Chơi Tương Tác Vận Động',
+      description: 'Bé tương tác trực tiếp với các vật thể chuyển động trên màn hình để tìm đáp án đúng.',
+      reason: 'Trò chơi vận động tương tác kích thích sự hào hứng và rèn luyện phản xạ cho bé.',
+    }
+  }
+
+  const isCatcher = mentionsAny(idea, ...CATCH_WORDS)
+  const isArchery = mentionsAny(idea, ...SHOOT_WORDS)
+  const isTapper = mentionsAny(idea, ...TAP_WORDS)
+
+  if (isCatcher) {
+    const isFarmOrApple = mentionsAny(idea, ['táo', 'nông trại', 'vườn', 'trái cây'], ['qua tao', 'nong trai', 'trai cay'])
+
+    return {
+      title: isFarmOrApple ? 'Hứng Táo Nông Trại' : 'Hứng Vật Phẩm',
+      description: 'Bé di chuyển giỏ hứng sang trái/phải để đón các vật mang đáp án đúng, vừa rèn phản xạ vừa ôn bài.',
+      reason: 'Trò chơi vận động tương tác giúp bé vừa rèn phản xạ vừa ôn kiến thức của bài một cách trực quan.',
+    }
+  }
+
+  if (isArchery) {
+    return {
+      title: 'Bắn Ná Mục Tiêu',
+      description: 'Bé kéo và canh góc bắn trúng các mục tiêu mang đáp án chính xác để ghi điểm.',
+      reason: 'Cơ chế kéo thả và canh góc giúp tăng sự tập trung và kích thích hứng thú học bài.',
+    }
+  }
+
+  if (isTapper) {
+    return {
+      title: 'Chạm Bóng Bay',
+      description: 'Bé nhanh tay chạm vỡ các quả bóng bay mang đáp án đúng trước khi bóng bay mất.',
+      reason: 'Luyện phản xạ nhanh tay lẹ mắt kết hợp ôn tập kiến thức.',
+    }
+  }
+
+  return {
+    title: 'Trò Chơi Tương Tác Vận Động',
+    description: 'Bé tương tác trực tiếp với các vật thể chuyển động trên màn hình để tìm đáp án đúng.',
+    reason: 'Trò chơi vận động tương tác kích thích sự hào hứng và rèn luyện phản xạ cho bé.',
+  }
+}
+
+/**
+ * Nhận diện từ khóa tương tác vật lý / vận động (CPF).
+ */
+export function isPhysicsCpfIdea(idea: string): boolean {
+  if (!idea || !idea.trim()) return false
+  return mentionsAny(idea, ...PHYSICS_ROUTE_WORDS)
+}
+
 /**
  * Xếp hạng loại game cho ý tưởng này (thuần, dễ test): điểm cao đứng trước, hòa thì giữ thứ tự khai báo.
  * Mục tiêu nào cho điểm cao nhất với loại game đó thì lấy điểm và câu lý do của mục tiêu ấy. Loại dưới MIN_FIT_SCORE bị
@@ -159,22 +248,46 @@ export function rankGameTypes(input: SuggestGameTypesInput): GameTypeSuggestion[
     }
   }
 
+  // Ưu tiên tương tác vật lý Composable Primitives Framework (CPF)
+  if (isPhysicsCpfIdea(input.idea)) {
+    const plan = inferPedagogicalGamePlan(input.idea)
+    best.set('SPOT_THE_TARGET', {
+      score: 0.99,
+      reason: plan.reason,
+    })
+  }
+
   return selectSuggestions(best, input)
 }
 
 /** Bước lọc, sắp xếp và cắt (tách riêng để test với bảng điểm tùy ý). */
 export function selectSuggestions(best: ReadonlyMap<string, Fit>, input: SuggestGameTypesInput): GameTypeSuggestion[] {
+  const isCpf = isPhysicsCpfIdea(input.idea)
+  const pedagogicalPlan = isCpf ? inferPedagogicalGamePlan(input.idea) : null
+
   return [...best.entries()]
     .map(([type, fit], index) => ({ type, fit, index, score: round(fit.score + contextBonus(type, input)) }))
     .filter((item) => item.score >= MIN_FIT_SCORE)
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, SUGGESTION_MAX)
-    .map(({ type, fit, score }) => ({
-      type,
-      reason: fit.reason,
-      description: DESCRIPTIONS[type] ?? '',
-      fitScore: score,
-    }))
+    .map(({ type, fit, score }) => {
+      if (type === 'SPOT_THE_TARGET' && isCpf && pedagogicalPlan) {
+        return {
+          type: 'CUSTOM',
+          title: pedagogicalPlan.title,
+          track: 'CPF',
+          reason: pedagogicalPlan.reason,
+          description: pedagogicalPlan.description,
+          fitScore: score,
+        }
+      }
+      return {
+        type,
+        reason: fit.reason,
+        description: DESCRIPTIONS[type] ?? '',
+        fitScore: score,
+      }
+    })
 }
 
 /** MOCK: giả lập độ trễ của lời gọi AI. `latencyMs` để test chạy nhanh. */
