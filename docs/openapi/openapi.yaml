@@ -116,9 +116,6 @@ paths:
 
         `rememberMe: true` kéo dài refresh token và cookie lên 30 ngày (mặc định 24 giờ).
 
-        > **Sẽ đổi ở Frontend:** code Frontend hiện còn theo contract v1.0.0 (đọc `refreshToken`
-        > từ body và dùng `AuthUser.id`). Cần chuyển sang cookie và `teacherId`.
-
         Đã cài: `rememberMe` (token xoay vòng giữ nguyên thời hạn 30 ngày), `ACCOUNT_LOCKED`,
         `LOGIN_TEMPORARILY_LOCKED` (lần sai thứ 5 liên tiếp bật khoá 15 phút; đăng nhập đúng hoặc đặt lại
         mật khẩu thì xoá bộ đếm). Phần mở rộng chưa cài: `role` trong `teacher`.

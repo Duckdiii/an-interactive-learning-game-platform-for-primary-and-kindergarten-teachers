@@ -29,8 +29,12 @@ export default function AppLayout() {
   const location = useLocation()
   const mainRef = useRef<HTMLElement>(null)
   // Đăng xuất cũng xóa bộ nhớ đệm truy vấn (danh sách game, game đang mở): máy dùng chung không giữ dữ liệu của người trước.
-  const handleLogout = () => {
-    logout()
+  // Chặn bấm hai lần khi mạng chậm: lần thứ hai sẽ gặp 401 và kéo theo một lượt refresh vô ích.
+  const isLoggingOut = useRef(false)
+  const handleLogout = async () => {
+    if (isLoggingOut.current) return
+    isLoggingOut.current = true
+    await logout()
     queryClient.clear()
   }
   // Người Việt gọi bằng tên (từ cuối): "Nguyễn Thị Lan" -> "Cô Lan". Chưa có họ tên thì dùng email, không thêm "Cô".

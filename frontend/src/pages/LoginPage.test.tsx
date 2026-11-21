@@ -96,9 +96,9 @@ describe('Đăng nhập: thông báo lỗi', () => {
 
   it('đăng nhập thành công thì chuyển vào trang chủ và không có thông báo lỗi', async () => {
     mockedLogin.mockResolvedValue({
-      teacher: { id: 't1', email: 'giaovien@example.com' },
+      teacher: { teacherId: 't1', email: 'giaovien@example.com' },
       accessToken: 'a',
-      refreshToken: 'r',
+      expiresIn: 900,
     })
     await submitLogin()
 
