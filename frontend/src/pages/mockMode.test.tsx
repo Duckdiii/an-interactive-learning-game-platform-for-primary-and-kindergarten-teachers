@@ -95,7 +95,7 @@ describe('trang giáo viên ở chế độ mô phỏng (nhóm games)', () => {
     mockedLogin.mockResolvedValue({
       teacher: { teacherId: 't1', fullName: 'Nguyễn Thị Lan', email: 'lan@truong.edu.vn' },
       accessToken: 'a',
-      refreshToken: 'r',
+      expiresIn: 900,
     } as Awaited<ReturnType<typeof loginTeacher>>)
     renderWithProviders(<App />, '/login')
 

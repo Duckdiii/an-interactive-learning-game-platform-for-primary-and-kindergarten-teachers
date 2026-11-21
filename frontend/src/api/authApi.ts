@@ -13,10 +13,11 @@ export interface LoginPayload {
   password: string
 }
 
+// Refresh token không nằm trong body: Backend đặt vào cookie HttpOnly qua Set-Cookie.
 export interface LoginResponse {
   teacher: AuthUser
   accessToken: string
-  refreshToken: string
+  expiresIn: number
 }
 
 export async function registerTeacher(payload: RegisterPayload) {
@@ -35,4 +36,9 @@ export async function loginTeacher(payload: LoginPayload) {
   )
 
   return response.data.data
+}
+
+// Thu hồi refresh token của phiên hiện tại; Backend trả 204 kèm Set-Cookie xóa cookie.
+export async function logoutTeacher() {
+  await axiosInstance.post('/auth/logout')
 }

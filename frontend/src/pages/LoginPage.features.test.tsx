@@ -52,9 +52,9 @@ describe('Đăng nhập: giao diện và cờ khả năng', () => {
     features.forgotPassword = true
     features.rememberMe = true
     mockedLogin.mockResolvedValue({
-      teacher: { id: 't1', email: 'giaovien@example.com' },
+      teacher: { teacherId: 't1', email: 'giaovien@example.com' },
       accessToken: 'a',
-      refreshToken: 'r',
+      expiresIn: 900,
     })
     const user = userEvent.setup({ delay: null })
     renderPage()

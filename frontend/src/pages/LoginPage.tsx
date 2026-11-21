@@ -45,8 +45,8 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      const { teacher, accessToken, refreshToken } = await loginTeacher(form)
-      login(teacher, accessToken, refreshToken)
+      const { teacher, accessToken } = await loginTeacher(form)
+      login(teacher, accessToken)
       navigate(ROUTES.dashboard, { replace: true })
     } catch (error) {
       const isAuthFailure =
