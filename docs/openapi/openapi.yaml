@@ -215,10 +215,12 @@ paths:
         Response **luôn giống nhau** dù email có tồn tại hay không (tránh dò tài khoản).
         Nếu email tồn tại, Backend gửi thư chứa liên kết `https://<frontend>/reset-password?token=...`;
         token dùng một lần, hết hạn sau 30 phút, lưu dạng băm. Giới hạn 3 yêu cầu mỗi giờ mỗi email.
+        Giới hạn đếm theo email đã nhập, kể cả email không tồn tại, nên 429 cũng không để lộ tài khoản.
 
         Môi trường dev: Backend in liên kết ra log thay vì gửi email (tuyệt đối không bật khi
-        triển khai thật). Cấu hình SMTP lấy từ biến môi trường.
-      x-status: planned
+        triển khai thật). Cấu hình SMTP lấy từ biến môi trường (`MAIL_ENABLED`, `MAIL_HOST`, `MAIL_FROM`...);
+        profile prod luôn gửi thư thật.
+      x-status: implemented
       security: []
       requestBody:
         required: true
@@ -265,7 +267,10 @@ paths:
       description: |
         Thành công thì thu hồi mọi refresh token của tài khoản và xoá bộ đếm đăng nhập sai.
         Lỗi 400 khi liên kết hết hạn/không hợp lệ, hoặc mật khẩu mới không đạt yêu cầu.
-      x-status: planned
+
+        Đã cài: thu hồi refresh token, vô hiệu mọi liên kết đặt lại khác của tài khoản. Bộ đếm đăng nhập sai
+        chưa có (sẽ có cùng `LOGIN_TEMPORARILY_LOCKED`), nên chưa có gì để xoá.
+      x-status: implemented
       security: []
       requestBody:
         required: true
@@ -2290,7 +2295,7 @@ components:
         | `AI_GENERATION_TIMEOUT` | 504 | đã cài | Dịch vụ AI timeout sau khi retry |
         | `INTERNAL_ERROR` | 500 | đã cài | Lỗi không xác định |
         | `CONFLICT` | 409 | chưa cài | Xung đột trạng thái nghiệp vụ |
-        | `RATE_LIMITED` | 429 | chưa cài | Vượt giới hạn tần suất; kèm `Retry-After` |
+        | `RATE_LIMITED` | 429 | đã cài (`/auth/forgot-password`) | Vượt giới hạn tần suất; kèm `Retry-After` |
         | `ACCOUNT_LOCKED` | 403 | chưa cài | Tài khoản bị quản trị viên khoá |
         | `LOGIN_TEMPORARILY_LOCKED` | 429 | chưa cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
         | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |

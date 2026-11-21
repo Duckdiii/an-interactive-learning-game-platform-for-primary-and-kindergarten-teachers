@@ -4,6 +4,20 @@ spring:
   application:
     name: aigame-backend
 
+  # SMTP cho thư đặt lại mật khẩu; chỉ dùng khi app.mail.enabled=true (MAIL_ENABLED).
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      # Relay SMTP nội bộ không cần đăng nhập thì đặt MAIL_SMTP_AUTH=false.
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+
   datasource:
     # Supabase (managed PostgreSQL) — use Session Pooler or Direct Connection.
     # Do NOT use the Transaction Pooler (port 6543): it is not compatible with
@@ -67,6 +81,14 @@ app:
       same-site: Strict
       # Secure cookies need HTTPS in production; browsers still accept them on http://localhost.
       secure: ${COOKIE_SECURE:true}
+    password-reset:
+      # Trang Frontend nhận ?token=...; profile prod bắt buộc PASSWORD_RESET_URL.
+      url: ${PASSWORD_RESET_URL:http://localhost:5173/reset-password}
+  mail:
+    # false (mặc định khi chạy ở máy): không gửi thư, in liên kết đặt lại mật khẩu ra log.
+    # Profile prod luôn bật (application-prod.yml).
+    enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:no-reply@localhost}
   moderation:
     # Mặc định true: app từ chối khởi động nếu chưa có OPENAI_API_KEY, để không lỡ chạy với kiểm duyệt yếu.
     # Chỉ đặt MODERATION_REQUIRED=false khi chạy thử ở máy cá nhân (khi đó chỉ dùng danh sách từ cấm).
