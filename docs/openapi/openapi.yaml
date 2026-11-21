@@ -118,8 +118,9 @@ paths:
 
         Đã cài: `rememberMe` (token xoay vòng giữ nguyên thời hạn 30 ngày), `ACCOUNT_LOCKED`,
         `LOGIN_TEMPORARILY_LOCKED` (lần sai thứ 5 liên tiếp bật khoá 15 phút; đăng nhập đúng hoặc đặt lại
-        mật khẩu thì xoá bộ đếm). Phần mở rộng chưa cài: `role` trong `teacher`.
-      x-status: extended-pending
+        mật khẩu thì xoá bộ đếm). `teacher.role` đã cài (`ROLE_TEACHER` hoặc `ROLE_ADMIN`);
+        claim vai trò trong JWT và route `/admin/**` chưa cài.
+      x-status: implemented
       security: []
       requestBody:
         required: true

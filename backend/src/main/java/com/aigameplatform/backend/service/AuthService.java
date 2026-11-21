@@ -197,8 +197,8 @@ public class AuthService {
         AuthResponse response = new AuthResponse(
                 accessToken,
                 jwtService.getAccessTokenTtlSeconds(),
-                new TeacherInfo(teacher.getId(), teacher.getFullName(), teacher.getEmail()));
-        return new AuthResult(response, rawRefreshToken, rememberMe);
+                new TeacherInfo(teacher.getId(), teacher.getFullName(), teacher.getEmail(), teacher.getRole()));
+        return new AuthResult(response, rawRefreshToken, rememberMe, Duration.between(now, expiresAt));
     }
 
     // Dùng chung với PasswordResetService để email được so khớp giống hệt lúc đăng ký/đăng nhập.

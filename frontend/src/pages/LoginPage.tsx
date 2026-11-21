@@ -36,7 +36,7 @@ export default function LoginPage() {
   const [form, setForm] = useState(initialForm)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const locationState = location.state as LoginLocationState | null
@@ -48,6 +48,14 @@ export default function LoginPage() {
 
     try {
       const { teacher, accessToken } = await loginTeacher(form)
+      // shortcut: chưa có giao diện quản trị trên main; tới khi gộp admin-portal (#72) thì chuyển ROLE_ADMIN sang route /admin.
+      if (teacher.role === 'ROLE_ADMIN') {
+        // Cấp phiên tạm để gọi được /auth/logout, thu hồi refresh token backend vừa đặt.
+        login(teacher, accessToken)
+        await logout()
+        setErrorMessage('Tài khoản quản trị viên chưa có giao diện quản trị. Vui lòng liên hệ nhóm phát triển.')
+        return
+      }
       login(teacher, accessToken)
       navigate(ROUTES.dashboard, { replace: true })
     } catch (error) {
@@ -55,8 +63,9 @@ export default function LoginPage() {
         axios.isAxiosError(error) && error.response?.status === 401
       setErrorMessage(
         isAuthFailure
-          ? 'Email hoặc mật khẩu không đúng'
-          : parseApiError(error, 'Không thể đăng nhập lúc này').message,
+          ? 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.'
+          : parseApiError(error, 'Không thể đăng nhập vào lúc này. Vui lòng thử lại sau.')
+              .message,
       )
     } finally {
       setIsSubmitting(false)

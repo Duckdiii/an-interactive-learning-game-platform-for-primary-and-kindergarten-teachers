@@ -1,6 +1,7 @@
 package com.aigameplatform.backend.entity;
 
 import com.aigameplatform.backend.entity.enums.TeacherStatus;
+import com.aigameplatform.backend.entity.enums.UserRole;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,6 +41,10 @@ public class Teacher {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TeacherStatus status = TeacherStatus.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.ROLE_TEACHER;
 
     // Số lần đăng nhập sai liên tiếp tính từ lần đúng gần nhất (hoặc từ lần khóa tạm gần nhất).
     @Column(nullable = false)
