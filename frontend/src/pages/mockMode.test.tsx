@@ -95,7 +95,7 @@ describe('trang giáo viên ở chế độ mô phỏng (nhóm games)', () => {
     mockedLogin.mockResolvedValue({
       teacher: { teacherId: 't1', fullName: 'Nguyễn Thị Lan', email: 'lan@truong.edu.vn' },
       accessToken: 'a',
-      refreshToken: 'r',
+      expiresIn: 900,
     } as Awaited<ReturnType<typeof loginTeacher>>)
     renderWithProviders(<App />, '/login')
 
@@ -103,7 +103,7 @@ describe('trang giáo viên ở chế độ mô phỏng (nhóm games)', () => {
     await user.type(screen.getByLabelText('Mật khẩu'), 'matkhau123')
     await user.click(screen.getByRole('button', { name: 'Đăng nhập' }))
 
-    expect(mockedLogin).toHaveBeenCalledWith({ email: 'lan@truong.edu.vn', password: 'matkhau123' })
+    expect(mockedLogin).toHaveBeenCalledWith({ email: 'lan@truong.edu.vn', password: 'matkhau123', rememberMe: false })
     expect(await screen.findByRole('heading', { level: 1, name: /Chào cô Lan/ }, { timeout: 5000 })).toBeInTheDocument()
     expect(screen.getByRole('note')).toHaveTextContent('Đang dùng dữ liệu mô phỏng')
   })

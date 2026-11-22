@@ -1,10 +1,11 @@
-import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS } from '../constants/aiLimits'
+import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS, UNDERSTAND_TIMEOUT_MS } from '../constants/aiLimits'
 import axiosInstance from './axiosInstance'
 import type { ApiSuccessResponse } from '../types/api'
 import type { PublishResult } from '../types/publish.types'
 import type { RegeneratedQuestion } from '../types/regenerate.types'
+import type { ChatTurn, GameUnderstandingResponse, UnderstandGameRequest } from '../types/understanding.types'
 import type { GenerateGameRequest } from '../utils/generateRequest'
-import type { GameEnvelopeBody, GameResponse } from '../types/game-response.types'
+import type { AnyGameResponse, GameEnvelopeBody, GameResponse } from '../types/game-response.types'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
 
 // Chỉ áp cho lệnh đọc danh sách: nếu máy chủ treo thì báo lỗi sau 10 giây thay vì quay vô hạn.
@@ -34,7 +35,7 @@ export async function getGames(filters: GameFilters) {
 
 /** GET /games/{gameId}: mở một game đầy đủ (kèm câu hỏi) cho trình soạn thảo. */
 export async function fetchGame(gameId: string) {
-  const response = await axiosInstance.get<ApiSuccessResponse<GameResponse>>(
+  const response = await axiosInstance.get<ApiSuccessResponse<AnyGameResponse>>(
     `/games/${encodeURIComponent(gameId)}`,
     { timeout: GAME_REQUEST_TIMEOUT_MS },
   )
@@ -74,12 +75,37 @@ export async function postRegenerateQuestion(gameId: string, questionId: string,
   return response.data.data
 }
 
+/** POST /games/understand: AI đọc cuộc chat, trả lời đáp, câu hỏi lại (nếu có) và thẻ hiểu yêu cầu. Không lưu gì ở máy chủ. */
+export interface ReviseGameBody {
+  instruction: string
+  history?: ChatTurn[]
+}
+
+/** `POST /games/{gameId}/revise`: AI sửa game đang lưu theo yêu cầu chat; KHÔNG lưu, trả game đã sửa (đủ 3 lớp kiểm duyệt). */
+export async function postReviseGame(gameId: string, body: ReviseGameBody, options: { signal?: AbortSignal } = {}) {
+  const response = await axiosInstance.post<ApiSuccessResponse<AnyGameResponse>>(`/games/${encodeURIComponent(gameId)}/revise`, body, {
+    timeout: GENERATE_GAME_TIMEOUT_MS,
+    signal: options.signal,
+  })
+
+  return response.data.data
+}
+
+export async function postUnderstandGame(body: UnderstandGameRequest, options: { signal?: AbortSignal } = {}) {
+  const response = await axiosInstance.post<ApiSuccessResponse<GameUnderstandingResponse>>('/games/understand', body, {
+    timeout: UNDERSTAND_TIMEOUT_MS,
+    signal: options.signal,
+  })
+
+  return response.data.data
+}
+
 /**
  * POST /games/generate (bản JSON đồng bộ): AI sinh MỘT game nháp theo yêu cầu. Muốn nhiều loại thì gọi nhiều lần, mỗi lần một `gameType`.
  * Không tự thử lại (Backend đã thử lại dịch vụ AI; giới hạn 10 yêu cầu mỗi phút nên thử lại tự động còn dễ chạm 429).
  */
 export async function postGenerateGame(request: GenerateGameRequest, signal?: AbortSignal) {
-  const response = await axiosInstance.post<ApiSuccessResponse<GameResponse>>('/games/generate', request, {
+  const response = await axiosInstance.post<ApiSuccessResponse<AnyGameResponse>>('/games/generate', request, {
     timeout: GENERATE_GAME_TIMEOUT_MS,
     signal,
   })

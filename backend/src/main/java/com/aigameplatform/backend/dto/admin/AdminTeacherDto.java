@@ -1,6 +1,6 @@
 package com.aigameplatform.backend.dto.admin;
 
-import com.aigameplatform.backend.entity.enums.TeacherAccountStatus;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import java.time.LocalDateTime;
 
 public record AdminTeacherDto(
@@ -8,6 +8,6 @@ public record AdminTeacherDto(
         String fullName,
         String email,
         String school,
-        TeacherAccountStatus status,
+        TeacherStatus status,
         LocalDateTime createdAt
 ) {}

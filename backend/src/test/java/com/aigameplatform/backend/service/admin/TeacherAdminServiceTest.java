@@ -15,7 +15,7 @@ import com.aigameplatform.backend.dto.admin.PageResultDto;
 import com.aigameplatform.backend.dto.admin.TeacherStatusResultDto;
 import com.aigameplatform.backend.entity.Teacher;
 import com.aigameplatform.backend.entity.enums.AuditResult;
-import com.aigameplatform.backend.entity.enums.TeacherAccountStatus;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.entity.enums.UserRole;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
@@ -70,14 +70,14 @@ class TeacherAdminServiceTest {
         t.setFullName("Nguyen Van A");
         t.setEmail("a@school.vn");
         t.setSchool("TH Chu Van An");
-        t.setStatus(TeacherAccountStatus.ACTIVE);
+        t.setStatus(TeacherStatus.ACTIVE);
         t.setCreatedAt(LocalDateTime.now());
 
         Pageable pageable = PageRequest.of(0, 10);
-        when(teacherRepository.searchTeachers("Nguyen", TeacherAccountStatus.ACTIVE, pageable))
+        when(teacherRepository.searchTeachers("Nguyen", TeacherStatus.ACTIVE, pageable))
                 .thenReturn(new PageImpl<>(List.of(t), pageable, 1));
 
-        PageResultDto<AdminTeacherDto> result = service.listTeachers("Nguyen", TeacherAccountStatus.ACTIVE, pageable);
+        PageResultDto<AdminTeacherDto> result = service.listTeachers("Nguyen", TeacherStatus.ACTIVE, pageable);
 
         assertThat(result.totalItems()).isEqualTo(1);
         assertThat(result.items()).hasSize(1);
@@ -122,7 +122,7 @@ class TeacherAdminServiceTest {
         saved.setEmail("b@school.vn");
         saved.setSchool("TH Le Quy Don");
         saved.setRole(UserRole.ROLE_TEACHER);
-        saved.setStatus(TeacherAccountStatus.ACTIVE);
+        saved.setStatus(TeacherStatus.ACTIVE);
         saved.setCreatedAt(LocalDateTime.now());
         when(teacherRepository.save(any(Teacher.class))).thenReturn(saved);
 
@@ -180,14 +180,14 @@ class TeacherAdminServiceTest {
         Teacher t = new Teacher();
         t.setId("t-1");
         t.setEmail("a@school.vn");
-        t.setStatus(TeacherAccountStatus.ACTIVE);
+        t.setStatus(TeacherStatus.ACTIVE);
 
         when(teacherRepository.findById("t-1")).thenReturn(Optional.of(t));
 
         TeacherStatusResultDto result = service.lockTeacher("t-1", admin, "127.0.0.1");
 
-        assertThat(result.status()).isEqualTo(TeacherAccountStatus.LOCKED);
-        assertThat(t.getStatus()).isEqualTo(TeacherAccountStatus.LOCKED);
+        assertThat(result.status()).isEqualTo(TeacherStatus.LOCKED);
+        assertThat(t.getStatus()).isEqualTo(TeacherStatus.LOCKED);
         verify(refreshTokenRepository).revokeAllByTeacherId(eq("t-1"), any(LocalDateTime.class));
         verify(auditLogService).logAction(
                 eq("admin-id"), eq("ROLE_ADMIN"), eq("127.0.0.1"),
@@ -211,14 +211,14 @@ class TeacherAdminServiceTest {
         Teacher t = new Teacher();
         t.setId("t-1");
         t.setEmail("a@school.vn");
-        t.setStatus(TeacherAccountStatus.LOCKED);
+        t.setStatus(TeacherStatus.LOCKED);
 
         when(teacherRepository.findById("t-1")).thenReturn(Optional.of(t));
 
         TeacherStatusResultDto result = service.unlockTeacher("t-1", admin, "127.0.0.1");
 
-        assertThat(result.status()).isEqualTo(TeacherAccountStatus.ACTIVE);
-        assertThat(t.getStatus()).isEqualTo(TeacherAccountStatus.ACTIVE);
+        assertThat(result.status()).isEqualTo(TeacherStatus.ACTIVE);
+        assertThat(t.getStatus()).isEqualTo(TeacherStatus.ACTIVE);
         verify(auditLogService).logAction(
                 eq("admin-id"), eq("ROLE_ADMIN"), eq("127.0.0.1"),
                 eq("POST /api/admin/teachers/t-1/unlock"), eq(AuditResult.SUCCESS),

@@ -1,6 +1,6 @@
 # Kiểm thử và vận hành
 
-Nguồn: `docs/SRS-full.md` mục 3.4, 3.5.
+Nguồn: `docs/srs/SRS-full.md` mục 3.4, 3.5.
 Cập nhật: 2026-11-02
 
 ## Bốn tầng kiểm thử

@@ -1,6 +1,11 @@
 package com.aigameplatform.backend.service.generation;
 
 import com.aigameplatform.backend.dto.admin.AiConfigVersionDto;
+import com.aigameplatform.backend.service.asset.AssetRetriever;
+import com.aigameplatform.backend.service.factory.GameAssetCatalog;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
@@ -41,25 +46,56 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
             không được đổi chủ đề, kỹ năng, giới hạn số hoặc thêm phép tính.
             """;
 
+    private static final int SHORTLIST_SIZE = 12;
+
+    private static final String ASSET_RULES = """
+            HÌNH MINH HỌA (trường asset): ở mỗi chỗ có visualPrompt, đặt asset là id trong DANH MỤC HÌNH dưới đây khi có
+            hình đúng NGHĨA của chữ trong ngữ cảnh (ví dụ "bóng bay" là fluent-object-balloon, không phải quả bóng đá).
+            Không có hình đúng nghĩa thì BỎ HẲN trường asset (không để chuỗi rỗng); TUYỆT ĐỐI không chọn hình khác nghĩa chỉ để có hình
+            (ví dụ "bàn" không phải quyển sách, "khăn" không phải cái ô, từ vô nghĩa không có hình). Chỉ dùng đúng id có trong danh mục.
+            Câu đếm số lượng ("3 con vịt"): asset là hình VẬT được đếm (con vịt), KHÔNG chọn hình thẻ số vì thẻ số lộ đáp án và
+            không có gì để đếm.
+            Mô tả hình (visualPrompt) của câu đếm viết bằng chữ số, ví dụ "3 con vịt" (không viết "ba con vịt"), và số đó phải
+            bằng đáp án đúng.
+            DANH MỤC HÌNH (id: tên):
+            """;
+
     private final ChatModel model;
     private final GameContentStrategyRegistry strategies;
     private final AiConfigService aiConfigService;
+    private final GameAssetCatalog assets;
     private final CurriculumTopicParser topicParser = new CurriculumTopicParser();
+    private final AssetRetriever retriever;
+    private final boolean shortlistEnabled;
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog;
 
-    public GeminiGameContentGenerator(
-            @Qualifier("gameGenerationChatModel") ChatModel model,
-            GameContentStrategyRegistry strategies) {
-        this(model, strategies, null);
+    public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
+            GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
+            boolean shortlistEnabled, com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        this(model, strategies, assets, retriever, shortlistEnabled, notoCatalog, null);
     }
 
     @Autowired
-    public GeminiGameContentGenerator(
-            @Qualifier("gameGenerationChatModel") ChatModel model,
-            GameContentStrategyRegistry strategies,
+    public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
+            GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
+            @Value("${app.assets.shortlist.enabled:false}") boolean shortlistEnabled,
+            com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog,
             @Autowired(required = false) AiConfigService aiConfigService) {
+        this.notoCatalog = notoCatalog;
         this.model = model;
         this.strategies = strategies;
+        this.assets = assets;
+        this.retriever = retriever;
+        this.shortlistEnabled = shortlistEnabled;
         this.aiConfigService = aiConfigService;
+    }
+
+    /** Hình có từ khóa trong yêu cầu của giáo viên, đưa lên đầu danh mục để AI chọn đúng hình (thử nghiệm, sau cờ). */
+    private String shortlist(String topic) {
+        if (!shortlistEnabled) return "";
+        String lines = retriever.match(topic).stream().limit(SHORTLIST_SIZE).map(match -> assets.find(match.assetId()))
+                .filter(Objects::nonNull).map(entry -> entry.id() + ": " + entry.label()).collect(Collectors.joining("\n"));
+        return lines.isEmpty() ? "" : "HÌNH LIÊN QUAN TỚI YÊU CẦU (ưu tiên chọn nếu đúng nghĩa):\n" + lines + "\n\n";
     }
 
     @Override
@@ -80,7 +116,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                     attempt.curriculumContext());
         }
         if (attempt.oddImageMode()) {
-            String catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog().assets().stream()
+            String catalog = notoCatalog.assets().stream()
                     .map(asset -> asset.id() + " | " + asset.label() + " | " + asset.group())
                     .collect(java.util.stream.Collectors.joining("\n"));
             systemPrompt += "\n\n" + """
@@ -92,7 +128,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                     """ + catalog;
         }
         if (attempt.avmCatalogMode()) {
-            String catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog().assets().stream()
+            String catalog = notoCatalog.assets().stream()
                     .map(asset -> asset.id() + " | " + asset.label() + " | " + asset.group())
                     .collect(java.util.stream.Collectors.joining("\n"));
             systemPrompt += "\n\n" + """
@@ -103,19 +139,26 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                     CATALOG (mã | nhãn đã biên tập | nhóm):
                     """ + catalog;
         }
+        // Chỉ loại game có trường asset trong schema đầu ra mới cần danh mục (tránh prompt dài vô ích); các chế độ hình
+        // ảnh có danh mục/ảnh riêng nên không thêm, tránh hai chỉ dẫn chọn hình mâu thuẫn nhau.
+        boolean imageMode = attempt.imageInput() != null || attempt.oddImageMode() || attempt.avmCatalogMode();
+        if (strategy.hasAssetField() && !imageMode) {
+            systemPrompt += "\n\n" + ASSET_RULES + shortlist(attempt.topic()) + assets.promptList();
+        }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;
-        if (attempt.customInstruction() != null && !attempt.customInstruction().isBlank()) {
+        boolean singleQuestion = attempt.customInstruction() != null && !attempt.customInstruction().isBlank();
+        if (singleQuestion) {
             systemPrompt += "\n\n" + attempt.customInstruction();
         }
-        String userPrompt;
-        if (attempt.isRetry()) {
-            userPrompt = retryPrompt(attempt);
-        } else if (attempt.customInstruction() != null && !attempt.customInstruction().isBlank()) {
-            userPrompt = "Tạo đúng 1 câu hỏi mới theo yêu cầu và hướng dẫn trong system prompt. Chỉ trả về JSON theo schema đã cung cấp (mảng questions chứa đúng 1 phần tử).";
-        } else {
-            userPrompt = "Tạo nội dung game theo yêu cầu trong system prompt. Chỉ trả về JSON theo schema đã cung cấp.";
-        }
+        Revision revision = attempt.revision();
+        String userPrompt = attempt.isRetry()
+                ? retryPrompt(attempt) + (revision == null ? "" : "\n" + revision.reminder())
+                : revision != null
+                        ? revision.promptSection() + "\nChỉ trả về JSON theo schema đã cung cấp."
+                        : singleQuestion
+                                ? "Tạo đúng 1 câu hỏi mới theo yêu cầu và hướng dẫn trong system prompt. Chỉ trả về JSON theo schema đã cung cấp (mảng questions chứa đúng 1 phần tử)."
+                                : "Tạo nội dung game theo yêu cầu trong system prompt. Chỉ trả về JSON theo schema đã cung cấp.";
         ResponseFormat schemaFormat = ResponseFormat.builder().type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder().rootElement(JsonRawSchema.builder()
                         .schema(decoderSchema(attempt.structuredSchema())).build()).build()).build();

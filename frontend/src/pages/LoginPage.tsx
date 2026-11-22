@@ -18,6 +18,7 @@ import { parseApiError } from '../utils/apiError'
 interface LoginForm {
   email: string
   password: string
+  rememberMe: boolean
 }
 
 interface LoginLocationState {
@@ -27,6 +28,7 @@ interface LoginLocationState {
 const initialForm: LoginForm = {
   email: '',
   password: '',
+  rememberMe: false,
 }
 
 export default function LoginPage() {
@@ -45,20 +47,17 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      const { teacher, accessToken, refreshToken } = await loginTeacher(form)
-      login(teacher, accessToken, refreshToken)
-      if (teacher.role === 'ROLE_ADMIN') {
-        navigate(ROUTES.adminTeachers, { replace: true })
-      } else {
-        navigate(ROUTES.dashboard, { replace: true })
-      }
+      const { teacher, accessToken } = await loginTeacher(form)
+      login(teacher, accessToken)
+      navigate(teacher.role === 'ROLE_ADMIN' ? ROUTES.adminTeachers : ROUTES.dashboard, { replace: true })
     } catch (error) {
       const isAuthFailure =
         axios.isAxiosError(error) && error.response?.status === 401
       setErrorMessage(
         isAuthFailure
-          ? 'Email hoặc mật khẩu không đúng'
-          : parseApiError(error, 'Không thể đăng nhập lúc này').message,
+          ? 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.'
+          : parseApiError(error, 'Không thể đăng nhập vào lúc này. Vui lòng thử lại sau.')
+              .message,
       )
     } finally {
       setIsSubmitting(false)
@@ -111,13 +110,12 @@ export default function LoginPage() {
           label="Mật khẩu"
           aside={
             AUTH_FEATURES.forgotPassword ? (
-              // Chưa có route/màn "quên mật khẩu" (API planned); đổi sang Link khi có.
-              <a
-                href="/forgot-password"
+              <Link
+                to={ROUTES.forgotPassword}
                 className="inline-flex min-h-11 items-center text-sm font-extrabold text-brand-strong underline"
               >
                 {viText.auth.forgotPassword}
-              </a>
+              </Link>
             ) : undefined
           }
         >
@@ -135,12 +133,15 @@ export default function LoginPage() {
         </FormField>
 
         {AUTH_FEATURES.rememberMe ? (
-          // Chưa gửi lên API: LoginRequest.rememberMe chưa được Backend cài.
+          // Mặc định không chọn: máy ở trường thường dùng chung, chỉ giữ đăng nhập 30 ngày khi cô chủ động chọn.
           <label className="flex min-h-11 items-center gap-3 text-sm font-bold">
             <input
               type="checkbox"
               name="rememberMe"
-              defaultChecked
+              checked={form.rememberMe}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, rememberMe: event.target.checked }))
+              }
               className="h-5 w-5 accent-brand"
             />
             {viText.auth.rememberMe}

@@ -10,6 +10,11 @@ import OddOneOutSetupForm from '../components/create/OddOneOutSetupForm'
 import type { VisualClozeImageOptionInput } from '../components/create/VisualClozeSetupForm'
 import IdeaSuggestions from '../components/create/IdeaSuggestions'
 import LessonContextPicker from '../components/create/LessonContextPicker'
+import RequestChat from '../components/create/RequestChat'
+import UnderstandingCard from '../components/create/UnderstandingCard'
+import { useRequestChat } from '../hooks/useRequestChat'
+import { composeIdea } from '../utils/understandingIdea'
+import { deduceThemeFromText } from '../utils/assetResolver'
 import FileDropZone from '../components/ui/FileDropZone'
 import FormField from '../components/ui/FormField'
 import Icon from '../components/ui/Icon'
@@ -39,7 +44,8 @@ import { ideaPlaceholderFor } from '../utils/ideaPlaceholder'
 import { LESSON_FILE_MAX_BYTES, checkLessonFile } from '../utils/lessonFile'
 
 type Mode = 'idea' | 'random'
-type Step = 'describe' | 'suggest'
+// 'chat': trao đổi với trợ lý rồi xác nhận thẻ (đường mô tả); 'suggest': AI đề xuất kiểu chơi (tạo ngẫu nhiên, hoặc có giáo án).
+type Step = 'describe' | 'chat' | 'suggest'
 type FieldErrors = Partial<Record<'idea' | 'file', string>>
 
 const DEFAULT_VOICE = { voiceRegion: 'NORTH', voiceGender: 'FEMALE' }
@@ -91,10 +97,21 @@ export default function CreateGamePage() {
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
   const suggestionsMutation = useGameTypeSuggestions()
   const lastInput = useRef({ idea: '', gradeLevel: '', subject: '' })
+  const chat = useRequestChat({ subject: lesson.subject, gradeLevel: lesson.gradeLevel })
 
   // "Tạo ngẫu nhiên" ở Trang chủ dẫn tới đây: đưa tiêu điểm vào ô khối lớp, ô đầu tiên của luồng này.
   useEffect(() => {
     if (params.get('random')) document.getElementById('create-grade')?.focus()
+    if (params.get('step') === 'suggest' && initialIdea) {
+      setMode('idea')
+      lastInput.current = {
+        idea: initialIdea.trim(),
+        gradeLevel: known(params.get('grade'), GRADE_LEVEL_VALUES) ?? '',
+        subject: known(params.get('subject'), SUBJECT_VALUES) ?? '',
+      }
+      setStep('suggest')
+      suggestionsMutation.mutate(lastInput.current)
+    }
   }, [params])
 
   // Đổi ý tưởng hoặc lựa chọn thì kết quả tạo trước đó không còn đúng nữa (game đã tạo vẫn còn trong danh sách, chỉ không dùng lại cho lần tạo mới).
@@ -152,6 +169,22 @@ export default function CreateGamePage() {
     suggestionsMutation.mutate(lastInput.current)
   }
 
+  const proceedToSuggest = (finalIdea: string, nextMode: Mode) => {
+    setMode(nextMode)
+    setSelectedTypes([])
+    lastInput.current = {
+      idea: nextMode === 'random' ? '' : finalIdea.trim(),
+      gradeLevel: lesson.gradeLevel,
+      subject: lesson.subject,
+    }
+    setStep('suggest')
+    requestSuggestions()
+    setTimeout(() => {
+      window.scrollTo({ top: 0 })
+      stepHeadingRef.current?.focus({ preventScroll: true })
+    }, 0)
+  }
+
   const submit = (nextMode: Mode) => {
     const problem = checkGenerate({ idea, hasFile: file !== null }, nextMode)
 
@@ -159,29 +192,48 @@ export default function CreateGamePage() {
     touch()
 
     if (problem) {
-      // Chuyển tiêu điểm tới ô lỗi (sau khi React đã vẽ aria-invalid).
       setTimeout(() => document.getElementById('create-idea')?.focus(), 0)
       return
     }
 
-    setMode(nextMode)
-    setSelectedTypes([])
-    lastInput.current = {
-      idea: nextMode === 'random' ? '' : idea.trim(),
-      gradeLevel: lesson.gradeLevel,
-      subject: lesson.subject,
+    // Tạo ngẫu nhiên và luồng có giáo án vẫn qua bước AI đề xuất kiểu chơi (có giáo án thì đề xuất theo cả mô tả nếu có).
+    if (nextMode === 'random' || file !== null) {
+      proceedToSuggest(idea, nextMode)
+      return
     }
-    setStep('suggest')
-    requestSuggestions()
-    // Về đầu trang để thấy cả thanh các bước, rồi mới chuyển tiêu điểm (không để trình duyệt tự cuộn tới tiêu đề).
+
+    // Trợ lý cần môn và khối để hiểu đúng bài (openapi: bắt buộc ở POST /games/understand).
+    if (!lesson.subject || !lesson.gradeLevel) {
+      setErrors({ idea: text.needLessonForChat })
+      setTimeout(() => document.getElementById(lesson.gradeLevel ? 'create-idea' : 'create-grade')?.focus(), 0)
+      return
+    }
+
+    // Mô tả là tin nhắn đầu tiên của cuộc trò chuyện; mỗi lần bấm là một cuộc mới.
+    setMode('idea')
+    setSelectedTypes([])
+    chat.reset()
+    chat.send(idea)
+    setStep('chat')
     setTimeout(() => {
       window.scrollTo({ top: 0 })
       stepHeadingRef.current?.focus({ preventScroll: true })
     }, 0)
   }
 
+  // Giáo viên xác nhận thẻ: ghép thẻ thành ý tưởng rồi tạo đúng kiểu chơi đang chọn trên thẻ.
+  const confirmUnderstanding = () => {
+    const card = chat.understanding
+    if (!card) return
+    lastInput.current = { idea: composeIdea(card, idea), gradeLevel: lesson.gradeLevel, subject: lesson.subject }
+    setSelectedTypes([card.gameType])
+    void createSelected([card.gameType])
+  }
+
   const backToDescribe = () => {
     suggestionsMutation.reset()
+    // Huỷ cả lượt chat đang chờ (nếu có): bấm "Để AI soạn giúp" lần sau là một cuộc trò chuyện mới.
+    chat.reset()
     setStep('describe')
     touch()
     setTimeout(() => document.getElementById('create-idea')?.focus(), 0)
@@ -197,6 +249,7 @@ export default function CreateGamePage() {
       voiceRegion: voice.voiceRegion,
       voiceGender: voice.voiceGender,
       hasFile: file !== null,
+      theme: deduceThemeFromText(lastInput.current.idea).theme,
       visualClozeMode,
       oddOneOutMode,
       sceneImageUrl,
@@ -265,28 +318,45 @@ export default function CreateGamePage() {
           >
             <span aria-hidden="true">‹</span>
           </Link>
-        ) : null}
+        ) : (
+          <button
+            type="button"
+            onClick={backToDescribe}
+            aria-label={text.backToDescribe}
+            className="grid h-11 w-11 place-items-center rounded-full bg-surface text-2xl font-bold text-ink shadow-sm transition hover:bg-brand-soft"
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+        )}
         <ol
           aria-label={text.stepsLabel}
           className="flex flex-wrap items-center gap-x-3 gap-y-2 text-base font-semibold"
         >
-          <StepMarker number={1} label={text.stepDescribe} current={step === 'describe'} done={step === 'suggest'} />
+          <StepMarker
+            number={1}
+            label={text.stepDescribe}
+            current={step === 'describe'}
+            done={step !== 'describe'}
+            onSelect={step !== 'describe' ? backToDescribe : undefined}
+          />
           <li aria-hidden="true" className="h-0.5 w-6 bg-ink/20" />
           <StepMarker
             number={2}
-            label={text.stepPick}
-            current={step === 'suggest' && !creation.creating}
-            done={step === 'suggest' && creation.creating}
+            label={step === 'chat' ? text.stepChat : text.stepPick}
+            current={step !== 'describe' && !creation.creating}
+            done={step !== 'describe' && creation.creating}
           />
           <li aria-hidden="true" className="h-0.5 w-6 bg-ink/20" />
-          <StepMarker number={3} label={text.stepCompose} current={step === 'suggest' && creation.creating} done={false} />
+          <StepMarker number={3} label={text.stepCompose} current={step !== 'describe' && creation.creating} done={false} />
         </ol>
         <h1 ref={stepHeadingRef} tabIndex={-1} className="font-display text-3xl font-extrabold outline-none sm:text-4xl">
-          {step === 'describe' ? text.heading : text.suggestStepTitle}
+          {step === 'describe' ? text.heading : step === 'chat' ? text.chatStepTitle : text.suggestStepTitle}
         </h1>
       </header>
 
-      <div className={`grid items-start gap-6 ${step === 'describe' ? 'lg:grid-cols-[2fr_1fr]' : ''}`}>
+      <div
+        className={`grid items-start gap-6 ${step === 'describe' ? 'lg:grid-cols-[2fr_1fr]' : step === 'chat' ? 'lg:grid-cols-[3fr_2fr]' : ''}`}
+      >
         <div className="space-y-6">
           {step === 'describe' ? (
             <form
@@ -418,6 +488,17 @@ export default function CreateGamePage() {
                 {randomBlocked ? text.randomBlockedHint : text.randomHint}
               </p>
             </form>
+          ) : step === 'chat' ? (
+            <RequestChat
+              messages={chat.messages}
+              question={chat.question}
+              pending={chat.pending}
+              error={chat.error}
+              canSend={chat.canSend}
+              mock={isMock('ai')}
+              onSend={chat.send}
+              onRetry={chat.retry}
+            />
           ) : (
             <GameTypeSuggestionStep
               // Mỗi lần đề xuất mới thì quay về 3 thẻ đầu.
@@ -483,7 +564,7 @@ export default function CreateGamePage() {
             </p>
           ) : null}
 
-          {step === 'suggest' && !visualClozeSetupOpen && !oddSetupOpen ? (
+          {step !== 'describe' && !visualClozeSetupOpen && !oddSetupOpen ? (
             <CreateGamesProgress
               ref={progressRef}
               types={selectedTypes}
@@ -501,6 +582,15 @@ export default function CreateGamePage() {
         {step === 'describe' ? (
           <IdeaSuggestions subject={lesson.subject} group={group} onPick={pickIdea} />
         ) : null}
+        {step === 'chat' ? (
+          <UnderstandingCard
+            understanding={chat.understanding}
+            pending={chat.pending || creation.creating}
+            awaitingAnswer={chat.question !== null}
+            onChange={chat.editCard}
+            onConfirm={confirmUnderstanding}
+          />
+        ) : null}
       </div>
     </div>
   )
@@ -511,14 +601,17 @@ function StepMarker({
   label,
   current,
   done,
+  onSelect,
 }: {
   number: number
   label: string
   current: boolean
   done: boolean
+  /** Có thì bước này bấm được để quay lại. */
+  onSelect?: () => void
 }) {
-  return (
-    <li aria-current={current ? 'step' : undefined} className="flex items-center gap-2">
+  const content = (
+    <>
       <span
         aria-hidden="true"
         className={[
@@ -532,6 +625,21 @@ function StepMarker({
         {label}
         {done ? <span className="sr-only"> ({viText.generator.stepDone})</span> : null}
       </span>
+    </>
+  )
+  return (
+    <li aria-current={current ? 'step' : undefined} className="flex items-center gap-2">
+      {onSelect ? (
+        <button
+          type="button"
+          onClick={onSelect}
+          className="flex min-h-11 items-center gap-2 rounded-full pr-2 underline-offset-4 hover:underline"
+        >
+          {content}
+        </button>
+      ) : (
+        content
+      )}
     </li>
   )
 }

@@ -7,7 +7,7 @@ import com.aigameplatform.backend.dto.admin.PageResultDto;
 import com.aigameplatform.backend.dto.admin.TeacherStatusResultDto;
 import com.aigameplatform.backend.entity.Teacher;
 import com.aigameplatform.backend.entity.enums.AuditResult;
-import com.aigameplatform.backend.entity.enums.TeacherAccountStatus;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.entity.enums.UserRole;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
@@ -45,7 +45,7 @@ public class TeacherAdminService {
 
     @Transactional(readOnly = true)
     public PageResultDto<AdminTeacherDto> listTeachers(
-            String search, TeacherAccountStatus status, Pageable pageable) {
+            String search, TeacherStatus status, Pageable pageable) {
         String trimmedSearch = (search != null && !search.isBlank()) ? search.trim() : null;
         Page<Teacher> page = teacherRepository.searchTeachers(trimmedSearch, status, pageable);
         var items = page.getContent().stream().map(this::toDto).toList();
@@ -86,7 +86,7 @@ public class TeacherAdminService {
         teacher.setSchool(req.school() != null ? req.school().trim() : null);
         teacher.setPasswordHash(passwordEncoder.encode(req.initialPassword()));
         teacher.setRole(UserRole.ROLE_TEACHER);
-        teacher.setStatus(TeacherAccountStatus.ACTIVE);
+        teacher.setStatus(TeacherStatus.ACTIVE);
         teacher.setCreatedAt(LocalDateTime.now());
         Teacher saved = teacherRepository.save(teacher);
 
@@ -138,7 +138,7 @@ public class TeacherAdminService {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Không thể tự khoá tài khoản của chính mình");
         }
 
-        teacher.setStatus(TeacherAccountStatus.LOCKED);
+        teacher.setStatus(TeacherStatus.LOCKED);
         teacherRepository.save(teacher);
 
         // Thu hồi toàn bộ refresh token để buộc đăng xuất tức thì
@@ -153,7 +153,7 @@ public class TeacherAdminService {
                 null,
                 "Khóa tài khoản giáo viên: " + teacher.getEmail());
 
-        return new TeacherStatusResultDto(teacherId, TeacherAccountStatus.LOCKED);
+        return new TeacherStatusResultDto(teacherId, TeacherStatus.LOCKED);
     }
 
     @Transactional
@@ -162,7 +162,7 @@ public class TeacherAdminService {
         Teacher teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy giáo viên với mã: " + teacherId));
 
-        teacher.setStatus(TeacherAccountStatus.ACTIVE);
+        teacher.setStatus(TeacherStatus.ACTIVE);
         teacherRepository.save(teacher);
 
         auditLogService.logAction(
@@ -174,7 +174,7 @@ public class TeacherAdminService {
                 null,
                 "Mở khóa tài khoản giáo viên: " + teacher.getEmail());
 
-        return new TeacherStatusResultDto(teacherId, TeacherAccountStatus.ACTIVE);
+        return new TeacherStatusResultDto(teacherId, TeacherStatus.ACTIVE);
     }
 
     private AdminTeacherDto toDto(Teacher t) {

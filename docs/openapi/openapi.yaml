@@ -116,12 +116,11 @@ paths:
 
         `rememberMe: true` kéo dài refresh token và cookie lên 30 ngày (mặc định 24 giờ).
 
-        > **Sẽ đổi ở Frontend:** code Frontend hiện còn theo contract v1.0.0 (đọc `refreshToken`
-        > từ body và dùng `AuthUser.id`). Cần chuyển sang cookie và `teacherId`.
-
-        Phần mở rộng chưa cài: `rememberMe`, `role` trong `teacher`, lỗi `ACCOUNT_LOCKED`,
-        `LOGIN_TEMPORARILY_LOCKED`.
-      x-status: extended-pending
+        Đã cài: `rememberMe` (token xoay vòng giữ nguyên thời hạn 30 ngày), `ACCOUNT_LOCKED`,
+        `LOGIN_TEMPORARILY_LOCKED` (lần sai thứ 5 liên tiếp bật khoá 15 phút; đăng nhập đúng hoặc đặt lại
+        mật khẩu thì xoá bộ đếm). `teacher.role` đã cài (`ROLE_TEACHER` hoặc `ROLE_ADMIN`);
+        claim vai trò trong JWT và route `/admin/**` chưa cài.
+      x-status: implemented
       security: []
       requestBody:
         required: true
@@ -215,10 +214,12 @@ paths:
         Response **luôn giống nhau** dù email có tồn tại hay không (tránh dò tài khoản).
         Nếu email tồn tại, Backend gửi thư chứa liên kết `https://<frontend>/reset-password?token=...`;
         token dùng một lần, hết hạn sau 30 phút, lưu dạng băm. Giới hạn 3 yêu cầu mỗi giờ mỗi email.
+        Giới hạn đếm theo email đã nhập, kể cả email không tồn tại, nên 429 cũng không để lộ tài khoản.
 
         Môi trường dev: Backend in liên kết ra log thay vì gửi email (tuyệt đối không bật khi
-        triển khai thật). Cấu hình SMTP lấy từ biến môi trường.
-      x-status: planned
+        triển khai thật). Cấu hình SMTP lấy từ biến môi trường (`MAIL_ENABLED`, `MAIL_HOST`, `MAIL_FROM`...);
+        profile prod luôn gửi thư thật.
+      x-status: implemented
       security: []
       requestBody:
         required: true
@@ -265,7 +266,10 @@ paths:
       description: |
         Thành công thì thu hồi mọi refresh token của tài khoản và xoá bộ đếm đăng nhập sai.
         Lỗi 400 khi liên kết hết hạn/không hợp lệ, hoặc mật khẩu mới không đạt yêu cầu.
-      x-status: planned
+
+        Đã cài: thu hồi refresh token, vô hiệu mọi liên kết đặt lại khác của tài khoản, xoá bộ đếm đăng nhập
+        sai và gỡ khoá tạm (`LOGIN_TEMPORARILY_LOCKED`).
+      x-status: implemented
       security: []
       requestBody:
         required: true
@@ -341,7 +345,14 @@ paths:
 
         Xử lý có thể mất vài giây đến vài chục giây; Frontend đặt timeout riêng lớn hơn mặc định.
         Giới hạn 10 yêu cầu mỗi phút mỗi người dùng (NFR-04).
-      x-status: implemented
+
+        **Game ngoài danh mục (`gameType: CUSTOM`):** AI đọc `idea`, tự lập kế hoạch cách chơi và sinh
+        game CPF Game v2.0.0 (`docs/cpf-game-v2.0.0.md`) thay cho DSL v1.0.0; kiểm duyệt 3 lớp theo mục 4
+        của tài liệu đó. Kết quả là nhánh CPF của `GameResponse`. `CUSTOM` do hệ thống đề xuất khi mô tả
+        nằm ngoài 10 loại (`suggest-game-types` trả `CUSTOM`); client gửi `gameType: CUSTOM` khi giáo viên
+        chấp nhận đề xuất đó, giao diện không có `CUSTOM` trong danh sách chọn tay. Backend không phân
+        biệt hai đường này. Với `CUSTOM`, `idea` là bắt buộc (thiếu thì 400).
+      x-status: extended-pending  # đã cài bản JSON đồng bộ (cả CUSTOM); chưa: SSE, tệp giáo án, giọng đọc, giới hạn 429
       security:
         - bearerAuth: []
       requestBody:
@@ -388,13 +399,55 @@ paths:
         '504':
           $ref: '#/components/responses/AiTimeout'
 
+  /games/understand:
+    post:
+      tags: [Games]
+      operationId: understandGameRequest
+      summary: AI phân tích yêu cầu của giáo viên trước khi sinh game (khung chat tạo game)
+      description: |
+        Bước trước `POST /games/generate`. Nhận lịch sử chat giữa giáo viên và trợ lý (tin cuối là của
+        giáo viên) cùng thẻ hiểu yêu cầu hiện tại (nếu giáo viên đã tự sửa), trả lại lời đáp, câu hỏi
+        lại (nếu còn thiếu thông tin) và thẻ hiểu yêu cầu đã cập nhật.
+
+        AI đối chiếu yêu cầu với năng lực của hệ thống (10 loại game DSL và game CPF): phần chưa làm
+        được (ví dụ ghi âm giọng trẻ) được nêu trong `understanding.unsupported` kèm phương án thay thế,
+        không âm thầm đổi sang kiểu khác. Tối đa 2 câu hỏi lại trong một cuộc chat; sau đó AI tự điền
+        phần còn thiếu và ghi vào `assumptions`.
+
+        Không lưu gì vào cơ sở dữ liệu. Khi giáo viên xác nhận thẻ, client ghép thẻ thành `idea` và gửi
+        `POST /games/generate` với `gameType` đã chọn (contract của `/games/generate` không đổi).
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnderstandGameRequest'
+      responses:
+        '200':
+          description: Lời đáp, câu hỏi lại (nếu có) và thẻ hiểu yêu cầu.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameUnderstandingResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+
   /games:
     get:
       tags: [Games]
       operationId: listGames
       summary: Dashboard, danh sách game của giáo viên đang đăng nhập
       description: Sắp xếp `updatedAt` giảm dần. Chưa phân trang.
-      x-status: planned
+      x-status: extended-pending  # đã cài danh sách và bộ lọc; chưa: shareUrl, thumbnailUrl (cần xuất bản, ảnh)
       security:
         - bearerAuth: []
       parameters:
@@ -455,9 +508,20 @@ paths:
       operationId: updateGame
       summary: Lưu bản nháp / chỉnh sửa thủ công (UC-04, UC-05)
       description: |
-        Request body is the game DSL envelope. The game type cannot change.
-        This task edits DRAFT games only; editing a PUBLISHED game returns 409 CONFLICT.
-      x-status: implemented
+        Body là **chỉ phần envelope DSL**. Id lấy từ đường dẫn; `gameId, status, updatedAt` do server
+        quản. `gameType` không đổi được.
+
+        Backend chạy lại đủ 3 lớp kiểm duyệt trước khi lưu, tự ghi `EditLog` (người sửa là giáo viên)
+        và tự so sánh với bản cũ để biết trường nào bị sửa (phục vụ KPI-03, không cần endpoint riêng).
+        Lưu bản nháp **không** bắt buộc đủ `hitRegion` của SPOT_THE_TARGET (nới lỏng so với JSON
+        Schema DSL, chỉ bắt buộc khi xuất bản).
+
+        Game đang `PUBLISHED` vẫn giữ `PUBLISHED`. **Nếu game đang có phiên chưa kết thúc**
+        (`WAITING`, `ACTIVE` hoặc `PAUSED`) thì bị từ chối 409 `CONFLICT`.
+
+        Game `CUSTOM`: body là nguyên game CPF Game v2.0.0 (`CpfGameEnvelope`), kiểm duyệt theo
+        `docs/cpf-game-v2.0.0.md` mục 4. Gửi envelope DSL cho game `CUSTOM` (hoặc ngược lại) thì 400.
+      x-status: extended-pending  # đã cài kiểm duyệt lại và lưu; chưa: 409 khi có phiên chơi, EditLog
       security:
         - bearerAuth: []
       requestBody:
@@ -465,7 +529,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameEnvelope'
+              oneOf:
+                - $ref: '#/components/schemas/GameEnvelope'
+                - $ref: '#/components/schemas/CpfGameEnvelope'
       responses:
         '200':
           $ref: '#/components/responses/GameSuccess'
@@ -488,7 +554,7 @@ paths:
       operationId: deleteGame
       summary: Xoá game
       description: Bị từ chối 409 `CONFLICT` nếu game đang có phiên chưa kết thúc.
-      x-status: planned
+      x-status: extended-pending  # đã cài xóa; 409 hiện báo khi game còn phiên chơi bất kỳ (chưa phân biệt phiên đã kết thúc)
       security:
         - bearerAuth: []
       responses:
@@ -522,7 +588,11 @@ paths:
         400 khi dữ liệu chưa hợp lệ (câu chưa có đáp án đúng, cấu trúc chưa hoàn chỉnh) hoặc game
         SPOT_THE_TARGET còn câu chưa có `hitRegion` (UC-07 2c). 500 khi không lưu được hoặc không tạo
         được mã chia sẻ (UC-07 2a, 2b): game không chuyển sang `PUBLISHED`.
-      x-status: implemented
+
+        Game `CUSTOM`: chưa có dạng dành cho học sinh và phiên chơi cho CPF, nên xuất bản game `CUSTOM`
+        trả 400 `VALIDATION_ERROR` cho tới khi các phần đó được đặc tả. Body `CpfGameEnvelope` đã nhận
+        sẵn (như `PUT`) để không phải đổi contract khi cài.
+      x-status: implemented  # game DSL; game CUSTOM trả 400 như mô tả trên
       security:
         - bearerAuth: []
       requestBody:
@@ -530,7 +600,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameEnvelope'
+              oneOf:
+                - $ref: '#/components/schemas/GameEnvelope'
+                - $ref: '#/components/schemas/CpfGameEnvelope'
       responses:
         '200':
           description: Đã xuất bản.
@@ -565,6 +637,9 @@ paths:
         Giữ nguyên `gameId`, **thay toàn bộ `questions[]` và lưu**, `status` đặt về `DRAFT`. Giáo viên
         chọn chức năng này là chủ ý bỏ nội dung đang có. Bị từ chối 409 `CONFLICT` nếu game đang có phiên
         chưa kết thúc. Hỗ trợ `Accept: text/event-stream` như `generate`. Giới hạn 10 yêu cầu mỗi phút.
+
+        Game `CUSTOM`: thay toàn bộ `cpf` (AI lập lại kế hoạch và sinh game CPF mới), kiểm duyệt như
+        `generate`.
       x-status: planned
       security:
         - bearerAuth: []
@@ -605,6 +680,89 @@ paths:
         '504':
           $ref: '#/components/responses/AiTimeout'
 
+  /games/{gameId}/revise:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [Games]
+      operationId: reviseGame
+      summary: Sửa game bằng chat (trình soạn)
+      description: |
+        Giáo viên nhắn một yêu cầu sửa (ví dụ "câu 2 đổi thành phép trừ", "thêm 2 câu", "dễ hơn"). AI nhận nội dung
+        game hiện tại cùng yêu cầu, giữ nguyên phần không được nhắc tới, rồi trả về game đã sửa qua đủ 3 lớp kiểm
+        duyệt như `generate`. **Không lưu**: trình soạn áp kết quả vào bản nháp (giáo viên hoàn tác được), việc lưu
+        vẫn qua `PUT /games/{gameId}`. Vì không lưu nên `status` và `updatedAt` trong response là của game đang lưu.
+
+        Nội dung hiện tại lấy từ game đã lưu; trình soạn lưu bản nháp trước khi gọi. Không đổi `gameType`.
+        Game `CUSTOM`: sửa trong trường `cpf`. Giới hạn 10 yêu cầu mỗi phút cho mỗi giáo viên (429 kèm `Retry-After`).
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviseGameRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/GameSuccess'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+
+  /games/{gameId}/curriculum-review:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [Games]
+      operationId: getGameCurriculumReview
+      summary: Căn cứ chương trình của game (chỉ giáo viên)
+      description: |
+        Kết quả đối chiếu nội dung game với chương trình (GDPT 2018 / chương trình mầm non), ghi cùng lúc với game ở
+        `POST /games/generate`. Chỉ giáo viên chủ game xem được; **không** đưa vào response cho học sinh.
+
+        `status`: `REVIEWED`/`PENDING` khi đã đối chiếu, `UNAVAILABLE` khi lúc sinh không bật truy xuất chương trình,
+        `STALE` khi giáo viên đã sửa game bằng `PUT /games/{gameId}` sau khi đối chiếu (kết quả cũ không còn đúng với
+        nội dung hiện tại). Game `CUSTOM` (CPF) không qua đối chiếu nên trả 404.
+
+        404 cũng dùng cho game không tồn tại hoặc không thuộc giáo viên đang đăng nhập (không phân biệt, để không lộ
+        sự tồn tại của game người khác).
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Kết quả đối chiếu.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/CurriculumReview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /games/{gameId}/questions/{questionId}/regenerate:
     parameters:
       - $ref: '#/components/parameters/GameId'
@@ -618,6 +776,9 @@ paths:
         **Endpoint không tự lưu**: Frontend ghép câu mới vào bản đang soạn rồi lưu bằng `PUT` khi giáo
         viên bấm "Lưu bản nháp". Cách này bảo toàn chỉnh sửa tay chưa lưu ở các thẻ khác.
         Giới hạn 10 yêu cầu mỗi phút.
+
+        Game `CUSTOM` không có thẻ câu hỏi DSL: trả 400 `VALIDATION_ERROR` (dùng `regenerate` toàn game).
+        Game chế độ hình ảnh chưa hỗ trợ: trả 400 `VALIDATION_ERROR`.
       x-status: implemented
       security:
         - bearerAuth: []
@@ -649,7 +810,12 @@ paths:
                       question:
                         $ref: '#/components/schemas/Question'
                       gameType:
-                        $ref: '#/components/schemas/GameType'
+                        allOf:
+                          - $ref: '#/components/schemas/GameType'
+                          - not:
+                              const: CUSTOM
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -735,7 +901,7 @@ paths:
       summary: Giáo viên tạo phiên Live Arena (SOLO hoặc TEAM)
       description: |
         Chỉ tạo được từ game `PUBLISHED`. `SELF` không tạo qua endpoint này (xem
-        `POST /games/shared/{shareCode}/play`).
+        `POST /games/shared/{shareCode}/play`). Game `CUSTOM` chưa hỗ trợ phiên chơi (chưa xuất bản được).
 
         - `maxParticipants`: số nguyên từ 1 trở lên; bỏ qua nghĩa là không giới hạn.
         - Chỉ với `TEAM`: `groupingStrategy` (mặc định `RANDOM`, giáo viên không phải xếp đội, phù hợp
@@ -2290,9 +2456,9 @@ components:
         | `AI_GENERATION_TIMEOUT` | 504 | đã cài | Dịch vụ AI timeout sau khi retry |
         | `INTERNAL_ERROR` | 500 | đã cài | Lỗi không xác định |
         | `CONFLICT` | 409 | chưa cài | Xung đột trạng thái nghiệp vụ |
-        | `RATE_LIMITED` | 429 | chưa cài | Vượt giới hạn tần suất; kèm `Retry-After` |
-        | `ACCOUNT_LOCKED` | 403 | chưa cài | Tài khoản bị quản trị viên khoá |
-        | `LOGIN_TEMPORARILY_LOCKED` | 429 | chưa cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
+        | `RATE_LIMITED` | 429 | đã cài (`/auth/forgot-password`, `POST /games/{gameId}/revise`) | Vượt giới hạn tần suất; kèm `Retry-After` |
+        | `ACCOUNT_LOCKED` | 403 | đã cài | Tài khoản bị quản trị viên khoá |
+        | `LOGIN_TEMPORARILY_LOCKED` | 429 | đã cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
         | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |
         | `SERVICE_UNAVAILABLE` | 503 | đã cài | Dịch vụ tạm thời không khả dụng (chạm trần chi phí AI, circuit breaker) |
       enum:
@@ -2469,6 +2635,10 @@ components:
         - DRAG_DROP
         - ORDERING
         - VISUAL_CLOZE
+        - CUSTOM
+      description: |
+        10 loại preset theo DSL v1.0.0, cộng `CUSTOM` là game ngoài danh mục theo CPF Game v2.0.0
+        (`docs/cpf-game-v2.0.0.md`). `CUSTOM` do hệ thống đề xuất, giáo viên không chọn tay.
 
     GameStatus:
       type: string
@@ -2489,7 +2659,7 @@ components:
 
     GenerateGameRequest:
       type: object
-      required: [subject, gradeLevel, gameType]
+      required: [subject, gradeLevel]
       description: |
         Phải có ít nhất một trong `idea`, `randomTopic` (hoặc `file` khi dùng multipart); Backend
         kiểm tra điều này (không biểu diễn bằng `anyOf` vì tệp nằm ngoài schema JSON).
@@ -2537,6 +2707,146 @@ components:
         voice:
           $ref: '#/components/schemas/Voice'
 
+    UnderstandGameRequest:
+      type: object
+      required: [subject, gradeLevel, messages]
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        gradeLevel:
+          $ref: '#/components/schemas/GradeLevel'
+        messages:
+          type: array
+          minItems: 1
+          maxItems: 12
+          description: Lịch sử chat theo thứ tự thời gian; tin cuối phải có `role` là `TEACHER`.
+          items:
+            $ref: '#/components/schemas/ChatTurn'
+        understanding:
+          $ref: '#/components/schemas/GameUnderstanding'
+          description: Thẻ hiện tại, kể cả phần giáo viên đã tự sửa; AI giữ những gì giáo viên đã sửa.
+
+    ReviseGameRequest:
+      type: object
+      required: [instruction]
+      properties:
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Yêu cầu sửa mới nhất của giáo viên.
+        history:
+          type: array
+          maxItems: 10
+          description: Các lượt chat sửa trước đó trong phiên soạn (cũ trước), để AI hiểu yêu cầu nối tiếp. Có thể bỏ trống.
+          items:
+            $ref: '#/components/schemas/ChatTurn'
+
+    ChatTurn:
+      type: object
+      required: [role, text]
+      properties:
+        role:
+          type: string
+          enum: [TEACHER, ASSISTANT]
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    GameUnderstanding:
+      type: object
+      description: Thẻ "Hệ thống hiểu như sau". Mọi chữ bằng tiếng Việt (môn Tiếng Anh có thể chèn từ cần học).
+      required: [learningGoal, childAction, content, setting, gameType, alternativeGameTypes, unsupported, assumptions]
+      properties:
+        learningGoal:
+          type: string
+          maxLength: 200
+          description: Mục tiêu học.
+        childAction:
+          type: string
+          maxLength: 200
+          description: Trẻ sẽ làm gì khi chơi.
+        content:
+          type: array
+          maxItems: 20
+          description: Nội dung cụ thể (từ, phép tính, cặp...) đã biết hoặc AI đề xuất.
+          items:
+            type: string
+            maxLength: 100
+        setting:
+          type: string
+          maxLength: 200
+          description: Bối cảnh, nhân vật, đồ vật trong game.
+        gameType:
+          $ref: '#/components/schemas/GameType'
+        alternativeGameTypes:
+          type: array
+          maxItems: 2
+          description: Kiểu chơi thay thế, khác `gameType` và không trùng nhau.
+          items:
+            $ref: '#/components/schemas/GameType'
+        unsupported:
+          type: array
+          maxItems: 5
+          description: Phần giáo viên muốn mà hệ thống chưa làm được, kèm phương án thay thế.
+          items:
+            type: object
+            required: [need, fallback]
+            properties:
+              need:
+                type: string
+                maxLength: 200
+              fallback:
+                type: string
+                maxLength: 200
+        assumptions:
+          type: array
+          maxItems: 5
+          description: Những gì AI tự đoán khi giáo viên chưa nói, để giáo viên xem lại.
+          items:
+            type: string
+            maxLength: 200
+
+    GameUnderstandingResponse:
+      type: object
+      required: [reply, understanding, ready]
+      properties:
+        reply:
+          type: string
+          maxLength: 600
+          description: Lời đáp của trợ lý trong khung chat.
+        question:
+          oneOf:
+            - type: 'null'
+            - type: object
+              required: [text, quickReplies]
+              properties:
+                text:
+                  type: string
+                  maxLength: 300
+                quickReplies:
+                  type: array
+                  maxItems: 4
+                  description: Nút trả lời nhanh.
+                  items:
+                    type: string
+                    maxLength: 60
+          description: Câu hỏi lại; `null` khi đã đủ thông tin.
+        understanding:
+          $ref: '#/components/schemas/GameUnderstanding'
+        ready:
+          type: boolean
+          description: Đủ thông tin để tạo game (không còn câu hỏi lại).
+
+    GameUnderstandingResult:
+      type: object
+      required: [success, data]
+      properties:
+        success: { const: true }
+        data:
+          $ref: '#/components/schemas/GameUnderstandingResponse'
+
     # --- DSL v1.0.0 (nguồn sự thật: JSON Schema trong backend, mỗi loại game một file) ---
 
     GameEnvelope:
@@ -2558,6 +2868,13 @@ components:
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.1.0/visual-cloze.schema.json'
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.1.0/odd-one-out.schema.json'
 
+    CpfGameEnvelope:
+      description: |
+        Game ngoài danh mục theo CPF Game v2.0.0 (dạng hoàn chỉnh, có `answerKey`). Tham chiếu thẳng
+        JSON Schema của Backend để không viết hai lần. Luật không diễn tả được bằng schema ở
+        `docs/cpf-game-v2.0.0.md` mục 4.2.
+      $ref: '../../backend/src/main/resources/schema/cpf/2.0.0/cpf-game.schema.json'
+
     Question:
       description: Một câu hỏi theo DSL v1.0.0, cấu trúc phụ thuộc `gameType` (dạng đầy đủ cho giáo viên).
       oneOf:
@@ -2575,6 +2892,35 @@ components:
         - $ref: '../../backend/src/main/resources/schema/game-dsl/1.1.0/odd-one-out.schema.json#/$defs/question'
 
     GameResponse:
+      description: |
+        Game đầy đủ cho giáo viên. Phân biệt theo `gameType`: 10 loại preset là nhánh DSL v1.0.0 phẳng
+        (`DslGameResponse`); `CUSTOM` là nhánh CPF (`CpfGameResponse`), nội dung nằm trong `cpf`.
+      oneOf:
+        - $ref: '#/components/schemas/DslGameResponse'
+        - $ref: '#/components/schemas/CpfGameResponse'
+
+    CpfGameResponse:
+      type: object
+      description: |
+        Game `CUSTOM` cho giáo viên. Body của `PUT /games/{gameId}` là đúng giá trị của trường `cpf`
+        (lồng riêng vì schema CPF không cho thêm trường ở gốc).
+      additionalProperties: false
+      required: [gameId, status, updatedAt, gameType, cpf]
+      properties:
+        gameId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/GameStatus'
+        updatedAt:
+          type: string
+          format: date-time
+        gameType:
+          const: CUSTOM
+        cpf:
+          $ref: '#/components/schemas/CpfGameEnvelope'
+
+    DslGameResponse:
       type: object
       required:
         - gameId
@@ -2602,7 +2948,10 @@ components:
           type: string
           enum: ['1.0.0', '1.1.0']
         gameType:
-          $ref: '#/components/schemas/GameType'
+          allOf:
+            - $ref: '#/components/schemas/GameType'
+            - not:
+                const: CUSTOM
         mode:
           type: string
           enum: [TEXT, IMAGE]
@@ -2622,6 +2971,22 @@ components:
               type: string
               minLength: 1
               maxLength: 200
+            presentation:
+              type: object
+              additionalProperties: false
+              description: |
+                Cách trình bày (tùy chọn, xem `metadata.presentation` trong docs/game-json-dsl-v1.0.0.md); thiếu thì
+                frontend tự chọn. Gửi lại trong `PUT /games/{gameId}` để lưu lựa chọn của giáo viên.
+              properties:
+                world:
+                  type: string
+                  enum: [farm, ocean, jungle, space]
+                carrier:
+                  type: string
+                  enum: [balloon, bubble, planet, fruit, card, fish, flower]
+                layout:
+                  type: string
+                  enum: [scatter, row, arc]
         gameplaySettings:
           type: object
           required: [hitboxScale]
@@ -2648,7 +3013,9 @@ components:
 
     GameSummary:
       type: object
-      description: Rút gọn, KHÔNG kèm `questions[]`.
+      description: |
+        Rút gọn, KHÔNG kèm `questions[]`. Game `CUSTOM` lấy `title`, `subject`, `gradeLevel` từ
+        `cpf.metadata`.
       required: [gameId, title, gameType, subject, gradeLevel, status, updatedAt]
       properties:
         gameId:
@@ -2682,6 +3049,50 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    CurriculumReview:
+      type: object
+      description: Bản đối chiếu nội dung game với chương trình, ghi khi sinh game. Các trường phiên bản `null` khi không có.
+      required: [id, gameId, createdAt, status, evidence, claims, warnings]
+      properties:
+        id:
+          type: string
+          format: uuid
+        gameId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, REVIEWED, UNAVAILABLE, STALE]
+        evidence:
+          type: object
+          description: Căn cứ đã truy xuất (các đoạn chương trình `chunks`, phiên bản dữ liệu); khi `UNAVAILABLE` các trường là chuỗi rỗng và `chunks` là mảng rỗng.
+          additionalProperties: true
+        claims:
+          type: array
+          description: Từng khẳng định về mức bám chương trình, gắn với `chunkId` trong `evidence`.
+          items:
+            type: object
+            additionalProperties: true
+        warnings:
+          type: array
+          items:
+            type: string
+          examples: [[GAME_CHANGED_REVIEW_STALE]]
+        datasetVersion:
+          type: [string, 'null']
+        curriculumVersion:
+          type: [string, 'null']
+        embeddingModel:
+          type: [string, 'null']
+        reviewerModel:
+          type: [string, 'null']
+        curriculumLabel:
+          type: [string, 'null']
+          description: Câu tóm tắt hiển thị cho giáo viên, ví dụ "Nội dung tương ứng kết quả mong đợi của trẻ 4–5 tuổi."
 
     PublishResult:
       type: object
@@ -2872,6 +3283,13 @@ components:
       type: object
       required: [schemaVersion, gameType, metadata, gameplaySettings, questions, answeredQuestionIds]
       description: |
+        Dạng dành cho học sinh của `GameResponse`: bỏ `gameId, status, updatedAt`, bỏ trường đáp án, các
+        phần tử đã xáo. Chưa có dạng học sinh cho game `CUSTOM` (CPF): game `CUSTOM` chưa xuất bản và
+        chưa tạo phiên được. Biến đổi theo từng loại game xem mô tả của `GET /sessions/{sessionId}/questions`.
+        Cấu trúc câu hỏi chưa có schema máy đọc cho hầu hết loại game (DSL chưa mô tả dạng học sinh; đây là
+        cam kết ở cấp hợp đồng). Đã có schema cho MATCHING: `MatchingStudentQuestion`.
+        Chưa có `metadata.presentation`: màn học sinh tự chọn cách trình bày theo mã chia sẻ (giáo viên chọn
+        trong trình soạn chỉ áp dụng ở xem trước, chơi thử, trình chiếu và phòng chơi).
         Student-facing form of GameResponse. IMAGE questions can be in progress; they are omitted from answeredQuestionIds and restored through acceptedPlacements.
         Question structures are documented by the schema references below.
       properties:

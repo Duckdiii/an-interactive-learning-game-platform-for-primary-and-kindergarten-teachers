@@ -15,7 +15,7 @@ import com.aigameplatform.backend.dto.admin.AdminTeacherDto;
 import com.aigameplatform.backend.dto.admin.AdminUpdateTeacherRequest;
 import com.aigameplatform.backend.dto.admin.PageResultDto;
 import com.aigameplatform.backend.dto.admin.TeacherStatusResultDto;
-import com.aigameplatform.backend.entity.enums.TeacherAccountStatus;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.exception.GlobalExceptionHandler;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.service.admin.TeacherAdminService;
@@ -61,7 +61,7 @@ class AdminTeacherControllerTest {
 
     @Test
     void listTeachers_returns200() throws Exception {
-        var dto = new AdminTeacherDto("t-1", "Nguyen Van A", "a@school.vn", "TH Chu Van An", TeacherAccountStatus.ACTIVE, LocalDateTime.now());
+        var dto = new AdminTeacherDto("t-1", "Nguyen Van A", "a@school.vn", "TH Chu Van An", TeacherStatus.ACTIVE, LocalDateTime.now());
         when(teacherAdminService.listTeachers(any(), any(), any()))
                 .thenReturn(new PageResultDto<>(0, 20, 1, 1, List.of(dto)));
 
@@ -74,7 +74,7 @@ class AdminTeacherControllerTest {
 
     @Test
     void createTeacher_returns201() throws Exception {
-        var dto = new AdminTeacherDto("t-2", "Tran Thi B", "b@school.vn", "TH Le Quy Don", TeacherAccountStatus.ACTIVE, LocalDateTime.now());
+        var dto = new AdminTeacherDto("t-2", "Tran Thi B", "b@school.vn", "TH Le Quy Don", TeacherStatus.ACTIVE, LocalDateTime.now());
         when(teacherAdminService.createTeacher(any(AdminCreateTeacherRequest.class), any(), any()))
                 .thenReturn(dto);
 
@@ -95,7 +95,7 @@ class AdminTeacherControllerTest {
 
     @Test
     void getTeacher_returns200() throws Exception {
-        var dto = new AdminTeacherDto("t-1", "Nguyen Van A", "a@school.vn", "TH Chu Van An", TeacherAccountStatus.ACTIVE, LocalDateTime.now());
+        var dto = new AdminTeacherDto("t-1", "Nguyen Van A", "a@school.vn", "TH Chu Van An", TeacherStatus.ACTIVE, LocalDateTime.now());
         when(teacherAdminService.getTeacher("t-1")).thenReturn(dto);
 
         mockMvc.perform(get("/api/admin/teachers/t-1"))
@@ -106,7 +106,7 @@ class AdminTeacherControllerTest {
 
     @Test
     void updateTeacher_returns200() throws Exception {
-        var dto = new AdminTeacherDto("t-1", "Updated Name", "a@school.vn", "Updated School", TeacherAccountStatus.ACTIVE, LocalDateTime.now());
+        var dto = new AdminTeacherDto("t-1", "Updated Name", "a@school.vn", "Updated School", TeacherStatus.ACTIVE, LocalDateTime.now());
         when(teacherAdminService.updateTeacher(eq("t-1"), any(AdminUpdateTeacherRequest.class), any(), any()))
                 .thenReturn(dto);
 
@@ -126,7 +126,7 @@ class AdminTeacherControllerTest {
     @Test
     void lockTeacher_returns200() throws Exception {
         when(teacherAdminService.lockTeacher(eq("t-1"), any(), any()))
-                .thenReturn(new TeacherStatusResultDto("t-1", TeacherAccountStatus.LOCKED));
+                .thenReturn(new TeacherStatusResultDto("t-1", TeacherStatus.LOCKED));
 
         mockMvc.perform(post("/api/admin/teachers/t-1/lock"))
                 .andExpect(status().isOk())
@@ -137,7 +137,7 @@ class AdminTeacherControllerTest {
     @Test
     void unlockTeacher_returns200() throws Exception {
         when(teacherAdminService.unlockTeacher(eq("t-1"), any(), any()))
-                .thenReturn(new TeacherStatusResultDto("t-1", TeacherAccountStatus.ACTIVE));
+                .thenReturn(new TeacherStatusResultDto("t-1", TeacherStatus.ACTIVE));
 
         mockMvc.perform(post("/api/admin/teachers/t-1/unlock"))
                 .andExpect(status().isOk())

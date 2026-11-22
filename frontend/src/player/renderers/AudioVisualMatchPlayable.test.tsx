@@ -170,4 +170,11 @@ describe('AudioVisualMatchPlayable', () => {
     setup(vi.fn(), { ...question, options: [{ id: 'a', visualPrompt: 'mèo' }, { id: 'b', visualPrompt: 'chó' }] })
     expect(screen.getByText(/🖼️.*mèo/s)).toBeInTheDocument()
   })
+
+  it('lựa chọn chỉ có chữ ("Thẻ chữ cân") hiện đúng chữ, không kèm mô tả', () => {
+    setup(vi.fn(), { ...question, options: [{ id: 'a', visualPrompt: 'Thẻ chữ cân' }, { id: 'b', visualPrompt: 'Thẻ chữ chân' }] })
+    expect(screen.getByText('cân')).toBeInTheDocument()
+    expect(screen.getByText('chân')).toBeInTheDocument()
+    expect(screen.queryByText(/Thẻ chữ/)).not.toBeInTheDocument()
+  })
 })

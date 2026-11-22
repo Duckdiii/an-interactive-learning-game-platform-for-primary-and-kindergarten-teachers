@@ -31,9 +31,19 @@ public class MatchingGameStrategy extends GameContentStrategy<MatchingQuestionDs
     }
 
     @Override
+    protected boolean hasShortChoiceLabels() {
+        return true;
+    }
+
+    @Override
     protected String buildTypeSpecificInstruction(String topic, GradeLevel grade) {
         return "Chủ đề: " + topic + ". Tạo các cặp để người học nối khái niệm, từ, hình-mô tả hoặc biểu diễn tương đương "
-                + "chỉ khi quan hệ đó nằm trong YCCĐ; dùng từ ngữ phù hợp " + grade + ".";
+                + "chỉ khi quan hệ đó nằm trong YCCĐ; dùng từ ngữ phù hợp " + grade + ". "
+                + "Nếu giáo viên không nêu số lượng, tạo 3-5 câu, mỗi câu 3-6 cặp. "
+                + "Hai vế của một cặp phải khác nhau về nội dung (từ ↔ nghĩa, số ↔ số lượng, chữ hoa ↔ chữ thường của một chữ cái); "
+                + "text của hai vế không được là cùng một từ ('head' ↔ 'Head' là sai). Vế có visualPrompt vẫn bắt buộc có "
+                + "text, và text đó phải khác vế kia (ví dụ 'cái đầu' ↔ 'head'). Khi bài là đếm hoặc nhận biết qua hình, "
+                + "viết vế hình dạng 'N + tên vật' (ví dụ '3 con vịt') để hệ thống vẽ đúng N hình.";
     }
 
     @Override

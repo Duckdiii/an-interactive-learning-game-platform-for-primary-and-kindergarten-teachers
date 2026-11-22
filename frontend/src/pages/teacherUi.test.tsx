@@ -7,6 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import { loginAsTeacher, makeGame, renderWithProviders } from '../test/renderWithApp'
 
 vi.mock('../api/gamesApi', () => ({ getGames: vi.fn() }))
+vi.mock('../api/authApi', () => ({ logoutTeacher: vi.fn().mockResolvedValue(undefined) }))
 // Sandbox Canvas (chỉ có ở bản dev) kéo theo react-konva, không cần cho test giao diện giáo viên.
 vi.mock('./dev/CanvasSandbox', () => ({ default: () => null }))
 

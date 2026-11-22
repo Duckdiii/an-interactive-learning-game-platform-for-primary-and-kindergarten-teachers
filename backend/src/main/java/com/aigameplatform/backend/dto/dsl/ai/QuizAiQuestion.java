@@ -10,7 +10,8 @@ public record QuizAiQuestion(
         List<String> options,
         int correctIndex,
         String visualPrompt,
-        String audioText) implements AiQuestion {
+        String audioText,
+        String asset) implements AiQuestion {
 
     @Override
     public List<String> problems() {

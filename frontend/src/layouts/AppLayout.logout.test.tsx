@@ -10,6 +10,7 @@ import { loadDraft, saveDraft } from '../utils/draftStorage'
 import { resetMockGames } from '../services/mock/mockGames'
 
 vi.mock('../api/gamesApi', () => ({ getGames: vi.fn() }))
+vi.mock('../api/authApi', () => ({ logoutTeacher: vi.fn().mockResolvedValue(undefined) }))
 // Sandbox Canvas (chỉ có ở bản dev) kéo theo react-konva, không cần cho test này.
 vi.mock('../pages/dev/CanvasSandbox', () => ({ default: () => null }))
 
@@ -65,7 +66,7 @@ describe('đăng xuất khi đang soạn dở', () => {
 describe('phiên không rõ là ai', () => {
   it('thiếu cả mã giáo viên lẫn email thì về trang đăng nhập, không kẹt ở khung chờ', async () => {
     localStorage.clear()
-    storeSession({} as never, 'token', 'refresh')
+    storeSession({} as never, 'token')
     renderWithProviders(<App />, '/dashboard')
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Chào cô quay lại!' })).toBeInTheDocument()

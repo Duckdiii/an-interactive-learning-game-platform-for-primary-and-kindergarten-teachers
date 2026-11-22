@@ -7,7 +7,7 @@ import com.aigameplatform.backend.dto.admin.AdminUpdateTeacherRequest;
 import com.aigameplatform.backend.dto.admin.PageResultDto;
 import com.aigameplatform.backend.dto.admin.TeacherStatusResultDto;
 import com.aigameplatform.backend.dto.response.ApiResponse;
-import com.aigameplatform.backend.entity.enums.TeacherAccountStatus;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.service.admin.TeacherAdminService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,7 +37,7 @@ public class AdminTeacherController {
     @GetMapping({"/api/admin/teachers", "/admin/teachers"})
     public ResponseEntity<ApiResponse<PageResultDto<AdminTeacherDto>>> listTeachers(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) TeacherAccountStatus status,
+            @RequestParam(required = false) TeacherStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(Math.max(1, size), 100));

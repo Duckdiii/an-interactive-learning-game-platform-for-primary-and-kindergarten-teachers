@@ -1,5 +1,5 @@
 import type { AudioVisualMatchGame, VisualClozeImageGame } from '../../types/game-dsl.types'
-import { visualClozeImageDemo } from '../../games/visual-cloze-image/visualClozeImageDemo'
+import { visualClozeImageDemo } from './visualClozeImageDemo'
 
 interface ImageMockInput {
   sceneImageUrl: string
