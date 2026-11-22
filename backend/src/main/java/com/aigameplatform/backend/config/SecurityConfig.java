@@ -49,7 +49,7 @@ public class SecurityConfig {
                         "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers("/ws/live-arena/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/interactions", "/sessions/*/interactions").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/interactions").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)
