@@ -209,7 +209,7 @@ public class GameGenerationService {
             VisualClozeImageGenerationInput imageInput, String targetQuestionId, GameDsl baseGameDsl) {
         if (type == GameType.AUDIO_VISUAL_MATCH && request.effectiveVisualClozeMode() == VisualClozeMode.IMAGE) {
             var avm = (com.aigameplatform.backend.dto.dsl.ai.AudioVisualMatchAiOutput) output;
-            var catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog();
+            var catalog = notoCatalog;
             var problems = new java.util.ArrayList<ValidationError>();
             for (int i = 0; i < avm.questions().size(); i++) {
                 var question = avm.questions().get(i);
@@ -227,7 +227,7 @@ public class GameGenerationService {
         }
         if (type == GameType.ODD_ONE_OUT && request.effectiveVisualClozeMode() == VisualClozeMode.IMAGE) {
             var odd = (com.aigameplatform.backend.dto.dsl.ai.OddOneOutAiOutput) output;
-            var catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog();
+            var catalog = notoCatalog;
             var problems = new java.util.ArrayList<ValidationError>();
             for (int i = 0; i < odd.questions().size(); i++) {
                 var question = odd.questions().get(i);
