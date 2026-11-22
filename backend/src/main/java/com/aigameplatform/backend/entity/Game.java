@@ -6,8 +6,6 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.entity.enums.OddOneOutMode;
-import org.hibernate.annotations.UpdateTimestamp;
-import java.time.LocalDateTime;
 import com.aigameplatform.backend.entity.question.QuestionGame;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -63,13 +61,18 @@ public class Game {
     @Column(name = "odd_one_out_mode", length = 16)
     private OddOneOutMode oddOneOutMode;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GameStatus status = GameStatus.DRAFT;
+
+    // Ba cột null cùng lúc thì Hibernate trả null (game chưa có cách trình bày riêng).
+    @Embedded
+    private GamePresentation presentation;
+
+    // Hibernate tự đặt khi thêm và mỗi lần sửa; trả ra API là updatedAt.
+    @org.hibernate.annotations.UpdateTimestamp
+    @Column(nullable = false)
+    private java.time.Instant updatedAt;
 
     // Composition: Game ◆ 1..* QuestionGame. Câu hỏi chết theo Game.
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

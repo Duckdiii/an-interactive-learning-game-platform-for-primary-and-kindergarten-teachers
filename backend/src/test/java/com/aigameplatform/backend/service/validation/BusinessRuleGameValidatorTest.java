@@ -34,7 +34,7 @@ class BusinessRuleGameValidatorTest {
     private static final GameDslSchemaRegistry REGISTRY = new GameDslSchemaRegistry();
 
     private static List<AbstractGameRule<?, ?>> allRules() {
-        return List.of(new QuizRule(), new AudioVisualMatchRule(), new OddOneOutRule(), new WordScrambleRule(),
+        return List.of(new QuizRule(), new AudioVisualMatchRule(), new OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new WordScrambleRule(),
                 new MatchingRule(), new MemoryCardRule(), new DragDropRule(), new OrderingRule(), new VisualClozeRule());
     }
 
@@ -56,11 +56,16 @@ class BusinessRuleGameValidatorTest {
     }
 
     private List<String> errorPaths(GameType type, Consumer<ObjectNode> mutation) throws IOException {
+        List<String> paths = allErrorPaths(type, mutation);
+        assertThat(paths).as("JSON sai phải bị chặn").isNotEmpty();
+        return paths;
+    }
+
+    /** Mọi lỗi (Layer 1 và 2) sau khi sửa ví dụ; dùng cho ca mong đợi hợp lệ, không bắt buộc phải có lỗi như errorPaths. */
+    private List<String> allErrorPaths(GameType type, Consumer<ObjectNode> mutation) throws IOException {
         ObjectNode json = example(type);
         mutation.accept(json);
-        ValidationReport report = service.validate(json);
-        assertThat(report.valid()).as("JSON sai phải bị chặn").isFalse();
-        return report.errors().stream().map(ValidationError::path).toList();
+        return service.validate(json).errors().stream().map(ValidationError::path).toList();
     }
 
     private static ObjectNode question(ObjectNode game, int index) {
@@ -74,7 +79,7 @@ class BusinessRuleGameValidatorTest {
     // ---- ví dụ hợp lệ ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExamplePassesBothLayers(GameType type) throws IOException {
         ValidationReport report = service.validate(example(type));
 
@@ -208,6 +213,15 @@ class BusinessRuleGameValidatorTest {
                 .containsExactly("$.questions[0].items[1].text");
     }
 
+    @Test
+    void oddOneOutItemIdsMustFollowTheirPosition() throws IOException {
+        // Đổi chỗ hai id hợp lệ ("b", "a"): schema chỉ giới hạn tập id nên chỉ luật Layer 2 bắt được thứ tự sai.
+        assertThat(errorPaths(GameType.ODD_ONE_OUT, g -> {
+            element(question(g, 0), "items", 0).put("id", "b");
+            element(question(g, 0), "items", 1).put("id", "a");
+        })).containsExactly("$.questions[0].items[0].id", "$.questions[0].items[1].id");
+    }
+
     // ---- AUDIO_VISUAL_MATCH ----
 
     @Test
@@ -296,9 +310,238 @@ class BusinessRuleGameValidatorTest {
     }
 
     @Test
+    void matchingSidesOfAPairMustDifferNotJustInCase() throws IOException {
+        assertThat(errorPaths(GameType.MATCHING, g ->
+                ((ObjectNode) element(question(g, 0), "pairs", 1).get("right")).put("text", "Dog")))
+                .containsExactly("$.questions[0].pairs[1].right");
+    }
+
+    @Test
+    void quizRejectsAFillInTheBlankWhoseHintAlreadyContainsTheAnswer() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            ObjectNode first = question(g, 0);
+            first.put("questionText", "Điền vần còn thiếu: th... gỗ (để có từ 'than gỗ')");
+            element(first, "options", 1).put("text", "an");
+        })).containsExactly("$.questions[0].questionText");
+    }
+
+    @Test
+    void quizRejectsAudioThatSaysTheAnswerOfABlank() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> comparison(question(g, 0), "Bé chọn dấu thích hợp: 3 nhỏ hơn 8")))
+                .containsExactly("$.questions[0].audioText");
+    }
+
+    @Test
+    void quizAllowsAudioThatOnlyReadsTheQuestion() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        comparison(question(game, 0), "Bé chọn dấu thích hợp: 3 mấy 8");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizRejectsAudioThatSaysAnEqualsAnswerOrASymbolGluedToNumbers() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            ObjectNode first = question(g, 0);
+            comparison(first, "Năm bằng năm");
+            first.put("questionText", "Bé chọn dấu thích hợp: 5 ... 5");
+            first.put("correctOptionId", "c");
+        })).containsExactly("$.questions[0].audioText");
+        assertThat(errorPaths(GameType.QUIZ, g -> comparison(question(g, 0), "Bé chọn dấu: 3<8"))).containsExactly("$.questions[0].audioText");
+    }
+
+    @Test
+    void quizAllowsAudioThatReadsTheChoicesOrRepeatsANumberAlreadyInTheQuestion() throws IOException {
+        ObjectNode choices = example(GameType.QUIZ);
+        comparison(question(choices, 0), "Bé chọn dấu lớn hơn, bé hơn hay bằng cho 3 và 8");
+        assertThat(service.validate(choices).errors()).isEmpty();
+
+        ObjectNode number = example(GameType.QUIZ);
+        ObjectNode first = question(number, 0);
+        first.put("questionText", "Số liền trước của 4 là ...");
+        first.put("audioText", "Số liền trước của 4 là số mấy?");
+        element(first, "options", 0).put("text", "5");
+        element(first, "options", 1).put("text", "3");
+        element(first, "options", 2).put("text", "4");
+        first.put("correctOptionId", "b");
+        assertThat(service.validate(number).errors()).isEmpty();
+    }
+
+    @Test
+    void quizRejectsANumberCardIllustrationThatIsTheAnswerOfACountingQuestion() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> counting(question(g, 0), "3 con vịt", "/assets/numbers/number-3.svg")))
+                .containsExactly("$.questions[0].imageUrl");
+    }
+
+    @Test
+    void quizRejectsTheNumberCardEvenWhenTheCountingPromptSaysQuantityOrHasNoPrompt() throws IOException {
+        // "số lượng" là câu đếm, không phải câu nhận biết chữ số; thiếu mô tả hình cũng vẫn là thẻ số lộ đáp án.
+        assertThat(errorPaths(GameType.QUIZ, g -> counting(question(g, 0), "Số lượng 3 con vịt", "/assets/numbers/number-3.svg")))
+                .containsExactly("$.questions[0].imageUrl");
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            counting(question(g, 0), "3 con vịt", "/assets/numbers/number-3.svg");
+            question(g, 0).remove("visualPrompt");
+        })).containsExactly("$.questions[0].imageUrl");
+    }
+
+    @Test
+    void quizAllowsANumberCardWhenTheQuestionIsAboutTheNumberItself() throws IOException {
+        for (String prompt : List.of("chữ số 3 to", "Số 3 màu xanh")) {
+            ObjectNode game = example(GameType.QUIZ);
+            counting(question(game, 0), prompt, "/assets/numbers/number-3.svg");
+
+            assertThat(service.validate(game).errors()).as(prompt).isEmpty();
+        }
+    }
+
+    @Test
+    void quizAllowsAnObjectIllustrationOrANumberCardThatIsNotTheAnswer() throws IOException {
+        ObjectNode object = example(GameType.QUIZ);
+        counting(question(object, 0), "3 con vịt", "/assets/animals/duck.svg");
+        assertThat(service.validate(object).errors()).isEmpty();
+
+        ObjectNode other = example(GameType.QUIZ);
+        counting(question(other, 0), "3 con vịt", "/assets/numbers/number-2.svg");
+        assertThat(service.validate(other).errors()).isEmpty();
+    }
+
+    @Test
+    void quizRejectsACountingQuestionWhoseImageShowsAnotherNumberThanTheAnswer() throws IOException {
+        // Lỗi thật ở kịch bản 001, thử nghiệm lần 5: mô tả "Hai con vịt" nhưng đáp án đúng là 3.
+        assertThat(errorPaths(GameType.QUIZ, g -> counting(question(g, 0), "Hai con vịt", "/assets/animals/duck.svg")))
+                .containsExactly("$.questions[0].correctOptionId");
+        assertThat(errorPaths(GameType.QUIZ, g -> counting(question(g, 0), "2 con vịt", "/assets/animals/duck.svg")))
+                .containsExactly("$.questions[0].correctOptionId");
+    }
+
+    @Test
+    void quizAllowsACountingQuestionWhoseImageMatchesTheAnswerOrWhoseQuestionAddsOrCompares() throws IOException {
+        ObjectNode same = example(GameType.QUIZ);
+        counting(question(same, 0), "Ba con vịt", "/assets/animals/duck.svg");
+        assertThat(service.validate(same).errors()).isEmpty();
+
+        // Có phép thêm: số trong hình không phải đáp án.
+        ObjectNode adds = example(GameType.QUIZ);
+        counting(question(adds, 0), "2 con vịt", "/assets/animals/duck.svg");
+        question(adds, 0).put("questionText", "Có 2 con vịt, thêm 1 con nữa, hỏi có bao nhiêu con vịt?");
+        assertThat(service.validate(adds).errors()).isEmpty();
+    }
+
+    /** Câu đếm với ba lựa chọn 1, 2, 3 (đúng là 3) và hình minh họa tuỳ ý. */
+    private static void counting(ObjectNode question, String visualPrompt, String imageUrl) {
+        question.put("questionText", "Có bao nhiêu con vịt?");
+        question.put("visualPrompt", visualPrompt);
+        question.put("imageUrl", imageUrl);
+        element(question, "options", 0).put("text", "1");
+        element(question, "options", 1).put("text", "2");
+        element(question, "options", 2).put("text", "3");
+        question.put("correctOptionId", "c");
+    }
+
+    /** Câu so sánh "3 ... 8" có đáp án "<" (lựa chọn b) và lời đọc cho trước. */
+    private static void comparison(ObjectNode question, String audioText) {
+        question.put("questionText", "Bé chọn dấu thích hợp: 3 ... 8");
+        question.put("audioText", audioText);
+        element(question, "options", 0).put("text", ">");
+        element(question, "options", 1).put("text", "<");
+        element(question, "options", 2).put("text", "=");
+        question.put("correctOptionId", "b");
+    }
+
+    @Test
+    void quizAllowsAskingTheRhymeOfAQuotedWordWhenThereIsNoBlank() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "Tiếng 'than' có vần gì?");
+        element(first, "options", 1).put("text", "an");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void matchingAllowsUppercaseToLowercaseOfASingleLetter() throws IOException {
+        ObjectNode game = example(GameType.MATCHING);
+        ObjectNode pair = element(question(game, 0), "pairs", 1);
+        ((ObjectNode) pair.get("left")).put("text", "Ă");
+        ((ObjectNode) pair.get("right")).put("text", "ă");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizAllowsAOneLetterBlankWhenTheHintDoesNotShowTheCompletedWord() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        ObjectNode first = question(game, 0);
+        first.put("questionText", "Điền chữ còn thiếu vào 'co...' để gọi tên con vật đang bơi");
+        element(first, "options", 1).put("text", "n");
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizAllowsTrueFalseQuestionsThatShareTheSameAnswer() throws IOException {
+        ObjectNode game = example(GameType.QUIZ);
+        for (int i = 0; i < 2; i++) {
+            element(question(game, i), "options", 0).put("text", "Đúng");
+            element(question(game, i), "options", 1).put("text", "Sai");
+            question(game, i).put("correctOptionId", "a");
+        }
+        ((ArrayNode) question(game, 0).get("options")).remove(2);
+        ObjectNode third = question(game, 1).deepCopy();
+        third.put("id", "q3");
+        third.put("questionText", "Con gà có hai chân?");
+        ((ArrayNode) game.get("questions")).add(third);
+
+        assertThat(service.validate(game).errors()).isEmpty();
+    }
+
+    @Test
+    void quizRejectsARepeatedQuestion() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            ObjectNode copy = question(g, 0).deepCopy();
+            copy.put("id", "q3");
+            ((ArrayNode) g.get("questions")).add(copy);
+        })).containsExactly("$.questions[2].questionText");
+    }
+
+    @Test
+    void quizRejectsTheSameCorrectAnswerInEveryQuestion() throws IOException {
+        assertThat(errorPaths(GameType.QUIZ, g -> {
+            element(question(g, 1), "options", 0).put("text", "3");
+            ObjectNode third = question(g, 0).deepCopy();
+            third.put("id", "q3");
+            third.put("questionText", "Có mấy con gà?");
+            ((ArrayNode) g.get("questions")).add(third);
+        })).containsExactly("$.questions");
+    }
+
+    @Test
     void matchingPairIdsMustBeDistinct() throws IOException {
         assertThat(errorPaths(GameType.MATCHING, g -> element(question(g, 0), "pairs", 1).put("pairId", "p1")))
                 .containsExactly("$.questions[0].pairs[1].pairId");
+    }
+
+    @Test
+    void matchingAcceptsImageOnlySidesWithDifferentPictures() throws IOException {
+        // Vế chỉ có hình: không được coi là trùng nhau (khoá theo từ khoá hình) và không so "cùng chữ" khi vế không có chữ.
+        assertThat(allErrorPaths(GameType.MATCHING, g -> {
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 0).get("left"), "apple");
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 1).get("right"), "dog");
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 2).get("right"), "cat");
+        })).isEmpty();
+    }
+
+    @Test
+    void matchingImageOnlySidesWithTheSamePictureAreDuplicates() throws IOException {
+        assertThat(errorPaths(GameType.MATCHING, g -> {
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 1).get("right"), "dog");
+            imageOnly((ObjectNode) element(question(g, 0), "pairs", 2).get("right"), "Dog");
+        })).containsExactly("$.questions[0].pairs[2].right");
+    }
+
+    private static void imageOnly(ObjectNode side, String visualPrompt) {
+        side.removeAll();
+        side.put("visualPrompt", visualPrompt);
     }
 
     // ---- MEMORY_CARD ----
@@ -344,6 +587,13 @@ class BusinessRuleGameValidatorTest {
                 .containsExactly("$.questions[0].items[1].id");
     }
 
+    @Test
+    void dragDropZoneIdsMustBeDistinct() throws IOException {
+        // z2 biến mất nên item i2 (nhắm z2) cũng báo lỗi; lỗi chính cần kiểm là id trùng của vùng thả.
+        assertThat(errorPaths(GameType.DRAG_DROP, g -> element(question(g, 0), "dropZones", 1).put("id", "z1")))
+                .containsExactlyInAnyOrder("$.questions[0].dropZones[1].id", "$.questions[0].items[1].targetZoneId");
+    }
+
     // ---- ORDERING ----
 
     @Test
@@ -362,6 +612,23 @@ class BusinessRuleGameValidatorTest {
     void orderingStepTextsMustBeDistinct() throws IOException {
         assertThat(errorPaths(GameType.ORDERING, g -> element(question(g, 0), "steps", 1).put("text", "gieo hạt")))
                 .containsExactly("$.questions[0].steps[1].text");
+    }
+
+    @Test
+    void orderingStepIdsMustBeDistinct() throws IOException {
+        assertThat(errorPaths(GameType.ORDERING, g -> element(question(g, 0), "steps", 1).put("id", "s1")))
+                .containsExactly("$.questions[0].steps[1].id");
+    }
+
+    @Test
+    void orderingAcceptsImageOnlyStepsWithDifferentPictures() throws IOException {
+        assertThat(allErrorPaths(GameType.ORDERING, g -> {
+            for (int i = 0; i < 3; i++) {
+                ObjectNode step = element(question(g, 0), "steps", i);
+                step.remove("text");
+                step.put("visualPrompt", List.of("seed", "watering can", "tree").get(i));
+            }
+        })).isEmpty();
     }
 
     // ---- VISUAL_CLOZE ----

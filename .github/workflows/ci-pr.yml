@@ -1,8 +1,14 @@
-# ci-pr: chạy trên mỗi PR nhắm vào main. 3 job độc lập, chạy song song.
-# - backend-test: 447 unit test + AigameBackendApplicationTests (khởi động thật, chạy Flyway trên Supabase thật
-#   của dự án — cần 5 secret bên dưới) + JaCoCo (chặn nếu LINE coverage < 70%, xem backend/pom.xml).
-# - frontend-build: lint (oxlint) + test (Vitest) + build (gồm type-check TypeScript).
+# ci-pr: chạy trên mỗi PR nhắm vào main hoặc dev. 4 job độc lập, chạy song song.
+# - backend-test: toàn bộ test backend (unit test, ArchitectureRulesTest, AigameBackendApplicationTests) + JaCoCo
+#   (chặn nếu LINE coverage < 70%, xem backend/pom.xml). AigameBackendApplicationTests khởi động context trên H2 trong
+#   bộ nhớ (profile test: Flyway tắt, ddl-auto none). Migration và entity khớp schema được kiểm trên Postgres thật bằng
+#   Testcontainers (PostgresMigrationTest, GameCurriculumReviewPersistenceTest; cần Docker của runner, kéo image
+#   pgvector/pgvector:pg17). Các test *LiveTest gọi DB/AI thật chỉ chạy khi đặt biến RUN_LIVE_*. TeacherFlowVerificationTest chạy luồng giáo
+#   viên qua HTTP với AI giả (H2, schema do Hibernate tạo), bằng chứng tải lên artifact verify-flow-evidence.
+# - frontend-build: lint (oxlint) + ranh giới import (dependency-cruiser) + test (Vitest) + build (gồm type-check TypeScript).
 # - secret-scan: Gitleaks quét toàn bộ diff của PR, tìm secret bị commit nhầm.
+# - docs-scripts: log AI không quá dài và đúng định dạng, migration Flyway không bị sửa so với base, cấu hình dùng
+#   chung không có giá trị nguy hiểm, và docs/openapi/INDEX.md còn mới.
 #
 # Còn thiếu so với sơ đồ CI/CD gốc (để làm sau, cần thêm tài khoản/hạ tầng):
 # - SonarCloud (cần tài khoản) — khi có, gộp luôn phần "lint backend" vào đó.
@@ -12,7 +18,7 @@ name: ci-pr
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   backend-test:
@@ -22,38 +28,44 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: "21"
           cache: maven
 
-      - name: Run tests (unit test + Layer 1-3 + khởi động thật trên Supabase)
+      - name: Run tests (unit test + Layer 1-3 + ArchUnit + khởi động context trên H2)
         env:
           DB_URL: ${{ secrets.DB_URL }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-        # PR của Dependabot không nhận Actions secret nên không kết nối được Supabase; chỉ bỏ test khởi động thật,
-        # không thêm secret DB cho Dependabot vì code của gói bên thứ ba chạy trong job này.
-        run: |
-          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
-            ./mvnw --batch-mode test '-Dtest=!AigameBackendApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
-          else
-            ./mvnw --batch-mode test
-          fi
+        # PR của Dependabot không nhận Actions secret; không thêm secret cho Dependabot vì code của gói bên thứ ba chạy
+        # trong job này. Không cần loại test nào: mọi test không gắn RUN_LIVE_* chạy trên H2 (profile test) hoặc trên
+        # Postgres của Testcontainers (đè DB_* bằng property test, không chạm Supabase). Đã kiểm khi không có secret nào
+        # (không biến DB_*/JWT_SECRET/OPENAI_API_KEY, không backend/.env): 997 test xanh, ngày 2026-11-15.
+        run: ./mvnw --batch-mode test
 
       - name: Upload JaCoCo coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: jacoco-report
           path: backend/target/site/jacoco
           retention-days: 14
+
+      # Bằng chứng từng bước của TeacherFlowVerificationTest (luồng giáo viên qua HTTP, AI giả, token đã che).
+      - name: Upload verify-flow evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verify-flow-evidence
+          path: backend/target/verify-evidence
+          retention-days: 14
+          if-no-files-found: warn
 
   frontend-build:
     name: Frontend lint & build
@@ -62,9 +74,9 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24.22.1"
           cache: npm
@@ -72,19 +84,50 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      # Ranh giới import (frontend/.dependency-cruiser.cjs): vòng import, trang chỉ từ App, tầng đáy/dữ liệu không phụ
+      # thuộc UI, games/ chỉ là renderer, không import test hay devDependency vào code chạy thật.
+      - run: npm run depcruise
       # Chỉ trên CI: giới hạn số luồng vitest (máy chạy CI ít nhân nên nhiều luồng làm test thời gian chập chờn, xem mục Nợ và rủi ro trong "docs/wiki/Kế hoạch và việc còn lại.md").
       # Chạy cục bộ vẫn dùng mặc định của vite.config.ts.
       - run: npm run test -- --maxWorkers=2
       - run: npm run build
 
+  docs-scripts:
+    name: Log AI và chỉ mục OpenAPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          # check-migrations cần lịch sử để tìm merge-base với nhánh base.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.22.1"
+
+      # Lỗi ở đây nghĩa là quên chạy: node scripts/ai-log/rotate.mjs hoặc node scripts/openapi/build-index.mjs
+      - run: node scripts/ai-log/rotate.mjs --check
+      - run: node scripts/ai-log/check-ai-usage-log.mjs
+      - run: node scripts/db/check-migrations.mjs --base "origin/${{ github.base_ref }}"
+      - run: node scripts/hooks/check-config.mjs --tracked
+      # Thêm/đổi endpoint mà quên cập nhật docs/FEATURE-MAP.md, hoặc trích dẫn trỏ tới file đã xoá, thì đỏ.
+      - run: node scripts/verify/check-feature-map.mjs
+      # Controller và openapi.yaml lệch nhau (endpoint thiếu trong spec, x-status sai) thì đỏ: spec trước, code sau.
+      - run: node scripts/openapi/compare-endpoints.mjs --strict
+      # Mọi test script do git theo dõi (test mới tự được chạy; trước đây danh sách viết tay chỉ chạy 5/22 file).
+      # shortcut: tạm loại extract-srs/extract-uc vì lỗi thời so với docs/srs (KNOWN-GAPS #18), bỏ loại trừ khi sửa xong.
+      - run: >-
+          node --test $(git ls-files 'scripts/*.test.mjs' '.claude/hooks/*.test.mjs'
+          | grep -v -e 'ai-review/extract-srs' -e 'ai-review/extract-uc')
+
   secret-scan:
     name: Secret scan (Gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
 
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -67,7 +67,7 @@ public final class GameTestFixtures {
 
     /** Luật Layer 2 của cả 10 loại game (SPOT_THE_TARGET không có luật riêng, xem {@code AbstractGameRule}). */
     public static List<AbstractGameRule<?, ?>> rules() {
-        return List.of(new QuizRule(), new AudioVisualMatchRule(), new OddOneOutRule(), new WordScrambleRule(),
+        return List.of(new QuizRule(), new AudioVisualMatchRule(), new OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new WordScrambleRule(),
                 new MatchingRule(), new MemoryCardRule(), new DragDropRule(), new OrderingRule(), new VisualClozeRule());
     }
 
@@ -86,11 +86,11 @@ public final class GameTestFixtures {
     /** Factory Method của cả 10 loại game, dùng chung một nguồn ngẫu nhiên để xáo trộn lặp lại được khi test. */
     public static GameDslFactoryRegistry factoryRegistry(RandomGenerator random) {
         return new GameDslFactoryRegistry(List.of(
-                new QuizGameDslFactory(random), new AudioVisualMatchGameDslFactory(random),
-                new OddOneOutGameDslFactory(random), new SpotTheTargetGameDslFactory(random),
-                new WordScrambleGameDslFactory(random), new MatchingGameDslFactory(random),
-                new MemoryCardGameDslFactory(random), new DragDropGameDslFactory(random),
-                new OrderingGameDslFactory(random), new VisualClozeGameDslFactory(random)));
+                new QuizGameDslFactory(random, GameAssetCatalogFixture.ASSETS), new AudioVisualMatchGameDslFactory(random, GameAssetCatalogFixture.ASSETS, new com.aigameplatform.backend.service.media.NotoEmojiCatalog()),
+                new OddOneOutGameDslFactory(random, GameAssetCatalogFixture.ASSETS, new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new SpotTheTargetGameDslFactory(random, GameAssetCatalogFixture.ASSETS),
+                new WordScrambleGameDslFactory(random, GameAssetCatalogFixture.ASSETS), new MatchingGameDslFactory(random, GameAssetCatalogFixture.ASSETS),
+                new MemoryCardGameDslFactory(random, GameAssetCatalogFixture.ASSETS), new DragDropGameDslFactory(random, GameAssetCatalogFixture.ASSETS),
+                new OrderingGameDslFactory(random, GameAssetCatalogFixture.ASSETS), new VisualClozeGameDslFactory(random, GameAssetCatalogFixture.ASSETS)));
     }
 
     /** Strategy của cả 10 loại game. */

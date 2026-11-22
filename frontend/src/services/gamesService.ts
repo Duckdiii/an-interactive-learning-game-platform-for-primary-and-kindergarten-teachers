@@ -1,6 +1,6 @@
 import { getGames, postGenerateGame } from '../api/gamesApi'
 import { isMock } from '../config/mockMode'
-import type { GameResponse } from '../types/game-response.types'
+import type { AnyGameResponse } from '../types/game-response.types'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
 import { GenerateBlockedError } from '../utils/generateErrors'
 import { MAX_GAMES_PER_REQUEST } from '../utils/generateRequest'
@@ -20,10 +20,10 @@ export async function listGames(filters: GameFilters): Promise<GameSummary[]> {
 
 // Kết quả RIÊNG của từng loại game đã chọn: một loại lỗi không làm mất game của loại khác.
 export type CreateGameOutcome =
-  | { ok: true; gameType: string; game: GameResponse }
+  | { ok: true; gameType: string; game: AnyGameResponse }
   | { ok: false; gameType: string; error: unknown }
 
-function generateOne(request: GenerateGameRequest, signal?: AbortSignal): Promise<GameResponse> {
+function generateOne(request: GenerateGameRequest, signal?: AbortSignal): Promise<AnyGameResponse> {
   // Nhóm "ai" đang mô phỏng thì dùng AI giả lập. Game mô phỏng nằm trong kho mô phỏng nên nhóm games và editor phải mô phỏng cùng.
   if (isMock('ai')) return mockGenerateGame(request, signal)
 

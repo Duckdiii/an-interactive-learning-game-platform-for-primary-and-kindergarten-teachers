@@ -2,6 +2,7 @@ import { viText } from '../../constants/viText'
 import PlayButton from '../components/PlayButton'
 import { feedbackRules } from '../policies/feedback'
 import { useUiProfile } from '../profile/useUiProfile'
+import { ConfettiEffect } from '../../games/common/ConfettiEffect'
 import type { ResultProps } from './types'
 
 const STREAK_MIN = 2
@@ -12,6 +13,7 @@ export default function StudentResult({ nickname, correctCount, total, score, be
 
   return (
     <main data-band="hocSinh" className="grid min-h-screen place-items-start bg-play-page play-safe-x play-safe-y text-center text-play-ink md:place-items-center">
+      <ConfettiEffect active={correctCount > 0} />
       <section className="flex w-full min-w-0 flex-col items-center gap-3 md:max-w-md md:rounded-2xl md:border md:border-play-outline md:bg-play-surface md:p-8">
         <p className="text-play-ink-soft">{nickname}</p>
         <h1 className="text-3xl font-bold">{viText.player.finishedTitle}</h1>

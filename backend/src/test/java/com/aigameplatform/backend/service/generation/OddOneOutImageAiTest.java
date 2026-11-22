@@ -28,7 +28,7 @@ class OddOneOutImageAiTest {
         assertThat(output.valid()).isTrue();
         var request = new GameDslRequest("Trái cây", Subject.VIETNAMESE, GradeLevel.GRADE_1,
                 null, null, VisualClozeMode.IMAGE, null, null);
-        OddOneOutGameDsl game = new OddOneOutGameDslFactory(new Random(4)).createImage(output.output(), request);
+        OddOneOutGameDsl game = new OddOneOutGameDslFactory(new Random(4), com.aigameplatform.backend.service.testsupport.GameAssetCatalogFixture.ASSETS, new com.aigameplatform.backend.service.media.NotoEmojiCatalog()).createImage(output.output(), request);
         assertThat(game.mode()).isEqualTo(OddOneOutMode.IMAGE);
         var question = game.questions().getFirst();
         assertThat(question.questionText()).isEqualTo("Hình nào không phải trái cây?");

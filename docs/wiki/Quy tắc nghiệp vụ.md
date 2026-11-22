@@ -1,6 +1,6 @@
 # Quy tắc nghiệp vụ
 
-Nguồn: `docs/srs/FLD.md`, `docs/srs/FR-summary.md`, `docs/srs/NFR.md`, các file UC; mục 3.1.1 ở `docs/SRS-full.md`.
+Nguồn: `docs/srs/FLD.md`, `docs/srs/FR-summary.md`, `docs/srs/NFR.md`, các file UC; mục 3.1.1 ở `docs/srs/SRS-full.md`.
 Cập nhật: 2026-11-02
 
 Tra nhanh các con số. Khi viết code hay test, đối chiếu lại nguồn và contract, xem [[wiki/README|quy tắc wiki]].

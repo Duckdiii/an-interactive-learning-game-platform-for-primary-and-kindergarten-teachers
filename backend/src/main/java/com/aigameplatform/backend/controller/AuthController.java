@@ -1,15 +1,19 @@
 package com.aigameplatform.backend.controller;
 
 import com.aigameplatform.backend.config.OpenApiConfig;
+import com.aigameplatform.backend.dto.request.ForgotPasswordRequest;
 import com.aigameplatform.backend.dto.request.LoginRequest;
 import com.aigameplatform.backend.dto.request.RegisterRequest;
+import com.aigameplatform.backend.dto.request.ResetPasswordRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
 import com.aigameplatform.backend.dto.response.AuthResponse;
+import com.aigameplatform.backend.dto.response.MessageResponse;
 import com.aigameplatform.backend.dto.response.RegisterResponse;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.security.RefreshCookieFactory;
 import com.aigameplatform.backend.service.AuthResult;
 import com.aigameplatform.backend.service.AuthService;
+import com.aigameplatform.backend.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,17 +28,33 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Auth", description = "Đăng ký, đăng nhập, làm mới token, đăng xuất")
+@Tag(name = "Auth", description = "Đăng ký, đăng nhập, làm mới token, đăng xuất, quên/đặt lại mật khẩu")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
     private final RefreshCookieFactory refreshCookieFactory;
 
-    public AuthController(AuthService authService, RefreshCookieFactory refreshCookieFactory) {
+    public AuthController(
+            AuthService authService,
+            PasswordResetService passwordResetService,
+            RefreshCookieFactory refreshCookieFactory) {
         this.authService = authService;
+        this.passwordResetService = passwordResetService;
         this.refreshCookieFactory = refreshCookieFactory;
+    }
+
+    @PostMapping("/forgot-password")
+    public ApiResponse<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ApiResponse.ok(new MessageResponse(passwordResetService.forgotPassword(request.email())));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.token(), request.newPassword());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/register")
@@ -64,7 +84,7 @@ public class AuthController {
 
     private ResponseEntity<ApiResponse<AuthResponse>> withRefreshCookie(AuthResult result) {
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookieFactory.create(result.refreshToken()).toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookieFactory.create(result.refreshToken(), result.refreshTtl()).toString())
                 .cacheControl(CacheControl.noStore())
                 .body(ApiResponse.ok(result.response()));
     }

@@ -1,6 +1,6 @@
 # Trải nghiệm cho trẻ
 
-Nguồn: `docs/Dinh_huong_de_tai.md` mục 6; `docs/SRS-full.md` mục 3.2.1, 3.2.2.
+Nguồn: `docs/Dinh_huong_de_tai.md` mục 6; `docs/srs/SRS-full.md` mục 3.2.1, 3.2.2.
 Cập nhật: 2026-10-31
 
 Yêu cầu của thầy Thanh: độ mượt, sức hấp dẫn, đồ họa phải hơn web tool, nên phần này cần mục tiêu và cách đo cụ thể. Trẻ Mầm non chưa đọc được, nên hình ảnh và giọng đọc là kênh chính.

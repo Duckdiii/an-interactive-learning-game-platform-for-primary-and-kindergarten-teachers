@@ -6,7 +6,7 @@ import { viText } from '../../constants/viText'
 import { useGame } from '../../hooks/useGame'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { ROUTES, roomJoinPath } from '../../routes/paths'
-import type { GameResponse } from '../../types/game-response.types'
+import { isCpfGameResponse, type GameResponse } from '../../types/game-response.types'
 import PlayerLoading from '../components/PlayerLoading'
 import { PROFILES } from '../profile/profiles'
 import { getPlayableRenderer } from '../renderers'
@@ -100,7 +100,7 @@ export default function RoomHostPage() {
   if (!isRoomAvailable()) return <Message title={text.unavailable} />
   if (query.isPending) return <PlayerLoading />
   if (!query.data) return <Message title={viText.present.notFound} />
-  if (!getPlayableRenderer(query.data.gameType)) return <Message title={viText.editor.publish.cards.room.unsupported} />
+  if (isCpfGameResponse(query.data) || !getPlayableRenderer(query.data.gameType)) return <Message title={viText.editor.publish.cards.room.unsupported} />
 
   return <HostedRoomScreen key={query.data.gameId} game={query.data} />
 }

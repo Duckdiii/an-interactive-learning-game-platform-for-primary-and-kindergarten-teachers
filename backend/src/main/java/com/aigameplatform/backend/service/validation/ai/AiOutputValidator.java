@@ -59,7 +59,7 @@ public class AiOutputValidator {
         SchemaRegistry registry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12,
                 builder -> builder.schemaRegistryConfig(
                         SchemaRegistryConfig.builder().pathType(PathType.JSON_PATH).build()));
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             schemas.put(type, registry.getSchema(AiOutputSchemas.rawJson(type), InputFormat.JSON));
         }
         visualClozeImageSchema = registry.getSchema(AiOutputSchemas.visualClozeImageRawJson(), InputFormat.JSON);
@@ -85,6 +85,9 @@ public class AiOutputValidator {
             return failed("Image mode is not supported for this game type");
         }
         Schema schema = imageMode ? (type == GameType.ODD_ONE_OUT ? oddImageSchema : visualClozeImageSchema) : schemas.get(type);
+        if (schema == null) {
+            return failed("Loại game " + type + " không có dạng đầu ra AI theo DSL v1.0.0");
+        }
         List<Error> schemaErrors = schema.validate(json);
         if (!schemaErrors.isEmpty()) {
             return new AiOutputReport(schemaErrors.stream()

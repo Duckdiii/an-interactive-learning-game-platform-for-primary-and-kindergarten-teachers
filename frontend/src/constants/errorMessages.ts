@@ -25,10 +25,13 @@ export const ERROR_MESSAGES = new Map<string, string>([
     'Nội dung vừa được thay đổi ở nơi khác. Hãy tải lại trang rồi thử lại.',
   ],
   ['RATE_LIMITED', 'Bạn thao tác quá nhanh. Hãy chờ một lúc rồi thử lại.'],
-  ['ACCOUNT_LOCKED', 'Tài khoản này đang bị khóa. Hãy liên hệ quản trị viên.'],
+  [
+    'ACCOUNT_LOCKED',
+    'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.',
+  ],
   [
     'LOGIN_TEMPORARILY_LOCKED',
-    'Bạn đã nhập sai quá nhiều lần. Hãy thử đăng nhập lại sau 15 phút.',
+    'Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau 15 phút.',
   ],
   [
     'CONTENT_NOT_AGE_APPROPRIATE',

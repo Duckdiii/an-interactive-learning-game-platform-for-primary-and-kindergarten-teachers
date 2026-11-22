@@ -13,6 +13,11 @@ import ResponsiveStage from '../common/ResponsiveStage'
 import { useFeedback } from '../common/useFeedback'
 import { useIllustration } from '../common/useIllustration'
 import { useQuestionAudio } from '../common/useQuestionAudio'
+import { useAnimationTime } from '../common/useAnimationTime'
+import { objectKindForTheme, illustrationCount } from '../common/optionVisual'
+import { usePresentation } from '../../player/theme/PresentationContext'
+import SceneBackground, { QuestionPanel } from '../common/SceneBackground'
+import { useTheme } from '../../player/theme/useTheme'
 import { QUESTION_FONT_SIZE, QUESTION_TEXT_WIDTH, computeQuizLayout } from './quizLayout'
 
 /**
@@ -58,6 +63,14 @@ export default function QuizRenderer(props: QuizRendererProps) {
   const { showFeedback } = useFeedback()
   const { image: illustration, reserveSpace: hasIllustration } = useIllustration(question.imageUrl)
   const playAudio = useQuestionAudio(question.audioUrl)
+  const theme = useTheme()
+  const time = useAnimationTime(mode !== 'review')
+  // Lúc bắt đầu phản hồi đúng/sai (theo đồng hồ hoạt ảnh) để vật nảy lên hoặc lắc nhẹ đúng một lần.
+  const [reactedAt, setReactedAt] = useState<number | null>(null)
+  const timeRef = useRef(time)
+  useEffect(() => {
+    timeRef.current = time
+  }, [time])
 
   // Đo chiều cao thật của câu hỏi (Konva wrap theo từ nên số dòng khó ước lượng). Đo bằng useMemo,
   // không dùng setState trong effect; đo không được thì layout tự quay về phép ước lượng.
@@ -71,12 +84,17 @@ export default function QuizRenderer(props: QuizRendererProps) {
     [question.questionText],
   )
 
+  // Vật và bố cục theo cách trình bày của game; chưa có nơi cung cấp (vd. xem trước cũ) thì theo thế giới và lưới cũ.
+  const presentation = usePresentation()
+  const optionKind = presentation?.carrier ?? objectKindForTheme(theme.id)
+  const optionLayout = presentation?.layout ?? 'row'
   const layout = computeQuizLayout({
     hasIllustration,
     hasAudio: Boolean(question.audioUrl),
     optionCount: question.options.length,
     questionLength: question.questionText.length,
     measuredQuestionHeight,
+    optionLayout,
   })
 
   // Component có thể được cha tái sử dụng cho câu khác hoặc đổi mode mà không unmount (ví dụ GV bấm
@@ -92,6 +110,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
     setLocked(next.locked)
     setRevealCorrect(next.revealCorrect)
     setRevealedCorrectId(null)
+    setReactedAt(null)
   }
 
   // Đếm số lần "thế hệ" (tăng mỗi lần đổi câu/mode) để huỷ kết quả `onAnswered` cũ nếu nó resolve
@@ -111,6 +130,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
     if (props.mode === 'preview') {
       const isCorrect = optionId === props.question.correctOptionId
       setRevealCorrect(true)
+      setReactedAt(timeRef.current)
       showFeedback(isCorrect)
       // Kiểu `void` không chặn được cha truyền hàm async; bọc lại để Promise bị reject không thành
       // unhandled rejection.
@@ -130,6 +150,7 @@ export default function QuizRenderer(props: QuizRendererProps) {
       if (typeof verdict?.isCorrect === 'boolean') {
         setRevealedCorrectId(verdict.correctAnswer?.selectedOptionId ?? null)
         setRevealCorrect(true)
+        setReactedAt(timeRef.current)
         showFeedback(verdict.isCorrect)
       }
     } catch (error) {
@@ -168,10 +189,12 @@ export default function QuizRenderer(props: QuizRendererProps) {
   return (
     <ResponsiveStage width={STAGE_WIDTH} height={layout.stageHeight}>
       <Layer>
+        <SceneBackground height={layout.stageHeight} time={time} />
         {layout.illustrationY !== null && (
-          <QuestionIllustration image={illustration} y={layout.illustrationY} />
+          <QuestionIllustration image={illustration} y={layout.illustrationY} count={illustrationCount(question.visualPrompt, question.imageUrl)} />
         )}
 
+        <QuestionPanel y={layout.questionY} height={layout.questionHeight} />
         <Text
           text={question.questionText}
           fontSize={QUESTION_FONT_SIZE}
@@ -198,6 +221,11 @@ export default function QuizRenderer(props: QuizRendererProps) {
             isCorrect={revealCorrect && option.id === correctId}
             locked={locked}
             onClick={() => handleSelect(option.id)}
+            kind={optionKind}
+            layout={optionLayout}
+            count={question.options.length}
+            time={time}
+            reactedAt={reactedAt}
           />
         ))}
       </Layer>
