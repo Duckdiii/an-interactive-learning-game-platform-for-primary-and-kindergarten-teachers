@@ -3,6 +3,7 @@ package com.aigameplatform.backend.repository;
 import com.aigameplatform.backend.entity.RefreshToken;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -26,4 +27,10 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
     @Modifying
     @Query("update RefreshToken r set r.revokedAt = :now where r.familyId = :familyId and r.revokedAt is null")
     int revokeFamily(@Param("familyId") String familyId, @Param("now") LocalDateTime now);
+
+    // Đặt lại mật khẩu: các phiên (family) còn token chưa thu hồi của tài khoản, để lockFamily + revokeFamily từng
+    // phiên. Sắp xếp để mọi giao dịch khóa các family theo cùng thứ tự, tránh deadlock giữa hai lần đặt lại.
+    @Query("select distinct r.familyId from RefreshToken r where r.teacher.id = :teacherId and r.revokedAt is null "
+            + "order by r.familyId")
+    List<String> findActiveFamilyIds(@Param("teacherId") String teacherId);
 }

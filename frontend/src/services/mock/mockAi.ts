@@ -4,6 +4,8 @@ import type { RegeneratedQuestion } from '../../types/regenerate.types'
 import { deepEqual } from '../../utils/gameContent'
 import { hasPhrase, toMatchText } from '../../utils/phraseMatch'
 import { buildMockGameContents } from './gameFixtures'
+import { parsePedagogicalConstraints } from '../pipeline/constraintParser'
+import { generateMathQuestions } from '../pipeline/dynamicMathGenerator'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 import { getMockGame, isMockGameLocked } from './mockGames'
 import { findMockImages } from './mockMedia'
@@ -50,10 +52,23 @@ export function resetMockAi() {
 
 // Phần NỘI DUNG của câu (bỏ mã thẻ, thời gian, điểm do giáo viên đặt và ảnh, giọng đọc do AI tự gán sau khi làm lại): câu đang hiện đã được gán ảnh và giọng nên so cả hai thì
 // không bao giờ nhận ra nó trùng câu mẫu gốc.
+function stripMedia(val: unknown): unknown {
+  if (Array.isArray(val)) return val.map(stripMedia)
+  if (typeof val === 'object' && val !== null) {
+    const next: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(val)) {
+      if (k === 'imageUrl' || k === 'audioUrl') continue
+      next[k] = stripMedia(v)
+    }
+    return next
+  }
+  return val
+}
+
 const contentOf = (question: QuestionDsl) => {
   const { id: _id, timeLimitSeconds: _time, points: _points, imageUrl: _image, audioUrl: _audio, ...rest } = question
 
-  return rest
+  return stripMedia(rest)
 }
 
 function collectStrings(value: unknown): string[] {
@@ -66,6 +81,36 @@ function collectStrings(value: unknown): string[] {
 
 /** Chọn một câu cùng loại KHÁC câu hiện tại trong bộ câu mẫu, xoay vòng theo số lần làm lại; luôn giữ nguyên `id` của thẻ. */
 function pickReplacement(request: MockRegenerateRequest): QuestionDsl {
+  if (request.gameType === 'QUIZ' && request.feedback?.trim()) {
+    const constraints = parsePedagogicalConstraints(request.feedback)
+    const hasMathIntent =
+      constraints.mathType !== 'COUNT' ||
+      /cộng|trừ|nhân|chia|toán|số|phép|chẵn|lẻ|so sánh|bé|lớn|\+|-|\*|\/|x/i.test(request.feedback)
+
+    if (hasMathIntent) {
+      const [mq] = generateMathQuestions(constraints, 1)
+      const optionsList = [mq.correctAnswer, ...mq.distractors]
+      const shuffled = optionsList.map((val) => String(val)).sort(() => Math.random() - 0.5)
+      const unique = Array.from(new Set(shuffled))
+      while (unique.length < 2) unique.push(String(Number(unique[0]) + 1))
+      const letters = ['a', 'b', 'c', 'd']
+      const options = unique.slice(0, 4).map((text, i) => ({ id: letters[i], text }))
+      const correctOption = options.find((opt) => opt.text === String(mq.correctAnswer)) ?? options[0]
+
+      return {
+        id: request.current.id,
+        timeLimitSeconds: request.current.timeLimitSeconds,
+        points: request.current.points,
+        questionText: mq.questionText,
+        options,
+        correctOptionId: correctOption.id,
+        audioText: mq.questionText,
+        imageUrl: mq.spriteUrl,
+        visualPrompt: mq.spriteName,
+      } as QuestionDsl
+    }
+  }
+
   const pool = buildMockGameContents().find((game) => game.gameType === request.gameType)?.questions ?? []
   const different = pool.filter((question) => !deepEqual(contentOf(question), contentOf(request.current)))
   const candidates = different.length > 0 ? different : pool
@@ -97,7 +142,7 @@ function decorate(question: QuestionDsl, voice: VoiceGender): QuestionDsl {
   const next: QuestionDsl = { ...question }
   const image = question.visualPrompt ? findMockImages(question.visualPrompt)[0] : undefined
 
-  if (image) next.imageUrl = image.url
+  if (image && !next.imageUrl) next.imageUrl = image.url
   if (question.audioText) next.audioUrl = `/mock/q1.wav?voice=${voice}`
 
   return next

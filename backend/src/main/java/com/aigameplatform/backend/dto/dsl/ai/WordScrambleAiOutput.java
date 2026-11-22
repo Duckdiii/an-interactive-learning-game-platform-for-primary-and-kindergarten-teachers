@@ -5,5 +5,7 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record WordScrambleAiOutput(
-        List<WordScrambleAiQuestion> questions) implements AiGameOutput {
+        List<WordScrambleAiQuestion> questions,
+        String title,
+        AiPresentation presentation) implements AiGameOutput {
 }

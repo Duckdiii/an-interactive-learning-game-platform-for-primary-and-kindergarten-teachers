@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class OddOneOutRule extends AbstractGameRule<OddOneOutGameDsl, OddOneOutQuestionDsl> {
 
-    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog catalog =
-            new com.aigameplatform.backend.service.media.NotoEmojiCatalog();
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog catalog;
 
-    public OddOneOutRule() {
+    public OddOneOutRule(com.aigameplatform.backend.service.media.NotoEmojiCatalog catalog) {
         super(GameType.ODD_ONE_OUT, OddOneOutGameDsl.class);
+        this.catalog = catalog;
     }
 
     @Override

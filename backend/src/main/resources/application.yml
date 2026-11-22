@@ -4,6 +4,20 @@ spring:
   application:
     name: aigame-backend
 
+  # SMTP cho thư đặt lại mật khẩu; chỉ dùng khi app.mail.enabled=true (MAIL_ENABLED).
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      # Relay SMTP nội bộ không cần đăng nhập thì đặt MAIL_SMTP_AUTH=false.
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+
   datasource:
     # Supabase (managed PostgreSQL) — use Session Pooler or Direct Connection.
     # Do NOT use the Transaction Pooler (port 6543): it is not compatible with
@@ -16,6 +30,9 @@ spring:
       maximum-pool-size: 5
       # Supabase installs pgvector in the extensions schema; LangChain4j needs it on the search path.
       connection-init-sql: SET search_path TO public, extensions
+      data-source-properties:
+        # Driver gộp các lệnh insert cùng loại trong một lô thành một câu multi-row: ít lượt đi về Supabase hơn.
+        reWriteBatchedInserts: true
 
   jpa:
     hibernate:
@@ -24,6 +41,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Mỗi lượt đi về Supabase mất hàng trăm ms: lưu một game (xóa rồi ghi lại mọi câu, bảng JOINED, danh sách lựa chọn) từng
+        # tốn khoảng 100 câu lệnh lẻ. Gộp insert/update/delete theo lô và đọc các danh sách con theo lô thay vì từng câu một.
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        default_batch_fetch_size: 50
     open-in-view: false
 
   flyway:
@@ -33,9 +57,12 @@ spring:
     # baseline-version 0 makes sure V1 and V2 are still applied.
     baseline-on-migrate: true
     baseline-version: 0
+    # Mặc định của Flyway là *:future. DB dùng chung đã áp V12–V16 của nhánh feature chưa merge,
+    # nên ở máy cá nhân đặt FLYWAY_IGNORE_MIGRATION_PATTERNS=*:missing,*:future (KNOWN-GAPS #26).
+    ignore-migration-patterns: ${FLYWAY_IGNORE_MIGRATION_PATTERNS:*:future}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 # Swagger UI (/swagger-ui.html) và spec sinh từ controller (/v3/api-docs). Mặc định bật để dev xem;
 # môi trường triển khai thật đặt SWAGGER_ENABLED=false.
@@ -62,6 +89,8 @@ app:
     secret: ${JWT_SECRET}
     access-token-ttl-minutes: 15
     refresh-token-ttl-hours: 24
+    # "Ghi nhớ đăng nhập" (UC-15 luồng 3a): refresh token và cookie sống 30 ngày.
+    remember-me-refresh-token-ttl-days: 30
   auth:
     refresh-cookie:
       name: refresh_token
@@ -69,6 +98,28 @@ app:
       same-site: Strict
       # Secure cookies need HTTPS in production; browsers still accept them on http://localhost.
       secure: ${COOKIE_SECURE:true}
+    password-reset:
+      # Trang Frontend nhận ?token=...; profile prod bắt buộc PASSWORD_RESET_URL.
+      url: ${PASSWORD_RESET_URL:http://localhost:5173/reset-password}
+  mail:
+    # false (mặc định khi chạy ở máy): không gửi thư, in liên kết đặt lại mật khẩu ra log.
+    # Profile prod luôn bật (application-prod.yml).
+    enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:no-reply@localhost}
+  assets:
+    # Thử nghiệm: chữ nói tới hình A mà gắn hình B thì báo lỗi Layer 2 để AI sinh lại (retrieval + luật).
+    meaning-check:
+      enabled: ${ASSET_MEANING_CHECK_ENABLED:false}
+    # Thử nghiệm: đưa các hình có từ khóa trong yêu cầu lên đầu danh mục trong prompt.
+    shortlist:
+      enabled: ${ASSET_SHORTLIST_ENABLED:false}
+    # Tách bước gán hình riêng sau Gemini (bản đầu: tra nhãn, đồ thị khái niệm, khóa họ phong cách).
+    binder:
+      enabled: ${ASSET_BINDER_ENABLED:false}
+      mode: ${ASSET_BINDER_MODE:fill-empty}               # fill-empty | override
+      style-lock:
+        enabled: ${ASSET_STYLE_LOCK_ENABLED:true}
+        min-coverage: ${ASSET_STYLE_LOCK_MIN_COVERAGE:0.5}
   moderation:
     # Mặc định true: app từ chối khởi động nếu chưa có OPENAI_API_KEY, để không lỡ chạy với kiểm duyệt yếu.
     # Chỉ đặt MODERATION_REQUIRED=false khi chạy thử ở máy cá nhân (khi đó chỉ dùng danh sách từ cấm).
@@ -82,9 +133,13 @@ app:
   ai:
     gemini:
       api-key: ${GEMINI_API_KEY:}
-      model: ${GEMINI_MODEL:gemini-2.5-flash}
+      model: ${GEMINI_MODEL:gemini-3-flash-preview}
       game-generation:
         enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
+  generation:
+    # Rà chính tả bằng AI sau khi sinh game: thêm tới 2 lần gọi Gemini mỗi game (tốn hạn mức theo ngày của gói Gemini), nên tắt mặc định.
+    wording-review:
+      enabled: ${WORDING_REVIEW_ENABLED:false}
   curriculum-rag:
     constraints-approved-sha256: ${CURRICULUM_CONSTRAINTS_APPROVED_SHA256:}
     enabled: ${CURRICULUM_RAG_ENABLED:false}

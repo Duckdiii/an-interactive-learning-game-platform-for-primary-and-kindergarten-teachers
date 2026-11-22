@@ -44,7 +44,9 @@ vi.mock('../../games/common/useQuestionAudio', () => ({
 }))
 
 // Đáp án đúng của 3 câu mẫu: '3', '5', '9'. Chọn đáp án khác là sai.
-const [quiz, , , audioVisual, unplayable] = buildMockGameContents()
+const [quiz] = buildMockGameContents()
+const unplayable = { ...quiz, gameType: 'UNSUPPORTED' as any }
+const audioVisual = buildMockGameContents().find((content) => content.gameType === 'AUDIO_VISUAL_MATCH')!
 const asGame = (content: unknown) => ({ ...(content as object), gameId: 'g1', status: 'PUBLISHED', updatedAt: '' }) as GameResponse
 
 function renderPlay(game: GameResponse = asGame(quiz), onLeave = vi.fn()) {

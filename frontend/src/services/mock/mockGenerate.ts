@@ -41,6 +41,10 @@ export async function mockGenerateGame(request: GenerateGameRequest, signal?: Ab
   if (scenario === 'error') throw mockNetworkError()
   if (scenario === 'timeout' || failure === 'timeout') throw mockApiError(504, 'AI_GENERATION_TIMEOUT', 'Dịch vụ AI không phản hồi kịp sau khi đã thử lại.')
   if (failure === 'rateLimited') throw mockApiError(429, 'RATE_LIMITED', 'Vượt giới hạn 10 yêu cầu mỗi phút.')
+  // Game ngoài danh mục (CPF) chỉ sinh được bằng AI thật: bộ mẫu mô phỏng không có nội dung CPF.
+  if (request.gameType === 'CUSTOM') {
+    throw mockApiError(400, 'VALIDATION_ERROR', 'Trò chơi tự do cần AI thật. Hãy tắt chế độ mô phỏng (VITE_USE_MOCK) cho nhóm ai, games, editor.')
+  }
   if (failure === 'unsafe' || MOCK_UNSAFE_HINT.test(request.idea ?? '')) {
     throw mockApiError(422, 'UNSAFE_CONTENT', 'Nội dung không đạt chuẩn an toàn học đường.')
   }

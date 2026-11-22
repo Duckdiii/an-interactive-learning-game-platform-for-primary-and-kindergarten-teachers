@@ -1,6 +1,6 @@
 # Tổng quan đề tài
 
-Nguồn: `docs/Dinh_huong_de_tai.md` mục 0, 1, 9; `docs/SRS-full.md` chương 1, 2.
+Nguồn: `docs/Dinh_huong_de_tai.md` mục 0, 1, 9; `docs/srs/SRS-full.md` chương 1, 2.
 Cập nhật: 2026-11-02
 
 ## Đề tài là gì

@@ -199,7 +199,9 @@ jobs:
         if: steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'
         with:
           ref: ${{ steps.ctx.outputs.checkout_ref }}
-          fetch-depth: 1
+          # Cần đủ lịch sử để agent chạy được `git diff` với base; clone nông (depth 1) khiến commit cha thiếu, agent
+          # không lấy được diff và báo status=incomplete (PR #79).
+          fetch-depth: 0
           persist-credentials: false
 
       # Script, prompt, schema, SRS: từ nhánh base (PR) hoặc từ ref đang chạy workflow (workflow_dispatch).
@@ -259,7 +261,8 @@ jobs:
         env:
           MODE: ${{ inputs.mode || 'C' }}
           PR: ${{ steps.ctx.outputs.pr }}
-          MAX_TURNS: ${{ inputs.max_turns }}
+          # Mặc định 30: chế độ C với PR lớn dùng >15 turn và bị báo incomplete (tối đa 40).
+          MAX_TURNS: ${{ inputs.max_turns || '30' }}
           UC: ${{ steps.uc.outputs.uc }}
           ROUND: ${{ steps.pre.outputs.round }}
           BASE_SHA: ${{ steps.pre.outputs.base_sha }}

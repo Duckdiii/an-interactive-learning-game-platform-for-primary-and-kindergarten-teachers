@@ -30,7 +30,7 @@ public class GameDslSchemaRegistry {
                 builder -> builder.schemaRegistryConfig(
                         SchemaRegistryConfig.builder().pathType(PathType.JSON_PATH).build()));
         Map<GameType, Schema> v1Schemas = new EnumMap<>(GameType.class);
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             v1Schemas.put(type, load(registry, SUPPORTED_VERSION, type));
         }
         schemas.putAll(v1Schemas);

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "2.0.0",
+  "kind": "CPF",
+  "metadata": { "title": "Hứng táo số chẵn", "subject": "MATH", "gradeLevel": "GRADE_1", "topic": "Số chẵn trong phạm vi 10" },
+  "world": { "backgroundId": "bg.farm", "mascotId": "mascot.pippy" },
+  "content": {
+    "instruction": "Kéo giỏ để hứng những quả táo mang số chẵn nhé!",
+    "rounds": [
+      {
+        "id": "r1",
+        "task": "PICK_ALL",
+        "prompt": "Hứng các quả táo có số chẵn",
+        "choices": [
+          { "id": "c1", "label": "2" },
+          { "id": "c2", "label": "3" },
+          { "id": "c3", "label": "4" },
+          { "id": "c4", "label": "7" },
+          { "id": "c5", "label": "8" }
+        ]
+      },
+      {
+        "id": "r2",
+        "task": "PICK_ALL",
+        "prompt": "Hứng các quả táo có số chẵn",
+        "choices": [
+          { "id": "c1", "label": "1" },
+          { "id": "c2", "label": "6" },
+          { "id": "c3", "label": "9" },
+          { "id": "c4", "label": "10" }
+        ]
+      }
+    ]
+  },
+  "answerKey": {
+    "rounds": [
+      { "roundId": "r1", "correctChoiceIds": ["c1", "c3", "c5"] },
+      { "roundId": "r2", "correctChoiceIds": ["c2", "c4"] }
+    ]
+  },
+  "entities": [
+    {
+      "id": "apples",
+      "assetId": "fruit.apple",
+      "bindTo": "choices",
+      "placement": { "region": "TOP", "arrangement": "SCATTER" },
+      "motion": { "type": "FALL", "speed": "SLOW", "spawn": "STREAM" }
+    },
+    {
+      "id": "basket",
+      "assetId": "object.basket",
+      "placement": { "region": "BOTTOM", "arrangement": "SINGLE" },
+      "control": "DRAG_X"
+    }
+  ],
+  "rules": [
+    {
+      "on": { "type": "COLLIDE", "a": "basket", "b": "apples" },
+      "do": [
+        {
+          "type": "CHECK",
+          "onCorrect": [
+            { "type": "EFFECT", "name": "STARS", "at": "basket" },
+            { "type": "SOUND", "name": "CORRECT" },
+            { "type": "SCORE", "add": 1 }
+          ],
+          "onWrong": [
+            { "type": "EFFECT", "name": "WIGGLE", "at": "basket" },
+            { "type": "SOUND", "name": "GENTLE_WRONG" }
+          ]
+        },
+        { "type": "REMOVE", "subject": "$subject" }
+      ]
+    }
+  ]
+}

@@ -5,7 +5,10 @@ import { resolveUiProfile } from '../../../player/profile/resolveUiProfile'
 import { UiProfileProvider } from '../../../player/profile/UiProfileContext'
 import { getPlayableRenderer } from '../../../player/renderers'
 import { playerRootVars } from '../../../player/theme/playerRootVars'
-import type { GameType, QuestionDsl, Subject } from '../../../types/game-dsl.types'
+import { ThemeProvider } from '../../../player/theme/ThemeContext'
+import type { GamePresentation, GameType, PresentationCarrier, PresentationWorld, QuestionDsl, Subject } from '../../../types/game-dsl.types'
+import { PresentationProvider } from '../../../player/theme/PresentationContext'
+import { editorPresentation } from './editorPresentation'
 import GameTypeCover from '../../ui/GameTypeCover'
 import PreviewBoundary from './PreviewBoundary'
 import PreviewStage from './PreviewStage'
@@ -21,13 +24,67 @@ interface LivePreviewProps {
   total: number
   gradeLevel: string
   subject: Subject
+  topic?: string
   /** Câu đang chọn còn lỗi kiểm tra: không dựng renderer vì dữ liệu dở có thể làm nó vỡ. */
   hasIssues: boolean
+  /** Cách trình bày đã lưu (metadata.presentation); thiếu phần nào thì tự chọn giống màn chơi thử. */
+  presentation?: GamePresentation
+  /** Chuỗi riêng của game (gameId) để phần tự chọn cố định theo game. */
+  seed?: string
+  /** Giáo viên đổi thế giới hoặc vật mang đáp án: trình soạn ghi vào bản nháp nên lưu là còn. */
+  onPresentationChange?: (change: GamePresentation) => void
 }
 
 const text = viText.editor.preview
 
 const DEVICE_LABEL: Record<PreviewDevice, string> = { tv: text.tv, tablet: text.tablet, phone: text.phone }
+
+const PREVIEW_THEME_ITEMS: ReadonlyArray<{ id: string; label: string }> = [
+  { id: 'farm', label: '🌾 Nông Trại' },
+  { id: 'ocean', label: '🌊 Đại Dương' },
+  { id: 'jungle', label: '🌴 Rừng Xanh' },
+  { id: 'space', label: '🚀 Vũ Trụ' },
+]
+
+const PREVIEW_CARRIER_ITEMS: ReadonlyArray<{ id: PresentationCarrier; label: string }> = [
+  { id: 'balloon', label: '🎈 Bóng bay' },
+  { id: 'bubble', label: '🫧 Bong bóng' },
+  { id: 'planet', label: '🪐 Hành tinh' },
+  { id: 'fruit', label: '🍎 Quả' },
+  { id: 'card', label: '🃏 Thẻ' },
+  { id: 'fish', label: '🐟 Cá' },
+  { id: 'flower', label: '🌼 Hoa' },
+]
+
+function ChipGroup<T extends string>({ title, label, items, active, onSelect }: {
+  title: string
+  label: string
+  items: ReadonlyArray<{ id: T; label: string }>
+  active: string
+  onSelect: (id: T) => void
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-xs font-bold text-ink-soft shrink-0">{title}</span>
+      <div role="group" aria-label={label} className="flex flex-wrap gap-1">
+        {items.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            aria-pressed={item.id === active}
+            onClick={() => onSelect(item.id)}
+            className={[
+              'rounded-lg px-2.5 py-1 text-xs font-bold transition cursor-pointer',
+              item.id === active ? 'bg-brand text-white shadow-xs ring-1 ring-brand' : 'border border-ink/15 bg-white text-ink hover:border-brand/40',
+            ].join(' ')}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 // Đo chiều rộng khung chứa để co thiết bị (kích thước thiết kế) vừa cột. Chưa đo được (jsdom, chưa vẽ) thì giữ tỉ lệ 1.
 function useScale(designWidth: number) {
@@ -64,7 +121,6 @@ function DeviceFrame({ width, height, vars, children }: DeviceFrameProps) {
   const { ref, scale } = useScale(width)
   // Biến --play-* gắn lên chính khung này (không lên documentElement như usePlayerRootStyle) nên không đổi màu trang giáo viên.
   // Konva tự chia toạ độ chạm theo tỉ lệ getBoundingClientRect/offsetWidth nên vẫn đúng dưới CSS scale (đã thử trên trình duyệt).
-  // shortcut: chưa áp `fontSize` (fontScale) của profile vì rem tính theo gốc trang, nên chữ DOM của khung Bé nhỏ hơn trang chơi thật ~25%; Konva không ảnh hưởng.
   const style = { ...vars, width, height, transform: `scale(${scale})`, transformOrigin: 'top left' } as CSSProperties
 
   return (
@@ -87,11 +143,27 @@ function DeviceFrame({ width, height, vars, children }: DeviceFrameProps) {
 }
 
 // Cột "Bé sẽ thấy": chạy CHÍNH khung (shell) và renderer của phần chơi, thu nhỏ theo thiết bị giáo viên chọn. Chấm cục bộ, không gọi API.
-export default function LivePreview({ gameType, question, title, index, total, gradeLevel, subject, hasIssues }: LivePreviewProps) {
+export default function LivePreview({
+  gameType,
+  question,
+  title,
+  index,
+  total,
+  gradeLevel,
+  subject,
+  topic,
+  hasIssues,
+  presentation,
+  seed,
+  onPresentationChange,
+}: LivePreviewProps) {
   const [device, setDevice] = useState<PreviewDevice>(DEFAULT_PREVIEW_DEVICE)
   const profile = resolveUiProfile({ gradeLevel })
   const Renderer = getPlayableRenderer(gameType)
   const size = previewDeviceSize(gameType, device)
+  // Cùng cách chọn nền với màn chơi thử (PlayTestPanel) nên "Bé sẽ thấy" khớp với lúc chơi.
+  const { theme: resolvedTheme, presentation: resolved } = editorPresentation({ presentation, subject, gameType, topic, seed: seed ?? title })
+  const activeThemeId = resolvedTheme.id
 
   const body = () => {
     if (!question) return <p className="text-base text-ink-soft">{viText.editor.emptyQuestions}</p>
@@ -111,10 +183,14 @@ export default function LivePreview({ gameType, question, title, index, total, g
 
     return (
       <DeviceFrame width={size.width} height={size.height} vars={playerRootVars(profile).vars}>
-        {/* Dựng lại khi câu đổi hoặc được sửa: sửa form là xem trước cập nhật (một câu nên JSON.stringify đủ rẻ). */}
-        <PreviewBoundary key={`${question.id}:${JSON.stringify(question)}`}>
+        {/* Dựng lại khi câu đổi, được sửa hoặc chuyển Theme: xem trước cập nhật tức thì. */}
+        <PreviewBoundary key={`${question.id}:${JSON.stringify(question)}:${activeThemeId}:${resolved.carrier}:${resolved.layout}`}>
           <UiProfileProvider profile={profile}>
-            <PreviewStage gameType={gameType} Renderer={Renderer} question={question} subject={subject} title={title} index={index} total={total} />
+            <ThemeProvider theme={resolvedTheme}>
+              <PresentationProvider presentation={resolved}>
+                <PreviewStage gameType={gameType} Renderer={Renderer} question={question} subject={subject} title={title} index={index} total={total} />
+              </PresentationProvider>
+            </ThemeProvider>
           </UiProfileProvider>
         </PreviewBoundary>
       </DeviceFrame>
@@ -131,6 +207,17 @@ export default function LivePreview({ gameType, question, title, index, total, g
           </span>
         ) : null}
       </div>
+
+      {/* Đổi nhanh thế giới và vật mang đáp án; trình soạn lưu vào bản nháp nên màn chơi thử đổi theo và lưu là còn. */}
+      <div className="space-y-2 pb-1">
+        <ChipGroup title="🎨 Thế giới:" label="Chuyển đổi thế giới game" items={PREVIEW_THEME_ITEMS} active={activeThemeId}
+          onSelect={(world) => onPresentationChange?.({ world: world as PresentationWorld })} />
+        {gameType === 'QUIZ' ? (
+          <ChipGroup title="🎯 Vật mang đáp án:" label="Chọn vật mang đáp án" items={PREVIEW_CARRIER_ITEMS} active={resolved.carrier}
+            onSelect={(carrier) => onPresentationChange?.({ carrier })} />
+        ) : null}
+      </div>
+
       {question && Renderer ? (
         <div role="group" aria-label={text.devicesLabel} className="flex flex-wrap gap-2">
           {PREVIEW_DEVICES.map((item) => (

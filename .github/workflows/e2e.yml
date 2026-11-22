@@ -1,0 +1,65 @@
+# e2e: luồng giáo viên trên trình duyệt thật (Playwright, Chromium) với backend thật trên Postgres Testcontainers và
+# AI giả (backend/src/test/.../e2e/E2eBackendApplication, profile e2e + verify-flow). Không dùng secret, không gọi AI thật.
+# Chỉ chạy khi PR đổi frontend, code main của backend, hoặc chính phần e2e (người dùng chốt 2026-11-15). Vì lọc theo
+# `paths`, đừng đặt check này làm required: PR không đổi các đường dẫn đó sẽ treo ở trạng thái chờ.
+name: e2e
+
+on:
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "frontend/**"
+      - "backend/src/main/**"
+      - "backend/pom.xml"
+      - "backend/mvnw"
+      - "backend/.mvn/**"
+      - "backend/src/test/java/com/aigameplatform/backend/e2e/**"
+      - "backend/src/test/java/com/aigameplatform/backend/flow/FakeAiConfiguration.java"
+      - "backend/src/test/java/com/aigameplatform/backend/db/AbstractPostgresTest.java"
+      - "backend/src/test/resources/application-e2e.yml"
+      - "backend/src/test/resources/ai-output-examples/**"
+      - ".github/workflows/e2e.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  teacher-flow:
+    name: E2E luồng giáo viên (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.22.1"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Biên dịch trước để thời gian chờ backend khởi động trong Playwright không gồm thời gian tải dependency Maven.
+      - run: ./mvnw --batch-mode -q test-compile
+        working-directory: backend
+      # Playwright tự khởi động backend (Docker có sẵn trên runner) và Vite theo frontend/playwright.config.ts.
+      - run: npm run e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          retention-days: 7
