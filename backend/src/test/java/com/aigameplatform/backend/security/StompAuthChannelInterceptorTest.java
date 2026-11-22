@@ -29,9 +29,10 @@ class StompAuthChannelInterceptorTest {
         interceptor = new StompAuthChannelInterceptor(jwt, registry);
     }
 
-    private Message<?> connect(String header, String value) {
+    private Message<?> connect(String header, String value, String... more) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
         if (header != null) accessor.addNativeHeader(header, value);
+        for (int i = 0; i + 1 < more.length; i += 2) accessor.addNativeHeader(more[i], more[i + 1]);
         accessor.setLeaveMutable(true);
         return MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
     }
@@ -50,7 +51,7 @@ class StompAuthChannelInterceptorTest {
     @Test
     void issuedParticipantBecomesPrincipal() {
         registry.addOrUpdate("sess", new ParticipantDto("p-1", "Bé An", true));
-        Message<?> out = interceptor.preSend(connect("X-Participant-Id", "p-1"), null);
+        Message<?> out = interceptor.preSend(connect("X-Participant-Id", "p-1", "X-Session-Id", "sess"), null);
         assertThat(user(out)).isEqualTo("p-1");
     }
 
@@ -59,6 +60,12 @@ class StompAuthChannelInterceptorTest {
         assertThatThrownBy(() -> interceptor.preSend(connect("Authorization", "Bearer rac"), null))
                 .isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> interceptor.preSend(connect("X-Participant-Id", "la"), null))
+                .isInstanceOf(AccessDeniedException.class);
+        // Có participantId nhưng thiếu hoặc sai phiên thì từ chối
+        registry.addOrUpdate("sess", new ParticipantDto("p-1", "Bé An", true));
+        assertThatThrownBy(() -> interceptor.preSend(connect("X-Participant-Id", "p-1"), null))
+                .isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> interceptor.preSend(connect("X-Participant-Id", "p-1", "X-Session-Id", "other"), null))
                 .isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> interceptor.preSend(connect(null, null), null))
                 .isInstanceOf(AccessDeniedException.class);

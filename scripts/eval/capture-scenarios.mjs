@@ -166,21 +166,50 @@ class Page {
     }
   }
 
-  /** Tìm phần tử theo đoạn JS trả về phần tử, cuộn vào giữa màn hình rồi bấm. */
-  async clickElement(finder) {
-    const box = await this.eval(`(() => { const el = (${finder})(); if (!el) return null; el.scrollIntoView({block:'center'}); const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 } })()`)
-    if (!box) return false
+  // Gọi hàm JS trong trang với tham số truyền qua CDP (không nối chuỗi vào mã nguồn, tránh chèn mã).
+  async #callOnPage(fn, args, { objectId, byValue = true } = {}) {
+    objectId ??= (await this.cdp.send('Runtime.evaluate', { expression: 'globalThis' })).result.objectId
+    const result = await this.cdp.send('Runtime.callFunctionOn', {
+      objectId,
+      functionDeclaration: String(fn),
+      arguments: args.map((value) => ({ value })),
+      awaitPromise: true,
+      returnByValue: byValue,
+    })
+    if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description ?? 'eval lỗi')
+    return result.result
+  }
+
+  /** Tìm phần tử bằng hàm `finder(...args)` chạy trong trang, cuộn vào giữa màn hình rồi bấm. */
+  async clickElement(finder, ...args) {
+    const { objectId } = await this.#callOnPage(finder, args, { byValue: false })
+    if (!objectId) return false
+    const { value: box } = await this.#callOnPage(
+      function () {
+        this.scrollIntoView({ block: 'center' })
+        const r = this.getBoundingClientRect()
+        return { x: r.x + r.width / 2, y: r.y + r.height / 2 }
+      },
+      [],
+      { objectId },
+    )
     await sleep(250)
     await this.clickAt(box.x, box.y)
     return true
   }
 
-  clickButtonText(text, scope = 'document') {
-    return this.clickElement(`() => [...${scope}.querySelectorAll('button, a')].find(b => b.offsetParent !== null && !b.disabled && b.textContent.replace(/\\s+/g,' ').trim().includes(${JSON.stringify(text)}))`)
+  /** `scopeSelector`: selector của vùng cần tìm nút (bỏ trống = cả trang). */
+  clickButtonText(text, scopeSelector = null) {
+    return this.clickElement(
+      (t, scope) => [...(scope ? document.querySelector(scope) : document).querySelectorAll('button, a')]
+        .find((b) => b.offsetParent !== null && !b.disabled && b.textContent.replace(/\s+/g, ' ').trim().includes(t)),
+      text,
+      scopeSelector,
+    )
   }
 
   async type(selector, text) {
-    await this.eval(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); el.scrollIntoView({block:'center'}); el.focus(); return true })()`)
+    await this.#callOnPage((s) => { const el = document.querySelector(s); el.scrollIntoView({ block: 'center' }); el.focus(); return true }, [selector])
     await this.cdp.send('Input.insertText', { text })
   }
 
@@ -228,7 +257,7 @@ async function login(page) {
   if (!(await page.eval(`location.pathname === '/login'`))) return
   await page.type('input[type=email]', EVAL_EMAIL)
   await page.type('input[type=password]', EVAL_PASSWORD)
-  await page.clickButtonText('Đăng nhập', 'document.querySelector("form")')
+  await page.clickButtonText('Đăng nhập', 'form')
   await page.waitFor(`location.pathname !== '/login'`, 20_000, 'đăng nhập')
 }
 
@@ -251,14 +280,14 @@ async function runScenario(page, scenario) {
   await page.waitFor(`!!document.querySelector('#create-idea')`, 20_000, 'trang tạo game')
 
   // Môn, lớp, mô tả của giáo viên.
-  await page.clickElement(`() => [...document.querySelectorAll('[aria-labelledby="create-subject-title"] button')].find(b => b.textContent.includes(${JSON.stringify(SUBJECT[scenario.subject])}))`)
+  await page.clickElement((subject) => [...document.querySelectorAll('[aria-labelledby="create-subject-title"] button')].find((b) => b.textContent.includes(subject)), SUBJECT[scenario.subject])
   const grade = GRADE[scenario.gradeLevel]
   if (['GRADE_2', 'GRADE_3', 'GRADE_4', 'GRADE_5'].includes(scenario.gradeLevel)) {
-    await page.clickElement(`() => [...document.querySelectorAll('[aria-labelledby="create-grade-title"] button')].find(b => b.textContent.includes('Lớp 2–5'))`)
+    await page.clickElement(() => [...document.querySelectorAll('[aria-labelledby="create-grade-title"] button')].find((b) => b.textContent.includes('Lớp 2–5')))
     await sleep(300)
-    await page.clickElement(`() => [...document.querySelectorAll('[aria-labelledby="create-grade-upper-title"] button')].find(b => b.textContent.trim() === ${JSON.stringify(grade)})`)
+    await page.clickElement((g) => [...document.querySelectorAll('[aria-labelledby="create-grade-upper-title"] button')].find((b) => b.textContent.trim() === g), grade)
   } else {
-    await page.clickElement(`() => [...document.querySelectorAll('[aria-labelledby="create-grade-title"] button')].find(b => b.textContent.trim() === ${JSON.stringify(grade)})`)
+    await page.clickElement((g) => [...document.querySelectorAll('[aria-labelledby="create-grade-title"] button')].find((b) => b.textContent.trim() === g), grade)
   }
   await page.type('#create-idea', scenario.idea)
   await sleep(500)

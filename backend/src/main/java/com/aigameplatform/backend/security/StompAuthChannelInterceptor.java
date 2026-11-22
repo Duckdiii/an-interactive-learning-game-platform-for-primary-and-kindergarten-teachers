@@ -14,13 +14,14 @@ import org.springframework.stereotype.Component;
 
 /**
  * Gán Principal thật cho phiên STOMP ở khung CONNECT: giáo viên bằng JWT (name = teacherId),
- * học sinh bằng participantId đã cấp lúc join (name = participantId). Không hợp lệ thì từ chối.
+ * học sinh bằng participantId đã cấp lúc join kèm sessionId của phiên đó (name = participantId). Không hợp lệ thì từ chối.
  */
 @Component
 public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     static final String AUTHORIZATION = "Authorization";
     static final String PARTICIPANT_ID = "X-Participant-Id";
+    static final String SESSION_ID = "X-Session-Id";
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
@@ -51,7 +52,8 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             }
         }
         String participantId = accessor.getFirstNativeHeader(PARTICIPANT_ID);
-        if (participantId != null && participants.hasParticipant(participantId)) {
+        String sessionId = accessor.getFirstNativeHeader(SESSION_ID);
+        if (participants.hasParticipant(sessionId, participantId)) {
             return () -> participantId;
         }
         throw new AccessDeniedException("Thiếu thông tin xác thực WebSocket");

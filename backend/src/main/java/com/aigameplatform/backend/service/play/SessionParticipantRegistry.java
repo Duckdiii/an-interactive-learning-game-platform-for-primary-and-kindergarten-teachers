@@ -29,9 +29,12 @@ public class SessionParticipantRegistry {
         return host != null && host.equals(requesterId);
     }
 
-    public boolean hasParticipant(String participantId) {
-        return participantId != null
-                && sessionParticipants.values().stream().anyMatch(m -> m.containsKey(participantId));
+    public boolean hasParticipant(String sessionId, String participantId) {
+        if (sessionId == null || participantId == null) {
+            return false;
+        }
+        Map<String, ParticipantDto> map = sessionParticipants.get(sessionId);
+        return map != null && map.containsKey(participantId);
     }
 
     public void addOrUpdate(String sessionId, ParticipantDto participant) {
