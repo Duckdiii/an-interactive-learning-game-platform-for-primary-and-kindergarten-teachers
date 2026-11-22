@@ -1,7 +1,10 @@
 # ai-review: review PR bằng AI theo thiết kế trong .github/ai-review/ai-auto-review.md.
-# Hai job tách quyền:
-#   analyze  — chạy agent, CHỈ ĐỌC (contents: read, pull-requests: read), trả JSON theo schema.
-#   post     — KHÔNG chạy agent, KHÔNG có OAuth token; chạy script đăng kết quả (pull-requests: write).
+# Ba job, tách quyền:
+#   prepare  — CHỈ ĐỌC, không có OAuth token: xác định PR, quyết định bỏ qua/vòng 2/toàn bộ, chia PR lớn thành các phần.
+#   analyze  — ma trận, mỗi phần một lần chạy agent, CHỈ ĐỌC (contents: read, pull-requests: read), trả JSON theo schema.
+#              Là nơi duy nhất có OAuth token. PR nhỏ chỉ có một phần.
+#   post     — KHÔNG chạy agent, KHÔNG có OAuth token; gộp kết quả các phần rồi chạy script đăng (pull-requests: write).
+# Chia phần: scripts/ai-review/shard.mjs (theo số file và số ký tự diff), gộp: scripts/ai-review/merge-shards.mjs.
 # Script, prompt và schema luôn lấy từ nhánh base (thư mục trusted/), không lấy từ PR.
 #
 # Trigger (tác giả PR không phải làm gì):
@@ -14,6 +17,7 @@
 #     hoặc chạy tay (workflow_dispatch).
 #   - Bỏ qua PR draft, PR từ fork, PR của dependabot, và PR chỉ đụng .md / docs.
 # Workflow này thay thế claude-review.yml (đã gỡ).
+# Chia phần (matrix + artifact giữa các job) chỉ xác nhận được bằng một lần chạy thật: chạy workflow_dispatch với dry_run.
 # Các điểm đánh dấu [cần kiểm chứng] chỉ xác nhận được bằng một lần chạy thật (nên chạy dry_run trước khi merge vào main,
 # vì trigger tự động có hiệu lực ngay trên mọi PR sau khi merge).
 
@@ -59,7 +63,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  analyze:
+  prepare:
     # Bỏ qua: label khác ai-review, PR draft, PR từ fork (không có secret và code không tin cậy), PR do dependabot tạo.
     # Dùng TÁC GIẢ PR (user.login), không dùng github.actor: với sự kiện labeled, actor là người gắn label.
     # workflow_dispatch không đi qua điều kiện này nên tác giả được kiểm tra lại ở bước ctx và boot.
@@ -71,19 +75,25 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository &&
        github.event.pull_request.user.login != 'dependabot[bot]')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: read
     outputs:
       pr: ${{ steps.ctx.outputs.pr }}
       head_sha: ${{ steps.ctx.outputs.head_sha }}
+      checkout_ref: ${{ steps.ctx.outputs.checkout_ref }}
       mode: ${{ steps.prep.outputs.mode }}
       prompt_version: ${{ steps.prep.outputs.prompt_version }}
       run: ${{ steps.pre.outputs.run }}
       runs: ${{ steps.pre.outputs.runs }}
       round: ${{ steps.pre.outputs.round }}
       base_sha: ${{ steps.pre.outputs.base_sha }}
+      uc: ${{ steps.uc.outputs.uc }}
+      uc_declared: ${{ steps.uc.outputs.uc_declared }}
+      uc_unknown: ${{ steps.uc.outputs.uc_unknown }}
+      shards: ${{ steps.shard.outputs.shards }}
+      matrix: ${{ steps.shard.outputs.matrix }}
     steps:
       - name: Xác định PR
         id: ctx
@@ -194,16 +204,6 @@ jobs:
         run: |
           echo "> **Bỏ qua:** PR đã có commit mới hơn trong lúc chờ; lần chạy của commit mới nhất sẽ review." >> "$GITHUB_STEP_SUMMARY"
 
-      # Mã của PR (để agent đọc ở chế độ B/C). Không giữ credential trong .git.
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        if: steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'
-        with:
-          ref: ${{ steps.ctx.outputs.checkout_ref }}
-          # Cần đủ lịch sử để agent chạy được `git diff` với base; clone nông (depth 1) khiến commit cha thiếu, agent
-          # không lấy được diff và báo status=incomplete (PR #79).
-          fetch-depth: 0
-          persist-credentials: false
-
       # Script, prompt, schema, SRS: từ nhánh base (PR) hoặc từ ref đang chạy workflow (workflow_dispatch).
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         if: steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'
@@ -261,7 +261,7 @@ jobs:
         env:
           MODE: ${{ inputs.mode || 'C' }}
           PR: ${{ steps.ctx.outputs.pr }}
-          # Mặc định 40 (mức tối đa prepare-run.mjs cho phép): PR lớn ở chế độ C bị báo incomplete khi chỉ có 30.
+          # Mặc định 40 (mức tối đa prepare-run.mjs cho phép); mỗi phần của PR lớn có đủ 40 lượt riêng.
           MAX_TURNS: ${{ inputs.max_turns || '40' }}
           UC: ${{ steps.uc.outputs.uc }}
           ROUND: ${{ steps.pre.outputs.round }}
@@ -271,9 +271,85 @@ jobs:
             --mode "$MODE" --trusted trusted --repo "$GITHUB_REPOSITORY" --pr "$PR" --max-turns "$MAX_TURNS" --uc "$UC" \
             --round "$ROUND" --base-sha "$BASE_SHA"
 
+      # PR lớn được chia thành nhiều phần (scripts/ai-review/shard.mjs): mỗi phần một agent riêng với đủ lượt, thay vì một
+      # agent không xem hết và báo incomplete. PR nhỏ và vòng 2 luôn là một phần. Chỉ đọc diff qua API.
+      - name: Chia PR thành các phần review
+        id: shard
+        if: steps.pre.outputs.run == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR: ${{ steps.ctx.outputs.pr }}
+          ROUND: ${{ steps.pre.outputs.round }}
+          MODE: ${{ inputs.mode || 'C' }}
+        run: |
+          set -euo pipefail
+          node trusted/scripts/ai-review/shard.mjs --pr "$PR" --repo "$GITHUB_REPOSITORY" --round "$ROUND" --mode "$MODE" --out-dir ai-review-input | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Đầu vào của các phần (danh sách file từng phần; vòng 2 thì thêm previous.json và incremental.diff) đi qua artifact.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: steps.pre.outputs.run == 'true'
+        with:
+          name: ai-review-input-${{ github.run_id }}
+          path: ai-review-input/
+          retention-days: 14
+          if-no-files-found: error
+
+  # Mỗi phần của PR một lần chạy riêng (matrix). Job này CHỈ ĐỌC và là nơi duy nhất có OAuth token của agent.
+  analyze:
+    needs: prepare
+    if: needs.prepare.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
+    strategy:
+      # Một phần lỗi không hủy các phần còn lại (đã tốn token); job post chỉ chạy khi mọi phần thành công.
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      # Mã của PR (để agent đọc ở chế độ B/C). Không giữ credential trong .git.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ needs.prepare.outputs.checkout_ref }}
+          # Cần đủ lịch sử để agent chạy được `git diff` với base; clone nông (depth 1) khiến commit cha thiếu, agent
+          # không lấy được diff và báo status=incomplete (PR #79).
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Script, prompt, schema, SRS: từ nhánh base (PR) hoặc từ ref đang chạy workflow (workflow_dispatch).
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          path: trusted
+          fetch-depth: 1
+          persist-credentials: false
+
+      # Đầu vào do job prepare ghi (danh sách file của từng phần; vòng 2 thì có thêm previous.json, incremental.diff).
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ai-review-input-${{ github.run_id }}
+          path: ai-review-input
+
+      - name: Chuẩn bị prompt và đối số
+        id: prep
+        env:
+          MODE: ${{ inputs.mode || 'C' }}
+          # i/n khi PR được chia phần; rỗng khi chỉ có một phần.
+          SHARD: ${{ needs.prepare.outputs.shards != '1' && format('{0}/{1}', matrix.shard, needs.prepare.outputs.shards) || '' }}
+          PR: ${{ needs.prepare.outputs.pr }}
+          # Mặc định 40 (mức tối đa prepare-run.mjs cho phép): PR lớn ở chế độ C bị báo incomplete khi chỉ có 30.
+          MAX_TURNS: ${{ inputs.max_turns || '40' }}
+          UC: ${{ needs.prepare.outputs.uc }}
+          ROUND: ${{ needs.prepare.outputs.round }}
+          BASE_SHA: ${{ needs.prepare.outputs.base_sha }}
+        run: |
+          node trusted/scripts/ai-review/prepare-run.mjs \
+            --mode "$MODE" --trusted trusted --repo "$GITHUB_REPOSITORY" --pr "$PR" --max-turns "$MAX_TURNS" --uc "$UC" \
+            --round "$ROUND" --base-sha "$BASE_SHA" ${SHARD:+--shard "$SHARD"}
+
       - name: Agent review (chỉ đọc)
         id: claude
-        if: steps.pre.outputs.run == 'true'
         uses: anthropics/claude-code-action@ed670b4cf9de2a5a570d130d2f6197b9e543cd64 # v1.0.240
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -284,7 +360,6 @@ jobs:
           claude_args: ${{ steps.prep.outputs.claude_args }}
 
       - name: Lưu kết quả
-        if: steps.pre.outputs.run == 'true'
         env:
           RESULT: ${{ steps.claude.outputs.structured_output }}
         run: |
@@ -297,15 +372,15 @@ jobs:
             || { echo "structured_output không phải JSON hợp lệ."; exit 1; }
 
       - name: Tóm tắt turn và token
-        if: always() && steps.pre.outputs.run == 'true'
+        if: always()
         env:
           EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
           MODE: ${{ steps.prep.outputs.mode }}
           PROMPT_VERSION: ${{ steps.prep.outputs.prompt_version }}
-          UC: ${{ steps.uc.outputs.uc }}
-          UC_DECLARED: ${{ steps.uc.outputs.uc_declared }}
-          UC_UNKNOWN: ${{ steps.uc.outputs.uc_unknown }}
-          ROUND: ${{ steps.pre.outputs.round }}
+          UC: ${{ needs.prepare.outputs.uc }}
+          UC_DECLARED: ${{ needs.prepare.outputs.uc_declared }}
+          UC_UNKNOWN: ${{ needs.prepare.outputs.uc_unknown }}
+          ROUND: ${{ needs.prepare.outputs.round }}
         run: |
           mkdir -p out
           {
@@ -316,16 +391,16 @@ jobs:
           } | tee out/usage.md >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always() && steps.pre.outputs.run == 'true'
+        if: always()
         with:
-          name: ai-review-${{ github.run_id }}
+          name: ai-review-${{ github.run_id }}-${{ matrix.shard }}
           path: out/
           retention-days: 14
           if-no-files-found: warn
 
   post:
-    needs: analyze
-    if: needs.analyze.result == 'success' && needs.analyze.outputs.run == 'true'
+    needs: [prepare, analyze]
+    if: needs.analyze.result == 'success' && needs.prepare.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -339,21 +414,25 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      # Kết quả của từng phần nằm ở một thư mục con của shards/ (tên theo artifact); gộp lại thành một kết quả duy nhất.
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: ai-review-${{ github.run_id }}
-          path: result
+          pattern: ai-review-${{ github.run_id }}-*
+          path: shards
+
+      - name: Gộp kết quả các phần
+        run: node trusted/scripts/ai-review/merge-shards.mjs --dir shards --out result/review.json
 
       - name: Đăng kết quả lên PR
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          PR: ${{ needs.analyze.outputs.pr }}
-          ANALYZED_SHA: ${{ needs.analyze.outputs.head_sha }}
-          ROUND: ${{ needs.analyze.outputs.round }}
-          BASE_SHA: ${{ needs.analyze.outputs.base_sha }}
-          EXPECT_MODE: ${{ needs.analyze.outputs.mode }}
-          EXPECT_PROMPT: ${{ needs.analyze.outputs.prompt_version }}
-          EXPECT_RUNS: ${{ needs.analyze.outputs.runs }}
+          PR: ${{ needs.prepare.outputs.pr }}
+          ANALYZED_SHA: ${{ needs.prepare.outputs.head_sha }}
+          ROUND: ${{ needs.prepare.outputs.round }}
+          BASE_SHA: ${{ needs.prepare.outputs.base_sha }}
+          EXPECT_MODE: ${{ needs.prepare.outputs.mode }}
+          EXPECT_PROMPT: ${{ needs.prepare.outputs.prompt_version }}
+          EXPECT_RUNS: ${{ needs.prepare.outputs.runs }}
           DRY_RUN: ${{ inputs.dry_run }}
           FORCE: ${{ inputs.force }}
         run: |

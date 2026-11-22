@@ -1,5 +1,5 @@
 // Chuẩn bị đầu vào cho bước claude-code-action từ file prompt/schema ở thư mục tin cậy (checkout nhánh base).
-// Dùng: node prepare-run.mjs --mode C --trusted trusted --repo owner/name --pr 12 [--max-turns 15] [--uc UC-04,UC-05] [--round 2 --base-sha <sha>]
+// Dùng: node prepare-run.mjs --mode C --trusted trusted --repo owner/name --pr 12 [--max-turns 15] [--uc UC-04,UC-05] [--round 2 --base-sha <sha>] [--shard 2/3]
 // Ghi ra $GITHUB_OUTPUT: prompt, claude_args, prompt_version, mode (nhiều dòng dùng dấu phân cách ngẫu nhiên).
 import { appendFileSync, readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
@@ -20,7 +20,15 @@ function roundHeader(round, baseSha) {
   return ["ROUND: 2", `BASE_SHA: ${baseSha}`, `PREVIOUS_FINDINGS_FILE: ${INPUT_DIR}/previous.json`, `INCREMENTAL_DIFF_FILE: ${INPUT_DIR}/incremental.diff`].join("\n");
 }
 
-export function buildRunInputs({ mode, promptText, schema, repo, pr, maxTurns, uc = "", round = 1, baseSha = "" }) {
+// PR lớn được chia phần (shard.mjs): mỗi agent chỉ review các file trong shard-<i>.json do shard.mjs ghi.
+function shardHeader(shard) {
+  if (!shard) return "";
+  const m = /^([1-9][0-9]?)\/([1-9][0-9]?)$/.exec(shard);
+  if (!m || Number(m[1]) > Number(m[2]) || Number(m[2]) < 2) throw new Error("shard phải có dạng i/n với 1 <= i <= n và n >= 2");
+  return `\nSHARD: ${m[1]}/${m[2]}\nSHARD_FILES_FILE: ${INPUT_DIR}/shard-${m[1]}.json`;
+}
+
+export function buildRunInputs({ mode, promptText, schema, repo, pr, maxTurns, uc = "", round = 1, baseSha = "", shard = "" }) {
   if (!["A", "B", "C"].includes(mode)) throw new Error(`mode phải là A, B hoặc C (nhận: ${mode})`);
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error("repo phải có dạng owner/name");
   if (!/^[0-9]+$/.test(String(pr))) throw new Error("pr phải là số");
@@ -30,7 +38,9 @@ export function buildRunInputs({ mode, promptText, schema, repo, pr, maxTurns, u
   if (round === 2) {
     if (!/^[0-9a-f]{40}$/.test(baseSha)) throw new Error("vòng 2 cần base-sha hợp lệ");
     if (mode === "A") throw new Error("chế độ A không có công cụ Read nên không chạy được vòng 2");
+    if (shard) throw new Error("vòng 2 không chia phần");
   }
+  if (shard && mode === "A") throw new Error("chế độ A không có công cụ Read nên không đọc được danh sách file của phần");
   const turns = maxTurns === undefined || maxTurns === "" ? DEFAULT_TURNS[mode] : Number(maxTurns);
   if (!Number.isInteger(turns) || turns < 1 || turns > 40) throw new Error("max-turns phải là số nguyên từ 1 đến 40");
   const version = /^prompt_version: (\d+\.\d+\.\d+)\r?\n/.exec(promptText)?.[1];
@@ -42,7 +52,7 @@ export function buildRunInputs({ mode, promptText, schema, repo, pr, maxTurns, u
     promptVersion: version,
     mode,
     round,
-    prompt: `MODE: ${mode}\nREPO: ${repo}\nPR NUMBER: ${pr}\nUC: ${uc ? uc.split(",").join(", ") : "(không khai báo)"}\n${roundHeader(round, baseSha)}\n\n${promptText}`,
+    prompt: `MODE: ${mode}\nREPO: ${repo}\nPR NUMBER: ${pr}\nUC: ${uc ? uc.split(",").join(", ") : "(không khai báo)"}\n${roundHeader(round, baseSha)}${shardHeader(shard)}\n\n${promptText}`,
     claudeArgs: [`--allowedTools "${TOOLS[mode].join(",")}"`, `--max-turns ${turns}`, `--json-schema '${compact}'`].join("\n"),
   };
 }
@@ -74,6 +84,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       uc: arg(a, "uc") ?? "",
       round: arg(a, "round") === "2" ? 2 : 1,
       baseSha: arg(a, "base-sha") ?? "",
+      shard: arg(a, "shard") ?? "",
       promptText: readFileSync(join(dir, "prompt.md"), "utf8"),
       schema: JSON.parse(readFileSync(join(dir, "review-result.schema.json"), "utf8")),
     });

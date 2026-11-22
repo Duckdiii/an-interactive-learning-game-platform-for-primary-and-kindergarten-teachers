@@ -54,6 +54,8 @@ export class Github {
   compare(base, head) { return this.#request("GET", `/compare/${base}...${head}?per_page=1`); }
   getCompareDiff(base, head) { return this.#request("GET", `/compare/${base}...${head}`, { accept: "application/vnd.github.diff" }); }
   getDiff(n) { return this.#request("GET", `/pulls/${n}`, { accept: "application/vnd.github.diff" }); }
+  /** Danh sách file của PR (có phân trang; GitHub trả tối đa 3000 file). */
+  listPullFiles(n) { return this.#paginate(`/pulls/${n}/files`); }
   listReviewComments(n) { return this.#paginate(`/pulls/${n}/comments`); }
   listIssueComments(n) { return this.#paginate(`/issues/${n}/comments`); }
   createReview(n, payload) { return this.#request("POST", `/pulls/${n}/reviews`, { body: payload }); }
