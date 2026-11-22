@@ -72,6 +72,12 @@ test("prompt.md nhắc mọi category, severity và mode có trong schema", () =
   for (const m of schema.properties.mode.enum) assert.ok(prompt.includes(`| ${m} |`), `prompt thiếu mode ${m}`);
 });
 
+test("mô tả status trong schema (agent đọc qua --json-schema) không mâu thuẫn với chế độ chia phần của prompt", () => {
+  // Lỗi đã gặp ở lần chạy thử PR #83: schema bảo "hết các file thay đổi" nên mọi phần đều tự báo incomplete.
+  assert.match(schema.properties.status.description, /SHARD/);
+  assert.match(prompt, /SHARD_FILES_FILE/);
+});
+
 test("round chỉ nhận 1 hoặc 2", () => {
   for (const ok of [1, 2]) assert.deepEqual(errs(result({ round: ok })), []);
   assert.ok(errs(result({ round: 3 })).length > 0);
