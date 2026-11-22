@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { mergeResults, readShardResults, MAX_FINDINGS } from "./merge-shards.mjs";
+import { describeShards, mergeResults, readShardResults, MAX_FINDINGS } from "./merge-shards.mjs";
 import { validate } from "./schema-validate.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -75,6 +75,12 @@ test("chạy thật: đọc các thư mục con theo thứ tự, ghi review.json
   const run = spawnSync(process.execPath, [resolve(here, "merge-shards.mjs"), "--dir", dir, "--out", out], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr);
   assert.deepEqual(JSON.parse(readFileSync(out, "utf8")).files_reviewed, ["a.java", "b.java"]);
+});
+
+test("describeShards ghi trạng thái từng phần và lý do của phần chưa xong", () => {
+  const text = describeShards([result({ files_reviewed: ["a", "b"] }), result({ status: "incomplete", summary: "chưa   xem hết\nfile lớn" })]);
+  assert.match(text, /Phần 1\/2: status=complete, đã xem 2 file, 0 nhận xét/);
+  assert.match(text, /Phần 2\/2: status=incomplete[\s\S]*Tóm tắt của agent: chưa xem hết file lớn/);
 });
 
 test("thiếu review.json trong một thư mục thì báo lỗi rõ", () => {

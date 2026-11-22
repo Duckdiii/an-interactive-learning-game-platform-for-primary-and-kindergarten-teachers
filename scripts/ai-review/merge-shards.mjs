@@ -1,7 +1,7 @@
 // Gộp kết quả review của các phần (mỗi phần một agent) thành một kết quả theo đúng schema review-result.
 // Dùng: node merge-shards.mjs --dir shards --out result/review.json
 // --dir chứa các thư mục con (mỗi artifact một thư mục), mỗi thư mục có review.json. Một phần duy nhất thì chép nguyên.
-import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { appendFileSync, readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -66,6 +66,14 @@ export function mergeResults(results) {
   };
 }
 
+/** Mỗi phần một dòng (trạng thái, số file đã xem, số nhận xét); phần chưa xong kèm tóm tắt của agent để biết lý do. */
+export function describeShards(results) {
+  return results.map((r, i) => {
+    const head = `Phần ${i + 1}/${results.length}: status=${r.status}, đã xem ${r.files_reviewed.length} file, ${r.findings.length} nhận xét`;
+    return r.status === "complete" ? head : `${head}\n  Tóm tắt của agent: ${String(r.summary).replace(/\s+/g, " ").slice(0, 400)}`;
+  }).join("\n");
+}
+
 /** Đọc review.json trong mọi thư mục con của dir, theo thứ tự tên thư mục (ổn định giữa các lần chạy). */
 export function readShardResults(dir) {
   const names = readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
@@ -89,10 +97,13 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const dir = arg(a, "dir");
     const out = arg(a, "out");
     if (!dir || !out) throw new Error("Thiếu --dir hoặc --out");
-    const merged = mergeResults(readShardResults(dir));
+    const results = readShardResults(dir);
+    const merged = mergeResults(results);
     mkdirSync(dirname(resolve(out)), { recursive: true });
     writeFileSync(out, JSON.stringify(merged));
-    console.log(`Đã gộp ${readShardResults(dir).length} phần: ${merged.findings.length} nhận xét, status=${merged.status}`);
+    const report = `${describeShards(results)}\nĐã gộp ${results.length} phần: ${merged.findings.length} nhận xét, status=${merged.status}`;
+    console.log(report);
+    if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### AI review: kết quả từng phần\n\n\`\`\`\n${report}\n\`\`\`\n`);
   } catch (e) {
     console.error(e.message);
     process.exit(1);
