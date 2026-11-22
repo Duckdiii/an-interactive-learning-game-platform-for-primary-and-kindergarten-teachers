@@ -27,6 +27,7 @@ async function submitLogin() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<p>Đã vào trang chủ</p>} />
+          <Route path="/admin/teachers" element={<p>Đã vào trang quản trị</p>} />
         </Routes>
       </MemoryRouter>
     </AuthProvider>,
@@ -96,7 +97,7 @@ describe('Đăng nhập: thông báo lỗi', () => {
     )
   })
 
-  it('tài khoản quản trị viên không vào màn hình giáo viên', async () => {
+  it('tài khoản quản trị viên vào trang quản trị, không vào màn hình giáo viên', async () => {
     mockedLogin.mockResolvedValue({
       teacher: { teacherId: 'a1', email: 'admin@example.com', role: 'ROLE_ADMIN' },
       accessToken: 'a',
@@ -104,7 +105,7 @@ describe('Đăng nhập: thông báo lỗi', () => {
     })
     await submitLogin()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('chưa có giao diện quản trị')
+    expect(await screen.findByText('Đã vào trang quản trị')).toBeInTheDocument()
     expect(screen.queryByText('Đã vào trang chủ')).toBeNull()
   })
 
