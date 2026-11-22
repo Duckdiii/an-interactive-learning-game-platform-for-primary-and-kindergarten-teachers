@@ -34,6 +34,7 @@ Trạng thái:
 | Học sinh bắt đầu chơi | `POST /api/games/shared/{shareCode}/play` | `C/controller/StudentPlayController.java:32` → `C/service/play/StudentPlayService.java:75` | `F/player/api/realPlayerApi.ts:23` | `T/service/play/StudentPlayServiceTest.java:53` | `OA:1597` (implemented) | có đủ |
 | Câu hỏi của phiên chơi | `GET /api/sessions/{sessionId}/questions` | `C/controller/StudentPlayController.java:38` → `C/service/play/StudentPlayService.java:96` | `F/player/api/realPlayerApi.ts:33` | `T/service/play/StudentPlayServiceTest.java:106` | `OA:1380` (implemented) | có đủ |
 | Nộp câu trả lời | `POST /api/sessions/{sessionId}/interactions` | `C/controller/StudentPlayController.java:44` → `C/service/play/StudentPlayService.java:140` | `F/player/api/realPlayerApi.ts:42` | `T/service/play/StudentPlayServiceTest.java:116` | `OA:1432` (implemented) | có đủ |
+| Tìm ảnh Pexels để đổi ảnh | `GET /api/media/pexels-search` | `C/controller/PexelsController.java:23` | `F/services/mediaService.ts:20` | `T/controller/PexelsControllerTest.java:1` | `OA:835` (implemented) | có đủ |
 
 ## Frontend gọi nhưng backend chưa có
 
@@ -42,7 +43,7 @@ Frontend gọi qua lớp service có công tắc mock `VITE_USE_MOCK`; tắt moc
 | Tính năng | Endpoint | Frontend gọi | Nơi bật mock | OA (`x-status`) | Trạng thái |
 |---|---|---|---|---|---|
 | Sinh lại một câu hỏi | `POST /api/games/{gameId}/questions/{questionId}/regenerate` | `F/api/gamesApi.ts:67` | `F/services/aiService.ts:18` | `OA:735` (planned) | chưa có backend |
-| Tải ảnh/âm thanh | `POST /api/media/upload` | `F/api/mediaApi.ts:19` | `F/services/mediaService.ts:12` | `OA:801` (planned) | chưa có backend |
+| Tải ảnh/âm thanh | `POST /api/media/upload` | `F/api/mediaApi.ts:19` | `F/services/mediaService.ts:12` | `OA:887` (planned) | chưa có backend |
 
 ## Đối chiếu với openapi.yaml
 
