@@ -1,8 +1,10 @@
 package com.aigameplatform.backend.controller;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateQuestionRequest;
 import com.aigameplatform.backend.dto.request.ReviseGameRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
+import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
 import com.aigameplatform.backend.dto.response.GameSummaryResponse;
 import com.aigameplatform.backend.entity.enums.GameStatus;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
@@ -79,6 +81,14 @@ public class GamesController {
     public ResponseEntity<ApiResponse<JsonNode>> revise(@PathVariable String gameId, @Valid @RequestBody ReviseGameRequest request,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
         return ResponseEntity.ok(ApiResponse.ok(games.revise(teacherId(teacher), gameId, request)));
+    }
+
+    @PostMapping("/{gameId}/questions/{questionId}/regenerate")
+    public ResponseEntity<ApiResponse<RegeneratedQuestionDto>> regenerateQuestion(@PathVariable String gameId,
+            @PathVariable String questionId, @Valid @RequestBody(required = false) RegenerateQuestionRequest request,
+            @AuthenticationPrincipal AuthenticatedTeacher teacher) {
+        String feedback = request == null ? null : request.feedback();
+        return ResponseEntity.ok(ApiResponse.ok(games.regenerateQuestion(teacherId(teacher), gameId, questionId, feedback)));
     }
 
     @DeleteMapping("/{gameId}")

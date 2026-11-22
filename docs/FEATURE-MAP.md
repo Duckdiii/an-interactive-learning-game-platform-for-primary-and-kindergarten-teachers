@@ -35,6 +35,22 @@ Trạng thái:
 | Câu hỏi của phiên chơi | `GET /api/sessions/{sessionId}/questions` | `C/controller/StudentPlayController.java:38` → `C/service/play/StudentPlayService.java:96` | `F/player/api/realPlayerApi.ts:33` | `T/service/play/StudentPlayServiceTest.java:106` | `OA:1380` (implemented) | có đủ |
 | Nộp câu trả lời | `POST /api/sessions/{sessionId}/interactions` | `C/controller/StudentPlayController.java:44` → `C/service/play/StudentPlayService.java:140` | `F/player/api/realPlayerApi.ts:42` | `T/service/play/StudentPlayServiceTest.java:116` | `OA:1432` (implemented) | có đủ |
 | Tìm ảnh Pexels để đổi ảnh | `GET /api/media/pexels-search` | `C/controller/PexelsController.java:23` | `F/services/mediaService.ts:20` | `T/controller/PexelsControllerTest.java:1` | `OA:835` (implemented) | có đủ |
+| Làm lại một thẻ câu hỏi (UC-06 4b, FLD-14) | `POST /api/games/{gameId}/questions/{questionId}/regenerate` | `C/controller/GamesController.java:86` | `F/api/gamesApi.ts:67` | `T/controller/GamesControllerRegenerateTest.java:1` | `OA:770` (implemented) | có đủ |
+| Giáo viên tạo phiên Live Arena (SOLO hoặc TEAM) | `POST /api/games/{gameId}/sessions` | `C/controller/SessionController.java:27` | — | `T/controller/SessionControllerTest.java:1` | `OA:950` (implemented) | có đủ |
+| Danh sách phiên của một game | `GET /api/games/{gameId}/sessions` | `C/controller/SessionController.java:37` | — | `T/controller/SessionControllerTest.java:1` | `OA:994` (implemented) | có đủ |
+| Bắt đầu phiên (WAITING sang ACTIVE) | `POST /api/sessions/{sessionId}/start` | `C/controller/SessionController.java:47` | — | `T/controller/SessionControllerTest.java:1` | `OA:1040` (implemented) | có đủ |
+| Tạm dừng phiên (ACTIVE sang PAUSED) | `POST /api/sessions/{sessionId}/pause` | `C/controller/SessionController.java:55` | — | `T/controller/SessionControllerTest.java:1` | `OA:1068` (implemented) | có đủ |
+| Tiếp tục phiên (PAUSED sang ACTIVE) | `POST /api/sessions/{sessionId}/resume` | `C/controller/SessionController.java:63` | — | `T/controller/SessionControllerTest.java:1` | `OA:1093` (implemented) | có đủ |
+| Kết thúc phiên (bất kỳ trạng thái sang CLOSED) | `POST /api/sessions/{sessionId}/close` | `C/controller/SessionController.java:71` | — | `T/controller/SessionControllerTest.java:1` | `OA:1117` (implemented) | có đủ |
+| Chi tiết phiên cho màn hình Host | `GET /api/sessions/{sessionId}` | `C/controller/SessionController.java:79` | — | `T/controller/SessionControllerTest.java:1` | `OA:1142` (implemented) | có đủ |
+| Kết quả cả phiên (giáo viên) | `GET /api/sessions/{sessionId}/results` | `C/controller/SessionController.java:87` | — | `T/controller/SessionControllerTest.java:1` | `OA:1176` (implemented) | có đủ |
+| Chi tiết từng câu của một học sinh (xem lại bài) | `GET /api/sessions/{sessionId}/participants/{participantId}/interactions` | `C/controller/SessionController.java:95` | — | `T/controller/SessionControllerTest.java:1` | `OA:1209` (implemented) | có đủ |
+| Giáo viên xếp học sinh vào đội (phiên TEAM) | `PUT /api/sessions/{sessionId}/participants/{participantId}/team` | `C/controller/SessionController.java:104` | — | `T/controller/SessionControllerTest.java:1` | `OA:1246` (implemented) | có đủ |
+| Tra phiên bằng mã PIN (học sinh, public) | `GET /api/sessions/by-code/{accessCode}` | `C/controller/SessionController.java:114` | — | `T/controller/SessionControllerTest.java:1` | `OA:1296` (implemented) | có đủ |
+| Học sinh vào phòng (public) | `POST /api/sessions/{sessionId}/join` | `C/controller/SessionController.java:120` | — | `T/controller/SessionControllerTest.java:1` | `OA:1336` (implemented) | có đủ |
+| Học sinh tự đổi đội (FREE_CHOICE) | `PUT /api/sessions/{sessionId}/my-team` | `C/controller/SessionController.java:129` | — | `T/controller/SessionControllerTest.java:1` | `OA:1384` (implemented) | có đủ |
+| Bảng xếp hạng | `GET /api/sessions/{sessionId}/leaderboard` | `C/controller/SessionController.java:140` | — | `T/controller/SessionControllerTest.java:1` | `OA:1551` (implemented) | có đủ |
+| Kết quả lượt chơi của chính mình | `GET /api/sessions/{sessionId}/my-result` | `C/controller/SessionController.java:151` | — | `T/controller/SessionControllerTest.java:1` | `OA:1588` (implemented) | có đủ |
 
 ## Frontend gọi nhưng backend chưa có
 
@@ -42,7 +58,6 @@ Frontend gọi qua lớp service có công tắc mock `VITE_USE_MOCK`; tắt moc
 
 | Tính năng | Endpoint | Frontend gọi | Nơi bật mock | OA (`x-status`) | Trạng thái |
 |---|---|---|---|---|---|
-| Sinh lại một câu hỏi | `POST /api/games/{gameId}/questions/{questionId}/regenerate` | `F/api/gamesApi.ts:67` | `F/services/aiService.ts:18` | `OA:735` (planned) | chưa có backend |
 | Tải ảnh/âm thanh | `POST /api/media/upload` | `F/api/mediaApi.ts:19` | `F/services/mediaService.ts:12` | `OA:887` (planned) | chưa có backend |
 
 ## Đối chiếu với openapi.yaml

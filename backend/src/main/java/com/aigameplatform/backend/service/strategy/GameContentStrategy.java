@@ -220,6 +220,14 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
         return result;
     }
 
+    public D toQuestionDsl(QuestionGame question, String questionId) {
+        if (!entityType.isInstance(question)) {
+            throw new IllegalArgumentException("Game " + getSupportedType() + " cần câu hỏi kiểu "
+                    + entityType.getSimpleName() + ", nhưng nhận được " + question.getClass().getSimpleName());
+        }
+        return toDsl(entityType.cast(question), questionId);
+    }
+
     protected abstract E toEntity(D dsl);
 
     /** Dựng màn chơi DSL từ entity; các trường chung (thời gian, điểm, media) đọc thẳng từ entity. */
@@ -230,6 +238,17 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     }
 
     protected abstract GameDsl assemble(GameMetadata metadata, GameplaySettings settings, List<D> questions);
+
+    public GameDsl assembleGame(GameMetadata metadata, GameplaySettings settings, List<? extends QuestionDsl> questions) {
+        List<D> typed = new ArrayList<>();
+        for (QuestionDsl q : questions) {
+            if (!dslType.isInstance(q)) {
+                throw new IllegalArgumentException("Question must be of type " + dslType.getSimpleName());
+            }
+            typed.add(dslType.cast(q));
+        }
+        return assemble(metadata, settings, typed);
+    }
 
     /** Allows a strategy to restore persisted envelope metadata while preserving existing implementations. */
     protected GameDsl assemble(Game game, GameMetadata metadata, GameplaySettings settings, List<D> questions) {

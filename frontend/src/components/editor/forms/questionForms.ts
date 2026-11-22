@@ -2,10 +2,13 @@ import type { ComponentType } from 'react'
 import type { GameType } from '../../../types/game-dsl.types'
 import type { QuestionFormProps } from './formTypes'
 import AudioVisualMatchForm from './AudioVisualMatchForm'
+import DragDropForm from './DragDropForm'
 import MatchingForm from './MatchingForm'
 import MemoryCardForm from './MemoryCardForm'
 import OddOneOutModeForm from './OddOneOutModeForm'
+import OrderingForm from './OrderingForm'
 import QuizForm from './QuizForm'
+import SpotTheTargetForm from './SpotTheTargetForm'
 import VisualClozeModeForm from './VisualClozeModeForm'
 import WordScrambleForm from './WordScrambleForm'
 
@@ -19,4 +22,7 @@ export const QUESTION_FORMS: Readonly<Partial<Record<GameType, ComponentType<Que
   ODD_ONE_OUT: OddOneOutModeForm,
   VISUAL_CLOZE: VisualClozeModeForm,
   WORD_SCRAMBLE: WordScrambleForm,
+  ORDERING: OrderingForm,
+  DRAG_DROP: DragDropForm,
+  SPOT_THE_TARGET: SpotTheTargetForm,
 }

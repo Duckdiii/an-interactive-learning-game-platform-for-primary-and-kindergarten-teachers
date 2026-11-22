@@ -48,8 +48,11 @@ public class SecurityConfig {
                         "/api/auth/register", "/api/auth/login", "/api/auth/refresh",
                         "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers("/ws/live-arena/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/interactions").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions",
+                        "/api/sessions/by-code/*", "/api/sessions/*/leaderboard", "/api/sessions/*/my-result").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/join",
+                        "/api/sessions/*/interactions").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/sessions/*/my-team").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)

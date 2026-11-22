@@ -468,6 +468,77 @@ class GameGenerationServiceTest {
                         assertThat(error.getErrorCode()).isEqualTo(com.aigameplatform.backend.exception.ErrorCode.VALIDATION_ERROR));
     }
 
+    @Test
+    void regenerateQuestionSucceedsOnSingleValidQuestion() throws Exception {
+        String singleQuiz = """
+                {"questions":[{"text":"1 + 1 bằng mấy?","options":["2","3"],"correctIndex":0,"audioText":"1 cộng 1 bằng mấy?"}]}
+                """;
+        var generator = new ScriptedGenerator(singleQuiz);
+        var service = service(generator, 0);
+
+        var current = new com.aigameplatform.backend.dto.dsl.QuizQuestionDsl("q1", 30, 10, null, null, null, null,
+                "Câu cũ", List.of(new com.aigameplatform.backend.dto.dsl.TextChoiceDsl("opt_0", "1")), "opt_0");
+        var baseGame = new com.aigameplatform.backend.dto.dsl.QuizGameDsl("1.0.0", GameType.QUIZ,
+                new com.aigameplatform.backend.dto.dsl.GameMetadata("Toán", Subject.MATH, GradeLevel.GRADE_1, "Toán"),
+                new com.aigameplatform.backend.dto.dsl.GameplaySettings(1), List.of(current));
+
+        var regenerated = (com.aigameplatform.backend.dto.dsl.QuizQuestionDsl) service.regenerateQuestion(
+                GameType.QUIZ, REQUEST, current, "làm dễ hơn", "q1", baseGame);
+
+        assertThat(regenerated.questionText()).isEqualTo("1 + 1 bằng mấy?");
+        assertThat(generator.attempts).hasSize(1);
+        assertThat(generator.attempts.getFirst().customInstruction()).contains("SINGLE QUESTION REGENERATION");
+        assertThat(generator.attempts.getFirst().customInstruction()).contains("làm dễ hơn");
+    }
+
+    @Test
+    void regenerateQuestionRetriesWhenFirstAttemptInvalid() throws Exception {
+        String invalid = "{\"questions\":[]}";
+        String valid = """
+                {"questions":[{"text":"2 + 2 bằng mấy?","options":["4","5"],"correctIndex":0}]}
+                """;
+        var generator = new ScriptedGenerator(invalid, valid);
+        var service = service(generator, 1);
+
+        var current = new com.aigameplatform.backend.dto.dsl.QuizQuestionDsl("q1", 30, 10, null, null, null, null,
+                "Câu cũ", List.of(new com.aigameplatform.backend.dto.dsl.TextChoiceDsl("opt_0", "1")), "opt_0");
+        var baseGame = new com.aigameplatform.backend.dto.dsl.QuizGameDsl("1.0.0", GameType.QUIZ,
+                new com.aigameplatform.backend.dto.dsl.GameMetadata("Toán", Subject.MATH, GradeLevel.GRADE_1, "Toán"),
+                new com.aigameplatform.backend.dto.dsl.GameplaySettings(1), List.of(current));
+
+        var regenerated = (com.aigameplatform.backend.dto.dsl.QuizQuestionDsl) service.regenerateQuestion(
+                GameType.QUIZ, REQUEST, current, null, "q1", baseGame);
+
+        assertThat(regenerated.questionText()).isEqualTo("2 + 2 bằng mấy?");
+        assertThat(generator.attempts).hasSize(2);
+        assertThat(generator.attempts.get(1).isRetry()).isTrue();
+    }
+
+    @Test
+    void regenerateQuestionThrowsUnsafeWhenContentUnsafe() {
+        String unsafeContent = """
+                {"questions":[{"text":"Câu hỏi bạo lực súng đạn","options":["a","b"],"correctIndex":0}]}
+                """;
+        var client = new ContentModerationClient() {
+            @Override
+            public boolean isConfigured() { return true; }
+            @Override
+            public List<ModerationResult> moderate(List<String> texts) {
+                return texts.stream().map(t -> new ModerationResult(t.contains("bạo lực"), List.of("violence"))).toList();
+            }
+        };
+        var service = service(new ScriptedGenerator(unsafeContent), 1, client);
+
+        var current = new com.aigameplatform.backend.dto.dsl.QuizQuestionDsl("q1", 30, 10, null, null, null, null,
+                "Câu cũ", List.of(new com.aigameplatform.backend.dto.dsl.TextChoiceDsl("opt_0", "1")), "opt_0");
+        var baseGame = new com.aigameplatform.backend.dto.dsl.QuizGameDsl("1.0.0", GameType.QUIZ,
+                new com.aigameplatform.backend.dto.dsl.GameMetadata("Toán", Subject.MATH, GradeLevel.GRADE_1, "Toán"),
+                new com.aigameplatform.backend.dto.dsl.GameplaySettings(1), List.of(current));
+
+        assertThatThrownBy(() -> service.regenerateQuestion(GameType.QUIZ, REQUEST, current, null, "q1", baseGame))
+                .isInstanceOf(com.aigameplatform.backend.exception.UnsafeContentException.class);
+    }
+
     private static byte[] scenePng(int width, int height) throws IOException {
         var image = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
         var bytes = new java.io.ByteArrayOutputStream();

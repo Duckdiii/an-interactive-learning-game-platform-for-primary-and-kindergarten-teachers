@@ -37,6 +37,18 @@ public interface GameContentHandler {
      */
     ObjectNode revise(ObjectNode current, String instruction, List<ChatTurn> history);
 
+    /**
+     * Làm lại đúng một câu hỏi bằng AI (POST /games/{gameId}/questions/{questionId}/regenerate): nhận {@code GameResponse}
+     * hiện tại, trả câu mới cùng {@code questionId}, đã qua đủ 3 lớp kiểm duyệt. Không lưu. Mặc định báo 400: chỉ game DSL
+     * có thẻ câu hỏi riêng.
+     */
+    default com.aigameplatform.backend.dto.response.RegeneratedQuestionDto regenerateQuestion(ObjectNode current,
+            String questionId, String feedback) {
+        throw new com.aigameplatform.backend.exception.ApiException(
+                com.aigameplatform.backend.exception.ErrorCode.VALIDATION_ERROR,
+                "Trò chơi này không có thẻ câu hỏi riêng; hãy dùng chức năng làm lại cả game");
+    }
+
     /** Dựng {@code GameResponse} theo openapi.yaml từ game đã lưu và ba trường quản lý (gameId, status, updatedAt). */
     ObjectNode toResponse(Game game, ObjectNode management);
 
