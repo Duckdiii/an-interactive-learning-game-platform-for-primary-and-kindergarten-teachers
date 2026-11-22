@@ -124,25 +124,25 @@ flowchart TD
 
 Đọc cùng ca sử dụng tương ứng trong `docs/srs/`.
 
-| Ca sử dụng | File Diagram |
+| Ca sử dụng | Nơi có sơ đồ |
 |---|---|
-| UC-01 Đăng ký | `docs/diagrams/sequence/UC-01_Register_SequenceDiagram.drawio` |
-| UC-02 Gửi mô tả trò chơi | `docs/diagrams/sequence/UC-02_Submit_Game_Description_SequenceDiagram.drawio` |
-| UC-03 Chơi thử | `docs/diagrams/sequence/UC-03_TrialPlay_SequenceDiagram.drawio` |
-| UC-04 Chỉnh sửa trò chơi | `docs/diagrams/sequence/UC-04_Edit_Game_WorkspaceEditor_SequenceDiagram.drawio` |
-| UC-05 Chỉnh sửa thủ công | `docs/diagrams/sequence/UC-05_Manual_Edit_SequenceDiagram.drawio` |
-| UC-06 AI làm lại | `docs/diagrams/sequence/UC-06_AI_Regenerate_SequenceDiagram.drawio` |
-| UC-07 Lưu và xuất bản | `docs/diagrams/sequence/UC-07_SaveAndPublishGame_SequenceDiagram.drawio` |
-| UC-08 Tự luyện | `docs/diagrams/sequence/UC-08_SelfPractice_SequenceDiagram.drawio` |
-| UC-09 Tham gia phòng | `docs/diagrams/sequence/UC-09_JoinGame_SequenceDiagram.drawio` |
-| UC-11 Giọng đọc | `docs/diagrams/sequence/UC-11_NarrationAudio_SequenceDiagram.drawio` |
-| UC-12 Theo dõi chi phí | `docs/diagrams/sequence/UC-12_CostMonitoring_SequenceDiagram.drawio` |
-| UC-13 Quản lý giáo viên | `docs/diagrams/sequence/UC-13_TeacherManagement_SequenceDiagram.drawio` |
-| UC-14 Cài đặt AI | `docs/diagrams/sequence/UC-14_AIBrainConfig_SequenceDiagram.drawio` |
-| UC-15 Đăng nhập | `docs/diagrams/sequence/UC-15_Login_SequenceDiagram.drawio` |
-| **UC-16 Quản lý hồ sơ lớp học** | `docs/diagrams/sequence/UC-16_ProfileClassManagement_SequenceDiagram.drawio` |
-| **UC-17 Quản lý kho trò chơi** | `docs/diagrams/sequence/UC-17_GameLibraryManagement_SequenceDiagram.drawio` |
-| **UC-18 Thống kê kết quả lớp** | `docs/diagrams/sequence/UC-18_ClassResultsStatistics_SequenceDiagram.drawio` |
+| UC-01 Đăng ký | `docs/srs/UC-01.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-02 Gửi mô tả trò chơi | `docs/srs/UC-02.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-03 Chơi thử | `docs/srs/UC-03.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-04 Chỉnh sửa trò chơi | `docs/srs/UC-04.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-05 Chỉnh sửa thủ công | `docs/srs/UC-05.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-06 AI làm lại | `docs/srs/UC-06.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-07 Lưu và xuất bản | `docs/srs/UC-07.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-08 Tự luyện | `docs/srs/UC-08.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-09 Tham gia phòng | `docs/srs/UC-09.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-11 Giọng đọc | `docs/srs/UC-11.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-12 Theo dõi chi phí | `docs/srs/UC-12.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-13 Quản lý giáo viên | `docs/srs/UC-13.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-14 Cài đặt AI | `docs/srs/UC-14.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-15 Đăng nhập | `docs/srs/UC-15.md` (mục Sơ đồ Tuần tự, mermaid) |
+| **UC-16 Quản lý hồ sơ lớp học** | `docs/srs/UC-16.md` (mục Sơ đồ Tuần tự, mermaid) |
+| **UC-17 Quản lý kho trò chơi** | `docs/srs/UC-17.md` (mục Sơ đồ Tuần tự, mermaid) |
+| **UC-18 Thống kê kết quả lớp** | `docs/srs/UC-18.md` (mục Sơ đồ Tuần tự, mermaid) |
 
 ## Liên kết liên quan
 - [[Kiến trúc và công nghệ]]
