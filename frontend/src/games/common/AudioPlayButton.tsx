@@ -1,6 +1,6 @@
 import { Group, Circle, Path } from 'react-konva'
 import { useEffect, useState } from 'react'
-import { audioService } from '../../services/audioService'
+import { audioService } from '../../services/pipeline/audioService'
 import { AUDIO_PLAY_ACTIVE_FILL, AUDIO_PLAY_INACTIVE_FILL } from './palette'
 
 export interface AudioPlayButtonProps {

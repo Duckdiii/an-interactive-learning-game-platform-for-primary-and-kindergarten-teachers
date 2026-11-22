@@ -34,7 +34,7 @@ public class AdminTeacherController {
     }
 
     @Operation(summary = "Danh sách giáo viên (UC-13)")
-    @GetMapping({"/api/admin/teachers", "/admin/teachers"})
+    @GetMapping("/api/admin/teachers")
     public ResponseEntity<ApiResponse<PageResultDto<AdminTeacherDto>>> listTeachers(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) TeacherStatus status,
@@ -45,7 +45,7 @@ public class AdminTeacherController {
     }
 
     @Operation(summary = "Thêm giáo viên (UC-13)")
-    @PostMapping({"/api/admin/teachers", "/admin/teachers"})
+    @PostMapping("/api/admin/teachers")
     public ResponseEntity<ApiResponse<AdminTeacherDto>> createTeacher(
             @Valid @RequestBody AdminCreateTeacherRequest request,
             @AuthenticationPrincipal AuthenticatedTeacher admin,
@@ -56,14 +56,14 @@ public class AdminTeacherController {
     }
 
     @Operation(summary = "Chi tiết một giáo viên")
-    @GetMapping({"/api/admin/teachers/{teacherId}", "/admin/teachers/{teacherId}"})
+    @GetMapping("/api/admin/teachers/{teacherId}")
     public ResponseEntity<ApiResponse<AdminTeacherDto>> getTeacher(
             @PathVariable String teacherId) {
         return ResponseEntity.ok(ApiResponse.ok(teacherAdminService.getTeacher(teacherId)));
     }
 
     @Operation(summary = "Sửa thông tin giáo viên")
-    @PutMapping({"/api/admin/teachers/{teacherId}", "/admin/teachers/{teacherId}"})
+    @PutMapping("/api/admin/teachers/{teacherId}")
     public ResponseEntity<ApiResponse<AdminTeacherDto>> updateTeacher(
             @PathVariable String teacherId,
             @Valid @RequestBody AdminUpdateTeacherRequest request,
@@ -74,7 +74,7 @@ public class AdminTeacherController {
     }
 
     @Operation(summary = "Khoá tài khoản giáo viên")
-    @PostMapping({"/api/admin/teachers/{teacherId}/lock", "/admin/teachers/{teacherId}/lock"})
+    @PostMapping("/api/admin/teachers/{teacherId}/lock")
     public ResponseEntity<ApiResponse<TeacherStatusResultDto>> lockTeacher(
             @PathVariable String teacherId,
             @AuthenticationPrincipal AuthenticatedTeacher admin,
@@ -84,7 +84,7 @@ public class AdminTeacherController {
     }
 
     @Operation(summary = "Mở khoá tài khoản giáo viên")
-    @PostMapping({"/api/admin/teachers/{teacherId}/unlock", "/admin/teachers/{teacherId}/unlock"})
+    @PostMapping("/api/admin/teachers/{teacherId}/unlock")
     public ResponseEntity<ApiResponse<TeacherStatusResultDto>> unlockTeacher(
             @PathVariable String teacherId,
             @AuthenticationPrincipal AuthenticatedTeacher admin,

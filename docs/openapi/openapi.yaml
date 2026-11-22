@@ -833,6 +833,58 @@ paths:
         '504':
           $ref: '#/components/responses/AiTimeout'
 
+  /media/pexels-search:
+    get:
+      tags: [Media]
+      operationId: searchPexelsImages
+      summary: Tìm ảnh minh họa trên Pexels để đổi ảnh trong Workspace Editor (UC-05)
+      description: |
+        Backend làm proxy gọi Pexels để khóa API không lộ ra trình duyệt. Chưa cấu hình `PEXELS_API_KEY`
+        hoặc bị giới hạn lượt gọi thì trả danh sách ảnh dự phòng an toàn, không báo lỗi.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema: { type: string, default: '' }
+          description: Từ khóa tìm ảnh.
+        - name: perPage
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 12 }
+          description: Số ảnh mỗi lần (tối đa 50).
+      responses:
+        '200':
+          description: Danh sách ảnh.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [images]
+                    properties:
+                      images:
+                        type: array
+                        items:
+                          type: object
+                          required: [id, url, thumbnailUrl]
+                          properties:
+                            id: { type: integer, format: int64 }
+                            url: { type: string, format: uri }
+                            thumbnailUrl: { type: string, format: uri }
+                            alt: { type: string }
+                            photographer: { type: string }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /media/upload:
     post:
       tags: [Media]
@@ -1973,6 +2025,69 @@ paths:
                   success: { const: true }
                   data:
                     $ref: '#/components/schemas/SystemStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/budget-config:
+    get:
+      tags: [Admin]
+      operationId: adminGetBudgetConfig
+      summary: Xem trần ngân sách AI tháng và mức cảnh báo (UC-12)
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cấu hình ngân sách hiện tại cùng chi phí tháng đang dùng.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/AdminBudgetConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Admin]
+      operationId: adminUpdateBudgetConfig
+      summary: Cập nhật trần ngân sách AI tháng và mức cảnh báo (UC-12)
+      description: |
+        Chạm 100% trần thì `POST /games/generate` trả 503 `SERVICE_UNAVAILABLE` (circuit breaker, FR-12).
+        Thao tác được ghi vào nhật ký quản trị.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminBudgetConfig'
+      responses:
+        '200':
+          description: Đã cập nhật.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/AdminBudgetConfig'
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -4008,6 +4123,16 @@ components:
       type: string
       enum: [ACTIVE, LOCKED]
 
+    AdminBudgetConfig:
+      type: object
+      required: [monthlyBudget]
+      properties:
+        monthlyBudget: { type: number, minimum: 0, description: Trần chi phí AI mỗi tháng (USD). }
+        yellowPct: { type: number, minimum: 0, default: 70, description: Mức cảnh báo vàng (% trần). }
+        redPct: { type: number, minimum: 0, default: 90, description: Mức cảnh báo đỏ (% trần). }
+        costCapExceeded: { type: boolean, readOnly: true }
+        currentMonthCost: { type: number, readOnly: true }
+        budgetUsedPercent: { type: number, readOnly: true }
     AdminTeacher:
       type: object
       required: [teacherId, fullName, email, status, createdAt]

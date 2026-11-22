@@ -30,7 +30,7 @@ public class AdminAuditLogController {
     }
 
     @Operation(summary = "Audit Log (FLD-28)")
-    @GetMapping({"/api/admin/audit-logs", "/admin/audit-logs"})
+    @GetMapping("/api/admin/audit-logs")
     public ResponseEntity<ApiResponse<PageResultDto<AuditLogDto>>> listAuditLogs(
             @RequestParam(required = false) String actorId,
             @RequestParam(required = false) String action,

@@ -38,6 +38,7 @@ export default function AuditLogPage() {
   }, [actionFilter, resultFilter, page, size])
 
   useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect -- tải dữ liệu khi mở trang hoặc đổi bộ lọc
     fetchLogs()
   }, [fetchLogs])
 

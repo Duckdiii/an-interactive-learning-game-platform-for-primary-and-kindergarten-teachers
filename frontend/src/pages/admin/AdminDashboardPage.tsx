@@ -51,6 +51,7 @@ export default function AdminDashboardPage() {
   }, [range])
 
   useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect -- tải dữ liệu khi mở trang hoặc đổi khoảng thời gian
     void fetchData()
   }, [fetchData])
 

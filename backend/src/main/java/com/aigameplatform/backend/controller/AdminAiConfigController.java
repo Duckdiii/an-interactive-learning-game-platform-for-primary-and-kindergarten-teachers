@@ -36,14 +36,14 @@ public class AdminAiConfigController {
     }
 
     @Operation(summary = "Phiên bản cấu hình AI đang áp dụng và lịch sử (UC-14)")
-    @GetMapping({"/api/admin/ai-config", "/admin/ai-config"})
+    @GetMapping("/api/admin/ai-config")
     public ResponseEntity<ApiResponse<AiConfigResponseDto>> getAiConfig() {
         AiConfigResponseDto data = aiConfigService.getAiConfig();
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @Operation(summary = "Tạo và áp dụng phiên bản cấu hình AI mới (UC-14)")
-    @PostMapping({"/api/admin/ai-config/versions", "/admin/ai-config/versions"})
+    @PostMapping("/api/admin/ai-config/versions")
     public ResponseEntity<ApiResponse<AiConfigVersionDto>> createAiConfigVersion(
             @Valid @RequestBody AiConfigInput input,
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
@@ -54,7 +54,7 @@ public class AdminAiConfigController {
     }
 
     @Operation(summary = "Đóng băng một phiên bản làm bản chuẩn (UC-14)")
-    @PostMapping({"/api/admin/ai-config/versions/{versionId}/freeze", "/admin/ai-config/versions/{versionId}/freeze"})
+    @PostMapping("/api/admin/ai-config/versions/{versionId}/freeze")
     public ResponseEntity<ApiResponse<AiConfigVersionDto>> freezeAiConfigVersion(
             @PathVariable String versionId,
             @RequestBody(required = false) FreezeAiConfigRequest freezeRequest,
@@ -66,7 +66,7 @@ public class AdminAiConfigController {
     }
 
     @Operation(summary = "Khôi phục phiên bản làm bản đang áp dụng (UC-14)")
-    @PostMapping({"/api/admin/ai-config/versions/{versionId}/activate", "/admin/ai-config/versions/{versionId}/activate"})
+    @PostMapping("/api/admin/ai-config/versions/{versionId}/activate")
     public ResponseEntity<ApiResponse<AiConfigVersionDto>> activateAiConfigVersion(
             @PathVariable String versionId,
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
@@ -77,14 +77,14 @@ public class AdminAiConfigController {
     }
 
     @Operation(summary = "Danh sách từ cấm an toàn học đường (FLD-25)")
-    @GetMapping({"/api/admin/safety/blocked-words", "/admin/safety/blocked-words"})
+    @GetMapping("/api/admin/safety/blocked-words")
     public ResponseEntity<ApiResponse<BlockedWordsDto>> getBlockedWords() {
         BlockedWordsDto data = safetyAdminService.getBlockedWords();
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @Operation(summary = "Thay toàn bộ danh sách từ cấm (hot-reload)")
-    @PutMapping({"/api/admin/safety/blocked-words", "/admin/safety/blocked-words"})
+    @PutMapping("/api/admin/safety/blocked-words")
     public ResponseEntity<ApiResponse<BlockedWordsDto>> replaceBlockedWords(
             @Valid @RequestBody BlockedWordsDto request,
             @AuthenticationPrincipal AuthenticatedTeacher teacher,

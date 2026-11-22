@@ -36,7 +36,7 @@ public class AdminUsageController {
     }
 
     @Operation(summary = "Chi phí và trạng thái dịch vụ (UC-12)")
-    @GetMapping({"/api/admin/usage", "/admin/usage"})
+    @GetMapping("/api/admin/usage")
     public ResponseEntity<ApiResponse<UsageReportDto>> getUsage(
             @RequestParam(required = false, defaultValue = "7D") String range,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
@@ -47,21 +47,21 @@ public class AdminUsageController {
     }
 
     @Operation(summary = "Sức khoẻ máy chủ (NFR-03)")
-    @GetMapping({"/api/admin/system-status", "/admin/system-status"})
+    @GetMapping("/api/admin/system-status")
     public ResponseEntity<ApiResponse<SystemStatusDto>> getSystemStatus() {
         SystemStatusDto data = systemHealthService.getSystemStatus();
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @Operation(summary = "Lấy cấu hình ngân sách và định mức cảnh báo")
-    @GetMapping({"/api/admin/budget-config", "/admin/budget-config"})
+    @GetMapping("/api/admin/budget-config")
     public ResponseEntity<ApiResponse<BudgetConfigDto>> getBudgetConfig() {
         BudgetConfigDto data = costMonitoringService.getBudgetConfig();
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @Operation(summary = "Cập nhật cấu hình trần ngân sách AI và mức cảnh báo")
-    @PostMapping({"/api/admin/budget-config", "/admin/budget-config"})
+    @PostMapping("/api/admin/budget-config")
     public ResponseEntity<ApiResponse<BudgetConfigDto>> updateBudgetConfig(
             @Valid @RequestBody BudgetConfigDto request,
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
