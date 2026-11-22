@@ -832,6 +832,58 @@ paths:
         '504':
           $ref: '#/components/responses/AiTimeout'
 
+  /media/pexels-search:
+    get:
+      tags: [Media]
+      operationId: searchPexelsImages
+      summary: Tìm ảnh minh họa trên Pexels để đổi ảnh trong Workspace Editor (UC-05)
+      description: |
+        Backend làm proxy gọi Pexels để khóa API không lộ ra trình duyệt. Chưa cấu hình `PEXELS_API_KEY`
+        hoặc bị giới hạn lượt gọi thì trả danh sách ảnh dự phòng an toàn, không báo lỗi.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema: { type: string, default: '' }
+          description: Từ khóa tìm ảnh.
+        - name: perPage
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 12 }
+          description: Số ảnh mỗi lần (tối đa 50).
+      responses:
+        '200':
+          description: Danh sách ảnh.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [images]
+                    properties:
+                      images:
+                        type: array
+                        items:
+                          type: object
+                          required: [id, url, thumbnailUrl]
+                          properties:
+                            id: { type: integer, format: int64 }
+                            url: { type: string, format: uri }
+                            thumbnailUrl: { type: string, format: uri }
+                            alt: { type: string }
+                            photographer: { type: string }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /media/upload:
     post:
       tags: [Media]

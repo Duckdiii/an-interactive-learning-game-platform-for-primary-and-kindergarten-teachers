@@ -74,6 +74,8 @@ springdoc:
     operations-sorter: method
 
 app:
+  pexels:
+    api-key: ${PEXELS_API_KEY:}
   cors:
     # Nhiều origin thì ngăn bằng dấu phẩy. Profile prod bắt buộc CORS_ALLOWED_ORIGINS (application-prod.yml).
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
