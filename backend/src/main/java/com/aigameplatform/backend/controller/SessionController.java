@@ -24,7 +24,7 @@ public class SessionController {
     }
 
     // 1. Giáo viên tạo phiên Live Arena (SOLO hoặc TEAM)
-    @PostMapping({"/api/games/{gameId}/sessions", "/games/{gameId}/sessions"})
+    @PostMapping("/api/games/{gameId}/sessions")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CreateSessionResult> createSession(
             @PathVariable String gameId,
@@ -34,7 +34,7 @@ public class SessionController {
     }
 
     // 2. Danh sách phiên của một game
-    @GetMapping({"/api/games/{gameId}/sessions", "/games/{gameId}/sessions"})
+    @GetMapping("/api/games/{gameId}/sessions")
     public ApiResponse<List<SessionListItem>> listGameSessions(
             @PathVariable String gameId,
             @RequestParam(required = false) SessionType sessionType,
@@ -44,7 +44,7 @@ public class SessionController {
     }
 
     // 3. Bắt đầu phiên (WAITING sang ACTIVE)
-    @PostMapping({"/api/sessions/{sessionId}/start", "/sessions/{sessionId}/start"})
+    @PostMapping("/api/sessions/{sessionId}/start")
     public ApiResponse<SessionControlSuccess> startSession(
             @PathVariable String sessionId,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
@@ -52,7 +52,7 @@ public class SessionController {
     }
 
     // 4. Tạm dừng phiên (ACTIVE sang PAUSED)
-    @PostMapping({"/api/sessions/{sessionId}/pause", "/sessions/{sessionId}/pause"})
+    @PostMapping("/api/sessions/{sessionId}/pause")
     public ApiResponse<SessionControlSuccess> pauseSession(
             @PathVariable String sessionId,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
@@ -60,7 +60,7 @@ public class SessionController {
     }
 
     // 5. Tiếp tục phiên (PAUSED sang ACTIVE)
-    @PostMapping({"/api/sessions/{sessionId}/resume", "/sessions/{sessionId}/resume"})
+    @PostMapping("/api/sessions/{sessionId}/resume")
     public ApiResponse<SessionControlSuccess> resumeSession(
             @PathVariable String sessionId,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
@@ -68,7 +68,7 @@ public class SessionController {
     }
 
     // 6. Kết thúc phiên (bất kỳ trạng thái sang CLOSED)
-    @PostMapping({"/api/sessions/{sessionId}/close", "/sessions/{sessionId}/close"})
+    @PostMapping("/api/sessions/{sessionId}/close")
     public ApiResponse<SessionControlSuccess> closeSession(
             @PathVariable String sessionId,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
@@ -76,7 +76,7 @@ public class SessionController {
     }
 
     // 7. Chi tiết phiên cho màn hình Host
-    @GetMapping({"/api/sessions/{sessionId}", "/sessions/{sessionId}"})
+    @GetMapping("/api/sessions/{sessionId}")
     public ApiResponse<SessionDetail> getSession(
             @PathVariable String sessionId,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
@@ -84,7 +84,7 @@ public class SessionController {
     }
 
     // 8. Kết quả cả phiên (giáo viên)
-    @GetMapping({"/api/sessions/{sessionId}/results", "/sessions/{sessionId}/results"})
+    @GetMapping("/api/sessions/{sessionId}/results")
     public ApiResponse<SessionResults> getSessionResults(
             @PathVariable String sessionId,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
@@ -92,7 +92,7 @@ public class SessionController {
     }
 
     // 9. Chi tiết từng câu của một học sinh
-    @GetMapping({"/api/sessions/{sessionId}/participants/{participantId}/interactions", "/sessions/{sessionId}/participants/{participantId}/interactions"})
+    @GetMapping("/api/sessions/{sessionId}/participants/{participantId}/interactions")
     public ApiResponse<List<ParticipantInteractionDto>> getParticipantInteractions(
             @PathVariable String sessionId,
             @PathVariable String participantId,
@@ -101,7 +101,7 @@ public class SessionController {
     }
 
     // 10. Giáo viên xếp học sinh vào đội (phiên TEAM)
-    @PutMapping({"/api/sessions/{sessionId}/participants/{participantId}/team", "/sessions/{sessionId}/participants/{participantId}/team"})
+    @PutMapping("/api/sessions/{sessionId}/participants/{participantId}/team")
     public ApiResponse<TeamAssignResult> assignParticipantTeam(
             @PathVariable String sessionId,
             @PathVariable String participantId,
@@ -111,13 +111,13 @@ public class SessionController {
     }
 
     // 11. Tra phiên bằng mã PIN (học sinh, public)
-    @GetMapping({"/api/sessions/by-code/{accessCode}", "/sessions/by-code/{accessCode}"})
+    @GetMapping("/api/sessions/by-code/{accessCode}")
     public ApiResponse<SessionByCode> getSessionByCode(@PathVariable String accessCode) {
         return ApiResponse.ok(sessionService.getSessionByCode(accessCode));
     }
 
     // 12. Học sinh vào phòng (public)
-    @PostMapping({"/api/sessions/{sessionId}/join", "/sessions/{sessionId}/join"})
+    @PostMapping("/api/sessions/{sessionId}/join")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<JoinResult> joinSession(
             @PathVariable String sessionId,
@@ -126,7 +126,7 @@ public class SessionController {
     }
 
     // 13. Học sinh tự đổi đội (FREE_CHOICE)
-    @PutMapping({"/api/sessions/{sessionId}/my-team", "/sessions/{sessionId}/my-team"})
+    @PutMapping("/api/sessions/{sessionId}/my-team")
     public ApiResponse<TeamAssignResult> changeMyTeam(
             @PathVariable String sessionId,
             @RequestHeader(name = "X-Participant-Id", required = false) String participantIdHeader,
@@ -137,7 +137,7 @@ public class SessionController {
     }
 
     // 14. Bảng xếp hạng (giáo viên hoặc học sinh)
-    @GetMapping({"/api/sessions/{sessionId}/leaderboard", "/sessions/{sessionId}/leaderboard"})
+    @GetMapping("/api/sessions/{sessionId}/leaderboard")
     public ApiResponse<LeaderboardDto> getLeaderboard(
             @PathVariable String sessionId,
             @RequestHeader(name = "X-Participant-Id", required = false) String participantIdHeader,
@@ -148,7 +148,7 @@ public class SessionController {
     }
 
     // 15. Kết quả lượt chơi của chính mình
-    @GetMapping({"/api/sessions/{sessionId}/my-result", "/sessions/{sessionId}/my-result"})
+    @GetMapping("/api/sessions/{sessionId}/my-result")
     public ApiResponse<MyResultDto> getMyResult(
             @PathVariable String sessionId,
             @RequestHeader(name = "X-Participant-Id", required = false) String participantIdHeader,

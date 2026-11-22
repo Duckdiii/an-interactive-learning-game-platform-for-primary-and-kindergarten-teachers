@@ -23,6 +23,8 @@ export default function ImagePickerModal({ initialQuery = '', onSelect, onClose 
     if (initialQuery.trim()) {
       void handleSearch(initialQuery.trim())
     }
+    // Chỉ tìm theo initialQuery một lần lúc mở hộp thoại; gõ tiếp thì chỉ tìm khi bấm Tìm hoặc Enter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSearch = async (searchTerm?: string) => {

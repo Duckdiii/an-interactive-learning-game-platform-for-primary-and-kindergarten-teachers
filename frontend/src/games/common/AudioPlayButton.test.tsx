@@ -2,10 +2,10 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AudioPlayButton } from './AudioPlayButton'
-import { audioService } from '../../services/audioService'
+import { audioService } from '../../services/pipeline/audioService'
 import { AUDIO_PLAY_ACTIVE_FILL, AUDIO_PLAY_INACTIVE_FILL } from './palette'
 
-vi.mock('../../services/audioService', () => ({
+vi.mock('../../services/pipeline/audioService', () => ({
   audioService: {
     play: vi.fn(),
     stopCurrent: vi.fn(),
