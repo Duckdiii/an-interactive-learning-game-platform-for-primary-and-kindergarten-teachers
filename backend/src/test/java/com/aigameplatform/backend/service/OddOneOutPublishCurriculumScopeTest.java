@@ -60,7 +60,7 @@ class OddOneOutPublishCurriculumScopeTest {
             new GameplaySettings(1.5), List.of());
     private final GamePublicationService service = new GamePublicationService(games, validation, strategies,
             mock(SceneImageLoader.class), reviews, reviewers, mapper, true,
-            "http://localhost:5173", "http://localhost:5173/play");
+            "http://localhost:5173", "http://localhost:5173/play", new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
 
     @BeforeEach void setup() {
         Teacher owner = new Teacher();
@@ -94,7 +94,7 @@ class OddOneOutPublishCurriculumScopeTest {
         givenEvidence(List.of(chunk(Subject.VIETNAMESE, GradeLevel.GRADE_1)));
         when(reviewers.getIfAvailable()).thenReturn(reviewer);
         when(reviewer.review(any(), any(), any())).thenReturn(new GeneratedContentReviewer.Result(List.of(),
-                new CurriculumEvidenceReview(CurriculumEvidenceReview.Status.PENDING,
+                new CurriculumEvidenceReview(com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                         List.of(Map.of("questionId", "q1")), List.of(), "test-reviewer")));
         when(strategy.parseToQuestions(dsl)).thenReturn(List.of());
         when(games.findByShareCode(any())).thenReturn(Optional.empty());
@@ -109,7 +109,7 @@ class OddOneOutPublishCurriculumScopeTest {
     private void givenEvidence(List<RetrievedChunk> chunks) {
         var evidence = new CurriculumEvidence("source", "sha", "dataset", "curriculum", "model", chunks);
         when(reviews.getForTeacher("game-1", "teacher-1")).thenReturn(new GameCurriculumReviewService.ReviewView(
-                UUID.randomUUID(), "game-1", Instant.EPOCH, CurriculumEvidenceReview.Status.STALE,
+                UUID.randomUUID(), "game-1", Instant.EPOCH, com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.STALE,
                 mapper.valueToTree(evidence), mapper.valueToTree(List.of()), mapper.valueToTree(List.of()),
                 "dataset", "curriculum", "model", null));
     }

@@ -29,8 +29,12 @@ export default function AppLayout() {
   const location = useLocation()
   const mainRef = useRef<HTMLElement>(null)
   // Đăng xuất cũng xóa bộ nhớ đệm truy vấn (danh sách game, game đang mở): máy dùng chung không giữ dữ liệu của người trước.
-  const handleLogout = () => {
-    logout()
+  // Chặn bấm hai lần khi mạng chậm: lần thứ hai sẽ gặp 401 và kéo theo một lượt refresh vô ích.
+  const isLoggingOut = useRef(false)
+  const handleLogout = async () => {
+    if (isLoggingOut.current) return
+    isLoggingOut.current = true
+    await logout()
     queryClient.clear()
   }
   // Người Việt gọi bằng tên (từ cuối): "Nguyễn Thị Lan" -> "Cô Lan". Chưa có họ tên thì dùng email, không thêm "Cô".
@@ -143,7 +147,13 @@ export default function AppLayout() {
         tabIndex={-1}
         className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-6 outline-none sm:px-6 sm:pt-8 lg:mx-0 lg:max-w-none lg:px-10 lg:pb-12"
       >
-        <div key={location.pathname} className="page-in mx-auto max-w-5xl">
+        <div
+          key={location.pathname}
+          className={[
+            'page-in mx-auto',
+            location.pathname.startsWith('/workspace/editor') ? 'w-full max-w-[1780px]' : 'max-w-5xl',
+          ].join(' ')}
+        >
           <MockBanner />
           <Outlet />
         </div>

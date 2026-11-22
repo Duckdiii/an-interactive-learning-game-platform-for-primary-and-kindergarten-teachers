@@ -11,7 +11,7 @@ paths:
   - `service/validation/rule` (luật Layer 2 từng loại game) và `service/validation/safety` (Layer 3: danh sách từ cấm, client OpenAI Moderation).
   - `dto/dsl`: các record của Game JSON DSL.
 - **Schema do Flyway quản lý** — `jpa.hibernate.ddl-auto` luôn là `validate`, không được đổi sang `update`/`create`. Mọi thay đổi schema phải viết migration mới trong `src/main/resources/db/migration/` theo thứ tự version tăng dần (`V1__...sql`, `V2__...sql`), không sửa lại migration đã tồn tại.
-- Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
+- Database là **Supabase** (PostgreSQL managed) — không dùng Postgres local/Docker cho môi trường chạy. Ngoại lệ duy nhất: test tự động trên Postgres thật dùng Testcontainers qua `src/test/.../db/AbstractPostgresTest`. Dùng Session Pooler hoặc Direct Connection; **không dùng Transaction Pooler (port 6543)** vì không tương thích với prepared statement của Hibernate.
 - Hikari `maximum-pool-size: 5` — Supabase free tier giới hạn connection đồng thời, không tăng giá trị này mà không hỏi.
 - Dùng Lombok cho entity/DTO thay vì viết getter/setter tay.
 - Test Spring: backend dùng Spring Boot 4.x nên mock bean bằng `@MockitoBean` (`org.springframework.test.context.bean.override.mockito`), không dùng `@MockBean`. Bỏ qua mẫu Spring Boot 3.x trong skill `spring-boot-engineer`.

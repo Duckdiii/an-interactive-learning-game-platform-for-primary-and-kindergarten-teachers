@@ -48,13 +48,37 @@ describe('Đăng nhập: giao diện và cờ khả năng', () => {
     expect(screen.queryByLabelText(/Giữ đăng nhập/)).toBeNull()
   })
 
-  it('cờ bật: hiện cả hai, nhưng API vẫn chỉ nhận email và mật khẩu', async () => {
-    features.forgotPassword = true
+  it('"Giữ đăng nhập" mặc định không chọn (máy dùng chung); chọn thì gửi rememberMe: true', async () => {
     features.rememberMe = true
     mockedLogin.mockResolvedValue({
       teacher: { id: 't1', email: 'giaovien@example.com' },
       accessToken: 'a',
-      refreshToken: 'r',
+      expiresIn: 900,
+    })
+    const user = userEvent.setup({ delay: null })
+    renderPage()
+
+    const remember = screen.getByLabelText(/Giữ đăng nhập/)
+    expect(remember).not.toBeChecked()
+    await user.click(remember)
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'giaovien@example.com' } })
+    fireEvent.change(screen.getByLabelText('Mật khẩu'), { target: { value: 'mat-khau-thu' } })
+    await user.click(screen.getByRole('button', { name: 'Đăng nhập' }))
+
+    expect(mockedLogin).toHaveBeenCalledWith({
+      email: 'giaovien@example.com',
+      password: 'mat-khau-thu',
+      rememberMe: true,
+    })
+  })
+
+  it('cờ bật: hiện cả hai; không chọn "Giữ đăng nhập" thì gửi rememberMe: false', async () => {
+    features.forgotPassword = true
+    features.rememberMe = true
+    mockedLogin.mockResolvedValue({
+      teacher: { teacherId: 't1', email: 'giaovien@example.com' },
+      accessToken: 'a',
+      expiresIn: 900,
     })
     const user = userEvent.setup({ delay: null })
     renderPage()
@@ -69,6 +93,7 @@ describe('Đăng nhập: giao diện và cờ khả năng', () => {
     expect(mockedLogin).toHaveBeenCalledWith({
       email: 'giaovien@example.com',
       password: 'mat-khau-thu',
+      rememberMe: false,
     })
     expect(await screen.findByText('Đã vào trang chủ')).toBeInTheDocument()
   })

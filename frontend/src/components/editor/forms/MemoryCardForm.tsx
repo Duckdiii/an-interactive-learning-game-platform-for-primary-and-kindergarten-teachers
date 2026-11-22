@@ -1,7 +1,11 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { viText } from '../../../constants/viText'
 import type { MemoryCardQuestion, MemoryPair } from '../../../types/game-dsl.types'
 import { QUESTION_LIMITS, TYPE_LIMITS } from '../../../utils/questionSpecs'
+import { resolveAssetUrl } from '../../../utils/assetResolver'
+import { cardStyleOf } from '../../../utils/presentation'
+import { usePresentation } from '../../../player/theme/PresentationContext'
+import MemoryCardFaces from '../../../player/renderers/MemoryCardFaces'
 import Button from '../../Button'
 import Icon from '../../ui/Icon'
 import CheckedTextField from './CheckedTextField'
@@ -67,18 +71,24 @@ export default function MemoryCardForm({ gameType, question: raw, issues, onUpda
           {countHint}
         </p>
 
-        <ol className="space-y-3">
+        <ol className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {question.pairs.map((pair, index) => (
             <li key={pair.pairId}>
-              <fieldset className="rounded-xl border-2 border-ink/10 p-3">
-                <legend className="px-1 text-base font-bold">
+              <fieldset className="rounded-2xl border-2 border-brand/20 bg-surface p-4 shadow-xs transition hover:border-brand/40">
+                <legend className="px-2 text-base font-extrabold text-ink">
                   {text.pairLabel} {index + 1}
                 </legend>
-                <div className="mb-2 flex justify-end">
+                <div className="mb-3 -mt-2 flex items-center justify-between border-b border-ink/5 pb-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-ink-soft">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-xs font-black text-brand-strong">
+                      {index + 1}
+                    </span>
+                    <span>Cặp thẻ nhớ #{index + 1}</span>
+                  </div>
                   <Button
                     type="button"
                     variant="secondary"
-                    className="shrink-0"
+                    className="shrink-0 h-8 w-8 !p-0 flex items-center justify-center rounded-lg hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300"
                     disabled={!canRemove}
                     aria-describedby={canRemove ? undefined : 'memory-pairs-limit'}
                     aria-label={`${text.removePair} ${index + 1}`}
@@ -138,36 +148,73 @@ function CardFields({ pair, index, issues, onCommit }: CardFieldsProps) {
   const base = `pairs[${index}].content`
   const needError = fieldMessage(issues, base)
   const prefix = idPrefix(pair.pairId)
+  const assetUrl = pair.content.imageUrl || resolveAssetUrl(pair.content.text, pair.content.visualPrompt)
+  const cardStyle = cardStyleOf(usePresentation()?.world)
+  // Thẻ mẫu mở sẵn mặt ngửa; giáo viên bấm để xem mặt úp như bé thấy khi bắt đầu.
+  const [faceUp, setFaceUp] = useState(true)
+  const hasFace = Boolean(pair.content.text || assetUrl)
 
   return (
-    <fieldset className="space-y-3 rounded-xl bg-paper p-3" aria-describedby={needError ? `${prefix}-need` : undefined}>
-      <legend className="px-1 text-sm font-bold">{text.cardFace}</legend>
+    <fieldset
+      className="space-y-3 rounded-xl border border-purple-200/70 bg-purple-50/25 p-3.5 transition"
+      aria-describedby={needError ? `${prefix}-need` : undefined}
+    >
+      <legend className="px-1 text-sm font-bold text-ink flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full bg-purple-500" />
+        <span>{text.cardFace}</span>
+      </legend>
       {needError ? (
         <p id={`${prefix}-need`} className="flex items-start gap-2 text-sm font-semibold text-rose-800">
           <Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{needError}</span>
         </p>
       ) : null}
-      <CheckedTextField
-        id={`${prefix}-text`}
-        label={`${text.cardTextLabel} (${text.pairLabel.toLowerCase()} ${index + 1})`}
-        required={false}
-        invalid={Boolean(needError)}
-        value={pair.content.text ?? ''}
-        limits={LIMITS.sideText}
-        error={fieldMessage(issues, `${base}.text`)}
-        onCommit={(next) => onCommit('text', next)}
-      />
-      <CheckedTextField
-        id={`${prefix}-image`}
-        label={`${text.cardImageLabel} (${text.pairLabel.toLowerCase()} ${index + 1})`}
-        required={false}
-        invalid={Boolean(needError)}
-        value={pair.content.visualPrompt ?? ''}
-        limits={QUESTION_LIMITS.visualPrompt}
-        error={fieldMessage(issues, `${base}.visualPrompt`)}
-        onCommit={(next) => onCommit('visualPrompt', next)}
-      />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <CheckedTextField
+          id={`${prefix}-text`}
+          label={`${text.cardTextLabel} (${text.pairLabel.toLowerCase()} ${index + 1})`}
+          required={false}
+          invalid={Boolean(needError)}
+          value={pair.content.text ?? ''}
+          limits={LIMITS.sideText}
+          error={fieldMessage(issues, `${base}.text`)}
+          onCommit={(next) => onCommit('text', next)}
+        />
+        <CheckedTextField
+          id={`${prefix}-image`}
+          label={`${text.cardImageLabel} (${text.pairLabel.toLowerCase()} ${index + 1})`}
+          required={false}
+          invalid={Boolean(needError)}
+          value={pair.content.visualPrompt ?? ''}
+          limits={QUESTION_LIMITS.visualPrompt}
+          error={fieldMessage(issues, `${base}.visualPrompt`)}
+          onCommit={(next) => onCommit('visualPrompt', next)}
+        />
+      </div>
+      {hasFace ? (
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setFaceUp((up) => !up)}
+            aria-pressed={!faceUp}
+            aria-label={text.flipCard}
+            className="flip-card relative aspect-[4/5] w-20 shrink-0 select-none focus:outline-none focus-visible:ring-4 focus-visible:ring-brand"
+            style={{ borderRadius: cardStyle.radius }}
+          >
+            <MemoryCardFaces content={pair.content} cardStyle={cardStyle} flipped={faceUp} showContent={faceUp} />
+          </button>
+          <p className="text-sm text-ink-soft">{text.cardPreviewHint}</p>
+        </div>
+      ) : null}
+      {assetUrl ? (
+        <div className="flex items-center gap-2.5 rounded-xl border border-purple-200/70 bg-white/90 p-2 shadow-2xs">
+          <img src={assetUrl} alt="" className="h-8 w-8 shrink-0 rounded-lg bg-surface object-contain p-0.5 border border-ink/5" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <span className="block truncate text-xs font-bold text-ink">Hình minh họa mặt thẻ</span>
+            <span className="block truncate text-2xs text-ink-soft">{pair.content.imageUrl ? 'Đã gán vector' : 'Nhận diện từ khóa'}</span>
+          </div>
+        </div>
+      ) : null}
     </fieldset>
   )
 }

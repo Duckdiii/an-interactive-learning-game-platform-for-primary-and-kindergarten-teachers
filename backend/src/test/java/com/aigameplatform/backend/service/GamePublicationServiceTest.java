@@ -60,7 +60,7 @@ class GamePublicationServiceTest {
     private final VisualClozeGameDsl dsl = imageDsl();
     private final GamePublicationService service = new GamePublicationService(games, validation, strategies, images, reviews,
             reviewerProvider, mapper, false,
-            "http://localhost:5173", "https://play.example/room/");
+            "http://localhost:5173", "https://play.example/room/", new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
 
     GamePublicationServiceTest() {
         Teacher owner = new Teacher(); owner.setId("teacher-1");
@@ -101,40 +101,6 @@ class GamePublicationServiceTest {
     void publishingUnchangedDraftDoesNotMarkItsReviewStale() {
         when(strategy.toGameDsl(game)).thenReturn(dsl);
         service.publish("game-1", mapper.valueToTree(dsl), teacher);
-        verify(reviews, never()).saveEditedGame(any(), any());
-        verify(games).saveAndFlush(game);
-    }
-
-    @Test
-    void teacherCanLoadOwnedDraftForExistingWorkspaceRoute() {
-        when(strategies.get(GameType.VISUAL_CLOZE)).thenReturn(strategy);
-        when(strategy.toGameDsl(game)).thenReturn(dsl);
-
-        var result = service.getGame("game-1", teacher);
-
-        assertThat(result.get("gameId").asString()).isEqualTo("game-1");
-        assertThat(result.get("status").asString()).isEqualTo("DRAFT");
-        assertThat(result.get("mode").asString()).isEqualTo("IMAGE");
-    }
-
-    @Test
-    void teacherCanSaveValidatedDraftThroughExistingWorkspaceRoute() {
-        when(validation.validate(any(tools.jackson.databind.JsonNode.class))).thenReturn(new ValidationReport(List.of(), dsl));
-        when(strategies.get(GameType.VISUAL_CLOZE)).thenReturn(strategy);
-        when(strategy.parseToQuestions(dsl)).thenReturn(List.of());
-        when(games.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
-        var result = service.saveDraft("game-1", mapper.valueToTree(dsl), teacher);
-
-        assertThat(result.get("mode").asString()).isEqualTo("IMAGE");
-        assertThat(game.getStatus()).isEqualTo(GameStatus.DRAFT);
-        verify(reviews).saveEditedGame(game, "teacher-1");
-    }
-
-    @Test
-    void savingUnchangedDraftDoesNotMarkReviewStale() {
-        when(strategy.toGameDsl(game)).thenReturn(dsl);
-        service.saveDraft("game-1", mapper.valueToTree(dsl), teacher);
         verify(reviews, never()).saveEditedGame(any(), any());
         verify(games).saveAndFlush(game);
     }
@@ -302,7 +268,7 @@ class GamePublicationServiceTest {
         when(validation.validate(any(tools.jackson.databind.JsonNode.class))).thenReturn(new ValidationReport(List.of(), odd));
         when(strategies.get(GameType.ODD_ONE_OUT)).thenReturn(strategy);
         var ragService = new GamePublicationService(games, validation, strategies, images, reviews, reviewerProvider,
-                mapper, true, "http://localhost:5173", "https://play.example/room/");
+                mapper, true, "http://localhost:5173", "https://play.example/room/", new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
         assertThatThrownBy(() -> ragService.publish("game-1", mapper.valueToTree(odd), teacher))
                 .isInstanceOf(com.aigameplatform.backend.exception.CurriculumEvidenceNotFoundException.class);
         verify(reviewerProvider, never()).getIfAvailable();

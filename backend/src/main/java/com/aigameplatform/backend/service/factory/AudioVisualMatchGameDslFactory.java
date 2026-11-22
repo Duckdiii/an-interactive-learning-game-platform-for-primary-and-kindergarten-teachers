@@ -17,8 +17,11 @@ import org.springframework.stereotype.Component;
 public class AudioVisualMatchGameDslFactory extends AbstractGameDslFactory<AudioVisualMatchAiOutput,
         AudioVisualMatchAiQuestion, AudioVisualMatchQuestionDsl, AudioVisualMatchGameDsl> {
 
-    public AudioVisualMatchGameDslFactory(RandomGenerator random) {
-        super(GameType.AUDIO_VISUAL_MATCH, AudioVisualMatchAiOutput.class, random);
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog;
+
+    public AudioVisualMatchGameDslFactory(RandomGenerator random, GameAssetCatalog assets, com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        super(GameType.AUDIO_VISUAL_MATCH, AudioVisualMatchAiOutput.class, random, assets);
+        this.notoCatalog = notoCatalog;
     }
 
     @Override
@@ -30,7 +33,7 @@ public class AudioVisualMatchGameDslFactory extends AbstractGameDslFactory<Audio
     protected AudioVisualMatchQuestionDsl createQuestion(AudioVisualMatchAiQuestion ai, QuestionBase base) {
         // Hình đúng và hình nhiễu lưu riêng; việc trộn thứ tự hiển thị là của bản dành cho học sinh.
         return new AudioVisualMatchQuestionDsl(base.id(), base.timeLimitSeconds(), base.points(), ai.audioText(),
-                null, null, null, image(ai.correct()), ai.distractors().stream().map(AudioVisualMatchGameDslFactory::image).toList());
+                null, null, null, image(ai.correct()), ai.distractors().stream().map(this::image).toList());
     }
 
     @Override
@@ -39,14 +42,14 @@ public class AudioVisualMatchGameDslFactory extends AbstractGameDslFactory<Audio
         return new AudioVisualMatchGameDsl(schemaVersion(), supportedType(), metadata, settings, questions);
     }
 
-    private static ImageChoiceDsl image(AiImage ai) {
-        return new ImageChoiceDsl(ai.visualPrompt(), null);
+    private ImageChoiceDsl image(AiImage ai) {
+        return new ImageChoiceDsl(ai.visualPrompt(), imageOf(ai.asset()));
     }
 
     public AudioVisualMatchGameDsl createCatalog(com.aigameplatform.backend.dto.dsl.ai.AiGameOutput output,
             GameDslRequest request) {
         if (!(output instanceof AudioVisualMatchAiOutput avm)) throw new IllegalArgumentException("AVM output required");
-        var catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog();
+        var catalog = notoCatalog;
         var questions = new java.util.ArrayList<AudioVisualMatchQuestionDsl>();
         for (int i = 0; i < avm.questions().size(); i++) {
             var question = avm.questions().get(i);

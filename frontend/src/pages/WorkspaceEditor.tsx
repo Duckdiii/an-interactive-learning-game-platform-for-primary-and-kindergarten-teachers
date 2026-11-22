@@ -35,7 +35,12 @@ import { useGameEditor } from '../hooks/useGameEditor'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChangesGuard'
 import { ROUTES } from '../routes/paths'
-import type { GameResponse } from '../types/game-response.types'
+import CpfWorkspace from '../components/editor/CpfWorkspace'
+import ReviseChatPanel from '../components/editor/ReviseChatPanel'
+import { deepEqual, toContent } from '../utils/gameContent'
+import { editorPresentation } from '../components/editor/preview/editorPresentation'
+import { PresentationProvider } from '../player/theme/PresentationContext'
+import { isCpfGameResponse, type GameResponse } from '../types/game-response.types'
 import { parseApiError } from '../utils/apiError'
 import { groupByQuestion } from '../utils/gameValidation'
 import { summarizeQuestions } from '../utils/questionSummary'
@@ -86,6 +91,8 @@ function EditorSkeleton() {
   )
 }
 
+const reviseText = viText.reviseChat
+
 function EditorWorkspace({ game }: { game: GameResponse }) {
   // Số ô chữ còn chữ vừa gõ chưa vào bản đang soạn (xem `PendingEditsContext`). Khai báo trước hook để hoãn tự lưu trong lúc đó.
   const [pendingEdits, setPendingEdits] = useState(0)
@@ -96,7 +103,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   useEffect(() => unmarkNewGame(game.gameId), [game.gameId])
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
-  const [playing, setPlaying] = useState(false)
+  const [playing, setPlaying] = useState(() => new URLSearchParams(window.location.search).get('play') === '1')
   // Vừa nhờ AI làm lại (hoặc vừa hoàn tác) câu nào: để hiện thông báo kèm nút Hoàn tác. Nằm ở đây vì thẻ sửa câu được dựng lại sau khi áp câu mới.
   const [regenNotice, setRegenNotice] = useState<{ kind: 'applied' | 'undone'; questionId: string } | null>(null)
   const beginEdit = useCallback(() => {
@@ -132,6 +139,18 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const current = items[index]
   const isPublished = game.status === 'PUBLISHED'
   const title = draft.metadata.title.trim() || text.untitled
+  const [reviseNotice, setReviseNotice] = useState<string | null>(null)
+  // Bản nháp mới nhất (đọc trong callback trả về muộn) và bản nháp lúc gửi yêu cầu sửa.
+  const draftRef = useRef(draft)
+  draftRef.current = draft
+  const sentDraft = useRef(draft)
+  const formPresentation = editorPresentation({
+    presentation: draft.metadata.presentation,
+    subject: draft.metadata.subject,
+    gameType: draft.gameType,
+    topic: draft.metadata.topic,
+    seed: draft.metadata.title,
+  }).presentation
   const saveText = text.save
   const conflict = editor.saveError?.code === 'CONFLICT'
 
@@ -271,6 +290,8 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
         {current ? `${text.questionLabel} ${index + 1}` : ''}
       </p>
       {current ? (
+        // Phần form vẽ thứ bé sẽ thấy (mặt úp thẻ Lật thẻ) theo cùng thế giới với xem trước.
+        <PresentationProvider presentation={formPresentation}>
         <QuestionEditor
           key={`${index}-${editor.revision}`}
           gameType={draft.gameType}
@@ -296,6 +317,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
             />
           }
         />
+        </PresentationProvider>
       ) : null}
     </div>
   )
@@ -310,13 +332,53 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
         total={items.length}
         gradeLevel={draft.metadata.gradeLevel}
         subject={draft.metadata.subject}
+        topic={draft.metadata.topic}
         hasIssues={issuesByQuestion.has(index)}
+        presentation={draft.metadata.presentation}
+        seed={draft.metadata.title}
+        onPresentationChange={editor.setPresentation}
       />
       <PublishReadiness
         issues={editor.readinessIssues}
         questionCount={items.length}
         onSelectQuestion={choose}
         onSelectGameInfo={() => focusField('game-title')}
+      />
+      <ReviseChatPanel
+        gameId={game.gameId}
+        // AI sửa từ bản đã lưu trên máy chủ: bản đang sửa phải hợp lệ và lưu xong thì kết quả mới không làm mất sửa tay.
+        blockedReason={editor.liveIssues.length > 0 ? reviseText.fixFirst : editor.dirty || editor.autosave !== 'saved' ? reviseText.waitSave : null}
+        onSending={() => {
+          sentDraft.current = draftRef.current
+        }}
+        onRevised={(revised) => {
+          if (isCpfGameResponse(revised)) return reviseText.errorFallback
+          if (!deepEqual(draftRef.current, sentDraft.current)) {
+            setReviseNotice(reviseText.editedMeanwhile)
+            return reviseText.editedMeanwhile
+          }
+          editor.applyChatRevision(toContent(revised))
+          setReviseNotice(reviseText.applied)
+        }}
+        actions={
+          <>
+            {editor.canUndoChatRevision ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  editor.undoChatRevision()
+                  setReviseNotice(reviseText.undone)
+                }}
+              >
+                {reviseText.undo}
+              </Button>
+            ) : null}
+            <p role="status" className="text-sm text-ink-soft">
+              {reviseNotice}
+            </p>
+          </>
+        }
       />
     </div>
   )
@@ -350,9 +412,9 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
 
       {/* Game do AI mô phỏng tạo: nội dung là bản mẫu của loại game, không khớp mô tả của giáo viên. Nhắc ngay ở trình soạn thảo, không chỉ ở trang tạo. */}
       {isMockGenerated(game.gameId) ? (
-        <div role="note" className="flex flex-wrap items-start gap-3 rounded-2xl border-2 border-sun bg-sun-soft p-4">
+        <div role="note" className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-50/90 via-amber-50/60 to-orange-50/40 p-3.5 shadow-xs">
           <MockBadge />
-          <p className="min-w-0 flex-1 text-base text-ink">{text.simulatedGame}</p>
+          <p className="min-w-0 flex-1 text-sm font-medium text-ink-soft sm:text-base">{text.simulatedGame}</p>
         </div>
       ) : null}
 
@@ -534,5 +596,7 @@ export default function WorkspaceEditor() {
   }
 
   // `key` theo gameId: đổi sang game khác thì câu đang chọn và khung đang xem được đặt lại.
+  if (isCpfGameResponse(query.data)) return <CpfWorkspace key={query.data.gameId} game={query.data} />
+
   return <EditorWorkspace key={query.data.gameId} game={query.data} />
 }

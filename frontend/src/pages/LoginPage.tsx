@@ -18,6 +18,7 @@ import { parseApiError } from '../utils/apiError'
 interface LoginForm {
   email: string
   password: string
+  rememberMe: boolean
 }
 
 interface LoginLocationState {
@@ -27,6 +28,7 @@ interface LoginLocationState {
 const initialForm: LoginForm = {
   email: '',
   password: '',
+  rememberMe: false,
 }
 
 export default function LoginPage() {
@@ -34,7 +36,7 @@ export default function LoginPage() {
   const [form, setForm] = useState(initialForm)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const locationState = location.state as LoginLocationState | null
@@ -45,16 +47,25 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      const { teacher, accessToken, refreshToken } = await loginTeacher(form)
-      login(teacher, accessToken, refreshToken)
+      const { teacher, accessToken } = await loginTeacher(form)
+      // shortcut: chưa có giao diện quản trị trên main; tới khi gộp admin-portal (#72) thì chuyển ROLE_ADMIN sang route /admin.
+      if (teacher.role === 'ROLE_ADMIN') {
+        // Cấp phiên tạm để gọi được /auth/logout, thu hồi refresh token backend vừa đặt.
+        login(teacher, accessToken)
+        await logout()
+        setErrorMessage('Tài khoản quản trị viên chưa có giao diện quản trị. Vui lòng liên hệ nhóm phát triển.')
+        return
+      }
+      login(teacher, accessToken)
       navigate(ROUTES.dashboard, { replace: true })
     } catch (error) {
       const isAuthFailure =
         axios.isAxiosError(error) && error.response?.status === 401
       setErrorMessage(
         isAuthFailure
-          ? 'Email hoặc mật khẩu không đúng'
-          : parseApiError(error, 'Không thể đăng nhập lúc này').message,
+          ? 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.'
+          : parseApiError(error, 'Không thể đăng nhập vào lúc này. Vui lòng thử lại sau.')
+              .message,
       )
     } finally {
       setIsSubmitting(false)
@@ -107,13 +118,12 @@ export default function LoginPage() {
           label="Mật khẩu"
           aside={
             AUTH_FEATURES.forgotPassword ? (
-              // Chưa có route/màn "quên mật khẩu" (API planned); đổi sang Link khi có.
-              <a
-                href="/forgot-password"
+              <Link
+                to={ROUTES.forgotPassword}
                 className="inline-flex min-h-11 items-center text-sm font-extrabold text-brand-strong underline"
               >
                 {viText.auth.forgotPassword}
-              </a>
+              </Link>
             ) : undefined
           }
         >
@@ -131,12 +141,15 @@ export default function LoginPage() {
         </FormField>
 
         {AUTH_FEATURES.rememberMe ? (
-          // Chưa gửi lên API: LoginRequest.rememberMe chưa được Backend cài.
+          // Mặc định không chọn: máy ở trường thường dùng chung, chỉ giữ đăng nhập 30 ngày khi cô chủ động chọn.
           <label className="flex min-h-11 items-center gap-3 text-sm font-bold">
             <input
               type="checkbox"
               name="rememberMe"
-              defaultChecked
+              checked={form.rememberMe}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, rememberMe: event.target.checked }))
+              }
               className="h-5 w-5 accent-brand"
             />
             {viText.auth.rememberMe}

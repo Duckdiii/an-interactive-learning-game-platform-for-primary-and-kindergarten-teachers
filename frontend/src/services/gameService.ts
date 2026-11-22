@@ -1,6 +1,6 @@
 import { fetchGame, saveGame } from '../api/gamesApi'
 import { isMock } from '../config/mockMode'
-import type { GameEnvelopeBody, GameResponse } from '../types/game-response.types'
+import type { AnyGameResponse, GameEnvelopeBody, GameResponse } from '../types/game-response.types'
 import { notFoundError } from './mock/mockErrors'
 import { getMockGame, saveMockGame } from './mock/mockGames'
 import { runMock } from './mock/mockRuntime'
@@ -9,7 +9,7 @@ import { runMock } from './mock/mockRuntime'
 // thật. Lỗi mô phỏng (404, 409, 400) có đúng hình dạng lỗi của backend nên `parseApiError` xử lý như nhau.
 
 /** `GET /games/{gameId}`: mở một game để soạn thảo. */
-export async function getGame(gameId: string): Promise<GameResponse> {
+export async function getGame(gameId: string): Promise<AnyGameResponse> {
   if (!isMock('editor')) return fetchGame(gameId)
 
   // Kịch bản "trống" nghĩa là giáo viên chưa có game nào, nên mở thẳng một địa chỉ game cũng không tìm thấy.
