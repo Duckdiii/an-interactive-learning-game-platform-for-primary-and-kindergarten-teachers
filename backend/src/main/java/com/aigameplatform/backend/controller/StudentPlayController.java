@@ -1,11 +1,13 @@
 package com.aigameplatform.backend.controller;
 
-import com.aigameplatform.backend.dto.livearena.ParticipantDto;
 import com.aigameplatform.backend.dto.request.PlayRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
+import com.aigameplatform.backend.service.play.LeaderboardRegistry;
 import com.aigameplatform.backend.service.play.LiveArenaService;
+import com.aigameplatform.backend.service.play.ScoringService;
 import com.aigameplatform.backend.service.play.StudentPlayService;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,50 +22,69 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api")
 public class StudentPlayController {
     private final StudentPlayService play;
     private final LiveArenaService liveArenaService;
+    private final ScoringService scoringService;
+    private final LeaderboardRegistry leaderboardRegistry;
 
-    public StudentPlayController(StudentPlayService play, LiveArenaService liveArenaService) {
+    public StudentPlayController(
+            StudentPlayService play,
+            LiveArenaService liveArenaService,
+            ScoringService scoringService,
+            LeaderboardRegistry leaderboardRegistry) {
         this.play = play;
         this.liveArenaService = liveArenaService;
+        this.scoringService = scoringService;
+        this.leaderboardRegistry = leaderboardRegistry;
     }
 
-    @GetMapping("/api/games/shared/{shareCode}")
+    @GetMapping("/games/shared/{shareCode}")
     public ApiResponse<Map<String, Object>> shared(@PathVariable String shareCode) {
         return ApiResponse.ok(play.sharedGame(shareCode));
     }
 
-    @PostMapping("/api/games/shared/{shareCode}/play")
+    @PostMapping("/games/shared/{shareCode}/play")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Map<String, Object>> start(@PathVariable String shareCode, @Valid @RequestBody PlayRequest body) {
-        Map<String, Object> started = play.start(shareCode, body.nickname());
-        liveArenaService.addParticipant(String.valueOf(started.get("sessionId")),
-                new ParticipantDto(String.valueOf(started.get("participantId")),
-                        String.valueOf(started.get("nickname")), true));
-        return ApiResponse.ok(started);
+        return ApiResponse.ok(play.start(shareCode, body.nickname()));
     }
 
-    @GetMapping("/api/sessions/{sessionId}/questions")
+    @GetMapping("/sessions/{sessionId}/questions")
     public ApiResponse<ObjectNode> questions(@PathVariable String sessionId,
             @RequestHeader(name = "X-Participant-Id", required = false) String participantId) {
-        ObjectNode questions = play.questions(sessionId, participantId);
-        liveArenaService.startQuestionClock(sessionId, participantId); // chỉ chạy tới đây khi participantId đã được service xác thực
-        return ApiResponse.ok(questions);
+        return ApiResponse.ok(play.questions(sessionId, participantId));
     }
 
-    @PostMapping("/api/sessions/{sessionId}/interactions")
+    @PostMapping("/sessions/{sessionId}/interactions")
     public ApiResponse<Map<String, Object>> interaction(@PathVariable String sessionId,
             @RequestHeader(name = "X-Participant-Id", required = false) String participantIdHeader,
-            @RequestBody(required = false) JsonNode body) {
-        // Học sinh không có Principal ở REST; participantId do play.interact xác thực thuộc đúng phiên.
+            @RequestBody(required = false) JsonNode body,
+            Principal principal) {
         Map<String, Object> result = play.interact(sessionId, participantIdHeader, body);
-        liveArenaService.broadcastAnswerStatus(sessionId, participantIdHeader);
+        String pid = participantIdHeader;
+        if (pid == null && principal != null) {
+            pid = principal.getName();
+        }
+        if (pid == null && body != null && body.has("participantId")) {
+            pid = body.get("participantId").asText();
+        }
+        if (pid != null) {
+            liveArenaService.broadcastAnswerStatus(sessionId, pid);
 
-        // body đã được play.interact kiểm tra là object; điểm tính theo giờ server trong LiveArenaService.
-        liveArenaService.recordAnswer(sessionId, participantIdHeader, body.path("questionId").asText(),
-                Boolean.TRUE.equals(result.get("isCorrect")));
+            boolean isCorrect = Boolean.TRUE.equals(result.get("isCorrect"));
+            long timeSpentMs = body != null && body.has("timeSpentMs") ? body.get("timeSpentMs").asLong(0) : 0;
+            long timeLimitMs = 30_000L;
+            if (result.containsKey("timeLimitMs")) {
+                timeLimitMs = ((Number) result.get("timeLimitMs")).longValue();
+            }
+
+            int points = scoringService.calculateScore(isCorrect, timeSpentMs, timeLimitMs);
+            String participantName = liveArenaService.getParticipantName(sessionId, pid);
+            leaderboardRegistry.addScore(sessionId, pid, participantName, points);
+            liveArenaService.broadcastLeaderboard(sessionId);
+        }
         return ApiResponse.ok(result);
     }
 }

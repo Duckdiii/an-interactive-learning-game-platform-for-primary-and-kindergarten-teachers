@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.generation;
 
+import com.aigameplatform.backend.dto.admin.AiConfigVersionDto;
 import com.aigameplatform.backend.service.asset.AssetRetriever;
 import com.aigameplatform.backend.service.factory.GameAssetCatalog;
 import java.util.Objects;
@@ -8,12 +9,13 @@ import org.springframework.beans.factory.annotation.Value;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.service.admin.AiConfigService;
+import com.aigameplatform.backend.service.curriculum.CurriculumConstraints;
+import com.aigameplatform.backend.service.curriculum.CurriculumTopicParser;
 import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
-import com.aigameplatform.backend.service.curriculum.CurriculumTopicParser;
-import com.aigameplatform.backend.service.curriculum.CurriculumConstraints;
-import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -22,10 +24,11 @@ import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import java.util.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import java.util.Base64;
 
 /** Gemini adapter that delegates content instructions and schema to the selected game strategy. */
 @Component
@@ -59,6 +62,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
 
     private final ChatModel model;
     private final GameContentStrategyRegistry strategies;
+    private final AiConfigService aiConfigService;
     private final GameAssetCatalog assets;
     private final CurriculumTopicParser topicParser = new CurriculumTopicParser();
     private final AssetRetriever retriever;
@@ -67,14 +71,23 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
 
     public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
             GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
+            boolean shortlistEnabled, com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        this(model, strategies, assets, retriever, shortlistEnabled, notoCatalog, null);
+    }
+
+    @Autowired
+    public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
+            GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
             @Value("${app.assets.shortlist.enabled:false}") boolean shortlistEnabled,
-            com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+            com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog,
+            @Autowired(required = false) AiConfigService aiConfigService) {
         this.notoCatalog = notoCatalog;
         this.model = model;
         this.strategies = strategies;
         this.assets = assets;
         this.retriever = retriever;
         this.shortlistEnabled = shortlistEnabled;
+        this.aiConfigService = aiConfigService;
     }
 
     /** Hình có từ khóa trong yêu cầu của giáo viên, đưa lên đầu danh mục để AI chọn đúng hình (thử nghiệm, sau cờ). */
@@ -134,16 +147,34 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;
+        boolean singleQuestion = attempt.customInstruction() != null && !attempt.customInstruction().isBlank();
+        if (singleQuestion) {
+            systemPrompt += "\n\n" + attempt.customInstruction();
+        }
         Revision revision = attempt.revision();
         String userPrompt = attempt.isRetry()
                 ? retryPrompt(attempt) + (revision == null ? "" : "\n" + revision.reminder())
                 : revision != null
                         ? revision.promptSection() + "\nChỉ trả về JSON theo schema đã cung cấp."
-                        : "Tạo nội dung game theo yêu cầu trong system prompt. Chỉ trả về JSON theo schema đã cung cấp.";
+                        : singleQuestion
+                                ? "Tạo đúng 1 câu hỏi mới theo yêu cầu và hướng dẫn trong system prompt. Chỉ trả về JSON theo schema đã cung cấp (mảng questions chứa đúng 1 phần tử)."
+                                : "Tạo nội dung game theo yêu cầu trong system prompt. Chỉ trả về JSON theo schema đã cung cấp.";
         ResponseFormat schemaFormat = ResponseFormat.builder().type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder().rootElement(JsonRawSchema.builder()
                         .schema(decoderSchema(attempt.structuredSchema())).build()).build()).build();
-        ChatRequestParameters parameters = ChatRequestParameters.builder().responseFormat(schemaFormat).build();
+        var paramBuilder = ChatRequestParameters.builder().responseFormat(schemaFormat);
+        if (aiConfigService != null) {
+            AiConfigVersionDto activeConfig = aiConfigService.getActiveConfig();
+            if (activeConfig != null) {
+                if (activeConfig.temperature() != null) {
+                    paramBuilder.temperature(activeConfig.temperature());
+                }
+                if (activeConfig.maxTokens() != null) {
+                    paramBuilder.maxOutputTokens(activeConfig.maxTokens());
+                }
+            }
+        }
+        ChatRequestParameters parameters = paramBuilder.build();
         try {
             UserMessage userMessage = attempt.imageInput() == null ? UserMessage.from(userPrompt)
                     : UserMessage.from(userPrompt, ImageContent.from(

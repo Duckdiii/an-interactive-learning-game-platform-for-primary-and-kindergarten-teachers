@@ -30,7 +30,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http, JwtService jwtService, RestSecurityErrorHandler errorHandler) throws Exception {
         http
-            // API xác thực bằng header Authorization (không dựa vào cookie), nên bỏ kiểm tra CSRF cho các đường dẫn API/WebSocket.
+            // API xác thực bằng header Authorization (không dựa vào cookie), nên bỏ kiểm tra CSRF cho đường dẫn API/WebSocket.
             // Cookie refresh token chỉ gửi tới /api/auth, kèm SameSite=Strict.
             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/ws/**"))
             .cors(Customizer.withDefaults())
@@ -47,8 +47,12 @@ public class SecurityConfig {
                         "/api/auth/register", "/api/auth/login", "/api/auth/refresh",
                         "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers("/ws/live-arena/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/interactions").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions",
+                        "/api/sessions/by-code/*", "/api/sessions/*/leaderboard", "/api/sessions/*/my-result").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/join",
+                        "/api/sessions/*/interactions").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/sessions/*/my-team").permitAll()
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)

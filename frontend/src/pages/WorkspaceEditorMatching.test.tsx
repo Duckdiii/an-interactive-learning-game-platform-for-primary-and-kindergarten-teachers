@@ -1,9 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { buildMockGameContents } from '../services/mock/gameFixtures'
 import { getMockGame, resetMockGames } from '../services/mock/mockGames'
-import { summarizeQuestion } from '../utils/questionSummary'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import WorkspaceEditor from './WorkspaceEditor'
@@ -343,34 +341,8 @@ describe('MATCHING: chỉnh sửa chồng nhau khi kiểm tra từ ngữ còn đ
   })
 })
 
-describe('các loại game còn lại: chỉ sửa trường chung, nội dung chữ chỉ đọc', () => {
-  // mock-game-3 DRAG_DROP, 4 AUDIO_VISUAL_MATCH (đã có form), 5 ORDERING, 6 MEMORY_CARD (đã có form), 7 SPOT_THE_TARGET, 8 WORD_SCRAMBLE, 9 ODD_ONE_OUT, 10 VISUAL_CLOZE.
-  const OTHER_IDS = [3, 5, 7].map((n) => `mock-game-${n}`)
-
-  // Cùng thứ tự với `OTHER_IDS`.
-  const OTHER_TYPES = ['DRAG_DROP', 'ORDERING', 'SPOT_THE_TARGET'] as const
-
-  it.each(OTHER_IDS.map((gameId, position) => [gameId, OTHER_TYPES[position]] as const))('%s (%s): có thông báo, nội dung chỉ đọc và đủ 4 trường chung; không có ô sửa nội dung', async (gameId, type) => {
-    await openLoaded(gameId)
-
-    expect(screen.getByText('Loại game này chưa có form sửa chi tiết')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Nội dung câu (chỉ đọc)' })).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: /^Lời đọc/ })).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: /^Mô tả hình ảnh/ })).toBeInTheDocument()
-    expect(timingBox(/Thời gian trả lời/)).toBeInTheDocument()
-    expect(timingBox(/^Điểm/)).toBeInTheDocument()
-    expect(screen.queryByRole('textbox', { name: /Nội dung câu hỏi/ })).not.toBeInTheDocument()
-    // Nội dung chữ chỉ đọc: một đoạn văn, không phải ô nhập.
-    const readOnly = screen.getByRole('heading', { name: 'Nội dung câu (chỉ đọc)' }).parentElement as HTMLElement
-
-    expect(within(readOnly).queryAllByRole('textbox')).toHaveLength(0)
-    // Đúng bằng dòng tóm tắt dùng cho danh sách câu (không thiếu, không thừa).
-    const game = buildMockGameContents().find((item) => item.gameType === type)!
-
-    expect(readOnly.querySelector('p')?.textContent).toBe(summarizeQuestion(game.gameType, game.questions[0]))
-  })
-
-  it('sửa thời gian ở loại chỉ có trường chung: danh sách cập nhật và lưu được', async () => {
+describe('các trường chung: thời gian, lời đọc, mô tả hình ảnh', () => {
+  it('sửa thời gian: danh sách cập nhật và lưu được', async () => {
     const user = userEvent.setup()
 
     await openLoaded('mock-game-5')

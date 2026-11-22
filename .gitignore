@@ -97,3 +97,5 @@ scripts/tmp/
 /frontend/public/mock/noto-emoji-ooo/
 /frontend/src/pages/dev/NotoOddOneOutFixtures.ts
 /frontend/src/pages/dev/GameRenderersSandbox.test.tsx
+
+.vite/

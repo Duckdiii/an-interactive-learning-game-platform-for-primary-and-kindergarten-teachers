@@ -21,7 +21,14 @@ import com.aigameplatform.backend.service.generation.Revision;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import com.aigameplatform.backend.service.validation.GameValidationService;
 import com.aigameplatform.backend.service.validation.ValidationReport;
+import com.aigameplatform.backend.dto.dsl.QuestionDsl;
+import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
+import com.aigameplatform.backend.entity.question.QuestionGame;
+import com.aigameplatform.backend.service.media.GameAudioEnricher;
+import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import java.util.List;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -35,9 +42,17 @@ public class DslGameContentHandler implements GameContentHandler {
     private final GameValidationService validation;
     private final GameContentStrategyRegistry strategies;
     private final JsonMapper jsonMapper;
+    private final ObjectProvider<GameAudioEnricher> audioEnrichers;
 
     public DslGameContentHandler(GameGenerationService generation, GameValidationService validation,
             GameContentStrategyRegistry strategies, JsonMapper jsonMapper) {
+        this(generation, validation, strategies, jsonMapper, null);
+    }
+
+    @Autowired
+    public DslGameContentHandler(GameGenerationService generation, GameValidationService validation,
+            GameContentStrategyRegistry strategies, JsonMapper jsonMapper, ObjectProvider<GameAudioEnricher> audioEnrichers) {
+        this.audioEnrichers = audioEnrichers;
         this.generation = generation;
         this.validation = validation;
         this.strategies = strategies;
@@ -134,6 +149,32 @@ public class DslGameContentHandler implements GameContentHandler {
             ((ObjectNode) revised.get("metadata")).set("presentation", metadata.get("presentation"));
         }
         return revised;
+    }
+
+    @Override
+    public RegeneratedQuestionDto regenerateQuestion(ObjectNode current, String questionId, String feedback) {
+        ObjectNode content = current.deepCopy();
+        content.remove(GameReports.MANAGEMENT_FIELDS);
+        // Như revise: bộ sinh lại chỉ có dạng chữ, game chế độ hình ảnh sẽ mất ảnh (KNOWN-GAPS #27).
+        if ("IMAGE".equals(content.path("mode").asString(null))) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chưa hỗ trợ làm lại câu hỏi cho trò chơi chế độ hình ảnh");
+        }
+        GameDsl base = jsonMapper.treeToValue(content, GameDsl.class);
+        QuestionDsl currentQuestion = base.questions().stream().filter(q -> questionId.equals(q.id())).findFirst()
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy câu hỏi " + questionId));
+        var metadata = base.metadata();
+        QuestionDsl candidate = generation.regenerateQuestion(base.gameType(),
+                new GameDslRequest(metadata.topic(), metadata.subject(), metadata.gradeLevel(), null, null, null, null, null),
+                currentQuestion, feedback, questionId, base);
+        // Đi qua entity để gắn giọng đọc TTS giống lúc sinh game, rồi dựng lại DSL với đúng id của câu bị thay.
+        GameContentStrategy<?, ?> strategy = strategies.get(base.gameType());
+        List<QuestionGame> entities = strategy.parseToQuestions(
+                strategy.assembleGame(metadata, base.gameplaySettings(), List.of(candidate)));
+        GameAudioEnricher enricher = audioEnrichers == null ? null : audioEnrichers.getIfAvailable();
+        if (enricher != null) {
+            enricher.enrichAllQuestionsWithAudio(entities);
+        }
+        return new RegeneratedQuestionDto(strategy.toQuestionDsl(entities.get(0), questionId), base.gameType());
     }
 
     @Override

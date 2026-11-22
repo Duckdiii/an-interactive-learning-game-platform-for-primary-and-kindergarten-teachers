@@ -27,6 +27,11 @@ public class Teacher {
     @Column(nullable = false)
     private String fullName;
 
+    private String school;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
     // Giữ theo class diagram; mật khẩu thật phải lưu ở passwordHash (BCrypt).
     private String password;
 

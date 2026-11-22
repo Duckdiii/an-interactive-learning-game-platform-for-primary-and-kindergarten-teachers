@@ -23,7 +23,6 @@ public class Team {
     private String teamColor;
 
     // Aggregation: Team ◇ 1..* Participant. Không cascade; mỗi Participant thuộc đúng 1 Team.
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
+    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
     private List<Participant> members = new ArrayList<>();
 }

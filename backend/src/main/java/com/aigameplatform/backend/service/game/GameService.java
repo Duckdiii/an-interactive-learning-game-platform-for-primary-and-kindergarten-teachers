@@ -18,7 +18,13 @@ import java.util.List;
 import java.util.random.RandomGenerator;
 import com.aigameplatform.backend.service.curriculum.CurriculumCatalog;
 import com.aigameplatform.backend.service.curriculum.CurriculumChunk;
+import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
+import com.aigameplatform.backend.entity.enums.SessionStatus;
+import com.aigameplatform.backend.repository.GameSessionRepository;
+import com.aigameplatform.backend.service.admin.CostMonitoringService;
+import com.aigameplatform.backend.service.media.GameAudioEnricher;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,11 +51,27 @@ public class GameService {
     private final GameCurriculumReviewService curriculumReviews;
     private final ObjectProvider<CurriculumCatalog> curriculumCatalog;
     private final RandomGenerator random;
+    private final ObjectProvider<GameAudioEnricher> audioEnrichers;
+    private final GameSessionRepository sessions;
+    private final ObjectProvider<CostMonitoringService> costMonitoring;
 
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
             RandomGenerator random) {
+        this(games, teachers, handlers, jsonMapper, rateLimiter, transactions, curriculumReviews, curriculumCatalog,
+                random, null, null, null);
+    }
+
+    @Autowired
+    public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
+            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
+            GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
+            RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
+            ObjectProvider<CostMonitoringService> costMonitoring) {
+        this.costMonitoring = costMonitoring;
+        this.sessions = sessions;
+        this.audioEnrichers = audioEnrichers;
         this.curriculumCatalog = curriculumCatalog;
         this.random = random;
         this.games = games;
@@ -68,6 +90,12 @@ public class GameService {
      */
     public ObjectNode generate(String teacherId, GenerateGameRequest request) {
         requireTeacher(teacherId);
+        // Circuit breaker (FR-12): chạm trần chi phí AI tháng thì ngừng nhận yêu cầu sinh game.
+        CostMonitoringService cost = costMonitoring == null ? null : costMonitoring.getIfAvailable();
+        if (cost != null && cost.isCostCapExceeded()) {
+            throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE,
+                    "Hệ thống AI tạm thời ngưng nhận yêu cầu sinh game do đã chạm trần chi phí tháng. Vui lòng liên hệ Quản trị viên.");
+        }
         GameType type = request.gameType() != null ? request.gameType() : GameType.QUIZ;
         String idea = ideaOf(request, type);
 
@@ -86,6 +114,11 @@ public class GameService {
         game.setPresentation(content.presentation());
         game.setSchemaVersion(content.schemaVersion());
         game.setStatus(GameStatus.DRAFT);
+        // Sinh giọng đọc TTS cho câu hỏi; lỗi dịch vụ ngoài không làm hỏng luồng tạo game (enricher tự nuốt lỗi).
+        GameAudioEnricher enricher = audioEnrichers != null ? audioEnrichers.getIfAvailable() : null;
+        if (enricher != null) {
+            enricher.enrichAllQuestionsWithAudio(content.questions());
+        }
         game.getQuestions().addAll(content.questions());
         game.setQuestionNum(content.questions().size());
         // Có kết quả đối chiếu chương trình (game DSL) thì lưu game và bản đối chiếu trong cùng một transaction.
@@ -137,6 +170,24 @@ public class GameService {
             ObjectNode revised = handlerFor(stored.type()).revise(stored.response(), request.instruction().trim(), request.history());
             GameReports.MANAGEMENT_FIELDS.forEach(field -> revised.set(field, stored.response().get(field)));
             return revised;
+        }
+    }
+
+    /**
+     * POST /games/{gameId}/questions/{questionId}/regenerate: AI làm lại một câu, KHÔNG lưu (trình soạn cho giáo viên xem,
+     * hoàn tác, rồi lưu bằng PUT). Cùng khuôn với {@link #revise}: kiểm quyền và phiên đang chạy trong transaction ngắn,
+     * gọi AI ngoài transaction.
+     */
+    public RegeneratedQuestionDto regenerateQuestion(String teacherId, String gameId, String questionId, String feedback) {
+        StoredGame stored = transactions.execute(status -> {
+            Game game = owned(teacherId, gameId);
+            if (sessions.existsByGame_IdAndStatus(gameId, SessionStatus.ACTIVE)) {
+                throw new ApiException(ErrorCode.CONFLICT, "Game đang có phiên chơi diễn ra, chưa sửa được");
+            }
+            return new StoredGame(game.getGameType(), toResponse(game));
+        });
+        try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
+            return handlerFor(stored.type()).regenerateQuestion(stored.response(), questionId, feedback);
         }
     }
 
