@@ -57,7 +57,7 @@ spring:
     # baseline-version 0 makes sure V1 and V2 are still applied.
     baseline-on-migrate: true
     baseline-version: 0
-    # Mặc định của Flyway là *:future. DB dùng chung đã áp V12–V16 của nhánh feature chưa merge,
+    # Mặc định của Flyway là *:future. DB dùng chung đã áp V12–V16 của nhánh feature chưa merge (nay là V23–V27),
     # nên ở máy cá nhân đặt FLYWAY_IGNORE_MIGRATION_PATTERNS=*:missing,*:future (KNOWN-GAPS #26).
     ignore-migration-patterns: ${FLYWAY_IGNORE_MIGRATION_PATTERNS:*:future}
 
@@ -74,6 +74,10 @@ springdoc:
     operations-sorter: method
 
 app:
+  admin:
+    email: ${APP_ADMIN_EMAIL:admin@aigame.local}
+    # Không có mặc định. Trống thì không tạo tài khoản admin; profile prod bắt buộc (application-prod.yml).
+    password: ${APP_ADMIN_PASSWORD:}
   pexels:
     api-key: ${PEXELS_API_KEY:}
   cors:

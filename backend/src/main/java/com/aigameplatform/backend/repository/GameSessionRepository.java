@@ -19,4 +19,8 @@ public interface GameSessionRepository extends JpaRepository<GameSession, String
     List<GameSession> findByGame_IdOrderByCreatedAtDesc(String gameId);
 
     List<GameSession> findByGame_IdAndStatusOrderByCreatedAtDesc(String gameId, SessionStatus status);
+
+    long countByStatus(SessionStatus status);
+
+    long countByStatusIn(Collection<SessionStatus> statuses);
 }

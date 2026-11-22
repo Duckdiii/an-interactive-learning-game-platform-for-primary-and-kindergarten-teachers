@@ -25,6 +25,7 @@ export const ERROR_MESSAGES = new Map<string, string>([
     'Nội dung vừa được thay đổi ở nơi khác. Hãy tải lại trang rồi thử lại.',
   ],
   ['RATE_LIMITED', 'Bạn thao tác quá nhanh. Hãy chờ một lúc rồi thử lại.'],
+  ['SERVICE_UNAVAILABLE', 'Tính năng tạo game tạm dừng do hệ thống đã chạm trần chi phí. Hãy thử lại sau hoặc liên hệ quản trị viên.'],
   [
     'ACCOUNT_LOCKED',
     'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.',

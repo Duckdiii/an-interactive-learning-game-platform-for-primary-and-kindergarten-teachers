@@ -21,6 +21,7 @@ import com.aigameplatform.backend.service.curriculum.CurriculumChunk;
 import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
 import com.aigameplatform.backend.entity.enums.SessionStatus;
 import com.aigameplatform.backend.repository.GameSessionRepository;
+import com.aigameplatform.backend.service.admin.CostMonitoringService;
 import com.aigameplatform.backend.service.media.GameAudioEnricher;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,20 +53,23 @@ public class GameService {
     private final RandomGenerator random;
     private final ObjectProvider<GameAudioEnricher> audioEnrichers;
     private final GameSessionRepository sessions;
+    private final ObjectProvider<CostMonitoringService> costMonitoring;
 
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
             RandomGenerator random) {
         this(games, teachers, handlers, jsonMapper, rateLimiter, transactions, curriculumReviews, curriculumCatalog,
-                random, null, null);
+                random, null, null, null);
     }
 
     @Autowired
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
-            RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions) {
+            RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
+            ObjectProvider<CostMonitoringService> costMonitoring) {
+        this.costMonitoring = costMonitoring;
         this.sessions = sessions;
         this.audioEnrichers = audioEnrichers;
         this.curriculumCatalog = curriculumCatalog;
@@ -86,6 +90,12 @@ public class GameService {
      */
     public ObjectNode generate(String teacherId, GenerateGameRequest request) {
         requireTeacher(teacherId);
+        // Circuit breaker (FR-12): chạm trần chi phí AI tháng thì ngừng nhận yêu cầu sinh game.
+        CostMonitoringService cost = costMonitoring == null ? null : costMonitoring.getIfAvailable();
+        if (cost != null && cost.isCostCapExceeded()) {
+            throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE,
+                    "Hệ thống AI tạm thời ngưng nhận yêu cầu sinh game do đã chạm trần chi phí tháng. Vui lòng liên hệ Quản trị viên.");
+        }
         GameType type = request.gameType() != null ? request.gameType() : GameType.QUIZ;
         String idea = ideaOf(request, type);
 

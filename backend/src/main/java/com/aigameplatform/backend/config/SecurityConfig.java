@@ -53,6 +53,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/join",
                         "/api/sessions/*/interactions").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/sessions/*/my-team").permitAll()
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)

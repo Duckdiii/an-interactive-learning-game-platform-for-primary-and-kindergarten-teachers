@@ -7,6 +7,7 @@ import com.aigameplatform.backend.dto.response.RegisterResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
 import com.aigameplatform.backend.entity.RefreshToken;
 import com.aigameplatform.backend.entity.Teacher;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.exception.LoginTemporarilyLockedException;
@@ -193,7 +194,7 @@ public class AuthService {
         token.setExpiresAt(expiresAt);
         refreshTokenRepository.save(token);
 
-        String accessToken = jwtService.generateAccessToken(teacher.getId(), teacher.getEmail(), familyId);
+        String accessToken = jwtService.generateAccessToken(teacher.getId(), teacher.getEmail(), familyId, teacher.getRole().name());
         AuthResponse response = new AuthResponse(
                 accessToken,
                 jwtService.getAccessTokenTtlSeconds(),

@@ -51,6 +51,23 @@ Trạng thái:
 | Học sinh tự đổi đội (FREE_CHOICE) | `PUT /api/sessions/{sessionId}/my-team` | `C/controller/SessionController.java:129` | — | `T/controller/SessionControllerTest.java:1` | `OA:1384` (implemented) | có đủ |
 | Bảng xếp hạng | `GET /api/sessions/{sessionId}/leaderboard` | `C/controller/SessionController.java:140` | — | `T/controller/SessionControllerTest.java:1` | `OA:1551` (implemented) | có đủ |
 | Kết quả lượt chơi của chính mình | `GET /api/sessions/{sessionId}/my-result` | `C/controller/SessionController.java:151` | — | `T/controller/SessionControllerTest.java:1` | `OA:1588` (implemented) | có đủ |
+| Phiên bản cấu hình AI đang áp dụng và lịch sử (UC-14) | `GET /api/admin/ai-config` | `C/controller/AdminAiConfigController.java:39` | `F/services/adminService.ts:1` | `T/controller/AdminAiConfigControllerTest.java:1` | `OA:2099` (implemented) | có đủ |
+| Tạo và áp dụng phiên bản cấu hình mới | `POST /api/admin/ai-config/versions` | `C/controller/AdminAiConfigController.java:46` | `F/services/adminService.ts:1` | `T/controller/AdminAiConfigControllerTest.java:1` | `OA:2135` (implemented) | có đủ |
+| Đóng băng một phiên bản làm bản chuẩn | `POST /api/admin/ai-config/versions/{versionId}/freeze` | `C/controller/AdminAiConfigController.java:57` | `F/services/adminService.ts:1` | `T/controller/AdminAiConfigControllerTest.java:1` | `OA:2168` (implemented) | có đủ |
+| Khôi phục phiên bản làm bản đang áp dụng | `POST /api/admin/ai-config/versions/{versionId}/activate` | `C/controller/AdminAiConfigController.java:69` | `F/services/adminService.ts:1` | `T/controller/AdminAiConfigControllerTest.java:1` | `OA:2203` (implemented) | có đủ |
+| Danh sách từ cấm an toàn học đường (FLD-25) | `GET /api/admin/safety/blocked-words` | `C/controller/AdminAiConfigController.java:80` | `F/services/adminService.ts:1` | `T/controller/AdminAiConfigControllerTest.java:1` | `OA:2225` (implemented) | có đủ |
+| Thay toàn bộ danh sách từ cấm | `PUT /api/admin/safety/blocked-words` | `C/controller/AdminAiConfigController.java:87` | `F/services/adminService.ts:1` | `T/controller/AdminAiConfigControllerTest.java:1` | `OA:2242` (implemented) | có đủ |
+| Audit Log (FLD-28) | `GET /api/admin/audit-logs` | `C/controller/AdminAuditLogController.java:33` | `F/services/adminService.ts:1` | — | `OA:1886` (implemented) | có đủ |
+| Danh sách giáo viên (UC-13) | `GET /api/admin/teachers` | `C/controller/AdminTeacherController.java:37` | `F/services/adminService.ts:1` | `T/controller/AdminTeacherControllerTest.java:1` | `OA:1690` (implemented) | có đủ |
+| Thêm giáo viên (UC-13) | `POST /api/admin/teachers` | `C/controller/AdminTeacherController.java:48` | `F/services/adminService.ts:1` | `T/controller/AdminTeacherControllerTest.java:1` | `OA:1736` (implemented) | có đủ |
+| Chi tiết một giáo viên | `GET /api/admin/teachers/{teacherId}` | `C/controller/AdminTeacherController.java:59` | `F/services/adminService.ts:1` | `T/controller/AdminTeacherControllerTest.java:1` | `OA:1778` (implemented) | có đủ |
+| Sửa thông tin giáo viên | `PUT /api/admin/teachers/{teacherId}` | `C/controller/AdminTeacherController.java:66` | `F/services/adminService.ts:1` | `T/controller/AdminTeacherControllerTest.java:1` | `OA:1797` (implemented) | có đủ |
+| Khoá tài khoản giáo viên | `POST /api/admin/teachers/{teacherId}/lock` | `C/controller/AdminTeacherController.java:77` | `F/services/adminService.ts:1` | `T/controller/AdminTeacherControllerTest.java:1` | `OA:1836` (implemented) | có đủ |
+| Mở khoá tài khoản giáo viên | `POST /api/admin/teachers/{teacherId}/unlock` | `C/controller/AdminTeacherController.java:87` | `F/services/adminService.ts:1` | `T/controller/AdminTeacherControllerTest.java:1` | `OA:1864` (implemented) | có đủ |
+| Chi phí và trạng thái dịch vụ (UC-12) | `GET /api/admin/usage` | `C/controller/AdminUsageController.java:39` | `F/services/adminService.ts:1` | `T/controller/AdminUsageControllerTest.java:1` | `OA:1951` (implemented) | có đủ |
+| Sức khoẻ máy chủ (NFR-03) | `GET /api/admin/system-status` | `C/controller/AdminUsageController.java:50` | `F/services/adminService.ts:1` | `T/controller/AdminUsageControllerTest.java:1` | `OA:2008` (implemented) | có đủ |
+| Xem trần ngân sách AI tháng và mức cảnh báo (UC-12) | `GET /api/admin/budget-config` | `C/controller/AdminUsageController.java:57` | `F/services/adminService.ts:1` | `T/controller/AdminUsageControllerTest.java:1` | `OA:2036` (implemented) | có đủ |
+| Cập nhật trần ngân sách AI tháng và mức cảnh báo (UC-12) | `POST /api/admin/budget-config` | `C/controller/AdminUsageController.java:64` | `F/services/adminService.ts:1` | `T/controller/AdminUsageControllerTest.java:1` | `OA:2061` (implemented) | có đủ |
 
 ## Frontend gọi nhưng backend chưa có
 
