@@ -197,8 +197,8 @@ test("khi bỏ qua vì đã có kết quả, job summary ghi rõ lý do thay vì
 
 test("nhánh base chưa có hệ thống thì bỏ qua nhẹ nhàng: kiểm tra bằng API trước mọi bước tốn kém, không báo lỗi đỏ", () => {
   assert.match(prepare, /id: boot/);
-  // kiểm tra đủ ba file cần có ở nhánh base
-  for (const f of ["scripts/ai-review/precheck.mjs", ".github/ai-review/prompt.md", ".github/ai-review/review-result.schema.json"]) {
+  // kiểm tra đủ các file (script và prompt) cần có ở nhánh base
+  for (const f of ["scripts/ai-review/precheck.mjs", "scripts/ai-review/shard.mjs", "scripts/ai-review/merge-shards.mjs", ".github/ai-review/prompt.md", ".github/ai-review/review-result.schema.json"]) {
     assert.ok(prepare.includes(f), `boot phải kiểm tra ${f}`);
   }
   // boot đứng trước bước chờ, hai checkout và precheck; các bước đó chỉ chạy khi ready
@@ -320,7 +320,7 @@ test("boot chạy thật: lỗi khác 404 (5xx, hết giới hạn tốc độ) 
   }
 });
 
-test("boot chạy thật: đủ ba file ở nhánh base thì ready=true và không ghi lời bỏ qua", skipBash, () => {
+test("boot chạy thật: đủ các file cần có ở nhánh base thì ready=true và không ghi lời bỏ qua", skipBash, () => {
   const r = runBoot({ gh: GH_OK });
   assert.equal(r.status, 0);
   assert.match(r.output, /ready=true/);

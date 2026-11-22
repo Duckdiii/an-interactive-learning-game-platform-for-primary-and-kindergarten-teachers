@@ -157,7 +157,7 @@ jobs:
             ready=false
             reason="PR do dependabot[bot] tạo (không có secret nên không review)."
           else
-            for f in scripts/ai-review/precheck.mjs .github/ai-review/prompt.md .github/ai-review/review-result.schema.json; do
+            for f in scripts/ai-review/precheck.mjs scripts/ai-review/shard.mjs scripts/ai-review/merge-shards.mjs .github/ai-review/prompt.md .github/ai-review/review-result.schema.json; do
               rc=0
               err=$(gh api "repos/${GITHUB_REPOSITORY}/contents/${f}?ref=${BASE_REF}" 2>&1 > /dev/null) || rc=$?
               if [ "$rc" -ne 0 ]; then
