@@ -39,6 +39,7 @@ import {
   IDEA_MAX_LENGTH,
   buildGenerateRequest,
   checkGenerate,
+  parseReviewFrom,
 } from '../utils/generateRequest'
 import { ideaPlaceholderFor } from '../utils/ideaPlaceholder'
 import { LESSON_FILE_MAX_BYTES, checkLessonFile } from '../utils/lessonFile'
@@ -60,6 +61,8 @@ export default function CreateGamePage() {
   const [params] = useSearchParams()
   const [initialIdea] = useState(() => (params.get('idea') ?? '').slice(0, IDEA_MAX_LENGTH))
   const [idea, setIdea] = useState(initialIdea)
+  // Game ôn tập từ kết quả lớp: chỉ mang mã game và mã câu, Backend tự lấy số liệu (không đưa dữ liệu học sinh qua địa chỉ).
+  const [reviewFrom] = useState(() => parseReviewFrom(params.get('reviewGame'), params.get('reviewQ')))
   const lesson = useLessonContext(idea, {
     gradeLevel: known(params.get('grade'), GRADE_LEVEL_VALUES),
     subject: known(params.get('subject'), SUBJECT_VALUES),
@@ -254,6 +257,7 @@ export default function CreateGamePage() {
       oddOneOutMode,
       sceneImageUrl,
       optionImages,
+      reviewFrom,
     }
     setCreatingInput({ idea: form.idea, gradeLevel: form.gradeLevel })
     const running = creation.create(types.map((type) => buildGenerateRequest(form, mode, type)))

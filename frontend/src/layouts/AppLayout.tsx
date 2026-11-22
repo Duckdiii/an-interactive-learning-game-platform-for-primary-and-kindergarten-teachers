@@ -20,6 +20,7 @@ const navigationItems: ReadonlyArray<{
   { label: viText.nav.home, to: ROUTES.dashboard, end: true, icon: 'home' },
   { label: viText.nav.myGames, to: ROUTES.workspace, end: false, icon: 'library' },
   { label: viText.nav.results, to: ROUTES.results, end: true, icon: 'chart' },
+  { label: viText.nav.classrooms, to: ROUTES.classrooms, end: true, icon: 'user' },
   { label: viText.nav.createGame, to: ROUTES.createGame, end: true, icon: 'sparkles' },
 ]
 

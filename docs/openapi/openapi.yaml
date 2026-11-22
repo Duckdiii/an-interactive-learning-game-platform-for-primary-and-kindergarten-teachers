@@ -38,6 +38,8 @@ tags:
       Toàn bộ nhóm này **chưa cài** ở Backend (`x-status: planned`).
   - name: Media
     description: Tải lên ảnh/âm thanh riêng cho thẻ câu hỏi (UC-05).
+  - name: Classrooms
+    description: 'Lớp học của giáo viên (UC-16, phần lớp): thêm, sửa, xóa, dùng để lọc thống kê (UC-18).'
   - name: Sessions
     description: |
       Giáo viên tạo và điều khiển phiên Live Arena (`SOLO`, `TEAM`), xem kết quả (UC-09).
@@ -390,6 +392,8 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
         '429':
@@ -956,6 +960,8 @@ paths:
         `POST /games/shared/{shareCode}/play`). Game `CUSTOM` chưa hỗ trợ phiên chơi (chưa xuất bản được).
 
         - `maxParticipants`: số nguyên từ 1 trở lên; bỏ qua nghĩa là không giới hạn.
+        - `classroomId` (tùy chọn): lớp của giáo viên mà phiên diễn ra, để thống kê lọc theo lớp; lớp không phải của
+          giáo viên trả `404`.
         - Chỉ với `TEAM`: `groupingStrategy` (mặc định `RANDOM`, giáo viên không phải xếp đội, phù hợp
           trẻ nhỏ) và `teams` (từ 2 đến 6 đội; bỏ qua thì tạo "Đội 1", "Đội 2" với màu mặc định).
         - `accessCode` là mã PIN 6 chữ số hiển thị lớn trên màn Presentation, duy nhất trong các phiên
@@ -1199,6 +1205,263 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /classrooms:
+    get:
+      tags: [Classrooms]
+      operationId: listClassrooms
+      summary: Lớp học của giáo viên (UC-16)
+      description: Sắp theo tên lớp. Chỉ lớp của giáo viên đang đăng nhập.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Danh sách lớp.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Classroom'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Classrooms]
+      operationId: createClassroom
+      summary: Thêm lớp học
+      description: Các ô chữ được kiểm tra từ ngữ phù hợp với học sinh (`422 UNSAFE_CONTENT` nếu không đạt).
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassroomInput'
+      responses:
+        '201':
+          description: Đã tạo lớp.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/Classroom'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /classrooms/{classroomId}:
+    parameters:
+      - name: classroomId
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags: [Classrooms]
+      operationId: updateClassroom
+      summary: Sửa lớp học
+      description: Lớp của giáo viên khác trả `404` như lớp không tồn tại.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassroomInput'
+      responses:
+        '200':
+          description: Lớp sau khi sửa.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/Classroom'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Classrooms]
+      operationId: deleteClassroom
+      summary: Xóa lớp học
+      description: Trò chơi và phiên đã có không bị ảnh hưởng; phiên chỉ không còn gắn với lớp này.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Đã xóa, không có body.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /games/{gameId}/insights:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [Sessions]
+      operationId: getGameInsights
+      summary: Thống kê theo câu của một game (UC-18)
+      description: |
+        Gộp mọi lượt chơi của game, chỉ số liệu tổng hợp, không có biệt danh hay định danh học sinh.
+        Game không thuộc giáo viên trả `404` như game không tồn tại. `needsReview` khi `correctRate < 0.6`
+        và `answeredCount >= 5`. `commonWrong` chỉ nêu đáp án sai lặp lại từ 2 lần, tối đa 3 đáp án, nhãn
+        một dòng tối đa 40 ký tự, đã lọc từ cấm. Hiện dựng được cho Visual Cloze (nhập chữ), Audio-Visual
+        Match, Odd One Out dạng ảnh, Quiz, Word Scramble, Ordering, Drag & Drop, Matching và Spot the Target (nhãn theo
+        hướng chạm lệch so với tâm đích, ví dụ "Gần đích (lệch sang phải)"), ở cả `SELF`,
+        `SOLO` và `TEAM` (đáp án chọn lưu dạng mã mờ theo salt của phiên hoặc id theo vị trí, được giải mã
+        lại); Memory Card và Visual Cloze dạng ảnh là mảng rỗng vì API nộp đáp án chưa hỗ trợ, nên operation
+        còn `extended-pending`. Nhãn chứa email, số điện thoại hoặc đường dẫn (chữ trẻ gõ) bị bỏ.
+        `completionRate` (học sinh đã chơi làm hết các câu; học sinh bị đóng phòng khi chưa xong không tính)
+        và `avgScore` tính trên học sinh đã chơi ít nhất một câu.
+      x-status: extended-pending
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InsightsSessionType'
+        - $ref: '#/components/parameters/InsightsFrom'
+        - $ref: '#/components/parameters/InsightsTo'
+        - $ref: '#/components/parameters/InsightsClassroom'
+      responses:
+        '200':
+          description: Số liệu tổng hợp. `lowSample` là `true` khi có lượt chơi nhưng ít hơn 5.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/GameInsights'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /games/{gameId}/questions/{questionId}/insights:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Sessions]
+      operationId: getQuestionInsights
+      summary: Chi tiết một câu, phân bố đáp án (UC-18 bước 5)
+      description: |
+        Phân bố các đáp án học sinh đã chọn hoặc gõ. Chỉ nêu đáp án lặp lại từ 2 lần (tối đa 6), các đáp án
+        còn lại gộp vào `otherCount`; `noAnswerCount` là số lượt bỏ qua hoặc hết giờ. Chỉ dựng được nhãn cho
+        các loại game như `getGameInsights` (Matching, Ordering, Drag & Drop đã có); loại khác `distribution` rỗng.
+      x-status: extended-pending
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InsightsSessionType'
+        - $ref: '#/components/parameters/InsightsFrom'
+        - $ref: '#/components/parameters/InsightsTo'
+        - $ref: '#/components/parameters/InsightsClassroom'
+      responses:
+        '200':
+          description: Chi tiết câu hỏi.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/QuestionInsightDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /insights/review-needed:
+    get:
+      tags: [Sessions]
+      operationId: listReviewNeeded
+      summary: Các câu lớp cần ôn lại (trang chủ giáo viên)
+      description: |
+        Gộp mọi game đã xuất bản của giáo viên, sắp theo `correctRate` tăng dần (câu yếu nhất trước).
+        `commonWrong` là `null` khi chưa có đáp án sai nào lặp lại từ 2 lần.
+      x-status: extended-pending
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 3
+      responses:
+        '200':
+          description: Danh sách câu cần ôn lại.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReviewNeeded'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -1683,6 +1946,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
+        '429':
+          $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -2308,6 +2573,36 @@ components:
       schema:
         type: string
         format: uuid
+    InsightsSessionType:
+      name: sessionType
+      in: query
+      required: false
+      description: Bỏ trống là tất cả loại lượt chơi.
+      schema:
+        $ref: '#/components/schemas/SessionType'
+    InsightsFrom:
+      name: from
+      in: query
+      required: false
+      description: Chỉ tính phiên tạo từ ngày này (đầu ngày). Không được sau `to`.
+      schema:
+        type: string
+        format: date
+    InsightsTo:
+      name: to
+      in: query
+      required: false
+      description: Chỉ tính phiên tạo đến hết ngày này.
+      schema:
+        type: string
+        format: date
+    InsightsClassroom:
+      name: classroomId
+      in: query
+      required: false
+      description: Chỉ tính phiên gắn với lớp này (phiên chơi tự do không thuộc lớp nào). Bỏ trống là mọi phiên.
+      schema:
+        type: string
     Page:
       name: page
       in: query
@@ -2821,6 +3116,25 @@ components:
               visualPrompt: { type: string, minLength: 1, maxLength: 255 }
         voice:
           $ref: '#/components/schemas/Voice'
+        reviewFrom:
+          type: object
+          description: |
+            Tạo game ôn tập từ kết quả lớp (UC-18). Backend lấy các câu và lỗi hay gặp của game cũ rồi đưa vào lời nhắc
+            AI trong một khối dữ liệu không tin cậy; Frontend không tự dựng lời nhắc từ dữ liệu học sinh. Game phải
+            thuộc giáo viên (`404` nếu không), `questionIds` phải thuộc game đó (`400` nếu không).
+          required: [gameId, questionIds]
+          properties:
+            gameId:
+              type: string
+              minLength: 1
+            questionIds:
+              type: array
+              minItems: 1
+              maxItems: 10
+              items:
+                type: string
+                minLength: 1
+                maxLength: 64
 
     UnderstandGameRequest:
       type: object
@@ -3304,6 +3618,37 @@ components:
           description: Chỉ với `TEAM`. Bỏ qua thì tạo "Đội 1", "Đội 2" với màu mặc định.
           items:
             $ref: '#/components/schemas/TeamInput'
+        classroomId:
+          type: string
+          description: Lớp học của giáo viên mà phiên diễn ra (tùy chọn), để thống kê lọc theo lớp. Lớp không phải của giáo viên trả `404`.
+
+    ClassroomInput:
+      type: object
+      required: [className]
+      properties:
+        className:
+          type: string
+          minLength: 1
+          maxLength: 100
+        schoolYear:
+          type: [string, 'null']
+          maxLength: 20
+        schoolName:
+          type: [string, 'null']
+          maxLength: 100
+
+    Classroom:
+      type: object
+      required: [classroomId, className]
+      properties:
+        classroomId:
+          type: string
+        className:
+          type: string
+        schoolYear:
+          type: [string, 'null']
+        schoolName:
+          type: [string, 'null']
 
     CreateSessionResult:
       type: object
@@ -4075,6 +4420,138 @@ components:
               score:
                 type: number
               memberCount:
+                type: integer
+
+    QuestionInsightDetail:
+      type: object
+      required: [questionId, order, text, answeredCount, correctRate, needsReview, distribution, otherCount, noAnswerCount]
+      properties:
+        questionId:
+          type: string
+        order:
+          type: integer
+          minimum: 1
+        text:
+          type: string
+        answeredCount:
+          type: integer
+          minimum: 0
+        correctRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        needsReview:
+          type: boolean
+        distribution:
+          type: array
+          items:
+            type: object
+            required: [label, count, correct]
+            properties:
+              label:
+                type: string
+              count:
+                type: integer
+              correct:
+                type: boolean
+        otherCount:
+          type: integer
+          minimum: 0
+          description: Số lượt trả lời có nhãn nhưng không nêu riêng (đáp án chỉ xuất hiện một lần).
+        noAnswerCount:
+          type: integer
+          minimum: 0
+          description: Số lượt bỏ qua hoặc hết giờ.
+
+    ReviewNeeded:
+      type: object
+      required: [gameId, gameTitle, questionId, questionText, correctRate]
+      properties:
+        gameId:
+          type: string
+        gameTitle:
+          type: string
+        questionId:
+          type: string
+        questionText:
+          type: string
+        correctRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        commonWrong:
+          type: [object, 'null']
+          required: [label, count]
+          properties:
+            label:
+              type: string
+            count:
+              type: integer
+
+    GameInsights:
+      type: object
+      required: [playCount, correctRate, avgAttemptsPerQuestion, completionRate, avgScore, lowSample, questions]
+      properties:
+        completionRate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Tỉ lệ học sinh đã chơi mà làm hết các câu của game (0..1); 0 khi chưa có lượt chơi.
+        avgScore:
+          type: number
+          minimum: 0
+          description: Điểm trung bình mỗi học sinh đã chơi (điểm do máy chủ tính); 0 khi chưa có lượt chơi.
+        lowSample:
+          type: boolean
+          description: '`true` khi có lượt chơi nhưng ít hơn 5, số liệu chỉ mang tính tham khảo.'
+        playCount:
+          type: integer
+          minimum: 0
+          description: Số học sinh đã chơi (tổng các phiên của game).
+        correctRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        avgAttemptsPerQuestion:
+          type: number
+          minimum: 0
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionInsight'
+
+    QuestionInsight:
+      type: object
+      required: [questionId, order, text, answeredCount, correctRate, avgAttempts, needsReview, commonWrong]
+      properties:
+        questionId:
+          type: string
+        order:
+          type: integer
+          minimum: 1
+        text:
+          type: string
+        answeredCount:
+          type: integer
+          minimum: 0
+        correctRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        avgAttempts:
+          type: number
+          minimum: 0
+        needsReview:
+          type: boolean
+        commonWrong:
+          type: array
+          items:
+            type: object
+            required: [label, count]
+            properties:
+              label:
+                type: string
+              count:
                 type: integer
 
     ParticipantInteraction:

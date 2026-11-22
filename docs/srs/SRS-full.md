@@ -2097,9 +2097,9 @@ Bảng 5.1: Ma trận Truy xuất Yêu cầu (Requirements Traceability Matrix)
 | FR-13 | UC-13 | FLD-26, 27, 28 | NFR-02 | — | TS-19* | Chưa. |
 | FR-14 | UC-14 | FLD-10, 21, 22, 23, 25 | NFR-05 | — | TS-08, 20* | Chưa: prompt hiện nằm trong mã nguồn, chưa có bảng lưu phiên bản và đóng băng. |
 | FR-15 | UC-15 | FLD-46, 47, 49 | NFR-02 | — | TS-07 | Backend: đã cài đăng nhập, làm mới và đăng xuất (JWT, cookie HttpOnly). Frontend: có trang đăng nhập. |
-| FR-16 | UC-16 | FLD-31 đến 37 | NFR-02 | KPI-01 | TS-22*, 23* | Chưa: chưa có bảng hồ sơ giáo viên và hồ sơ lớp; mã nguồn mới truyền môn, khối lớp, mô tả và căn cứ chương trình vào mô hình. |
+| FR-16 | UC-16 | FLD-31 đến 37 | NFR-02 | KPI-01 | TS-22*, 23* | Một phần: đã có lớp học tối thiểu (`/api/classrooms`: tên lớp, năm học, trường; thêm, sửa, xóa, kiểm từ ngữ, kiểm quyền) và trang "Lớp học"; chưa có hồ sơ giáo viên (bộ sách, giọng đọc) và các trường khối lớp, sĩ số, phạm vi kiến thức, đặc điểm lớp; việc điền sẵn khi tạo game chưa có: mã nguồn mới truyền môn, khối lớp, mô tả và căn cứ chương trình vào mô hình. |
 | FR-17 | UC-17 | FLD-39, 40, 41 | NFR-02 | KPI-05 | TS-24* | Chưa: chưa có API danh sách, nhân bản, hủy xuất bản, xóa trò chơi và mở phòng chơi. |
-| FR-18 | UC-18 | FLD-42, 43, 44 | NFR-01, 02 | KPI-05 | TS-25*, 26* | Chưa: chưa có bảng lưu kết quả theo câu và API thống kê. |
+| FR-18 | UC-18 | FLD-42, 43, 44 | NFR-01, 02 | KPI-05 | TS-25*, 26* | Một phần: đã có `GET /games/{gameId}/insights` (tổng hợp theo câu từ `play_interaction_details`); `commonWrong` chỉ có cho 3 loại game (Visual Cloze nhập chữ, Audio-Visual Match, Odd One Out ảnh), phiên SOLO/TEAM đã lưu đáp án cho các loại này; đã có lọc khoảng ngày và theo lớp, cảnh báo ít lượt, chi tiết một câu, `review-needed`, game ôn tập (`reviewFrom`); `commonWrong` thêm Quiz và Word Scramble; chưa có giao diện chọn lớp khi mở phòng và `commonWrong` cho 6 loại game còn lại. |
 
 
 Ghi chú: FR-01 chỉ gồm đăng ký; đăng nhập, phiên làm việc và phân quyền thuộc FR-15. Cột Hiện trạng chỉ phản ánh cấu trúc mã nguồn tại thời điểm đối chiếu và cần cập nhật theo tiến độ.

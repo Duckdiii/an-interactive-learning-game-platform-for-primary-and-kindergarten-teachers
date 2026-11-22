@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import ButtonLink from '../components/ButtonLink'
@@ -11,16 +12,20 @@ import { MIXED_TILES } from '../components/ui/tileSets'
 import { gameTypeLabel, gradeLevelLabel } from '../constants/labels'
 import { viText } from '../constants/viText'
 import { sortByUpdatedDesc, useGames } from '../hooks/useGames'
-import { useGameInsights } from '../hooks/useHomeData'
+import { useClassrooms } from '../hooks/useClassrooms'
+import { useGameInsights, useQuestionInsights } from '../hooks/useHomeData'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { ROUTES } from '../routes/paths'
-import type { GameInsights, QuestionInsight } from '../services/home'
+import type { GameInsights, InsightsRange, InsightsSessionType, QuestionInsight } from '../services/home'
 import type { GameSummary } from '../types/game-summary.types'
 import { parseApiError } from '../utils/apiError'
+import { reviewSeedParams } from '../utils/generateRequest'
 import {
   filterToSessionType,
   formatDecimalVi,
   isLowRate,
+  parseDateParam,
+  parseIdParam,
   parseResultsFilter,
   pickReviewQuestion,
   resultsLink,
@@ -36,12 +41,17 @@ const FILTERS: ReadonlyArray<{ value: ResultsFilter; label: string }> = [
   { value: 'SELF', label: text.filterSelf },
 ]
 
-// Chưa có `reviewFrom` (API-CONTRACT 2.8) nên chỉ điền tên game của giáo viên, không đưa câu trả lời của học sinh vào.
-const reviewLink = (game: GameSummary) =>
+// Chỉ mang tên game và mã các câu cần ôn; Backend tự lấy lỗi hay gặp (`reviewFrom`, API-CONTRACT 2.8), nên không
+// đưa câu trả lời của học sinh qua địa chỉ.
+const reviewLink = (game: GameSummary, questions: ReadonlyArray<QuestionInsight>) =>
   `${ROUTES.createGame}?${new URLSearchParams({
     idea: `${viText.home.reviewIdeaPrefix}${game.title}`,
     grade: game.gradeLevel,
     subject: game.subject,
+    ...reviewSeedParams(
+      game.gameId,
+      questions.filter((question) => question.needsReview).map((question) => question.questionId),
+    ),
   }).toString()}`
 
 export default function ResultsPage() {
@@ -49,7 +59,7 @@ export default function ResultsPage() {
   const [params] = useSearchParams()
   const gameId = params.get('gameId')
 
-  return gameId ? <GameResults gameId={gameId} /> : <GamePicker />
+  return gameId ? <GameResults key={gameId} gameId={gameId} /> : <GamePicker />
 }
 
 function Pending() {
@@ -122,9 +132,56 @@ function LoadError({ error, onRetry }: { error: unknown; onRetry: () => void }) 
 function GameResults({ gameId }: { gameId: string }) {
   const [params, setParams] = useSearchParams()
   const filter = parseResultsFilter(params.get('type'))
+  const from = parseDateParam(params.get('from'))
+  const to = parseDateParam(params.get('to'))
+  const classroomParam = parseIdParam(params.get('classroomId'))
+  const classroomsQuery = useClassrooms()
+  // Lớp đã bị xóa (đường dẫn cũ, hoặc vừa xóa ở trang Lớp học) thì bỏ bộ lọc thay vì lọc ra kết quả rỗng khó hiểu.
+  const classroomId =
+    classroomParam && (!classroomsQuery.data || classroomsQuery.data.some((item) => item.classroomId === classroomParam))
+      ? classroomParam
+      : undefined
+  const range = useMemo(() => ({ from, to, classroomId }), [from, to, classroomId])
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const gamesQuery = useGames()
   const game = gamesQuery.data?.find((item) => item.gameId === gameId)
-  const insightsQuery = useGameInsights(game ? gameId : null, filterToSessionType(filter))
+  const insightsQuery = useGameInsights(game ? gameId : null, filterToSessionType(filter), range)
+
+  const setDate = (key: 'from' | 'to', value: string) =>
+    setParams(
+      (previous) => {
+        const next = new URLSearchParams(previous)
+        if (parseDateParam(value)) next.set(key, value)
+        else next.delete(key)
+
+        return next
+      },
+      { replace: true },
+    )
+
+  const setClassroom = (value: string) =>
+    setParams(
+      (previous) => {
+        const next = new URLSearchParams(previous)
+        if (parseIdParam(value)) next.set('classroomId', value)
+        else next.delete('classroomId')
+
+        return next
+      },
+      { replace: true },
+    )
+
+  const clearDates = () =>
+    setParams(
+      (previous) => {
+        const next = new URLSearchParams(previous)
+        next.delete('from')
+        next.delete('to')
+
+        return next
+      },
+      { replace: true },
+    )
 
   const selectFilter = (value: ResultsFilter) =>
     setParams(
@@ -198,6 +255,51 @@ function GameResults({ gameId }: { gameId: string }) {
         ))}
       </div>
 
+      <div role="group" aria-label={text.dateGroupLabel} className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col text-sm font-bold text-ink-soft">
+          {text.dateFrom}
+          <input
+            type="date"
+            value={from ?? ''}
+            max={to}
+            onChange={(event) => setDate('from', event.target.value)}
+            className="mt-1 min-h-11 rounded-card border-2 border-line bg-surface px-3 text-base font-semibold text-ink"
+          />
+        </label>
+        <label className="flex flex-col text-sm font-bold text-ink-soft">
+          {text.dateTo}
+          <input
+            type="date"
+            value={to ?? ''}
+            min={from}
+            onChange={(event) => setDate('to', event.target.value)}
+            className="mt-1 min-h-11 rounded-card border-2 border-line bg-surface px-3 text-base font-semibold text-ink"
+          />
+        </label>
+        {classroomsQuery.data && classroomsQuery.data.length > 0 ? (
+          <label className="flex flex-col text-sm font-bold text-ink-soft">
+            {text.classroomLabel}
+            <select
+              value={classroomId ?? ''}
+              onChange={(event) => setClassroom(event.target.value)}
+              className="mt-1 min-h-11 rounded-card border-2 border-line bg-surface px-3 text-base font-semibold text-ink"
+            >
+              <option value="">{text.classroomAll}</option>
+              {classroomsQuery.data.map((classroom) => (
+                <option key={classroom.classroomId} value={classroom.classroomId}>
+                  {classroom.className}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        {from || to ? (
+          <Button variant="secondary" onClick={clearDates}>
+            {text.dateClear}
+          </Button>
+        ) : null}
+      </div>
+
       {insightsQuery.isPending ? <Pending /> : null}
       {insightsQuery.isError ? <LoadError error={insightsQuery.error} onRetry={() => insightsQuery.refetch()} /> : null}
 
@@ -207,8 +309,20 @@ function GameResults({ gameId }: { gameId: string }) {
       {result?.insights && result.insights.playCount === 0 ? (
         <Notice title={text.noPlaysTitle} description={text.noPlaysDescription} />
       ) : null}
+      {result?.insights?.lowSample ? (
+        <p role="note" className="rounded-card bg-warn-soft px-4 py-3 text-base font-bold text-warn-ink">
+          {text.lowSample}
+        </p>
+      ) : null}
       {result?.insights && result.insights.playCount > 0 ? (
-        <Insights insights={result.insights} game={game} />
+        <Insights
+          insights={result.insights}
+          game={game}
+          selectedQuestionId={selectedQuestionId}
+          onSelectQuestion={setSelectedQuestionId}
+          filter={filterToSessionType(filter)}
+          range={range}
+        />
       ) : null}
 
       <p className="text-sm font-semibold text-ink-soft">{text.privacy}</p>
@@ -225,16 +339,27 @@ function Notice({ title, description }: { title: string; description: string }) 
   )
 }
 
-function Insights({ insights, game }: { insights: GameInsights; game: GameSummary }) {
+interface InsightsProps {
+  insights: GameInsights
+  game: GameSummary
+  selectedQuestionId: string | null
+  onSelectQuestion: (questionId: string | null) => void
+  filter?: InsightsSessionType
+  range: InsightsRange
+}
+
+function Insights({ insights, game, selectedQuestionId, onSelectQuestion, filter, range }: InsightsProps) {
   const stats = [
     { value: String(insights.playCount), label: text.statPlays },
     { value: `${toPercent(insights.correctRate)}%`, label: text.statCorrect },
     { value: formatDecimalVi(insights.avgAttemptsPerQuestion), label: text.statAttempts },
+    { value: `${toPercent(insights.completionRate)}%`, label: text.statCompletion },
+    { value: formatDecimalVi(insights.avgScore), label: text.statScore },
   ]
 
   return (
     <>
-      <dl className="grid gap-3 sm:grid-cols-3">
+      <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
           <Card key={stat.label} padding="sm" className="flex flex-col-reverse">
             <dt className="text-sm font-bold text-ink-soft">{stat.label}</dt>
@@ -250,9 +375,25 @@ function Insights({ insights, game }: { insights: GameInsights; game: GameSummar
           </h2>
           <ol className="mt-3 space-y-2">
             {insights.questions.map((question) => (
-              <QuestionRow key={question.questionId} question={question} />
+              <QuestionRow
+                key={question.questionId}
+                question={question}
+                selected={question.questionId === selectedQuestionId}
+                onSelect={() =>
+                  onSelectQuestion(question.questionId === selectedQuestionId ? null : question.questionId)
+                }
+              />
             ))}
           </ol>
+          {selectedQuestionId ? (
+            <QuestionDetail
+              gameId={game.gameId}
+              questionId={selectedQuestionId}
+              filter={filter}
+              range={range}
+              onClose={() => onSelectQuestion(null)}
+            />
+          ) : null}
         </Card>
 
         <ReviewCard questions={insights.questions} game={game} />
@@ -261,14 +402,73 @@ function Insights({ insights, game }: { insights: GameInsights; game: GameSummar
   )
 }
 
-function QuestionRow({ question }: { question: QuestionInsight }) {
+function QuestionDetail({
+  gameId,
+  questionId,
+  filter,
+  range,
+  onClose,
+}: {
+  gameId: string
+  questionId: string
+  filter?: InsightsSessionType
+  range: InsightsRange
+  onClose: () => void
+}) {
+  const query = useQuestionInsights(gameId, questionId, filter, range)
+  const detail = query.data
+
+  return (
+    <section aria-label={detail ? text.detailTitle(detail.order) : text.detailLoading} className="mt-4 rounded-card bg-brand-soft/50 p-4">
+      {query.isPending ? <Pending /> : null}
+      {query.isError ? <p role="alert" className="font-bold">{text.detailError}</p> : null}
+      {detail ? (
+        <>
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-display text-xl font-extrabold">
+              {text.detailTitle(detail.order)}: {detail.text}
+            </h3>
+            <Button variant="secondary" onClick={onClose}>
+              {text.detailClose}
+            </Button>
+          </div>
+          {detail.needsReview ? <p className="mt-1 text-base font-extrabold text-warn-ink">{text.detailNeedsReview}</p> : null}
+          <h4 className="mt-3 text-base font-extrabold">{text.detailDistribution}</h4>
+          {detail.distribution.length === 0 ? (
+            <p className="mt-1 text-base text-ink-soft">{text.detailEmpty}</p>
+          ) : (
+            <ul className="mt-1 space-y-1">
+              {detail.distribution.map((share) => (
+                <li key={`${share.label}|${share.correct}`} className="flex flex-wrap items-center gap-2 text-base font-bold">
+                  <span className={share.correct ? 'text-brand-strong' : ''}>{share.label}</span>
+                  {share.correct ? <span className="text-sm text-brand-strong">({text.detailCorrectTag})</span> : null}
+                  <span className="text-ink-soft">{text.detailCount(share.count)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {detail.otherCount > 0 ? <p className="mt-1 text-sm font-semibold text-ink-soft">{text.detailOther(detail.otherCount)}</p> : null}
+          {detail.noAnswerCount > 0 ? <p className="text-sm font-semibold text-ink-soft">{text.detailNoAnswer(detail.noAnswerCount)}</p> : null}
+        </>
+      ) : null}
+    </section>
+  )
+}
+
+function QuestionRow({ question, selected, onSelect }: { question: QuestionInsight; selected: boolean; onSelect: () => void }) {
   const percent = toPercent(question.correctRate)
   const low = isLowRate(question.correctRate)
 
   return (
     <li className="min-h-11">
-      <span className="sr-only">{text.questionLabel(question.order, question.text, percent)}</span>
-      <div aria-hidden="true" className="flex min-h-11 items-center gap-3">
+      <button
+        type="button"
+        aria-pressed={selected}
+        aria-label={`${text.questionLabel(question.order, question.text, percent)}. ${text.detailOpen(question.order)}`}
+        onClick={onSelect}
+        className={`block w-full rounded-card text-left ${selected ? 'bg-brand-soft/60' : ''}`}
+      >
+      <span aria-hidden="true" className="flex min-h-11 items-center gap-3">
         <span className="w-2/5 min-w-0 break-words text-base font-bold sm:w-1/3">
           {question.order}. {question.text}
         </span>
@@ -281,7 +481,8 @@ function QuestionRow({ question }: { question: QuestionInsight }) {
         <span className={`w-12 text-right text-base font-extrabold ${low ? 'text-warn-ink' : 'text-brand-strong'}`}>
           {percent}%
         </span>
-      </div>
+      </span>
+      </button>
     </li>
   )
 }
@@ -302,7 +503,7 @@ function ReviewCard({ questions, game }: { questions: ReadonlyArray<QuestionInsi
             {text.reviewRate(toPercent(weakest.correctRate))}
             {wrong ? ` ${text.reviewCommonWrong(wrong)}` : ''}
           </p>
-          <ButtonLink to={reviewLink(game)} variant="accent" className="mt-4">
+          <ButtonLink to={reviewLink(game, questions)} variant="accent" className="mt-4">
             {text.reviewCreate}
           </ButtonLink>
           <p className="mt-2 text-sm font-bold">{text.reviewHint}</p>

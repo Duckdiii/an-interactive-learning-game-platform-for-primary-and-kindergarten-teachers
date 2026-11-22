@@ -1,21 +1,24 @@
-import { screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { fetchClassrooms } from '../api/classroomsApi'
 import { getGames } from '../api/gamesApi'
 import { getHomeApi } from '../services/home'
-import type { GameInsights, HomeApi, InsightsSessionType } from '../services/home'
-import { RealHomeApi } from '../services/home/realHomeApi'
+import type { GameInsights, HomeApi, InsightsRange, InsightsSessionType, QuestionInsightDetail } from '../services/home'
+import { HomeApiNotSupportedError } from '../services/home/HomeApi'
 import { loginAsTeacher, makeGame, renderWithProviders } from '../test/renderWithApp'
 import ResultsPage from './ResultsPage'
 
 vi.mock('../api/gamesApi', () => ({ getGames: vi.fn() }))
+vi.mock('../api/classroomsApi', () => ({ fetchClassrooms: vi.fn(), createClassroom: vi.fn(), deleteClassroom: vi.fn() }))
 vi.mock('../services/home', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../services/home')>()),
   getHomeApi: vi.fn(),
 }))
 
 const mockedGetGames = vi.mocked(getGames)
+const mockedFetchClassrooms = vi.mocked(fetchClassrooms)
 const mockedGetHomeApi = vi.mocked(getHomeApi)
 
 const PUBLISHED = makeGame(1, { status: 'PUBLISHED', title: 'Ghép chữ về gia đình', subject: 'VIETNAMESE', gradeLevel: 'GRADE_1' })
@@ -25,6 +28,9 @@ const INSIGHTS: GameInsights = {
   playCount: 26,
   correctRate: 0.72,
   avgAttemptsPerQuestion: 1.6,
+  completionRate: 0.85,
+  lowSample: false,
+  avgScore: 240,
   questions: [
     { questionId: 'q1', order: 1, text: 'MẸ', answeredCount: 26, correctRate: 0.92, avgAttempts: 1.1, needsReview: false, commonWrong: [] },
     {
@@ -40,16 +46,39 @@ const INSIGHTS: GameInsights = {
   ],
 }
 
-function useInsights(produce: (sessionType?: InsightsSessionType) => Promise<GameInsights>, isSample = true) {
-  const getGameInsights = vi.fn((_gameId: string, sessionType?: InsightsSessionType) => produce(sessionType))
+const DETAIL: QuestionInsightDetail = {
+  questionId: 'q4',
+  order: 4,
+  text: 'CHỊ',
+  answeredCount: 26,
+  correctRate: 0.408,
+  needsReview: true,
+  distribution: [
+    { label: 'chị', count: 11, correct: true },
+    { label: 'chi', count: 9, correct: false },
+  ],
+  otherCount: 4,
+  noAnswerCount: 2,
+}
+
+function useInsights(
+  produce: (sessionType?: InsightsSessionType, range?: InsightsRange) => Promise<GameInsights>,
+  isSample = true,
+  detail: () => Promise<QuestionInsightDetail> = () => Promise.resolve(DETAIL),
+) {
+  const getGameInsights = vi.fn((_gameId: string, sessionType?: InsightsSessionType, range?: InsightsRange) =>
+    produce(sessionType, range),
+  )
+  const getQuestionInsights = vi.fn(detail)
   const api: HomeApi = {
     listLiveSessions: () => Promise.resolve([]),
     listReviewNeeded: () => Promise.resolve([]),
     getGameInsights,
+    getQuestionInsights,
   }
   mockedGetHomeApi.mockResolvedValue({ api, isSample })
 
-  return getGameInsights
+  return Object.assign(getGameInsights, { getQuestionInsights })
 }
 
 function LocationProbe() {
@@ -74,6 +103,7 @@ describe('Trang Kết quả', () => {
   beforeEach(() => {
     loginAsTeacher()
     mockedGetGames.mockResolvedValue([PUBLISHED, DRAFT])
+    mockedFetchClassrooms.mockResolvedValue([])
     useInsights(() => Promise.resolve(INSIGHTS))
   })
   afterEach(() => {
@@ -113,17 +143,20 @@ describe('Trang Kết quả', () => {
   })
 
   describe('đã chọn game', () => {
-    it('hiện 3 chỉ số kiểu Việt Nam, từng câu, câu cần ôn kèm lỗi hay gặp và một h1', async () => {
+    it('hiện 5 chỉ số kiểu Việt Nam, từng câu, câu cần ôn kèm lỗi hay gặp và một h1', async () => {
       renderResults('/results?gameId=g1')
 
       expect(await screen.findByRole('heading', { level: 1, name: 'Ghép chữ về gia đình' })).toBeInTheDocument()
       expect(await screen.findByText('26')).toBeInTheDocument()
       expect(screen.getByText('72%')).toBeInTheDocument()
       expect(screen.getByText('1,6')).toBeInTheDocument()
+      expect(screen.getByText('85%')).toBeInTheDocument()
+      expect(screen.getByText('học sinh làm hết các câu')).toBeInTheDocument()
+      expect(screen.getByText('240,0')).toBeInTheDocument()
       expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
 
-      expect(screen.getByText('Câu 1: MẸ, 92% đúng')).toBeInTheDocument()
-      expect(screen.getByText('Câu 4: CHỊ, 41% đúng')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Câu 1: MẸ, 92% đúng. Xem chi tiết câu 1' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Câu 4: CHỊ, 41% đúng. Xem chi tiết câu 4' })).toBeInTheDocument()
 
       const review = within(screen.getByRole('region', { name: 'Cần ôn lại' }))
       expect(review.getByText('Câu 4: “CHỊ”')).toBeInTheDocument()
@@ -193,16 +226,123 @@ describe('Trang Kết quả', () => {
       expect(fetchInsights).toHaveBeenCalledWith('g1', 'SELF')
     })
 
+    it('lowSample hiện cảnh báo "số lượt chơi còn ít", không có thì không hiện', async () => {
+      useInsights(() => Promise.resolve({ ...INSIGHTS, lowSample: true }))
+      const first = renderResults('/results?gameId=g1')
+
+      expect(await screen.findByRole('note')).toHaveTextContent('Số lượt chơi còn ít, số liệu chỉ mang tính tham khảo.')
+      first.unmount()
+
+      useInsights(() => Promise.resolve(INSIGHTS))
+      renderResults('/results?gameId=g1')
+      await screen.findByText('26')
+      expect(screen.queryByRole('note')).toBeNull()
+    })
+
+    it('lọc theo khoảng ngày: gửi from/to, giữ trên địa chỉ, có nút xóa lọc', async () => {
+      const user = userEvent.setup()
+      const fetchInsights = useInsights(() => Promise.resolve(INSIGHTS))
+      renderResults('/results?gameId=g1')
+      await screen.findByText('26')
+
+      fireEvent.change(screen.getByLabelText('Từ ngày'), { target: { value: '2026-11-01' } })
+
+      await waitFor(() =>
+        expect(fetchInsights).toHaveBeenLastCalledWith('g1', undefined, { from: '2026-11-01', to: undefined }),
+      )
+      expect(screen.getByTestId('where')).toHaveTextContent('/results?gameId=g1&from=2026-11-01')
+
+      await user.click(screen.getByRole('button', { name: 'Xóa lọc ngày' }))
+      expect(screen.getByTestId('where')).toHaveTextContent(/^\/results\?gameId=g1$/)
+    })
+
+    it('chưa có lớp nào thì không hiện ô chọn lớp', async () => {
+      renderResults('/results?gameId=g1')
+      await screen.findByText('26')
+
+      expect(screen.queryByLabelText('Lớp')).toBeNull()
+    })
+
+    it('có lớp thì chọn lớp gửi classroomId, giữ trên địa chỉ, chọn "Tất cả các lớp" thì bỏ', async () => {
+      const user = userEvent.setup()
+      mockedFetchClassrooms.mockResolvedValue([
+        { classroomId: 'class-1a', className: 'Lớp 1A' },
+        { classroomId: 'class-1b', className: 'Lớp 1B' },
+      ])
+      const fetchInsights = useInsights(() => Promise.resolve(INSIGHTS))
+      renderResults('/results?gameId=g1')
+      await screen.findByText('26')
+
+      await user.selectOptions(await screen.findByLabelText('Lớp'), 'class-1a')
+
+      await waitFor(() =>
+        expect(fetchInsights).toHaveBeenLastCalledWith('g1', undefined, {
+          from: undefined,
+          to: undefined,
+          classroomId: 'class-1a',
+        }),
+      )
+      expect(screen.getByTestId('where')).toHaveTextContent('/results?gameId=g1&classroomId=class-1a')
+
+      await user.selectOptions(screen.getByLabelText('Lớp'), '')
+      expect(screen.getByTestId('where')).toHaveTextContent(/^\/results\?gameId=g1$/)
+    })
+
+    it('lớp trên địa chỉ đã bị xóa (không còn trong danh sách) thì bỏ bộ lọc', async () => {
+      mockedFetchClassrooms.mockResolvedValue([{ classroomId: 'class-1b', className: 'Lớp 1B' }])
+      const fetchInsights = useInsights(() => Promise.resolve(INSIGHTS))
+      renderResults('/results?gameId=g1&classroomId=class-da-xoa')
+      await screen.findByLabelText('Lớp')
+
+      await waitFor(() => expect(fetchInsights).toHaveBeenLastCalledWith('g1', undefined))
+    })
+
+    it('classroomId lạ trên địa chỉ bị bỏ qua', async () => {
+      const fetchInsights = useInsights(() => Promise.resolve(INSIGHTS))
+      renderResults('/results?gameId=g1&classroomId=%3Cscript%3E')
+      await screen.findByText('26')
+
+      expect(fetchInsights).toHaveBeenLastCalledWith('g1', undefined)
+    })
+
+    it('địa chỉ có ngày không hợp lệ thì bỏ qua, không gửi lên máy chủ', async () => {
+      const fetchInsights = useInsights(() => Promise.resolve(INSIGHTS))
+      renderResults('/results?gameId=g1&from=hom-qua&to=2026-13-45')
+      await screen.findByText('26')
+
+      expect(fetchInsights).toHaveBeenLastCalledWith('g1', undefined)
+    })
+
+    it('chọn một câu hiện phân bố đáp án, bấm lại hoặc Đóng thì ẩn', async () => {
+      const user = userEvent.setup()
+      const fetchInsights = useInsights(() => Promise.resolve(INSIGHTS))
+      renderResults('/results?gameId=g1')
+      await screen.findByText('26')
+
+      await user.click(screen.getByRole('button', { name: /Câu 4: CHỊ.*Xem chi tiết câu 4/ }))
+
+      const detail = await screen.findByRole('region', { name: 'Chi tiết câu 4' })
+      expect(fetchInsights.getQuestionInsights).toHaveBeenCalled()
+      expect(within(detail).getByText('Lớp mình cần ôn lại')).toBeInTheDocument()
+      expect(within(detail).getByText('(đáp án đúng)')).toBeInTheDocument()
+      expect(within(detail).getByText('9 lượt')).toBeInTheDocument()
+      expect(within(detail).getByText(/Các đáp án khác .*: 4 lượt/)).toBeInTheDocument()
+      expect(within(detail).getByText('Bỏ qua hoặc hết giờ: 2 lượt')).toBeInTheDocument()
+
+      await user.click(within(detail).getByRole('button', { name: 'Đóng' }))
+      expect(screen.queryByRole('region', { name: 'Chi tiết câu 4' })).toBeNull()
+    })
+
     it('chưa có lượt chơi thì hiện "Chưa có lượt chơi nào" thay cho bảng', async () => {
-      useInsights(() => Promise.resolve({ playCount: 0, correctRate: 0, avgAttemptsPerQuestion: 0, questions: [] }))
+      useInsights(() => Promise.resolve({ playCount: 0, correctRate: 0, avgAttemptsPerQuestion: 0, completionRate: 0, avgScore: 0, lowSample: false, questions: [] }))
       renderResults('/results?gameId=g1')
 
       expect(await screen.findByText('Chưa có lượt chơi nào')).toBeInTheDocument()
       expect(screen.queryByRole('region', { name: 'Từng câu' })).toBeNull()
     })
 
-    it('bản thật chưa hỗ trợ: "Chưa có số liệu", không báo lỗi', async () => {
-      mockedGetHomeApi.mockResolvedValue({ api: new RealHomeApi(), isSample: false })
+    it('endpoint báo chưa hỗ trợ: "Chưa có số liệu", không báo lỗi', async () => {
+      useInsights(() => Promise.reject(new HomeApiNotSupportedError('GET /games/{gameId}/insights')), false)
       renderResults('/results?gameId=g1')
 
       expect(await screen.findByText('Chưa có số liệu')).toBeInTheDocument()

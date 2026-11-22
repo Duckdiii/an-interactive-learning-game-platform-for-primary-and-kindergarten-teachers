@@ -39,6 +39,19 @@ public class QuestionClock {
         return state(sessionId, participantId).lap(questionId, clock.instant());
     }
 
+    /**
+     * Số ms server đo từ mốc hiện tại tới giờ, không dời mốc. Rỗng nếu chưa có mốc (chưa tải đề, hoặc server vừa khởi
+     * động lại): khi đó chỉ còn số client khai. Dời mốc ({@link #advance}) chỉ sau khi một câu được nhận hợp lệ, để
+     * gửi một yêu cầu sai không "đặt lại đồng hồ" cho lần nộp thật.
+     */
+    public Optional<Long> elapsed(String sessionId, String participantId) {
+        return state(sessionId, participantId).elapsed(clock.instant());
+    }
+
+    public void advance(String sessionId, String participantId) {
+        state(sessionId, participantId).advance(clock.instant());
+    }
+
     public void clearSession(String sessionId) {
         if (sessionId != null) states.remove(sessionId);
     }
@@ -54,6 +67,14 @@ public class QuestionClock {
 
         synchronized void startIfAbsent(Instant now) {
             if (mark == null) mark = now;
+        }
+
+        synchronized Optional<Long> elapsed(Instant now) {
+            return mark == null ? Optional.empty() : Optional.of(Math.max(0, Duration.between(mark, now).toMillis()));
+        }
+
+        synchronized void advance(Instant now) {
+            if (mark != null) mark = now;
         }
 
         synchronized Optional<Long> lap(String questionId, Instant now) {

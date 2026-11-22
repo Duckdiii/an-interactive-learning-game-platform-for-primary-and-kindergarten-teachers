@@ -38,4 +38,11 @@ public class Participant {
     private LocalDateTime completedAt;
 
     private String note;
+
+    /** Ghi chú đặt khi giáo viên đóng phòng lúc học sinh chưa làm xong (không tính là hoàn thành). */
+    public static final String ENDED_BY_CLOSE_NOTE = "ENDED";
+
+    public boolean finishedByPlaying() {
+        return completedAt != null && !ENDED_BY_CLOSE_NOTE.equals(note);
+    }
 }

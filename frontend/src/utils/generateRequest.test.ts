@@ -4,6 +4,8 @@ import {
   buildGenerateRequest,
   checkGenerate,
   hasValidIdea,
+  parseReviewFrom,
+  reviewSeedParams,
   validateVisualClozeImageInput,
 } from './generateRequest'
 import type { GenerateForm } from './generateRequest'
@@ -172,5 +174,29 @@ describe('validateVisualClozeImageInput', () => {
 
   it('accepts a valid set of teacher supplied URLs', () => {
     expect(validateVisualClozeImageInput('https://example.com/scene.png', options)).toBeNull()
+  })
+})
+
+describe('reviewFrom (game ôn tập từ kết quả lớp)', () => {
+  it('buildGenerateRequest chỉ gửi reviewFrom khi form có', () => {
+    const reviewFrom = { gameId: 'old-game', questionIds: ['q4'] }
+
+    expect(buildGenerateRequest(form({ idea: 'Ôn tập các từ về gia đình', reviewFrom }), 'idea', 'QUIZ').reviewFrom)
+      .toEqual(reviewFrom)
+    expect(buildGenerateRequest(form({ idea: 'Ôn tập các từ về gia đình' }), 'idea', 'QUIZ')).not.toHaveProperty('reviewFrom')
+  })
+
+  it('parseReviewFrom nhận mã hợp lệ và bỏ cả khối nếu có giá trị lạ hoặc quá nhiều câu', () => {
+    expect(parseReviewFrom('g-1', 'q1,q4')).toEqual({ gameId: 'g-1', questionIds: ['q1', 'q4'] })
+    expect(parseReviewFrom(null, 'q1')).toBeUndefined()
+    expect(parseReviewFrom('g-1', null)).toBeUndefined()
+    expect(parseReviewFrom('g 1', 'q1')).toBeUndefined()
+    expect(parseReviewFrom('g-1', 'q1,<script>')).toBeUndefined()
+    expect(parseReviewFrom('g-1', Array.from({ length: 11 }, (_, i) => `q${i}`).join(','))).toBeUndefined()
+  })
+
+  it('reviewSeedParams tạo tham số địa chỉ, tối đa 10 câu', () => {
+    expect(reviewSeedParams('g-1', ['q1', 'q4'])).toEqual({ reviewGame: 'g-1', reviewQ: 'q1,q4' })
+    expect(reviewSeedParams('g-1', Array.from({ length: 12 }, (_, i) => `q${i}`)).reviewQ.split(',')).toHaveLength(10)
   })
 })

@@ -47,4 +47,16 @@ class QuestionClockTest {
         assertThat(questionClock.lap("s", "p", "q1")).isPresent();
         assertThat(questionClock.lap("s", "p", "q1")).isEmpty();
     }
+
+    @Test
+    void elapsedDoesNotMoveTheMarkUntilAdvanced() {
+        assertThat(questionClock.elapsed("s", "p")).isEmpty();
+        questionClock.start("s", "p");
+        clock.advance(Duration.ofSeconds(5));
+        assertThat(questionClock.elapsed("s", "p")).contains(5_000L);
+        assertThat(questionClock.elapsed("s", "p")).contains(5_000L);
+        questionClock.advance("s", "p");
+        clock.advance(Duration.ofSeconds(1));
+        assertThat(questionClock.elapsed("s", "p")).contains(1_000L);
+    }
 }

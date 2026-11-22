@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-22 — Đổi hành vi `RealHomeApi.getGameInsights` mà không chạy test của trang dùng nó
+- Lỗi: `getGameInsights` chuyển từ "ném HomeApiNotSupportedError" sang gọi API thật, nhưng `ResultsPage.test.tsx` vẫn có ca "bản thật chưa hỗ trợ" dựa vào hành vi cũ; chỉ chạy vitest ở `src/api` và `src/services/home` nên không thấy test đỏ.
+- Phát hiện nhờ: subagent `test-verifier` chạy toàn bộ vitest.
+- Nguyên nhân gốc: không grep nơi dùng `RealHomeApi` (đúng quy tắc "đổi hành vi hàm dùng chung thì grep mọi chỗ gọi") và chạy test theo thư mục mình sửa thay vì theo nơi dùng.
+- Cách chặn: đã có quy tắc trong `CLAUDE.md`; áp dụng: trước khi báo xong, chạy `npx vitest run` toàn bộ (hoặc `--related` theo file đã đổi).
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-21 — Viết migration mới mà không đối chiếu cột do migration chưa merge đã thêm trên DB dùng chung
 - Lỗi: V21 (`main`, FR-15) `add column status` vào `teachers`, trong khi V14 của `feature/admin-portal` đã áp trên DB dùng chung và đã thêm cột này; backend bản gộp dev+main dừng khi migrate V21 (V20 đã áp trước đó). Trên DB mới, khi admin-portal merge, V14 chạy trước V21 nên cũng lỗi y hệt.
 - Phát hiện nhờ: chạy backend với DB dùng chung trong lúc thử đầu-cuối.
@@ -358,4 +365,18 @@ Mẫu một mục:
 - Phát hiện nhờ: chạy thật kịch bản 006 (nhóm A) trên trình duyệt.
 - Nguyên nhân gốc: chọn kích thước theo số ký tự mà không đo/ước lượng bề rộng chữ, chỉ kiểm bằng mắt với nhãn số ("6").
 - Cách chặn: kích thước khung chữ trên canvas phải tính từ độ dài chữ và cỡ chữ (hoặc đo bằng Konva), kiểm với nhãn có dấu và chữ rộng; có thể thêm test hàm thuần cho bề rộng nhãn.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-22 — Thêm mục menu nhưng không chạy test đếm mục menu; dùng cờ trạng thái có sẵn mà không đọc nơi ghi nó
+- Lỗi: (1) thêm mục "Lớp học" vào `AppLayout` (UC-16) mà không chạy `teacherUi.test.tsx`, test đếm đúng 4 mục nên đỏ cho tới khi test-verifier chạy cả thư mục `src/pages`; (2) tính `completionRate` từ `Participant.completedAt != null` mà chưa đọc `SessionService.closeSession`, nơi cũng đặt `completedAt` (kèm note ENDED) cho học sinh chưa làm xong, nên tỉ lệ bị thổi phồng.
+- Phát hiện nhờ: test-verifier (1); tự đọc `closeSession` khi kiểm mục 4 (2).
+- Nguyên nhân gốc: chỉ chạy test của file vừa sửa, không chạy test của mọi nơi dùng chung (menu); dùng một trường do nơi khác ghi mà không grep nơi ghi.
+- Cách chặn: đổi cấu trúc dùng chung thì grep test tham chiếu nó (đã có quy tắc "đổi hành vi hàm dùng chung"); với cờ trạng thái, grep mọi `set...` của trường trước khi dựa vào nó. (2) đã thành hằng `ENDED_BY_CLOSE_NOTE` và test `GameInsightsServiceTest`.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-22 — Chặn truy cập bằng danh sách chặn đường dẫn, và quên kiểm một đường khác trả cùng dữ liệu nhạy cảm
+- Lỗi: vá lộ `participantId` bằng cách chỉ chặn SUBSCRIBE hai đường dẫn cụ thể; đăng ký bằng mẫu có `*` vẫn lọt, và `GET /sessions/{id}/leaderboard` vẫn trả `pid` cho mọi JWT giáo viên. Regex số điện thoại ban đầu chặn nhầm ngày tháng và số lớn.
+- Phát hiện nhờ: security-auditor và reviewer.
+- Nguyên nhân gốc: sửa theo đường dẫn đã biết thay vì liệt kê mọi nơi dữ liệu đó đi ra; chặn bằng danh sách chặn thay vì danh sách cho phép; không thử regex trên đầu vào thật.
+- Cách chặn: khi vá một dữ liệu nhạy cảm, grep mọi chỗ phát/trả field đó trước khi sửa; kiểm soát truy cập dùng danh sách cho phép; regex lọc phải chạy thử trên vài đầu vào hợp lệ và không hợp lệ. Đã thành test ở tầng 2 (xem `docs/corrections.md`).
 - Trạng thái: CHỜ DUYỆT
