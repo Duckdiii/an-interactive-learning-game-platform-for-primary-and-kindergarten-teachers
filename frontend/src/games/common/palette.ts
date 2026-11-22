@@ -21,6 +21,8 @@ export interface Palette {
   wrongFill: string
   audioFill: string
   audioStroke: string
+  audioPlayActive: string
+  audioPlayInactive: string
   /** Màu đường nối theo thứ tự cặp; không có đỏ và xanh lá. */
   linkColors: readonly string[]
   correctLine: string
@@ -68,6 +70,8 @@ export const DEFAULT_PALETTE: Palette = {
   wrongFill: '#FFE082',
   audioFill: '#E0F2FE',
   audioStroke: '#0284C7',
+  audioPlayActive: '#FFD54F',
+  audioPlayInactive: '#4FC3F7',
   linkColors: ['#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#92400E', '#64748B'],
   correctLine: '#43A047',
   wrongLine: '#F59E0B',
@@ -134,6 +138,10 @@ export const ORDERING_SLOT_INK = '#7B1FA2'
 export const ORDERING_SLOT_EMPTY_INK = '#9C27B0'
 export const ORDERING_STEP_LOCKED_FILL = '#E8F5E9'
 export const ORDERING_STEP_LOCKED_STROKE = '#2E7D32'
+
+/** Bảng màu chuyên biệt cho nút AudioPlayButton */
+export const AUDIO_PLAY_ACTIVE_FILL = '#FFD54F'
+export const AUDIO_PLAY_INACTIVE_FILL = '#4FC3F7'
 
 /** `fooBar` -> `foo-bar`, cho tên biến CSS. */
 const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)

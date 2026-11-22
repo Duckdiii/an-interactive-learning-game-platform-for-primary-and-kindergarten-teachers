@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.random.RandomGenerator;
 import com.aigameplatform.backend.service.curriculum.CurriculumCatalog;
 import com.aigameplatform.backend.service.curriculum.CurriculumChunk;
+import com.aigameplatform.backend.service.media.GameAudioEnricher;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,11 +47,22 @@ public class GameService {
     private final GameCurriculumReviewService curriculumReviews;
     private final ObjectProvider<CurriculumCatalog> curriculumCatalog;
     private final RandomGenerator random;
+    private final ObjectProvider<GameAudioEnricher> audioEnrichers;
 
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
             RandomGenerator random) {
+        this(games, teachers, handlers, jsonMapper, rateLimiter, transactions, curriculumReviews, curriculumCatalog,
+                random, null);
+    }
+
+    @Autowired
+    public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
+            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
+            GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
+            RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers) {
+        this.audioEnrichers = audioEnrichers;
         this.curriculumCatalog = curriculumCatalog;
         this.random = random;
         this.games = games;
@@ -86,6 +99,11 @@ public class GameService {
         game.setPresentation(content.presentation());
         game.setSchemaVersion(content.schemaVersion());
         game.setStatus(GameStatus.DRAFT);
+        // Sinh giọng đọc TTS cho câu hỏi; lỗi dịch vụ ngoài không làm hỏng luồng tạo game (enricher tự nuốt lỗi).
+        GameAudioEnricher enricher = audioEnrichers != null ? audioEnrichers.getIfAvailable() : null;
+        if (enricher != null) {
+            enricher.enrichAllQuestionsWithAudio(content.questions());
+        }
         game.getQuestions().addAll(content.questions());
         game.setQuestionNum(content.questions().size());
         // Có kết quả đối chiếu chương trình (game DSL) thì lưu game và bản đối chiếu trong cùng một transaction.
