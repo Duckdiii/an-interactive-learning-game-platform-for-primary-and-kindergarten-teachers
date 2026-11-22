@@ -387,3 +387,10 @@ Mẫu một mục:
 - Nguyên nhân gốc: không đối chiếu danh sách bước trong `.github/workflows/ci-pr.yml` với những gì đã chạy cục bộ.
 - Cách chặn: trước khi mở PR chạy đủ các lệnh `node scripts/...` trong job đó (đã chạy lại và xanh). Đã là kiểm tra tầng 2 (CI), không cần thêm quy tắc.
 - Trạng thái: CHỜ DUYỆT
+
+### 2026-11-23 — Thêm script mới cho workflow lấy script từ nhánh gốc mà không tính chuyện chạy lần đầu; tin một lần chạy thử đơn lẻ
+- Lỗi: (1) workflow AI Review lấy script từ nhánh gốc (`trusted/`), nên PR thêm `shard.mjs` tự đỏ vì nhánh gốc chưa có file này (bước `boot` chỉ kiểm ba file cũ); (2) mô tả `status` trong schema (agent đọc) mâu thuẫn với prompt chia phần mới; (3) một lần chạy thử thành công không đủ: chạy thử PR #83 ba lần cho 1 lần xanh, 2 lần đỏ vì một phần báo incomplete (chập chờn).
+- Phát hiện nhờ: run đầu của PR #84 và các lần chạy thử bằng workflow_dispatch (dry_run).
+- Nguyên nhân gốc: không đối chiếu mọi nơi agent đọc chỉ dẫn (prompt và schema) khi đổi hành vi; không nghĩ đến thứ tự merge của chính hệ thống; chạy thử ít lần.
+- Cách chặn: khi thêm script mà workflow cần từ `trusted/`, thêm file đó vào danh sách của `boot` (đã làm, có test); test kiểm prompt và schema không mâu thuẫn về chia phần (đã làm); với hành vi của agent thì chạy thử nhiều lần trước khi kết luận. Còn thiếu: xử lý phần `incomplete` chập chờn (Lớp 2 hoặc chạy lại phần đó).
+- Trạng thái: CHỜ DUYỆT
