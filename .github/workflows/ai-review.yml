@@ -261,8 +261,8 @@ jobs:
         env:
           MODE: ${{ inputs.mode || 'C' }}
           PR: ${{ steps.ctx.outputs.pr }}
-          # Mặc định 30: chế độ C với PR lớn dùng >15 turn và bị báo incomplete (tối đa 40).
-          MAX_TURNS: ${{ inputs.max_turns || '30' }}
+          # Mặc định 40 (mức tối đa prepare-run.mjs cho phép): PR lớn ở chế độ C bị báo incomplete khi chỉ có 30.
+          MAX_TURNS: ${{ inputs.max_turns || '40' }}
           UC: ${{ steps.uc.outputs.uc }}
           ROUND: ${{ steps.pre.outputs.round }}
           BASE_SHA: ${{ steps.pre.outputs.base_sha }}
