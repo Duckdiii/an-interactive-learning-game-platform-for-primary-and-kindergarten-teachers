@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,9 +30,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http, JwtService jwtService, RestSecurityErrorHandler errorHandler) throws Exception {
         http
-            // API xác thực bằng header Authorization (không dựa vào cookie), nên tắt CSRF.
+            // API xác thực bằng header Authorization (không dựa vào cookie), nên bỏ kiểm tra CSRF cho đường dẫn API/WebSocket.
             // Cookie refresh token chỉ gửi tới /api/auth, kèm SameSite=Strict.
-            .csrf(AbstractHttpConfigurer::disable)
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/ws/**"))
             .cors(Customizer.withDefaults())
             // Không lưu session phía server, mỗi request tự mang token.
             .sessionManagement(session ->

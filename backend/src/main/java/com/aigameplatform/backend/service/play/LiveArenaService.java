@@ -19,20 +19,46 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LiveArenaService {
 
+    // Kết quả của StudentPlayService chưa có thời hạn từng câu nên dùng mức chung.
+    private static final long DEFAULT_TIME_LIMIT_MS = 30_000L;
+
     private final SimpMessagingTemplate messagingTemplate;
     private final SessionParticipantRegistry sessionParticipantRegistry;
     private final LeaderboardRegistry leaderboardRegistry;
     private final SessionParticipantScoreRepository sessionParticipantScoreRepository;
+    private final ScoringService scoringService;
+    private final QuestionClock questionClock;
 
     public LiveArenaService(
             SimpMessagingTemplate messagingTemplate,
             SessionParticipantRegistry sessionParticipantRegistry,
             LeaderboardRegistry leaderboardRegistry,
-            SessionParticipantScoreRepository sessionParticipantScoreRepository) {
+            SessionParticipantScoreRepository sessionParticipantScoreRepository,
+            ScoringService scoringService,
+            QuestionClock questionClock) {
         this.messagingTemplate = messagingTemplate;
         this.sessionParticipantRegistry = sessionParticipantRegistry;
         this.leaderboardRegistry = leaderboardRegistry;
         this.sessionParticipantScoreRepository = sessionParticipantScoreRepository;
+        this.scoringService = scoringService;
+        this.questionClock = questionClock;
+    }
+
+    /** Học sinh tải câu hỏi: bắt đầu đo giờ phía server. */
+    public void startQuestionClock(String sessionId, String participantId) {
+        questionClock.start(sessionId, participantId);
+    }
+
+    /**
+     * Chấm điểm một câu trả lời bằng giờ server rồi phát bảng xếp hạng. Câu gửi lại hoặc chưa tải đề
+     * thì không cộng điểm. participantId phải đã được StudentPlayService xác thực.
+     */
+    public void recordAnswer(String sessionId, String participantId, String questionId, boolean isCorrect) {
+        questionClock.lap(sessionId, participantId, questionId).ifPresent(elapsedMs -> {
+            int points = scoringService.calculateScore(isCorrect, elapsedMs, DEFAULT_TIME_LIMIT_MS);
+            leaderboardRegistry.addScore(sessionId, participantId, getParticipantName(sessionId, participantId), points);
+            broadcastLeaderboard(sessionId);
+        });
     }
 
     public void registerHost(String sessionId, String hostId) {
@@ -84,7 +110,7 @@ public class LiveArenaService {
     public void endSessionAndPersistScores(String sessionId) {
         List<LeaderboardRegistry.ScoreEntry> finalScores = leaderboardRegistry.getSortedLeaderboard(sessionId);
 
-        if (sessionParticipantScoreRepository != null && !finalScores.isEmpty()) {
+        if (!finalScores.isEmpty()) {
             List<SessionParticipantScore> entities = finalScores.stream()
                     .map(entry -> SessionParticipantScore.builder()
                             .sessionId(sessionId)
@@ -98,6 +124,8 @@ public class LiveArenaService {
             sessionParticipantScoreRepository.saveAll(entities);
         }
         leaderboardRegistry.clearSession(sessionId); // dọn bộ nhớ sau khi đã lưu xong
+        questionClock.clearSession(sessionId);
+        sessionParticipantRegistry.clear(sessionId); // hết rò bộ nhớ: bỏ cả danh sách học sinh và host
     }
 
     public void kickParticipant(String sessionId, String requesterId, String participantId) {

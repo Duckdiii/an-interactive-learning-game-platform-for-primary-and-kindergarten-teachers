@@ -62,7 +62,7 @@ tags:
       **WebSocket không nằm trong OpenAPI.** Sự kiện realtime đi qua STOMP over SockJS broker
       `/ws/live-arena`. Đích: `/topic/session/{sessionId}/...` (server phát) và
       `/app/session/{sessionId}/...` (client gửi). Giáo viên xác thực bằng access token, học sinh bằng
-      `X-Participant-Id` ngay ở bước `CONNECT`. Frontend hiển thị `Connected`, `Reconnecting`,
+      `X-Participant-Id` kèm `X-Session-Id` (phiên mà participant thuộc về) ngay ở bước `CONNECT`. Frontend hiển thị `Connected`, `Reconnecting`,
       `Disconnected` (FLD-24). Message format chi tiết chốt ở tài liệu WebSocket riêng; theo SRS tối thiểu
       có các sự kiện: có người vào/rời phòng (giáo viên nhận); đổi trạng thái phiên `start, pause,
       resume, close` (tất cả); cập nhật tiến trình participant (giáo viên); cập nhật bảng xếp hạng sau

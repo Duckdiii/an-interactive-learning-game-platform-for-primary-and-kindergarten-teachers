@@ -25,9 +25,16 @@ public class SessionParticipantRegistry {
             return false;
         }
         String host = sessionHosts.get(sessionId);
-        // Nếu host chưa đăng ký trước trong registry, mặc định cho phép test nếu requesterId không rỗng,
-        // nhưng nếu đã đăng ký thì phải khớp chính xác.
+        // Chưa đăng ký host cho phiên thì không ai là host (từ chối); đã đăng ký thì phải khớp chính xác.
         return host != null && host.equals(requesterId);
+    }
+
+    public boolean hasParticipant(String sessionId, String participantId) {
+        if (sessionId == null || participantId == null) {
+            return false;
+        }
+        Map<String, ParticipantDto> map = sessionParticipants.get(sessionId);
+        return map != null && map.containsKey(participantId);
     }
 
     public void addOrUpdate(String sessionId, ParticipantDto participant) {

@@ -41,14 +41,9 @@ describe('useLiveArenaSocket', () => {
   })
 
   describe('resolveLiveArenaWsUrl', () => {
-    it('ghép đúng endpoint ws/live-arena kèm token query', () => {
-      const url = resolveLiveArenaWsUrl('jwt-sample-token')
-      expect(url).toContain('/ws/live-arena?token=jwt-sample-token')
-    })
-
-    it('tạo url không có token query khi token rỗng hoặc null', () => {
-      const url = resolveLiveArenaWsUrl(null)
-      expect(url).toContain('/ws/live-arena')
+    it('ghép đúng endpoint ws/live-arena, không đưa token lên URL', () => {
+      const url = resolveLiveArenaWsUrl()
+      expect(url.endsWith('/ws/live-arena')).toBe(true)
       expect(url).not.toContain('?token=')
     })
   })
