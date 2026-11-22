@@ -380,3 +380,10 @@ Mẫu một mục:
 - Nguyên nhân gốc: sửa theo đường dẫn đã biết thay vì liệt kê mọi nơi dữ liệu đó đi ra; chặn bằng danh sách chặn thay vì danh sách cho phép; không thử regex trên đầu vào thật.
 - Cách chặn: khi vá một dữ liệu nhạy cảm, grep mọi chỗ phát/trả field đó trước khi sửa; kiểm soát truy cập dùng danh sách cho phép; regex lọc phải chạy thử trên vài đầu vào hợp lệ và không hợp lệ. Đã thành test ở tầng 2 (xem `docs/corrections.md`).
 - Trạng thái: CHỜ DUYỆT
+
+### 2026-11-22 — Thêm 7 endpoint mới (lớp học, thống kê) mà không cập nhật `docs/FEATURE-MAP.md`
+- Lỗi: bảy endpoint của `ClassroomController` và `GameInsightsController` có code nhưng thiếu ở mục "Đã có code" của FEATURE-MAP; job CI "Log AI và chỉ mục OpenAPI" đỏ trên PR #83 vì `check-feature-map.mjs`. Trước khi commit chỉ chạy checker log và openapi, không chạy các bước còn lại của job đó.
+- Phát hiện nhờ: CI của PR, người dùng gửi ảnh chụp.
+- Nguyên nhân gốc: không đối chiếu danh sách bước trong `.github/workflows/ci-pr.yml` với những gì đã chạy cục bộ.
+- Cách chặn: trước khi mở PR chạy đủ các lệnh `node scripts/...` trong job đó (đã chạy lại và xanh). Đã là kiểm tra tầng 2 (CI), không cần thêm quy tắc.
+- Trạng thái: CHỜ DUYỆT
