@@ -13,3 +13,14 @@ app:
     browser-origin: ${PLAYER_ORIGIN}
     # Gốc của link chia sẻ, ví dụ https://play.truong.example/play
     share-base-url: ${PLAYER_SHARE_BASE_URL}
+  auth:
+    password-reset:
+      # Trang đặt lại mật khẩu của Frontend, ví dụ https://app.truong.example/reset-password
+      url: ${PASSWORD_RESET_URL}
+  mail:
+    # Luôn gửi thư thật: bản in liên kết ra log (LoggingPasswordResetMailer) không được chạy khi triển khai.
+    enabled: true
+    from: ${MAIL_FROM}
+spring:
+  mail:
+    host: ${MAIL_HOST}

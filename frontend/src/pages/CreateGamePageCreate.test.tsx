@@ -59,9 +59,11 @@ const cards = () => screen.getAllByRole('button', { name: /^Dùng kiểu này:/ 
 const createButton = () => cards()[0]
 const probe = () => screen.getByTestId('location').textContent ?? ''
 
-// Điền ý tưởng rồi sang bước đề xuất (chờ có thẻ "Dùng kiểu này").
+// Điền ý tưởng kèm giáo án rồi sang bước đề xuất (chờ có thẻ "Dùng kiểu này"); không có giáo án thì đường mô tả sang khung chat.
 async function toSuggestions(user: ReturnType<typeof userEvent.setup>) {
   fireEvent.change(screen.getByLabelText('Ý tưởng bài học'), { target: { value: IDEA } })
+  const lesson = new File(['x'], 'giao-an.pdf', { type: 'application/pdf' })
+  fireEvent.change(document.getElementById('create-file') as HTMLInputElement, { target: { files: [lesson] } })
   await user.click(screen.getByRole('button', { name: 'Để AI soạn giúp' }))
   await screen.findByRole('heading', { name: 'AI đề xuất kiểu chơi cho bài này' })
   await screen.findAllByRole('button', { name: /^Dùng kiểu này:/ })
@@ -338,5 +340,35 @@ describe('nhãn mô phỏng', () => {
     expect(within(results).getByText('Dữ liệu mô phỏng')).toBeInTheDocument()
     expect(within(results).getByText(/bản mẫu, có thể không khớp mô tả của bạn/)).toBeInTheDocument()
     expect(within(results).getByText(gameTypeLabel(SUGGESTED[0]))).toBeInTheDocument()
+  })
+})
+
+describe('tạo game từ khung chat', () => {
+  it('xác nhận thẻ: tạo đúng kiểu chơi đang chọn trên thẻ, ý tưởng ghép từ thẻ, rồi mở trình soạn thảo', async () => {
+    const user = userEvent.setup()
+
+    const idea = `${IDEA} trong phạm vi 5`
+    // Bản mô phỏng xếp hạng kiểu chơi giống bước đề xuất, theo đúng mô tả, môn và khối của cuộc chat.
+    const ranked = rankGameTypes({ idea, gradeLevel: 'KINDERGARTEN', subject: 'MATH' }).map((item) => item.type)
+
+    renderFlow()
+    await user.click(screen.getByRole('button', { name: 'Mầm non' }))
+    await user.click(screen.getByRole('button', { name: 'Toán' }))
+    fireEvent.change(screen.getByLabelText('Ý tưởng bài học'), { target: { value: idea } })
+    await user.click(screen.getByRole('button', { name: 'Để AI soạn giúp' }))
+
+    // Chọn kiểu thứ hai và sửa mục tiêu ngay trên thẻ: cả hai phải đi vào game được tạo.
+    await user.click(await screen.findByRole('button', { name: gameTypeLabel(ranked[1]) }, SLOW))
+    await user.clear(screen.getByLabelText('Mục tiêu học'))
+    await user.type(screen.getByLabelText('Mục tiêu học'), 'Đếm vịt trong phạm vi 5')
+    await user.click(screen.getByRole('button', { name: 'Đúng rồi, tạo game' }))
+
+    await waitFor(() => expect(probe()).toMatch(/^\/workspace\/editor\?gameId=mock-game-11\|/), SLOW)
+    const created = getMockGame('mock-game-11')
+    expect(created.gameType).toBe(ranked[1])
+    expect(created.metadata).toMatchObject({ gradeLevel: 'KINDERGARTEN', subject: 'MATH' })
+    // Bản mô phỏng đặt chủ đề từ `idea` gửi lên: idea là thẻ đã ghép, có mục tiêu cô vừa sửa.
+    expect(created.metadata.topic).toMatch(/^Mục tiêu: Đếm vịt trong phạm vi 5/)
+    expect(getMockGenerateCalls()).toBe(1)
   })
 })

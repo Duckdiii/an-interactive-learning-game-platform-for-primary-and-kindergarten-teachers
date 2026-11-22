@@ -37,6 +37,10 @@ public class RefreshToken {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    // "Ghi nhớ đăng nhập": token mới sinh khi xoay vòng giữ cùng thời hạn dài (30 ngày) với phiên gốc.
+    @Column(nullable = false)
+    private boolean rememberMe;
+
     public boolean isRevoked() {
         return revokedAt != null;
     }

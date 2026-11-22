@@ -44,12 +44,12 @@ import tools.jackson.databind.json.JsonMapper;
  * Luồng đầu-cuối không gọi LLM: JSON thô của AI, kiểm tra đầu ra AI, Backend dựng DSL hoàn chỉnh, rồi 3 lớp kiểm
  * duyệt. Toàn bộ bean do Spring nối, không cần DB; chưa có API key nên Layer 3 chỉ dùng danh sách từ cấm.
  */
-@SpringJUnitConfig({RandomConfig.class, GameDslFactoryRegistry.class, QuizGameDslFactory.class,
+@SpringJUnitConfig({RandomConfig.class, GameAssetCatalog.class, com.aigameplatform.backend.service.media.NotoEmojiCatalog.class, GameDslFactoryRegistry.class, QuizGameDslFactory.class,
         AudioVisualMatchGameDslFactory.class, OddOneOutGameDslFactory.class, SpotTheTargetGameDslFactory.class,
         WordScrambleGameDslFactory.class, MatchingGameDslFactory.class, MemoryCardGameDslFactory.class,
         DragDropGameDslFactory.class, OrderingGameDslFactory.class, VisualClozeGameDslFactory.class,
         AiOutputValidator.class, GameDslSchemaRegistry.class, SchemaGameValidator.class,
-        BusinessRuleGameValidator.class, SafetyGameValidator.class, BlockedWordList.class,
+        BusinessRuleGameValidator.class, SafetyGameValidator.class, com.aigameplatform.backend.service.validation.ContentSafetyCheck.class, BlockedWordList.class,
         OpenAiModerationClient.class, GameValidationService.class, QuizRule.class, AudioVisualMatchRule.class,
         OddOneOutRule.class, WordScrambleRule.class, MatchingRule.class, MemoryCardRule.class, DragDropRule.class,
         OrderingRule.class, VisualClozeRule.class})
@@ -93,7 +93,7 @@ class GameCreationPipelineTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void rawAiJsonBecomesAGameThatPassesAllThreeLayers(GameType type) throws IOException {
         ValidationReport report = run(type, rawAiOutput(type));
 

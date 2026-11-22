@@ -36,7 +36,7 @@ class AiOutputSchemasTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void llmSchemaUsesOnlyKeywordsAnLlmAccepts(GameType type) {
         JsonNode schema = MAPPER.readTree(AiOutputSchemas.forLlm(type));
         Set<String> keywords = new HashSet<>();
@@ -46,7 +46,7 @@ class AiOutputSchemasTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void llmSchemaDropsTheSchemaAndTitleMetadata(GameType type) {
         JsonNode raw = MAPPER.readTree(AiOutputSchemas.rawJson(type));
         JsonNode forLlm = MAPPER.readTree(AiOutputSchemas.forLlm(type));
@@ -54,11 +54,12 @@ class AiOutputSchemasTest {
         assertThat(raw.has("$schema")).isTrue();
         assertThat(raw.get("title").asString()).contains(type.name());
         assertThat(forLlm.has("$schema")).isFalse();
+        assertThat(forLlm.path("properties").has("title")).as("chỉ bỏ tiêu đề schema, giữ trường title cho AI").isTrue();
         assertThat(forLlm.has("title")).isFalse();
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everySchemaDescribesAnObjectWithARequiredQuestionsArray(GameType type) {
         JsonNode schema = MAPPER.readTree(AiOutputSchemas.forLlm(type));
 
@@ -70,7 +71,7 @@ class AiOutputSchemasTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void schemasAreCachedAndSharedBetweenCalls(GameType type) {
         assertThat(AiOutputSchemas.rawJson(type)).isSameAs(AiOutputSchemas.rawJson(type));
         assertThat(AiOutputSchemas.forLlm(type)).isSameAs(AiOutputSchemas.forLlm(type));

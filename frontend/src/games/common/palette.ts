@@ -92,6 +92,41 @@ export const DEFAULT_PALETTE: Palette = {
   streakInk: '#14532D',
 }
 
+/** Màu sắc hoạt hình ngọt ngào dùng cho hiệu ứng pháo hoa giấy Confetti & Star Burst */
+export const CELEBRATION_CONFETTI_COLORS: readonly string[] = [
+  DEFAULT_PALETTE.dotYellow,
+  DEFAULT_PALETTE.dotPink,
+  DEFAULT_PALETTE.dotBlue,
+  DEFAULT_PALETTE.dotGreen,
+  DEFAULT_PALETTE.dotOrange,
+  DEFAULT_PALETTE.dotPurple,
+  DEFAULT_PALETTE.accent,
+]
+
+/** Màu nội dung khi đáp án là tên màu (vẽ vật đúng màu đó). Là nội dung bài học, không phải phản hồi đúng/sai, nên có cả đỏ. */
+export type ColorWord = 'red' | 'blue' | 'green' | 'yellow' | 'orange' | 'purple' | 'pink' | 'brown' | 'black' | 'white'
+export const COLOR_WORD_FILLS: Readonly<Record<ColorWord, string>> = {
+  red: '#EF4444',
+  blue: '#3B82F6',
+  green: '#22C55E',
+  yellow: '#FACC15',
+  orange: '#FB923C',
+  purple: '#A855F7',
+  pink: '#F472B6',
+  brown: '#A16207',
+  black: '#1F2937',
+  white: '#FFFFFF',
+}
+
+/** Màu vật lựa chọn khi không phải câu về màu: xoay vòng các màu kẹo, không có đỏ (đỏ dễ gợi "sai"). */
+export const OPTION_OBJECT_FILLS: readonly string[] = [
+  DEFAULT_PALETTE.dotPink,
+  DEFAULT_PALETTE.dotBlue,
+  DEFAULT_PALETTE.dotYellow,
+  DEFAULT_PALETTE.dotGreen,
+  DEFAULT_PALETTE.dotOrange,
+  DEFAULT_PALETTE.dotPurple,
+]
 /** Bảng màu chuyên biệt cho game Sắp xếp thứ tự (Ordering) theo yêu cầu thiết kế ô vị trí và bước đã khoá */
 export const ORDERING_SLOT_FILL = '#F3E5F5'
 export const ORDERING_SLOT_STROKE = '#7B1FA2'

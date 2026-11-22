@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 public class MemoryCardGameDslFactory extends
         AbstractGameDslFactory<MemoryCardAiOutput, MemoryCardAiQuestion, MemoryCardQuestionDsl, MemoryCardGameDsl> {
 
-    public MemoryCardGameDslFactory(RandomGenerator random) {
-        super(GameType.MEMORY_CARD, MemoryCardAiOutput.class, random);
+    public MemoryCardGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.MEMORY_CARD, MemoryCardAiOutput.class, random, assets);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class MemoryCardGameDslFactory extends
         List<MemoryPairDsl> pairs = new ArrayList<>();
         for (int i = 0; i < ai.pairs().size(); i++) {
             var card = ai.pairs().get(i);
-            pairs.add(new MemoryPairDsl(Ids.numbered("p", i), new PairSideDsl(card.text(), card.visualPrompt(), null)));
+            pairs.add(new MemoryPairDsl(Ids.numbered("p", i), new PairSideDsl(card.text(), card.visualPrompt(), imageOf(card.asset()))));
         }
         return new MemoryCardQuestionDsl(base.id(), base.timeLimitSeconds(), base.points(), ai.audioText(), null,
                 null, null, pairs);

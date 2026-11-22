@@ -1,6 +1,6 @@
 package com.aigameplatform.backend.entity;
 
-import com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status;
+import com.aigameplatform.backend.entity.enums.CurriculumReviewStatus;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
@@ -15,7 +15,7 @@ public class GameCurriculumReview {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "game_id", nullable = false, unique = true) private Game game;
     @Column(nullable = false) private Instant createdAt = Instant.now();
-    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private Status status;
+    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private CurriculumReviewStatus status;
     @JdbcTypeCode(SqlTypes.JSON) @Column(nullable = false, columnDefinition = "jsonb") private String evidence;
     @JdbcTypeCode(SqlTypes.JSON) @Column(nullable = false, columnDefinition = "jsonb") private String claims;
     @JdbcTypeCode(SqlTypes.JSON) @Column(nullable = false, columnDefinition = "jsonb") private String warnings;

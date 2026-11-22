@@ -14,12 +14,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.aigameplatform.backend.controller.AuthController;
 import com.aigameplatform.backend.dto.response.AuthResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
+import com.aigameplatform.backend.entity.enums.UserRole;
 import com.aigameplatform.backend.exception.GlobalExceptionHandler;
 import com.aigameplatform.backend.security.JwtService;
 import com.aigameplatform.backend.security.RefreshCookieFactory;
 import com.aigameplatform.backend.security.RestSecurityErrorHandler;
 import com.aigameplatform.backend.service.AuthResult;
 import com.aigameplatform.backend.service.AuthService;
+import com.aigameplatform.backend.service.PasswordResetService;
 import jakarta.servlet.http.Cookie;
 import java.time.Clock;
 import java.time.Instant;
@@ -41,6 +43,7 @@ import org.springframework.test.web.servlet.MockMvc;
         "app.jwt.secret=0123456789abcdef0123456789abcdef-test-secret",
         "app.jwt.access-token-ttl-minutes=15",
         "app.jwt.refresh-token-ttl-hours=24",
+        "app.jwt.remember-me-refresh-token-ttl-days=30",
         "app.cors.allowed-origins=http://localhost:5173",
         "app.auth.refresh-cookie.name=refresh_token",
         "app.auth.refresh-cookie.path=/api/auth",
@@ -58,6 +61,9 @@ class SecurityConfigTest {
     @MockitoBean
     private AuthService authService;
 
+    @MockitoBean
+    private PasswordResetService passwordResetService;
+
     private static String validAccessToken() {
         return new JwtService(SECRET, 15, Clock.systemUTC())
                 .generateAccessToken("teacher-1", "a@school.edu.vn", "session-1");
@@ -70,8 +76,8 @@ class SecurityConfigTest {
 
     private static AuthResult authResult() {
         return new AuthResult(
-                new AuthResponse("access-jwt", 900, new TeacherInfo("teacher-1", "Nguyễn Văn A", "a@school.edu.vn")),
-                "raw-refresh-token");
+                new AuthResponse("access-jwt", 900, new TeacherInfo("teacher-1", "Nguyễn Văn A", "a@school.edu.vn", UserRole.ROLE_TEACHER)),
+                "raw-refresh-token", false, java.time.Duration.ofHours(24));
     }
 
     @Test
@@ -128,6 +134,24 @@ class SecurityConfigTest {
         mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(LOGIN_BODY))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.accessToken").value("access-jwt"));
+    }
+
+    @Test
+    void forgotPasswordIsPublic() throws Exception {
+        when(passwordResetService.forgotPassword("a@school.edu.vn")).thenReturn("ok");
+
+        mockMvc.perform(post("/api/auth/forgot-password").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"a@school.edu.vn\"}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void resetPasswordIsPublic() throws Exception {
+        mockMvc.perform(post("/api/auth/reset-password").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"token\":\"raw-token\",\"newPassword\":\"NewPass1!\"}"))
+                .andExpect(status().isNoContent());
+
+        verify(passwordResetService).resetPassword("raw-token", "NewPass1!");
     }
 
     @Test

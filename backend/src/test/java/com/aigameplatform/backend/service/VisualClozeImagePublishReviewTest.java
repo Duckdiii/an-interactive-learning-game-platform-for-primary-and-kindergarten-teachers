@@ -72,7 +72,7 @@ class VisualClozeImagePublishReviewTest {
 
     private GamePublicationService service(boolean rag) {
         return new GamePublicationService(games, validation, strategies, images, reviews, reviewerProvider, mapper,
-                rag, ORIGIN, "https://play.example/room");
+                rag, ORIGIN, "https://play.example/room", new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
     }
 
     @BeforeEach

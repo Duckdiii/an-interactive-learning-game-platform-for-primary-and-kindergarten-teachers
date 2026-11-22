@@ -74,4 +74,71 @@ describe('createMockGame (giống kết quả POST /games/generate)', () => {
 
     expect(getMockGame(game.gameId).metadata.title).not.toBe('Bị sửa')
   })
+
+  it('BR-05: tạo game MATCHING cho môn Toán / đếm số: sinh nội dung đếm số đồ vật, không bị lẫn vần tiếng Việt', () => {
+    const game = createMockGame({ gameType: 'MATCHING', subject: 'MATH', gradeLevel: 'KINDERGARTEN', idea: 'Bé đếm số con vật từ 1 đến 5' })
+
+    expect(game.gameType).toBe('MATCHING')
+    expect(game.metadata.subject).toBe('MATH')
+    const firstQuestion = game.questions[0] as { pairs: Array<{ left: { text?: string }; right: { text?: string } }> }
+    expect(firstQuestion.pairs[0].left.text).toContain('quả táo')
+    expect(firstQuestion.pairs[0].right.text).toBe('Số 1')
+  })
+  it('BR-06: tạo game MATCHING Tiếng Việt mầm non / lớp 1: sinh thẻ chữ gắn liền với hình vector CC0 (a - quả táo, c - con cá...)', () => {
+    const game = createMockGame({ gameType: 'MATCHING', subject: 'VIETNAMESE', gradeLevel: 'KINDERGARTEN', idea: 'Nhận biết chữ cái' })
+
+    expect(game.gameType).toBe('MATCHING')
+    const firstQuestion = game.questions[0] as { pairs: Array<{ left: { text?: string; imageUrl?: string }; right: { text?: string; imageUrl?: string } }> }
+    expect(firstQuestion.pairs).toHaveLength(4)
+    expect(firstQuestion.pairs[0].left.text).toBe('a')
+    expect(firstQuestion.pairs[0].left.imageUrl).toBe('/assets/fruits/apple.svg')
+    expect(firstQuestion.pairs[0].right.text).toBe('Quả táo')
+    expect(firstQuestion.pairs[0].right.imageUrl).toBe('/assets/fruits/apple.svg')
+
+    expect(firstQuestion.pairs[1].left.text).toBe('c')
+    expect(firstQuestion.pairs[1].left.imageUrl).toBe('/assets/animals/fish.svg')
+    expect(firstQuestion.pairs[1].right.text).toBe('Con cá')
+    expect(firstQuestion.pairs[1].right.imageUrl).toBe('/assets/animals/fish.svg')
+
+    // 100% thẻ đều có imageUrl
+    for (const pair of firstQuestion.pairs) {
+      expect(pair.left.imageUrl).toBeTruthy()
+      expect(pair.right.imageUrl).toBeTruthy()
+    }
+  })
+
+  it('BR-07: tạo game MATCHING với bối cảnh đại dương: tự động bóc tách thực thể và gán asset biển', () => {
+    const game = createMockGame({ gameType: 'MATCHING', subject: 'SCIENCE', gradeLevel: 'GRADE_1', idea: 'Bé nối các sinh vật biển: cá hề, rùa biển, sao biển, bạch tuộc' })
+
+    expect(game.gameType).toBe('MATCHING')
+    const firstQuestion = game.questions[0] as { pairs: Array<{ left: { text?: string; imageUrl?: string }; right: { text?: string; imageUrl?: string } }> }
+    expect(firstQuestion.pairs.length).toBeGreaterThanOrEqual(3)
+    for (const pair of firstQuestion.pairs) {
+      expect(pair.left.imageUrl).toContain('/assets/')
+      expect(pair.right.imageUrl).toContain('/assets/')
+    }
+  })
+
+  it('BR-08: tạo game QUIZ phép cộng có nhớ phạm vi 50 trong nông trại: sinh câu hỏi toán động chính xác', () => {
+    const game = createMockGame({ gameType: 'QUIZ', subject: 'MATH', gradeLevel: 'GRADE_2', idea: 'Phép cộng có nhớ trong phạm vi 50 ở nông trại' })
+
+    expect(game.gameType).toBe('QUIZ')
+    expect(game.questions).toHaveLength(3)
+    for (const q of game.questions as any[]) {
+      expect(q.options.length).toBeGreaterThanOrEqual(2)
+      expect(q.correctOptionId).toBeTruthy()
+      expect(q.imageUrl).toContain('/assets/themes/farm/')
+    }
+  })
+
+  it('BR-09: tạo game MATCHING phân biệt âm l và n: sinh các cặp ngữ âm động', () => {
+    const game = createMockGame({ gameType: 'MATCHING', subject: 'VIETNAMESE', gradeLevel: 'GRADE_1', idea: 'Phân biệt âm l và n' })
+
+    expect(game.gameType).toBe('MATCHING')
+    const firstQuestion = game.questions[0] as any
+    expect(firstQuestion.pairs.length).toBeGreaterThanOrEqual(2)
+    const hasLOrN = firstQuestion.pairs.some((p: any) => p.left.text.includes('l') || p.left.text.includes('n'))
+    expect(hasLOrN).toBe(true)
+  })
+
 })

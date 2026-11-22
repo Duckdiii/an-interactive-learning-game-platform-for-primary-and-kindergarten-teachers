@@ -4,7 +4,7 @@ import { createEditorState, editorReducer } from '../components/editor/editorRed
 import { viText } from '../constants/viText'
 import { getGame, updateGame } from '../services/gameService'
 import { publishGame } from '../services/publishService'
-import type { GameDsl, QuestionDsl } from '../types/game-dsl.types'
+import type { GameDsl, GamePresentation, QuestionDsl } from '../types/game-dsl.types'
 import type { GameResponse } from '../types/game-response.types'
 import type { PublishResult } from '../types/publish.types'
 import { parseApiError } from '../utils/apiError'
@@ -291,6 +291,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
     pendingRestore,
     setTitle: (title: string) => edit({ type: 'setTitle', title }),
     setTopic: (topic: string) => edit({ type: 'setTopic', topic }),
+    setPresentation: (presentation: GamePresentation) => edit({ type: 'setPresentation', presentation }),
     setGameDefault: (field: DefaultField, value: number) => edit({ type: 'setGameDefault', field, value }),
     updateQuestion: (index: number, questionId: string, update: (question: QuestionDsl) => QuestionDsl) =>
       edit({ type: 'updateQuestion', index, questionId, update }),
@@ -318,6 +319,17 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
       setRevision((value) => value + 1)
 
       return { ok: true }
+    },
+    /** Áp game AI đã sửa theo chat vào bản nháp (tự lưu như sửa tay); hoàn tác được một bước bằng `undoChatRevision`. */
+    applyChatRevision: (content: GameDsl) => {
+      edit({ type: 'applyChatRevision', content })
+      setRevision((value) => value + 1)
+    },
+    /** Còn hoàn tác được lần sửa bằng chat gần nhất: bản nháp vẫn đúng là game AI vừa đưa vào. */
+    canUndoChatRevision: Boolean(state.chatUndo && deepEqual(state.draft, state.chatUndo.applied)),
+    undoChatRevision: () => {
+      edit({ type: 'undoChatRevision' })
+      setRevision((value) => value + 1)
     },
     undoRegenerated: (index: number, questionId: string) => {
       edit({ type: 'undoRegenerated', index, questionId })
