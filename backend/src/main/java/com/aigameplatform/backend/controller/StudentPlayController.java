@@ -2,18 +2,20 @@ package com.aigameplatform.backend.controller;
 
 import com.aigameplatform.backend.dto.request.PlayRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
+import com.aigameplatform.backend.service.play.LiveArenaService;
 import com.aigameplatform.backend.service.play.StudentPlayService;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -21,8 +23,12 @@ import tools.jackson.databind.node.ObjectNode;
 @RequestMapping("/api")
 public class StudentPlayController {
     private final StudentPlayService play;
+    private final LiveArenaService liveArenaService;
 
-    public StudentPlayController(StudentPlayService play) { this.play = play; }
+    public StudentPlayController(StudentPlayService play, LiveArenaService liveArenaService) {
+        this.play = play;
+        this.liveArenaService = liveArenaService;
+    }
 
     @GetMapping("/games/shared/{shareCode}")
     public ApiResponse<Map<String, Object>> shared(@PathVariable String shareCode) {
@@ -43,8 +49,20 @@ public class StudentPlayController {
 
     @PostMapping("/sessions/{sessionId}/interactions")
     public ApiResponse<Map<String, Object>> interaction(@PathVariable String sessionId,
-            @RequestHeader(name = "X-Participant-Id", required = false) String participantId,
-            @RequestBody JsonNode body) {
-        return ApiResponse.ok(play.interact(sessionId, participantId, body));
+            @RequestHeader(name = "X-Participant-Id", required = false) String participantIdHeader,
+            @RequestBody(required = false) JsonNode body,
+            Principal principal) {
+        Map<String, Object> result = play.interact(sessionId, participantIdHeader, body);
+        String pid = participantIdHeader;
+        if (pid == null && principal != null) {
+            pid = principal.getName();
+        }
+        if (pid == null && body != null && body.has("participantId")) {
+            pid = body.get("participantId").asText();
+        }
+        if (pid != null) {
+            liveArenaService.broadcastAnswerStatus(sessionId, pid);
+        }
+        return ApiResponse.ok(result);
     }
 }

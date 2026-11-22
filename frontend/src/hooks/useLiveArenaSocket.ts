@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import { useAuth } from './useAuth'
+import { registerStompClient, unregisterStompClient } from './stompClientRegistry'
 import type { LiveArenaHandlers } from '../player/presentation/presentationTypes'
 
 export function resolveLiveArenaWsUrl(accessToken?: string | null): string {
@@ -77,6 +78,15 @@ export function useLiveArenaSocket(sessionId: string, handlers: LiveArenaHandler
             // Bỏ qua gói tin không đúng định dạng JSON
           }
         })
+
+        client.subscribe(`/topic/session/${sessionId}/answer-status`, (msg) => {
+          try {
+            const data = JSON.parse(msg.body)
+            handlersRef.current.onAnswerStatus?.(data)
+          } catch {
+            // Bỏ qua gói tin không đúng định dạng JSON
+          }
+        })
       },
       onDisconnect: () => {
         setConnected(false)
@@ -86,10 +96,12 @@ export function useLiveArenaSocket(sessionId: string, handlers: LiveArenaHandler
       },
     })
 
+    registerStompClient(sessionId, client)
     client.activate()
     clientRef.current = client
 
     return () => {
+      unregisterStompClient(sessionId, client)
       client.deactivate()
       clientRef.current = null
       setConnected(false)
