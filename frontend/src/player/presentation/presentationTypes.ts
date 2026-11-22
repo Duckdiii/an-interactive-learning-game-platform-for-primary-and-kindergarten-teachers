@@ -14,6 +14,7 @@ export interface LiveArenaLeaderboardEntry {
   rank: number
   name: string
   score: number
+  participantId?: string
 }
 
 export interface LiveArenaQuestion {
