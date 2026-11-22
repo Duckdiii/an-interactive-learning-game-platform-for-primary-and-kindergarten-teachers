@@ -20,7 +20,9 @@ import org.springframework.security.access.AccessDeniedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +36,7 @@ class LiveArenaServiceTest {
 
     private SessionParticipantRegistry sessionParticipantRegistry;
     private LeaderboardRegistry leaderboardRegistry;
+    private final QuestionClock questionClock = new QuestionClock(java.time.Clock.systemUTC());
     private LiveArenaService liveArenaService;
 
     @BeforeEach
@@ -44,8 +47,38 @@ class LiveArenaServiceTest {
                 messagingTemplate,
                 sessionParticipantRegistry,
                 leaderboardRegistry,
-                scoreRepository
+                scoreRepository,
+                new ScoringService(),
+                questionClock
         );
+    }
+
+    @Test
+    @DisplayName("recordAnswer chấm điểm theo giờ server, câu gửi lại không cộng thêm, chưa tải đề thì không cộng")
+    void testRecordAnswerUsesServerClockAndIgnoresResubmit() {
+        String sessionId = "session-score";
+        sessionParticipantRegistry.addOrUpdate(sessionId, new ParticipantDto("p1", "Bé Lan", true));
+
+        liveArenaService.recordAnswer(sessionId, "p1", "q1", true); // chưa start: bỏ qua
+        assertThat(leaderboardRegistry.getSortedLeaderboard(sessionId)).isEmpty();
+
+        liveArenaService.startQuestionClock(sessionId, "p1");
+        liveArenaService.recordAnswer(sessionId, "p1", "q1", true);
+        liveArenaService.recordAnswer(sessionId, "p1", "q1", true); // gửi lại
+
+        List<LeaderboardRegistry.ScoreEntry> board = leaderboardRegistry.getSortedLeaderboard(sessionId);
+        assertThat(board).hasSize(1);
+        // Trả lời gần như tức thì theo đồng hồ server => gần điểm tối đa, và chỉ cộng một lần
+        assertThat(board.get(0).getTotalScore()).isBetween(990, ScoringService.BASE_POINTS);
+    }
+
+    @Test
+    @DisplayName("endSessionAndPersistScores dọn cả đồng hồ câu hỏi của phiên")
+    void testEndSessionClearsQuestionClock() {
+        liveArenaService.startQuestionClock("session-clock", "p1");
+        liveArenaService.endSessionAndPersistScores("session-clock");
+
+        assertThat(questionClock.lap("session-clock", "p1", "q1")).isEmpty();
     }
 
     @Test
@@ -116,6 +149,52 @@ class LiveArenaServiceTest {
 
         // Đã dọn sạch khỏi registry (không leak memory)
         assertThat(leaderboardRegistry.getSortedLeaderboard(sessionId)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("endSessionAndPersistScores dọn danh sách học sinh và host của phiên")
+    void testEndSessionClearsParticipantRegistry() {
+        liveArenaService.registerHost("session-reg", "teacher-1");
+        sessionParticipantRegistry.addOrUpdate("session-reg", new ParticipantDto("p1", "Bé Lan", true));
+
+        liveArenaService.endSessionAndPersistScores("session-reg");
+
+        assertThat(sessionParticipantRegistry.getAll("session-reg")).isEmpty();
+        assertThat(sessionParticipantRegistry.isHost("session-reg", "teacher-1")).isFalse();
+    }
+
+    @Test
+    @DisplayName("endSessionAndPersistScores lưu đủ mọi học sinh, giữ tên và điểm của từng người")
+    void testEndSessionPersistsEveryParticipant() {
+        String sessionId = "session-multi";
+        leaderboardRegistry.addScore(sessionId, "p1", "Bé Lan", 600);
+        leaderboardRegistry.addScore(sessionId, "p1", "Bé Lan", 400);
+        leaderboardRegistry.addScore(sessionId, "p2", "Bé Hùng", 700);
+        leaderboardRegistry.addScore("session-other", "p9", "Bé Khác", 100);
+
+        liveArenaService.endSessionAndPersistScores(sessionId);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<SessionParticipantScore>> captor = ArgumentCaptor.forClass(List.class);
+        verify(scoreRepository).saveAll(captor.capture());
+        assertThat(captor.getValue())
+                .extracting(SessionParticipantScore::getParticipantId,
+                        SessionParticipantScore::getParticipantName,
+                        SessionParticipantScore::getFinalScore)
+                .containsExactlyInAnyOrder(
+                        org.assertj.core.groups.Tuple.tuple("p1", "Bé Lan", 1000),
+                        org.assertj.core.groups.Tuple.tuple("p2", "Bé Hùng", 700));
+        assertThat(captor.getValue()).allSatisfy(s -> assertThat(s.getCreatedAt()).isNotNull());
+        // Phiên khác không bị đụng tới
+        assertThat(leaderboardRegistry.getSortedLeaderboard("session-other")).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("endSessionAndPersistScores với phiên chưa có điểm: không gọi saveAll")
+    void testEndSessionWithoutScoresSavesNothing() {
+        liveArenaService.endSessionAndPersistScores("session-empty");
+
+        verify(scoreRepository, never()).saveAll(any());
     }
 
     @Test
