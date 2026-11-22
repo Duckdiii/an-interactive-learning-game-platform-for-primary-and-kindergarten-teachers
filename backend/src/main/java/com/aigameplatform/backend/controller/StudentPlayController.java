@@ -20,7 +20,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api")
 public class StudentPlayController {
     private final StudentPlayService play;
     private final LiveArenaService liveArenaService;
@@ -30,24 +30,24 @@ public class StudentPlayController {
         this.liveArenaService = liveArenaService;
     }
 
-    @GetMapping({"/api/games/shared/{shareCode}", "/games/shared/{shareCode}"})
+    @GetMapping("/games/shared/{shareCode}")
     public ApiResponse<Map<String, Object>> shared(@PathVariable String shareCode) {
         return ApiResponse.ok(play.sharedGame(shareCode));
     }
 
-    @PostMapping({"/api/games/shared/{shareCode}/play", "/games/shared/{shareCode}/play"})
+    @PostMapping("/games/shared/{shareCode}/play")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Map<String, Object>> start(@PathVariable String shareCode, @Valid @RequestBody PlayRequest body) {
         return ApiResponse.ok(play.start(shareCode, body.nickname()));
     }
 
-    @GetMapping({"/api/sessions/{sessionId}/questions", "/sessions/{sessionId}/questions"})
+    @GetMapping("/sessions/{sessionId}/questions")
     public ApiResponse<ObjectNode> questions(@PathVariable String sessionId,
             @RequestHeader(name = "X-Participant-Id", required = false) String participantId) {
         return ApiResponse.ok(play.questions(sessionId, participantId));
     }
 
-    @PostMapping({"/api/sessions/{sessionId}/interactions", "/sessions/{sessionId}/interactions"})
+    @PostMapping("/sessions/{sessionId}/interactions")
     public ApiResponse<Map<String, Object>> interaction(@PathVariable String sessionId,
             @RequestHeader(name = "X-Participant-Id", required = false) String participantIdHeader,
             @RequestBody(required = false) JsonNode body,
