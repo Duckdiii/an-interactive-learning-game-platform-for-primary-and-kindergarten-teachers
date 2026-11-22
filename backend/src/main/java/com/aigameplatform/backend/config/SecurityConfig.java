@@ -45,7 +45,8 @@ public class SecurityConfig {
                         "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // Logout không nằm trong danh sách này: phải có access token hợp lệ.
                 .requestMatchers(HttpMethod.POST,
-                        "/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
+                        "/api/auth/register", "/api/auth/login", "/api/auth/refresh",
+                        "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers("/ws/live-arena/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/interactions", "/sessions/*/interactions").permitAll()

@@ -5,5 +5,7 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record AudioVisualMatchAiOutput(
-        List<AudioVisualMatchAiQuestion> questions) implements AiGameOutput {
+        List<AudioVisualMatchAiQuestion> questions,
+        String title,
+        AiPresentation presentation) implements AiGameOutput {
 }

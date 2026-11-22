@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.generation;
 
+import com.aigameplatform.backend.entity.enums.CurriculumReviewStatus;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.OrderingGameDsl;
 import com.aigameplatform.backend.dto.dsl.OrderStepDsl;
@@ -9,6 +10,7 @@ import com.aigameplatform.backend.service.media.LoadedSceneImage;
 import com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence;
 import com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview;
 import com.aigameplatform.backend.service.validation.ValidationError;
+import com.aigameplatform.backend.service.validation.rule.OddOneOutRule;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
@@ -89,9 +91,14 @@ public class GeminiGeneratedContentReviewer implements GeneratedContentReviewer 
     private final ChatModel model;
     private final JsonMapper mapper;
     private final String modelName;
+    private final OddOneOutRule oddOneOutRule;
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog;
 
     public GeminiGeneratedContentReviewer(ChatModel model, JsonMapper mapper,
-            @Value("${app.ai.gemini.model:gemini-2.5-flash}") String modelName) {
+            @Value("${app.ai.gemini.model:gemini-2.5-flash}") String modelName, OddOneOutRule oddOneOutRule,
+            com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        this.oddOneOutRule = oddOneOutRule;
+        this.notoCatalog = notoCatalog;
         this.model = model;
         this.mapper = mapper;
         this.modelName = modelName;
@@ -116,7 +123,7 @@ public class GeminiGeneratedContentReviewer implements GeneratedContentReviewer 
         boolean oddImageMode = game instanceof com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl odd
                 && odd.effectiveMode() == com.aigameplatform.backend.entity.enums.OddOneOutMode.IMAGE;
         boolean catalogAudioVisual = isCatalogAudioVisual(game);
-        if (oddImageMode && !new com.aigameplatform.backend.service.validation.rule.OddOneOutRule().check(game).isEmpty())
+        if (oddImageMode && !oddOneOutRule.check(game).isEmpty())
             throw new AiServiceUnavailableException("Odd IMAGE catalog validation failed");
         if (imageMode && sceneImage == null) {
             throw new AiServiceUnavailableException("Image-mode review requires the validated scene bytes");
@@ -156,7 +163,7 @@ public class GeminiGeneratedContentReviewer implements GeneratedContentReviewer 
                     "supportedByCurriculum", Boolean.TRUE.equals(q.supportedByCurriculum()),
                     "supportingChunkIds", q.supportingChunkIds() == null ? List.of() : q.supportingChunkIds())).toList();
             var evidenceReview = validation.isEmpty() && hasEvidence
-                    ? new CurriculumEvidenceReview(CurriculumEvidenceReview.Status.PENDING, claims,
+                    ? new CurriculumEvidenceReview(CurriculumReviewStatus.PENDING, claims,
                             List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), modelName)
                     : CurriculumEvidenceReview.unavailable();
             return new GeneratedContentReviewer.Result(validation, evidenceReview,
@@ -210,10 +217,10 @@ public class GeminiGeneratedContentReviewer implements GeneratedContentReviewer 
                         option.id(), option.visualPrompt(), option.imageUrl()))).toList();
     }
 
-    private static boolean isCatalogAudioVisual(GameDsl game) {
+    private boolean isCatalogAudioVisual(GameDsl game) {
         if (!(game instanceof com.aigameplatform.backend.dto.dsl.AudioVisualMatchGameDsl avm)
                 || avm.questions() == null || avm.questions().isEmpty()) return false;
-        var catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog();
+        var catalog = notoCatalog;
         return avm.questions().stream().allMatch(question -> {
             if (question.correct() == null || question.distractors() == null) return false;
             var choices = new ArrayList<com.aigameplatform.backend.dto.dsl.ImageChoiceDsl>();

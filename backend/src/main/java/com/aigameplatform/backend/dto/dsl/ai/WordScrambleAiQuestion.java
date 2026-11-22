@@ -7,5 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record WordScrambleAiQuestion(
         String correctWord,
         String visualPrompt,
-        String audioText) implements AiQuestion {
+        String audioText,
+        String asset) implements AiQuestion {
 }

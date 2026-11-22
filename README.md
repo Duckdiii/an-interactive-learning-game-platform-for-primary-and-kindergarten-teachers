@@ -72,9 +72,13 @@ frontend/  React + TypeScript (giao diện giáo viên, trình chơi trên Canva
 docs/      Tài liệu: đặc tả yêu cầu (SRS), Game JSON DSL, hợp đồng REST API
 ```
 
+## Thiết lập sau khi clone
+
+Bật git hook của repo (một lần, cần Node): `git config core.hooksPath .githooks`. Hook tự chuyển các dòng cũ của `ai-usage-log.md` sang `docs/ai-usage-log-archive/` trước mỗi commit.
+
 ## Tài liệu
 
 - Đặc tả yêu cầu phần mềm: [`docs/SRS.docx`](docs/SRS.docx) (bản trích dạng chữ ở [`docs/srs/`](docs/srs/README.md))
 - Đặc tả Game JSON DSL: [`docs/game-json-dsl-v1.0.0.md`](docs/game-json-dsl-v1.0.0.md)
 - Hợp đồng REST API (OpenAPI): [`docs/openapi/openapi.yaml`](docs/openapi/openapi.yaml)
-- Hướng dẫn cho AI agent trong repo: [`CLAUDE.md`](CLAUDE.md)
+- Hướng dẫn cho AI agent trong repo: [`AGENTS.md`](AGENTS.md) (mọi agent), [`CLAUDE.md`](CLAUDE.md) (Claude Code)

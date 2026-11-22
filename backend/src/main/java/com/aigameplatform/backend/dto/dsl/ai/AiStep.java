@@ -6,5 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record AiStep(
         String text,
-        String visualPrompt) {
+        String visualPrompt,
+        String asset) {
 }

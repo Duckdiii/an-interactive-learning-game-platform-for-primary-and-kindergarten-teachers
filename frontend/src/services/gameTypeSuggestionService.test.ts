@@ -7,6 +7,8 @@ import {
   SUGGESTION_MAX,
   TOP_FIT_SCORE,
   detectGoals,
+  inferPedagogicalGamePlan,
+  isPhysicsCpfIdea,
   rankGameTypes,
   selectSuggestions,
   suggestGameTypes,
@@ -227,3 +229,78 @@ describe('suggestGameTypes (mock có độ trễ)', () => {
     vi.useRealTimers()
   })
 })
+
+describe('isPhysicsCpfIdea: không nhận nhầm do bỏ dấu (kịch bản 006, 008, 009, 011)', () => {
+  it.each([
+    'Nối tiếng để tạo từ ghép: hoa + hồng, xe + đạp, bàn + tay, mặt + trời',
+    'Tìm số lớn nhất trong các số thập phân 3,45; 3,5; 3,405',
+    'Tạo trò chơi so sánh số cho lớp 1',
+    'Mục tiêu bài học: nhận biết các vần an, ăn, ân',
+    'Nối trái cây với tên tiếng Anh',
+    'Đếm táo trong giỏ',
+    'Count the balloons and choose the number',
+  ])('không phải game vận động: %s', (idea) => {
+    expect(isPhysicsCpfIdea(idea)).toBe(false)
+  })
+
+  it.each([
+    'I say a colour, you pop the balloon of that colour',
+    'Bé kéo ná bắn trúng mục tiêu mang phép nhân',
+    'Thỏ hứng cà rốt có phép cộng bằng 12',
+    'be hung qua tao mang so chan',
+    'be hung qua tao “so chan”',
+  ])('là game vận động: %s', (idea) => {
+    expect(isPhysicsCpfIdea(idea)).toBe(true)
+  })
+
+  it('mô tả thẻ hứng không gắn cứng môn Toán', () => {
+    const plan = inferPedagogicalGamePlan('Bé hứng quả mang từ chỉ hoạt động')
+    expect(`${plan.description} ${plan.reason}`).not.toMatch(/số học|toán/i)
+  })
+})
+
+describe('inferPedagogicalGamePlan & Không chứa thuật ngữ CPF', () => {
+  it('suy luận đúng tựa game sư phạm cho hành vi hứng táo rơi', () => {
+    const plan = inferPedagogicalGamePlan('Bé di chuyển giỏ để hứng các quả táo mang số chẵn rơi từ trên cây ở nông trại')
+    expect(plan.title).toBe('Hứng Táo Nông Trại')
+    expect(plan.description).toContain('giỏ hứng')
+    expect(plan.reason).toContain('vận động tương tác')
+    expect(plan.title).not.toMatch(/CPF/i)
+    expect(plan.description).not.toMatch(/CPF/i)
+    expect(plan.reason).not.toMatch(/CPF/i)
+  })
+
+  it('suy luận đúng tựa game sư phạm cho hành vi bắn ná / cung tên', () => {
+    const plan = inferPedagogicalGamePlan('Bé kéo ná bắn trúng bóng bay số chẵn')
+    expect(plan.title).toBe('Bắn Ná Mục Tiêu')
+    expect(plan.description).toContain('canh góc bắn')
+    expect(plan.title).not.toMatch(/CPF/i)
+    expect(plan.description).not.toMatch(/CPF/i)
+  })
+
+  it('suy luận đúng tựa game sư phạm cho hành vi chạm / đập bóng', () => {
+    const plan = inferPedagogicalGamePlan('Bé nhanh tay chạm bong bóng mang kết quả đúng')
+    expect(plan.title).toBe('Chạm Bóng Bay')
+    expect(plan.description).toContain('chạm vỡ')
+    expect(plan.title).not.toMatch(/CPF/i)
+  })
+
+  it('toàn bộ danh sách gợi ý cho prompt vật lý tuyệt đối KHÔNG chứa từ "CPF" hay "CPF Engine" trong text hiển thị', () => {
+    const prompts = [
+      'Bé di chuyển giỏ để hứng các quả táo mang số chẵn rơi từ trên cây ở nông trại',
+      'Kéo ná bắn mục tiêu phép trừ có nhớ',
+      'Đập bóng bay chạm bong bóng từ vựng',
+      'Trò chơi vận động tương tác vật lý lớp 1',
+    ]
+
+    for (const prompt of prompts) {
+      const suggestions = rankGameTypes(input(prompt, 'GRADE_1', 'MATH'))
+      for (const s of suggestions) {
+        expect(s.title || '').not.toMatch(/CPF/i)
+        expect(s.description || '').not.toMatch(/CPF/i)
+        expect(s.reason || '').not.toMatch(/CPF/i)
+        expect(s.description || '').not.toContain('Engine')
+      }
+    }
+  })
+  })

@@ -8,7 +8,7 @@ import { loginTeacher } from '../api/authApi'
 import { AuthProvider } from '../context/AuthContext'
 import LoginPage from './LoginPage'
 
-vi.mock('../api/authApi', () => ({ loginTeacher: vi.fn() }))
+vi.mock('../api/authApi', () => ({ loginTeacher: vi.fn(), logoutTeacher: vi.fn() }))
 
 const mockedLogin = vi.mocked(loginTeacher)
 
@@ -59,7 +59,7 @@ describe('Đăng nhập: thông báo lỗi', () => {
     await submitLogin()
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Email hoặc mật khẩu không đúng',
+      'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.',
     )
     expect(screen.queryByText(/Phiên đăng nhập đã hết hạn/)).toBeNull()
   })
@@ -91,14 +91,28 @@ describe('Đăng nhập: thông báo lỗi', () => {
     )
     await submitLogin()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('sau 15 phút')
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau 15 phút.',
+    )
+  })
+
+  it('tài khoản quản trị viên không vào màn hình giáo viên', async () => {
+    mockedLogin.mockResolvedValue({
+      teacher: { teacherId: 'a1', email: 'admin@example.com', role: 'ROLE_ADMIN' },
+      accessToken: 'a',
+      expiresIn: 900,
+    })
+    await submitLogin()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('chưa có giao diện quản trị')
+    expect(screen.queryByText('Đã vào trang chủ')).toBeNull()
   })
 
   it('đăng nhập thành công thì chuyển vào trang chủ và không có thông báo lỗi', async () => {
     mockedLogin.mockResolvedValue({
-      teacher: { id: 't1', email: 'giaovien@example.com' },
+      teacher: { teacherId: 't1', email: 'giaovien@example.com' },
       accessToken: 'a',
-      refreshToken: 'r',
+      expiresIn: 900,
     })
     await submitLogin()
 

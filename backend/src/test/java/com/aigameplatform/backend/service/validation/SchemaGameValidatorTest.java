@@ -42,7 +42,7 @@ class SchemaGameValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void acceptsEveryValidExampleAndExposesTheTypedGame(GameType type) throws IOException {
         GameValidationContext context = new GameValidationContext(example(type));
 
@@ -68,6 +68,19 @@ class SchemaGameValidatorTest {
         assertThat(game.mode()).isEqualTo(VisualClozeMode.IMAGE);
         assertThat(game.questions().getFirst().sceneWidth()).isEqualTo(1200);
         assertThat(game.questions().getFirst().blanks()).hasSize(1);
+    }
+
+    @Test
+    void v1_1KeepsThePresentationTheTeacherChoseLikeV1_0() throws IOException {
+        ObjectNode image = loadVisualClozeImageV1_1();
+        ((ObjectNode) image.get("metadata")).putObject("presentation").put("world", "ocean").put("carrier", "fish");
+        GameValidationContext context = new GameValidationContext(image);
+
+        assertThat(validator.validate(context)).isEmpty();
+        assertThat(context.getGame().metadata().presentation().world()).isEqualTo("ocean");
+
+        ((ObjectNode) image.get("metadata").get("presentation")).put("color", "red");
+        assertThat(validator.validate(new GameValidationContext(image))).isNotEmpty();
     }
 
     @Test
@@ -99,7 +112,7 @@ class SchemaGameValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void frozenVersionRejectsTeacherCurriculumReviewInsideGameMetadata(GameType type) throws IOException {
         ObjectNode json = example(type);
         ((ObjectNode) json.get("metadata")).set("curriculumReview",

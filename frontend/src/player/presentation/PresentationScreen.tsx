@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import axios from 'axios'
+import axiosInstance from '../../api/axiosInstance'
 import { useLiveArenaSocket } from '../../hooks/useLiveArenaSocket'
 import type {
   LiveArenaLeaderboardEntry,
@@ -35,27 +35,26 @@ export function PresentationScreen() {
   const [currentQuestion, setCurrentQuestion] = useState<LiveArenaQuestion | null>(null)
   const [leaderboard, setLeaderboard] = useState<LiveArenaLeaderboardEntry[]>([])
 
-  // Đồng bộ lại trạng thái từ REST API khi reconnect hoặc khởi tạo
-  const syncSession = useCallback(async () => {
-    if (!sessionId) return
-    try {
-      const apiBase = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8088/api'
-      const res = await axios.get(`${apiBase}/sessions/${encodeURIComponent(sessionId)}`)
-      if (res.data) {
+  // Đồng bộ lại trạng thái từ REST API khi reconnect hoặc khởi tạo. Gọi qua axiosInstance để có token và xử lý 401.
+  const syncSession = useCallback(() => {
+    if (!sessionId) return Promise.resolve()
+    return axiosInstance.get(`/sessions/${encodeURIComponent(sessionId)}`)
+      .then((res) => {
+        if (!res.data) return
         const d = res.data.data ?? res.data
         if (d.shareCode) setShareCode(d.shareCode)
         if (d.phase) setPhase(d.phase)
         if (Array.isArray(d.participants)) setParticipants(d.participants)
         if (d.currentQuestion) setCurrentQuestion(d.currentQuestion)
         if (Array.isArray(d.leaderboard)) setLeaderboard(d.leaderboard)
-      }
-    } catch {
-      // Bỏ qua khi ở môi trường mock hoặc chưa có session API
-    }
+      })
+      .catch(() => {
+        // Bỏ qua khi ở môi trường mock hoặc chưa có session API
+      })
   }, [sessionId])
 
   useEffect(() => {
-    syncSession()
+    void syncSession()
   }, [syncSession])
 
   const origin = typeof window !== 'undefined' ? window.location.origin : ''

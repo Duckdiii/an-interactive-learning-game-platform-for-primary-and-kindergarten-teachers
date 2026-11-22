@@ -10,12 +10,13 @@ public record VisualClozeAiQuestion(
         String correctAnswer,
         List<String> distractors,
         String audioText,
+        String asset,
         String questionText,
         List<VisualClozeAiBlank> blanks,
         List<VisualClozeAiImageOption> options) implements AiQuestion {
 
     public VisualClozeAiQuestion(String sentenceTemplate, String visualPrompt, String correctAnswer,
             List<String> distractors, String audioText) {
-        this(sentenceTemplate, visualPrompt, correctAnswer, distractors, audioText, null, null, null);
+        this(sentenceTemplate, visualPrompt, correctAnswer, distractors, audioText, null, null, null, null);
     }
 }

@@ -4,7 +4,12 @@ import type { GameResponse } from '../../types/game-response.types'
 import type { PublishResult } from '../../types/publish.types'
 import type { GameFilters, GameSummary } from '../../types/game-summary.types'
 import { validateGame } from '../../utils/gameValidation'
-import { buildMockGameContents } from './gameFixtures'
+import { buildMockGameContents, mathMatching, mathMemory } from './gameFixtures'
+import { enrichGameWithAssets, findCatalogItemsInText } from '../../utils/assetResolver'
+import { extractSemantics } from '../pipeline/semanticExtractor'
+import { parsePedagogicalConstraints } from '../pipeline/constraintParser'
+import { generateMathQuestions } from '../pipeline/dynamicMathGenerator'
+import { generateLanguagePairs } from '../pipeline/dynamicLanguageGenerator'
 import { buildImageClozeMock } from './imageGameFixtures'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
@@ -49,7 +54,7 @@ function buildRecords(now: number): MockGameRecord[] {
 
   return SEEDS.map((seed, index) => ({
     gameId: `mock-game-${index + 1}`,
-    content: contents[index],
+    content: enrichGameWithAssets(contents[index]),
     status: seed.status,
     shareCode: seed.shareCode ?? null,
     updatedAt: new Date(now - seed.hoursAgo * HOUR).toISOString(),
@@ -157,7 +162,6 @@ export interface MockGeneratedInfo {
   gameType: string
   subject?: string
   gradeLevel?: string
-  // Ý tưởng giáo viên nhập; trống khi tạo ngẫu nhiên.
   idea?: string
   mode?: 'TEXT' | 'IMAGE'
   sceneImageUrl?: string
@@ -173,10 +177,20 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
   if (imageMode && (!info.sceneImageUrl || !/^https:\/\//i.test(info.sceneImageUrl) || !info.optionImages || info.optionImages.length < 2 || info.optionImages.length > 8 ||
     info.optionImages.some((option) => !/^https:\/\//i.test(option.imageUrl) || !option.visualPrompt?.trim())))
     throw mockApiError(400, 'VALIDATION_ERROR', 'IMAGE cần URL HTTPS ảnh cảnh và 2–8 ảnh lựa chọn có mô tả.')
-  const template = imageMode ? buildImageClozeMock({ sceneImageUrl: info.sceneImageUrl!, optionImages: info.optionImages! }) :
+  let template = imageMode ? buildImageClozeMock({ sceneImageUrl: info.sceneImageUrl!, optionImages: info.optionImages! }) :
     buildMockGameContents().find((content) => content.gameType === info.gameType) ?? buildMockGameContents()[0]
   const idea = info.idea?.trim() ?? ''
+  const isMath = info.subject === 'MATH' || idea.toLowerCase().includes('đếm') || idea.toLowerCase().includes('toán') || idea.toLowerCase().includes('số')
+
+  // Game ảnh dùng đúng ảnh giáo viên đưa, không thay bằng mẫu toán.
+  if (!imageMode && info.gameType === 'MATCHING' && isMath) {
+    template = mathMatching
+  } else if (!imageMode && info.gameType === 'MEMORY_CARD' && isMath) {
+    template = mathMemory
+  }
   const content = structuredClone(template)
+  const semantics = extractSemantics(`${idea} ${content.metadata.topic}`)
+  const deduced = { theme: semantics.themeKey }
 
   content.metadata = {
     ...content.metadata,
@@ -185,6 +199,97 @@ export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()
     ...(info.subject ? { subject: info.subject } : {}),
     ...(info.gradeLevel ? { gradeLevel: info.gradeLevel } : {}),
   } as GameDsl['metadata']
+
+  const constraints = parsePedagogicalConstraints(`${idea} ${info.subject ?? ''} ${info.gradeLevel ?? ''}`)
+
+  if (info.gameType === 'QUIZ' && idea) {
+    if (isMath || constraints.subject === 'MATH') {
+      const mathQuestions = generateMathQuestions(constraints, 3)
+      content.questions = mathQuestions.map((mq, idx) => {
+        const optionsList = [mq.correctAnswer, ...mq.distractors]
+        const shuffled = optionsList.map((val) => String(val)).sort(() => Math.random() - 0.5)
+        const unique = Array.from(new Set(shuffled))
+        while (unique.length < 2) unique.push(String(Number(unique[0]) + 1))
+        const letters = ['a', 'b', 'c', 'd']
+        const options = unique.slice(0, 4).map((text, i) => ({ id: letters[i], text }))
+        const correctOption = options.find((opt) => opt.text === String(mq.correctAnswer)) ?? options[0]
+
+        return {
+          id: `q${idx + 1}`,
+          timeLimitSeconds: 30,
+          points: 10,
+          questionText: mq.questionText,
+          options,
+          correctOptionId: correctOption.id,
+          audioText: mq.questionText,
+          imageUrl: mq.spriteUrl,
+        }
+      })
+    }
+  }
+
+  const matchedItems = findCatalogItemsInText(idea)
+  if (!isMath && content.questions[0]) {
+    if (info.gameType === 'MATCHING') {
+      if (constraints.languageConcept && constraints.languageConcept.type !== 'LETTER') {
+        const langPairs = generateLanguagePairs(constraints, 4)
+        const pairs = langPairs.map((p) => ({
+          pairId: p.pairId,
+          left: { text: p.left.text, imageUrl: p.right.imageUrl },
+          right: { text: p.right.text, imageUrl: p.right.imageUrl },
+        }))
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = 'Bé hãy nối các thẻ tương ứng nhé'
+      } else if (matchedItems.length >= 3) {
+        const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
+          pairId: `p${idx + 1}`,
+          left: { text: item.name, imageUrl: item.url },
+          right: { text: item.name, imageUrl: item.url },
+        }))
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy nối các ${deduced.theme === 'ocean' ? 'sinh vật biển' : 'hình ảnh'} nhé`
+      } else if (semantics.visualEntities.filter((e) => e.mappedAssetUrl).length >= 3) {
+        const validEntities = semantics.visualEntities.filter((e) => e.mappedAssetUrl)
+        const pairs = validEntities.slice(0, 6).map((item, idx) => ({
+          pairId: `p${idx + 1}`,
+          left: { text: item.name, imageUrl: item.mappedAssetUrl },
+          right: { text: item.name, imageUrl: item.mappedAssetUrl },
+        }))
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy nối các ${deduced.theme === 'ocean' ? 'sinh vật biển' : 'hình ảnh'} nhé`
+      } else {
+        const phonicsPairs = [
+          { pairId: 'p1', left: { text: 'a', imageUrl: '/assets/fruits/apple.svg' }, right: { text: 'Quả táo', imageUrl: '/assets/fruits/apple.svg' } },
+          { pairId: 'p2', left: { text: 'c', imageUrl: '/assets/animals/fish.svg' }, right: { text: 'Con cá', imageUrl: '/assets/animals/fish.svg' } },
+          { pairId: 'p3', left: { text: 'm', imageUrl: '/assets/animals/cat.svg' }, right: { text: 'Con mèo', imageUrl: '/assets/animals/cat.svg' } },
+          { pairId: 'p4', left: { text: 'ch', imageUrl: '/assets/animals/dog.svg' }, right: { text: 'Con chó', imageUrl: '/assets/animals/dog.svg' } },
+        ]
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = phonicsPairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = 'Bé hãy nối chữ cái với hình ảnh tương ứng nhé'
+      }
+    } else if (info.gameType === 'MEMORY_CARD') {
+      if (matchedItems.length >= 3) {
+        const pairs = matchedItems.slice(0, 6).map((item, idx) => ({
+          pairId: `p${idx + 1}`,
+          content: { text: item.name, imageUrl: item.url },
+        }))
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = pairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = `Bé hãy lật tìm các cặp thẻ ${deduced.theme === 'ocean' ? 'sinh vật biển' : ''} nhé`
+      } else {
+        const defaultPairs = [
+          { pairId: 'p1', content: { text: 'Quả táo', imageUrl: '/assets/fruits/apple.svg' } },
+          { pairId: 'p2', content: { text: 'Con cá', imageUrl: '/assets/animals/fish.svg' } },
+          { pairId: 'p3', content: { text: 'Con mèo', imageUrl: '/assets/animals/cat.svg' } },
+          { pairId: 'p4', content: { text: 'Con chó', imageUrl: '/assets/animals/dog.svg' } },
+        ]
+        ;(content.questions[0] as unknown as { pairs: unknown[]; audioText?: string }).pairs = defaultPairs
+        ;(content.questions[0] as unknown as { audioText?: string }).audioText = 'Bé hãy lật tìm các cặp hình giống nhau nhé'
+      }
+    }
+  }
+
+
+  enrichGameWithAssets(content)
 
   const record: MockGameRecord = {
     gameId: `mock-game-${nextGameNumber}`,

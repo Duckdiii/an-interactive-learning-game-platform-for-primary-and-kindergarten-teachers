@@ -32,7 +32,6 @@ export function loginAsTeacher(fullName = 'Nguyễn Thị Lan') {
   storeSession(
     { teacherId: 't1', fullName, email: 'lan@truong.edu.vn' },
     'token',
-    'refresh',
   )
 }
 

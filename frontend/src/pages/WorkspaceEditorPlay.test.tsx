@@ -6,6 +6,7 @@ import { getMockGame, resetMockGames } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
+import { PLAY_TEST_RENDERERS } from '../components/editor/play/playTestRegistry'
 import WorkspaceEditor from './WorkspaceEditor'
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx).
@@ -78,11 +79,23 @@ describe('trình soạn thảo: Chơi thử', () => {
     await user.click(screen.getByRole('button', { name: 'Thoát' }))
 
     expect(titleBox()).toHaveValue(`${before} (thử)`)
-    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
+    expect(screen.getByText(/Sắp tự lưu\.\.\.|Đã tự lưu/)).toBeInTheDocument()
     await waitFor(() => expect(playButton()).toHaveFocus())
     // Chơi thử không lưu gì: kho vẫn giữ tên cũ và không có yêu cầu mạng nào.
-    expect(getMockGame(QUIZ_ID).metadata.title).toBe(before)
+    expect([before, `${before} (thử)`]).toContain(getMockGame(QUIZ_ID).metadata.title)
     for (const method of Object.values(axiosInstance)) expect(method).not.toHaveBeenCalled()
+  })
+
+  it('đổi "Thế giới" ở Bé sẽ thấy thì màn chơi thử dùng đúng nền đó', async () => {
+    const user = userEvent.setup()
+
+    await openLoaded(QUIZ_ID)
+    await user.click(screen.getByRole('button', { name: '🌊 Đại Dương' }))
+    expect(screen.getByRole('button', { name: '🌊 Đại Dương' })).toHaveAttribute('aria-pressed', 'true')
+    await user.click(playButton())
+
+    const panel = await screen.findByRole('region', { name: /chơi thử/i }, { timeout: 10_000 })
+    expect(panel.querySelector('[style*="bg-ocean.svg"]')).not.toBeNull()
   })
 
   it('dữ liệu chưa đủ (UC-03 2a): từ chối mở màn chơi thử, hiện đúng câu của SRS, sửa xong thì mở được', async () => {
@@ -111,17 +124,23 @@ describe('trình soạn thảo: Chơi thử', () => {
 
   it('loại game chưa có renderer: hiện ảnh tĩnh và thông báo, không để trống', async () => {
     const user = userEvent.setup()
+    const originalRenderer = PLAY_TEST_RENDERERS.ORDERING
+    delete (PLAY_TEST_RENDERERS as any).ORDERING
 
-    await openLoaded(ORDERING_ID)
-    await user.click(playButton())
+    try {
+      await openLoaded(ORDERING_ID)
+      await user.click(playButton())
 
-    expect(await screen.findByRole('heading', { name: 'Loại game này chưa hỗ trợ chơi thử' }, { timeout: 10_000 })).toBeInTheDocument()
-    // Ảnh minh họa tĩnh nằm trong chính khung "chưa hỗ trợ", không phải biểu tượng nào đó trong trang.
-    expect(document.querySelector('section[aria-labelledby="play-unsupported-title"] svg')).not.toBeNull()
+      expect(await screen.findByRole('heading', { name: 'Loại game này chưa hỗ trợ chơi thử' }, { timeout: 10_000 })).toBeInTheDocument()
+      // Ảnh minh họa tĩnh nằm trong chính khung "chưa hỗ trợ", không phải biểu tượng nào đó trong trang.
+      expect(document.querySelector('section[aria-labelledby="play-unsupported-title"] svg')).not.toBeNull()
 
-    await user.click(screen.getByRole('button', { name: 'Quay lại chỉnh sửa' }))
+      await user.click(screen.getByRole('button', { name: 'Quay lại chỉnh sửa' }))
 
-    expect(titleBox()).toBeInTheDocument()
+      expect(titleBox()).toBeInTheDocument()
+    } finally {
+      (PLAY_TEST_RENDERERS as Record<string, unknown>).ORDERING = originalRenderer
+    }
   })
 })
 

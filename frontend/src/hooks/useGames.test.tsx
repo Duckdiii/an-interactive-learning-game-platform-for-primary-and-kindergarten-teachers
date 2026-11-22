@@ -106,7 +106,7 @@ describe('useGames', () => {
 
     // Cô B dùng chung máy (cùng bộ nhớ đệm) nhưng là một tài khoản khác.
     localStorage.clear()
-    storeSession({ teacherId: 't2', fullName: 'Trần Thị Bích', email: 'bich@truong.edu.vn' }, 'token', 'refresh')
+    storeSession({ teacherId: 't2', fullName: 'Trần Thị Bích', email: 'bich@truong.edu.vn' }, 'token')
     let release: (value: GameSummary[]) => void = () => {}
     mockedGetGames.mockReturnValueOnce(new Promise<GameSummary[]>((resolve) => (release = resolve)))
 

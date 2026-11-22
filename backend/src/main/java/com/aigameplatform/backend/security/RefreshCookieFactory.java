@@ -16,23 +16,21 @@ public class RefreshCookieFactory {
     private final String path;
     private final String sameSite;
     private final boolean secure;
-    private final Duration maxAge;
 
     public RefreshCookieFactory(
             @Value("${app.auth.refresh-cookie.name}") String name,
             @Value("${app.auth.refresh-cookie.path}") String path,
             @Value("${app.auth.refresh-cookie.same-site}") String sameSite,
-            @Value("${app.auth.refresh-cookie.secure}") boolean secure,
-            @Value("${app.jwt.refresh-token-ttl-hours}") long refreshTtlHours) {
+            @Value("${app.auth.refresh-cookie.secure}") boolean secure) {
         this.name = name;
         this.path = path;
         this.sameSite = sameSite;
         this.secure = secure;
-        this.maxAge = Duration.ofHours(refreshTtlHours);
     }
 
-    public ResponseCookie create(String refreshToken) {
-        return build(refreshToken, maxAge);
+    // Cookie sống bằng đúng thời gian còn lại của refresh token bên trong (xoay vòng không gia hạn hạn tuyệt đối).
+    public ResponseCookie create(String refreshToken, Duration remainingTtl) {
+        return build(refreshToken, remainingTtl);
     }
 
     public ResponseCookie clear() {
