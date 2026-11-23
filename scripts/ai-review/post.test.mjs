@@ -321,3 +321,11 @@ test("bỏ qua vì đã review commit này được xét trước kiểm tra s�
   const out = await go(gh, { expectRuns: 0 });
   assert.equal(out.skipped, true);
 });
+
+test("backtest vòng 2 đọc được kết quả khi chưa có comment và không cho đăng", async () => {
+  const gh = new FakeGithub();
+  const args = { round: 2, baseSha: "b".repeat(40), backtest: true };
+  await assert.rejects(go(gh, args), /chỉ hỗ trợ dry run/);
+  const preview = await go(gh, { ...args, dryRun: true });
+  assert.equal(preview.dryRun, true);
+});

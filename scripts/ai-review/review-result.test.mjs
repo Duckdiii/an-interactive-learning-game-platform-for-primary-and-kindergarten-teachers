@@ -96,7 +96,7 @@ test("previous_findings: ref, trạng thái và căn cứ được kiểm tra", 
 test("prompt.md nhắc các trạng thái của vòng 2 và các dòng đầu vào", () => {
   const statuses = schema.properties.previous_findings.items.properties.status.enum;
   for (const s of statuses) assert.ok(prompt.includes(`\`${s}\``), `prompt thiếu trạng thái ${s}`);
-  for (const k of ["ROUND: 2", "PREVIOUS_FINDINGS_FILE", "INCREMENTAL_DIFF_FILE", "BASE_SHA"]) assert.ok(prompt.includes(k), `prompt thiếu ${k}`);
+  for (const k of ["ROUND: 2", "PREVIOUS_FINDINGS_FILE", "SHARD_DIFF_FILE", "SHARD_FILES_FILE", "BASE_SHA"]) assert.ok(prompt.includes(k), `prompt thiếu ${k}`);
 });
 
 test("fix tối đa 400 ký tự và impact tối đa 300 ký tự (hướng giải quyết ngắn, không phải bài văn)", () => {
