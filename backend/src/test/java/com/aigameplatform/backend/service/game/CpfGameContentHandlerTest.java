@@ -63,6 +63,22 @@ class CpfGameContentHandlerTest {
     }
 
     @Test
+    void regenerateReturnsACompleteCpfPreviewUsingTheStoredGradeAndSubject() throws Exception {
+        var old = example("catch-even-apples");
+        var current = MAPPER.createObjectNode().set("cpf", old);
+        var next = old.deepCopy();
+        ((ObjectNode) next.path("metadata")).put("title", "Game mới");
+        when(generation.generate("Chủ đề hoàn toàn mới", Subject.MATH, GradeLevel.GRADE_1)).thenReturn(next);
+
+        var preview = handler.regenerate(current,
+                new com.aigameplatform.backend.dto.request.RegenerateGameRequest("Chủ đề hoàn toàn mới", null, null));
+
+        assertThat(preview.path("gameType").asString()).isEqualTo("CUSTOM");
+        assertThat(preview.path("cpf")).isEqualTo(next);
+        assertThat(current.path("cpf").path("metadata").path("title").asString()).isNotEqualTo("Game mới");
+    }
+
+    @Test
     void handlesOnlyCustom() {
         assertThat(handler.handles(GameType.CUSTOM)).isTrue();
         assertThat(handler.handles(GameType.QUIZ)).isFalse();

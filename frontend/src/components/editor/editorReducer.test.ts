@@ -144,6 +144,15 @@ describe('editorReducer: AI làm lại một câu và hoàn tác', () => {
     expect(editorReducer(undone, { type: 'undoRegenerated', index: 0, questionId: 'q1' })).toBe(undone)
   })
 
+  it('hoàn tác lần sinh thứ hai vẫn giữ yêu cầu lưu thủ công của câu AI trước đó', () => {
+    const start = createEditorState(quiz())
+    const first = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
+    const second = editorReducer(first, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(first, 'Câu thứ hai') })
+    const undone = editorReducer(second, { type: 'undoRegenerated', index: 0, questionId: 'q1' })
+    expect(undone.draft.questions[0]).toBe(first.draft.questions[0])
+    expect(undone.manualSave?.has('q1')).toBe(true)
+  })
+
   it('sửa tiếp CHÍNH câu đó thì mất khả năng hoàn tác; sửa câu khác thì còn', () => {
     const start = createEditorState(quiz())
     const applied = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })

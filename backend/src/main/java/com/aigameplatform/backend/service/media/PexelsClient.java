@@ -42,12 +42,21 @@ public class PexelsClient {
     }
 
     public List<PexelsImageDto> search(String query, int perPage) {
+        return search(query, perPage, true);
+    }
+
+    public List<PexelsImageDto> searchOnline(String query, int perPage) {
+        return search(query, perPage, false);
+    }
+
+    private List<PexelsImageDto> search(String query, int perPage, boolean allowFallback) {
         if (query == null || query.isBlank()) {
             return List.of();
         }
         int limit = perPage > 0 ? Math.min(perPage, 50) : 12;
 
         if (apiKey.isBlank()) {
+            if (!allowFallback) return List.of();
             log.info("Pexels API key not configured. Returning fallback images for query: {}", query);
             return getFallbackImages(query.trim(), limit);
         }
@@ -68,8 +77,8 @@ public class PexelsClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                log.warn("Pexels API returned status code {}: {}", response.statusCode(), response.body());
-                return getFallbackImages(query.trim(), limit);
+                log.warn("Pexels API returned status code {}", response.statusCode());
+                return allowFallback ? getFallbackImages(query.trim(), limit) : List.of();
             }
 
             JsonNode root = mapper.readTree(response.body());
@@ -92,12 +101,15 @@ public class PexelsClient {
             }
 
             if (images.isEmpty()) {
-                return getFallbackImages(query.trim(), limit);
+                return allowFallback ? getFallbackImages(query.trim(), limit) : List.of();
             }
             return images;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return List.of();
         } catch (Exception e) {
-            log.error("Failed to fetch images from Pexels API: {}", e.getMessage());
-            return getFallbackImages(query.trim(), limit);
+            log.error("Failed to fetch images from Pexels API ({})", e.getClass().getSimpleName());
+            return allowFallback ? getFallbackImages(query.trim(), limit) : List.of();
         }
     }
 

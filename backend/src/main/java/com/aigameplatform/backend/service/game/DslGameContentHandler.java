@@ -6,6 +6,10 @@ import com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl;
 import com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl;
 import com.aigameplatform.backend.dto.dsl.VisualClozeQuestionDsl;
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
+import com.aigameplatform.backend.service.media.RegenerationIllustrations;
+import com.aigameplatform.backend.dto.media.SpeechVoice;
+import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import com.aigameplatform.backend.dto.understanding.ChatTurn;
 import com.aigameplatform.backend.entity.enums.OddOneOutMode;
 import com.aigameplatform.backend.entity.enums.VisualClozeMode;
@@ -50,15 +54,23 @@ public class DslGameContentHandler implements GameContentHandler {
     private final GameContentStrategyRegistry strategies;
     private final JsonMapper jsonMapper;
     private final ObjectProvider<GameAudioEnricher> audioEnrichers;
+    private final RegenerationIllustrations illustrations;
 
     public DslGameContentHandler(GameGenerationService generation, GameValidationService validation,
             GameContentStrategyRegistry strategies, JsonMapper jsonMapper) {
         this(generation, validation, strategies, jsonMapper, null);
     }
 
-    @Autowired
     public DslGameContentHandler(GameGenerationService generation, GameValidationService validation,
             GameContentStrategyRegistry strategies, JsonMapper jsonMapper, ObjectProvider<GameAudioEnricher> audioEnrichers) {
+        this(generation, validation, strategies, jsonMapper, audioEnrichers, null);
+    }
+
+    @Autowired
+    public DslGameContentHandler(GameGenerationService generation, GameValidationService validation,
+            GameContentStrategyRegistry strategies, JsonMapper jsonMapper, ObjectProvider<GameAudioEnricher> audioEnrichers,
+            RegenerationIllustrations illustrations) {
+        this.illustrations = illustrations;
         this.audioEnrichers = audioEnrichers;
         this.generation = generation;
         this.validation = validation;
@@ -181,7 +193,37 @@ public class DslGameContentHandler implements GameContentHandler {
     }
 
     @Override
+    public ObjectNode regenerate(ObjectNode current, RegenerateGameRequest request) {
+        ObjectNode content = current.deepCopy();
+        content.remove(GameReports.MANAGEMENT_FIELDS);
+        GameDsl base = jsonMapper.treeToValue(content, GameDsl.class);
+        GameDslRequest source = regenerationRequest(base, base.questions().getFirst());
+        String topic = request.idea() == null ? source.topic() : request.idea().strip();
+        GameDslRequest input = new GameDslRequest(topic, source.subject(), source.gradeLevel(), null, null,
+                source.effectiveVisualClozeMode(), source.sceneImageUrl(), source.optionImages());
+        GameDsl generated = generation.regenerateGame(base.gameType(), input, request.feedback());
+        var strategy = strategies.get(base.gameType());
+        List<QuestionGame> entities = strategy.parseToQuestions(generated);
+        enrichRegeneration(entities, request.voice());
+        var questions = java.util.stream.IntStream.range(0, entities.size())
+                .mapToObj(index -> strategy.toQuestionDsl(entities.get(index), generated.questions().get(index).id()))
+                .toList();
+        ObjectNode preview = jsonMapper.valueToTree(generated);
+        preview.set("questions", jsonMapper.valueToTree(questions));
+        if (visualImage(generated) && entities.stream().anyMatch(q -> q.getAudioUrl() != null)) {
+            preview.put("schemaVersion", GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_AUDIO_VERSION);
+        }
+        return preview;
+    }
+
+    @Override
     public RegeneratedQuestionDto regenerateQuestion(ObjectNode current, String questionId, String feedback) {
+        return regenerateQuestion(current, questionId, feedback, null);
+    }
+
+    @Override
+    public RegeneratedQuestionDto regenerateQuestion(ObjectNode current, String questionId, String feedback,
+            SpeechVoice voice) {
         ObjectNode content = current.deepCopy();
         content.remove(GameReports.MANAGEMENT_FIELDS);
         GameDsl base = jsonMapper.treeToValue(content, GameDsl.class);
@@ -194,13 +236,21 @@ public class DslGameContentHandler implements GameContentHandler {
         GameContentStrategy<?, ?> strategy = strategies.get(base.gameType());
         List<QuestionGame> entities = strategy.parseToQuestions(
                 strategy.assembleGame(metadata, base.gameplaySettings(), List.of(candidate)));
+        enrichRegeneration(entities, voice);
+        String version = visualImage(base) && entities.getFirst().getAudioUrl() != null
+                ? GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_AUDIO_VERSION : null;
+        return new RegeneratedQuestionDto(strategy.toQuestionDsl(entities.getFirst(), questionId), base.gameType(), version);
+    }
+
+    private static boolean visualImage(GameDsl game) {
+        return game instanceof VisualClozeGameDsl visual && visual.effectiveMode() == VisualClozeMode.IMAGE;
+    }
+
+    private void enrichRegeneration(List<QuestionGame> questions, SpeechVoice voice) {
+        if (illustrations != null) illustrations.enrich(questions);
         GameAudioEnricher enricher = audioEnrichers == null ? null : audioEnrichers.getIfAvailable();
-        // DSL 1.1 của Điền hình lưu lời đọc, không có trường URL âm thanh.
-        boolean visualImage = base instanceof VisualClozeGameDsl visual && visual.effectiveMode() == VisualClozeMode.IMAGE;
-        if (enricher != null && !visualImage) {
-            enricher.enrichAllQuestionsWithAudio(entities);
-        }
-        return new RegeneratedQuestionDto(strategy.toQuestionDsl(entities.get(0), questionId), base.gameType());
+        if (enricher == null) return;
+        enricher.enrichAllQuestionsWithAudio(questions, voice == null ? SpeechVoice.FEMALE : voice);
     }
 
     private static GameDslRequest regenerationRequest(GameDsl game, QuestionDsl question) {

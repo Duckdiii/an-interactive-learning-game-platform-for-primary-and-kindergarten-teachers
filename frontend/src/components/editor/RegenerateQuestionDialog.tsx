@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { REGENERATE_FEEDBACK_MAX } from '../../constants/aiLimits'
 import { viText } from '../../constants/viText'
+import type { VoiceGender } from '../../services/mediaService'
 import type { RegenerateFailure } from '../../utils/regenerateErrors'
 import Button from '../Button'
 import Dialog from '../ui/Dialog'
@@ -20,7 +21,7 @@ interface RegenerateQuestionDialogProps {
   failure: RegenerateFailure | null
   // Kết quả do AI mô phỏng: gắn nhãn "Dữ liệu mô phỏng".
   mock: boolean
-  // Giọng đọc đang chọn (chỉ hiện ở chế độ mô phỏng, vì yêu cầu thật chưa có trường giọng đọc), hoặc null để không hiện.
+  voice?: { value: VoiceGender; onChange: (value: VoiceGender) => void }
   voiceLabel: string | null
   onSubmit: (feedback: string) => void
   // Hủy yêu cầu đang chạy (hộp thoại vẫn mở).
@@ -33,7 +34,7 @@ const RETRYABLE: ReadonlyArray<RegenerateFailure['kind']> = ['busy', 'rateLimite
 const NOT_RETRYABLE: ReadonlyArray<RegenerateFailure['kind']> = ['notSaved', 'locked']
 
 // Hộp thoại "Yêu cầu AI làm lại" (UC-06 bước 2, 3): nhập gợi ý điều chỉnh rồi "Xác nhận tạo lại". Các nhánh lỗi 5a, 5b hiện ngay trong hộp, câu cũ luôn giữ nguyên.
-export default function RegenerateQuestionDialog({ questionNumber, working, failure, mock, voiceLabel, onSubmit, onCancelRequest, onClose }: RegenerateQuestionDialogProps) {
+export default function RegenerateQuestionDialog({ questionNumber, working, failure, mock, voice, voiceLabel, onSubmit, onCancelRequest, onClose }: RegenerateQuestionDialogProps) {
   const [feedback, setFeedback] = useState('')
   const size = [...feedback].length
   const tooLong = size > REGENERATE_FEEDBACK_MAX
@@ -65,7 +66,15 @@ export default function RegenerateQuestionDialog({ questionNumber, working, fail
         <div className="space-y-2 text-base text-ink-soft">
           <p>{text.intro}</p>
           <p>{text.replaces}</p>
-          {voiceLabel ? (
+          {voice ? (
+            <label className="flex items-center gap-2">
+              {text.voiceLine}
+              <select value={voice.value} disabled={working} onChange={(event) => voice.onChange(event.target.value === 'MALE' ? 'MALE' : 'FEMALE')} className="min-h-11 rounded-xl border border-ink/20 bg-surface px-3">
+                <option value="FEMALE">{viText.editor.media.voiceFemale}</option>
+                <option value="MALE">{viText.editor.media.voiceMale}</option>
+              </select>
+            </label>
+          ) : voiceLabel ? (
             <p>
               {text.voiceLine}: <strong className="text-ink">{voiceLabel}</strong>
             </p>

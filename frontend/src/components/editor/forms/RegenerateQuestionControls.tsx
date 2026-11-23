@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { isMock } from '../../../config/mockMode'
 import { viText } from '../../../constants/viText'
 import type { ApplyRegeneratedResult } from '../../../hooks/useGameEditor'
+import type { VoiceGender } from '../../../services/mediaService'
 import { useRegenerateQuestion } from '../../../hooks/useRegenerateQuestion'
 import type { GameType, QuestionDsl } from '../../../types/game-dsl.types'
 import { buttonClass } from '../../buttonStyles'
@@ -10,7 +11,6 @@ import { usePendingEdits } from './PendingEditsContext'
 import { useVoicePreference } from './VoiceContext'
 
 const text = viText.editor.regenerate
-const media = viText.editor.media
 
 interface RegenerateQuestionControlsProps {
   gameId: string
@@ -23,7 +23,7 @@ interface RegenerateQuestionControlsProps {
   // Còn bản sao lưu đang chờ hỏi khôi phục: khôi phục sẽ thay cả bản nháp và làm mất kết quả AI vừa áp, nên chờ giáo viên chọn xong.
   restorePending: boolean
   getQuestion: (index: number, questionId: string) => QuestionDsl | undefined
-  applyRegenerated: (index: number, questionId: string, question: QuestionDsl) => ApplyRegeneratedResult
+  applyRegenerated: (index: number, questionId: string, question: QuestionDsl, schemaVersion?: '1.2.0') => ApplyRegeneratedResult
   // Đã đưa câu mới vào bản đang soạn (cha hiện thông báo thành công và nút Hoàn tác, vì thẻ sửa câu được dựng lại sau khi áp).
   onApplied: (questionId: string) => void
 }
@@ -32,7 +32,7 @@ interface RegenerateQuestionControlsProps {
 // và nghe được LÝ DO vì sao chưa bấm được (chữ nằm ngay dưới nút, nối vào nút bằng `aria-describedby`).
 export default function RegenerateQuestionControls({ gameId, gameType, index, questionId, saved, sourceStale, restorePending, getQuestion, applyRegenerated, onApplied }: RegenerateQuestionControlsProps) {
   const [open, setOpen] = useState(false)
-  const { voice } = useVoicePreference()
+  const { voice, setVoice } = useVoicePreference()
   const { pending } = usePendingEdits()
   const hintId = useId()
   const regenerating = useRegenerateQuestion({ gameId, gameType, voice, getQuestion, applyRegenerated })
@@ -85,7 +85,8 @@ export default function RegenerateQuestionControls({ gameId, gameType, index, qu
           working={regenerating.working}
           failure={regenerating.failure}
           mock={mock}
-          voiceLabel={mock ? (voice === 'FEMALE' ? media.voiceFemale : media.voiceMale) : null}
+          voiceLabel={null}
+          voice={{ value: voice, onChange: (value: VoiceGender) => setVoice(value) }}
           onSubmit={(feedback) => void submit(feedback)}
           onCancelRequest={regenerating.cancel}
           onClose={close}

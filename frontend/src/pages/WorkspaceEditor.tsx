@@ -35,6 +35,7 @@ import { useGameEditor } from '../hooks/useGameEditor'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChangesGuard'
 import { ROUTES } from '../routes/paths'
+import RegenerateGameButton from '../components/editor/RegenerateGameButton'
 import CpfWorkspace from '../components/editor/CpfWorkspace'
 import ReviseChatPanel from '../components/editor/ReviseChatPanel'
 import { deepEqual, toContent } from '../utils/gameContent'
@@ -405,6 +406,21 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
         saving={editor.saving}
         playing={playing}
         canRetry={!conflict}
+        manualSaveRequired={editor.manualSaveRequired}
+        onSaveDraft={handleSave}
+        regenerateAction={
+          <RegenerateGameButton gameId={game.gameId} gameType={game.gameType}
+            disabled={applying || editor.saving || editor.dirty || Boolean(editor.pendingRestore)}
+            onPreview={(preview) => {
+              if (isCpfGameResponse(preview) || preview.updatedAt !== game.updatedAt || !deepEqual(draftRef.current, draft)) return false
+              editor.applyRegeneratedGame(toContent(preview))
+              setSelected(0)
+              setRegenNotice(null)
+              setReviseNotice('AI đã làm lại trò chơi. Bạn có thể chơi thử trước khi lưu.')
+              return true
+            }}
+          />
+        }
         onViewIssues={handleSave}
         onRetry={handleSave}
         onPublish={handlePublish}

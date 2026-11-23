@@ -27,14 +27,15 @@ public record GenerationAttempt(
         VisualClozeImageGenerationInput imageInput,
         boolean oddImageMode,
         boolean avmCatalogMode,
-        String customInstruction) {
+        String customInstruction,
+        boolean singleQuestion) {
 
     public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
             String structuredSchema, String curriculumContext, int attemptNumber, String previousOutput,
             List<ValidationError> previousErrors, Revision revision, VisualClozeImageGenerationInput imageInput,
             boolean oddImageMode, boolean avmCatalogMode) {
         this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext, attemptNumber, previousOutput,
-                previousErrors, revision, imageInput, oddImageMode, avmCatalogMode, null);
+                previousErrors, revision, imageInput, oddImageMode, avmCatalogMode, null, false);
     }
 
     public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,
@@ -42,7 +43,7 @@ public record GenerationAttempt(
             List<ValidationError> previousErrors, VisualClozeImageGenerationInput imageInput,
             boolean oddImageMode, boolean avmCatalogMode, String customInstruction) {
         this(gameType, topic, subject, gradeLevel, structuredSchema, curriculumContext, attemptNumber, previousOutput,
-                previousErrors, null, imageInput, oddImageMode, avmCatalogMode, customInstruction);
+                previousErrors, null, imageInput, oddImageMode, avmCatalogMode, customInstruction, customInstruction != null);
     }
 
     public GenerationAttempt(GameType gameType, String topic, Subject subject, GradeLevel gradeLevel,

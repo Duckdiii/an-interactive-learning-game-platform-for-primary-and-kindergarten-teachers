@@ -10,6 +10,7 @@ import { stripTransientMedia } from './gameContent'
 const PREFIX = 'ai-game:editor-draft'
 
 export interface StoredDraft {
+  manualSave?: boolean
   content: GameDsl
   // Thời điểm sao lưu (ISO).
   savedAt: string
@@ -47,12 +48,12 @@ function isStoredDraft(value: unknown): value is StoredDraft {
   )
 }
 
-export function saveDraft(owner: Owner, gameId: string, content: GameDsl, baseUpdatedAt: string, now: Date = new Date()) {
+export function saveDraft(owner: Owner, gameId: string, content: GameDsl, baseUpdatedAt: string, now: Date = new Date(), manualSave = false) {
   if (!hasOwner(owner)) return false
 
   try {
     // Tệp ảnh/âm thanh vừa tải lên (đường dẫn `blob:`/`data:`) KHÔNG đi vào bản sao lưu: khôi phục sẽ không có ảnh đó thay vì ảnh hỏng.
-    const draft: StoredDraft = { content: stripTransientMedia(content), savedAt: now.toISOString(), baseUpdatedAt }
+    const draft: StoredDraft = { ...(manualSave ? { manualSave } : {}), content: stripTransientMedia(content), savedAt: now.toISOString(), baseUpdatedAt }
 
     localStorage.setItem(keyOf(owner, gameId), JSON.stringify(draft))
 

@@ -2,6 +2,7 @@ import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, P
 import axiosInstance from './axiosInstance'
 import type { ApiSuccessResponse } from '../types/api'
 import type { PublishResult } from '../types/publish.types'
+import type { VoiceGender } from '../services/mediaService'
 import type { RegeneratedQuestion } from '../types/regenerate.types'
 import type { ChatTurn, GameUnderstandingResponse, UnderstandGameRequest } from '../types/understanding.types'
 import type { GenerateGameRequest } from '../utils/generateRequest'
@@ -107,7 +108,17 @@ export async function saveGame(gameId: string, body: GameEnvelopeBody) {
   return response.data.data
 }
 
+export async function postRegenerateGame(gameId: string, feedback: string, voice: VoiceGender, signal?: AbortSignal) {
+  const response = await axiosInstance.post<ApiSuccessResponse<AnyGameResponse>>(
+    `/games/${encodeURIComponent(gameId)}/regenerate`,
+    { feedback: feedback.trim(), voice },
+    { timeout: REGENERATE_IMAGE_QUESTION_TIMEOUT_MS, signal },
+  )
+  return response.data.data
+}
+
 export interface RegenerateQuestionOptions {
+  voice?: VoiceGender
   // Gợi ý điều chỉnh của giáo viên (tối đa 500 ký tự); trống thì không gửi thân yêu cầu.
   feedback?: string
   signal?: AbortSignal
@@ -122,7 +133,7 @@ export async function postRegenerateQuestion(gameId: string, questionId: string,
   const feedback = options.feedback?.trim()
   const response = await axiosInstance.post<ApiSuccessResponse<RegeneratedQuestion>>(
     `/games/${encodeURIComponent(gameId)}/questions/${encodeURIComponent(questionId)}/regenerate`,
-    feedback ? { feedback } : undefined,
+    feedback || options.voice ? { feedback: feedback || undefined, voice: options.voice } : undefined,
     {
       timeout: options.withImageReview ? REGENERATE_IMAGE_QUESTION_TIMEOUT_MS : REGENERATE_QUESTION_TIMEOUT_MS,
       signal: options.signal,

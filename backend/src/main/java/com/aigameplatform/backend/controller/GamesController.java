@@ -1,6 +1,7 @@
 package com.aigameplatform.backend.controller;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
 import com.aigameplatform.backend.dto.request.RegenerateQuestionRequest;
 import com.aigameplatform.backend.dto.request.ReviseGameRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
@@ -89,12 +90,21 @@ public class GamesController {
         return ResponseEntity.ok(ApiResponse.ok(games.revise(teacherId(teacher), gameId, request)));
     }
 
+    @PostMapping("/{gameId}/regenerate")
+    public ResponseEntity<ApiResponse<JsonNode>> regenerate(@PathVariable String gameId,
+            @Valid @RequestBody(required = false) RegenerateGameRequest request,
+            @AuthenticationPrincipal AuthenticatedTeacher teacher) {
+        return ResponseEntity.ok(ApiResponse.ok(games.regenerate(teacherId(teacher), gameId, request)));
+    }
+
     @PostMapping("/{gameId}/questions/{questionId}/regenerate")
     public ResponseEntity<ApiResponse<RegeneratedQuestionDto>> regenerateQuestion(@PathVariable String gameId,
             @PathVariable String questionId, @Valid @RequestBody(required = false) RegenerateQuestionRequest request,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
         String feedback = request == null ? null : request.feedback();
-        return ResponseEntity.ok(ApiResponse.ok(games.regenerateQuestion(teacherId(teacher), gameId, questionId, feedback)));
+        return ResponseEntity.ok(ApiResponse.ok(request == null || request.voice() == null
+                ? games.regenerateQuestion(teacherId(teacher), gameId, questionId, feedback)
+                : games.regenerateQuestion(teacherId(teacher), gameId, questionId, feedback, request.voice())));
     }
 
     @DeleteMapping("/{gameId}")

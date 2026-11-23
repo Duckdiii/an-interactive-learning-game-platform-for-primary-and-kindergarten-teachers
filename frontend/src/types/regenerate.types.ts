@@ -4,4 +4,5 @@ import type { GameType, QuestionDsl } from './game-dsl.types'
 export interface RegeneratedQuestion {
   question: QuestionDsl
   gameType: GameType
+  schemaVersion?: '1.2.0'
 }

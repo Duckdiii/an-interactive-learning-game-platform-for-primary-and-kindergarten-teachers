@@ -1,7 +1,10 @@
 package com.aigameplatform.backend.service.media;
 
+import com.aigameplatform.backend.dto.media.SpeechVoice;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -35,6 +38,17 @@ class GoogleCloudTtsServiceTest {
 
         assertThat(result).containsExactly(10, 20, 30);
         verify(mockClient).synthesizeSpeech(any(SynthesisInput.class), any(VoiceSelectionParams.class), any(AudioConfig.class));
+    }
+
+    @Test
+    void selectedMaleVoiceUsesVietnameseMaleModel() {
+        TextToSpeechClient client = mock(TextToSpeechClient.class);
+        when(client.synthesizeSpeech(any(SynthesisInput.class), any(VoiceSelectionParams.class), any(AudioConfig.class)))
+                .thenReturn(SynthesizeSpeechResponse.getDefaultInstance());
+        new GoogleCloudTtsService(client).synthesizeSpeech("Bé hãy lắng nghe", "vi-VN", SpeechVoice.MALE);
+        verify(client).synthesizeSpeech(any(SynthesisInput.class), argThat((VoiceSelectionParams voice) ->
+                        voice.getName().equals("vi-VN-Wavenet-B") && voice.getLanguageCode().equals("vi-VN")),
+                any(AudioConfig.class));
     }
 
     @Test

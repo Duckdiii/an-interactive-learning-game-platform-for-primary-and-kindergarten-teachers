@@ -255,7 +255,7 @@ export type DragDropGame = GameEnvelope<'DRAG_DROP', DragDropQuestion>
 export type OrderingGame = GameEnvelope<'ORDERING', OrderingQuestion>
 export type VisualClozeTextGame = GameEnvelope<'VISUAL_CLOZE', VisualClozeQuestion> & { mode?: 'TEXT' }
 export interface VisualClozeImageGame {
-  schemaVersion: '1.1.0'
+  schemaVersion: '1.1.0' | '1.2.0'
   gameType: 'VISUAL_CLOZE'
   mode: 'IMAGE'
   metadata: GameMetadata

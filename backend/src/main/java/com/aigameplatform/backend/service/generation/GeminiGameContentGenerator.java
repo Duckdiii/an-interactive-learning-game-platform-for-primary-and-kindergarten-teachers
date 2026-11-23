@@ -149,8 +149,8 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;
-        boolean singleQuestion = attempt.customInstruction() != null && !attempt.customInstruction().isBlank();
-        if (singleQuestion) {
+        boolean singleQuestion = attempt.singleQuestion();
+        if (attempt.customInstruction() != null && !attempt.customInstruction().isBlank()) {
             systemPrompt += "\n\n" + attempt.customInstruction();
         }
         Revision revision = attempt.revision();

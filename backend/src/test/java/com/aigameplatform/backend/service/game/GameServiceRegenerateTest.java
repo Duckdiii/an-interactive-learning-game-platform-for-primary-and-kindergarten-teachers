@@ -83,6 +83,31 @@ class GameServiceRegenerateTest {
     }
 
     @Test
+    void wholeGameReturnsPreviewWithOriginalManagementFieldsWithoutWriting() {
+        when(games.findById("g1")).thenReturn(Optional.of(game(OWNER)));
+        var preview = JsonMapper.builder().build().createObjectNode().put("status", "PUBLISHED").put("newGame", true);
+        when(dsl.regenerate(any(), any())).thenReturn(preview);
+
+        ObjectNode result = service.regenerate(OWNER, "g1", null);
+
+        assertThat(result.path("gameId").asString()).isEqualTo("g1");
+        assertThat(result.path("status").asString()).isEqualTo("DRAFT");
+        assertThat(result.path("newGame").asBoolean()).isTrue();
+        verify(games, never()).save(any());
+        verify(games, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void wholeGameRejectsUnfinishedSessionBeforeCallingAi() {
+        when(games.findById("g1")).thenReturn(Optional.of(game(OWNER)));
+        when(sessions.hasUnfinishedSession(eq("g1"), any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> service.regenerate(OWNER, "g1", null))
+                .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.CONFLICT));
+        verify(dsl, never()).regenerate(any(), any());
+    }
+
+    @Test
     void unknownGameIsNotFound() {
         when(games.findById("g1")).thenReturn(Optional.empty());
 
