@@ -1,4 +1,9 @@
 import { test } from "node:test";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { checkCoverage, collect, recover, retryScope } from "./coverage.mjs";
 
@@ -59,4 +64,32 @@ test("vòng 2 kiểm đủ cả file mới lẫn vấn đề cũ và retry giữ
     round: 2, previous_findings: [{ ref: previous[0], status: "still_present", evidence: "" }],
   });
   assert.equal(recover(missing, complete, files, previous, round2).result, complete);
+});
+
+test("gộp artifact tải phẳng với một hoặc nhiều phần", () => {
+  for (const count of [1, 2]) {
+    const cwd = mkdtempSync(join(tmpdir(), "review-coverage-"));
+    mkdirSync(join(cwd, "input"));
+    mkdirSync(join(cwd, "shards"));
+    const parts = Array.from({ length: count }, (_, i) => ({ id: i + 1, files: [`F${i}.java`] }));
+    const sha = "a".repeat(40);
+    writeFileSync(join(cwd, "input", "manifest.json"), JSON.stringify({
+      head: sha, round: 1, parts, manual: [], skipped: [], previous: [],
+    }));
+    for (const { id, files } of parts) {
+      writeFileSync(join(cwd, "shards", `coverage-${id}.json`), JSON.stringify({ result: result(files) }));
+    }
+    const run = spawnSync(process.execPath, [
+      fileURLToPath(new URL("./coverage.mjs", import.meta.url)), "collect", "input", "shards",
+    ], {
+      cwd, encoding: "utf8", env: {
+        ...process.env, EXPECT_MODE: expected.mode, EXPECT_PROMPT: expected.prompt, ANALYZED_SHA: sha,
+        GITHUB_OUTPUT: join(cwd, "outputs"), GITHUB_STEP_SUMMARY: join(cwd, "summary"),
+      },
+    });
+    assert.equal(run.status, 0, run.stderr);
+    assert.match(readFileSync(join(cwd, "outputs"), "utf8"), /ready=true/);
+    assert.deepEqual(JSON.parse(readFileSync(join(cwd, "result", "review.json"), "utf8")).files_reviewed,
+      parts.flatMap(({ files }) => files));
+  }
 });

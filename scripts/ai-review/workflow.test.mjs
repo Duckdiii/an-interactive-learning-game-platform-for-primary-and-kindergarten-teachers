@@ -70,6 +70,8 @@ test("analyze chạy theo ma trận các phần do prepare chia; một phần l�
 
 test("job post gộp kết quả các phần trước khi đăng, chỉ tải artifact của các phần (không lẫn input/post)", () => {
   assert.match(post, /needs: \[prepare, analyze\]/);
+  assert.match(analyze, /path: \$\{\{ runner\.temp \}\}\/review-coverage\/coverage-\$\{\{ matrix\.shard \}\}\.json/);
+  assert.match(post, /merge-multiple: true/);
   assert.match(post, /pattern: ai-review-\$\{\{ github\.run_id \}\}-\*/);
   assert.ok(post.indexOf("coverage.mjs") > 0 && post.indexOf("coverage.mjs") < post.indexOf("post.mjs"), "gộp phải đứng trước đăng");
   assert.match(prepare, /name: ai-review-input-\$\{\{ github\.run_id \}\}/);

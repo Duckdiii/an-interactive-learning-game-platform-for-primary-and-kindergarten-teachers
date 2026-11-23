@@ -72,13 +72,13 @@ function readAttempt(raw, outcome) {
 }
 
 function main() {
-  const [command, input, location, runId] = process.argv.slice(2);
+  const [command, input, location] = process.argv.slice(2);
   const manifest = readJson(join(input, "manifest.json"));
   const expected = { mode: process.env.EXPECT_MODE, prompt: process.env.EXPECT_PROMPT, round: manifest.round };
   if (command === "collect") {
     if (manifest.head !== process.env.ANALYZED_SHA) throw new Error("Manifest thuộc commit khác.");
     const report = collect(manifest, (id) => {
-      try { return readJson(join(location, `ai-review-${runId}-${id}`, "coverage.json")); }
+      try { return readJson(join(location, `coverage-${id}.json`)); }
       catch { return null; }
     }, expected);
     mkdirSync("result", { recursive: true });
@@ -101,26 +101,27 @@ function main() {
   const part = manifest.parts.find((item) => item.id === id);
   if (!part) throw new Error("Không tìm thấy phần trong manifest.");
   const { files } = part;
-  mkdirSync("out", { recursive: true });
+  const out = join(process.env.RUNNER_TEMP ?? ".", "review-coverage");
+  mkdirSync(out, { recursive: true });
   const latest = readAttempt(process.env.RESULT, process.env.AGENT_OUTCOME);
   if (command === "attempt") {
     const checked = checkCoverage(latest.result, files, manifest.previous, expected);
     if (checked.reason) {
       const patches = filePatches(readFileSync(join(input, `shard-${id}.diff`), "utf8"));
       writePackage(input, id, retryScope(files, checked, expected.round), patches);
-      writeFileSync("out/first.json", JSON.stringify(latest.result ?? null));
+      writeFileSync(join(out, "first.json"), JSON.stringify(latest.result ?? null));
     } else {
-      writeFileSync("out/coverage.json", JSON.stringify(latest));
+      writeFileSync(join(out, `coverage-${id}.json`), JSON.stringify(latest));
     }
     appendFileSync(process.env.GITHUB_OUTPUT, `retry=${Boolean(checked.reason)}\n`);
     appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Phần ${id}: lần đầu ${latest.reason ?? (checked.reason || "đủ phạm vi")} · ${files.length - checked.missing.length}/${files.length} file.\n`);
     return;
   }
   if (command !== "retry") throw new Error("Lệnh kiểm tra độ phủ không hợp lệ.");
-  const first = readJson("out/first.json");
+  const first = readJson(join(out, "first.json"));
   const entry = recover(first, latest.result, files, manifest.previous, expected);
   if (latest.reason) entry.reason = latest.reason;
-  writeFileSync("out/coverage.json", JSON.stringify(entry));
+  writeFileSync(join(out, `coverage-${id}.json`), JSON.stringify(entry));
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Phần ${id}: lần thử lại ${entry.reason ?? "đủ phạm vi"}.\n`);
 }
 

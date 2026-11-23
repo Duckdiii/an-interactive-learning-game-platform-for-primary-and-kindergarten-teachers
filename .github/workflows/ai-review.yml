@@ -129,7 +129,7 @@ jobs:
             echo "PR không còn mở: chỉ được chạy với dry_run=true."; exit 1
           fi
           # Mô tả PR là dữ liệu không tin cậy: chỉ ghi ra file, sau đó extract-uc.mjs chỉ lấy các mã UC-nn hợp lệ.
-          jq -r '.body // ""' <<<"$json" > "${RUNNER_TEMP}/pr-body.txt"
+          jq -r '(.body // "")[0:6000]' <<<"$json" > "${RUNNER_TEMP}/pr-body.txt"
           pr_base_sha=$(jq -r '.base.sha' <<<"$json")
           merge_sha=$(jq -r 'if .merged then .merge_commit_sha // "" else "" end' <<<"$json")
           [[ "$pr_base_sha" =~ ^[0-9a-f]{40}$ ]] || { echo "Không lấy được base SHA"; exit 1; }
@@ -303,6 +303,7 @@ jobs:
         run: |
           set -euo pipefail
           node trusted/scripts/ai-review/shard.mjs review-source "$PR_BASE" "$HEAD_SHA" "$MERGE_SHA" "$ROUND" ai-review-input | tee -a "$GITHUB_STEP_SUMMARY"
+          cp "${RUNNER_TEMP}/pr-body.txt" ai-review-input/pr-body.txt
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: steps.pre.outputs.run == 'true'
@@ -338,6 +339,15 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      - name: Kiểm tra đường dẫn dành riêng cho workflow
+        if: matrix.shard != 0
+        run: |
+          for path in ai-review-input trusted; do
+            if [ -e "$path" ] || [ -L "$path" ]; then
+              echo "PR chứa đường dẫn dành riêng: $path"
+              exit 1
+            fi
+          done
       # Script, prompt, schema, SRS: từ nhánh base (PR) hoặc từ ref đang chạy workflow (workflow_dispatch).
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         if: matrix.shard != 0
@@ -435,7 +445,7 @@ jobs:
         if: ${{ !cancelled() && matrix.shard != 0 }}
         with:
           name: ai-review-${{ github.run_id }}-${{ matrix.shard }}
-          path: out/
+          path: ${{ runner.temp }}/review-coverage/coverage-${{ matrix.shard }}.json
           retention-days: 14
           if-no-files-found: warn
 
@@ -465,6 +475,7 @@ jobs:
         with:
           pattern: ai-review-${{ github.run_id }}-*
           path: shards
+          merge-multiple: true
 
       - name: Xác minh manifest và gộp kết quả
         id: collect
@@ -472,8 +483,7 @@ jobs:
           EXPECT_MODE: ${{ needs.prepare.outputs.mode }}
           EXPECT_PROMPT: ${{ needs.prepare.outputs.prompt_version }}
           ANALYZED_SHA: ${{ needs.prepare.outputs.head_sha }}
-          RUN_ID: ${{ github.run_id }}
-        run: node trusted/scripts/ai-review/coverage.mjs collect ai-review-input shards "$RUN_ID"
+        run: node trusted/scripts/ai-review/coverage.mjs collect ai-review-input shards
 
       - name: Đăng kết quả lên PR
         if: steps.collect.outputs.ready == 'true'
