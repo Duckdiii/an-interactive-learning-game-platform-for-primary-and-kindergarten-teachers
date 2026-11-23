@@ -41,7 +41,7 @@ export function buildMockInsights(gameId: string, sessionType?: InsightsSessionT
   try {
     game = getMockGame(gameId)
   } catch {
-    return { playCount: 0, correctRate: 0, avgAttemptsPerQuestion: 0, questions: [] }
+    return { playCount: 0, correctRate: 0, avgAttemptsPerQuestion: 0, completionRate: 0, avgScore: 0, lowSample: false, questions: [] }
   }
 
   const key = sessionType ?? 'ALL'
@@ -53,6 +53,9 @@ export function buildMockInsights(gameId: string, sessionType?: InsightsSessionT
     playCount: PLAYS[key],
     correctRate: round(mean(questions.map((question) => question.correctRate)), 2),
     avgAttemptsPerQuestion: round(mean(questions.map((question) => question.avgAttempts)), 1),
+    completionRate: 0.82,
+    lowSample: false,
+    avgScore: round(mean(questions.map((question) => question.correctRate)) * 100 * questions.length, 0),
     questions,
   }
 }

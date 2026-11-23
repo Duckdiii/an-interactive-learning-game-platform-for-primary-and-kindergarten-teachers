@@ -1,5 +1,6 @@
-// Dữ liệu Trang chủ giáo viên mà Backend CHƯA có (đề xuất ở docs/ui/API-CONTRACT.md mục 2.10 và 2.8). Chỉ khai các trường
-// màn hình dùng tới; khi endpoint thật có thì chỉ cần sửa realHomeApi.ts.
+// Dữ liệu Trang chủ và trang Kết quả của giáo viên. `getGameInsights`, `getQuestionInsights` và `listReviewNeeded` đã có endpoint
+// thật (API-CONTRACT mục 2.8); `listLiveSessions` còn ở mức đề xuất (mục 2.10) nên Backend CHƯA có. Chỉ khai các trường
+// màn hình dùng tới.
 
 export interface LiveSession {
   sessionId: string
@@ -48,7 +49,39 @@ export interface GameInsights {
   playCount: number
   correctRate: number
   avgAttemptsPerQuestion: number
+  // Tỉ lệ học sinh làm hết các câu (0..1) và điểm trung bình mỗi học sinh đã chơi.
+  completionRate: number
+  avgScore: number
+  // true khi có lượt chơi nhưng ít (Backend dưới 5): số liệu chỉ mang tính tham khảo. Vắng nghĩa là không cảnh báo.
+  lowSample: boolean
   questions: QuestionInsight[]
+}
+
+/** Khoảng ngày (`YYYY-MM-DD`, tính trọn ngày) lọc theo ngày tạo phiên, và lớp học (UC-16); bỏ trống là không giới hạn. */
+export interface InsightsRange {
+  from?: string
+  to?: string
+  classroomId?: string
+}
+
+export interface AnswerShare {
+  label: string
+  count: number
+  correct: boolean
+}
+
+// Chi tiết một câu (`GET /games/{gameId}/questions/{questionId}/insights`).
+export interface QuestionInsightDetail {
+  questionId: string
+  order: number
+  text: string
+  answeredCount: number
+  correctRate: number
+  needsReview: boolean
+  // Chỉ đáp án lặp từ 2 lần; phần còn lại gộp vào otherCount. noAnswerCount là bỏ qua hoặc hết giờ.
+  distribution: AnswerShare[]
+  otherCount: number
+  noAnswerCount: number
 }
 
 export interface HomeApi {
@@ -56,8 +89,15 @@ export interface HomeApi {
   listLiveSessions(): Promise<LiveSession[]>
   /** `GET /insights/review-needed?limit=` */
   listReviewNeeded(limit: number): Promise<ReviewNeeded[]>
-  /** `GET /games/{gameId}/insights?sessionType=`; bỏ `sessionType` là tất cả loại lượt chơi. */
-  getGameInsights(gameId: string, sessionType?: InsightsSessionType): Promise<GameInsights>
+  /** `GET /games/{gameId}/insights?sessionType=&from=&to=`; bỏ `sessionType` là tất cả loại lượt chơi. */
+  getGameInsights(gameId: string, sessionType?: InsightsSessionType, range?: InsightsRange): Promise<GameInsights>
+  /** `GET /games/{gameId}/questions/{questionId}/insights?sessionType=&from=&to=` */
+  getQuestionInsights(
+    gameId: string,
+    questionId: string,
+    sessionType?: InsightsSessionType,
+    range?: InsightsRange,
+  ): Promise<QuestionInsightDetail>
 }
 
 /** Endpoint còn ở mức đề xuất: giao diện coi như "chưa có dữ liệu", không báo lỗi. */

@@ -34,6 +34,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(ApiResponse.fail(code.name(), ex.getMessage()));
     }
 
+    /** Khóa dòng quá thời gian chờ (hai lần nộp sát nhau của cùng một em): báo xung đột để thử lại, không phải lỗi hệ thống. */
+    @ExceptionHandler(org.springframework.dao.PessimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLockTimeout(org.springframework.dao.PessimisticLockingFailureException ex) {
+        log.warn("Khóa dòng quá thời gian chờ", ex);
+        return ResponseEntity.status(ErrorCode.CONFLICT.getStatus())
+                .body(ApiResponse.fail(ErrorCode.CONFLICT.name(), "Thao tác đang được xử lý, vui lòng thử lại"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception ex) {
         log.error("Lỗi không xác định", ex);

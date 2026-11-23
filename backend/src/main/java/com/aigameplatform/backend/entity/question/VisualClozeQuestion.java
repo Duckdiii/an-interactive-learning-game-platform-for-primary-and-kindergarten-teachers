@@ -53,4 +53,9 @@ public class VisualClozeQuestion extends QuestionGame {
     @CollectionTable(name = "visual_cloze_image_options", joinColumns = @JoinColumn(name = "question_id"))
     @OrderColumn(name = "option_order")
     private List<VisualClozeImageOption> options = new ArrayList<>();
+
+    @Override
+    public String insightLabel() {
+        return labelOrDefault(questionText != null && !questionText.isBlank() ? questionText : sentenceTemplate);
+    }
 }

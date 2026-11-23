@@ -12,6 +12,7 @@ import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.service.GamePublicationService;
 import com.aigameplatform.backend.service.game.GameService;
+import com.aigameplatform.backend.service.game.ReviewSeedService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +39,21 @@ public class GamesController {
 
     private final GameService games;
     private final GamePublicationService publication;
+    private final ReviewSeedService reviewSeed;
 
-    public GamesController(GameService games, GamePublicationService publication) {
+    public GamesController(GameService games, GamePublicationService publication, ReviewSeedService reviewSeed) {
         this.games = games;
         this.publication = publication;
+        this.reviewSeed = reviewSeed;
     }
 
     @PostMapping("/generate")
     public ResponseEntity<ApiResponse<JsonNode>> generate(@Valid @RequestBody GenerateGameRequest request,
             @AuthenticationPrincipal AuthenticatedTeacher teacher) {
-        return ResponseEntity.ok(ApiResponse.ok(games.generate(teacherId(teacher), request)));
+        String teacherId = teacherId(teacher);
+        // Game ôn tập: thêm số liệu lớp làm sai của game cũ vào phần mô tả (UC-18 bước 5a).
+        GenerateGameRequest effective = request.reviewFrom() == null ? request : reviewSeed.withReviewContext(request, teacherId);
+        return ResponseEntity.ok(ApiResponse.ok(games.generate(teacherId, effective)));
     }
 
     @GetMapping

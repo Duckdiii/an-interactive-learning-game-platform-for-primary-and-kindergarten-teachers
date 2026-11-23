@@ -19,7 +19,7 @@ import { ROUTES } from '../routes/paths'
 import type { LiveSession, ReviewNeeded } from '../services/home'
 import type { GameSummary } from '../types/game-summary.types'
 import { parseApiError } from '../utils/apiError'
-import { IDEA_MAX_LENGTH } from '../utils/generateRequest'
+import { IDEA_MAX_LENGTH, reviewSeedParams } from '../utils/generateRequest'
 import { resultsLink } from '../utils/insights'
 import { formatRelativeTime } from '../utils/relativeTime'
 import { suggestTopics, topicToCreateLink } from '../utils/topicSuggestions'
@@ -27,7 +27,8 @@ import { suggestTopics, topicToCreateLink } from '../utils/topicSuggestions'
 // Số bản nháp tối đa hiện ở mục "Soạn dở": đủ để chọn nhanh, không biến Trang chủ thành danh sách dài.
 const RECENT_DRAFTS = 3
 
-const createLink = (idea: string) => `${ROUTES.createGame}?${new URLSearchParams({ idea }).toString()}`
+const createLink = (idea: string, extra: Record<string, string> = {}) =>
+  `${ROUTES.createGame}?${new URLSearchParams({ idea, ...extra }).toString()}`
 
 export default function Dashboard() {
   usePageTitle(viText.home.kicker)
@@ -273,8 +274,11 @@ function ReviewItem({ item }: { item: ReviewNeeded }) {
           {wrong ? ` · ${viText.home.reviewCommonWrong(wrong)}` : ''}
         </p>
       </div>
-      {/* Chỉ đưa tên game của giáo viên vào `idea`, không đưa câu trả lời của học sinh (xem API-CONTRACT 2.8). */}
-      <ButtonLink to={createLink(`${viText.home.reviewIdeaPrefix}${item.gameTitle}`)} variant="accent">
+      {/* Chỉ đưa tên game và mã câu vào địa chỉ; Backend tự lấy lỗi hay gặp qua `reviewFrom` (API-CONTRACT 2.8). */}
+      <ButtonLink
+        to={createLink(`${viText.home.reviewIdeaPrefix}${item.gameTitle}`, reviewSeedParams(item.gameId, [item.questionId]))}
+        variant="accent"
+      >
         {viText.home.reviewCreate}
       </ButtonLink>
       <Link

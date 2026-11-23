@@ -104,4 +104,29 @@ class LeaderboardRegistryTest {
         assertThat(p2.getTotalScore()).isEqualTo(10_000);
         assertThat(p1.getTotalScore()).isEqualTo(5_000);
     }
+
+    @Test
+    @DisplayName("setScore không bao giờ hạ điểm khi hai request đến lệch thứ tự")
+    void setScoreNeverLowersTheScore() {
+        LeaderboardRegistry registry = new LeaderboardRegistry();
+
+        registry.setScore("s", "p1", "Lan", 200);
+        registry.setScore("s", "p1", "Lan", 100);
+
+        assertThat(registry.getSortedLeaderboard("s").get(0).getTotalScore()).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("setScore đặt tổng điểm, gọi lại cùng giá trị không làm điểm tăng")
+    void setScoreIsIdempotent() {
+        LeaderboardRegistry registry = new LeaderboardRegistry();
+
+        registry.setScore("s", "p1", "Lan", 150);
+        registry.setScore("s", "p1", "Lan", 150);
+        registry.setScore("s", "p2", "Minh", 90);
+
+        var sorted = registry.getSortedLeaderboard("s");
+        assertThat(sorted).extracting(LeaderboardRegistry.ScoreEntry::getParticipantId).containsExactly("p1", "p2");
+        assertThat(sorted.get(0).getTotalScore()).isEqualTo(150);
+    }
 }

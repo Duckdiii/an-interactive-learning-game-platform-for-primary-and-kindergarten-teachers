@@ -7,6 +7,13 @@ import type { ChatTurn, GameUnderstandingResponse, UnderstandGameRequest } from 
 import type { GenerateGameRequest } from '../utils/generateRequest'
 import type { AnyGameResponse, GameEnvelopeBody, GameResponse } from '../types/game-response.types'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
+import type {
+  GameInsights,
+  InsightsRange,
+  InsightsSessionType,
+  QuestionInsightDetail,
+  ReviewNeeded,
+} from '../services/home/HomeApi'
 
 // Chỉ áp cho lệnh đọc danh sách: nếu máy chủ treo thì báo lỗi sau 10 giây thay vì quay vô hạn.
 // Không đặt timeout chung trên axiosInstance vì các lệnh khác (ví dụ sinh game bằng AI) có thể chạy lâu hơn.
@@ -29,6 +36,52 @@ export async function getGames(filters: GameFilters) {
       },
     },
   )
+
+  return response.data.data
+}
+
+// Chỉ gửi tham số có giá trị (tránh `?sessionType=undefined`).
+function insightParams(sessionType?: InsightsSessionType, range?: InsightsRange) {
+  const params = {
+    ...(sessionType ? { sessionType } : {}),
+    ...(range?.from ? { from: range.from } : {}),
+    ...(range?.to ? { to: range.to } : {}),
+    ...(range?.classroomId ? { classroomId: range.classroomId } : {}),
+  }
+
+  return Object.keys(params).length > 0 ? params : undefined
+}
+
+/** GET /games/{gameId}/insights: thống kê theo câu (UC-18); bỏ `sessionType` là tất cả loại lượt chơi. */
+export async function fetchGameInsights(gameId: string, sessionType?: InsightsSessionType, range?: InsightsRange) {
+  const response = await axiosInstance.get<ApiSuccessResponse<GameInsights>>(
+    `/games/${encodeURIComponent(gameId)}/insights`,
+    { params: insightParams(sessionType, range) },
+  )
+
+  return response.data.data
+}
+
+/** GET /games/{gameId}/questions/{questionId}/insights: chi tiết một câu (UC-18 bước 5). */
+export async function fetchQuestionInsights(
+  gameId: string,
+  questionId: string,
+  sessionType?: InsightsSessionType,
+  range?: InsightsRange,
+) {
+  const response = await axiosInstance.get<ApiSuccessResponse<QuestionInsightDetail>>(
+    `/games/${encodeURIComponent(gameId)}/questions/${encodeURIComponent(questionId)}/insights`,
+    { params: insightParams(sessionType, range) },
+  )
+
+  return response.data.data
+}
+
+/** GET /insights/review-needed: các câu lớp cần ôn lại (trang chủ). */
+export async function fetchReviewNeeded(limit: number) {
+  const response = await axiosInstance.get<ApiSuccessResponse<ReviewNeeded[]>>('/insights/review-needed', {
+    params: { limit },
+  })
 
   return response.data.data
 }

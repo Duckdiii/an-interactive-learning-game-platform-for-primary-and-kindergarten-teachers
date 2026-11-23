@@ -41,12 +41,15 @@ class GamesControllerRegenerateTest {
     @Mock
     private GamePublicationService publication;
 
+    @Mock
+    private com.aigameplatform.backend.service.game.ReviewSeedService reviewSeed;
+
     private MockMvc mockMvc;
     private final AuthenticatedTeacher teacher = new AuthenticatedTeacher("teacher-1", "teacher@example.com", "s1");
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new GamesController(games, publication))
+        mockMvc = MockMvcBuilders.standaloneSetup(new GamesController(games, publication, reviewSeed))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .build();

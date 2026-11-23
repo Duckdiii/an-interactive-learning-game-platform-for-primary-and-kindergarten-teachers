@@ -2,12 +2,11 @@ package com.aigameplatform.backend.controller;
 
 import com.aigameplatform.backend.dto.request.PlayRequest;
 import com.aigameplatform.backend.dto.response.ApiResponse;
-import com.aigameplatform.backend.service.play.LeaderboardRegistry;
 import com.aigameplatform.backend.service.play.LiveArenaService;
-import com.aigameplatform.backend.service.play.ScoringService;
+import com.aigameplatform.backend.service.play.PlayStartRateLimiter;
 import com.aigameplatform.backend.service.play.StudentPlayService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.security.Principal;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,18 +25,13 @@ import tools.jackson.databind.node.ObjectNode;
 public class StudentPlayController {
     private final StudentPlayService play;
     private final LiveArenaService liveArenaService;
-    private final ScoringService scoringService;
-    private final LeaderboardRegistry leaderboardRegistry;
+    private final PlayStartRateLimiter playStartLimiter;
 
-    public StudentPlayController(
-            StudentPlayService play,
-            LiveArenaService liveArenaService,
-            ScoringService scoringService,
-            LeaderboardRegistry leaderboardRegistry) {
+    public StudentPlayController(StudentPlayService play, LiveArenaService liveArenaService,
+            PlayStartRateLimiter playStartLimiter) {
+        this.playStartLimiter = playStartLimiter;
         this.play = play;
         this.liveArenaService = liveArenaService;
-        this.scoringService = scoringService;
-        this.leaderboardRegistry = leaderboardRegistry;
     }
 
     @GetMapping("/games/shared/{shareCode}")
@@ -47,7 +41,9 @@ public class StudentPlayController {
 
     @PostMapping("/games/shared/{shareCode}/play")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<Map<String, Object>> start(@PathVariable String shareCode, @Valid @RequestBody PlayRequest body) {
+    public ApiResponse<Map<String, Object>> start(@PathVariable String shareCode, @Valid @RequestBody PlayRequest body,
+            HttpServletRequest request) {
+        playStartLimiter.acquire(request.getRemoteAddr());
         return ApiResponse.ok(play.start(shareCode, body.nickname()));
     }
 
@@ -60,30 +56,13 @@ public class StudentPlayController {
     @PostMapping("/sessions/{sessionId}/interactions")
     public ApiResponse<Map<String, Object>> interaction(@PathVariable String sessionId,
             @RequestHeader(name = "X-Participant-Id", required = false) String participantIdHeader,
-            @RequestBody(required = false) JsonNode body,
-            Principal principal) {
+            @RequestBody(required = false) JsonNode body) {
+        // interact() đã xác thực X-Participant-Id thuộc phiên; chỉ tin header này, không tin id trong body.
         Map<String, Object> result = play.interact(sessionId, participantIdHeader, body);
-        String pid = participantIdHeader;
-        if (pid == null && principal != null) {
-            pid = principal.getName();
-        }
-        if (pid == null && body != null && body.has("participantId")) {
-            pid = body.get("participantId").asText();
-        }
-        if (pid != null) {
-            liveArenaService.broadcastAnswerStatus(sessionId, pid);
-
-            boolean isCorrect = Boolean.TRUE.equals(result.get("isCorrect"));
-            long timeSpentMs = body != null && body.has("timeSpentMs") ? body.get("timeSpentMs").asLong(0) : 0;
-            long timeLimitMs = 30_000L;
-            if (result.containsKey("timeLimitMs")) {
-                timeLimitMs = ((Number) result.get("timeLimitMs")).longValue();
-            }
-
-            int points = scoringService.calculateScore(isCorrect, timeSpentMs, timeLimitMs);
-            String participantName = liveArenaService.getParticipantName(sessionId, pid);
-            leaderboardRegistry.addScore(sessionId, pid, participantName, points);
-            liveArenaService.broadcastLeaderboard(sessionId);
+        liveArenaService.broadcastAnswerStatus(sessionId, participantIdHeader);
+        // Bảng xếp hạng lấy tổng điểm server đã tính, không tự chấm lại từ dữ liệu client.
+        if (result.get("totalScore") instanceof Number total) {
+            liveArenaService.syncScore(sessionId, participantIdHeader, total.intValue());
         }
         return ApiResponse.ok(result);
     }

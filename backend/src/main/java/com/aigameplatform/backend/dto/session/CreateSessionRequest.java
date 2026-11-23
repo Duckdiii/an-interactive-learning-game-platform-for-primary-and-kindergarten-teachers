@@ -10,7 +10,9 @@ public record CreateSessionRequest(
         SessionType sessionType,
         @Min(1) Integer maxParticipants,
         ChoosingStrategy groupingStrategy,
-        List<TeamInput> teams
+        List<TeamInput> teams,
+        // Lớp học của giáo viên mà phiên diễn ra (tùy chọn); để thống kê UC-18 lọc theo lớp.
+        String classroomId
 ) {
     public SessionType getEffectiveSessionType() {
         return sessionType != null ? sessionType : SessionType.SOLO;

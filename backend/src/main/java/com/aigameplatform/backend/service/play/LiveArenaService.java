@@ -61,6 +61,16 @@ public class LiveArenaService {
         });
     }
 
+    /**
+     * Cập nhật bảng xếp hạng theo tổng điểm do server tính (participant.score) sau khi nộp một câu.
+     * Chỉ áp dụng cho học sinh đã vào phòng live; chơi tự do (SELF) không có bảng xếp hạng.
+     */
+    public void syncScore(String sessionId, String participantId, int totalScore) {
+        if (!sessionParticipantRegistry.hasParticipant(sessionId, participantId)) return;
+        leaderboardRegistry.setScore(sessionId, participantId, getParticipantName(sessionId, participantId), totalScore);
+        broadcastLeaderboard(sessionId);
+    }
+
     public void registerHost(String sessionId, String hostId) {
         sessionParticipantRegistry.registerHost(sessionId, hostId);
     }

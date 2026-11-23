@@ -6,12 +6,15 @@ import { RealHomeApi } from './realHomeApi'
 
 export { HomeApiNotSupportedError } from './HomeApi'
 export type {
+  AnswerShare,
   CommonWrong,
   GameInsights,
   HomeApi,
+  InsightsRange,
   InsightsSessionType,
   LiveSession,
   QuestionInsight,
+  QuestionInsightDetail,
   ReviewNeeded,
 } from './HomeApi'
 

@@ -34,6 +34,7 @@ class SessionServiceTest {
     private final LiveArenaService liveArenaService = mock(LiveArenaService.class);
     private final LeaderboardRegistry leaderboardRegistry = mock(LeaderboardRegistry.class);
     private final SimpMessagingTemplate messagingTemplate = mock(SimpMessagingTemplate.class);
+    private final com.aigameplatform.backend.service.classroom.ClassroomService classroomService = mock(com.aigameplatform.backend.service.classroom.ClassroomService.class);
 
     private SessionService service;
 
@@ -45,7 +46,7 @@ class SessionServiceTest {
     void setUp() {
         service = new SessionService(
                 sessions, games, teachers, participants, teams, scores,
-                blockedWordList, liveArenaService, leaderboardRegistry, messagingTemplate);
+                blockedWordList, liveArenaService, leaderboardRegistry, messagingTemplate, classroomService);
 
         author = new Teacher();
         author.setId("teacher-1");
@@ -71,7 +72,7 @@ class SessionServiceTest {
             return s;
         });
 
-        CreateSessionRequest req = new CreateSessionRequest("Tiết 1", SessionType.SOLO, 30, null, null);
+        CreateSessionRequest req = new CreateSessionRequest("Tiết 1", SessionType.SOLO, 30, null, null, null);
         CreateSessionResult result = service.createSession("game-1", req, teacherAuth);
 
         assertThat(result.sessionId()).isEqualTo("session-1");
@@ -79,6 +80,37 @@ class SessionServiceTest {
         assertThat(result.status()).isEqualTo(SessionStatus.WAITING);
         assertThat(result.accessCode()).matches("^[0-9]{6}$");
         verify(liveArenaService).registerHost("session-1", "teacher-1");
+    }
+
+    @Test
+    void createSessionAttachesTheTeachersClassroom() {
+        var classroom = new com.aigameplatform.backend.entity.Classroom();
+        classroom.setId("class-1");
+        when(classroomService.owned("teacher-1", "class-1")).thenReturn(classroom);
+        when(sessions.save(any(GameSession.class))).thenAnswer(inv -> {
+            GameSession s = inv.getArgument(0);
+            s.setId("session-1");
+            return s;
+        });
+
+        service.createSession("game-1", new CreateSessionRequest("Tiết 1", SessionType.SOLO, 30, null, null, "class-1"),
+                teacherAuth);
+
+        var saved = org.mockito.ArgumentCaptor.forClass(GameSession.class);
+        verify(sessions).save(saved.capture());
+        assertThat(((com.aigameplatform.backend.entity.session.TeacherSession) saved.getValue()).getClassroom())
+                .isSameAs(classroom);
+    }
+
+    @Test
+    void createSessionRejectsAClassroomThatIsNotTheTeachers() {
+        when(classroomService.owned("teacher-1", "other-class"))
+                .thenThrow(new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy lớp học"));
+
+        assertThatThrownBy(() -> service.createSession("game-1",
+                new CreateSessionRequest(null, SessionType.SOLO, null, null, null, "other-class"), teacherAuth))
+                .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND));
+        verify(sessions, org.mockito.Mockito.never()).save(any(GameSession.class));
     }
 
     @Test
@@ -92,7 +124,7 @@ class SessionServiceTest {
             return s;
         });
 
-        CreateSessionRequest req = new CreateSessionRequest("Thi đấu nhóm", SessionType.TEAM, null, ChoosingStrategy.RANDOM, null);
+        CreateSessionRequest req = new CreateSessionRequest("Thi đấu nhóm", SessionType.TEAM, null, ChoosingStrategy.RANDOM, null, null);
         CreateSessionResult result = service.createSession("game-1", req, teacherAuth);
 
         assertThat(result.sessionId()).isEqualTo("session-2");
@@ -104,7 +136,7 @@ class SessionServiceTest {
     @Test
     void createSessionFailsIfGameNotPublished() {
         game.setStatus(GameStatus.DRAFT);
-        CreateSessionRequest req = new CreateSessionRequest(null, null, null, null, null);
+        CreateSessionRequest req = new CreateSessionRequest(null, null, null, null, null, null);
 
         assertThatThrownBy(() -> service.createSession("game-1", req, teacherAuth))
                 .isInstanceOf(ApiException.class)
@@ -118,7 +150,7 @@ class SessionServiceTest {
         other.setId("teacher-2");
         game.setAuthor(other);
 
-        CreateSessionRequest req = new CreateSessionRequest(null, null, null, null, null);
+        CreateSessionRequest req = new CreateSessionRequest(null, null, null, null, null, null);
 
         assertThatThrownBy(() -> service.createSession("game-1", req, teacherAuth))
                 .isInstanceOf(ApiException.class)
@@ -130,7 +162,7 @@ class SessionServiceTest {
     void createSessionFailsIfActiveOrWaitingSessionExists() {
         when(sessions.existsByGame_IdAndStatusIn(eq("game-1"), any())).thenReturn(true);
 
-        CreateSessionRequest req = new CreateSessionRequest(null, null, null, null, null);
+        CreateSessionRequest req = new CreateSessionRequest(null, null, null, null, null, null);
 
         assertThatThrownBy(() -> service.createSession("game-1", req, teacherAuth))
                 .isInstanceOf(ApiException.class)
@@ -343,6 +375,7 @@ class SessionServiceTest {
     void getLeaderboardHidesParticipantIdForStudents() {
         SoloSession session = new SoloSession();
         session.setId("session-1");
+        session.setTeacher(author);
         session.setGame(game);
         session.setStatus(SessionStatus.ACTIVE);
 
@@ -361,6 +394,10 @@ class SessionServiceTest {
         // When teacher asks (isTeacher = true)
         LeaderboardDto teacherView = service.getLeaderboard("session-1", "teacher-1", true);
         assertThat(teacherView.participants().get(0).participantId()).isEqualTo("p-secret");
+
+        // Giáo viên khác (không sở hữu phiên) không được thấy participantId
+        LeaderboardDto otherTeacherView = service.getLeaderboard("session-1", "teacher-2", true);
+        assertThat(otherTeacherView.participants().get(0).participantId()).isNull();
     }
 
     @Test

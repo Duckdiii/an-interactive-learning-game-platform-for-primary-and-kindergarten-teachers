@@ -65,7 +65,7 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
     await waitFor(() => expect(document.title).toBe(`${title} · AI Game Platform`))
   })
 
-  it('cả thanh bên (máy tính) và thanh dưới (điện thoại) đều có đúng 4 mục', async () => {
+  it('cả thanh bên (máy tính) và thanh dưới (điện thoại) đều có đúng 5 mục', async () => {
     renderApp('/workspace')
     await waitForPage('Kệ trò chơi của cô')
 
@@ -77,12 +77,14 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
         'Trang chủ',
         'Trò chơi của tôi',
         'Kết quả',
+        'Lớp học',
         'Tạo game mới',
       ])
       expect(links.map((link) => link.getAttribute('href'))).toEqual([
         '/dashboard',
         '/workspace',
         '/results',
+        '/classrooms',
         '/games/new',
       ])
     }

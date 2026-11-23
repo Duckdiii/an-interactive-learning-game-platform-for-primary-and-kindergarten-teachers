@@ -3,6 +3,9 @@ package com.aigameplatform.backend.security;
 import com.aigameplatform.backend.service.play.SessionParticipantRegistry;
 import io.jsonwebtoken.JwtException;
 import java.security.Principal;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -37,8 +40,29 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
             accessor.setUser(authenticate(accessor));
+        } else if (accessor != null && StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+            authorizeSubscribe(accessor);
         }
         return message;
+    }
+
+    // Danh sách cho phép (không phải danh sách chặn): broker cho đăng ký theo mẫu Ant (/topic/**, /topic/session/*/*), nên
+    // mọi đích không nằm trong danh sách đều bị từ chối. Hai kênh có participantId (đủ để nộp bài thay bạn qua REST) chỉ
+    // dành cho giáo viên chủ phòng.
+    private static final Pattern SESSION_TOPIC =
+            Pattern.compile("^/topic/session/([^/*?{}]+)/(state|question|leaderboard|participants|answer-status)$");
+    private static final Set<String> HOST_ONLY_CHANNELS = Set.of("participants", "answer-status");
+
+    private void authorizeSubscribe(StompHeaderAccessor accessor) {
+        String destination = accessor.getDestination();
+        Principal user = accessor.getUser();
+        if (destination == null || user == null) throw new AccessDeniedException("Không được đăng ký kênh này");
+        if (destination.equals("/user/queue/kicked")) return;
+        Matcher topic = SESSION_TOPIC.matcher(destination);
+        if (!topic.matches()) throw new AccessDeniedException("Không được đăng ký kênh này");
+        if (HOST_ONLY_CHANNELS.contains(topic.group(2)) && !participants.isHost(topic.group(1), user.getName())) {
+            throw new AccessDeniedException("Chỉ giáo viên chủ phòng được theo dõi kênh này");
+        }
     }
 
     private Principal authenticate(StompHeaderAccessor accessor) {

@@ -54,6 +54,22 @@ class LiveArenaServiceTest {
     }
 
     @Test
+    @DisplayName("syncScore đặt điểm theo tổng server tính, nộp lại không tăng; người ngoài phòng live bị bỏ qua")
+    void testSyncScoreUsesServerTotalAndIgnoresNonLiveParticipants() {
+        String sessionId = "session-sync";
+        sessionParticipantRegistry.addOrUpdate(sessionId, new ParticipantDto("p1", "Bé Lan", true));
+
+        liveArenaService.syncScore(sessionId, "p1", 120);
+        liveArenaService.syncScore(sessionId, "p1", 120);
+        liveArenaService.syncScore(sessionId, "self-player", 999);
+
+        var board = leaderboardRegistry.getSortedLeaderboard(sessionId);
+        assertThat(board).hasSize(1);
+        assertThat(board.get(0).getParticipantName()).isEqualTo("Bé Lan");
+        assertThat(board.get(0).getTotalScore()).isEqualTo(120);
+    }
+
+    @Test
     @DisplayName("recordAnswer chấm điểm theo giờ server, câu gửi lại không cộng thêm, chưa tải đề thì không cộng")
     void testRecordAnswerUsesServerClockAndIgnoresResubmit() {
         String sessionId = "session-score";

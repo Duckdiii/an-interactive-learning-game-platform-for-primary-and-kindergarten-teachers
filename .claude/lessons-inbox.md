@@ -17,6 +17,13 @@ Mẫu một mục:
 
 ## Chờ duyệt
 
+### 2026-11-22 — Đổi hành vi `RealHomeApi.getGameInsights` mà không chạy test của trang dùng nó
+- Lỗi: `getGameInsights` chuyển từ "ném HomeApiNotSupportedError" sang gọi API thật, nhưng `ResultsPage.test.tsx` vẫn có ca "bản thật chưa hỗ trợ" dựa vào hành vi cũ; chỉ chạy vitest ở `src/api` và `src/services/home` nên không thấy test đỏ.
+- Phát hiện nhờ: subagent `test-verifier` chạy toàn bộ vitest.
+- Nguyên nhân gốc: không grep nơi dùng `RealHomeApi` (đúng quy tắc "đổi hành vi hàm dùng chung thì grep mọi chỗ gọi") và chạy test theo thư mục mình sửa thay vì theo nơi dùng.
+- Cách chặn: đã có quy tắc trong `CLAUDE.md`; áp dụng: trước khi báo xong, chạy `npx vitest run` toàn bộ (hoặc `--related` theo file đã đổi).
+- Trạng thái: CHỜ DUYỆT
+
 ### 2026-11-21 — Viết migration mới mà không đối chiếu cột do migration chưa merge đã thêm trên DB dùng chung
 - Lỗi: V21 (`main`, FR-15) `add column status` vào `teachers`, trong khi V14 của `feature/admin-portal` đã áp trên DB dùng chung và đã thêm cột này; backend bản gộp dev+main dừng khi migrate V21 (V20 đã áp trước đó). Trên DB mới, khi admin-portal merge, V14 chạy trước V21 nên cũng lỗi y hệt.
 - Phát hiện nhờ: chạy backend với DB dùng chung trong lúc thử đầu-cuối.
@@ -358,4 +365,32 @@ Mẫu một mục:
 - Phát hiện nhờ: chạy thật kịch bản 006 (nhóm A) trên trình duyệt.
 - Nguyên nhân gốc: chọn kích thước theo số ký tự mà không đo/ước lượng bề rộng chữ, chỉ kiểm bằng mắt với nhãn số ("6").
 - Cách chặn: kích thước khung chữ trên canvas phải tính từ độ dài chữ và cỡ chữ (hoặc đo bằng Konva), kiểm với nhãn có dấu và chữ rộng; có thể thêm test hàm thuần cho bề rộng nhãn.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-22 — Thêm mục menu nhưng không chạy test đếm mục menu; dùng cờ trạng thái có sẵn mà không đọc nơi ghi nó
+- Lỗi: (1) thêm mục "Lớp học" vào `AppLayout` (UC-16) mà không chạy `teacherUi.test.tsx`, test đếm đúng 4 mục nên đỏ cho tới khi test-verifier chạy cả thư mục `src/pages`; (2) tính `completionRate` từ `Participant.completedAt != null` mà chưa đọc `SessionService.closeSession`, nơi cũng đặt `completedAt` (kèm note ENDED) cho học sinh chưa làm xong, nên tỉ lệ bị thổi phồng.
+- Phát hiện nhờ: test-verifier (1); tự đọc `closeSession` khi kiểm mục 4 (2).
+- Nguyên nhân gốc: chỉ chạy test của file vừa sửa, không chạy test của mọi nơi dùng chung (menu); dùng một trường do nơi khác ghi mà không grep nơi ghi.
+- Cách chặn: đổi cấu trúc dùng chung thì grep test tham chiếu nó (đã có quy tắc "đổi hành vi hàm dùng chung"); với cờ trạng thái, grep mọi `set...` của trường trước khi dựa vào nó. (2) đã thành hằng `ENDED_BY_CLOSE_NOTE` và test `GameInsightsServiceTest`.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-22 — Chặn truy cập bằng danh sách chặn đường dẫn, và quên kiểm một đường khác trả cùng dữ liệu nhạy cảm
+- Lỗi: vá lộ `participantId` bằng cách chỉ chặn SUBSCRIBE hai đường dẫn cụ thể; đăng ký bằng mẫu có `*` vẫn lọt, và `GET /sessions/{id}/leaderboard` vẫn trả `pid` cho mọi JWT giáo viên. Regex số điện thoại ban đầu chặn nhầm ngày tháng và số lớn.
+- Phát hiện nhờ: security-auditor và reviewer.
+- Nguyên nhân gốc: sửa theo đường dẫn đã biết thay vì liệt kê mọi nơi dữ liệu đó đi ra; chặn bằng danh sách chặn thay vì danh sách cho phép; không thử regex trên đầu vào thật.
+- Cách chặn: khi vá một dữ liệu nhạy cảm, grep mọi chỗ phát/trả field đó trước khi sửa; kiểm soát truy cập dùng danh sách cho phép; regex lọc phải chạy thử trên vài đầu vào hợp lệ và không hợp lệ. Đã thành test ở tầng 2 (xem `docs/corrections.md`).
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-22 — Thêm 7 endpoint mới (lớp học, thống kê) mà không cập nhật `docs/FEATURE-MAP.md`
+- Lỗi: bảy endpoint của `ClassroomController` và `GameInsightsController` có code nhưng thiếu ở mục "Đã có code" của FEATURE-MAP; job CI "Log AI và chỉ mục OpenAPI" đỏ trên PR #83 vì `check-feature-map.mjs`. Trước khi commit chỉ chạy checker log và openapi, không chạy các bước còn lại của job đó.
+- Phát hiện nhờ: CI của PR, người dùng gửi ảnh chụp.
+- Nguyên nhân gốc: không đối chiếu danh sách bước trong `.github/workflows/ci-pr.yml` với những gì đã chạy cục bộ.
+- Cách chặn: trước khi mở PR chạy đủ các lệnh `node scripts/...` trong job đó (đã chạy lại và xanh). Đã là kiểm tra tầng 2 (CI), không cần thêm quy tắc.
+- Trạng thái: CHỜ DUYỆT
+
+### 2026-11-23 — Thêm script mới cho workflow lấy script từ nhánh gốc mà không tính chuyện chạy lần đầu; tin một lần chạy thử đơn lẻ
+- Lỗi: (1) workflow AI Review lấy script từ nhánh gốc (`trusted/`), nên PR thêm `shard.mjs` tự đỏ vì nhánh gốc chưa có file này (bước `boot` chỉ kiểm ba file cũ); (2) mô tả `status` trong schema (agent đọc) mâu thuẫn với prompt chia phần mới; (3) một lần chạy thử thành công không đủ: chạy thử PR #83 ba lần cho 1 lần xanh, 2 lần đỏ vì một phần báo incomplete (chập chờn).
+- Phát hiện nhờ: run đầu của PR #84 và các lần chạy thử bằng workflow_dispatch (dry_run).
+- Nguyên nhân gốc: không đối chiếu mọi nơi agent đọc chỉ dẫn (prompt và schema) khi đổi hành vi; không nghĩ đến thứ tự merge của chính hệ thống; chạy thử ít lần.
+- Cách chặn: khi thêm script mà workflow cần từ `trusted/`, thêm file đó vào danh sách của `boot` (đã làm, có test); test kiểm prompt và schema không mâu thuẫn về chia phần (đã làm); với hành vi của agent thì chạy thử nhiều lần trước khi kết luận. Còn thiếu: xử lý phần `incomplete` chập chờn (Lớp 2 hoặc chạy lại phần đó).
 - Trạng thái: CHỜ DUYỆT

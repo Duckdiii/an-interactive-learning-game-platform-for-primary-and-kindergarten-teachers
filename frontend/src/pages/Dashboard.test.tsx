@@ -42,6 +42,7 @@ function useSampleHome(live: LiveSession[] = [LIVE], review: ReviewNeeded[] = [R
     listLiveSessions: () => Promise.resolve(live),
     listReviewNeeded: () => Promise.resolve(review),
     getGameInsights: () => Promise.reject(new Error('không dùng ở Trang chủ')),
+    getQuestionInsights: () => Promise.reject(new Error('không dùng ở Trang chủ')),
   }
   mockedGetHomeApi.mockResolvedValue({ api, isSample: true })
 }
@@ -243,6 +244,7 @@ describe('Trang chủ giáo viên', () => {
           listLiveSessions: () => Promise.reject(new Error('boom')),
           listReviewNeeded: () => Promise.resolve([]),
           getGameInsights: () => Promise.reject(new Error('không dùng ở Trang chủ')),
+          getQuestionInsights: () => Promise.reject(new Error('không dùng ở Trang chủ')),
         },
         isSample: false,
       })

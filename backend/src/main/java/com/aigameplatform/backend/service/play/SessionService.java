@@ -15,6 +15,7 @@ import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.*;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
+import com.aigameplatform.backend.service.classroom.ClassroomService;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SessionService {
 
+    private final ClassroomService classroomService;
     private final GameSessionRepository sessions;
     private final GameRepository games;
     private final TeacherRepository teachers;
@@ -54,7 +56,9 @@ public class SessionService {
             BlockedWordList blockedWordList,
             LiveArenaService liveArenaService,
             LeaderboardRegistry leaderboardRegistry,
-            SimpMessagingTemplate messagingTemplate) {
+            SimpMessagingTemplate messagingTemplate,
+            ClassroomService classroomService) {
+        this.classroomService = classroomService;
         this.sessions = sessions;
         this.games = games;
         this.teachers = teachers;
@@ -134,6 +138,9 @@ public class SessionService {
             session = soloSession;
         }
 
+        if (req != null && req.classroomId() != null && !req.classroomId().isBlank()) {
+            session.setClassroom(classroomService.owned(teacherPrincipal.teacherId(), req.classroomId())); // 404 nếu không phải lớp của cô
+        }
         session.setGame(game);
         session.setTeacher(teacher);
         session.setSessionName(sessionName);
@@ -281,7 +288,7 @@ public class SessionService {
         for (Participant p : session.getParticipants()) {
             if (p.getCompletedAt() == null) {
                 p.setCompletedAt(now);
-                p.setNote("ENDED");
+                p.setNote(Participant.ENDED_BY_CLOSE_NOTE);
             }
         }
 
@@ -564,6 +571,9 @@ public class SessionService {
         GameSession session = sessions.findById(sessionId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy phiên chơi"));
 
+        // participantId là credential của học sinh: chỉ giáo viên sở hữu phiên được thấy (không phải mọi tài khoản giáo viên).
+        isTeacher = isTeacher && session instanceof TeacherSession owned && owned.getTeacher() != null
+                && owned.getTeacher().getId().equals(requesterId);
         List<LeaderboardRegistry.ScoreEntry> liveEntries = leaderboardRegistry.getSortedLeaderboard(sessionId);
 
         List<LeaderboardParticipantDto> participants = new ArrayList<>();
@@ -701,7 +711,7 @@ public class SessionService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-    private static SessionType resolveSessionType(GameSession session) {
+    static SessionType resolveSessionType(GameSession session) {
         if (session instanceof SoloSession) return SessionType.SOLO;
         if (session instanceof TeamSession) return SessionType.TEAM;
         if (session instanceof SelfSession) return SessionType.SELF;

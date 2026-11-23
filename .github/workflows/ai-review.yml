@@ -67,13 +67,14 @@ jobs:
     # Bỏ qua: label khác ai-review, PR draft, PR từ fork (không có secret và code không tin cậy), PR do dependabot tạo.
     # Dùng TÁC GIẢ PR (user.login), không dùng github.actor: với sự kiện labeled, actor là người gắn label.
     # workflow_dispatch không đi qua điều kiện này nên tác giả được kiểm tra lại ở bước ctx và boot.
+    # TẠM TẮT (theo yêu cầu): `false &&` làm prepare bị skipped, kéo theo analyze và post cũng skipped. Muốn bật lại: xóa `false &&` ở dưới.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      false && (github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
        (github.event.action != 'labeled' || github.event.label.name == 'ai-review') &&
        github.event.pull_request.draft == false &&
        github.event.pull_request.head.repo.full_name == github.repository &&
-       github.event.pull_request.user.login != 'dependabot[bot]')
+       github.event.pull_request.user.login != 'dependabot[bot]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

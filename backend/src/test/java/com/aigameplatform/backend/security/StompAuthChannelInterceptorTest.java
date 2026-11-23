@@ -55,6 +55,39 @@ class StompAuthChannelInterceptorTest {
         assertThat(user(out)).isEqualTo("p-1");
     }
 
+    private Message<?> subscribe(String destination, String userName) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessor.setDestination(destination);
+        if (userName != null) accessor.setUser(() -> userName);
+        accessor.setLeaveMutable(true);
+        return MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+    }
+
+    @Test
+    void channelsCarryingParticipantIdsAreHostOnly() {
+        registry.registerHost("sess", "teacher-1");
+        registry.addOrUpdate("sess", new ParticipantDto("p-1", "Bé An", true));
+        for (String topic : new String[] {"participants", "answer-status"}) {
+            String destination = "/topic/session/sess/" + topic;
+            assertThat(interceptor.preSend(subscribe(destination, "teacher-1"), null)).isNotNull();
+            assertThatThrownBy(() -> interceptor.preSend(subscribe(destination, "p-1"), null))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> interceptor.preSend(subscribe(destination, null), null))
+                    .isInstanceOf(AccessDeniedException.class);
+        }
+        // Mẫu đăng ký rộng và đích lạ đều bị từ chối, kể cả với giáo viên chủ phòng.
+        for (String destination : new String[] {"/topic/**", "/topic/session/*/*", "/topic/session/sess/*",
+                "/topic/session/sess/participants/", "/topic/session/sess/other", "/queue/anything"}) {
+            assertThatThrownBy(() -> interceptor.preSend(subscribe(destination, "p-1"), null))
+                    .as(destination).isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> interceptor.preSend(subscribe(destination, "teacher-1"), null))
+                    .as(destination).isInstanceOf(AccessDeniedException.class);
+        }
+        assertThat(interceptor.preSend(subscribe("/user/queue/kicked", "p-1"), null)).isNotNull();
+        // Kênh không chứa id (bảng xếp hạng, câu hỏi, trạng thái) học sinh vẫn nghe được.
+        assertThat(interceptor.preSend(subscribe("/topic/session/sess/leaderboard", "p-1"), null)).isNotNull();
+    }
+
     @Test
     void rejectsBadTokenUnknownParticipantAndNoCredentials() {
         assertThatThrownBy(() -> interceptor.preSend(connect("Authorization", "Bearer rac"), null))

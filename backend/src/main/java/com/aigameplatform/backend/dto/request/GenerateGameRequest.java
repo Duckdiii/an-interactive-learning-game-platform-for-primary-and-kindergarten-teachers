@@ -26,12 +26,23 @@ public record GenerateGameRequest(
         VisualClozeMode mode,
         @Size(max = 2048) String sceneImageUrl,
         @Size(max = 8) List<@Valid OptionImage> optionImages,
-        JsonNode voice) {
+        JsonNode voice,
+        @Valid ReviewFrom reviewFrom) {
 
     public GenerateGameRequest(Subject subject, GradeLevel gradeLevel, String idea, Boolean randomTopic,
             GameType gameType, JsonNode voice) {
-        this(subject, gradeLevel, idea, randomTopic, gameType, null, null, null, voice);
+        this(subject, gradeLevel, idea, randomTopic, gameType, null, null, null, voice, null);
     }
+
+    public GenerateGameRequest(Subject subject, GradeLevel gradeLevel, String idea, Boolean randomTopic,
+            GameType gameType, VisualClozeMode mode, String sceneImageUrl, List<OptionImage> optionImages,
+            JsonNode voice) {
+        this(subject, gradeLevel, idea, randomTopic, gameType, mode, sceneImageUrl, optionImages, voice, null);
+    }
+
+    /** Tạo game ôn tập từ lỗi hay gặp (UC-18 bước 5a): các câu của game cũ mà giáo viên muốn ôn lại. */
+    public record ReviewFrom(@NotBlank String gameId,
+            @NotNull @Size(min = 1, max = 10) List<@NotBlank @Size(max = 64) String> questionIds) { }
 
     public record OptionImage(@NotBlank @Size(max = 2048) String imageUrl,
             @NotBlank @Size(max = 255) String visualPrompt) { }

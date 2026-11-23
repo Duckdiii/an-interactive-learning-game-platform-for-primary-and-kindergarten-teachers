@@ -11,6 +11,18 @@ export type ResultsFilter = 'ALL' | 'TEAM' | 'SELF'
 
 export const parseResultsFilter = (raw: string | null): ResultsFilter => (raw === 'TEAM' || raw === 'SELF' ? raw : 'ALL')
 
+/** Ngày hợp lệ dạng `YYYY-MM-DD` từ địa chỉ, ngược lại bỏ qua (không tin giá trị tùy ý trên URL). */
+export function parseDateParam(raw: string | null): string | undefined {
+  const match = raw === null ? null : /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw)
+  if (!match) return undefined
+
+  // So lại từng phần: `Date.parse` tự cuộn "2026-02-31" thành 3/3 nên không đủ để biết ngày có thật.
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])]
+  const date = new Date(Date.UTC(year, month - 1, day))
+
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? raw ?? undefined : undefined
+}
+
 /** Tất cả lượt thì không gửi `sessionType` (API-CONTRACT 2.8). */
 export const filterToSessionType = (filter: ResultsFilter): InsightsSessionType | undefined =>
   filter === 'ALL' ? undefined : filter
@@ -36,3 +48,7 @@ export const isLowRate = (rate: number) => toPercent(rate) < 50
 
 /** Số thập phân kiểu Việt Nam: 1,6 (dấu phẩy). */
 export const formatDecimalVi = (value: number, digits = 1) => value.toFixed(digits).replace('.', ',')
+
+/** Mã (lớp, game...) hợp lệ từ địa chỉ: chữ, số, gạch; ngược lại bỏ qua, không gửi giá trị tùy ý lên máy chủ. */
+export const parseIdParam = (raw: string | null): string | undefined =>
+  raw !== null && /^[A-Za-z0-9_-]{1,64}$/.test(raw) ? raw : undefined
