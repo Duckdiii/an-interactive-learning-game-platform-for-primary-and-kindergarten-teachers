@@ -1,17 +1,11 @@
-// Chia PR lớn thành nhiều phần để mỗi phần có một agent review riêng (mỗi agent có đủ lượt, không bị incomplete).
-// Dùng: node shard.mjs --pr 12 --repo owner/name --round 1|2 [--out-dir ai-review-input]
-//        [--max-files 15] [--max-chars 120000] [--max-shards 6]
-// Cần GITHUB_TOKEN (chỉ đọc diff). Ghi $GITHUB_OUTPUT: shards (số phần), matrix (JSON cho strategy.matrix).
-// Từ 2 phần trở lên, ghi thêm <out-dir>/shard-<i>.json = {"shard": i, "of": n, "files": [...]}; agent đọc file này
-// (tên file là dữ liệu không tin cậy nên đi qua JSON, không chép vào prompt). Vòng 2 và PR nhỏ luôn là 1 phần.
-import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Github, GithubError } from "./github.mjs";
+import { execFileSync } from "node:child_process";
 
-export const DEFAULT_MAX_FILES = 15;
-export const DEFAULT_MAX_CHARS = 120_000;
-export const DEFAULT_MAX_SHARDS = 6;
+export const DEFAULT_MAX_FILES = 10;
+export const DEFAULT_MAX_CHARS = 55_000;
+export const DEFAULT_MAX_SHARDS = 24;
 
 // File sinh tự động hoặc nhật ký: prompt đã bảo agent bỏ qua, nên không chiếm chỗ trong ngân sách của phần nào.
 const NOISE = [
@@ -20,10 +14,10 @@ const NOISE = [
   /^ai-usage-log\.md$/,
   /^docs\/openapi\/INDEX\.md$/,
   /^docs\/srs\//,
+  /\.(png|jpe?g|gif|webp|ico|avif)$/i,
   /\.min\.(js|css)$/,
 ];
 
-/** Kích thước (ký tự) của từng file trong một unified diff. Khóa là đường dẫn phía mới. */
 /** Git bọc đường dẫn có ký tự đặc biệt (kể cả tiếng Việt) trong dấu nháy và viết byte dạng \ooo; giải mã về chữ thường. */
 export function unquote(raw) {
   const p = raw.trim();
@@ -61,111 +55,92 @@ function newPath(part) {
   return lazy ? lazy[1] : null;
 }
 
-export function fileSizes(diffText) {
-  const sizes = new Map();
-  for (const part of diffText.split(/^(?=diff --git )/m)) {
-    if (!part.startsWith("diff --git ")) continue;
+export function filePatches(diff) {
+  const patches = new Map();
+  for (const part of diff.split(/^(?=diff --git )/m).filter(Boolean)) {
     const path = newPath(part);
-    if (path) sizes.set(path, (sizes.get(path) ?? 0) + part.length);
+    if (!part.startsWith("diff --git ") || !path || patches.has(path)) {
+      throw new Error("Không đọc được đầy đủ đường dẫn trong diff.");
+    }
+    patches.set(path, part);
   }
-  return sizes;
+  return patches;
 }
 
-/** Dự phòng khi GitHub không trả diff cả PR (PR quá lớn): dùng danh sách file có phân trang, đổi dòng thay đổi ra ký tự gần đúng. */
-export function sizesFromFileList(files) {
-  const sizes = new Map();
-  for (const f of files) sizes.set(f.filename, (f.patch?.length ?? 0) || (f.changes ?? 0) * 60 || 1);
-  return sizes;
-}
-
-/**
- * @param {Map<string, number>} sizes đường dẫn → số ký tự diff
- * @returns {{shards: {files: string[], chars: number}[], skipped: string[]}}
- *   skipped: file bị loại vì là file sinh tự động; shards[0..n-1] là các phần (rỗng nếu PR chỉ có file loại đó).
- */
-export function planShards(sizes, { maxFiles = DEFAULT_MAX_FILES, maxChars = DEFAULT_MAX_CHARS, maxShards = DEFAULT_MAX_SHARDS } = {}) {
+export function planShards(patches, { maxFiles = DEFAULT_MAX_FILES, maxChars = DEFAULT_MAX_CHARS, maxShards = DEFAULT_MAX_SHARDS } = {}) {
   const skipped = [];
-  const entries = [];
-  for (const [path, chars] of sizes) {
-    if (NOISE.some((re) => re.test(path))) skipped.push(path);
-    else entries.push([path, chars]);
-  }
-  // Xếp theo đường dẫn để file cùng thư mục (thường liên quan nhau) rơi vào cùng một phần.
-  entries.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
-  const total = entries.reduce((sum, [, c]) => sum + c, 0);
-  const wanted = Math.max(Math.ceil(entries.length / maxFiles), Math.ceil(total / maxChars), 1);
-  const n = Math.min(wanted, maxShards, Math.max(entries.length, 1));
+  const manual = [];
   const shards = [];
-  let current = { files: [], chars: 0 };
-  let done = 0;
-  let doneAtStart = 0; // lượng đã chia xong trước khi phần hiện tại bắt đầu
-  for (const [path, chars] of entries) {
-    // Cắt phần mới khi phần hiện tại đã đạt phần chia đều của lượng còn lại (và còn chỗ cho phần tiếp theo).
-    const remainingShards = n - shards.length;
-    const target = (total - doneAtStart) / remainingShards;
-    if (current.files.length > 0 && remainingShards > 1 && current.chars >= target) {
-      shards.push(current);
+  let current;
+  for (const [path, patch] of [...patches].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
+    if (NOISE.some((re) => re.test(path))) {
+      skipped.push(path);
+      continue;
+    }
+    if (patch.length > maxChars || path.length > 300 || /^Binary files .* differ\r?$/m.test(patch)) {
+      manual.push(path);
+      continue;
+    }
+    if (!current || current.files.length === maxFiles || current.chars + patch.length > maxChars) {
+      if (shards.length === maxShards) {
+        manual.push(path);
+        continue;
+      }
       current = { files: [], chars: 0 };
-      doneAtStart = done;
+      shards.push(current);
     }
     current.files.push(path);
-    current.chars += chars;
-    done += chars;
+    current.chars += patch.length;
   }
-  if (current.files.length > 0 || shards.length === 0) shards.push(current);
-  return { shards, skipped };
+  return { shards, skipped, manual };
 }
 
-function arg(argv, name) {
-  const i = argv.indexOf(`--${name}`);
-  return i >= 0 ? argv[i + 1] : undefined;
+export function pinnedDiff(source, base, head, merge) {
+  const git = (...args) => execFileSync("git", args, { cwd: source, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  for (const sha of [base, head, ...(merge ? [merge] : [])]) {
+    if (!/^[a-f0-9]{40}$/.test(sha)) throw new Error("SHA phạm vi review không hợp lệ.");
+  }
+  // Backtest PR đã merge dùng parent trước merge nếu GitHub giữ nguyên head làm parent thứ hai.
+  if (merge) {
+    const [first, second] = git("show", "-s", "--format=%P", merge).trim().split(" ");
+    if (second === head) base = first;
+  }
+  const range = `${base}...${head}`;
+  const diff = git("diff", "--no-ext-diff", "--no-textconv", "--find-renames", range);
+  const paths = git("diff", "--name-only", "-z", "--find-renames", range).split("\0").filter(Boolean);
+  const patches = filePatches(diff);
+  if (paths.length !== patches.size || paths.some((file) => !patches.has(file))) {
+    throw new Error("Danh sách file Git khác nội dung diff. Dừng để tránh review thiếu.");
+  }
+  return patches;
 }
 
-async function main() {
-  const a = process.argv.slice(2);
-  const need = (k) => { const v = arg(a, k); if (!v) throw new Error(`Thiếu --${k}`); return v; };
-  const pr = need("pr");
-  if (!/^[0-9]+$/.test(pr)) throw new Error("pr phải là số");
-  const round = need("round");
-  let shards = [{ files: [], chars: 0 }];
-  let summary = "vòng 2 hoặc không có diff: 1 phần";
-  if (round === "1") {
-    const github = new Github({ token: process.env.GITHUB_TOKEN, repo: need("repo") });
-    let sizes;
-    try {
-      sizes = fileSizes(await github.getDiff(Number(pr)));
-    } catch (e) {
-      if (!(e instanceof GithubError)) throw e;
-      console.log(`Không lấy được diff cả PR (${e.message}); dùng danh sách file.`);
-      sizes = sizesFromFileList(await github.listPullFiles(Number(pr)));
-    }
-    // Chế độ A không có công cụ Read nên không đọc được danh sách file của phần: luôn một phần.
-    const single = arg(a, "mode") === "A";
-    const plan = planShards(sizes, {
-      maxFiles: single ? Infinity : Number(arg(a, "max-files") ?? DEFAULT_MAX_FILES),
-      maxChars: single ? Infinity : Number(arg(a, "max-chars") ?? DEFAULT_MAX_CHARS),
-      maxShards: Number(arg(a, "max-shards") ?? DEFAULT_MAX_SHARDS),
-    });
-    shards = plan.shards;
-    summary = `${shards.length} phần, ${shards.map((s) => s.files.length).join("+")} file (bỏ qua ${plan.skipped.length} file sinh tự động)`;
-  }
-  const n = shards.length;
-  // Luôn ghi manifest để thư mục đầu vào không bao giờ rỗng (job sau tải nó như một artifact).
-  const dir = resolve(arg(a, "out-dir") ?? "ai-review-input");
+export function writePackage(dir, id, files, patches) {
+  writeFileSync(join(dir, `shard-${id}.json`), JSON.stringify({ files }));
+  writeFileSync(join(dir, `shard-${id}.diff`), files.map((file) => patches.get(file)).join(""));
+}
+
+function main() {
+  const [source, base, head, merge, round, dir] = process.argv.slice(2);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "manifest.json"), JSON.stringify({ shards: n }));
-  if (n > 1) {
-    shards.forEach((s, i) => writeFileSync(join(dir, `shard-${i + 1}.json`), JSON.stringify({ shard: i + 1, of: n, files: s.files }, null, 2)));
+  const previous = round === "2" ? JSON.parse(readFileSync(join(dir, "previous.json"), "utf8")).findings.map((finding) => finding.ref) : [];
+  const patches = round === "2"
+    ? filePatches(readFileSync(join(dir, "incremental.diff"), "utf8"))
+    : pinnedDiff(source, base, head, merge);
+  const { shards, skipped, manual } = planShards(patches);
+  if (round === "2" && (shards.length > 1 || manual.length)) {
+    throw new Error("Diff vòng 2 vượt ngân sách. Chạy lại với force để review toàn bộ.");
   }
-  if (process.env.GITHUB_OUTPUT) {
-    appendFileSync(process.env.GITHUB_OUTPUT, `shards=${n}\nmatrix=${JSON.stringify({ shard: shards.map((_, i) => i + 1) })}\n`);
-  }
-  console.log(`Chia review: ${summary}`);
+  if (round === "2" && !shards.length && previous.length) shards.push({ files: [], chars: 0 });
+  for (const [index, shard] of shards.entries()) writePackage(dir, index + 1, shard.files, patches);
+  const parts = shards.map(({ files }, i) => ({ id: i + 1, files }));
+  // Một job rỗng giữ cấu trúc matrix hợp lệ. Không gọi model khi không có phần cần review.
+  const matrix = { shard: parts.length ? parts.map(({ id }) => id) : [0] };
+  writeFileSync(join(dir, "manifest.json"), JSON.stringify({ round: Number(round), head, parts, skipped, manual, previous }));
+  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(matrix)}\n`);
+  console.log(`Chia review: ${parts.length} phần, ${shards.map(({ files }) => files.length).join("+") || "0"} file; ${skipped.length} loại trừ, ${manual.length} cần review tay.`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  main().catch((e) => {
-    console.error(e.message);
-    process.exit(1);
-  });
+  try { main(); } catch (error) { console.error(error.message); process.exitCode = 1; }
 }

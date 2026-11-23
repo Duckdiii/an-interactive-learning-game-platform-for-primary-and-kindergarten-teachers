@@ -8,7 +8,7 @@
     "schema_version": { "const": "1.0.0" },
     "prompt_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "Phiên bản prompt.md đã dùng." },
     "mode": { "enum": ["A", "B", "C"], "description": "A: chỉ diff. B: diff + đọc repo. C: diff + repo + SRS." },
-    "status": { "enum": ["complete", "incomplete"], "description": "complete chỉ khi đã review hết các file thay đổi của PR; nếu yêu cầu có dòng SHARD thì chỉ cần hết các file được giao trong SHARD_FILES_FILE (không tính file của phần khác). Hết lượt hoặc bỏ dở thì ghi incomplete." },
+    "status": { "enum": ["complete", "incomplete"], "description": "complete chỉ khi đã review hết file được giao trong SHARD_FILES_FILE và đã đánh giá đủ vấn đề cũ nếu chạy vòng 2. Hết lượt hoặc bỏ dở thì ghi incomplete." },
     "files_reviewed": {
       "type": "array",
       "maxItems": 300,

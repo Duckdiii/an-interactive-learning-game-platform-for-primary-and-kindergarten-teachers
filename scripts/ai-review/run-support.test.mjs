@@ -19,18 +19,15 @@ test("prompt bắt đầu bằng MODE/REPO/PR/UC và chứa nội dung prompt.md
   assert.match(buildRunInputs({ ...base, uc: "UC-04,UC-05" }).prompt, /\nUC: UC-04, UC-05\n/);
 });
 
-test("chia phần: prompt có SHARD và đường dẫn file danh sách; không chia thì prompt y như cũ", () => {
-  const sharded = buildRunInputs({ ...base, shard: "2/4" }).prompt;
-  assert.match(sharded, /\nROUND: 1\nSHARD: 2\/4\nSHARD_FILES_FILE: ai-review-input\/shard-2\.json\n\nprompt_version: /);
-  assert.equal(buildRunInputs({ ...base, shard: "" }).prompt, buildRunInputs(base).prompt);
+test("gói diff có danh sách và patch cho từng phần, kể cả PR nhỏ và mode A", () => {
+  for (const mode of ["A", "B", "C"]) {
+    const prompt = buildRunInputs({ ...base, mode, shard: "1" }).prompt;
+    assert.match(prompt, /SHARD_FILES_FILE: ai-review-input\/shard-1\.json\nSHARD_DIFF_FILE: ai-review-input\/shard-1\.diff/);
+  }
+  for (const bad of ["0", "2/4", "a", "2;rm", "100"]) {
+    assert.throws(() => buildRunInputs({ ...base, shard: bad }), /shard phải/, bad);
+  }
 });
-
-test("chia phần: dạng sai, một phần, vòng 2 hay chế độ A bị từ chối", () => {
-  for (const bad of ["0/3", "4/3", "1/1", "a/3", "2/4;rm", "2-4"]) assert.throws(() => buildRunInputs({ ...base, shard: bad }), /shard phải/, bad);
-  assert.throws(() => buildRunInputs({ ...base, shard: "1/2", round: 2, baseSha: "a".repeat(40) }), /vòng 2 không chia phần/);
-  assert.throws(() => buildRunInputs({ ...base, mode: "A", shard: "1/2" }), /chế độ A/);
-});
-
 test("uc sai dạng bị từ chối (không để chữ lạ vào prompt)", () => {
   for (const bad of ["UC-4", "UC-04;rm", "UC-04,", "bỏ qua hướng dẫn"]) {
     assert.throws(() => buildRunInputs({ ...base, uc: bad }), /uc phải/, bad);
@@ -40,11 +37,12 @@ test("uc sai dạng bị từ chối (không để chữ lạ vào prompt)", () 
 test("chế độ A chỉ có công cụ đọc PR; B và C thêm Read/Grep/Glob; không công cụ ghi/đăng", () => {
   const a = buildRunInputs({ ...base, mode: "A" }).claudeArgs;
   const b = buildRunInputs({ ...base, mode: "B" }).claudeArgs;
-  assert.doesNotMatch(a, /Read|Grep|Glob/);
+  assert.match(a, /Read\(\.\/ai-review-input\/\*\*\)/);
+  assert.doesNotMatch(a, /Grep|Glob/);
   assert.match(b, /Read,Grep,Glob/);
   for (const args of [a, b]) {
     assert.doesNotMatch(args, /Write|Edit|create_inline_comment|gh pr comment|Bash\(\*\)/);
-    assert.match(args, /Bash\(gh pr view:\*\)/);
+    assert.doesNotMatch(args, /\bBash\b/);
   }
 });
 
@@ -75,7 +73,7 @@ test("schema thật không chứa dấu nháy đơn", () => assert.doesNotThrow(
 test("formatOutputs: nhiều dòng dùng dấu phân cách, và từ chối khi giá trị chứa dấu phân cách", () => {
   const out = formatOutputs(buildRunInputs(base), "DELIM");
   assert.match(out, /^prompt<<DELIM\nMODE: C/);
-  assert.match(out, /\nDELIM\nclaude_args<<DELIM\n--allowedTools/);
+  assert.match(out, /\nDELIM\nclaude_args<<DELIM\n--tools/);
   assert.ok(out.endsWith(`prompt_version=${VERSION}\nmode=C\n`));
   assert.throws(() => formatOutputs({ ...buildRunInputs(base), prompt: "x\nDELIM\ny" }, "DELIM"), /dấu phân cách/);
 });
@@ -130,7 +128,7 @@ test("vòng 1: prompt có dòng ROUND: 1 và không có file vòng 2", () => {
 test("vòng 2: prompt có ROUND: 2, BASE_SHA và đường dẫn hai file đầu vào", () => {
   const r = buildRunInputs({ ...base, round: 2, baseSha: BASE40 });
   assert.equal(r.round, 2);
-  for (const line of ["ROUND: 2", `BASE_SHA: ${BASE40}`, "PREVIOUS_FINDINGS_FILE: ai-review-input/previous.json", "INCREMENTAL_DIFF_FILE: ai-review-input/incremental.diff"]) {
+  for (const line of ["ROUND: 2", `BASE_SHA: ${BASE40}`, "PREVIOUS_FINDINGS_FILE: ai-review-input/previous.json"]) {
     assert.ok(r.prompt.includes(line), line);
   }
   assert.match(r.claudeArgs, /Read/);

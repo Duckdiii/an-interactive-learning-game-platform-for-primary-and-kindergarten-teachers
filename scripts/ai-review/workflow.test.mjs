@@ -70,8 +70,10 @@ test("analyze chạy theo ma trận các phần do prepare chia; một phần l�
 
 test("job post gộp kết quả các phần trước khi đăng, chỉ tải artifact của các phần (không lẫn input/post)", () => {
   assert.match(post, /needs: \[prepare, analyze\]/);
+  assert.match(analyze, /path: \$\{\{ runner\.temp \}\}\/review-coverage\/coverage-\$\{\{ matrix\.shard \}\}\.json/);
+  assert.match(post, /merge-multiple: true/);
   assert.match(post, /pattern: ai-review-\$\{\{ github\.run_id \}\}-\*/);
-  assert.ok(post.indexOf("merge-shards.mjs") > 0 && post.indexOf("merge-shards.mjs") < post.indexOf("post.mjs"), "gộp phải đứng trước đăng");
+  assert.ok(post.indexOf("coverage.mjs") > 0 && post.indexOf("coverage.mjs") < post.indexOf("post.mjs"), "gộp phải đứng trước đăng");
   assert.match(prepare, /name: ai-review-input-\$\{\{ github\.run_id \}\}/);
   assert.match(analyze, /name: ai-review-input-\$\{\{ github\.run_id \}\}/);
 });
@@ -82,8 +84,8 @@ test("job post có pull-requests: write nhưng không chạy agent và không c�
   assert.doesNotMatch(post, /CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY/);
 });
 
-test("OAuth token chỉ xuất hiện đúng một lần, trong job analyze", () => {
-  assert.equal((text.match(/secrets\.CLAUDE_CODE_OAUTH_TOKEN/g) ?? []).length, 1);
+test("OAuth token chỉ dùng cho hai lần thử trong job analyze", () => {
+  assert.equal((text.match(/secrets\.CLAUDE_CODE_OAUTH_TOKEN/g) ?? []).length, 2);
   assert.match(analyze, /secrets\.CLAUDE_CODE_OAUTH_TOKEN/);
 });
 
@@ -128,13 +130,13 @@ test("điều kiện job prepare: label ai-review, không draft, không fork, kh
 
 test("PR đã đóng chỉ được chạy dry_run; kết quả phải hợp lệ JSON trước khi đăng", () => {
   assert.match(text, /PR không còn mở: chỉ được chạy với dry_run=true/);
-  assert.match(text, /structured_output không phải JSON hợp lệ/);
-  assert.match(text, /Agent không trả structured_output/);
+  assert.match(analyze, /coverage\.mjs attempt/);
+  assert.match(post, /if: steps\.collect\.outputs\.ready/);
 });
 
-test("job post chỉ chạy khi mọi phần của analyze thành công, và các job đều có timeout", () => {
+test("job post chẩn đoán cả phần thất bại và các job đều có timeout", () => {
   assert.match(post, /needs: \[prepare, analyze\]/);
-  assert.match(post, /needs\.analyze\.result == 'success'/);
+  assert.match(post, /!cancelled\(\) && needs\.prepare\.result == 'success'/);
   for (const job of [prepare, analyze, post]) assert.match(job, /timeout-minutes:/);
 });
 
@@ -198,7 +200,7 @@ test("khi bỏ qua vì đã có kết quả, job summary ghi rõ lý do thay vì
 test("nhánh base chưa có hệ thống thì bỏ qua nhẹ nhàng: kiểm tra bằng API trước mọi bước tốn kém, không báo lỗi đỏ", () => {
   assert.match(prepare, /id: boot/);
   // kiểm tra đủ các file (script và prompt) cần có ở nhánh base
-  for (const f of ["scripts/ai-review/precheck.mjs", "scripts/ai-review/shard.mjs", "scripts/ai-review/merge-shards.mjs", ".github/ai-review/prompt.md", ".github/ai-review/review-result.schema.json"]) {
+  for (const f of ["scripts/ai-review/precheck.mjs", "scripts/ai-review/shard.mjs", "scripts/ai-review/coverage.mjs", ".github/ai-review/prompt.md", ".github/ai-review/review-result.schema.json"]) {
     assert.ok(prepare.includes(f), `boot phải kiểm tra ${f}`);
   }
   // boot đứng trước bước chờ, hai checkout và precheck; các bước đó chỉ chạy khi ready
@@ -333,4 +335,10 @@ test("boot chạy thật: PR của dependabot thì bỏ qua ngay mà không gọ
   assert.match(r.output, /ready=false/);
   assert.match(r.summary, /dependabot/);
   assert.doesNotMatch(r.stderr, /KHÔNG ĐƯỢC GỌI/);
+});
+
+test("giữ review tự động tắt trong lúc kiểm chứng bằng dry run", () => {
+  assert.match(prepare, /workflow_dispatch' && inputs\.dry_run/);
+  assert.match(prepare, /vars\.AI_REVIEW_ENABLED == 'true'/);
+  assert.match(analyze, /if: steps\.coverage\.outputs\.retry == 'true'/);
 });
