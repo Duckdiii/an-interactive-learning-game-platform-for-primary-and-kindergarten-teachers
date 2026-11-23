@@ -19,6 +19,18 @@ test("prompt bắt đầu bằng MODE/REPO/PR/UC và chứa nội dung prompt.md
   assert.match(buildRunInputs({ ...base, uc: "UC-04,UC-05" }).prompt, /\nUC: UC-04, UC-05\n/);
 });
 
+test("chia phần: prompt có SHARD và đường dẫn file danh sách; không chia thì prompt y như cũ", () => {
+  const sharded = buildRunInputs({ ...base, shard: "2/4" }).prompt;
+  assert.match(sharded, /\nROUND: 1\nSHARD: 2\/4\nSHARD_FILES_FILE: ai-review-input\/shard-2\.json\n\nprompt_version: /);
+  assert.equal(buildRunInputs({ ...base, shard: "" }).prompt, buildRunInputs(base).prompt);
+});
+
+test("chia phần: dạng sai, một phần, vòng 2 hay chế độ A bị từ chối", () => {
+  for (const bad of ["0/3", "4/3", "1/1", "a/3", "2/4;rm", "2-4"]) assert.throws(() => buildRunInputs({ ...base, shard: bad }), /shard phải/, bad);
+  assert.throws(() => buildRunInputs({ ...base, shard: "1/2", round: 2, baseSha: "a".repeat(40) }), /vòng 2 không chia phần/);
+  assert.throws(() => buildRunInputs({ ...base, mode: "A", shard: "1/2" }), /chế độ A/);
+});
+
 test("uc sai dạng bị từ chối (không để chữ lạ vào prompt)", () => {
   for (const bad of ["UC-4", "UC-04;rm", "UC-04,", "bỏ qua hướng dẫn"]) {
     assert.throws(() => buildRunInputs({ ...base, uc: bad }), /uc phải/, bad);

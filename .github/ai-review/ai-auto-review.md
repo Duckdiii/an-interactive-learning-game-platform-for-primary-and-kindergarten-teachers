@@ -304,6 +304,8 @@ Một nhận xét **không** được đăng inline sẽ nằm trong comment t�
 | Đăng xong nhưng không đọc lại thấy comment tổng kết | Job đỏ |
 | Kết quả có `mode` hoặc `prompt_version` khác đầu vào của job `analyze` | **Từ chối đăng**, job đỏ |
 | Trạng thái trong comment đã đổi từ lúc phân tích (số lần chạy khác, hoặc mốc commit khác ở vòng 2): lần chạy khác đang ghi cùng lúc | **Không đăng** để tránh ghi đè, job đỏ; chạy lại |
+| PR lớn (nhiều file hoặc diff dài) | **Chia phần** (mục 5.6): mỗi phần một agent riêng, kết quả gộp lại; không còn báo `incomplete` vì hết lượt ở PR lớn |
+| Một phần vẫn báo `incomplete` hoặc không trả kết quả | Kết quả gộp là `incomplete` (hoặc job `analyze` đỏ): **từ chối đăng** như trên |
 | Diff quá lớn, GitHub từ chối trả diff | Job đỏ (chưa có xử lý riêng) |
 
 ### 5.4. Làm sạch nội dung agent trước khi đăng
@@ -350,6 +352,19 @@ Nội dung agent sinh ra là **dữ liệu không tin cậy**. `sanitize.mjs` th
 **Hạn chế đã biết:** "đã xử lý" là ý kiến của AI; commit mới có thể gây lỗi ở đoạn code không đổi mà vòng 2 bắt kém hơn review toàn bộ; nếu dev merge `main` vào nhánh thì diff phần mới lẫn cả thay đổi của `main`; vấn đề được ghi ở trạng thái "PR đã có commit mới" chỉ nằm trong tổng kết và không bao giờ được gắn lên dòng ở các vòng sau.
 
 ---
+
+### 5.6. PR lớn: chia phần
+
+Một agent chỉ có tối đa 40 lượt, nên PR hàng chục file không xem hết và báo `incomplete` (khi đó hệ thống từ chối đăng). Vì vậy job `prepare` chia PR trước khi tốn token:
+
+1. `shard.mjs` đọc diff, **bỏ qua file sinh tự động** (lockfile, `ai-usage-log.md` và kho lưu, `docs/openapi/INDEX.md`, `docs/srs/`), rồi tính số phần = lớn nhất của (số file ÷ 15, số ký tự diff ÷ 120.000), tối đa 6, tối thiểu 1.
+2. Các file xếp theo đường dẫn (file cùng thư mục thường liên quan nhau nên ở cùng phần) và cắt thành các phần có lượng diff xấp xỉ nhau.
+3. Mỗi phần chạy một job `analyze` riêng (ma trận) với đủ lượt: agent đọc `shard-<i>.json` để biết file của mình, vẫn được đọc file khác để lấy ngữ cảnh nhưng chỉ nhận xét file được giao (mục 9 của `prompt.md`).
+4. `post` chạy `merge-shards.mjs` để gộp: nhận xét trùng (cùng file, dòng, nội dung) chỉ giữ một; quá 40 nhận xét thì giữ mức nặng trước và ghi vào tóm tắt; `status` là `complete` chỉ khi mọi phần `complete`; kết luận `fail` nếu có `blocker`. Sau đó đăng như một lần review bình thường.
+
+PR nhỏ (và mọi vòng 2) chỉ có một phần nên chạy y như trước. Tên file là dữ liệu không tin cậy: danh sách file của phần nằm trong file JSON, không chép vào prompt.
+
+Chi phí: PR lớn tốn token gấp vài lần (mỗi phần một agent). Chưa làm: tự đăng phần đã review được khi một phần hỏng (hiện vẫn từ chối đăng cả lần).
 
 ## 6. Nguồn tài liệu nạp cho agent
 
@@ -423,17 +438,17 @@ File `.github/workflows/ai-review.yml`.
 | `mode` | `C` | A / B / C |
 | `dry_run` | **true** | Chỉ ghi kết quả ra artifact, không đăng |
 | `force` | false | Chạy lại dù đã có kết quả cho cùng commit/prompt/chế độ |
-| `max_turns` | để trống | Mặc định A=6, B/C=15; tối đa 40 |
+| `max_turns` | để trống | Workflow mặc định 40 (tối đa); áp dụng cho **mỗi phần** khi PR được chia |
 
 ### 8.2. Chi tiết kỹ thuật
 
 - **Concurrency:** khóa theo số PR; mọi lần chạy có ghi lên PR (tự động, label `ai-review`, chạy tay với `dry_run=false`) dùng chung một nhóm, lần mới hủy lần cũ, để hai lần chạy không ghi đè trạng thái của nhau. Label khác có nhóm riêng nên không hủy run đang chạy (điều kiện `concurrency` được đánh giá trước điều kiện `if` của job). Chạy tay với `dry_run=true` không ghi gì nên mỗi lần có nhóm riêng (các lần chạy lặp để đo độ ổn định không hủy lẫn nhau). **Lưu ý:** `cancel-in-progress` áp dụng cho cả workflow nên lần chạy mới có thể hủy job `post` đang ghi giữa chừng (ví dụ review inline đã đăng nhưng comment tổng kết chưa cập nhật). Trạng thái vẫn tự sửa ở lần chạy sau nhờ fingerprint (không đăng trùng) và việc ghi lại comment tổng kết; đây là đánh đổi có chủ ý **[cần kiểm chứng]** khi chạy thật. Nếu gây phiền, chuyển `concurrency` xuống riêng job `analyze`.
-- **Thời gian tối đa:** `analyze` 30 phút (đã tính 3 phút chờ gom push), `post` 10 phút.
+- **Ba job:** `prepare` (chỉ đọc, không có OAuth token: xác định PR, chờ gom push, precheck, chia phần; tối đa 15 phút), `analyze` (ma trận, mỗi phần một agent, chỉ đọc, nơi duy nhất có OAuth token; tối đa 30 phút mỗi phần), `post` (gộp rồi đăng, 10 phút).
 - **Chờ gom push (`synchronize`):** job ngủ 180 giây rồi hỏi lại GitHub; nếu SHA đầu PR đã đổi thì dừng. Lần chạy cũ còn bị `concurrency` hủy ngay khi có lần mới, nên thực tế chỉ commit cuối của một chuỗi push được review. Bước ngủ không tốn token.
 - **`precheck.mjs`:** chạy sau hai bước checkout (cần script ở `trusted/`) và trước mọi bước tốn token; kết quả (`run`, `round`, `base_sha`, `runs`, `reason`) đi vào job summary và vào các bước sau. Vòng và mốc commit do bước này quyết định; job `post` nhận từ đây chứ không lấy từ kết quả của agent.
 - **`boot`:** bước đầu tiên sau khi xác định PR; bỏ qua nhẹ nhàng (job vẫn thành công, có dòng giải thích trong job summary) khi PR do dependabot tạo, hoặc khi API GitHub trả **404** cho một trong `scripts/ai-review/precheck.mjs`, `.github/ai-review/prompt.md`, `.github/ai-review/review-result.schema.json` ở nhánh base (hoặc ref chạy workflow). Lỗi khác 404 (xác thực, giới hạn tốc độ, 5xx) làm job thất bại để chạy lại. Khi bỏ qua, bước chờ, hai checkout và `precheck` đều không chạy. Bước này **cố ý tắt `bash -e`** (GitHub bật `-e` mặc định) để đọc được mã lỗi của `gh api`; có test chạy thật đoạn lệnh này.
-- **`ai-review-input/`:** thư mục trong workspace của PR do `precheck.mjs` ghi ở vòng 2 để agent đọc bằng `Read`.
-- **Artifact:** kết quả JSON, `usage.md`, `plan.json`, giữ 14 ngày. Không upload file execution của agent (có thể chứa nội dung file).
+- **`ai-review-input/`:** thư mục do job `prepare` ghi (`manifest.json`, `shard-<i>.json` khi PR chia phần, và `previous.json`, `incremental.diff` ở vòng 2), chuyển sang các phần qua artifact `ai-review-input-<run_id>`; agent đọc bằng `Read`.
+- **Artifact:** `ai-review-<run_id>-<phần>` (kết quả JSON và `usage.md` của từng phần), `ai-review-post-<run_id>` (kết quả gộp, `plan.json`), giữ 14 ngày. Không upload file execution của agent (có thể chứa nội dung file).
 - **Job summary:** turn, token, thời gian, cảnh báo lẫn chế độ, UC khai báo, kết quả đăng.
 - **Kiểm tra trước khi đăng:** `structured_output` phải khác rỗng và là JSON hợp lệ, nếu không job `analyze` đỏ.
 - **PR đang mở theo label** lấy code qua `refs/pull/N/merge`; **chạy tay** (kể cả PR đã đóng, để backtest) lấy qua `refs/pull/N/head`.
@@ -473,7 +488,9 @@ Các file **chưa tạo** (đã dự kiến): `scripts/ai-review/stats.mjs` (th�
 | `sanitize.mjs` | Làm sạch đầu ra của agent | `sanitize.test.mjs` |
 | `github.mjs` | Client REST tối thiểu, có phân trang, không lộ token trong lỗi | trong `post.test.mjs` |
 | `schema-validate.mjs` | Kiểm tra JSON theo tập con JSON Schema; **ném lỗi khi gặp từ khóa chưa hỗ trợ** | `review-result.test.mjs` |
-| `prepare-run.mjs` | Dựng prompt và `claude_args`, kiểm tra tham số | `run-support.test.mjs` |
+| `prepare-run.mjs` | Dựng prompt và `claude_args`, kiểm tra tham số (kể cả `--shard i/n`) | `run-support.test.mjs` |
+| `shard.mjs` | Chia PR lớn thành các phần theo số file và số ký tự diff; ghi `shard-<i>.json` và ma trận cho job `analyze` | `shard.test.mjs` |
+| `merge-shards.mjs` | Gộp kết quả các phần thành một kết quả theo đúng schema (dồn file đã xem, đánh lại số nhận xét, `status` chỉ `complete` khi mọi phần xong) | `merge-shards.test.mjs` |
 | `extract-uc.mjs` | Trích mã UC khai báo từ mô tả PR | `extract-uc.test.mjs` |
 | `precheck.mjs` | Chạy đầu job 1: bỏ qua / vòng 2 / review toàn bộ, ghi file đầu vào vòng 2 | `precheck.test.mjs` |
 | `state.mjs` | Ghi và đọc trạng thái trong comment tổng kết (commit, số lần chạy, vấn đề còn mở), kiểm tra schema khi đọc | `state.test.mjs` |
@@ -482,7 +499,7 @@ Các file **chưa tạo** (đã dự kiến): `scripts/ai-review/stats.mjs` (th�
 | `extract-srs.mjs` | Tách SRS thành từng UC, NFR, bảng FR↔UC | `extract-srs.test.mjs` |
 | (kiểm tra workflow) | Các bất biến bảo mật của `ai-review.yml` | `workflow.test.mjs` |
 
-Tổng cộng khoảng 3.200 dòng (cả test) và **203 test**, chạy bằng:
+Tổng cộng khoảng 3.900 dòng (cả test) và hơn **230 test**, chạy bằng:
 
 ```bash
 node --test scripts/ai-review/
@@ -583,7 +600,8 @@ PR cũ đã merge (backtest, dry_run)  +  PR lỗi cố ý trên bản mirror re
 9. API so sánh commit (`compare`) có trả `status: ahead` đúng với commit mới nằm sau commit cũ, trả 404/422 khi mất mốc do force-push; media type `diff` cho `compare` có chạy; và `pull-requests: read` có đủ để đọc comment của PR trong `precheck.mjs`.
 10. Bước chờ 3 phút kết hợp `cancel-in-progress` có thực sự hủy lần chạy cũ khi push liên tiếp.
 11. Agent đọc được `ai-review-input/previous.json` và `incremental.diff` bằng `Read`, và trả đủ, đúng `ref` trong `previous_findings`; mức độ "đã xử lý" mà AI nêu có căn cứ thật hay không.
-12. Kích thước comment tổng kết kèm dữ liệu ẩn (hiện giới hạn 60.000 ký tự cho cả comment, dữ liệu ẩn tối đa 20.000) có nằm trong giới hạn 65.536 của GitHub không.
+12. Chia phần: ma trận động (`fromJSON`) đi qua artifact giữa ba job, `download-artifact` với `pattern` có tạo đúng thư mục con cho từng phần, và agent mỗi phần đọc được `shard-<i>.json` và chỉ nhận xét file được giao (chạy `workflow_dispatch` với `dry_run` trên một PR lớn trước khi tin).
+13. Kích thước comment tổng kết kèm dữ liệu ẩn (hiện giới hạn 60.000 ký tự cho cả comment, dữ liệu ẩn tối đa 20.000) có nằm trong giới hạn 65.536 của GitHub không.
 
 ---
 
