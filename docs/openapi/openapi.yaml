@@ -840,6 +840,65 @@ paths:
         '504':
           $ref: '#/components/responses/AiTimeout'
 
+  /games/validate-text:
+    post:
+      tags: [Games]
+      operationId: validateGameText
+      summary: Kiểm tra nội dung chữ trước khi áp vào bản nháp (UC-05 2a)
+      description: |
+        Chỉ dành cho giáo viên đã đăng nhập. Kiểm tra từ cấm và kiểm duyệt nội dung như khi lưu game.
+        Yêu cầu không thay đổi game. Giới hạn 60 yêu cầu mỗi phút, tối đa một yêu cầu đang xử lý mỗi giáo viên.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [texts]
+              properties:
+                texts:
+                  type: array
+                  minItems: 1
+                  maxItems: 8
+                  items:
+                    type: string
+                    maxLength: 1000
+                    description: Tối đa 1000 đơn vị UTF-16. Chuỗi trống hoặc chỉ có khoảng trắng được bỏ qua.
+      responses:
+        '200':
+          description: Nội dung được chấp nhận.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [safe]
+                    properties:
+                      safe: { const: true }
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          description: Dịch vụ kiểm duyệt tạm thời không khả dụng.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /media/pexels-search:
     get:
       tags: [Media]

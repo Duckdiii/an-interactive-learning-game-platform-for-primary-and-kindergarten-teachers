@@ -1077,56 +1077,64 @@ sequenceDiagram
 
 ### 4.4.5. Sơ đồ Tuần tự UC-05: Chỉnh sửa thủ công
 
-`mermaid
+```mermaid
 sequenceDiagram
     autonumber
     actor Teacher as Giáo viên (Actor)
     participant Page as WorkspaceEditorPage
-    participant Ctrl as GameController
-    participant Svc as ManualEditService
+    participant TextCtrl as TextSafetyController
+    participant TextSafety as ContentSafetyCheck
+    participant MediaCtrl as MediaController
     participant MediaSvc as MediaUploadService
-    participant Mod as ModerationService
-    participant S3 as AWS S3 Storage
+    participant Mod as OpenAI Moderation
+    participant Storage as LocalMediaStorageService
 
-    alt Trường hợp 1: Sửa chữ / đổi đáp án đúng
-        Teacher->>Page: 1. Gõ sửa câu hỏi / đáp án trên thẻ
-        Page->>Ctrl: POST /api/games/{id}/questions/{qid}/validate-text
-        Ctrl->>Mod: checkSafety(editedText)
-        
-        alt 2a. Phát hiện từ ngữ nhạy cảm / không an toàn
-            Mod-->>Ctrl: UnsafeDetected
-            Ctrl-->>Page: 422 UnsafeContent
-            Page-->>Teacher: Giữ nguyên nội dung cũ, báo "Chưa đạt chuẩn an toàn"
-        else An toàn
-            Mod-->>Ctrl: Safe
-            Ctrl-->>Page: 200 OK (Validated)
-            Page->>Page: 2. Cập nhật state bản nháp trong Editor
-            Page->>Page: 3. Vẽ lại Konva Canvas tức thì (Re-render 60 FPS)
+    alt Giáo viên sửa chữ trên thẻ câu hỏi
+        Teacher->>Page: Nhập câu hỏi hoặc câu trả lời
+        Page->>TextCtrl: POST /api/games/validate-text
+        TextCtrl->>TextSafety: Kiểm tra từ cấm và kiểm duyệt nội dung
+        alt 2a. Chữ không phù hợp
+            TextSafety-->>TextCtrl: Chữ bị từ chối
+            TextCtrl-->>Page: 422 UNSAFE_CONTENT
+            Page-->>Teacher: Giữ nội dung cũ trong bản nháp và bản xem trước, báo lỗi ngay tại ô nhập
+        else Dịch vụ kiểm duyệt lỗi
+            TextSafety-->>TextCtrl: Không có kết quả kiểm duyệt
+            TextCtrl-->>Page: 503 SERVICE_UNAVAILABLE
+            Page-->>Teacher: Giữ nội dung cũ và cho phép kiểm tra lại
+        else Chữ được chấp nhận
+            TextSafety-->>TextCtrl: Đã duyệt
+            TextCtrl-->>Page: 200 OK
+            Page->>Page: Áp chữ mới vào bản nháp và vẽ lại bản xem trước
         end
-        
-    else Trường hợp 2: Tải ảnh hoặc âm thanh riêng lên (1a)
-        Teacher->>Page: 1a. Bấm "Tải tệp lên" (chọn ảnh <=5MB hoặc mp3 <=10MB)
-        
-        alt 3a. Sai định dạng hoặc vượt quá dung lượng
-            Page-->>Teacher: Báo lỗi định dạng/kích thước tại chỗ
-        else File hợp lệ
-            Page->>Ctrl: POST /api/media/upload(file, category)
-            Ctrl->>MediaSvc: uploadFile(file)
-            MediaSvc->>MediaSvc: Kiểm tra Magic Bytes & Virus Scan
-            MediaSvc->>Mod: Kiểm duyệt an toàn hình ảnh / âm thanh
-            
-            alt 3b. Nội dung không phù hợp sư phạm
-                Mod-->>MediaSvc: UnsafeMedia
-                MediaSvc-->>Ctrl: 422 UnsafeMediaException
-                Ctrl-->>Page: Báo lỗi "Tệp không đáp ứng chuẩn an toàn"
-                Page-->>Teacher: Giữ nguyên ảnh/âm thanh cũ
-            else Đạt chuẩn an toàn
-                MediaSvc->>S3: PutObject(bucket, key, stream)
-                S3-->>MediaSvc: S3 URL lâu dài
-                MediaSvc-->>Ctrl: MediaUploadResponse (url)
-                Ctrl-->>Page: 200 OK (Media URL)
-                Page->>Page: Gắn mediaUrl mới vào thẻ câu hỏi
-                Page->>Page: Vẽ lại màn chơi trên Canvas Konva
+    else Giáo viên đổi lựa chọn đáp án đúng
+        Teacher->>Page: Chọn đáp án đúng
+        Page->>Page: Cập nhật bản nháp và bản xem trước
+    else Giáo viên tải ảnh hoặc âm thanh riêng (1a)
+        Teacher->>Page: Chọn và xác nhận ảnh PNG/JPG/WebP tối đa 5 MB hoặc MP3 tối đa 10 MB
+        alt 3a. Trình duyệt phát hiện tệp sai định dạng hoặc quá dung lượng
+            Page-->>Teacher: Báo lỗi, giữ tệp cũ
+        else Tệp qua kiểm tra ở trình duyệt
+            Page->>MediaCtrl: POST /api/media/upload (multipart, trường file)
+            MediaCtrl->>MediaSvc: Kiểm tra và xử lý tệp
+            alt 3a. Backend phát hiện tệp không hợp lệ
+                MediaSvc-->>MediaCtrl: 422 FILE_TOO_LARGE_OR_INVALID_FORMAT
+                MediaCtrl-->>Page: Báo lỗi, giữ tệp cũ
+            else Tệp hợp lệ
+                MediaSvc->>MediaSvc: Mã hóa lại ảnh hoặc bỏ thẻ metadata của MP3
+                MediaSvc->>Mod: Kiểm duyệt ảnh hoặc lời phiên âm từ MP3
+                alt 3b. Nội dung không phù hợp sư phạm
+                    MediaSvc-->>MediaCtrl: 422 UNSAFE_CONTENT
+                    MediaCtrl-->>Page: Báo lỗi, giữ tệp cũ
+                else Dịch vụ kiểm duyệt tạm thời không khả dụng
+                    MediaSvc-->>MediaCtrl: 503 SERVICE_UNAVAILABLE
+                    MediaCtrl-->>Page: Báo lỗi, giữ tệp cũ
+                else Nội dung được chấp nhận
+                    MediaSvc->>Storage: Lưu tệp đã xử lý
+                    Storage-->>MediaSvc: URL truy cập tệp
+                    MediaSvc-->>MediaCtrl: Đường dẫn và loại tệp
+                    MediaCtrl-->>Page: 200 OK
+                    Page->>Page: Gắn URL vào bản nháp và vẽ lại bản xem trước
+                end
             end
         end
     end

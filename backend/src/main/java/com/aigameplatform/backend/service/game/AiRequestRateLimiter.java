@@ -35,11 +35,15 @@ public class AiRequestRateLimiter {
 
     /** Bắt đầu một lượt của {@code key}; vượt giới hạn hoặc đang có lượt chạy thì ném 429. Gọi {@link Permit#close()} khi xong. */
     public Permit acquire(String key) {
+        return acquire(key, LIMIT);
+    }
+
+    public Permit acquire(String key, int limit) {
         if (!running.add(key)) {
             throw new RateLimitedException("Trợ lý đang sửa yêu cầu trước của cô, vui lòng đợi xong rồi nhắn tiếp", BUSY_RETRY_SECONDS);
         }
         try {
-            record(key);
+            record(key, limit);
         } catch (RuntimeException e) {
             running.remove(key);
             throw e;
@@ -47,12 +51,12 @@ public class AiRequestRateLimiter {
         return () -> running.remove(key);
     }
 
-    private void record(String key) {
+    private void record(String key, int limit) {
         Instant now = clock.instant();
         calls.compute(key, (k, recent) -> {
             Deque<Instant> window = recent == null ? new ArrayDeque<>() : recent;
             while (!window.isEmpty() && !window.peekFirst().isAfter(now.minus(WINDOW))) window.pollFirst();
-            if (window.size() >= LIMIT) {
+            if (window.size() >= limit) {
                 long wait = Math.max(1, Duration.between(now, window.peekFirst().plus(WINDOW)).toSeconds() + 1);
                 throw new RateLimitedException("Cô đã gửi nhiều yêu cầu sửa liên tiếp, vui lòng thử lại sau " + wait + " giây", wait);
             }

@@ -140,6 +140,23 @@ describe('CheckedTextField', () => {
 })
 
 describe('CheckedTextField: kết quả kiểm tra về muộn', () => {
+  it('rời thẻ khi đang kiểm tra thì kết quả về muộn không cập nhật bản nháp', async () => {
+    let resolveCheck!: (verdict: { safe: boolean }) => void
+    const check = vi.spyOn(safety, 'checkTextSafety').mockImplementation(
+      () => new Promise((resolve) => { resolveCheck = resolve }),
+    )
+    const onCommit = vi.fn()
+    const { unmount } = render(<Harness onCommit={onCommit} />)
+
+    fireEvent.change(box(), { target: { value: 'Quả táo' } })
+    fireEvent.blur(box())
+    expect(check).toHaveBeenCalledWith(['Quả táo'])
+
+    unmount()
+    await act(async () => resolveCheck({ safe: true }))
+    expect(onCommit).not.toHaveBeenCalled()
+  })
+
   it('gõ tiếp khi lần kiểm tra trước còn chạy: kết quả cũ bị bỏ, chỉ nội dung cuối cùng được áp', async () => {
     const resolvers: Array<(verdict: { safe: boolean }) => void> = []
 

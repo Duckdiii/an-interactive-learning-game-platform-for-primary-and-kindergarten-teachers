@@ -98,6 +98,10 @@ export default function CheckedTextField({ id, label, value, limits, error, inva
     commitRef.current = commit
   })
 
+  useEffect(() => () => {
+    requestRef.current += 1
+  }, [])
+
   useEffect(() => {
     if (typed === null) return
 
