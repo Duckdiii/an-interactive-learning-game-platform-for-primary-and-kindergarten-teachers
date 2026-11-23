@@ -507,6 +507,7 @@ export const viText = {
       unsafe: 'Nội dung chỉnh sửa của giáo viên chưa đạt chuẩn an toàn học đường dành cho trẻ nhỏ. Vui lòng điều chỉnh lại từ ngữ.',
       unsafeKept: 'Nội dung cũ vẫn được giữ cho tới khi bạn sửa lại.',
       safetyUnavailable: 'Chưa kiểm tra được từ ngữ vì lỗi kết nối. Nội dung cũ vẫn được giữ.',
+      safetyRateLimited: 'Hệ thống đang bận kiểm tra từ ngữ. Nội dung cũ vẫn được giữ. Hãy chờ một lát rồi thử lại.',
       recheck: 'Kiểm tra lại',
       pairsLegend: 'Các cặp ghép',
       pairsHint: 'Từ {min} đến {max} cặp. Mỗi bên của cặp cần có chữ hoặc mô tả hình, và không trùng với cặp khác.',

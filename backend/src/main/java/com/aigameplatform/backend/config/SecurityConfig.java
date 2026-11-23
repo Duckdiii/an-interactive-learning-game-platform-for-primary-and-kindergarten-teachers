@@ -51,7 +51,7 @@ public class SecurityConfig {
                         "/api/sessions/by-code/*", "/api/sessions/*/leaderboard", "/api/sessions/*/my-result").permitAll()
                 .requestMatchers(HttpMethod.GET, "/media/uploads/*", "/media/tts/*").permitAll()
                 .requestMatchers(HttpMethod.HEAD, "/media/uploads/*", "/media/tts/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/media/upload").hasAuthority("ROLE_TEACHER")
+                .requestMatchers(HttpMethod.POST, "/api/media/upload", "/api/games/validate-text").hasAuthority("ROLE_TEACHER")
                 .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/join",
                         "/api/sessions/*/interactions").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/sessions/*/my-team").permitAll()

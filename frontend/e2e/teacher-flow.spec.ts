@@ -84,6 +84,22 @@ test('giáo viên đăng ký, sinh game, sửa bằng trò chuyện và thấy g
     await page.reload()
     await expect(page.getByRole('textbox', { name: /Tên trò chơi/ })).toHaveValue('Bé đếm con gà')
   })
+  await test.step('kiểm duyệt chữ trước khi cập nhật bản nháp', async () => {
+    const field = page.getByRole('textbox', { name: /Nội dung câu hỏi/ })
+    const readQuestion = async () => (await api(page, `/games/${gameId}`)).body.data.questions[0].questionText
+    const original = await readQuestion()
+    const rejected = page.waitForResponse((response) =>
+      response.url() === `${API}/games/validate-text` && response.request().method() === 'POST')
+    await field.fill('Câu hỏi có từ ma túy')
+    expect((await rejected).status()).toBe(422)
+    await expect(field).toHaveAttribute('aria-invalid', 'true')
+    await expect(field).toHaveValue('Câu hỏi có từ ma túy')
+    expect(await readQuestion()).toBe(original)
+
+    await field.fill('Bé thấy mấy con gà?')
+    await expect(field).not.toHaveAttribute('aria-invalid', 'true')
+    await expect.poll(readQuestion).toBe('Bé thấy mấy con gà?')
+  })
   await test.step('tải ảnh thật, tự lưu URL và mở lại ảnh', async () => {
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2gAAAABJRU5ErkJggg==', 'base64')
     await page.getByLabel('Tải ảnh lên').setInputFiles({ name: 'illustration.png', mimeType: 'image/png', buffer: png })

@@ -6,6 +6,7 @@ import { getNotoCatalog } from '../../../api/notoCatalogApi'
 import OddOneOutImageForm from './OddOneOutImageForm'
 
 vi.mock('../../../api/notoCatalogApi', () => ({ getNotoCatalog: vi.fn() }))
+vi.mock('../../../services/safetyService', () => ({ checkTextSafety: async () => ({ safe: true }) }))
 beforeEach(() => vi.clearAllMocks())
 
 it('cho giáo viên xem hình và sửa tiêu chí hoặc chọn đáp án', async () => {

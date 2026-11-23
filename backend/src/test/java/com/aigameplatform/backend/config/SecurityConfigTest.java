@@ -89,6 +89,16 @@ class SecurityConfigTest {
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*"));
     }
 
+    @Test
+    void textSafetyRequiresTeacherRole() throws Exception {
+        String admin = new JwtService(SECRET, 15, Clock.systemUTC())
+                .generateAccessToken("admin-1", "admin@school.edu.vn", "session-admin", "ROLE_ADMIN");
+
+        mockMvc.perform(post("/api/games/validate-text")).andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/games/validate-text").header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
+                .andExpect(status().isForbidden());
+    }
+
     private static String validAccessToken() {
         return new JwtService(SECRET, 15, Clock.systemUTC())
                 .generateAccessToken("teacher-1", "a@school.edu.vn", "session-1");
