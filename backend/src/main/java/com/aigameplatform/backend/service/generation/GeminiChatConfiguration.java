@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.generation;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import java.time.Duration;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,12 +18,21 @@ public class GeminiChatConfiguration {
     @Bean
     ChatModel gameGenerationChatModel(@Value("${app.ai.gemini.api-key:}") String apiKey,
                                       @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName) {
+        return modelBuilder(apiKey, modelName).build();
+    }
+
+    @Bean
+    ChatModel questionRegenerationChatModel(@Value("${app.ai.gemini.api-key:}") String apiKey,
+                                            @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName) {
+        return modelBuilder(apiKey, modelName).timeout(Duration.ofSeconds(5)).build();
+    }
+
+    private static GoogleAiGeminiChatModel.GoogleAiGeminiChatModelBuilder modelBuilder(String apiKey, String modelName) {
         if (apiKey.isBlank()) {
             throw new IllegalStateException("GEMINI_API_KEY is required when Gemini game generation is enabled");
         }
         return GoogleAiGeminiChatModel.builder().apiKey(apiKey).modelName(modelName)
-                .supportedCapabilities(Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA))
-                .maxRetries(0).build();
+                .supportedCapabilities(Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA)).maxRetries(0);
     }
 
     @Bean

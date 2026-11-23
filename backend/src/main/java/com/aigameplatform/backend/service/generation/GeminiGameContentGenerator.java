@@ -61,6 +61,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
             """;
 
     private final ChatModel model;
+    private final ChatModel regenerationModel;
     private final GameContentStrategyRegistry strategies;
     private final AiConfigService aiConfigService;
     private final GameAssetCatalog assets;
@@ -72,17 +73,18 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
     public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
             GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
             boolean shortlistEnabled, com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
-        this(model, strategies, assets, retriever, shortlistEnabled, notoCatalog, null);
+        this(model, model, strategies, assets, retriever, shortlistEnabled, notoCatalog, null);
     }
 
     @Autowired
     public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
-            GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
+            @Qualifier("questionRegenerationChatModel") ChatModel regenerationModel, GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
             @Value("${app.assets.shortlist.enabled:false}") boolean shortlistEnabled,
             com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog,
             @Autowired(required = false) AiConfigService aiConfigService) {
         this.notoCatalog = notoCatalog;
         this.model = model;
+        this.regenerationModel = regenerationModel;
         this.strategies = strategies;
         this.assets = assets;
         this.retriever = retriever;
@@ -152,7 +154,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
             systemPrompt += "\n\n" + attempt.customInstruction();
         }
         Revision revision = attempt.revision();
-        String userPrompt = attempt.isRetry()
+        String userPrompt = attempt.previousOutput() != null
                 ? retryPrompt(attempt) + (revision == null ? "" : "\n" + revision.reminder())
                 : revision != null
                         ? revision.promptSection() + "\nChỉ trả về JSON theo schema đã cung cấp."
@@ -180,7 +182,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                     : UserMessage.from(userPrompt, ImageContent.from(
                             Base64.getEncoder().encodeToString(attempt.imageInput().sceneImage().bytes()),
                             attempt.imageInput().sceneImage().mediaType()));
-            var response = model.chat(ChatRequest.builder()
+            var response = (singleQuestion ? regenerationModel : model).chat(ChatRequest.builder()
                     .messages(SystemMessage.from(systemPrompt), userMessage)
                     .parameters(parameters).build());
             if (response == null || response.aiMessage() == null || response.aiMessage().text() == null) {

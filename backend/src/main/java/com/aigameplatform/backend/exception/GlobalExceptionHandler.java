@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /** Chuyển mọi lỗi thành envelope {success:false, error:{code, message}} theo contract. */
@@ -47,6 +48,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("Lỗi không xác định", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail(ErrorCode.INTERNAL_ERROR.name(), "Lỗi hệ thống, vui lòng thử lại sau"));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ErrorCode code = ErrorCode.FILE_TOO_LARGE_OR_INVALID_FORMAT;
+        return ResponseEntity.status(code.getStatus()).headers(headers)
+                .body(ApiResponse.fail(code.name(), "Tệp vượt quá dung lượng tải lên cho phép."));
     }
 
     @Override

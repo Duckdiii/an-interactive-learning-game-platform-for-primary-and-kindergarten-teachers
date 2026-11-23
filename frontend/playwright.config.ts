@@ -43,7 +43,7 @@ export default defineConfig({
       // Biến môi trường có sẵn được Vite ưu tiên hơn .env.local của máy dev.
       env: {
         VITE_API_BASE_URL: `http://localhost:${BACKEND_PORT}/api`,
-        VITE_USE_MOCK: 'media',
+        VITE_USE_MOCK: 'none',
       },
     },
   ],

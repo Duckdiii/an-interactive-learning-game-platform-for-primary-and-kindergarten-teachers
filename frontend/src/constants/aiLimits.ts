@@ -13,7 +13,11 @@ export const PUBLISH_REQUEST_TIMEOUT_MS = 20_000
 // Gợi ý điều chỉnh khi nhờ AI làm lại (openapi `feedback`, FLD-14).
 export const REGENERATE_FEEDBACK_MAX = 500
 
-export const REGENERATE_QUESTION_TIMEOUT_MS = AI_BACKEND_ATTEMPTS * AI_ATTEMPT_TIMEOUT_MS + 5_000
+export const REGENERATE_QUESTION_TIMEOUT_MS = AI_BACKEND_ATTEMPTS * AI_ATTEMPT_TIMEOUT_MS + 20_000
+
+// Câu ảnh còn tải cảnh và tối đa 8 ảnh lựa chọn (tối đa 12 giây/ảnh theo cấu hình mặc định).
+// Mỗi lần AI sinh lại còn có kiểm duyệt nội dung và xác minh ảnh. Giáo viên vẫn có thể hủy khi chờ.
+export const REGENERATE_IMAGE_QUESTION_TIMEOUT_MS = 360_000
 
 // Phân tích yêu cầu trong khung chat (POST /games/understand): một lần gọi Gemini có thể mất 5-15 giây, Backend thử lại tối đa 1 lần khi JSON hỏng.
 export const UNDERSTAND_TIMEOUT_MS = 45_000

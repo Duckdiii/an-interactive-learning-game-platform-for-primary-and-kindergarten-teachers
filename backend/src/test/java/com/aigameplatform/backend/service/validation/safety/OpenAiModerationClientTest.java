@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.validation.safety;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -52,6 +53,39 @@ class OpenAiModerationClientTest {
         List<ModerationResult> results = client.moderate(List.of("Con mèo kêu meo meo", "Hôm nay trời đẹp"));
 
         assertThat(results).hasSize(2);
+        server.verify();
+    }
+
+    @Test
+    void sendsImageBytesAsStructuredInputAndRejectsMissingFlag() {
+        server.expect(requestTo(URL))
+                .andExpect(jsonPath("$.input[0].type").value("image_url"))
+                .andExpect(jsonPath("$.input[0].image_url.url").value("data:image/png;base64,AQI="))
+                .andRespond(withSuccess(response("{\"categories\":{}}"), MediaType.APPLICATION_JSON));
+
+        assertThatThrownBy(() -> client.moderateImage(new byte[] {1, 2}, "image/png"))
+                .isInstanceOf(ModerationUnavailableException.class);
+        server.verify();
+    }
+
+    @Test
+    void postsNamedMp3ToTranscriptionsAndModeratesItWithoutCache() {
+        server.expect(requestTo("https://api.openai.com/v1/audio/transcriptions"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Authorization", "Bearer test-key"))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(content().string(org.hamcrest.Matchers.allOf(
+                        org.hamcrest.Matchers.containsString("filename=\"speech.mp3\""),
+                        org.hamcrest.Matchers.containsString("gpt-transcribe"))))
+                .andRespond(withSuccess("{\"text\":\"Con mèo.\"}", MediaType.APPLICATION_JSON));
+        for (int request = 0; request < 2; request++) {
+            server.expect(requestTo(URL)).andExpect(jsonPath("$.input[0]").value("Con mèo."))
+                    .andRespond(withSuccess(cleanResults(1), MediaType.APPLICATION_JSON));
+        }
+
+        String transcript = client.transcribeMp3(new byte[] {1, 2});
+        assertThat(client.moderateTranscript(transcript).flagged()).isFalse();
+        assertThat(client.moderateTranscript(transcript).flagged()).isFalse();
         server.verify();
     }
 

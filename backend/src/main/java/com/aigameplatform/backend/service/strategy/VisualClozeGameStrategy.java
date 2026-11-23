@@ -103,7 +103,7 @@ public class VisualClozeGameStrategy extends GameContentStrategy<VisualClozeQues
                 || entity.getBlanks() != null && !entity.getBlanks().isEmpty()
                 || entity.getOptions() != null && !entity.getOptions().isEmpty()) {
             return new VisualClozeQuestionDsl(questionId, entity.getTimeLimit(), entity.getPoint(), entity.getAudioText(),
-                    entity.getAudioUrl(), entity.getVisualPrompt(), null, null, null, null, entity.getQuestionText(),
+                    null, null, null, null, null, null, entity.getQuestionText(),
                     entity.getImageUrl(), entity.getSceneWidth(), entity.getSceneHeight(),
                     entity.getBlanks().stream().map(blank -> new VisualClozeBlankDsl(blank.getBlankId(), blank.getX(),
                             blank.getY(), blank.getCorrectOptionId())).toList(),

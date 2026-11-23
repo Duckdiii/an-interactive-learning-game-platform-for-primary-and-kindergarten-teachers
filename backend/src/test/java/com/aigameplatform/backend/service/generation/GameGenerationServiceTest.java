@@ -331,7 +331,7 @@ class GameGenerationServiceTest {
         String output = """
                 {"questions":[{"questionText":"Which animal is in the scene?","blanks":[{"id":"b1","x":150,"y":120,"correctOptionId":"o1"}],"options":[{"id":"o1","visualPrompt":"cat","imageUrl":"https://images.example.edu/cat.png"},{"id":"o2","visualPrompt":"dog","imageUrl":"https://images.example.edu/dog.png"}]}]}
                 """;
-        ScriptedGenerator generator = new ScriptedGenerator(output);
+        ScriptedGenerator generator = new ScriptedGenerator(output, output.replace("Which animal is", "What animal is"));
         var service = service(generator, 0, moderation(false, false));
         service.setSceneImageLoader(new com.aigameplatform.backend.service.media.SceneImageLoader(
                 (host, deadline) -> List.of(java.net.InetAddress.getByAddress(new byte[] {(byte) 93, (byte) 184, (byte) 216, 34})),
@@ -390,6 +390,15 @@ class GameGenerationServiceTest {
         assertThat(game.questions().getFirst().sceneImageUrl()).isEqualTo(request.sceneImageUrl());
         assertThat(game.questions().getFirst().sceneWidth()).isEqualTo(400);
         assertThat(game.questions().getFirst().sceneHeight()).isEqualTo(300);
+
+        var current = game.questions().getFirst();
+        var regenerated = (com.aigameplatform.backend.dto.dsl.VisualClozeQuestionDsl) service.regenerateQuestion(
+                GameType.VISUAL_CLOZE, request, current, null, current.id(), game);
+        assertThat(regenerated.questionText()).startsWith("What animal");
+        assertThat(regenerated.sceneImageUrl()).isEqualTo(current.sceneImageUrl());
+        assertThat(regenerated.options()).isEqualTo(current.options());
+        assertThat(optionReviewer.get()).containsKeys("q1/o1", "q1/o2");
+        assertThat(imageReviewer.get().bytes()).isEqualTo(png);
     }
 
     @Test
@@ -398,7 +407,7 @@ class GameGenerationServiceTest {
                 {"questions":[{"questionText":"Hình nào không phải trái cây?",
                 "items":["apple","banana","grapes","carrot"],"oddOneOutIndex":3}]}
                 """;
-        var generator = new ScriptedGenerator(valid.replace("grapes", "invented"), valid);
+        var generator = new ScriptedGenerator(valid.replace("grapes", "invented"), valid, valid.replace("grapes", "strawberry"));
         var service = service(generator, 1);
         var reviews = new java.util.concurrent.atomic.AtomicInteger();
         service.setGeneratedContentReviewer((game, topic, evidence) -> {
@@ -413,7 +422,12 @@ class GameGenerationServiceTest {
         assertThat(generator.attempts.getFirst().oddImageMode()).isTrue();
         assertThat(generator.attempts.get(1).previousErrors()).isNotEmpty();
         assertThat(game.questions().getFirst().items()).hasSize(4);
-        assertThat(reviews).hasValue(1);
+        var current = game.questions().getFirst();
+        var replacement = (com.aigameplatform.backend.dto.dsl.OddOneOutQuestionDsl) service.regenerateQuestion(
+                GameType.ODD_ONE_OUT, request, current, "Đổi loại trái cây", current.id(), game);
+        assertThat(replacement.id()).isEqualTo(current.id());
+        assertThat(replacement.items()).extracting(option -> option.assetId()).contains("strawberry", "carrot");
+        assertThat(reviews).hasValue(2);
     }
 
     @Test
@@ -422,7 +436,7 @@ class GameGenerationServiceTest {
                 {"questions":[{"audioText":"cat","correct":{"visualPrompt":"cat-face"},
                  "distractors":[{"visualPrompt":"dog-face"},{"visualPrompt":"apple"}]}]}
                 """;
-        var generator = new ScriptedGenerator(valid);
+        var generator = new ScriptedGenerator(valid, valid.replace("dog-face", "carrot"));
         var service = service(generator, 0);
         var reviews = new java.util.concurrent.atomic.AtomicInteger();
         service.setGeneratedContentReviewer((game, topic, evidence) -> {
@@ -437,7 +451,12 @@ class GameGenerationServiceTest {
         assertThat(game.questions().getFirst().distractors()).allSatisfy(choice ->
                 assertThat(choice.imageUrl()).startsWith("/assets/noto/"));
         assertThat(generator.attempts.getFirst().avmCatalogMode()).isTrue();
-        assertThat(reviews).hasValue(1);
+        var current = game.questions().getFirst();
+        var replacement = (com.aigameplatform.backend.dto.dsl.AudioVisualMatchQuestionDsl) service.regenerateQuestion(
+                GameType.AUDIO_VISUAL_MATCH, request, current, "Đổi ảnh gây nhiễu", current.id(), game);
+        assertThat(replacement.distractors()).extracting(option -> option.imageUrl())
+                .contains("/assets/noto/emoji_u1f955.svg");
+        assertThat(reviews).hasValue(2);
     }
 
     @Test
@@ -512,6 +531,44 @@ class GameGenerationServiceTest {
         assertThat(regenerated.questionText()).isEqualTo("2 + 2 bằng mấy?");
         assertThat(generator.attempts).hasSize(2);
         assertThat(generator.attempts.get(1).isRetry()).isTrue();
+    }
+
+    @Test
+    void regenerateQuestionSharesThreeAttemptBudgetBetweenProviderOutageAndInvalidQuestionCount() throws Exception {
+        var game = (com.aigameplatform.backend.dto.dsl.QuizGameDsl) MAPPER.readValue(
+                new ClassPathResource("dsl-examples/quiz.json").getInputStream(), GameDsl.class);
+        var target = game.questions().getLast();
+        String valid = """
+                {"questions":[{"text":"2 + 2 bằng mấy?","options":["4","5"],"correctIndex":0}]}
+                """;
+        var question = MAPPER.readTree(valid).path("questions").get(0);
+        var multiple = MAPPER.createObjectNode();
+        multiple.putArray("questions").add(question).add(question);
+        var generator = new ScriptedGenerator(new AiServiceUnavailableException("timeout"), multiple.toString(), valid);
+        var service = service(generator, 2);
+
+        var result = service.regenerateQuestion(GameType.QUIZ, REQUEST, target, null, target.id(), game);
+
+        assertThat(generator.attempts).extracting(GenerationAttempt::attemptNumber).containsExactly(1, 2, 3);
+        assertThat(generator.attempts.get(1).previousOutput()).isNull();
+        assertThat(generator.attempts.get(2).previousErrors()).extracting(ValidationError::path).contains("$.questions");
+        assertThat(result.id()).isEqualTo(target.id());
+        assertThat(result.points()).isEqualTo(target.points());
+        assertThat(result.timeLimitSeconds()).isEqualTo(target.timeLimitSeconds());
+    }
+
+    @Test
+    void regenerateQuestionStopsAfterThreeProviderOutages() throws Exception {
+        var game = (com.aigameplatform.backend.dto.dsl.QuizGameDsl) MAPPER.readValue(
+                new ClassPathResource("dsl-examples/quiz.json").getInputStream(), GameDsl.class);
+        var target = game.questions().getFirst();
+        var unavailable = new AiServiceUnavailableException("timeout");
+        var generator = new ScriptedGenerator(unavailable, unavailable, unavailable);
+        var service = service(generator, 2);
+
+        assertThatThrownBy(() -> service.regenerateQuestion(GameType.QUIZ, REQUEST, target, null, target.id(), game))
+                .isInstanceOf(AiGenerationTimeoutException.class).hasCause(unavailable);
+        assertThat(generator.attempts).hasSize(3);
     }
 
     @Test

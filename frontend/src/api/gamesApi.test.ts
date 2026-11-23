@@ -1,3 +1,4 @@
+import { REGENERATE_IMAGE_QUESTION_TIMEOUT_MS } from '../constants/aiLimits'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from './axiosInstance'
 import {
@@ -103,6 +104,14 @@ describe('postRegenerateQuestion', () => {
       { feedback: 'làm dễ hơn' },
       { timeout: REGENERATE_QUESTION_TIMEOUT_MS, signal: controller.signal },
     )
+  })
+
+  it('cho phép đợi lâu hơn khi cần tải và kiểm tra ảnh, giữ nguyên thân request', async () => {
+    await postRegenerateQuestion('g1', 'q1', { feedback: 'Đổi vị trí', withImageReview: true })
+
+    expect(axiosInstance.post).toHaveBeenCalledWith('/games/g1/questions/q1/regenerate', { feedback: 'Đổi vị trí' },
+      { timeout: REGENERATE_IMAGE_QUESTION_TIMEOUT_MS, signal: undefined })
+    expect(REGENERATE_IMAGE_QUESTION_TIMEOUT_MS).toBeGreaterThan(REGENERATE_QUESTION_TIMEOUT_MS)
   })
 
   it('không có gợi ý (trống hoặc toàn khoảng trắng) thì không gửi thân yêu cầu', async () => {

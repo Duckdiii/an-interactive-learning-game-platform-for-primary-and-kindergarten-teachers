@@ -94,7 +94,8 @@ public class StudentPlayService {
 
     @Transactional
     public Map<String, Object> start(String shareCode, String nickname) {
-        Game game = publishedGame(shareCode);
+        Game game = games.findByShareCodeForUpdate(shareCode).orElseThrow(() -> notFound());
+        if (game.getStatus() != GameStatus.PUBLISHED) throw notFound();
         if (nickname == null || nickname.isBlank() || nickname.length() > 20)
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Nickname must contain 1 to 20 characters");
         SelfSession session = new SelfSession();

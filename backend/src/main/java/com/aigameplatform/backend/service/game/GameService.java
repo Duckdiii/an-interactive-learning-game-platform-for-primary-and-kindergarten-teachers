@@ -3,17 +3,23 @@ package com.aigameplatform.backend.service.game;
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
 import com.aigameplatform.backend.dto.request.ReviseGameRequest;
 import com.aigameplatform.backend.dto.response.GameSummaryResponse;
+import com.aigameplatform.backend.entity.EditLog;
 import com.aigameplatform.backend.entity.Game;
+import com.aigameplatform.backend.entity.enums.EditorType;
 import com.aigameplatform.backend.entity.enums.GameStatus;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
+import com.aigameplatform.backend.repository.EditLogRepository;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.List;
 import java.util.random.RandomGenerator;
 import com.aigameplatform.backend.service.curriculum.CurriculumCatalog;
@@ -42,7 +48,10 @@ public class GameService {
 
     static final String RANDOM_TOPIC = "Chủ đề ngẫu nhiên phù hợp lứa tuổi và chương trình của khối lớp";
 
+    private static final List<SessionStatus> UNFINISHED = List.of(SessionStatus.WAITING, SessionStatus.ACTIVE, SessionStatus.PAUSED);
+
     private final GameRepository games;
+    private final EditLogRepository editLogs;
     private final TeacherRepository teachers;
     private final List<GameContentHandler> handlers;
     private final JsonMapper jsonMapper;
@@ -60,7 +69,7 @@ public class GameService {
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
             RandomGenerator random) {
         this(games, teachers, handlers, jsonMapper, rateLimiter, transactions, curriculumReviews, curriculumCatalog,
-                random, null, null, null);
+                random, null, null, null, null);
     }
 
     @Autowired
@@ -68,7 +77,8 @@ public class GameService {
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
             RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
-            ObjectProvider<CostMonitoringService> costMonitoring) {
+            ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs) {
+        this.editLogs = editLogs;
         this.costMonitoring = costMonitoring;
         this.sessions = sessions;
         this.audioEnrichers = audioEnrichers;
@@ -119,7 +129,7 @@ public class GameService {
         if (enricher != null) {
             enricher.enrichAllQuestionsWithAudio(content.questions());
         }
-        game.getQuestions().addAll(content.questions());
+        game.replaceQuestions(content.questions());
         game.setQuestionNum(content.questions().size());
         // Có kết quả đối chiếu chương trình (game DSL) thì lưu game và bản đối chiếu trong cùng một transaction.
         Game saved = content.curriculum() == null ? games.saveAndFlush(game)
@@ -147,12 +157,28 @@ public class GameService {
     /** PUT /games/{gameId}: kiểm duyệt lại đủ 3 lớp; game giữ trạng thái và loại. */
     @Transactional
     public ObjectNode update(String teacherId, String gameId, JsonNode body) {
-        Game game = owned(teacherId, gameId);
+        Game game = owned(teacherId, gameId, true);
+        requireNoUnfinishedSession(gameId);
+
+        ObjectNode before = toResponse(game);
         handlerFor(game.getGameType()).replaceContent(game, body);
-        // Chỉ sửa câu hỏi thì hàng games không "bẩn" nên @UpdateTimestamp không chạy; đặt tường minh để GET /games sắp đúng.
+        ObjectNode after = toResponse(game);
+        before.remove(GameReports.MANAGEMENT_FIELDS);
+        after.remove(GameReports.MANAGEMENT_FIELDS);
+        List<String> changes = new ArrayList<>();
+        diffPaths("", before, after, changes);
+        if (changes.isEmpty()) return toResponse(game);
+
         game.setUpdatedAt(Instant.now());
-        // Lưu qua bước này để bản đối chiếu chương trình (nếu có) chuyển STALE: nội dung đã khác lúc đối chiếu.
-        return toResponse(curriculumReviews.saveEditedGame(game, teacherId));
+        Game saved = curriculumReviews.saveEditedGame(game, teacherId);
+        EditLog log = new EditLog();
+        log.setGame(saved);
+        log.setEditedBy(EditorType.TEACHER);
+        log.setEditorTeacherId(teacherId);
+        log.setEditedAt(LocalDateTime.now());
+        log.setChangedPaths(jsonMapper.writeValueAsString(changes));
+        editLogs.save(log);
+        return toResponse(saved);
     }
 
     /**
@@ -181,13 +207,35 @@ public class GameService {
     public RegeneratedQuestionDto regenerateQuestion(String teacherId, String gameId, String questionId, String feedback) {
         StoredGame stored = transactions.execute(status -> {
             Game game = owned(teacherId, gameId);
-            if (sessions.existsByGame_IdAndStatus(gameId, SessionStatus.ACTIVE)) {
-                throw new ApiException(ErrorCode.CONFLICT, "Game đang có phiên chơi diễn ra, chưa sửa được");
-            }
+            requireNoUnfinishedSession(gameId);
             return new StoredGame(game.getGameType(), toResponse(game));
         });
         try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
             return handlerFor(stored.type()).regenerateQuestion(stored.response(), questionId, feedback);
+        }
+    }
+
+    private void requireNoUnfinishedSession(String gameId) {
+        if (sessions.hasUnfinishedSession(gameId, UNFINISHED, LocalDateTime.now())) {
+            throw new ApiException(ErrorCode.CONFLICT, "Game đang có phiên chơi chưa kết thúc, chưa sửa được");
+        }
+    }
+
+    private static void diffPaths(String path, JsonNode before, JsonNode after, List<String> changes) {
+        if (java.util.Objects.equals(before, after)) return;
+        if (before != null && after != null && before.isObject() && after.isObject()) {
+            var keys = new TreeSet<>(before.propertyNames());
+            keys.addAll(after.propertyNames());
+            for (String key : keys) {
+                String escaped = key.replace("~", "~0").replace("/", "~1");
+                diffPaths(path + "/" + escaped, before.get(key), after.get(key), changes);
+            }
+        } else if (before != null && after != null && before.isArray() && after.isArray()) {
+            for (int index = 0; index < Math.max(before.size(), after.size()); index++) {
+                diffPaths(path + "/" + index, before.get(index), after.get(index), changes);
+            }
+        } else {
+            changes.add(path);
         }
     }
 
@@ -207,8 +255,12 @@ public class GameService {
     }
 
     private Game owned(String teacherId, String gameId) {
+        return owned(teacherId, gameId, false);
+    }
+
+    private Game owned(String teacherId, String gameId, boolean lock) {
         requireTeacher(teacherId);
-        Game game = games.findById(gameId)
+        Game game = (lock ? games.findByIdForUpdate(gameId) : games.findById(gameId))
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy trò chơi"));
         if (game.getAuthor() == null || !teacherId.equals(game.getAuthor().getId())) {
             throw new ApiException(ErrorCode.FORBIDDEN, "Bạn không có quyền với trò chơi này");

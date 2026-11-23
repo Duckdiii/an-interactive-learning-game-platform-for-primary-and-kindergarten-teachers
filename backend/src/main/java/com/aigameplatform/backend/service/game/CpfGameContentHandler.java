@@ -62,9 +62,11 @@ public class CpfGameContentHandler implements GameContentHandler {
         game.setTitle(metadata.path("title").asString());
         game.setSubject(Subject.valueOf(metadata.path("subject").asString()));
         game.setGrade(GradeLevel.valueOf(metadata.path("gradeLevel").asString()));
-        game.getQuestions().clear();
-        game.getQuestions().add(question(cpf));
-        game.setQuestionNum(1);
+        var existing = game.getQuestions();
+        if (existing.size() != 1 || !(existing.getFirst() instanceof CpfQuestion current)
+                || !jsonMapper.readTree(current.getPayload()).equals(cpf)) {
+            game.replaceQuestions(List.of(question(cpf)));
+        }
     }
 
     @Override

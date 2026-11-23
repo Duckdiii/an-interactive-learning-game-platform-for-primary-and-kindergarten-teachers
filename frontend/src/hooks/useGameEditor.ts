@@ -217,6 +217,8 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
             : 'pending'
 
   const savedQuestionIds = useMemo(() => new Set(state.baseline.questions.map((question) => question.id)), [state.baseline])
+  const imageRegeneration = trimmedDraft.gameType === 'AUDIO_VISUAL_MATCH'
+    || ('mode' in trimmedDraft && trimmedDraft.mode === 'IMAGE')
 
   // Sau lần bấm Xuất bản đầu tiên, lỗi dữ liệu tính lại theo từng lần sửa (kiểm tra theo chế độ XUẤT BẢN, chặt hơn Lưu).
   const publishIssues = useMemo(
@@ -297,8 +299,13 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
       edit({ type: 'updateQuestion', index, questionId, update }),
     /** Mã các thẻ câu vừa được AI làm lại và còn hoàn tác được. */
     regeneratedIds: Object.keys(state.undo),
-    /** Mã các câu đã có trên máy chủ (theo bản đã lưu gần nhất): chỉ những câu này AI làm lại được. */
+    /** Mã các câu đã có trên máy chủ: AI lấy nội dung từ bản đã lưu. */
     savedQuestionIds,
+    // Câu ảnh cần dùng đúng ảnh giáo viên đang xem: chờ lưu nếu nguồn hình hoặc nội dung vừa đổi.
+    isRegenerationSourceStale: (index: number) => imageRegeneration && (
+      trimmedDraft.metadata.topic !== state.baseline.metadata.topic
+      || !deepEqual(trimmedDraft.questions[index], state.baseline.questions[index])
+    ),
     /**
      * Đưa câu AI làm lại vào đúng thẻ, áp lên bản đang soạn HIỆN HÀNH (các thẻ khác và sửa tay chưa lưu giữ nguyên). Câu mới phải qua bộ kiểm tra
      * như lúc lưu (kèm bản đã lưu làm mốc); không hợp lệ thì KHÔNG áp, câu cũ giữ nguyên. `stale`: thẻ đã đổi chỗ hoặc không còn.
@@ -308,6 +315,19 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
       const target = draft.questions[index]
 
       if (!target || target.id !== questionId || question.id !== questionId) return { ok: false, reason: 'stale' }
+
+      // Một kết quả sai chế độ từ API không được đổi loại thẻ hoặc làm mất ảnh đã chọn.
+      if (draft.gameType === 'VISUAL_CLOZE' && draft.mode === 'IMAGE' && (
+        !('sceneImageUrl' in target) || !('sceneImageUrl' in question)
+        || question.sceneImageUrl !== target.sceneImageUrl
+        || !Array.isArray(target.options) || !Array.isArray(question.options) || question.options.length !== target.options.length
+        || !target.options.every((asset) => question.options.some((option) =>
+          option?.imageUrl === asset.imageUrl && option.visualPrompt === asset.visualPrompt))
+      )) return { ok: false, reason: 'invalid' }
+      if (draft.gameType === 'ODD_ONE_OUT' && draft.mode === 'IMAGE' && (
+        !('items' in question) || !Array.isArray(question.items)
+        || !question.items.every((item) => item && typeof item === 'object' && 'assetId' in item && item.assetId)
+      )) return { ok: false, reason: 'invalid' }
 
       const candidate = { ...draft, questions: draft.questions.map((item, position) => (position === index ? question : item)) } as GameDsl
       const invalid = validateGame(candidate, 'save', { baseline }).some((issue) => issue.questionIndex === index)

@@ -1,4 +1,4 @@
-import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS, UNDERSTAND_TIMEOUT_MS } from '../constants/aiLimits'
+import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_IMAGE_QUESTION_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS, UNDERSTAND_TIMEOUT_MS } from '../constants/aiLimits'
 import axiosInstance from './axiosInstance'
 import type { ApiSuccessResponse } from '../types/api'
 import type { PublishResult } from '../types/publish.types'
@@ -111,6 +111,7 @@ export interface RegenerateQuestionOptions {
   // Gợi ý điều chỉnh của giáo viên (tối đa 500 ký tự); trống thì không gửi thân yêu cầu.
   feedback?: string
   signal?: AbortSignal
+  withImageReview?: boolean
 }
 
 /**
@@ -122,7 +123,10 @@ export async function postRegenerateQuestion(gameId: string, questionId: string,
   const response = await axiosInstance.post<ApiSuccessResponse<RegeneratedQuestion>>(
     `/games/${encodeURIComponent(gameId)}/questions/${encodeURIComponent(questionId)}/regenerate`,
     feedback ? { feedback } : undefined,
-    { timeout: REGENERATE_QUESTION_TIMEOUT_MS, signal: options.signal },
+    {
+      timeout: options.withImageReview ? REGENERATE_IMAGE_QUESTION_TIMEOUT_MS : REGENERATE_QUESTION_TIMEOUT_MS,
+      signal: options.signal,
+    },
   )
 
   return response.data.data

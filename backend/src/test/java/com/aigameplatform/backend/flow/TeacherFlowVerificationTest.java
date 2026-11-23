@@ -47,6 +47,12 @@ class TeacherFlowVerificationTest extends AbstractTeacherFlowTest {
 
         ObjectNode edited = (ObjectNode) call("get", "GET", "/api/games/" + gameId, token, null).body().path("data").deepCopy();
         edited.remove(List.of("gameId", "status", "updatedAt"));
+        assertThat(call("put-unchanged", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(edited)).status())
+                .isEqualTo(200);
+        Call unchanged = call("curriculum-review-unchanged", "GET", "/api/games/" + gameId + "/curriculum-review", token, null);
+        assertThat(unchanged.body().path("data").path("status").asString()).isEqualTo("UNAVAILABLE");
+
+        ((ObjectNode) edited.path("metadata")).put("title", "Đếm con vật sau khi soạn");
         assertThat(call("put", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(edited)).status()).isEqualTo(200);
 
         Call stale = call("curriculum-review-after-put", "GET", "/api/games/" + gameId + "/curriculum-review", token, null);

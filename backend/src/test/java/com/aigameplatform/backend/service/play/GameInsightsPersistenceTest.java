@@ -88,7 +88,7 @@ class GameInsightsPersistenceTest extends AbstractPostgresTest {
         game.setShareCode(UUID.randomUUID().toString().substring(0, 6));
         game.setStatus(GameStatus.PUBLISHED);
         game.setQuestionNum(dsl.questions().size());
-        game.getQuestions().addAll(strategies.get(dsl.gameType()).parseToQuestions(dsl));
+        game.setQuestions(strategies.get(dsl.gameType()).parseToQuestions(dsl));
         return games.saveAndFlush(game);
     }
 }

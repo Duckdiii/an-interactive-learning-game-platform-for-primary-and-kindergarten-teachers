@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -12,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.aigameplatform.backend.controller.AuthController;
+import com.aigameplatform.backend.controller.MediaController;
 import com.aigameplatform.backend.dto.response.AuthResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
 import com.aigameplatform.backend.entity.enums.UserRole;
@@ -22,6 +24,8 @@ import com.aigameplatform.backend.security.RestSecurityErrorHandler;
 import com.aigameplatform.backend.service.AuthResult;
 import com.aigameplatform.backend.service.AuthService;
 import com.aigameplatform.backend.service.PasswordResetService;
+import com.aigameplatform.backend.service.media.LocalMediaStorageService;
+import com.aigameplatform.backend.service.media.MediaUploadService;
 import jakarta.servlet.http.Cookie;
 import java.time.Clock;
 import java.time.Instant;
@@ -36,7 +40,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(AuthController.class)
+@WebMvcTest({AuthController.class, MediaController.class})
 @Import({SecurityConfig.class, ClockConfig.class, JwtService.class, RefreshCookieFactory.class,
         RestSecurityErrorHandler.class, GlobalExceptionHandler.class})
 @TestPropertySource(properties = {
@@ -63,6 +67,27 @@ class SecurityConfigTest {
 
     @MockitoBean
     private PasswordResetService passwordResetService;
+
+    @MockitoBean
+    private MediaUploadService mediaUploads;
+
+    @MockitoBean
+    private LocalMediaStorageService mediaStorage;
+
+    @Test
+    void uploadRequiresTeacherRoleAndPublicMediaAllowsCrossOriginReads() throws Exception {
+        String admin = new JwtService(SECRET, 15, Clock.systemUTC())
+                .generateAccessToken("admin-1", "admin@school.edu.vn", "session-admin", "ROLE_ADMIN");
+
+        mockMvc.perform(multipart("/api/media/upload")).andExpect(status().isUnauthorized());
+        mockMvc.perform(multipart("/api/media/upload").header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(options("/media/uploads/11111111-1111-1111-1111-111111111111.png")
+                        .header(HttpHeaders.ORIGIN, "https://classroom.example.test")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*"));
+    }
 
     private static String validAccessToken() {
         return new JwtService(SECRET, 15, Clock.systemUTC())

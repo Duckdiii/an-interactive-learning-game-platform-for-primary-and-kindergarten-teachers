@@ -50,6 +50,10 @@ class GameServiceTest {
     @SuppressWarnings("unchecked")
     private final org.springframework.beans.factory.ObjectProvider<com.aigameplatform.backend.service.curriculum.CurriculumCatalog> catalogs =
             mock(org.springframework.beans.factory.ObjectProvider.class);
+    private final com.aigameplatform.backend.repository.GameSessionRepository sessions =
+            mock(com.aigameplatform.backend.repository.GameSessionRepository.class);
+    private final com.aigameplatform.backend.repository.EditLogRepository editLogs =
+            mock(com.aigameplatform.backend.repository.EditLogRepository.class);
     private GameService service;
 
     @BeforeEach
@@ -67,7 +71,7 @@ class GameServiceTest {
         when(teachers.getReferenceById(anyString())).thenAnswer(inv -> teacher(inv.getArgument(0)));
         when(curriculumReviews.saveEditedGame(any(), anyString())).thenAnswer(inv -> inv.getArgument(0));
         service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews, catalogs, new java.util.Random(7));
+                curriculumReviews, catalogs, new java.util.Random(7), null, sessions, null, editLogs);
     }
 
     private static Teacher teacher(String id) {
@@ -172,7 +176,9 @@ class GameServiceTest {
 
     @Test
     void anotherTeachersGameIsForbiddenForReadUpdateAndDelete() {
-        when(games.findById("g")).thenReturn(Optional.of(game("g", "teacher-2", GameType.QUIZ)));
+        Game wrongOwner = game("g", "teacher-2", GameType.QUIZ);
+        when(games.findById("g")).thenReturn(Optional.of(wrongOwner));
+        when(games.findByIdForUpdate("g")).thenReturn(Optional.of(wrongOwner));
 
         for (Runnable call : List.<Runnable>of(() -> service.get(OWNER, "g"),
                 () -> service.update(OWNER, "g", MAPPER.createObjectNode()), () -> service.delete(OWNER, "g"))) {
@@ -186,14 +192,24 @@ class GameServiceTest {
     @Test
     void updateGoesThroughTheHandlerOfTheStoredType() {
         Game stored = game("g", OWNER, GameType.CUSTOM);
-        when(games.findById("g")).thenReturn(Optional.of(stored));
+        when(games.findByIdForUpdate("g")).thenReturn(Optional.of(stored));
+        org.mockito.Mockito.doAnswer(inv -> ((ObjectNode) inv.getArgument(1)).put("title", stored.getTitle()))
+                .when(cpf).toResponse(eq(stored), any());
         var body = MAPPER.createObjectNode().put("kind", "CPF");
+        org.mockito.Mockito.doAnswer(inv -> {
+            stored.setTitle("Updated");
+            return null;
+        }).when(cpf).replaceContent(stored, body);
 
         service.update(OWNER, "g", body);
 
         verify(cpf).replaceContent(stored, body);
         // Lưu qua bước của bản đối chiếu để bản đó chuyển STALE (KNOWN-GAPS #1).
         verify(curriculumReviews).saveEditedGame(stored, OWNER);
+        var log = org.mockito.ArgumentCaptor.forClass(com.aigameplatform.backend.entity.EditLog.class);
+        verify(editLogs).save(log.capture());
+        assertThat(log.getValue().getChangedPaths()).isEqualTo("[\"/title\"]");
+        assertThat(log.getValue().getEditorTeacherId()).isEqualTo(OWNER);
         verify(games, never()).saveAndFlush(any());
     }
 
@@ -217,12 +233,46 @@ class GameServiceTest {
     @Test
     void updateMovesUpdatedAtEvenWhenOnlyQuestionsChange() {
         Game stored = game("g", OWNER, GameType.QUIZ);
-        when(games.findById("g")).thenReturn(Optional.of(stored));
-        when(games.saveAndFlush(stored)).thenAnswer(inv -> inv.getArgument(0));
+        when(games.findByIdForUpdate("g")).thenReturn(Optional.of(stored));
+        org.mockito.Mockito.doAnswer(inv -> {
+            ObjectNode response = inv.getArgument(1);
+            response.putArray("questions").addObject().put("point", stored.getQuestionNum());
+            return response;
+        }).when(dsl).toResponse(eq(stored), any());
+        org.mockito.Mockito.doAnswer(inv -> {
+            stored.setQuestionNum(1);
+            return null;
+        }).when(dsl).replaceContent(eq(stored), any());
 
         service.update(OWNER, "g", MAPPER.createObjectNode());
 
         assertThat(stored.getUpdatedAt()).isAfter(Instant.EPOCH);
+        verify(editLogs).save(org.mockito.ArgumentMatchers.argThat(log ->
+                "[\"/questions/0/point\"]".equals(log.getChangedPaths())));
+    }
+
+    @Test
+    void lockedGameSkipsContentChangesAndHistory() {
+        Game stored = game("g", OWNER, GameType.QUIZ);
+        when(games.findByIdForUpdate("g")).thenReturn(Optional.of(stored));
+        when(sessions.hasUnfinishedSession(eq("g"), any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> service.update(OWNER, "g", MAPPER.createObjectNode()))
+                .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.CONFLICT));
+        verify(dsl, never()).replaceContent(any(), any());
+        verify(editLogs, never()).save(any());
+    }
+
+    @Test
+    void unchangedContentDoesNotRecordAnEdit() {
+        Game stored = game("g", OWNER, GameType.QUIZ);
+        when(games.findByIdForUpdate("g")).thenReturn(Optional.of(stored));
+
+        service.update(OWNER, "g", MAPPER.createObjectNode());
+
+        assertThat(stored.getUpdatedAt()).isEqualTo(Instant.EPOCH);
+        verify(curriculumReviews, never()).saveEditedGame(any(), anyString());
+        verify(editLogs, never()).save(any());
     }
 
     @Test

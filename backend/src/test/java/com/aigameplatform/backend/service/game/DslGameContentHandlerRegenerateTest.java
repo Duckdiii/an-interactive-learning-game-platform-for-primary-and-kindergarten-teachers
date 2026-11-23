@@ -10,10 +10,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.QuizQuestionDsl;
+import com.aigameplatform.backend.dto.dsl.VisualClozeQuestionDsl;
 import com.aigameplatform.backend.dto.dsl.TextChoiceDsl;
 import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
 import com.aigameplatform.backend.entity.enums.GameType;
+import com.aigameplatform.backend.entity.enums.VisualClozeMode;
+import com.aigameplatform.backend.service.factory.GameDslRequest;
 import com.aigameplatform.backend.entity.question.QuestionGame;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
@@ -87,12 +91,25 @@ class DslGameContentHandlerRegenerateTest {
     }
 
     @Test
-    void imageModeGamesAreRejectedWith400() throws Exception {
-        ObjectNode response = quizResponse();
-        response.put("mode", "IMAGE");
+    void visualClozeRegeneratesAgainstTheSavedSceneAndTeacherAssets() throws Exception {
+        try (InputStream in = getClass().getResourceAsStream("/dsl-examples/visual-cloze-image-v1.1.json")) {
+            ObjectNode response = (ObjectNode) MAPPER.readTree(in);
+            var game = MAPPER.treeToValue(response, GameDsl.class);
+            var original = (VisualClozeQuestionDsl) game.questions().getFirst();
+            when(generation.regenerateQuestion(eq(GameType.VISUAL_CLOZE), any(), eq(original), eq("Đổi vị trí"),
+                    eq("q1"), eq(game))).thenReturn(original);
 
-        assertThatThrownBy(() -> handler.regenerateQuestion(response, "q1", null))
-                .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR));
-        verify(generation, never()).regenerateQuestion(any(), any(), any(), any(), any(), any());
+            var result = handler.regenerateQuestion(response, "q1", "Đổi vị trí");
+
+            assertThat(result.question()).isEqualTo(original);
+            verify(enricher, never()).enrichAllQuestionsWithAudio(any());
+            var request = org.mockito.ArgumentCaptor.forClass(GameDslRequest.class);
+            verify(generation).regenerateQuestion(eq(GameType.VISUAL_CLOZE), request.capture(), eq(original),
+                    eq("Đổi vị trí"), eq("q1"), eq(game));
+            assertThat(request.getValue().effectiveVisualClozeMode()).isEqualTo(VisualClozeMode.IMAGE);
+            assertThat(request.getValue().sceneImageUrl()).isEqualTo(original.sceneImageUrl());
+            assertThat(request.getValue().optionImages()).extracting(option -> option.imageUrl())
+                    .containsExactlyElementsOf(original.options().stream().map(option -> option.imageUrl()).toList());
+        }
     }
 }

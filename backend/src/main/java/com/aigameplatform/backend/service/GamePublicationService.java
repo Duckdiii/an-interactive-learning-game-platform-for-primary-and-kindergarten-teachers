@@ -111,8 +111,7 @@ public class GamePublicationService {
         game.setSchemaVersion(dsl.schemaVersion());
         game.setQuestionNum(dsl.questions().size());
         var replacementQuestions = strategies.get(dsl.gameType()).parseToQuestions(dsl);
-        game.getQuestions().clear();
-        game.getQuestions().addAll(replacementQuestions);
+        game.replaceQuestions(replacementQuestions);
         game.setStatus(GameStatus.PUBLISHED);
         game.setShareCode(uniqueShareCode());
         return publishResult(edited ? curriculumReviews.saveEditedGame(game, principal.teacherId()) : games.saveAndFlush(game));

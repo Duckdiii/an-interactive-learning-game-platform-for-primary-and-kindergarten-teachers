@@ -44,6 +44,24 @@ test("controllerOperations ghép tiền tố class, báo dạng không đọc đ
   assert.deepEqual(unreadable.map((u) => u.text), ['@PutMapping(value = "/x")']);
 });
 
+test("đọc multipart mapping và đường dẫn tệp với server override", () => {
+  const spec = SPEC.replace("components:", [
+    "  /media/{group}/{name}:", "    get:", "      x-status: implemented",
+    "      servers:", "        - url: /", "components:",
+  ].join("\n"));
+  const source = `@RestController
+class MediaController {
+  @PostMapping(path = "/api/media/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  void upload() {}
+  @GetMapping("/media/{group}/{name}")
+  void download() {}
+}`;
+  const { ops, unreadable } = controllerOperations(source);
+  assert.deepEqual(unreadable, []);
+  assert.deepEqual(ops.map(({ path }) => path), ["/api/media/upload", "/media/{group}/{name}"]);
+  assert.equal(openapiOperations(spec).at(-1).path, ops.at(-1).path);
+});
+
 test("compare tìm chênh lệch cả hai chiều", () => {
   const { onlyCode, onlySpec } = compare(openapiOperations(SPEC), controllerOperations(CONTROLLER).ops);
   assert.deepEqual(onlyCode.map((o) => `${o.method} ${o.path}`), ["POST /api/games/{gameId}/revise"]);

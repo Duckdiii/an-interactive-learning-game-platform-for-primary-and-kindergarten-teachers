@@ -310,6 +310,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
               index={index}
               questionId={draft.questions[index].id}
               saved={editor.savedQuestionIds.has(draft.questions[index].id)}
+              sourceStale={editor.isRegenerationSourceStale(index)}
               getQuestion={(position, questionId) => (draft.questions[position]?.id === questionId ? draft.questions[position] : undefined)}
               applyRegenerated={editor.applyRegenerated}
               restorePending={Boolean(editor.pendingRestore)}

@@ -22,6 +22,9 @@ public abstract class QuestionGame {
 
     protected int itemIndex;
 
+    @Column(nullable = false)
+    protected boolean retired;
+
     protected int timeLimit;
 
     protected int point;

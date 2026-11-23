@@ -82,7 +82,7 @@ class GameInsightsServiceTest {
         game = new Game();
         game.setId("game-1");
         game.setAuthor(author);
-        game.getQuestions().addAll(List.of(quiz, scramble));
+        game.setQuestions(List.of(quiz, scramble));
         when(games.findByIdAndAuthor_Id("game-1", "teacher-1")).thenReturn(Optional.of(game));
     }
 
@@ -180,8 +180,7 @@ class GameInsightsServiceTest {
     @Test
     void textClozeCommonWrongNeedsTwoRepeatsAndMergesCase() {
         VisualClozeQuestion cloze = cloze("c1", 0);
-        game.getQuestions().clear();
-        game.getQuestions().add(cloze);
+        game.setQuestions(List.of(cloze));
         SelfSession session = new SelfSession();
         for (String typed : List.of("CHI", "chi ", "ba", "xấu hoắc", "xấu hoắc")) {
             session.getParticipants().add(participant(wrong(cloze, "{\"answer\":\"" + typed + "\"}")));
@@ -197,8 +196,7 @@ class GameInsightsServiceTest {
     @Test
     void typedAnswersThatLookLikePersonalInfoNeverBecomeLabels() {
         VisualClozeQuestion cloze = cloze("c1", 0);
-        game.getQuestions().clear();
-        game.getQuestions().add(cloze);
+        game.setQuestions(List.of(cloze));
         SelfSession session = new SelfSession();
         for (String typed : List.of("be.an@gmail.com", "be.an@gmail.com", "0912 345 678", "0912 345 678",
                 "www.abc.vn", "www.abc.vn", "chi", "chi")) {
@@ -225,8 +223,7 @@ class GameInsightsServiceTest {
         odd.setId("odd");
         odd.setImageItems(new java.util.ArrayList<>(List.of(
                 new OddOneOutImageItem("a1", "táo", "u1"), new OddOneOutImageItem("a2", "cam", "u2"))));
-        game.getQuestions().clear();
-        game.getQuestions().addAll(List.of(av, odd));
+        game.setQuestions(List.of(av, odd));
         SelfSession session = new SelfSession();
         session.setStudentOptionSalt(salt);
         String avWrong = OpaqueIds.opaque(salt, 0, "avm:2"); // distractor thứ hai: "con chó"
@@ -248,8 +245,7 @@ class GameInsightsServiceTest {
     void choiceAnswersWithoutSaltYieldNoLabel() {
         AudioVisualMatchQuestion av = new AudioVisualMatchQuestion();
         av.setId("av");
-        game.getQuestions().clear();
-        game.getQuestions().add(av);
+        game.setQuestions(List.of(av));
         SelfSession session = new SelfSession();
         for (int i = 0; i < 2; i++) {
             session.getParticipants().add(participant(wrong(av, "{\"selectedOptionId\":\"x1\"}")));
@@ -327,8 +323,7 @@ class GameInsightsServiceTest {
     @Test
     void questionDetailShowsRepeatedAnswersAndBucketsTheRest() {
         VisualClozeQuestion cloze = cloze("c1", 0);
-        game.getQuestions().clear();
-        game.getQuestions().add(cloze);
+        game.setQuestions(List.of(cloze));
         SelfSession session = new SelfSession();
         for (String typed : List.of("chị", "chị", "chi", "chi", "chi", "ba")) {
             boolean ok = typed.equals("chị");
@@ -455,8 +450,7 @@ class GameInsightsServiceTest {
         cloze.setId("image");
         cloze.setBlanks(List.of(new VisualClozeBlank("a", 100, 100, "cat")));
         cloze.setOptions(List.of(new VisualClozeImageOption("dog", "Ch\u00f3", null)));
-        game.getQuestions().clear();
-        game.getQuestions().add(cloze);
+        game.setQuestions(List.of(cloze));
 
         SelfSession session = new SelfSession();
         String salt = "image-salt";
@@ -490,8 +484,7 @@ class GameInsightsServiceTest {
         memory.setTimeLimit(30);
         memory.setPoint(100);
         memory.setPairs(List.of(memoryPair("a", "Mèo"), memoryPair("b", "Cá"), memoryPair("c", "Chó")));
-        game.getQuestions().clear();
-        game.getQuestions().add(memory);
+        game.setQuestions(List.of(memory));
         SelfSession session = new SelfSession();
         session.setGame(game);
         when(sessions.findByGame_IdOrderByCreatedAtDesc("game-1")).thenReturn(List.of(session));

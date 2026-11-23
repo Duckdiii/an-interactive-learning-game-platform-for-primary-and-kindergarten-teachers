@@ -1,8 +1,10 @@
 package com.aigameplatform.backend.service.game;
 
+import com.aigameplatform.backend.dto.dsl.AudioVisualMatchQuestionDsl;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl;
 import com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl;
+import com.aigameplatform.backend.dto.dsl.VisualClozeQuestionDsl;
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
 import com.aigameplatform.backend.dto.understanding.ChatTurn;
 import com.aigameplatform.backend.entity.enums.OddOneOutMode;
@@ -26,7 +28,12 @@ import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
 import com.aigameplatform.backend.entity.question.QuestionGame;
 import com.aigameplatform.backend.service.media.GameAudioEnricher;
 import com.aigameplatform.backend.service.strategy.GameContentStrategy;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -122,9 +129,31 @@ public class DslGameContentHandler implements GameContentHandler {
         game.setVisualClozeMode(visualClozeModeOf(dsl));
         game.setOddOneOutMode(oddOneOutModeOf(dsl));
         game.setPresentation(PresentationDsl.toEntity(dsl.metadata().presentation()));
-        game.getQuestions().clear();
-        game.getQuestions().addAll(strategies.get(dsl.gameType()).parseToQuestions(dsl));
-        game.setQuestionNum(game.getQuestions().size());
+        var strategy = strategies.get(dsl.gameType());
+        var existing = game.getQuestions();
+        var replacements = new ArrayList<>(strategy.parseToQuestions(dsl));
+        var reused = new HashSet<QuestionGame>();
+        // IDs in the DSL are positional. Compare content with a fixed ID to retain rows when questions move.
+        for (int index = 0; index < Math.min(existing.size(), replacements.size()); index++) {
+            var oldQuestion = existing.get(index);
+            if (strategy.toQuestionDsl(oldQuestion, "q1").equals(strategy.toQuestionDsl(replacements.get(index), "q1"))) {
+                replacements.set(index, oldQuestion);
+                reused.add(oldQuestion);
+            }
+        }
+        var remaining = new HashMap<QuestionDsl, ArrayDeque<QuestionGame>>();
+        for (var question : existing) {
+            if (!reused.contains(question)) {
+                remaining.computeIfAbsent(strategy.toQuestionDsl(question, "q1"), ignored -> new ArrayDeque<>()).add(question);
+            }
+        }
+        for (int index = 0; index < replacements.size(); index++) {
+            var replacement = replacements.get(index);
+            if (reused.contains(replacement)) continue;
+            var matches = remaining.get(strategy.toQuestionDsl(replacement, "q1"));
+            if (matches != null && !matches.isEmpty()) replacements.set(index, matches.removeFirst());
+        }
+        game.replaceQuestions(replacements);
     }
 
     @Override
@@ -155,26 +184,47 @@ public class DslGameContentHandler implements GameContentHandler {
     public RegeneratedQuestionDto regenerateQuestion(ObjectNode current, String questionId, String feedback) {
         ObjectNode content = current.deepCopy();
         content.remove(GameReports.MANAGEMENT_FIELDS);
-        // Như revise: bộ sinh lại chỉ có dạng chữ, game chế độ hình ảnh sẽ mất ảnh (KNOWN-GAPS #27).
-        if ("IMAGE".equals(content.path("mode").asString(null))) {
-            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chưa hỗ trợ làm lại câu hỏi cho trò chơi chế độ hình ảnh");
-        }
         GameDsl base = jsonMapper.treeToValue(content, GameDsl.class);
         QuestionDsl currentQuestion = base.questions().stream().filter(q -> questionId.equals(q.id())).findFirst()
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy câu hỏi " + questionId));
         var metadata = base.metadata();
         QuestionDsl candidate = generation.regenerateQuestion(base.gameType(),
-                new GameDslRequest(metadata.topic(), metadata.subject(), metadata.gradeLevel(), null, null, null, null, null),
-                currentQuestion, feedback, questionId, base);
+                regenerationRequest(base, currentQuestion), currentQuestion, feedback, questionId, base);
         // Đi qua entity để gắn giọng đọc TTS giống lúc sinh game, rồi dựng lại DSL với đúng id của câu bị thay.
         GameContentStrategy<?, ?> strategy = strategies.get(base.gameType());
         List<QuestionGame> entities = strategy.parseToQuestions(
                 strategy.assembleGame(metadata, base.gameplaySettings(), List.of(candidate)));
         GameAudioEnricher enricher = audioEnrichers == null ? null : audioEnrichers.getIfAvailable();
-        if (enricher != null) {
+        // DSL 1.1 của Điền hình lưu lời đọc, không có trường URL âm thanh.
+        boolean visualImage = base instanceof VisualClozeGameDsl visual && visual.effectiveMode() == VisualClozeMode.IMAGE;
+        if (enricher != null && !visualImage) {
             enricher.enrichAllQuestionsWithAudio(entities);
         }
         return new RegeneratedQuestionDto(strategy.toQuestionDsl(entities.get(0), questionId), base.gameType());
+    }
+
+    private static GameDslRequest regenerationRequest(GameDsl game, QuestionDsl question) {
+        var metadata = game.metadata();
+        if (game instanceof VisualClozeGameDsl visual && visual.effectiveMode() == VisualClozeMode.IMAGE
+                && question instanceof VisualClozeQuestionDsl scene) {
+            if (scene.sceneImageUrl() == null || scene.sceneImageUrl().isBlank() || scene.options() == null
+                    || scene.options().stream().anyMatch(option -> option.imageUrl() == null || option.imageUrl().isBlank()
+                            || option.visualPrompt() == null || option.visualPrompt().isBlank())) {
+                throw new ApiException(ErrorCode.VALIDATION_ERROR, "Hãy bổ sung ảnh cảnh và ảnh lựa chọn trước khi làm lại câu hỏi");
+            }
+            var options = scene.options().stream()
+                    .map(option -> new GenerateGameRequest.OptionImage(option.imageUrl(), option.visualPrompt())).toList();
+            return new GameDslRequest(metadata.topic(), metadata.subject(), metadata.gradeLevel(), null, null,
+                    VisualClozeMode.IMAGE, scene.sceneImageUrl(), options);
+        }
+        boolean catalogMode = game instanceof OddOneOutGameDsl odd && odd.effectiveMode() == OddOneOutMode.IMAGE
+                || question instanceof AudioVisualMatchQuestionDsl avm && avm.correct() != null
+                        && avm.distractors() != null && !avm.distractors().isEmpty()
+                        && Stream.concat(Stream.of(avm.correct()), avm.distractors().stream())
+                                .allMatch(choice -> choice != null && choice.imageUrl() != null
+                                        && choice.imageUrl().startsWith("/assets/noto/"));
+        return new GameDslRequest(metadata.topic(), metadata.subject(), metadata.gradeLevel(), null, null,
+                catalogMode ? VisualClozeMode.IMAGE : VisualClozeMode.TEXT, null);
     }
 
     @Override

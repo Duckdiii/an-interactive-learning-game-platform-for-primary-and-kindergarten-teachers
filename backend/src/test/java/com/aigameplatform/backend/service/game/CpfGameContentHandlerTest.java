@@ -58,7 +58,7 @@ class CpfGameContentHandlerTest {
     private Game storedGame() throws Exception {
         Game game = new Game();
         game.setGameType(GameType.CUSTOM);
-        game.getQuestions().addAll(handler.generate(GameType.CUSTOM, "x", request("x")).questions());
+        game.setQuestions(handler.generate(GameType.CUSTOM, "x", request("x")).questions());
         return game;
     }
 

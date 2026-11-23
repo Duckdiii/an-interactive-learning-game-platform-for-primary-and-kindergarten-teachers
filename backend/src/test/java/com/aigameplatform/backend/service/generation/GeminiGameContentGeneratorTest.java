@@ -99,6 +99,24 @@ class GeminiGameContentGeneratorTest {
     }
 
     @Test
+    void regenerationRetriesWithoutPreviousOutputUseTheSingleQuestionPromptAndDedicatedModel() {
+        var normal = new AtomicReference<ChatRequest>();
+        var regeneration = new AtomicReference<ChatRequest>();
+        var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
+        var generator = new GeminiGameContentGenerator(modelCapturing(normal), modelCapturing(regeneration),
+                strategies, ASSETS, new com.aigameplatform.backend.service.asset.KeywordAssetRetriever(ASSETS),
+                false, new com.aigameplatform.backend.service.media.NotoEmojiCatalog(), null);
+
+        generator.generate(new GenerationAttempt(GameType.QUIZ, "Toán", Subject.MATH, GradeLevel.GRADE_1,
+                strategies.get(GameType.QUIZ).getStructuredSchema(), null, 2, null, List.of(),
+                null, false, false, "Làm lại một câu"));
+
+        assertThat(normal).hasValue(null);
+        assertThat(UserMessage.findLast(regeneration.get().messages()).orElseThrow().singleText())
+                .contains("Tạo đúng 1 câu hỏi").doesNotContain("JSON lần trước");
+    }
+
+    @Test
     void imageModeSendsTheValidatedSceneBytesAsImageContent() {
         AtomicReference<ChatRequest> sent = new AtomicReference<>();
         var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));

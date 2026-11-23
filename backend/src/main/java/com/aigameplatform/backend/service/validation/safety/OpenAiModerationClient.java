@@ -4,13 +4,16 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import tools.jackson.databind.JsonNode;
@@ -93,14 +96,65 @@ public class OpenAiModerationClient implements ContentModerationClient {
         return texts.stream().map(text -> fresh.getOrDefault(text, SAFE)).toList();
     }
 
+    public ModerationResult moderateImage(byte[] image, String mediaType) {
+        String url = "data:" + mediaType + ";base64," + Base64.getEncoder().encodeToString(image);
+        return requestModeration(List.of(Map.of("type", "image_url", "image_url", Map.of("url", url))), 1)
+                .getFirst();
+    }
+
+    /** Nội dung phiên âm chỉ tồn tại trong lần kiểm tra này, không đi qua bộ nhớ đệm văn bản. */
+    public ModerationResult moderateTranscript(String transcript) {
+        return requestModeration(List.of(transcript), 1).getFirst();
+    }
+
+    public String transcribeMp3(byte[] audio) {
+        requireConfigured();
+        var parts = new LinkedMultiValueMap<String, Object>();
+        parts.add("model", "gpt-transcribe");
+        parts.add("file", new ByteArrayResource(audio) {
+            @Override
+            public String getFilename() {
+                return "speech.mp3";
+            }
+        });
+        JsonNode response;
+        try {
+            response = restClient.post()
+                    .uri("/v1/audio/transcriptions")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(parts)
+                    .retrieve()
+                    .body(JsonNode.class);
+        } catch (RestClientException e) {
+            throw new ModerationUnavailableException("Không phiên âm được tệp MP3", e);
+        }
+        JsonNode transcript = response == null ? null : response.get("text");
+        if (transcript == null || !transcript.isString()) {
+            throw new ModerationUnavailableException("Kết quả phiên âm không đúng định dạng");
+        }
+        return transcript.asString();
+    }
+
+    private void requireConfigured() {
+        if (!isConfigured()) {
+            throw new ModerationUnavailableException("Chưa cấu hình dịch vụ kiểm duyệt");
+        }
+    }
+
     private List<ModerationResult> moderateBatch(List<String> batch) {
+        return requestModeration(batch, batch.size());
+    }
+
+    private List<ModerationResult> requestModeration(List<?> input, int resultCount) {
+        requireConfigured();
         JsonNode response;
         try {
             response = restClient.post()
                     .uri("/v1/moderations")
                     .header("Authorization", "Bearer " + apiKey)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Map.of("model", model, "input", batch))
+                    .body(Map.of("model", model, "input", input))
                     .retrieve()
                     .body(JsonNode.class);
         } catch (RestClientException e) {
@@ -109,12 +163,16 @@ public class OpenAiModerationClient implements ContentModerationClient {
         }
 
         JsonNode results = response == null ? null : response.get("results");
-        if (results == null || !results.isArray() || results.size() != batch.size()) {
+        if (results == null || !results.isArray() || results.size() != resultCount) {
             throw new ModerationUnavailableException("Phản hồi của OpenAI Moderation không đúng định dạng");
         }
         List<ModerationResult> parsed = new ArrayList<>();
         for (JsonNode result : results) {
-            parsed.add(new ModerationResult(result.path("flagged").asBoolean(false), flaggedCategories(result)));
+            JsonNode flagged = result.path("flagged");
+            if (!flagged.isBoolean()) {
+                throw new ModerationUnavailableException("Kết quả kiểm duyệt thiếu trạng thái hợp lệ");
+            }
+            parsed.add(new ModerationResult(flagged.asBoolean(), flaggedCategories(result)));
         }
         return parsed;
     }

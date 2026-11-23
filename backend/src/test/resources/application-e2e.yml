@@ -28,3 +28,7 @@ app:
   generation:
     wording-review:
       enabled: false
+media:
+  storage:
+    local-dir: target/e2e-media
+    base-url: http://localhost:18080/media

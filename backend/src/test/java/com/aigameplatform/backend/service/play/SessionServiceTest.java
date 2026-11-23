@@ -59,7 +59,7 @@ class SessionServiceTest {
         game.setAuthor(author);
         game.setQuestionNum(5);
 
-        when(games.findById("game-1")).thenReturn(Optional.of(game));
+        when(games.findByIdForUpdate("game-1")).thenReturn(Optional.of(game));
         when(teachers.findById("teacher-1")).thenReturn(Optional.of(author));
         when(blockedWordList.findIn(any())).thenReturn(Optional.empty());
     }

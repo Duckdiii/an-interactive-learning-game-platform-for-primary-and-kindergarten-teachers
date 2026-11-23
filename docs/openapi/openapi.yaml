@@ -516,16 +516,18 @@ paths:
         quản. `gameType` không đổi được.
 
         Backend chạy lại đủ 3 lớp kiểm duyệt trước khi lưu, tự ghi `EditLog` (người sửa là giáo viên)
-        và tự so sánh với bản cũ để biết trường nào bị sửa (phục vụ KPI-03, không cần endpoint riêng).
+        và lưu ID giáo viên cùng đường dẫn các trường thay đổi (KPI-03). Nội dung trường không được ghi
+        vào nhật ký. Gửi lại bản không đổi không tạo EditLog. Workspace gọi endpoint này khi tự lưu.
         Lưu bản nháp **không** bắt buộc đủ `hitRegion` của SPOT_THE_TARGET (nới lỏng so với JSON
         Schema DSL, chỉ bắt buộc khi xuất bản).
 
         Game đang `PUBLISHED` vẫn giữ `PUBLISHED`. **Nếu game đang có phiên chưa kết thúc**
         (`WAITING`, `ACTIVE` hoặc `PAUSED`) thì bị từ chối 409 `CONFLICT`.
+        Phiên tự luyện đã hết hạn không chặn lưu.
 
         Game `CUSTOM`: body là nguyên game CPF Game v2.0.0 (`CpfGameEnvelope`), kiểm duyệt theo
         `docs/cpf-game-v2.0.0.md` mục 4. Gửi envelope DSL cho game `CUSTOM` (hoặc ngược lại) thì 400.
-      x-status: extended-pending  # đã cài kiểm duyệt lại và lưu; chưa: 409 khi có phiên chơi, EditLog
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -777,12 +779,13 @@ paths:
       summary: Làm lại một thẻ câu hỏi (UC-06 4b, FLD-14)
       description: |
         Trả câu mới theo DSL, giữ nguyên `id` của thẻ, đã qua kiểm duyệt, có ảnh và giọng đọc.
-        **Endpoint không tự lưu**: Frontend ghép câu mới vào bản đang soạn rồi lưu bằng `PUT` khi giáo
-        viên bấm "Lưu bản nháp". Cách này bảo toàn chỉnh sửa tay chưa lưu ở các thẻ khác.
+        Frontend ghép câu mới vào bản đang soạn rồi tự lưu bằng `PUT`. Cách này bảo toàn chỉnh sửa
+        tay chưa lưu ở các thẻ khác. Endpoint làm lại câu không ghi vào kho.
         Giới hạn 10 yêu cầu mỗi phút.
 
         Game `CUSTOM` không có thẻ câu hỏi DSL: trả 400 `VALIDATION_ERROR` (dùng `regenerate` toàn game).
-        Game chế độ hình ảnh chưa hỗ trợ: trả 400 `VALIDATION_ERROR`.
+        Game chế độ hình ảnh giữ nguyên chế độ chơi và dùng tài nguyên ảnh của câu hoặc thư viện
+        phù hợp. Nếu dịch vụ AI lỗi tạm thời, hệ thống thử lại tối đa hai lần.
       x-status: implemented
       security:
         - bearerAuth: []
@@ -904,9 +907,10 @@ paths:
         | Ảnh (`IMAGE`) | PNG, JPG, WebP | 5MB |
         | Âm thanh (`AUDIO`) | MP3 | 10MB |
 
-        Lỗi 422: `FILE_TOO_LARGE_OR_INVALID_FORMAT` hoặc `UNSAFE_CONTENT` (AI Moderation). Cả hai
-        trường hợp Frontend hiển thị đúng `error.message`, giữ nguyên ảnh/âm thanh cũ của thẻ.
-      x-status: planned
+        Lỗi 422: `FILE_TOO_LARGE_OR_INVALID_FORMAT` hoặc `UNSAFE_CONTENT`. Hệ thống kiểm tra dữ liệu tệp,
+        kiểm duyệt ảnh và kiểm duyệt lời nói được phiên âm từ MP3 trước khi công bố URL.
+        Khi lỗi, frontend giữ nguyên ảnh hoặc âm thanh cũ của thẻ.
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -943,10 +947,54 @@ paths:
                         enum: [IMAGE, AUDIO]
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          description: Dịch vụ kiểm duyệt hoặc xử lý tệp tạm thời không khả dụng.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
         '500':
           $ref: '#/components/responses/InternalError'
+
+  /media/{group}/{name}:
+    get:
+      tags: [Media]
+      operationId: downloadMedia
+      summary: Tải nội dung tệp qua URL do máy chủ cấp
+      x-status: implemented
+      servers:
+        - url: /
+      security: []
+      parameters:
+        - name: group
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [uploads, tts]
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tệp ảnh hoặc âm thanh.
+          content:
+            image/png:
+              schema: { type: string, format: binary }
+            image/jpeg:
+              schema: { type: string, format: binary }
+            audio/mpeg:
+              schema: { type: string, format: binary }
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /games/{gameId}/sessions:
     parameters:

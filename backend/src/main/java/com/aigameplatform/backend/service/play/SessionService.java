@@ -76,7 +76,7 @@ public class SessionService {
         if (teacherPrincipal == null) {
             throw new ApiException(ErrorCode.UNAUTHORIZED, "Yêu cầu đăng nhập tài khoản giáo viên");
         }
-        Game game = games.findById(gameId)
+        Game game = games.findByIdForUpdate(gameId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy trò chơi"));
 
         if (!game.getAuthor().getId().equals(teacherPrincipal.teacherId())) {

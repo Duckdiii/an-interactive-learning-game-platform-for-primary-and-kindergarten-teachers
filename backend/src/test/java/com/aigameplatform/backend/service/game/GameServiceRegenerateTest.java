@@ -17,7 +17,6 @@ import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.Teacher;
 import com.aigameplatform.backend.entity.enums.GameStatus;
 import com.aigameplatform.backend.entity.enums.GameType;
-import com.aigameplatform.backend.entity.enums.SessionStatus;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.GameRepository;
@@ -52,7 +51,7 @@ class GameServiceRegenerateTest {
         when(dsl.toResponse(any(), any())).thenAnswer(inv -> ((ObjectNode) inv.getArgument(1)).put("kind", "DSL"));
         service = new GameService(games, mock(TeacherRepository.class), List.of(dsl), JsonMapper.builder().build(),
                 mock(AiRequestRateLimiter.class), TransactionOperations.withoutTransaction(),
-                mock(GameCurriculumReviewService.class), mock(ObjectProvider.class), new java.util.Random(7), null, sessions, null);
+                mock(GameCurriculumReviewService.class), mock(ObjectProvider.class), new java.util.Random(7), null, sessions, null, null);
     }
 
     private static Game game(String authorId) {
@@ -103,7 +102,7 @@ class GameServiceRegenerateTest {
     @Test
     void gameWithAnActiveSessionIsConflictAndAiIsNotCalled() {
         when(games.findById("g1")).thenReturn(Optional.of(game(OWNER)));
-        when(sessions.existsByGame_IdAndStatus("g1", SessionStatus.ACTIVE)).thenReturn(true);
+        when(sessions.hasUnfinishedSession(eq("g1"), any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> service.regenerateQuestion(OWNER, "g1", "q1", null))
                 .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.CONFLICT));

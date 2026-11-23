@@ -160,40 +160,59 @@ public class GameGenerationService {
         if (feedback != null && !feedback.isBlank()) {
             instruction.append("Gợi ý điều chỉnh từ giáo viên: ").append(feedback.trim()).append("\n");
         }
-        instruction.append("Hãy tạo 1 câu hỏi mới đáp ứng gợi ý của giáo viên (nếu có), phù hợp với chủ đề, khối lớp, môn học và tuân thủ đúng JSON schema.");
+        instruction.append("Hãy tạo 1 câu hỏi mới đáp ứng gợi ý của giáo viên (nếu có), phù hợp với chủ đề, khối lớp, môn học và tuân thủ đúng JSON schema. "
+                + "Điền audioText bằng lời hướng dẫn mới, không tiết lộ đáp án.");
 
         String customInstruction = instruction.toString();
         String previousOutput = null;
         List<ValidationError> previousErrors = List.of();
 
         for (int attemptNumber = 1; attemptNumber <= maxRetries + 1; attemptNumber++) {
-            String raw = callAi(generator, new GenerationAttempt(type, request.topic(), request.subject(),
-                    request.gradeLevel(), schema, curriculumContext, attemptNumber, previousOutput, previousErrors,
-                    imageInput, oddImageMode, avmCatalogMode, customInstruction));
+            String raw;
+            try {
+                raw = callAi(generator, new GenerationAttempt(type, request.topic(), request.subject(),
+                        request.gradeLevel(), schema, curriculumContext, attemptNumber, previousOutput, previousErrors,
+                        imageInput, oddImageMode, avmCatalogMode, customInstruction));
+            } catch (AiGenerationTimeoutException unavailable) {
+                if (attemptNumber > maxRetries) throw unavailable;
+                continue;
+            }
 
             AiOutputReport aiReport = aiOutputValidator.validate(type, raw, imageInput != null || oddImageMode);
-            List<ValidationError> errors;
-            if (!aiReport.valid()) {
-                errors = aiReport.errors();
-            } else {
-                ValidationReport report = validateRegeneratedQuestion(type, aiReport.output(), request, imageInput,
-                        targetQuestionId, baseGameDsl);
-                if (!report.valid()) {
-                    if (report.unsafe()) {
-                        log.warn("Regenerated question rejected by safety validation (attempt {})", attemptNumber);
-                        throw new UnsafeContentException("Nội dung không phù hợp với trẻ em");
+            List<ValidationError> errors = !aiReport.valid() ? aiReport.errors()
+                    : aiReport.output().questions().size() != 1
+                            ? List.of(new ValidationError("$.questions", "Chỉ sinh đúng một câu hỏi"))
+                            : validateOutputAssets(type, aiReport.output(), request, imageInput);
+            if (errors.isEmpty()) {
+                GameDsl generated = factories.create(type, aiReport.output(), request, imageInput);
+                ValidationReport report = validateReplacement(baseGameDsl, currentQuestion,
+                        generated.questions().getFirst(), targetQuestionId);
+                if (report.unsafe()) {
+                    log.warn("Regenerated question rejected by safety validation (attempt {})", attemptNumber);
+                    throw new UnsafeContentException("Nội dung không phù hợp với trẻ em");
+                }
+                if (report.unavailable()) {
+                    throw new AiGenerationTimeoutException("Không kiểm tra được độ an toàn của nội dung, vui lòng thử lại sau");
+                }
+                errors = report.errors();
+                if (report.valid()) {
+                    if (imageInput != null || oddImageMode || avmCatalogMode) {
+                        if (generatedContentReviewer == null)
+                            throw new GeneratedContentUnverifiedException("SEMANTIC_CONTENT_REVIEWER_UNAVAILABLE");
+                        // Chỉ rà câu mới với ảnh của chính câu đó. Câu cũ có thể dùng ảnh cảnh khác.
+                        var review = imageInput == null
+                                ? reviewSemantically(generated, request.topic(), curriculum.evidence())
+                                : reviewSemantically(generated, request.topic(), curriculum.evidence(), imageInput,
+                                        loadOptionImages(generated, imageInput));
+                        if (!review.accepted()) {
+                            errors = review.errors().isEmpty()
+                                    ? List.of(new ValidationError("$.questions[0]", "Chưa xác minh được câu hỏi mới"))
+                                    : review.errors();
+                        }
                     }
-                    if (report.unavailable()) {
-                        throw new AiGenerationTimeoutException("Không kiểm tra được độ an toàn của nội dung, vui lòng thử lại sau");
-                    }
-                    errors = report.errors();
-                } else {
-                    GameDsl tempSingleGame = factories.create(type, aiReport.output(), request, imageInput);
-                    if (tempSingleGame.questions().isEmpty()) {
-                        errors = List.of(new ValidationError("$.questions", "Không có câu hỏi nào được sinh"));
-                    } else {
-                        return tempSingleGame.questions().get(0);
-                    }
+                    if (errors.isEmpty())
+                        return report.game().questions().stream().filter(question -> targetQuestionId.equals(question.id()))
+                                .findFirst().orElseThrow();
                 }
             }
 
@@ -205,67 +224,19 @@ public class GameGenerationService {
         throw new AiGenerationTimeoutException("AI chưa sinh được câu hỏi hợp lệ sau " + (maxRetries + 1) + " lần thử");
     }
 
-    private ValidationReport validateRegeneratedQuestion(GameType type, AiGameOutput output, GameDslRequest request,
-            VisualClozeImageGenerationInput imageInput, String targetQuestionId, GameDsl baseGameDsl) {
-        if (type == GameType.AUDIO_VISUAL_MATCH && request.effectiveVisualClozeMode() == VisualClozeMode.IMAGE) {
-            var avm = (com.aigameplatform.backend.dto.dsl.ai.AudioVisualMatchAiOutput) output;
-            var catalog = notoCatalog;
-            var problems = new java.util.ArrayList<ValidationError>();
-            for (int i = 0; i < avm.questions().size(); i++) {
-                var question = avm.questions().get(i);
-                var ids = new java.util.ArrayList<String>();
-                ids.add(question.correct().visualPrompt());
-                question.distractors().forEach(choice -> ids.add(choice.visualPrompt()));
-                var concepts = ids.stream().map(id -> catalog.find(id).map(asset -> asset.conceptId()).orElse(""))
-                        .toList();
-                if (ids.stream().anyMatch(id -> catalog.find(id).isEmpty())
-                        || new java.util.HashSet<>(ids).size() != ids.size()
-                        || new java.util.HashSet<>(concepts).size() != concepts.size())
-                    problems.add(new ValidationError("$.questions[" + i + "]", "Dùng các mã ảnh khác nhau có trong catalog"));
-            }
-            if (!problems.isEmpty()) return new ValidationReport(problems, null);
+    private ValidationReport validateReplacement(GameDsl baseGame, QuestionDsl current, QuestionDsl candidate,
+            String targetQuestionId) {
+        ObjectNode gameTree = jsonMapper.valueToTree(baseGame);
+        ArrayNode questions = (ArrayNode) gameTree.get("questions");
+        for (int i = 0; i < questions.size(); i++) {
+            if (!targetQuestionId.equals(questions.get(i).path("id").asString(""))) continue;
+            ObjectNode updated = jsonMapper.valueToTree(candidate);
+            updated.put("id", targetQuestionId).put("timeLimitSeconds", current.timeLimitSeconds())
+                    .put("points", current.points());
+            questions.set(i, updated);
+            return validationService.validate(gameTree);
         }
-        if (type == GameType.ODD_ONE_OUT && request.effectiveVisualClozeMode() == VisualClozeMode.IMAGE) {
-            var odd = (com.aigameplatform.backend.dto.dsl.ai.OddOneOutAiOutput) output;
-            var catalog = notoCatalog;
-            var problems = new java.util.ArrayList<ValidationError>();
-            for (int i = 0; i < odd.questions().size(); i++) {
-                var question = odd.questions().get(i);
-                if (question.items().stream().anyMatch(id -> catalog.find(id).isEmpty())
-                        || new java.util.HashSet<>(question.items()).size() != question.items().size())
-                    problems.add(new ValidationError("$.questions[" + i + "].items", "Dùng các mã ảnh khác nhau có trong catalog"));
-            }
-            if (!problems.isEmpty()) return new ValidationReport(problems, null);
-        }
-        if (imageInput != null) {
-            List<ValidationError> assetErrors = validateSuppliedOptionAssets(output, imageInput);
-            if (!assetErrors.isEmpty()) return new ValidationReport(assetErrors, null);
-        }
-
-        GameDsl tempSingleGame = factories.create(type, output, request, imageInput);
-        if (tempSingleGame.questions().isEmpty()) {
-            return new ValidationReport(List.of(new ValidationError("$.questions", "Không có câu hỏi")), null);
-        }
-
-        QuestionDsl candidate = tempSingleGame.questions().get(0);
-        ObjectNode gameTree = jsonMapper.valueToTree(baseGameDsl);
-        ArrayNode questionsArray = (ArrayNode) gameTree.get("questions");
-        boolean replaced = false;
-        if (questionsArray != null) {
-            for (int i = 0; i < questionsArray.size(); i++) {
-                if (targetQuestionId.equals(questionsArray.get(i).path("id").asString(""))) {
-                    ObjectNode candidateNode = jsonMapper.valueToTree(candidate);
-                    candidateNode.put("id", targetQuestionId);
-                    questionsArray.set(i, candidateNode);
-                    replaced = true;
-                    break;
-                }
-            }
-        }
-        if (!replaced) {
-            return validationService.validate(jsonMapper.valueToTree(tempSingleGame));
-        }
-        return validationService.validate(gameTree);
+        throw new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy câu hỏi " + targetQuestionId);
     }
 
     /** Sửa game đã có theo chat: như {@link #generate} nhưng mỗi lần gọi AI mang theo {@code revision} (game hiện tại + yêu cầu). */
@@ -546,6 +517,14 @@ public class GameGenerationService {
 
     private ValidationReport validate(GameType type, AiGameOutput output, GameDslRequest request,
             VisualClozeImageGenerationInput imageInput) {
+        List<ValidationError> errors = validateOutputAssets(type, output, request, imageInput);
+        if (!errors.isEmpty()) return new ValidationReport(errors, null);
+        GameDsl game = factories.create(type, output, request, imageInput);
+        return validationService.validate(jsonMapper.valueToTree(game));
+    }
+
+    private List<ValidationError> validateOutputAssets(GameType type, AiGameOutput output, GameDslRequest request,
+            VisualClozeImageGenerationInput imageInput) {
         if (type == GameType.AUDIO_VISUAL_MATCH && request.effectiveVisualClozeMode() == VisualClozeMode.IMAGE) {
             var avm = (com.aigameplatform.backend.dto.dsl.ai.AudioVisualMatchAiOutput) output;
             var catalog = notoCatalog;
@@ -562,7 +541,7 @@ public class GameGenerationService {
                         || new java.util.HashSet<>(concepts).size() != concepts.size())
                     problems.add(new ValidationError("$.questions[" + i + "]", "Dùng các mã ảnh khác nhau có trong catalog"));
             }
-            if (!problems.isEmpty()) return new ValidationReport(problems, null);
+            if (!problems.isEmpty()) return problems;
         }
         if (type == GameType.ODD_ONE_OUT && request.effectiveVisualClozeMode() == VisualClozeMode.IMAGE) {
             var odd = (com.aigameplatform.backend.dto.dsl.ai.OddOneOutAiOutput) output;
@@ -574,14 +553,9 @@ public class GameGenerationService {
                         || new java.util.HashSet<>(question.items()).size() != question.items().size())
                     problems.add(new ValidationError("$.questions[" + i + "].items", "Dùng các mã ảnh khác nhau có trong catalog"));
             }
-            if (!problems.isEmpty()) return new ValidationReport(problems, null);
+            if (!problems.isEmpty()) return problems;
         }
-        if (imageInput != null) {
-            List<ValidationError> assetErrors = validateSuppliedOptionAssets(output, imageInput);
-            if (!assetErrors.isEmpty()) return new ValidationReport(assetErrors, null);
-        }
-        GameDsl game = factories.create(type, output, request, imageInput);
-        return validationService.validate(jsonMapper.valueToTree(game));
+        return imageInput == null ? List.of() : validateSuppliedOptionAssets(output, imageInput);
     }
 
     private List<ValidationError> validateSuppliedOptionAssets(AiGameOutput output,

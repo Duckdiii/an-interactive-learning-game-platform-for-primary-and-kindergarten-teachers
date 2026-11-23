@@ -769,6 +769,7 @@ export const viText = {
       cancelRequest: 'Hủy yêu cầu',
       saveFirst: 'Hãy lưu trước',
       saveFirstHint: 'Câu này chưa có trên máy chủ. Hãy đợi trò chơi tự lưu rồi mới nhờ AI làm lại.',
+      saveImageSourceHint: 'Hãy đợi câu ảnh tự lưu để AI dùng đúng hình đang hiển thị.',
       applyingHint: 'Đang áp dụng chỉnh sửa, đợi một chút rồi bấm lại.',
       restoreFirstHint: 'Hãy chọn "Khôi phục bản chỉnh sửa" hoặc "Bỏ bản chỉnh sửa" ở trên trước.',
       appliedNote: 'Câu mới sẽ được tự lưu sau ít giây.',

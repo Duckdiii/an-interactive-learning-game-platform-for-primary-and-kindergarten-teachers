@@ -17,5 +17,14 @@ export type RegenerateQuestionRequest = MockRegenerateRequest
 export function regenerateQuestion(request: RegenerateQuestionRequest, options: { signal?: AbortSignal } = {}): Promise<RegeneratedQuestion> {
   if (isMock('ai')) return mockRegenerateQuestion(request, options.signal)
 
-  return postRegenerateQuestion(request.gameId, request.questionId, { feedback: request.feedback, signal: options.signal })
+  const { current, gameType, gameId, questionId, feedback } = request
+  const withImageReview =
+    (gameType === 'VISUAL_CLOZE' && 'sceneImageUrl' in current) ||
+    (gameType === 'ODD_ONE_OUT' && 'items' in current && current.items.some((item) => 'assetId' in item)) ||
+    gameType === 'AUDIO_VISUAL_MATCH'
+  return postRegenerateQuestion(gameId, questionId, {
+    feedback,
+    signal: options.signal,
+    ...(withImageReview ? { withImageReview } : {}),
+  })
 }

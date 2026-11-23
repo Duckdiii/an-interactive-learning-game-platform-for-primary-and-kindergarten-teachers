@@ -40,6 +40,7 @@ class GameCurriculumReviewPersistenceTest extends AbstractPostgresTest {
         game = new Game(); game.setAuthor(teacher); game.setTitle(dsl.metadata().title());
         game.setGameType(dsl.gameType()); game.setGrade(dsl.metadata().gradeLevel()); game.setSubject(dsl.metadata().subject());
         game.setSchemaVersion(dsl.schemaVersion()); game.setQuestionNum(dsl.questions().size());
+        var questions = new java.util.ArrayList<com.aigameplatform.backend.entity.question.QuestionGame>();
         for (int i = 0; i < dsl.questions().size(); i++) {
             var question = dsl.questions().get(i); var entity = new QuizQuestion();
             entity.setItemIndex(i); entity.setText(question.questionText());
@@ -47,8 +48,9 @@ class GameCurriculumReviewPersistenceTest extends AbstractPostgresTest {
             entity.setOptions(question.options().stream().map(TextChoiceDsl::text).toList());
             for (int j = 0; j < question.options().size(); j++)
                 if (question.options().get(j).id().equals(question.correctOptionId())) entity.setCorrectIndex(j);
-            game.getQuestions().add(entity);
+            questions.add(entity);
         }
+        game.replaceQuestions(questions);
         var source = new CurriculumSource("fixture.pdf", "a".repeat(64), "fixture-curriculum-v1", "fixture-v1", 1);
         var chunk = new CurriculumRAGService.RetrievedChunk("fixture-outcome", dsl.metadata().subject(), dsl.metadata().gradeLevel(),
                 "Fixture topic", "Fixture outcome", 0.9, "fixture.pdf", List.of(1), List.of(1), "fixture-curriculum-v1");

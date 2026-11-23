@@ -49,6 +49,9 @@ public class SecurityConfig {
                 .requestMatchers("/ws/live-arena/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions",
                         "/api/sessions/by-code/*", "/api/sessions/*/leaderboard", "/api/sessions/*/my-result").permitAll()
+                .requestMatchers(HttpMethod.GET, "/media/uploads/*", "/media/tts/*").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/media/uploads/*", "/media/tts/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/media/upload").hasAuthority("ROLE_TEACHER")
                 .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/join",
                         "/api/sessions/*/interactions").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/sessions/*/my-team").permitAll()
@@ -70,11 +73,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList(allowedOrigins));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Participant-Id"));
         config.setAllowCredentials(true);
 
+        CorsConfiguration publicMedia = new CorsConfiguration();
+        publicMedia.setAllowedOrigins(List.of("*"));
+        publicMedia.setAllowedMethods(List.of("GET", "HEAD", "OPTIONS"));
+        publicMedia.setAllowedHeaders(List.of("Range"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/media/**", publicMedia);
         source.registerCorsConfiguration("/**", config);
         return source;
     }

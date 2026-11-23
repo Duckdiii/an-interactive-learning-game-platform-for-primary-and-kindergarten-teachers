@@ -92,6 +92,7 @@ class AssetBindingGameContentGeneratorTest {
                     "app.ai.gemini.api-key", "fixture-key")));
 
             context.registerBean("gameGenerationChatModel", ChatModel.class, () -> mock(ChatModel.class));
+            context.registerBean("questionRegenerationChatModel", ChatModel.class, () -> mock(ChatModel.class));
             context.registerBean(JsonMapper.class, () -> MAPPER);
             context.registerBean(GameContentStrategyRegistry.class,
                     () -> new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));
@@ -120,6 +121,7 @@ class AssetBindingGameContentGeneratorTest {
                     "app.ai.gemini.api-key", "fixture-key")));
 
             context.registerBean("gameGenerationChatModel", ChatModel.class, () -> mock(ChatModel.class));
+            context.registerBean("questionRegenerationChatModel", ChatModel.class, () -> mock(ChatModel.class));
             context.registerBean(JsonMapper.class, () -> MAPPER);
             context.registerBean(GameContentStrategyRegistry.class,
                     () -> new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER)));

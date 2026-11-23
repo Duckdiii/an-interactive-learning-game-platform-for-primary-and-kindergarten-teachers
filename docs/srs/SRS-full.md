@@ -2086,7 +2086,7 @@ Bảng 5.1: Ma trận Truy xuất Yêu cầu (Requirements Traceability Matrix)
 | FR-01 | UC-01 | FLD-45, 46, 47, 48 | NFR-02 | — | TS-09* | Backend: đã cài đăng ký (POST /api/auth/register). Frontend: có trang đăng ký. |
 | FR-02 | UC-02 | FLD-01, 02, 03, 04, 15, 38, 50 | NFR-01, 02, 03 | KPI-01, 02 | TS-01, 02, 03, 05, 06, 10*, 11*, 23* | Một phần: đã có dịch vụ điều phối sinh game, 10 Strategy, validator 3 lớp, truy xuất YCCĐ (RAG) và đối chiếu chương trình. Chưa có endpoint sinh game, Planner, Critic, Media Preparer. |
 | FR-03 | UC-03 | FLD-16, 17, 18 | NFR-01, 04 | KPI-05 | TS-14* | Một phần: renderer Quiz và Matching (chế độ preview). |
-| FR-04 | UC-04 | FLD-05, 06, 07, 11, 12, 14 | NFR-01 | KPI-03 | TS-12* | Một phần: có khung giao diện WorkspaceEditor; chưa nối API lưu và sinh lại. |
+| FR-04 | UC-04 | FLD-05, 06, 07, 11, 12, 14 | NFR-01 | KPI-03 | TS-12* | Workspace đã nối API mở, tự lưu và làm lại một câu. Luồng tự lưu và ngoại lệ cập nhật tại UC-04. |
 | FR-05 | UC-05 | FLD-05, 06, 07, 11, 12 | NFR-02 | KPI-03 | TS-03, 12* | Chưa. |
 | FR-06 | UC-06 | FLD-14 | NFR-01, 03 | KPI-04 | TS-02, 06, 21* | Chưa (cơ chế sinh lại kèm lỗi cụ thể đã có trong dịch vụ sinh game). |
 | FR-07 | UC-07 | FLD-30 | NFR-05 | KPI-02 | TS-13* | Chưa. Đã có DSL, entity và migration V4 làm nền. |

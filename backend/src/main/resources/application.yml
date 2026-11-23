@@ -3,6 +3,10 @@ spring:
     import: optional:file:./.env[.properties]
   application:
     name: aigame-backend
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
 
   # SMTP cho thư đặt lại mật khẩu; chỉ dùng khi app.mail.enabled=true (MAIL_ENABLED).
   mail:
@@ -63,6 +67,11 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
+media:
+  storage:
+    local-dir: ${MEDIA_STORAGE_LOCAL_DIR:target/media-storage}
+    base-url: ${MEDIA_STORAGE_BASE_URL:http://localhost:${server.port}/media}
 
 # Swagger UI (/swagger-ui.html) và spec sinh từ controller (/v3/api-docs). Mặc định bật để dev xem;
 # môi trường triển khai thật đặt SWAGGER_ENABLED=false.
