@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,8 +33,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class TextSafetyControllerTest {
     private final ContentModerationClient moderation = mock(ContentModerationClient.class);
     private final ContentSafetyCheck safety = new ContentSafetyCheck(new BlockedWordList(List.of("từ cấm")), moderation, false);
-    private final MockMvc mvc = MockMvcBuilders.standaloneSetup(
-            new TextSafetyController(safety, new AiRequestRateLimiter(Clock.systemUTC())))
+    private final AiRequestRateLimiter requests = new AiRequestRateLimiter(Clock.systemUTC());
+    private final MockMvc mvc = MockMvcBuilders.standaloneSetup(new TextSafetyController(safety, requests))
             .setControllerAdvice(new GlobalExceptionHandler())
             .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
             .build();
@@ -71,6 +72,22 @@ class TextSafetyControllerTest {
                 .andExpect(jsonPath("$.error.code").value("UNSAFE_CONTENT"));
         mvc.perform(request("{\"texts\":[\"con cá\"]}")).andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.error.code").value("SERVICE_UNAVAILABLE"));
+    }
+
+    @Test
+    void overlappingChecksReturnTextSafetyMessageAndCanBeRetried() throws Exception {
+        authenticate();
+        var check = request("{\"texts\":[\"con mèo\"]}");
+        try (var first = requests.acquire("text-safety:teacher-1")) {
+            mvc.perform(check).andExpect(status().isTooManyRequests())
+                    .andExpect(header().string("Retry-After", "5"))
+                    .andExpect(jsonPath("$.error.code").value("RATE_LIMITED"))
+                    .andExpect(jsonPath("$.error.message").value(
+                            "Đang kiểm tra nội dung chữ trước đó. Vui lòng chờ một lát rồi thử lại."));
+        }
+
+        mvc.perform(check).andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.safe").value(true));
     }
 
     private static MockHttpServletRequestBuilder request(String json) {

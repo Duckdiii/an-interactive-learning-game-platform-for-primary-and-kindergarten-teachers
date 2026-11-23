@@ -35,7 +35,8 @@ public class TextSafetyController {
         var texts = request.texts().stream().map(String::strip).filter(text -> !text.isEmpty())
                 .map(text -> new TextEntry("texts", text)).toList();
         if (!texts.isEmpty()) {
-            try (var permit = requests.acquire("text-safety:" + teacher.teacherId(), 60)) {
+            try (var permit = requests.acquire("text-safety:" + teacher.teacherId(), 60,
+                    "Đang kiểm tra nội dung chữ trước đó. Vui lòng chờ một lát rồi thử lại.")) {
                 safety.check(texts).stream().findFirst().ifPresent(error -> {
                     if (error.kind() == ValidationError.Kind.UNAVAILABLE) {
                         throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, error.message());

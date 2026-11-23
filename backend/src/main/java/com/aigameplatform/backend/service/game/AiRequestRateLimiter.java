@@ -35,12 +35,12 @@ public class AiRequestRateLimiter {
 
     /** Bắt đầu một lượt của {@code key}; vượt giới hạn hoặc đang có lượt chạy thì ném 429. Gọi {@link Permit#close()} khi xong. */
     public Permit acquire(String key) {
-        return acquire(key, LIMIT);
+        return acquire(key, LIMIT, "Trợ lý đang sửa yêu cầu trước của cô, vui lòng đợi xong rồi nhắn tiếp");
     }
 
-    public Permit acquire(String key, int limit) {
+    public Permit acquire(String key, int limit, String busyMessage) {
         if (!running.add(key)) {
-            throw new RateLimitedException("Trợ lý đang sửa yêu cầu trước của cô, vui lòng đợi xong rồi nhắn tiếp", BUSY_RETRY_SECONDS);
+            throw new RateLimitedException(busyMessage, BUSY_RETRY_SECONDS);
         }
         try {
             record(key, limit);

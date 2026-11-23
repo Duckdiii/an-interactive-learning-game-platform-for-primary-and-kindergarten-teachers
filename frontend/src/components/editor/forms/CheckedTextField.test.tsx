@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { setMockScenario } from '../../../services/mock/mockRuntime'
@@ -122,6 +123,31 @@ describe('CheckedTextField', () => {
 
     await waitFor(() => expect(committed()).toBe('Quả cam'))
     expect(screen.queryAllByText(/Chưa kiểm tra được từ ngữ/)).toHaveLength(0)
+  })
+
+  it('giữ nội dung cũ khi kiểm tra bị giới hạn và áp chữ sau khi thử lại', async () => {
+    const rateLimited = Object.assign(new AxiosError('rate limited'), {
+      response: { status: 429, data: { error: { code: 'RATE_LIMITED' } } },
+    })
+    const check = vi.spyOn(safety, 'checkTextSafety')
+      .mockRejectedValueOnce(rateLimited)
+      .mockResolvedValueOnce({ safe: true })
+    const user = userEvent.setup()
+
+    render(<Harness />)
+    fireEvent.change(box(), { target: { value: 'Quả cam' } })
+    fireEvent.blur(box())
+
+    const retry = await screen.findByRole('button', { name: 'Kiểm tra lại' })
+    expect(box()).toHaveAccessibleDescription(/Hệ thống đang bận kiểm tra từ ngữ/)
+    expect(box()).toHaveValue('Quả cam')
+    expect(committed()).toBe('Có mấy quả táo?')
+    expect(check).toHaveBeenCalledTimes(1)
+
+    await user.click(retry)
+    await waitFor(() => expect(committed()).toBe('Quả cam'))
+    expect(check).toHaveBeenCalledTimes(2)
+    expect(screen.queryByRole('button', { name: 'Kiểm tra lại' })).not.toBeInTheDocument()
   })
 
   it('gõ lại đúng như cũ thì không cần kiểm tra và không đổi gì', async () => {
