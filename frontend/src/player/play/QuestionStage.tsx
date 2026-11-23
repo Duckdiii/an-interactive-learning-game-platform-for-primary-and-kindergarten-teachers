@@ -239,7 +239,10 @@ export default function QuestionStage({ gameType, subject, api, sessionId, title
         {/* QuestionStage dựng lại theo từng câu (key ở cha) nên hiệu ứng question-in chạy mỗi lần sang câu mới. */}
         <div className="question-in h-full w-full">
           <Renderer question={question} profile={profile} onSubmit={submit} playAudio={isAudioVisual ? replayPrompt : undefined}
-            answerDisabled={isAudioVisual && (remaining === 0 || result?.status === 'TIMEOUT' || result?.status === 'SKIPPED')} />
+            answerDisabled={
+              (isAudioVisual && (remaining === 0 || result?.status === 'TIMEOUT' || result?.status === 'SKIPPED')) ||
+              (gameType === 'MEMORY_CARD' && (remaining === 0 || result !== null))
+            } />
         </div>
       </PlayerShell>
       </div>
