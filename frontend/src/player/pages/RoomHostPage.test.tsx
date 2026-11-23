@@ -6,8 +6,9 @@ import RoomHostPage from './RoomHostPage'
 const mocks = vi.hoisted(() => ({ open: vi.fn(), available: vi.fn(), useGame: vi.fn() }))
 
 vi.mock('../../hooks/useGame', () => ({ useGame: mocks.useGame }))
-vi.mock('../room/getRoomApi', () => ({ getRoomApi: async () => ({ open: mocks.open }), isRoomAvailable: mocks.available }))
+vi.mock('../room/getRoomApi', () => ({ getRoomApi: async () => ({ open: mocks.open }), usesMockRoom: mocks.available }))
 vi.mock('../renderers', () => ({ getPlayableRenderer: (type: string) => (type === 'QUIZ' ? () => null : undefined) }))
+vi.mock('../room/LiveRoomHost', () => ({ default: () => <p>Chọn lớp cho phòng thật</p> }))
 vi.mock('../room/RoomTeacherScreen', () => ({ default: ({ room }: { room: { pin: string; joinUrl: string } }) => <p>PIN {room.pin} tại {room.joinUrl}</p> }))
 
 const GAME = { gameId: 'g1', gameType: 'QUIZ', metadata: { title: 'Đếm', subject: 'MATH', gradeLevel: 'GRADE_1', topic: 'Đếm' }, questions: [{}] }
@@ -70,11 +71,11 @@ describe('RoomHostPage', () => {
     expect(await screen.findByRole('heading', { name: 'Chưa mở được phòng' })).toBeInTheDocument()
   })
 
-  it('bản build thật: không gọi mở phòng', () => {
+  it('chế độ thật: cho chọn lớp trước khi mở', () => {
     mocks.available.mockReturnValue(false)
     open()
 
-    expect(screen.getByRole('heading', { name: 'Phòng thi đấu chưa mở được' })).toBeInTheDocument()
+    expect(screen.getByText('Chọn lớp cho phòng thật')).toBeInTheDocument()
     expect(mocks.open).not.toHaveBeenCalled()
   })
 

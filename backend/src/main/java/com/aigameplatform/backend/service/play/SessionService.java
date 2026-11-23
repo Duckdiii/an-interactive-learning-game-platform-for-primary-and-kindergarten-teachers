@@ -87,7 +87,7 @@ public class SessionService {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chỉ có thể tạo phòng chơi từ trò chơi đã xuất bản (PUBLISHED)");
         }
 
-        if (sessions.existsByGame_IdAndStatusIn(gameId, List.of(SessionStatus.ACTIVE, SessionStatus.WAITING))) {
+        if (sessions.existsByGame_IdAndAccessCodeIsNotNullAndStatusIn(gameId, List.of(SessionStatus.ACTIVE, SessionStatus.WAITING, SessionStatus.PAUSED))) {
             throw new ApiException(ErrorCode.CONFLICT, "Trò chơi đã có phiên đang chờ hoặc đang diễn ra");
         }
 
@@ -502,7 +502,6 @@ public class SessionService {
         }
 
         Participant participant = new Participant();
-        participant.setId(UUID.randomUUID().toString());
         participant.setStudentNickname(nickname);
         participant.setScore(0);
         participant.setPlayedAt(LocalDateTime.now());
@@ -519,7 +518,7 @@ public class SessionService {
         }
 
         session.getParticipants().add(participant);
-        sessions.save(session);
+        sessions.flush();
 
         liveArenaService.addParticipant(sessionId, new ParticipantDto(participant.getId(), participant.getStudentNickname(), true));
 

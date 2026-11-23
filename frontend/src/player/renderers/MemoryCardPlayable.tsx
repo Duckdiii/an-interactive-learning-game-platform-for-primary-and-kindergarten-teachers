@@ -28,6 +28,7 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
   const [hidingCardIds, setHidingCardIds] = useState<string[]>([])
   const [matchedPairIds, setMatchedPairIds] = useState<string[]>([])
   const [flips, setFlips] = useState(0)
+  const [wrongPairs, setWrongPairs] = useState<[string, string][]>([])
   const [isLocked, setIsLocked] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
   const cardStyle = cardStyleOf(usePresentation()?.world)
@@ -91,10 +92,14 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
         if (nextMatched.length === question.pairs.length) {
           setIsCompleted(true)
           playSound('/sounds/correct.wav')
-          void onSubmit({ matchedPairIds: nextMatched, flips: nextFlips })
+          void onSubmit({ matchedPairIds: nextMatched, flips: nextFlips, wrongPairs })
         }
       } else {
         // Chưa khớp, đợi 800ms để bé nhìn rồi úp lại
+        const pair: [string, string] = firstCard.pairId < card.pairId
+          ? [firstCard.pairId, card.pairId]
+          : [card.pairId, firstCard.pairId]
+        setWrongPairs((current) => current.some(([a, b]) => a === pair[0] && b === pair[1]) ? current : [...current, pair])
         setIsLocked(true)
         setTimeout(() => {
           setFlippedCardIds([])

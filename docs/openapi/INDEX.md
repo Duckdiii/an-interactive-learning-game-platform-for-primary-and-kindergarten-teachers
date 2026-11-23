@@ -9,7 +9,7 @@
 - `servers`: dòng 27–30
 - `tags`: dòng 31–73
 - `paths`: dòng 74–2536
-- `components`: dòng 2537–4831
+- `components`: dòng 2537–4839
 
 ## Operation
 
@@ -171,34 +171,34 @@
 | schemas | `MatchingStudentQuestion` | 3857–3913 |
 | schemas | `StudentVisualClozeImageQuestion` | 3915–3959 |
 | schemas | `InteractionBase` | 3961–3972 |
-| schemas | `InteractionRequest` | 3974–4114 |
-| schemas | `InteractionResult` | 4116–4152 |
-| schemas | `LeaderboardParticipant` | 4154–4171 |
-| schemas | `LeaderboardTeam` | 4173–4193 |
-| schemas | `Leaderboard` | 4195–4207 |
-| schemas | `MyResult` | 4209–4254 |
-| schemas | `SharedGameInfo` | 4256–4266 |
-| schemas | `PlayRequest` | 4268–4276 |
-| schemas | `PlayResult` | 4278–4297 |
-| schemas | `SessionListItem` | 4299–4317 |
-| schemas | `SessionDetail` | 4319–4364 |
-| schemas | `SessionResults` | 4366–4423 |
-| schemas | `QuestionInsightDetail` | 4425–4464 |
-| schemas | `ReviewNeeded` | 4466–4489 |
-| schemas | `GameInsights` | 4491–4521 |
-| schemas | `QuestionInsight` | 4523–4555 |
-| schemas | `ParticipantInteraction` | 4557–4580 |
-| schemas | `PageInfo` | 4582–4597 |
-| schemas | `TeacherAccountStatus` | 4599–4601 |
-| schemas | `AdminBudgetConfig` | 4603–4612 |
-| schemas | `AdminTeacher` | 4613–4631 |
-| schemas | `AdminCreateTeacherRequest` | 4633–4648 |
-| schemas | `AuditResult` | 4650–4652 |
-| schemas | `AuditLogEntry` | 4654–4677 |
-| schemas | `ServiceName` | 4679–4681 |
-| schemas | `ServiceUsage` | 4683–4714 |
-| schemas | `UsageReport` | 4716–4746 |
-| schemas | `SystemStatus` | 4748–4771 |
-| schemas | `AiConfigInput` | 4773–4794 |
-| schemas | `AiConfigVersion` | 4796–4821 |
-| schemas | `BlockedWords` | 4823–4830 |
+| schemas | `InteractionRequest` | 3974–4122 |
+| schemas | `InteractionResult` | 4124–4160 |
+| schemas | `LeaderboardParticipant` | 4162–4179 |
+| schemas | `LeaderboardTeam` | 4181–4201 |
+| schemas | `Leaderboard` | 4203–4215 |
+| schemas | `MyResult` | 4217–4262 |
+| schemas | `SharedGameInfo` | 4264–4274 |
+| schemas | `PlayRequest` | 4276–4284 |
+| schemas | `PlayResult` | 4286–4305 |
+| schemas | `SessionListItem` | 4307–4325 |
+| schemas | `SessionDetail` | 4327–4372 |
+| schemas | `SessionResults` | 4374–4431 |
+| schemas | `QuestionInsightDetail` | 4433–4472 |
+| schemas | `ReviewNeeded` | 4474–4497 |
+| schemas | `GameInsights` | 4499–4529 |
+| schemas | `QuestionInsight` | 4531–4563 |
+| schemas | `ParticipantInteraction` | 4565–4588 |
+| schemas | `PageInfo` | 4590–4605 |
+| schemas | `TeacherAccountStatus` | 4607–4609 |
+| schemas | `AdminBudgetConfig` | 4611–4620 |
+| schemas | `AdminTeacher` | 4621–4639 |
+| schemas | `AdminCreateTeacherRequest` | 4641–4656 |
+| schemas | `AuditResult` | 4658–4660 |
+| schemas | `AuditLogEntry` | 4662–4685 |
+| schemas | `ServiceName` | 4687–4689 |
+| schemas | `ServiceUsage` | 4691–4722 |
+| schemas | `UsageReport` | 4724–4754 |
+| schemas | `SystemStatus` | 4756–4779 |
+| schemas | `AiConfigInput` | 4781–4802 |
+| schemas | `AiConfigVersion` | 4804–4829 |
+| schemas | `BlockedWords` | 4831–4838 |

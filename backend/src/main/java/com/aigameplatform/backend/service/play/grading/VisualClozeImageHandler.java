@@ -72,7 +72,7 @@ public class VisualClozeImageHandler implements StudentGameHandler {
                 .filter(detail -> detail.getQuestion().getId().equals(question.getId())
                         && detail.getStatus() == InteractionStatus.IN_PROGRESS)
                 .findFirst().ifPresent(detail -> {
-                    node.set("acceptedPlacements", mapper.valueToTree(placements(progressPlacements(detail))));
+                    node.set("acceptedPlacements", mapper.valueToTree(placements(progressPlacements(storedProgress(detail)))));
                     node.put("elapsedTimeMs", detail.getTimeSpentMs());
                 });
     }
@@ -83,14 +83,17 @@ public class VisualClozeImageHandler implements StudentGameHandler {
         Participant participant = c.participant();
         PlayInteractionDetail detail = c.existing();
         Map<String, String> expected = publicMapping(question, c.salt(), c.index());
-        Map<String, String> accepted = detail == null ? new LinkedHashMap<>() : progressPlacements(detail);
+        ObjectNode progress = storedProgress(detail);
+        Map<String, String> accepted = progressPlacements(progress);
         if (c.outcome() != null || PlayRecorder.isOverTime(question, c.timeSpentMs())) {
             InteractionStatus terminal = "TIMEOUT".equals(c.outcome()) || PlayRecorder.isOverTime(question, c.timeSpentMs())
                     ? InteractionStatus.TIMEOUT : InteractionStatus.SKIPPED;
             PlayInteractionDetail saved = prepareDetail(detail, question, c.timeSpentMs());
             saved.setStatus(terminal);
             saved.setPointsEarned(0);
-            saved.setAnswerJson(mapper.valueToTree(Map.of("placements", placements(accepted), "outcome", terminal.name())).toString());
+            progress.set("placements", mapper.valueToTree(placements(accepted)));
+            progress.put("outcome", terminal.name());
+            saved.setAnswerJson(progress.toString());
             saved.setCorrectAnswerJson(null);
             attachIfNew(participant, detail, saved);
             recorder.markCompletedIfTerminal(participant, c.session().getGame());
@@ -116,13 +119,17 @@ public class VisualClozeImageHandler implements StudentGameHandler {
 
         boolean placementCorrect = optionId.equals(expected.get(blankId));
         if (placementCorrect) accepted.put(blankId, optionId);
+        else if (!progress.has("firstWrongPlacement")) {
+            progress.set("firstWrongPlacement", mapper.valueToTree(Map.of("blankId", blankId, "optionId", optionId)));
+        }
         boolean complete = placementCorrect && accepted.size() == expected.size();
         InteractionStatus responseStatus = complete ? InteractionStatus.CORRECT
                 : placementCorrect ? InteractionStatus.IN_PROGRESS : InteractionStatus.INCORRECT;
         PlayInteractionDetail saved = prepareDetail(detail, question, c.timeSpentMs());
         saved.setStatus(complete ? InteractionStatus.CORRECT : InteractionStatus.IN_PROGRESS);
         saved.setPointsEarned(complete ? PlayRecorder.points(question, c.timeSpentMs()) : 0);
-        saved.setAnswerJson(mapper.valueToTree(Map.of("placements", placements(accepted))).toString());
+        progress.set("placements", mapper.valueToTree(placements(accepted)));
+        saved.setAnswerJson(progress.toString());
         saved.setCorrectAnswerJson(complete ? mapper.valueToTree(Map.of("placements", placements(expected))).toString() : null);
         attachIfNew(participant, detail, saved);
         if (complete) participant.setScore(participant.getScore() + saved.getPointsEarned());
@@ -183,12 +190,16 @@ public class VisualClozeImageHandler implements StudentGameHandler {
         return result;
     }
 
-    private Map<String, String> progressPlacements(PlayInteractionDetail detail) {
-        if (detail == null || detail.getAnswerJson() == null) return new LinkedHashMap<>();
+    private Map<String, String> progressPlacements(ObjectNode progress) {
+        JsonNode saved = progress.get("placements");
+        return saved == null ? new LinkedHashMap<>() : parsePlacements(saved);
+    }
+
+    private ObjectNode storedProgress(PlayInteractionDetail detail) {
+        if (detail == null || detail.getAnswerJson() == null) return mapper.createObjectNode();
         try {
-            JsonNode progress = mapper.readTree(detail.getAnswerJson());
-            JsonNode placements = progress == null ? null : progress.get("placements");
-            return placements == null ? new LinkedHashMap<>() : parsePlacements(placements);
+            if (mapper.readTree(detail.getAnswerJson()) instanceof ObjectNode progress) return progress;
+            throw new IllegalStateException("Stored placement progress is not an object");
         } catch (JacksonException invalid) {
             throw new IllegalStateException("Stored placement progress is unreadable", invalid);
         }

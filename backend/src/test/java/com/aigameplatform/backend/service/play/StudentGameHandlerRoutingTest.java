@@ -13,6 +13,7 @@ import com.aigameplatform.backend.service.play.grading.AudioVisualMatchHandler;
 import com.aigameplatform.backend.service.play.grading.OddOneOutImageHandler;
 import com.aigameplatform.backend.service.play.grading.DragDropHandler;
 import com.aigameplatform.backend.service.play.grading.MatchingHandler;
+import com.aigameplatform.backend.service.play.grading.MemoryCardHandler;
 import com.aigameplatform.backend.service.play.grading.OrderingHandler;
 import com.aigameplatform.backend.service.play.grading.PlayRecorder;
 import com.aigameplatform.backend.service.play.grading.QuizHandler;
@@ -35,7 +36,7 @@ class StudentGameHandlerRoutingTest {
             new AudioVisualMatchHandler(recorder, mapper), new OddOneOutImageHandler(recorder, mapper),
             new VisualClozeTextHandler(recorder, mapper), new VisualClozeImageHandler(recorder, mapper),
             new OrderingHandler(recorder), new DragDropHandler(recorder), new MatchingHandler(recorder, mapper),
-            new SpotTheTargetHandler(recorder));
+            new SpotTheTargetHandler(recorder), new MemoryCardHandler(recorder));
 
     private Game game(GameType type, OddOneOutMode odd, VisualClozeMode cloze) {
         Game game = new Game();
@@ -67,6 +68,7 @@ class StudentGameHandlerRoutingTest {
         assertThat(matches(game(GameType.AUDIO_VISUAL_MATCH, null, null))).isEqualTo(1);
         assertThat(matches(game(GameType.ORDERING, null, null))).isEqualTo(1);
         assertThat(matches(game(GameType.MATCHING, null, null))).isEqualTo(1);
+        assertThat(matches(game(GameType.MEMORY_CARD, null, null))).isEqualTo(1);
         assertThat(matches(game(GameType.SPOT_THE_TARGET, null, null))).isEqualTo(1);
         assertThat(matches(game(GameType.DRAG_DROP, null, null))).isEqualTo(1);
         assertThat(matches(game(GameType.ODD_ONE_OUT, OddOneOutMode.IMAGE, null))).isEqualTo(1);
@@ -78,6 +80,6 @@ class StudentGameHandlerRoutingTest {
     @Test
     void gamesTheApiCannotGradeYetHaveNoHandler() {
         assertThat(matches(game(GameType.ODD_ONE_OUT, OddOneOutMode.TEXT, null))).isZero();
-        assertThat(matches(game(GameType.MEMORY_CARD, null, null))).isZero();
+
     }
 }

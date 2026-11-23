@@ -9,7 +9,7 @@ import { usePublishSettings } from '../../hooks/usePublishSettings'
 import { resolveAgeBand } from '../../player/profile/resolveUiProfile'
 import type { AgeBand } from '../../player/profile/types'
 import { getPlayableRenderer } from '../../player/renderers'
-import { isRoomAvailable } from '../../player/room/getRoomApi'
+import { usesMockRoom } from '../../player/room/getRoomApi'
 import type { GameType } from '../../types/game-dsl.types'
 import type { PublishResult } from '../../types/publish.types'
 import { safeHttpUrl } from '../../utils/safeUrl'
@@ -90,7 +90,7 @@ export default function PublishDialog({ result, gameTitle, gameType, gradeLevel,
   const settings = usePublishSettings(result.gameId)
   const recommended = RECOMMENDED[resolveAgeBand({ gradeLevel, uiOverride: settings.settings?.uiOverride })]
   const { present, room, home } = text.cards
-  const roomReady = isRoomAvailable() && getPlayableRenderer(gameType) !== undefined
+  const roomReady = getPlayableRenderer(gameType) !== undefined
 
   return (
     <Dialog title={text.panelTitle} initialFocusId="share-code" describedById="share-intro" onEscape={onClose} wide hideTitle>
@@ -137,7 +137,7 @@ export default function PublishDialog({ result, gameTitle, gameType, gradeLevel,
               </Button>
             )}
             <p id="room-reason" className="text-sm text-ink-soft">
-              {roomReady ? room.tabNote : isRoomAvailable() ? room.unsupported : room.reason}
+              {roomReady ? usesMockRoom() ? room.tabNote : 'Chọn lớp, rồi chia sẻ mã PIN để học sinh vào phòng.' : room.unsupported}
             </p>
           </OptionCard>
 

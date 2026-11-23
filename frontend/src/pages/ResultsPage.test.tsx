@@ -207,11 +207,11 @@ describe('Trang Kết quả', () => {
       expect(within(group).getByRole('button', { name: 'Tất cả lượt' })).toHaveAttribute('aria-pressed', 'true')
       expect(fetchInsights).toHaveBeenLastCalledWith('g1', undefined)
 
-      await user.click(within(group).getByRole('button', { name: 'Phòng thi đấu' }))
+      await user.click(within(group).getByRole('button', { name: 'Thi đấu theo đội' }))
 
       expect(await screen.findByText('18')).toBeInTheDocument()
       expect(fetchInsights).toHaveBeenLastCalledWith('g1', 'TEAM')
-      expect(within(group).getByRole('button', { name: 'Phòng thi đấu' })).toHaveAttribute('aria-pressed', 'true')
+      expect(within(group).getByRole('button', { name: 'Thi đấu theo đội' })).toHaveAttribute('aria-pressed', 'true')
       expect(screen.getByTestId('where')).toHaveTextContent('/results?gameId=g1&type=TEAM')
 
       await user.click(within(group).getByRole('button', { name: 'Tất cả lượt' }))

@@ -16,7 +16,7 @@ async function api(page: Page, path: string) {
   return { status: response.status(), body: await response.json() }
 }
 
-test('giáo viên đăng ký, sinh game, sửa bằng trò chuyện và thấy game trong danh sách', async ({ page }) => {
+test('giáo viên đăng ký, sinh game, sửa bằng trò chuyện và thấy game trong danh sách', async ({ page, browser }) => {
   const teacher = newTeacher()
 
   await test.step('đăng ký rồi đăng nhập', async () => {
@@ -77,4 +77,50 @@ test('giáo viên đăng ký, sinh game, sửa bằng trò chuyện và thấy g
     await expect(edit).toHaveCount(1)
     await expect(edit).toHaveAttribute('href', `/workspace/editor?gameId=${gameId}`)
   })
+  await test.step('mở phòng gắn lớp, học sinh nộp đáp án và giáo viên xem kết quả', async () => {
+    const token = await page.evaluate(() => localStorage.getItem('accessToken'))
+    const headers = { Authorization: `Bearer ${token}` }
+    const publish = await page.request.post(`${API}/games/${gameId}/publish`, { headers })
+    expect(publish.ok(), await publish.text()).toBe(true)
+    const first = await page.request.post(`${API}/classrooms`, { headers, data: { className: 'Lớp Ong Vàng' } })
+    const other = await page.request.post(`${API}/classrooms`, { headers, data: { className: 'Lớp Cánh Cam' } })
+    expect(first.status()).toBe(201)
+    expect(other.status()).toBe(201)
+    const { classroomId } = (await first.json()).data
+    const otherId = (await other.json()).data.classroomId
+
+    await page.goto(`/rooms/host/${gameId}`)
+    await page.getByLabel('Lớp học').selectOption({ label: 'Lớp Ong Vàng' })
+    await page.getByRole('button', { name: 'Mở phòng', exact: true }).click()
+    const guestContext = await browser.newContext({ baseURL: new URL(page.url()).origin })
+    try {
+      const guest = await guestContext.newPage()
+      const joinPath = await page.getByRole('link', { name: 'Đường dẫn cho học sinh' }).getAttribute('href')
+      expect(joinPath).toMatch(/^\/join\/\d{6}$/)
+      await guest.goto(joinPath!)
+      await guest.getByLabel('Biệt danh').fill('Ong Vàng')
+      await guest.getByRole('button', { name: 'Vào phòng', exact: true }).click()
+      await expect(guest.getByText('Đang đợi giáo viên bắt đầu')).toBeVisible()
+      await expect(page.getByText(/Ong Vàng · 0 điểm/)).toBeVisible()
+      await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
+      await guest.getByRole('button', { name: 'Vào chơi', exact: true }).click()
+      await expect(guest.locator('canvas').first()).toBeVisible()
+      const submitted = guest.waitForResponse((response) => response.url().endsWith('/interactions'))
+      await guest.keyboard.press('1')
+      expect((await submitted).ok()).toBe(true)
+      await expect(page.getByText(/Ong Vàng · .* · 1 câu/)).toBeVisible()
+
+      await page.getByRole('button', { name: 'Kết thúc phòng', exact: true }).click()
+      await page.getByRole('link', { name: 'Xem kết quả', exact: true }).click()
+      await expect(page).toHaveURL(new RegExp(`classroomId=${classroomId}`))
+      const insights = await api(page, `/games/${gameId}/insights?sessionType=SOLO&classroomId=${classroomId}`)
+      expect(insights.body.data.playCount).toBe(1)
+      const excluded = await api(page, `/games/${gameId}/insights?sessionType=SOLO&classroomId=${otherId}`)
+      expect(excluded.body.data.playCount).toBe(0)
+    } finally {
+      await guestContext.close()
+    }
+  })
+
+
 })

@@ -57,7 +57,7 @@ describe('định dạng và ánh xạ', () => {
   it('chip lọc <-> sessionType; giá trị lạ trên URL coi là Tất cả', () => {
     expect(parseResultsFilter('TEAM')).toBe('TEAM')
     expect(parseResultsFilter('SELF')).toBe('SELF')
-    expect(parseResultsFilter('SOLO')).toBe('ALL')
+    expect(parseResultsFilter('SOLO')).toBe('SOLO')
     expect(parseResultsFilter(null)).toBe('ALL')
     expect(filterToSessionType('ALL')).toBeUndefined()
     expect(filterToSessionType('TEAM')).toBe('TEAM')

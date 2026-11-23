@@ -160,7 +160,7 @@ class SessionServiceTest {
 
     @Test
     void createSessionFailsIfActiveOrWaitingSessionExists() {
-        when(sessions.existsByGame_IdAndStatusIn(eq("game-1"), any())).thenReturn(true);
+        when(sessions.existsByGame_IdAndAccessCodeIsNotNullAndStatusIn(eq("game-1"), any())).thenReturn(true);
 
         CreateSessionRequest req = new CreateSessionRequest(null, null, null, null, null, null);
 
@@ -291,6 +291,10 @@ class SessionServiceTest {
         when(sessions.findById("session-1")).thenReturn(Optional.of(session));
 
         JoinRequest req = new JoinRequest("Bé Bông", null);
+        doAnswer(invocation -> {
+            session.getParticipants().getFirst().setId("p1");
+            return null;
+        }).when(sessions).flush();
         JoinResult result = service.joinSession("session-1", req);
 
         assertThat(result.nickname()).isEqualTo("Bé Bông");

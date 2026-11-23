@@ -12,7 +12,7 @@ public class VisualClozeTextWrongAnswerLabeler implements WrongAnswerLabeler {
 
     @Override
     public boolean supports(QuestionGame question) {
-        return question instanceof VisualClozeQuestion;
+        return question instanceof VisualClozeQuestion cloze && cloze.getBlanks().isEmpty();
     }
 
     @Override

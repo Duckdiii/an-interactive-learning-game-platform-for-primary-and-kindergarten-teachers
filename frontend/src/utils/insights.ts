@@ -7,9 +7,9 @@ import type { InsightsSessionType, QuestionInsight } from '../services/home'
 export const resultsLink = (gameId: string) => `${ROUTES.results}?${new URLSearchParams({ gameId }).toString()}`
 
 // Chip lọc trên trang; giá trị nằm trên địa chỉ (?type=).
-export type ResultsFilter = 'ALL' | 'TEAM' | 'SELF'
+export type ResultsFilter = 'ALL' | InsightsSessionType
 
-export const parseResultsFilter = (raw: string | null): ResultsFilter => (raw === 'TEAM' || raw === 'SELF' ? raw : 'ALL')
+export const parseResultsFilter = (raw: string | null): ResultsFilter => (raw === 'SOLO' || raw === 'TEAM' || raw === 'SELF' ? raw : 'ALL')
 
 /** Ngày hợp lệ dạng `YYYY-MM-DD` từ địa chỉ, ngược lại bỏ qua (không tin giá trị tùy ý trên URL). */
 export function parseDateParam(raw: string | null): string | undefined {

@@ -27,11 +27,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
@@ -96,7 +98,7 @@ public class GameInsightsService {
             int shown = shares.stream().mapToInt(AnswerShareDto::count).sum();
             return new QuestionDetailDto(question.getId(), question.getItemIndex() + 1, question.insightLabel(),
                     tally.answered, tally.correctRate(), needsReview(tally), shares,
-                    tally.labelled - shown, tally.answered - tally.labelled);
+                    tally.answered - tally.noAnswer - shown, tally.noAnswer);
         }
         throw new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy câu hỏi");
     }
@@ -189,12 +191,15 @@ public class GameInsightsService {
                     QuestionGame question = detail.getQuestion();
                     Tally tally = aggregate.byQuestion.computeIfAbsent(question.getId(), id -> new Tally());
                     tally.add(detail);
-                    if (detail.getStatus() == InteractionStatus.CORRECT || detail.getStatus() == InteractionStatus.INCORRECT) {
+                    labelers.stream().filter(labeler -> labeler.supports(question)).findFirst().ifPresent(labeler -> {
                         boolean correct = detail.getStatus() == InteractionStatus.CORRECT;
-                        label(question, positions.getOrDefault(question.getId(), question.getItemIndex()),
-                                session.getStudentOptionSalt(), detail.getAnswerJson())
-                                .ifPresent(label -> tally.addAnswer(label, correct));
-                    }
+                        boolean retryMistake = labeler.labelsRetryMistakes();
+                        if (retryMistake || correct || detail.getStatus() == InteractionStatus.INCORRECT) {
+                            label(labeler, question, positions.getOrDefault(question.getId(), question.getItemIndex()),
+                                    session.getStudentOptionSalt(), detail.getAnswerJson())
+                                    .forEach(label -> tally.addAnswer(label, correct, retryMistake));
+                        }
+                    });
                 }
                 if (played) {
                     aggregate.playCount++;
@@ -230,20 +235,23 @@ public class GameInsightsService {
     }
 
     /** Nhãn đáp án đã làm sạch (một dòng, giới hạn độ dài, không chứa từ cấm), rỗng nếu không dựng được. */
-    private Optional<String> label(QuestionGame question, int index, String salt, String answerJson) {
-        if (answerJson == null) return Optional.empty();
+    private List<String> label(WrongAnswerLabeler labeler, QuestionGame question, int index, String salt,
+            String answerJson) {
+        if (answerJson == null) return List.of();
         JsonNode answer;
         try {
             answer = mapper.readTree(answerJson);
         } catch (JacksonException e) {
-            return Optional.empty();
+            return List.of();
         }
-        return labelers.stream().filter(labeler -> labeler.supports(question)).findFirst()
-                .flatMap(labeler -> labeler.label(question, index, salt, answer))
+        Set<String> labelsSeen = new HashSet<>();
+        return labeler.labels(question, index, salt, answer).stream()
                 .map(raw -> raw.replaceAll("\\s+", " ").trim())
                 .filter(text -> !PERSONAL_INFO.matcher(text).find()) // lọc trên nhãn đầy đủ, trước khi cắt
                 .map(text -> text.length() > LABEL_MAX_LENGTH ? text.substring(0, LABEL_MAX_LENGTH) : text)
-                .filter(text -> !text.isEmpty() && blockedWords.findIn(text).isEmpty());
+                .filter(text -> !text.isEmpty() && blockedWords.findIn(text).isEmpty())
+                .filter(text -> labelsSeen.add(text.toLowerCase(Locale.ROOT)))
+                .toList();
     }
 
     private static final class Aggregate {
@@ -257,18 +265,21 @@ public class GameInsightsService {
         int answered;
         int correct;
         int attempts;
-        int labelled;
+        int noAnswer;
         // Khóa là (nhãn viết thường, đúng/sai) để gộp "CHI" và "chi"; giá trị giữ nhãn gặp đầu tiên và số lần.
         final Map<String, AnswerShareDto> shares = new LinkedHashMap<>();
 
-        void addAnswer(String label, boolean isCorrect) {
-            labelled++;
-            shares.merge(label.toLowerCase(Locale.ROOT) + "|" + isCorrect, new AnswerShareDto(label, 1, isCorrect),
+        final Map<String, AnswerShareDto> retryMistakes = new LinkedHashMap<>();
+
+        void addAnswer(String label, boolean isCorrect, boolean retryMistake) {
+            Map<String, AnswerShareDto> counts = retryMistake ? retryMistakes : shares;
+            boolean correct = !retryMistake && isCorrect;
+            counts.merge(label.toLowerCase(Locale.ROOT) + "|" + correct, new AnswerShareDto(label, 1, correct),
                     (old, one) -> new AnswerShareDto(old.label(), old.count() + 1, old.correct()));
         }
 
         List<CommonWrongDto> commonWrong() {
-            return shares.values().stream()
+            return Stream.concat(shares.values().stream(), retryMistakes.values().stream())
                     .filter(share -> !share.correct() && share.count() >= SHARE_MIN_COUNT)
                     .sorted(Comparator.comparingInt(AnswerShareDto::count).reversed())
                     .limit(COMMON_WRONG_LIMIT)
@@ -279,6 +290,7 @@ public class GameInsightsService {
         void add(PlayInteractionDetail detail) {
             answered++;
             if (detail.getStatus() == InteractionStatus.CORRECT) correct++;
+            if (detail.getStatus() == InteractionStatus.TIMEOUT || detail.getStatus() == InteractionStatus.SKIPPED) noAnswer++;
             attempts += Math.max(1, detail.getAttemptsCount());
         }
 

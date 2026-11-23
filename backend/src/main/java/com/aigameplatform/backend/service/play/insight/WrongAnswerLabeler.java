@@ -1,6 +1,7 @@
 package com.aigameplatform.backend.service.play.insight;
 
 import com.aigameplatform.backend.entity.question.QuestionGame;
+import java.util.List;
 import java.util.Optional;
 import tools.jackson.databind.JsonNode;
 
@@ -8,6 +9,14 @@ import tools.jackson.databind.JsonNode;
 public interface WrongAnswerLabeler {
 
     boolean supports(QuestionGame question);
+
+    default List<String> labels(QuestionGame question, int index, String salt, JsonNode answer) {
+        return label(question, index, salt, answer).stream().toList();
+    }
+
+    default boolean labelsRetryMistakes() {
+        return false;
+    }
 
     /**
      * @param index  vị trí câu trong game (từ 0), đúng giá trị đã dùng khi sinh mã mờ lúc chơi

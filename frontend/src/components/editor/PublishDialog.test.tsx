@@ -55,7 +55,7 @@ describe('PublishDialog: 3 cách chơi', () => {
 
     expect(link).toHaveAttribute('href', '/rooms/host/g1')
     expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveAccessibleDescription(/tab khác/)
+    expect(link).toHaveAccessibleDescription(/Chọn lớp/)
   })
 
   it('loại game chưa có renderer: khóa và nêu đúng lý do', () => {
@@ -67,17 +67,13 @@ describe('PublishDialog: 3 cách chơi', () => {
     expect(button).toHaveAccessibleDescription(/Kiểu trò chơi này/)
   })
 
-  it('bản build thật: "Mở phòng" bị khóa, đọc được lý do và bấm không làm gì', async () => {
+  it('bản build thật vẫn mở được màn chọn lớp', () => {
     vi.stubEnv('PROD', true)
     open()
 
-    const button = within(card('Mở phòng thi đấu')).getByRole('button', { name: /Mở phòng/ })
-
-    expect(button).toHaveAttribute('aria-disabled', 'true')
-    expect(button).toHaveTextContent('Sắp có')
-    expect(button).toHaveAccessibleDescription(/Phòng chơi nhiều máy/)
-    await userEvent.setup().click(button)
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    const link = within(card('Mở phòng thi đấu')).getByRole('link', { name: /Mở phòng/ })
+    expect(link).toHaveAttribute('href', '/rooms/host/g1')
+    expect(link).toHaveAccessibleDescription(/Chọn lớp/)
   })
 
   it('"In phiếu QR" gọi window.print; vùng in có tên game, mã và liên kết', async () => {

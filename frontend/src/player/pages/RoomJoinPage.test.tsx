@@ -7,7 +7,7 @@ import RoomJoinPage from './RoomJoinPage'
 
 const api = vi.hoisted(() => ({ findByPin: vi.fn(), join: vi.fn() }))
 
-vi.mock('../room/getRoomApi', () => ({ getRoomApi: async () => api }))
+vi.mock('../room/getRoomApi', () => ({ getRoomApi: async () => api, usesMockRoom: () => true }))
 vi.mock('../room/RoomStudentScreen', () => ({
   default: ({ nickname }: { nickname: string }) => <p>đã vào phòng: {nickname}</p>,
   RoomJoinErrorScreen: ({ code }: { code: string }) => <p>lỗi {code}</p>,

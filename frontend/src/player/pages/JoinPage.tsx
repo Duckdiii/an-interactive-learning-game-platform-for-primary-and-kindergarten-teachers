@@ -9,7 +9,8 @@ import { publishInfoQuery } from '../api/publishInfoQuery'
 import PlayButton from '../components/PlayButton'
 import { isJoinCodeFormat, isRoomPin, normalizeJoinCode, publishErrorKind } from '../join/joinCode'
 import { PROFILES } from '../profile/profiles'
-import { getRoomApi } from '../room/getRoomApi'
+import { getRoomApi, usesMockRoom } from '../room/getRoomApi'
+import { findLiveRoom } from '../room/liveRoomApi'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 
 const text = viText.player
@@ -64,7 +65,10 @@ export default function JoinPage() {
     setBusy(true)
 
     try {
-      if (isRoomPin(code) && (await (await getRoomApi()).findByPin(code))) {
+      const room = isRoomPin(code) && (usesMockRoom()
+        ? await (await getRoomApi()).findByPin(code)
+        : await findLiveRoom(code))
+      if (room) {
         if (mounted.current) navigate(roomJoinPath(code))
 
         return

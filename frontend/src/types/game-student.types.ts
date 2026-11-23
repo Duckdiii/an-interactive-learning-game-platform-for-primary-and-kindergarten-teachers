@@ -161,7 +161,7 @@ export interface AnswerByType {
   SPOT_THE_TARGET: { x: number; y: number }
   WORD_SCRAMBLE: { word: string }
   MATCHING: { matches: { leftPairId: string; rightPairId: string }[] }
-  MEMORY_CARD: { matchedPairIds: string[]; flips: number }
+  MEMORY_CARD: { matchedPairIds: string[]; flips: number; wrongPairs?: [string, string][] }
   DRAG_DROP: { placements: { itemId: string; zoneId: string }[] }
   ORDERING: { order: string[] }
   VISUAL_CLOZE: { answer: string } | { placements: StudentVisualClozeImagePlacement[] }
@@ -210,7 +210,7 @@ export interface PlayerSession {
   sessionId: string
   participantId: string
   nickname: string
-  sessionType: 'SELF'
+  sessionType: 'SELF' | 'SOLO' | 'TEAM'
   status: 'ACTIVE'
   expiresAt: string
 }

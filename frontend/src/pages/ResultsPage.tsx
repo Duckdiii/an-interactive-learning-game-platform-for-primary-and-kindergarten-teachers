@@ -37,6 +37,7 @@ const text = viText.results
 
 const FILTERS: ReadonlyArray<{ value: ResultsFilter; label: string }> = [
   { value: 'ALL', label: text.filterAll },
+  { value: 'SOLO', label: text.filterSolo },
   { value: 'TEAM', label: text.filterTeam },
   { value: 'SELF', label: text.filterSelf },
 ]
@@ -389,6 +390,7 @@ function Insights({ insights, game, selectedQuestionId, onSelectQuestion, filter
             <QuestionDetail
               gameId={game.gameId}
               questionId={selectedQuestionId}
+              commonWrong={insights.questions.find((question) => question.questionId === selectedQuestionId)?.commonWrong ?? []}
               filter={filter}
               range={range}
               onClose={() => onSelectQuestion(null)}
@@ -405,12 +407,14 @@ function Insights({ insights, game, selectedQuestionId, onSelectQuestion, filter
 function QuestionDetail({
   gameId,
   questionId,
+  commonWrong,
   filter,
   range,
   onClose,
 }: {
   gameId: string
   questionId: string
+  commonWrong: QuestionInsight['commonWrong']
   filter?: InsightsSessionType
   range: InsightsRange
   onClose: () => void
@@ -433,6 +437,16 @@ function QuestionDetail({
             </Button>
           </div>
           {detail.needsReview ? <p className="mt-1 text-base font-extrabold text-warn-ink">{text.detailNeedsReview}</p> : null}
+          {commonWrong.length > 0 ? (
+            <>
+              <h4 className="mt-3 text-base font-extrabold">{text.detailCommonWrong}</h4>
+              <ul className="mt-1 space-y-1">
+                {commonWrong.map(({ label, count }) => (
+                  <li key={label}>{label} · {text.detailCount(count)}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
           <h4 className="mt-3 text-base font-extrabold">{text.detailDistribution}</h4>
           {detail.distribution.length === 0 ? (
             <p className="mt-1 text-base text-ink-soft">{text.detailEmpty}</p>

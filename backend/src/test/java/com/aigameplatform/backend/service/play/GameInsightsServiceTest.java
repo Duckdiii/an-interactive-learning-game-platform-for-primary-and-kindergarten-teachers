@@ -14,9 +14,20 @@ import com.aigameplatform.backend.entity.interaction.PlayInteractionDetail;
 import com.aigameplatform.backend.entity.question.AudioVisualMatchQuestion;
 import com.aigameplatform.backend.entity.question.OddOneOutQuestion;
 import com.aigameplatform.backend.entity.question.QuizQuestion;
+import com.aigameplatform.backend.entity.question.MemoryCardQuestion;
+import com.aigameplatform.backend.entity.question.embedded.MemoryPair;
+import com.aigameplatform.backend.entity.question.embedded.PairSide;
+import com.aigameplatform.backend.repository.SelfSessionRepository;
+import com.aigameplatform.backend.service.play.grading.GradeContext;
+import com.aigameplatform.backend.service.play.grading.MemoryCardHandler;
+import com.aigameplatform.backend.service.play.grading.PlayRecorder;
+import com.aigameplatform.backend.service.play.insight.MemoryCardWrongAnswerLabeler;
 import com.aigameplatform.backend.entity.question.VisualClozeQuestion;
 import com.aigameplatform.backend.entity.question.embedded.ImageChoice;
 import com.aigameplatform.backend.entity.question.embedded.OddOneOutImageItem;
+import com.aigameplatform.backend.entity.question.embedded.VisualClozeBlank;
+import com.aigameplatform.backend.entity.question.embedded.VisualClozeImageOption;
+import com.aigameplatform.backend.service.play.insight.VisualClozeImageWrongAnswerLabeler;
 import com.aigameplatform.backend.service.play.insight.AudioVisualWrongAnswerLabeler;
 import com.aigameplatform.backend.service.play.insight.OddOneOutImageWrongAnswerLabeler;
 import com.aigameplatform.backend.service.play.support.OpaqueIds;
@@ -54,7 +65,8 @@ class GameInsightsServiceTest {
     @BeforeEach
     void setUp() {
         service = new GameInsightsService(games, sessions,
-                List.of(new VisualClozeTextWrongAnswerLabeler(), new AudioVisualWrongAnswerLabeler(),
+                List.of(new VisualClozeTextWrongAnswerLabeler(), new VisualClozeImageWrongAnswerLabeler(),
+                        new AudioVisualWrongAnswerLabeler(), new MemoryCardWrongAnswerLabeler(),
                         new OddOneOutImageWrongAnswerLabeler(), new QuizWrongAnswerLabeler(),
                         new WordScrambleWrongAnswerLabeler()),
                 new BlockedWordList(List.of("xấu")), JsonMapper.builder().build());
@@ -435,6 +447,88 @@ class GameInsightsServiceTest {
         q.setId(id);
         q.setItemIndex(index);
         return q;
+    }
+
+    @Test
+    void imageClozeCountsMistakesDespiteCorrectRetryOrTimeout() {
+        VisualClozeQuestion cloze = new VisualClozeQuestion();
+        cloze.setId("image");
+        cloze.setBlanks(List.of(new VisualClozeBlank("a", 100, 100, "cat")));
+        cloze.setOptions(List.of(new VisualClozeImageOption("dog", "Ch\u00f3", null)));
+        game.getQuestions().clear();
+        game.getQuestions().add(cloze);
+
+        SelfSession session = new SelfSession();
+        String salt = "image-salt";
+        session.setStudentOptionSalt(salt);
+        String answer = """
+                {"firstWrongPlacement":{"blankId":"%s","optionId":"%s"}}
+                """.formatted(OpaqueIds.opaque(salt, 0, "blank:a"), OpaqueIds.opaque(salt, 0, "option:dog"));
+        var corrected = wrong(cloze, answer);
+        corrected.setStatus(InteractionStatus.CORRECT);
+        var timedOut = wrong(cloze, answer);
+        timedOut.setStatus(InteractionStatus.TIMEOUT);
+        var legacy = wrong(cloze, "{\"placements\":[]}");
+        var unfinished = wrong(cloze, answer);
+        unfinished.setStatus(InteractionStatus.IN_PROGRESS);
+        session.getParticipants().addAll(List.of(participant(corrected), participant(timedOut), participant(legacy), participant(unfinished)));
+        when(sessions.findByGame_IdOrderByCreatedAtDesc("game-1")).thenReturn(List.of(session));
+
+        var result = service.getInsights("game-1", null, null, null, null, teacher).questions().getFirst();
+        assertThat(result.commonWrong()).containsExactly(new GameInsightsDto.CommonWrongDto("\u00d4 1: Ch\u00f3", 2));
+        assertThat(result.correctRate()).isEqualTo(1.0 / 3);
+        var detail = service.getQuestionInsights("game-1", "image", null, null, null, null, teacher);
+        assertThat(detail.distribution()).isEmpty();
+        assertThat(detail.noAnswerCount()).isEqualTo(1);
+        assertThat(detail.otherCount()).isEqualTo(2);
+    }
+
+    @Test
+    void memoryCardKeepsDifferentRepeatedMistakesFromSuccessfulPlays() {
+        MemoryCardQuestion memory = new MemoryCardQuestion();
+        memory.setId("memory");
+        memory.setTimeLimit(30);
+        memory.setPoint(100);
+        memory.setPairs(List.of(memoryPair("a", "Mèo"), memoryPair("b", "Cá"), memoryPair("c", "Chó")));
+        game.getQuestions().clear();
+        game.getQuestions().add(memory);
+        SelfSession session = new SelfSession();
+        session.setGame(game);
+        when(sessions.findByGame_IdOrderByCreatedAtDesc("game-1")).thenReturn(List.of(session));
+
+        var mapper = JsonMapper.builder().build();
+        var handler = new MemoryCardHandler(new PlayRecorder(mapper, mock(SelfSessionRepository.class), sessions));
+        var legacy = mapper.readTree("""
+                {"matchedPairIds":["a","b","c"],"flips":6}
+                """);
+        var answer = mapper.readTree("""
+                {"matchedPairIds":["a","b","c"],"flips":10,"wrongPairs":[["b","a"],["c","b"]]}
+                """);
+        var invalid = mapper.readTree("""
+                {"matchedPairIds":["a","b","c"],"flips":8,"wrongPairs":[["a","other"]]}
+                """);
+        assertThatThrownBy(() -> handler.grade(new GradeContext(session, new Participant(), memory, 0, null, invalid, null, 1000)))
+                .isInstanceOf(ApiException.class);
+        for (var payload : List.of(answer, answer, legacy)) {
+            var player = new Participant();
+            session.getParticipants().add(player);
+            assertThat(handler.grade(new GradeContext(session, player, memory, 0, null, payload, null, 1000)).get("status"))
+                    .isEqualTo("CORRECT");
+        }
+        var result = service.getInsights("game-1", null, null, null, null, teacher).questions().getFirst();
+        assertThat(result.correctRate()).isEqualTo(1.0);
+        assertThat(result.commonWrong()).containsExactly(
+                new GameInsightsDto.CommonWrongDto("Mèo ↔ Cá", 2),
+                new GameInsightsDto.CommonWrongDto("Cá ↔ Chó", 2));
+    }
+
+    private static MemoryPair memoryPair(String id, String label) {
+        MemoryPair pair = new MemoryPair();
+        pair.setPairId(id);
+        PairSide content = new PairSide();
+        content.setText(label);
+        pair.setContent(content);
+        return pair;
     }
 
     private static PlayInteractionDetail wrong(

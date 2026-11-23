@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface GameSessionRepository extends JpaRepository<GameSession, String> {
     boolean existsByGame_IdAndStatus(String gameId, SessionStatus status);
 
-    boolean existsByGame_IdAndStatusIn(String gameId, Collection<SessionStatus> statuses);
+    boolean existsByGame_IdAndAccessCodeIsNotNullAndStatusIn(String gameId, Collection<SessionStatus> statuses);
 
     Optional<GameSession> findByAccessCode(String accessCode);
 
