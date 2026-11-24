@@ -1,7 +1,6 @@
-# SRS đã trích (dùng cho AI review)
+# Tra cứu SRS theo mục
 
-> Sinh tự động từ `docs/SRS.docx` bằng `scripts/ai-review/extract-srs.mjs`. **Không sửa tay**: sửa `SRS.docx` rồi chạy lại script.
-> Sơ đồ và ảnh trong SRS không chuyển sang chữ được, chỉ còn dòng `[hình ảnh]`; xem bản `.docx` khi cần.
+> [SRS v3 đầy đủ](../SRS-full.md) có nội dung và hình từ bản Word trong bộ tài liệu TLCN/KLTN. Các trang dưới đây phục vụ tra cứu theo mục và chứa những cập nhật triển khai của project.
 
 ## Use Case
 - [UC-01](UC-01.md)
@@ -28,7 +27,7 @@
 - [FR-summary.md](FR-summary.md)
 - [FLD.md](FLD.md)
 - [KPI.md](KPI.md)
-## Tài liệu SRS Gốc
-- [[srs/SRS-full|Toàn văn Đặc tả SRS v3 (SRS-full.md)]]
-- [[srs/Dinh_huong_de_tai|Định hướng đề tài v10 (Dinh_huong_de_tai.md)]]
+## Tài liệu đầy đủ
+- [[SRS-full|Toàn văn Đặc tả SRS v3 (SRS-full.md)]]
+- [[Dinh_huong_de_tai|Định hướng đề tài v10 (Dinh_huong_de_tai.md)]]
 

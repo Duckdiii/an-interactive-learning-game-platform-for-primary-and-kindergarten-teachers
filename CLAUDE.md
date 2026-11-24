@@ -132,7 +132,7 @@ Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.m
 | Luồng đầy đủ của một ca sử dụng | `docs/srs/UC-xx.md` |
 | Yêu cầu chức năng, phi chức năng | `docs/srs/FR-summary.md`, `docs/srs/NFR.md` |
 | Trường FLD, KPI | `docs/srs/FLD.md`, `docs/srs/KPI.md` |
-| Các mục SRS khác | `docs/srs/SRS-full.md`; hình trong SRS ở `docs/SRS.docx` |
+| Các mục SRS khác | `docs/SRS-full.md`; hình đi kèm ở `docs/srs-v3-assets/` |
 | Sơ đồ kiến trúc, use case, class, tuần tự | `docs/wiki/Sơ đồ hệ thống.md`, `docs/diagrams/` (chỉ lấy nhãn, không đọc nguyên file `.drawio`) |
 | Định hướng đề tài | `docs/Dinh_huong_de_tai.md` |
 | Field DSL | `docs/game-json-dsl-v1.0.0.md` |
