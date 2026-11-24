@@ -2,14 +2,20 @@ package com.aigameplatform.backend.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.aigameplatform.backend.dto.livearena.ParticipantDto;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
+import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.service.play.SessionParticipantRegistry;
 import java.time.Clock;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -20,17 +26,19 @@ class StompAuthChannelInterceptorTest {
     private static final String SECRET = "k".repeat(48);
 
     private final JwtService jwt = new JwtService(SECRET, 15, Clock.systemUTC());
+    private final TeacherRepository teachers = mock(TeacherRepository.class);
     private SessionParticipantRegistry registry;
     private StompAuthChannelInterceptor interceptor;
 
     @BeforeEach
     void setUp() {
         registry = new SessionParticipantRegistry();
-        interceptor = new StompAuthChannelInterceptor(jwt, registry);
+        interceptor = new StompAuthChannelInterceptor(new TeacherAccessAuthenticator(jwt, teachers), registry);
     }
 
     private Message<?> connect(String header, String value, String... more) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+        accessor.setSessionId("connection-1");
         if (header != null) accessor.addNativeHeader(header, value);
         for (int i = 0; i + 1 < more.length; i += 2) accessor.addNativeHeader(more[i], more[i + 1]);
         accessor.setLeaveMutable(true);
@@ -43,9 +51,31 @@ class StompAuthChannelInterceptorTest {
 
     @Test
     void teacherJwtBecomesPrincipalWithTeacherId() {
+        when(teachers.existsByIdAndStatusAndSessionVersion("teacher-1", TeacherStatus.ACTIVE, 0)).thenReturn(true);
         String token = jwt.generateAccessToken("teacher-1", "a@x.vn", "s");
         Message<?> out = interceptor.preSend(connect("Authorization", "Bearer " + token), null);
         assertThat(user(out)).isEqualTo("teacher-1");
+    }
+
+    @Test
+    void revokedTeacherCannotConnectOrSendOnAnExistingConnection() {
+        when(teachers.existsByIdAndStatusAndSessionVersion("teacher-1", TeacherStatus.ACTIVE, 0))
+                .thenReturn(true, false);
+        String token = jwt.generateAccessToken("teacher-1", "a@x.vn", "s");
+        interceptor.preSend(connect("Authorization", "Bearer " + token), null);
+        assertThatThrownBy(() -> interceptor.preSend(connect("Authorization", "Bearer " + token), null))
+                .isInstanceOf(AccessDeniedException.class);
+
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
+        accessor.setUser(jwt.parseAccessToken(token));
+        accessor.setLeaveMutable(true);
+        Message<?> send = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+        assertThatThrownBy(() -> interceptor.preSend(send, null)).isInstanceOf(AccessDeniedException.class);
+
+        var delivery = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+        delivery.setSessionId("connection-1");
+        assertThat(interceptor.canDeliver(MessageBuilder.createMessage(new byte[0], delivery.getMessageHeaders())))
+                .isFalse();
     }
 
     @Test

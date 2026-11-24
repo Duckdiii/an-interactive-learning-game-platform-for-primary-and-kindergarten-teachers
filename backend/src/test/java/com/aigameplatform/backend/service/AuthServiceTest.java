@@ -239,6 +239,21 @@ class AuthServiceTest {
     }
 
     @Test
+    void refreshRejectsAnUnrevokedTokenFromBeforeAnAdminLock() {
+        RefreshToken stored = storedToken("old-token", "family-1", nowUtc().plusHours(1), false);
+        stored.getTeacher().setSessionVersion(1);
+        String tokenHash = codec.hash("old-token");
+        when(refreshTokenRepository.findFamilyIdByTokenHash(tokenHash)).thenReturn(Optional.of("family-1"));
+        when(refreshTokenRepository.findByTokenHash(tokenHash)).thenReturn(Optional.of(stored));
+
+        assertThatThrownBy(() -> service.refresh("old-token"))
+                .isInstanceOfSatisfying(ApiException.class,
+                        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
+        verify(refreshTokenRepository).revokeFamily("family-1", nowUtc());
+        verify(refreshTokenRepository, never()).save(any());
+    }
+
+    @Test
     void refreshRejectsExpiredToken() {
         RefreshToken stored = storedToken("old-token", "family-1", nowUtc().minusMinutes(1), false);
         when(refreshTokenRepository.findFamilyIdByTokenHash(codec.hash("old-token"))).thenReturn(Optional.of("family-1"));

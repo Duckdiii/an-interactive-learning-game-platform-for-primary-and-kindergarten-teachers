@@ -158,6 +158,10 @@ public class AuthService {
             refreshTokenRepository.revokeFamily(stored.getFamilyId(), now);
             throw new ApiException(ErrorCode.ACCOUNT_LOCKED, ACCOUNT_LOCKED);
         }
+        if (stored.getSessionVersion() != teacher.getSessionVersion()) {
+            refreshTokenRepository.revokeFamily(stored.getFamilyId(), now);
+            throw new ApiException(ErrorCode.UNAUTHORIZED, INVALID_REFRESH_TOKEN);
+        }
 
         stored.revoke(now);
         // "Ghi nhớ đăng nhập" có hạn tuyệt đối 30 ngày tính từ lúc đăng nhập: xoay vòng giữ nguyên hạn cũ, không gia
@@ -189,12 +193,14 @@ public class AuthService {
         token.setTeacher(teacher);
         token.setTokenHash(refreshTokenCodec.hash(rawRefreshToken));
         token.setFamilyId(familyId);
+        token.setSessionVersion(teacher.getSessionVersion());
         token.setCreatedAt(now);
         token.setRememberMe(rememberMe);
         token.setExpiresAt(expiresAt);
         refreshTokenRepository.save(token);
 
-        String accessToken = jwtService.generateAccessToken(teacher.getId(), teacher.getEmail(), familyId, teacher.getRole().name());
+        String accessToken = jwtService.generateAccessToken(
+                teacher.getId(), teacher.getEmail(), familyId, teacher.getRole().name(), teacher.getSessionVersion());
         AuthResponse response = new AuthResponse(
                 accessToken,
                 jwtService.getAccessTokenTtlSeconds(),

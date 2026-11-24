@@ -2,6 +2,7 @@ package com.aigameplatform.backend.repository;
 
 import com.aigameplatform.backend.entity.Teacher;
 import com.aigameplatform.backend.entity.enums.TeacherStatus;
+import com.aigameplatform.backend.entity.enums.UserRole;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -17,12 +18,18 @@ public interface TeacherRepository extends JpaRepository<Teacher, String> {
 
     boolean existsByEmail(String email);
 
-    Page<Teacher> findByStatus(TeacherStatus status, Pageable pageable);
+    Optional<Teacher> findByIdAndRole(String id, UserRole role);
 
-    @Query("SELECT t FROM Teacher t WHERE LOWER(t.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.email) LIKE LOWER(CONCAT('%', :search, '%')) ORDER BY t.createdAt DESC")
+    boolean existsByIdAndStatusAndSessionVersion(String id, TeacherStatus status, long sessionVersion);
+
+    Page<Teacher> findByRole(UserRole role, Pageable pageable);
+
+    Page<Teacher> findByRoleAndStatus(UserRole role, TeacherStatus status, Pageable pageable);
+
+    @Query("SELECT t FROM Teacher t WHERE t.role = ROLE_TEACHER AND (LOWER(t.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.email) LIKE LOWER(CONCAT('%', :search, '%'))) ORDER BY t.createdAt DESC")
     Page<Teacher> findBySearch(@Param("search") String search, Pageable pageable);
 
-    @Query("SELECT t FROM Teacher t WHERE (LOWER(t.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND t.status = :status ORDER BY t.createdAt DESC")
+    @Query("SELECT t FROM Teacher t WHERE t.role = ROLE_TEACHER AND (LOWER(t.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND t.status = :status ORDER BY t.createdAt DESC")
     Page<Teacher> findBySearchAndStatus(@Param("search") String search, @Param("status") TeacherStatus status, Pageable pageable);
 
     default Page<Teacher> searchTeachers(String search, TeacherStatus status, Pageable pageable) {
@@ -31,11 +38,20 @@ public interface TeacherRepository extends JpaRepository<Teacher, String> {
         } else if (search != null && !search.isBlank()) {
             return findBySearch(search.trim(), pageable);
         } else if (status != null) {
-            return findByStatus(status, pageable);
+            return findByRoleAndStatus(UserRole.ROLE_TEACHER, status, pageable);
         } else {
-            return findAll(pageable);
+            return findByRole(UserRole.ROLE_TEACHER, pageable);
         }
     }
+
+    @Modifying
+    @Query("update Teacher t set t.status = LOCKED, t.sessionVersion = t.sessionVersion + 1 "
+            + "where t.id = :teacherId and t.role = ROLE_TEACHER")
+    int lockTeacherAccount(@Param("teacherId") String teacherId);
+
+    @Modifying
+    @Query("update Teacher t set t.status = ACTIVE where t.id = :teacherId and t.role = ROLE_TEACHER")
+    int unlockTeacherAccount(@Param("teacherId") String teacherId);
     /**
      * Cộng một lần đăng nhập sai bằng một câu UPDATE nguyên tử (các lần sai song song không ghi đè lẫn nhau, và không
      * phải giữ khóa dòng suốt lúc băm mật khẩu). Lần sai thứ {@code maxAttempts} liên tiếp thì đặt khóa tạm tới

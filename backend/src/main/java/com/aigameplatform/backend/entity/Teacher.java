@@ -9,8 +9,11 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
+// Ghi các trường thực sự thay đổi để đăng nhập hoặc sửa hồ sơ không ghi đè trạng thái khóa.
+@DynamicUpdate
 @Table(name = "teachers")
 @Getter
 @Setter
@@ -50,6 +53,9 @@ public class Teacher {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role = UserRole.ROLE_TEACHER;
+
+    @Column(nullable = false)
+    private long sessionVersion;
 
     // Số lần đăng nhập sai liên tiếp tính từ lần đúng gần nhất (hoặc từ lần khóa tạm gần nhất).
     @Column(nullable = false)

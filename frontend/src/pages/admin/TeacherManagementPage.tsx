@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import axios from 'axios'
 import {
   getTeachers,
+  getTeacher,
   createTeacher,
   updateTeacher,
   lockTeacher,
@@ -13,7 +14,8 @@ import Icon from '../../components/ui/Icon'
 import Button from '../../components/Button'
 import FormField from '../../components/ui/FormField'
 import ErrorNotice from '../../components/ui/ErrorNotice'
-import { inputClass } from '../../components/ui/formStyles'
+import Dialog from '../../components/ui/Dialog'
+import { describedBy, inputClass } from '../../components/ui/formStyles'
 import { parseApiError } from '../../utils/apiError'
 
 export default function TeacherManagementPage() {
@@ -33,6 +35,10 @@ export default function TeacherManagementPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState<AdminTeacher | null>(null)
+  const [teacherDetails, setTeacherDetails] = useState<AdminTeacher | null>(null)
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false)
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({})
+  const [editErrorMessage, setEditErrorMessage] = useState('')
 
   // Form states
   const [createForm, setCreateForm] = useState({
@@ -101,6 +107,14 @@ export default function TeacherManagementPage() {
   const handleEditSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!selectedTeacher) return
+    setEditErrorMessage('')
+    const errors: Record<string, string> = {}
+    if (!editForm.fullName.trim()) errors.fullName = 'Họ tên không được để trống'
+    else if (editForm.fullName.length > 255) errors.fullName = 'Họ tên tối đa 255 ký tự'
+    if (editForm.school.length > 255) errors.school = 'Trường / Đơn vị tối đa 255 ký tự'
+    setEditErrors(errors)
+    if (Object.keys(errors).length > 0) return
+
     setErrorMessage('')
     setIsSubmitting(true)
     try {
@@ -110,7 +124,9 @@ export default function TeacherManagementPage() {
       setSuccessMessage('Cập nhật thông tin giáo viên thành công!')
       fetchTeachers()
     } catch (err) {
-      setErrorMessage(parseApiError(err, 'Lỗi cập nhật giáo viên').message)
+      const error = parseApiError(err, 'Lỗi cập nhật giáo viên')
+      setEditErrors(error.fieldErrors)
+      setEditErrorMessage(error.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -139,12 +155,32 @@ export default function TeacherManagementPage() {
   }
 
   const openEditModal = (t: AdminTeacher) => {
+    setEditErrors({})
+    setEditErrorMessage('')
     setSelectedTeacher(t)
     setEditForm({
       fullName: t.fullName,
       school: t.school || '',
     })
     setIsEditOpen(true)
+  }
+
+  const closeEditModal = () => {
+    if (isSubmitting) return
+    setIsEditOpen(false)
+    setSelectedTeacher(null)
+  }
+
+  const openTeacherDetails = async (teacherId: string) => {
+    setIsLoadingDetails(true)
+    setErrorMessage('')
+    try {
+      setTeacherDetails(await getTeacher(teacherId))
+    } catch (err) {
+      setErrorMessage(parseApiError(err, 'Không thể tải thông tin giáo viên').message)
+    } finally {
+      setIsLoadingDetails(false)
+    }
   }
 
   return (
@@ -277,6 +313,15 @@ export default function TeacherManagementPage() {
                     <td className="py-4 px-6 text-right space-x-2">
                       <button
                         type="button"
+                        disabled={isLoadingDetails}
+                        aria-label={`Xem chi tiết giáo viên ${t.fullName}`}
+                        onClick={() => openTeacherDetails(t.teacherId)}
+                        className="text-xs font-medium px-2.5 py-1 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 disabled:opacity-50"
+                      >
+                        Xem chi tiết
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => openEditModal(t)}
                         className="text-xs font-medium px-2.5 py-1 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
                       >
@@ -399,30 +444,56 @@ export default function TeacherManagementPage() {
         </div>
       )}
 
+      {teacherDetails && (
+        <Dialog title="Chi tiết giáo viên" onEscape={() => setTeacherDetails(null)}>
+          <dl className="mt-4 space-y-3 break-words">
+            <div><dt className="font-semibold">Họ và tên</dt><dd>{teacherDetails.fullName}</dd></div>
+            <div><dt className="font-semibold">Email</dt><dd>{teacherDetails.email}</dd></div>
+            <div><dt className="font-semibold">Trường / Đơn vị</dt><dd>{teacherDetails.school || '—'}</dd></div>
+            <div>
+              <dt className="font-semibold">Trạng thái</dt>
+              <dd>{teacherDetails.status === 'ACTIVE' ? 'Hoạt động' : 'Đã khóa'}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold">Ngày tham gia</dt>
+              <dd>{new Date(teacherDetails.createdAt).toLocaleDateString('vi-VN')}</dd>
+            </div>
+          </dl>
+          <div className="mt-5 flex justify-end">
+            <Button type="button" variant="secondary" onClick={() => setTeacherDetails(null)}>Đóng</Button>
+          </div>
+        </Dialog>
+      )}
+
       {/* Modal: Chỉnh sửa thông tin giáo viên */}
       {isEditOpen && selectedTeacher && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <h3 className="text-lg font-bold text-slate-800 mb-1">Chỉnh sửa thông tin</h3>
+        <Dialog title="Chỉnh sửa thông tin" onEscape={closeEditModal}>
             <p className="text-xs text-slate-500 mb-4 font-mono">{selectedTeacher.email}</p>
+            {editErrorMessage && <ErrorNotice message={editErrorMessage} />}
 
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <FormField id="edit-fullName" label="Họ và tên giáo viên" required>
+            <form noValidate onSubmit={handleEditSubmit} className="space-y-4">
+              <FormField id="edit-fullName" label="Họ và tên giáo viên" error={editErrors.fullName} required>
                 <input
+                  id="edit-fullName"
                   type="text"
                   required
+                  aria-invalid={Boolean(editErrors.fullName)}
+                  aria-describedby={describedBy('edit-fullName', { error: Boolean(editErrors.fullName) })}
                   value={editForm.fullName}
                   onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                  className={inputClass()}
+                  className={inputClass(Boolean(editErrors.fullName))}
                 />
               </FormField>
 
-              <FormField id="edit-school" label="Trường / Đơn vị công tác">
+              <FormField id="edit-school" label="Trường / Đơn vị công tác" error={editErrors.school}>
                 <input
+                  id="edit-school"
                   type="text"
+                  aria-invalid={Boolean(editErrors.school)}
+                  aria-describedby={describedBy('edit-school', { error: Boolean(editErrors.school) })}
                   value={editForm.school}
                   onChange={(e) => setEditForm({ ...editForm, school: e.target.value })}
-                  className={inputClass()}
+                  className={inputClass(Boolean(editErrors.school))}
                 />
               </FormField>
 
@@ -431,10 +502,7 @@ export default function TeacherManagementPage() {
                   type="button"
                   variant="secondary"
                   disabled={isSubmitting}
-                  onClick={() => {
-                    setIsEditOpen(false)
-                    setSelectedTeacher(null)
-                  }}
+                  onClick={closeEditModal}
                 >
                   Hủy
                 </Button>
@@ -443,8 +511,7 @@ export default function TeacherManagementPage() {
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
+        </Dialog>
       )}
     </div>
   )
