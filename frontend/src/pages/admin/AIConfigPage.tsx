@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Icon from '../../components/ui/Icon'
 import Button from '../../components/Button'
 import ErrorNotice from '../../components/ui/ErrorNotice'
+import { parseApiError } from '../../utils/apiError'
 import {
   getAiConfig,
   createAiConfigVersion,
@@ -86,8 +87,11 @@ export default function AIConfigPage() {
       setSuccessMessage(`Đã tạo và kích hoạt phiên bản cấu hình mới (SHA: ${created.sha256.substring(0, 8)})`)
       await loadAllData()
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Lỗi khi tạo phiên bản mới'
-      setErrorMessage(msg)
+      const fallback = 'Không thể lưu cài đặt vào lúc này. Vui lòng thử lại sau.'
+      const error = parseApiError(err, fallback)
+      setErrorMessage(error.code === 'INTERNAL_ERROR'
+        ? fallback
+        : Object.values(error.fieldErrors)[0] ?? error.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -366,6 +370,7 @@ export default function AIConfigPage() {
                   </div>
                   <input
                     id="slider-mod"
+                    aria-describedby="moderation-threshold-help"
                     type="range"
                     min="0"
                     max="1"
@@ -374,7 +379,9 @@ export default function AIConfigPage() {
                     onChange={(e) => setModerationThreshold(parseFloat(e.target.value))}
                     className="w-full accent-indigo-600"
                   />
-                  <p className="text-[11px] text-slate-400">Ngưỡng lọc nội dung học đường (mặc định: 0.85)</p>
+                  <p id="moderation-threshold-help" className="text-[11px] text-slate-500">
+                    Chặn văn bản có điểm kiểm duyệt đạt ngưỡng (mặc định 0,85). Nội dung bị dịch vụ gắn cờ luôn bị chặn.
+                  </p>
                 </div>
               </div>
 

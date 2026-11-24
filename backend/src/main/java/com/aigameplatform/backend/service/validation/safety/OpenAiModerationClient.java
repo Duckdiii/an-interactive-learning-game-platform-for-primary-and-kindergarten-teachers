@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +24,18 @@ import tools.jackson.databind.JsonNode;
 public class OpenAiModerationClient implements ContentModerationClient {
 
     private static final int BATCH_SIZE = 20;
-    private static final ModerationResult SAFE = new ModerationResult(false, List.of());
     // Giới hạn bộ nhớ: bỏ đoạn lâu không dùng nhất khi vượt quá (đủ cho nhiều game đang soạn cùng lúc).
     private static final int MAX_REMEMBERED = 5_000;
     // Kết quả "an toàn" chỉ tin trong 24 giờ: OpenAI có thể đổi model/policy sau cùng một tên model.
     private static final Duration APPROVAL_TTL = Duration.ofHours(24);
 
-    /** Đoạn chữ đã được OpenAI xác nhận không vi phạm, kèm thời điểm duyệt (LRU, an toàn khi nhiều request cùng lúc). */
-    private final Map<String, Instant> approved = java.util.Collections.synchronizedMap(
-            new java.util.LinkedHashMap<String, Instant>(256, 0.75f, true) {
+    private record CachedModeration(Instant checkedAt, ModerationResult result) {}
+
+    // Giữ điểm gốc để áp dụng ngưỡng đang hoạt động ở mỗi lần kiểm, kể cả khi trúng cache.
+    private final Map<String, CachedModeration> approved = java.util.Collections.synchronizedMap(
+            new java.util.LinkedHashMap<String, CachedModeration>(256, 0.75f, true) {
                 @Override
-                protected boolean removeEldestEntry(Map.Entry<String, Instant> eldest) {
+                protected boolean removeEldestEntry(Map.Entry<String, CachedModeration> eldest) {
                     return size() > MAX_REMEMBERED;
                 }
             });
@@ -78,33 +80,37 @@ public class OpenAiModerationClient implements ContentModerationClient {
         }
         // Chỉ gửi đoạn chưa từng được duyệt an toàn: lưu game gửi lại toàn bộ chữ, phần lớn không đổi giữa các lần lưu.
         Instant cutoff = Instant.now().minus(APPROVAL_TTL);
-        // get() (không phải containsKey) để làm mới thứ tự LRU khi trúng.
-        List<String> unknown = texts.stream().filter(text -> {
-            Instant at = approved.get(text);
-            return at == null || at.isBefore(cutoff);
-        }).distinct().toList();
-        Map<String, ModerationResult> fresh = new java.util.HashMap<>();
+        Map<String, ModerationResult> checked = new HashMap<>();
+        List<String> unknown = new ArrayList<>();
+        for (String text : texts.stream().distinct().toList()) {
+            CachedModeration cached = approved.get(text);
+            if (cached == null || cached.checkedAt().isBefore(cutoff)) {
+                unknown.add(text);
+            } else {
+                checked.put(text, cached.result());
+            }
+        }
         for (int from = 0; from < unknown.size(); from += BATCH_SIZE) {
             List<String> batch = unknown.subList(from, Math.min(from + BATCH_SIZE, unknown.size()));
             List<ModerationResult> batchResults = moderateBatch(batch);
             for (int i = 0; i < batch.size(); i++) {
-                fresh.put(batch.get(i), batchResults.get(i));
-                // Bị gắn cờ thì không nhớ: lần sau vẫn gửi kiểm lại.
-                if (!batchResults.get(i).flagged()) approved.put(batch.get(i), Instant.now());
+                ModerationResult result = batchResults.get(i);
+                checked.put(batch.get(i), result);
+                if (!result.flagged()) approved.put(batch.get(i), new CachedModeration(Instant.now(), result));
             }
         }
-        return texts.stream().map(text -> fresh.getOrDefault(text, SAFE)).toList();
+        return texts.stream().map(checked::get).toList();
     }
 
     public ModerationResult moderateImage(byte[] image, String mediaType) {
         String url = "data:" + mediaType + ";base64," + Base64.getEncoder().encodeToString(image);
-        return requestModeration(List.of(Map.of("type", "image_url", "image_url", Map.of("url", url))), 1)
+        return requestModeration(List.of(Map.of("type", "image_url", "image_url", Map.of("url", url))), 1, false)
                 .getFirst();
     }
 
     /** Nội dung phiên âm chỉ tồn tại trong lần kiểm tra này, không đi qua bộ nhớ đệm văn bản. */
     public ModerationResult moderateTranscript(String transcript) {
-        return requestModeration(List.of(transcript), 1).getFirst();
+        return requestModeration(List.of(transcript), 1, false).getFirst();
     }
 
     public String transcribeMp3(byte[] audio) {
@@ -143,10 +149,10 @@ public class OpenAiModerationClient implements ContentModerationClient {
     }
 
     private List<ModerationResult> moderateBatch(List<String> batch) {
-        return requestModeration(batch, batch.size());
+        return requestModeration(batch, batch.size(), true);
     }
 
-    private List<ModerationResult> requestModeration(List<?> input, int resultCount) {
+    private List<ModerationResult> requestModeration(List<?> input, int resultCount, boolean requireScores) {
         requireConfigured();
         JsonNode response;
         try {
@@ -172,8 +178,26 @@ public class OpenAiModerationClient implements ContentModerationClient {
             if (!flagged.isBoolean()) {
                 throw new ModerationUnavailableException("Kết quả kiểm duyệt thiếu trạng thái hợp lệ");
             }
-            parsed.add(new ModerationResult(flagged.asBoolean(), flaggedCategories(result)));
+            boolean isFlagged = flagged.asBoolean();
+            Map<String, Double> scores = requireScores && !isFlagged ? readScores(result) : Map.of();
+            parsed.add(new ModerationResult(isFlagged, flaggedCategories(result), scores));
         }
+        return parsed;
+    }
+
+    private static Map<String, Double> readScores(JsonNode result) {
+        JsonNode scores = result.path("category_scores");
+        if (!scores.isObject() || scores.isEmpty()) {
+            throw new ModerationUnavailableException("Kết quả kiểm duyệt thiếu điểm theo nhóm");
+        }
+        Map<String, Double> parsed = new HashMap<>();
+        scores.properties().forEach(entry -> {
+            JsonNode value = entry.getValue();
+            if (!value.isNumber() || !(value.asDouble() >= 0 && value.asDouble() <= 1)) {
+                throw new ModerationUnavailableException("Điểm kiểm duyệt ngoài phạm vi hợp lệ");
+            }
+            parsed.put(entry.getKey(), value.asDouble());
+        });
         return parsed;
     }
 

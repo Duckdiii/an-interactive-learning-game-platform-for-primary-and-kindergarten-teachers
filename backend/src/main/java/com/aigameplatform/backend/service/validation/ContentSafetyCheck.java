@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.validation;
 
+import com.aigameplatform.backend.service.admin.AiConfigService;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.service.validation.safety.ContentModerationClient;
 import com.aigameplatform.backend.service.validation.safety.GameTextExtractor.TextEntry;
@@ -7,7 +8,9 @@ import com.aigameplatform.backend.service.validation.safety.ModerationResult;
 import com.aigameplatform.backend.service.validation.safety.ModerationUnavailableException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +28,19 @@ public class ContentSafetyCheck {
 
     private final BlockedWordList blockedWords;
     private final ContentModerationClient moderationClient;
+    private final AiConfigService aiConfigService;
 
     public ContentSafetyCheck(BlockedWordList blockedWords, ContentModerationClient moderationClient,
-            @Value("${app.moderation.required:true}") boolean moderationRequired) {
+            boolean moderationRequired) {
+        this(blockedWords, moderationClient, moderationRequired, null);
+    }
+
+    @Autowired
+    public ContentSafetyCheck(BlockedWordList blockedWords, ContentModerationClient moderationClient,
+            @Value("${app.moderation.required:true}") boolean moderationRequired, AiConfigService aiConfigService) {
         this.blockedWords = blockedWords;
         this.moderationClient = moderationClient;
+        this.aiConfigService = aiConfigService;
         if (!moderationClient.isConfigured()) {
             if (moderationRequired) {
                 throw new IllegalStateException(
@@ -64,12 +75,19 @@ public class ContentSafetyCheck {
             return List.of(new ValidationError("$", UNAVAILABLE_MESSAGE, ValidationError.Kind.UNAVAILABLE));
         }
 
+        double threshold = aiConfigService == null ? AiConfigService.DEFAULT_MODERATION_THRESHOLD
+                : aiConfigService.getActiveConfig().moderationThreshold();
         List<ValidationError> flagged = new ArrayList<>();
         for (int i = 0; i < results.size(); i++) {
             ModerationResult result = results.get(i);
-            if (result.flagged()) {
-                flagged.add(new ValidationError(texts.get(i).path(),
-                        UNSAFE_MESSAGE + " (" + String.join(", ", result.categories()) + ")", ValidationError.Kind.UNSAFE));
+            List<String> categories = result.flagged() ? result.categories() : result.categoryScores().entrySet().stream()
+                    .filter(entry -> entry.getValue() >= threshold)
+                    .map(Map.Entry::getKey)
+                    .sorted().toList();
+            if (result.flagged() || !categories.isEmpty()) {
+                String message = categories.isEmpty() ? UNSAFE_MESSAGE
+                        : UNSAFE_MESSAGE + " (" + String.join(", ", categories) + ")";
+                flagged.add(new ValidationError(texts.get(i).path(), message, ValidationError.Kind.UNSAFE));
             }
         }
         return flagged;

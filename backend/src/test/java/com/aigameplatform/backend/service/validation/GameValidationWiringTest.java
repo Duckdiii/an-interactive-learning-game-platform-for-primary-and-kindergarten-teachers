@@ -2,6 +2,7 @@ package com.aigameplatform.backend.service.validation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.aigameplatform.backend.service.admin.AiConfigService;
 import com.aigameplatform.backend.service.validation.rule.AudioVisualMatchRule;
 import com.aigameplatform.backend.service.validation.rule.DragDropRule;
 import com.aigameplatform.backend.service.validation.rule.MatchingRule;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
@@ -41,6 +43,9 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
         "app.moderation.openai.timeout-seconds=1"
 })
 class GameValidationWiringTest {
+
+    @MockitoBean
+    private AiConfigService aiConfigService;
 
     @Autowired
     private GameValidationService service;

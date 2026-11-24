@@ -26,7 +26,7 @@ import org.springframework.web.client.RestClient;
 class OpenAiModerationClientTest {
 
     private static final String URL = "https://api.openai.com/v1/moderations";
-    private static final String CLEAN = "{\"flagged\":false,\"categories\":{\"violence\":false,\"sexual\":false}}";
+    private static final String CLEAN = "{\"flagged\":false,\"categories\":{\"violence\":false,\"sexual\":false},\"category_scores\":{\"violence\":0.6,\"sexual\":0.01}}";
 
     private final RestClient.Builder builder = RestClient.builder().baseUrl("https://api.openai.com");
     private final MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
@@ -132,6 +132,7 @@ class OpenAiModerationClientTest {
         List<ModerationResult> second = client.moderate(List.of("Con mèo", "bạo lực", "câu mới", "Con mèo", "câu mới"));
 
         assertThat(second).extracting(ModerationResult::flagged).containsExactly(false, true, false, false, false);
+        assertThat(second.getFirst().categoryScores()).containsEntry("violence", 0.6);
         server.verify();
         assertThat(client.moderate(List.of("Con mèo", "câu mới"))).extracting(ModerationResult::flagged).containsExactly(false, false);
     }
@@ -157,6 +158,15 @@ class OpenAiModerationClientTest {
         server.expect(requestTo(URL)).andRespond(withSuccess(cleanResults(1), MediaType.APPLICATION_JSON));
 
         assertThatThrownBy(() -> client.moderate(List.of("a", "b"))).isInstanceOf(ModerationUnavailableException.class);
+    }
+
+    @Test
+    void unflaggedTextWithoutScoresBecomesUnavailable() {
+        server.expect(requestTo(URL)).andRespond(withSuccess(response("""
+                {"flagged":false,"categories":{"violence":false}}
+                """), MediaType.APPLICATION_JSON));
+
+        assertThatThrownBy(() -> client.moderate(List.of("x"))).isInstanceOf(ModerationUnavailableException.class);
     }
 
     @Test

@@ -168,6 +168,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         if (aiConfigService != null) {
             AiConfigVersionDto activeConfig = aiConfigService.getActiveConfig();
             if (activeConfig != null) {
+                systemPrompt = activeConfig.systemPrompt() + "\n\n" + systemPrompt;
                 if (activeConfig.temperature() != null) {
                     paramBuilder.temperature(activeConfig.temperature());
                 }

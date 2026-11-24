@@ -1,10 +1,17 @@
 package com.aigameplatform.backend.service.generation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import com.aigameplatform.backend.dto.admin.AiConfigVersionDto;
 
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.service.admin.AiConfigService;
+import com.aigameplatform.backend.service.asset.KeywordAssetRetriever;
+import com.aigameplatform.backend.service.media.NotoEmojiCatalog;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import com.aigameplatform.backend.service.strategy.QuizGameStrategy;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
@@ -16,6 +23,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -145,7 +153,7 @@ class GeminiGameContentGeneratorTest {
     }
 
     @Test
-    void sdkWireRequestUsesJsonSchemaWithBoundedArrayCountersRemoved() throws Exception {
+    void sdkWireRequestUsesActiveConfigAndJsonSchemaWithBoundedArrayCountersRemoved() throws Exception {
         var body = new AtomicReference<String>();
         var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {
@@ -164,14 +172,23 @@ class GeminiGameContentGeneratorTest {
                     .maxOutputTokens(1800).supportedCapabilities(java.util.Set.of(
                             dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA)).build();
             var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
-            generatorOf(model, strategies, ASSETS).generate(new GenerationAttempt(GameType.MATCHING,
+            var active = mock(AiConfigService.class);
+            when(active.getActiveConfig()).thenReturn(new AiConfigVersionDto("test-version", "Hướng dẫn đang áp dụng.",
+                    0.55, 2400, 0.85, null, false, true, "test-hash", Instant.EPOCH, "admin"));
+            var generator = new GeminiGameContentGenerator(model, model, strategies, ASSETS,
+                    new KeywordAssetRetriever(ASSETS), false, new NotoEmojiCatalog(), active);
+            generator.generate(new GenerationAttempt(GameType.MATCHING,
                     "Ghép từ", Subject.ENGLISH, GradeLevel.GRADE_3, strategies.get(GameType.MATCHING).getStructuredSchema(),
                     "[en-g3-010] Đọc hiểu nghĩa từ", 1, null, List.of()));
-            var config = MAPPER.readTree(body.get()).path("generationConfig");
+            var request = MAPPER.readTree(body.get());
+            assertThat(request.path("systemInstruction").path("parts").get(0).path("text").asString())
+                    .startsWith("Hướng dẫn đang áp dụng.\n\n").contains("Ghép từ");
+            var config = request.path("generationConfig");
             assertThat(config.path("responseMimeType").asString()).isEqualTo("application/json");
             assertThat(config.path("responseJsonSchema").path("type").asString()).isEqualTo("object");
             assertThat(config.has("responseSchema")).isFalse();
-            assertThat(config.path("maxOutputTokens").asInt()).isEqualTo(1800);
+            assertThat(config.path("maxOutputTokens").asInt()).isEqualTo(2400);
+            assertThat(config.path("temperature").asDouble()).isEqualTo(0.55);
             assertThat(config.path("responseJsonSchema").toString()).doesNotContain("maxItems", "minItems");
         } finally { server.stop(0); }
     }

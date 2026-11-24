@@ -144,8 +144,10 @@ public class AiConfigService {
         AiConfigVersion version = aiConfigVersionRepository.findById(versionId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy phiên bản cấu hình AI với ID: " + versionId));
 
-        aiConfigVersionRepository.deactivateAll();
-        version.setActive(true);
+        if (!version.isActive()) {
+            aiConfigVersionRepository.deactivateAll();
+            version.setActive(true);
+        }
 
         AiConfigVersion saved = aiConfigVersionRepository.save(version);
 
