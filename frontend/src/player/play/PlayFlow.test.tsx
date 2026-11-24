@@ -34,7 +34,9 @@ vi.mock('../../games/common/measureText', () => ({ measureWrappedTextHeight: () 
 vi.mock('../../games/common/sound', () => ({ playSound: vi.fn() }))
 vi.mock('../../games/common/useFeedback', () => ({ useFeedback: () => ({ showFeedback: vi.fn() }) }))
 vi.mock('../../games/common/OptionButton', () => ({
-  default: ({ option, onClick }: { option: { text: string }; onClick: () => void }) => <button onClick={onClick}>{option.text}</button>,
+  default: ({ option, locked, onClick }: { option: { text: string }; locked: boolean; onClick: () => void }) => (
+    <button disabled={locked} onClick={onClick}>{option.text}</button>
+  ),
 }))
 
 function openPlay(code: string) {
@@ -425,8 +427,11 @@ describe('trang chơi, các tình huống khác', () => {
     tap('3')
     expect(await screen.findByText('Chưa gửi được câu trả lời. Con thử lại nhé.')).toBeInTheDocument()
 
-    tap('3')
+    const answer = screen.getByRole('button', { name: '3' })
+    await waitFor(() => expect(answer).toBeEnabled())
+    fireEvent.click(answer)
     expect(await screen.findByText('Giỏi quá!')).toBeInTheDocument()
+    expect(submit).toHaveBeenCalledTimes(2)
     expect(screen.queryByText('Chưa gửi được câu trả lời. Con thử lại nhé.')).not.toBeInTheDocument()
     submit.mockRestore()
   })
