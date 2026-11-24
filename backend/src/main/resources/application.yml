@@ -55,6 +55,19 @@ app:
     # Profile prod bắt buộc PLAYER_ORIGIN + PLAYER_SHARE_BASE_URL, không có mặc định localhost.
     browser-origin: ${PLAYER_ORIGIN:http://localhost:5173}
     share-base-url: ${PLAYER_SHARE_BASE_URL:http://localhost:5173/play}
+  narration:
+    viettel:
+      token: ${VIETTEL_TTS_TOKEN:}
+    elevenlabs:
+      api-key: ${ELEVENLABS_API_KEY:}
+      voice-id: ${ELEVENLABS_VOICE_ID:JBFqnCBsd6RMkjVDRZzb}
+      model-id: ${ELEVENLABS_MODEL_ID:eleven_flash_v2_5}
+      connect-timeout-seconds: ${ELEVENLABS_CONNECT_TIMEOUT_SECONDS:5}
+      read-timeout-seconds: ${ELEVENLABS_READ_TIMEOUT_SECONDS:25}
+    storage:
+      url: ${SUPABASE_URL:}
+      service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
+      bucket: ${TTS_STORAGE_BUCKET:game-narration}
   jwt:
     # HS256 signing key, at least 32 bytes. Provide it via the JWT_SECRET environment variable.
     secret: ${JWT_SECRET}
