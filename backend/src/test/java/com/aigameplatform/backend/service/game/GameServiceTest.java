@@ -118,6 +118,28 @@ class GameServiceTest {
     }
 
     @Test
+    void classroomContextDoesNotReplaceTheTopicAndSelectedVoiceReachesAudio() {
+        var classrooms = mock(com.aigameplatform.backend.service.classroom.ClassroomService.class);
+        var audio = mock(com.aigameplatform.backend.service.media.GameAudioEnricher.class);
+        var audioProvider = new org.springframework.beans.factory.support.StaticListableBeanFactory();
+        audioProvider.addBean("testAudio", audio);
+        service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction(),
+                curriculumReviews, catalogs, new java.util.Random(7), audioProvider.getBeanProvider(
+                        com.aigameplatform.backend.service.media.GameAudioEnricher.class), sessions, null, editLogs, classrooms);
+        var request = new GenerateGameRequest(Subject.MATH, GradeLevel.GRADE_1, "Đếm số con mèo", false, GameType.QUIZ,
+                null, null, null, MAPPER.createObjectNode().put("gender", "MALE"), null, "class-1");
+        String context = "Phạm vi đã học: Đếm đến 5";
+        when(classrooms.generationContext(OWNER, "class-1", GradeLevel.GRADE_1)).thenReturn(context);
+        when(dsl.generate(GameType.QUIZ, "Đếm số con mèo", request, context)).thenReturn(
+                new GameContentHandler.GeneratedContent("Đếm mèo", "1.0.0", List.of(), null));
+
+        service.generate(OWNER, request);
+
+        verify(dsl).generate(GameType.QUIZ, "Đếm số con mèo", request, context);
+        verify(audio).enrichAllQuestionsWithAudio(List.of(), com.aigameplatform.backend.dto.media.SpeechVoice.MALE);
+    }
+
+    @Test
     void customGameNeedsAnIdea() {
         assertThatThrownBy(() -> service.generate(OWNER, request(null, true, GameType.CUSTOM)))
                 .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR));

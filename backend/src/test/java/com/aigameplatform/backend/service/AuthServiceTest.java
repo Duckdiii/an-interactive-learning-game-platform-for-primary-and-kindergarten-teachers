@@ -67,7 +67,8 @@ class AuthServiceTest {
     private AuthService serviceAt(Instant instant) {
         Clock clock = Clock.fixed(instant, ZoneOffset.UTC);
         jwtService = new JwtService(SECRET, 15, clock);
-        return new AuthService(teacherRepository, refreshTokenRepository, passwordEncoder, jwtService, codec, clock, 24, 30);
+        return new AuthService(teacherRepository, refreshTokenRepository, passwordEncoder, jwtService, codec, clock,
+                new com.aigameplatform.backend.service.validation.safety.BlockedWordList(java.util.List.of()), 24, 30);
     }
 
     private Teacher teacherWithPassword(String rawPassword) {
@@ -108,13 +109,14 @@ class AuthServiceTest {
         });
 
         RegisterResponse response = service.register(
-                new RegisterRequest("  Nguyễn Văn A ", "  A@School.edu.VN ", "Abcdef1!"));
+                new RegisterRequest("  Nguyễn Văn A ", "  A@School.edu.VN ", "Abcdef1!", "  Trường Hoa Mai  "));
 
         ArgumentCaptor<Teacher> captor = ArgumentCaptor.forClass(Teacher.class);
         verify(teacherRepository).saveAndFlush(captor.capture());
         Teacher saved = captor.getValue();
         assertThat(saved.getEmail()).isEqualTo("a@school.edu.vn");
         assertThat(saved.getFullName()).isEqualTo("Nguyễn Văn A");
+        assertThat(saved.getSchool()).isEqualTo("Trường Hoa Mai");
         assertThat(saved.getPassword()).isNull();
         assertThat(saved.getPasswordHash()).isNotEqualTo("Abcdef1!");
         assertThat(passwordEncoder.matches("Abcdef1!", saved.getPasswordHash())).isTrue();

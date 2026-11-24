@@ -8,7 +8,12 @@ import java.util.List;
 
 /** Một lần gọi AI sinh game CPF; từ lần 2 kèm JSON lần trước và lỗi kiểm duyệt để AI sửa đúng chỗ. */
 public record CpfGenerationAttempt(String idea, Subject subject, GradeLevel gradeLevel, int attemptNumber,
-        String previousOutput, List<ValidationError> previousErrors, Revision revision) {
+        String previousOutput, List<ValidationError> previousErrors, Revision revision, String classroomContext) {
+
+    public CpfGenerationAttempt(String idea, Subject subject, GradeLevel gradeLevel, int attemptNumber, String previousOutput,
+            List<ValidationError> previousErrors, Revision revision) {
+        this(idea, subject, gradeLevel, attemptNumber, previousOutput, previousErrors, revision, null);
+    }
 
     /** Lần sinh game mới (không phải sửa game đã có). */
     public CpfGenerationAttempt(String idea, Subject subject, GradeLevel gradeLevel, int attemptNumber, String previousOutput,

@@ -94,6 +94,14 @@ class ClassroomControllerTest {
     }
 
     @Test
+    void invalidLearningProfileReportsTheSpecificField() throws Exception {
+        mvc.perform(post("/api/classrooms").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"className\":\"1A\",\"learningProfile\":{\"studentCount\":0}}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.details['learningProfile.studentCount']").exists());
+    }
+
+    @Test
     void unsafeContentIs422() throws Exception {
         when(classrooms.create(eq("teacher-1"), any(ClassroomRequest.class)))
                 .thenThrow(new UnsafeContentException("Nội dung chưa đạt chuẩn an toàn dành cho học sinh. Vui lòng điều chỉnh lại."));

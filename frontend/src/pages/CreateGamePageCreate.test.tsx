@@ -3,6 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { gameTypeLabel } from '../constants/labels'
+import { fetchClassrooms } from '../api/classroomsApi'
+import { fetchSavedSuggestions, fetchTeacherProfile } from '../api/teacherProfileApi'
+import { buildGenerateRequest } from '../utils/generateRequest'
 import { rankGameTypes, suggestGameTypes } from '../services/gameTypeSuggestionService'
 import { getMockGenerateCalls, resetMockGenerate, setMockGenerateFailure } from '../services/mock/mockGenerate'
 import { getMockGame, listMockGames, resetMockGames } from '../services/mock/mockGames'
@@ -17,6 +20,10 @@ vi.mock('../services/gameTypeSuggestionService', async (original) => ({
   ...(await original<typeof import('../services/gameTypeSuggestionService')>()),
   suggestGameTypes: vi.fn(),
 }))
+
+vi.mock('../api/classroomsApi', () => ({ fetchClassrooms: vi.fn() }))
+vi.mock('../api/teacherProfileApi')
+vi.mock('../utils/generateRequest', { spy: true })
 
 const mockedSuggest = vi.mocked(suggestGameTypes)
 const IDEA = 'Đếm số lượng con vật cho các bé'
@@ -74,6 +81,10 @@ beforeEach(() => {
   mockedSuggest.mockReset()
   mockedSuggest.mockImplementation(async (input) => rankGameTypes(input))
   loginAsTeacher()
+  vi.mocked(fetchClassrooms).mockResolvedValue([])
+  vi.mocked(fetchSavedSuggestions).mockResolvedValue([])
+  vi.mocked(fetchTeacherProfile).mockResolvedValue({ school: null, textbook: null, voice: null, subject: null, gradeLevel: null })
+  vi.mocked(buildGenerateRequest).mockClear()
   resetMockGames()
   resetMockGenerate()
   clearNewGames()
@@ -87,6 +98,32 @@ afterEach(() => {
 })
 
 describe('tạo một game', () => {
+  it('điền hồ sơ và ưu tiên khối của lớp đã chọn trong yêu cầu tạo game', async () => {
+    const user = userEvent.setup()
+    vi.mocked(fetchTeacherProfile).mockResolvedValue({
+      school: null, textbook: null, voice: 'MALE', subject: 'MATH', gradeLevel: 'GRADE_1',
+    })
+    vi.mocked(fetchClassrooms).mockResolvedValue([{
+      classroomId: 'c1', className: 'Lớp 2A', learningProfile: { gradeLevel: 'GRADE_2' },
+    }])
+    renderFlow()
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Toán', pressed: true })).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: 'Lớp 1', pressed: true })).toBeInTheDocument()
+    const classroom = await screen.findByLabelText('Lớp học')
+    await user.selectOptions(classroom, 'c1')
+    expect(screen.getByRole('button', { name: 'Lớp 2', pressed: true })).toBeInTheDocument()
+    await user.selectOptions(classroom, '')
+    expect(screen.getByRole('button', { name: 'Lớp 1', pressed: true })).toBeInTheDocument()
+    await user.selectOptions(classroom, 'c1')
+    await toSuggestions(user)
+    await user.click(createButton())
+
+    await waitFor(() => expect(buildGenerateRequest).toHaveBeenCalledWith(expect.objectContaining({
+      classroomId: 'c1', subject: 'MATH', gradeLevel: 'GRADE_2', idea: IDEA, voiceGender: 'MALE',
+    }), 'idea', expect.any(String)))
+  })
+
   it('chọn 1 loại: tạo game nháp, đánh dấu "Mới" và mở thẳng trình soạn thảo của game đó', async () => {
     const user = userEvent.setup()
 

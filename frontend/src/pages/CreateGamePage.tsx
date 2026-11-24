@@ -33,6 +33,8 @@ import { ROUTES } from '../routes/paths'
 import { useCreateGames } from '../hooks/useCreateGames'
 import { useGameTypeSuggestions } from '../hooks/useGameTypeSuggestions'
 import { useLessonContext } from '../hooks/useLessonContext'
+import { useClassrooms } from '../hooks/useClassrooms'
+import { useSavedSuggestions, useTeacherProfile } from '../hooks/useTeacherProfile'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { parseApiError } from '../utils/apiError'
 import {
@@ -63,11 +65,23 @@ export default function CreateGamePage() {
   const [idea, setIdea] = useState(initialIdea)
   // Game ôn tập từ kết quả lớp: chỉ mang mã game và mã câu, Backend tự lấy số liệu (không đưa dữ liệu học sinh qua địa chỉ).
   const [reviewFrom] = useState(() => parseReviewFrom(params.get('reviewGame'), params.get('reviewQ')))
+  const profile = useTeacherProfile()
+  const classrooms = useClassrooms()
+  const savedTopics = useSavedSuggestions()
+  const [classroomId, setClassroomId] = useState('')
+  const selectedClassroom = classrooms.data?.find((classroom) => classroom.classroomId === classroomId)
   const lesson = useLessonContext(idea, {
     gradeLevel: known(params.get('grade'), GRADE_LEVEL_VALUES),
     subject: known(params.get('subject'), SUBJECT_VALUES),
-  })
-  const [voice, setVoice] = useState(DEFAULT_VOICE)
+  }, {
+    gradeLevel: profile.data?.gradeLevel ?? undefined,
+    subject: profile.data?.subject ?? undefined,
+  }, selectedClassroom?.learningProfile?.gradeLevel ?? undefined)
+  const [voiceOverride, setVoiceOverride] = useState<Partial<typeof DEFAULT_VOICE>>({})
+  const voice = {
+    voiceRegion: voiceOverride.voiceRegion ?? DEFAULT_VOICE.voiceRegion,
+    voiceGender: voiceOverride.voiceGender ?? profile.data?.voice ?? DEFAULT_VOICE.voiceGender,
+  }
   const [file, setFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState('')
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -99,23 +113,32 @@ export default function CreateGamePage() {
   }, [creation.creating])
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
   const suggestionsMutation = useGameTypeSuggestions()
+  const requestSuggestion = suggestionsMutation.mutate
+  const deepLinkStarted = useRef<URLSearchParams | null>(null)
   const lastInput = useRef({ idea: '', gradeLevel: '', subject: '' })
   const chat = useRequestChat({ subject: lesson.subject, gradeLevel: lesson.gradeLevel })
 
   // "Tạo ngẫu nhiên" ở Trang chủ dẫn tới đây: đưa tiêu điểm vào ô khối lớp, ô đầu tiên của luồng này.
   useEffect(() => {
     if (params.get('random')) document.getElementById('create-grade')?.focus()
-    if (params.get('step') === 'suggest' && initialIdea) {
+  }, [params])
+
+  useEffect(() => {
+    if (params.get('step') === 'suggest' && initialIdea && deepLinkStarted.current !== params) {
+      const grade = known(params.get('grade'), GRADE_LEVEL_VALUES)
+      const subject = known(params.get('subject'), SUBJECT_VALUES)
+      if (profile.isFetching && (!grade || !subject)) return
+      deepLinkStarted.current = params
       setMode('idea')
       lastInput.current = {
         idea: initialIdea.trim(),
-        gradeLevel: known(params.get('grade'), GRADE_LEVEL_VALUES) ?? '',
-        subject: known(params.get('subject'), SUBJECT_VALUES) ?? '',
+        gradeLevel: grade ?? profile.data?.gradeLevel ?? '',
+        subject: subject ?? profile.data?.subject ?? '',
       }
       setStep('suggest')
-      suggestionsMutation.mutate(lastInput.current)
+      requestSuggestion(lastInput.current)
     }
-  }, [params])
+  }, [params, initialIdea, profile.isFetching, profile.data, requestSuggestion])
 
   // Đổi ý tưởng hoặc lựa chọn thì kết quả tạo trước đó không còn đúng nữa (game đã tạo vẫn còn trong danh sách, chỉ không dùng lại cho lần tạo mới).
   const touch = () => creation.reset()
@@ -125,13 +148,20 @@ export default function CreateGamePage() {
   const group: IdeaGroup | '' = ideaGroupOf(lesson.gradeLevel) || (upperOpen ? 'UPPER' : '')
   const ideaRef = useRef<HTMLTextAreaElement>(null)
 
+  const changeGrade = (value: string) => {
+    if (selectedClassroom?.learningProfile?.gradeLevel && selectedClassroom.learningProfile.gradeLevel !== value) {
+      setClassroomId('')
+    }
+    lesson.setGradeLevel(value)
+  }
+
   const chooseGroup = (next: IdeaGroup) => {
     const unselect = group === next
     setUpperOpen(next === 'UPPER' && !unselect)
     if (next === 'UPPER') {
-      if (unselect || ideaGroupOf(lesson.gradeLevel) !== 'UPPER') lesson.setGradeLevel('')
+      if (unselect || ideaGroupOf(lesson.gradeLevel) !== 'UPPER') changeGrade('')
     } else {
-      lesson.setGradeLevel(unselect ? '' : next)
+      changeGrade(unselect ? '' : next)
     }
     touch()
   }
@@ -258,6 +288,7 @@ export default function CreateGamePage() {
       sceneImageUrl,
       optionImages,
       reviewFrom,
+      classroomId: classroomId || undefined,
     }
     setCreatingInput({ idea: form.idea, gradeLevel: form.gradeLevel })
     const running = creation.create(types.map((type) => buildGenerateRequest(form, mode, type)))
@@ -368,6 +399,19 @@ export default function CreateGamePage() {
               noValidate
               className="space-y-6 rounded-3xl bg-surface p-5 shadow-sm sm:p-7"
             >
+              {classrooms.data?.length ? (
+                <FormField id="create-classroom" label="Lớp học" hint="Chọn lớp để AI dùng thông tin chung của lớp khi tạo game.">
+                  <select id="create-classroom" className={inputClass()} value={selectedClassroom?.classroomId ?? ''}
+                    aria-describedby={describedBy('create-classroom', { hint: true })}
+                    onChange={(event) => {
+                      setClassroomId(event.target.value)
+                      touch()
+                    }}>
+                    <option value="">Không chọn lớp</option>
+                    {classrooms.data.map((item) => <option key={item.classroomId} value={item.classroomId}>{item.className}</option>)}
+                  </select>
+                </FormField>
+              ) : null}
               <LessonContextPicker
                 gradeLevel={lesson.gradeLevel}
                 subject={lesson.subject}
@@ -378,7 +422,7 @@ export default function CreateGamePage() {
                 onGradeLevelChange={(value) => {
                   // Bỏ chọn lớp cụ thể thì giữ hàng lớp mở để cô chọn lại.
                   setUpperOpen(group === 'UPPER')
-                  lesson.setGradeLevel(value)
+                  changeGrade(value)
                   touch()
                 }}
                 onSubjectChange={(value) => {
@@ -415,6 +459,22 @@ export default function CreateGamePage() {
                 />
               </FormField>
 
+              {savedTopics.data?.length ? (
+                <FormField id="create-saved-topic" label="Dùng gợi ý đã ghi nhớ">
+                  <select id="create-saved-topic" className={inputClass()} value=""
+                    onChange={(event) => {
+                      const topic = savedTopics.data?.find((item) => item.id === event.target.value)?.topic
+                      if (!topic) return
+                      setIdea((current) => (current.trim() ? current.trimEnd() + '\n' + topic : topic).slice(0, IDEA_MAX_LENGTH))
+                      setErrors((current) => ({ ...current, idea: undefined }))
+                      touch()
+                      ideaRef.current?.focus()
+                    }}>
+                    <option value="">Chọn chủ đề</option>
+                    {savedTopics.data.map((item) => <option key={item.id} value={item.id}>{item.topic}</option>)}
+                  </select>
+                </FormField>
+              ) : null}
               <FormField
                 id="create-file"
                 label={text.fileLabel}
@@ -444,7 +504,7 @@ export default function CreateGamePage() {
                     <select
                       id="create-voice-region"
                       value={voice.voiceRegion}
-                      onChange={(event) => setVoice((current) => ({ ...current, voiceRegion: event.target.value }))}
+                      onChange={(event) => setVoiceOverride((current) => ({ ...current, voiceRegion: event.target.value }))}
                       className={inputClass()}
                     >
                       {text.voiceRegions.map(([value, label]) => (
@@ -458,7 +518,7 @@ export default function CreateGamePage() {
                     <select
                       id="create-voice-gender"
                       value={voice.voiceGender}
-                      onChange={(event) => setVoice((current) => ({ ...current, voiceGender: event.target.value }))}
+                      onChange={(event) => setVoiceOverride((current) => ({ ...current, voiceGender: event.target.value }))}
                       className={inputClass()}
                     >
                       {text.voiceGenders.map(([value, label]) => (

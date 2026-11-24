@@ -4,6 +4,8 @@ import com.aigameplatform.backend.dto.classroom.ClassroomDto;
 import com.aigameplatform.backend.dto.classroom.ClassroomRequest;
 import com.aigameplatform.backend.entity.Classroom;
 import com.aigameplatform.backend.entity.Teacher;
+import com.aigameplatform.backend.entity.enums.GradeLevel;
+import java.util.StringJoiner;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.exception.UnsafeContentException;
@@ -77,8 +79,25 @@ public class ClassroomService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy lớp học"));
     }
 
+    @Transactional(readOnly = true)
+    public String generationContext(String teacherId, String classroomId, GradeLevel gradeLevel) {
+        Classroom classroom = owned(teacherId, classroomId);
+        if (classroom.getGradeLevel() != null && classroom.getGradeLevel() != gradeLevel) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Khối lớp đã chọn không khớp với lớp học");
+        }
+        StringJoiner context = new StringJoiner("\n");
+        if (classroom.getStudentCount() != null) context.add("Sĩ số: " + classroom.getStudentCount());
+        if (classroom.getKnowledgeScope() != null) context.add("Phạm vi đã học: " + classroom.getKnowledgeScope());
+        if (classroom.getCharacteristics() != null) context.add("Đặc điểm chung: " + classroom.getCharacteristics());
+        if (classroom.getFavoriteTopics() != null) context.add("Chủ đề yêu thích: " + classroom.getFavoriteTopics());
+        return context.length() == 0 ? null : context.toString();
+    }
+
     private void requireSafe(ClassroomRequest request) {
-        for (String text : new String[] {request.className(), request.schoolYear(), request.schoolName()}) {
+        var profile = request.learningProfile();
+        for (String text : new String[] {request.className(), request.schoolYear(), request.schoolName(),
+                profile == null ? null : profile.knowledgeScope(), profile == null ? null : profile.characteristics(),
+                profile == null ? null : profile.favoriteTopics()}) {
             if (text != null && blockedWords.findIn(text).isPresent()) {
                 throw new UnsafeContentException("Nội dung chưa đạt chuẩn an toàn dành cho học sinh. Vui lòng điều chỉnh lại.");
             }
@@ -89,6 +108,14 @@ public class ClassroomService {
         classroom.setClassName(request.className().trim());
         classroom.setSchoolYear(blankToNull(request.schoolYear()));
         classroom.setSchoolName(blankToNull(request.schoolName()));
+        var profile = request.learningProfile();
+        if (profile != null) {
+            classroom.setGradeLevel(profile.gradeLevel());
+            classroom.setStudentCount(profile.studentCount());
+            classroom.setKnowledgeScope(blankToNull(profile.knowledgeScope()));
+            classroom.setCharacteristics(blankToNull(profile.characteristics()));
+            classroom.setFavoriteTopics(blankToNull(profile.favoriteTopics()));
+        }
     }
 
     private static String blankToNull(String text) {

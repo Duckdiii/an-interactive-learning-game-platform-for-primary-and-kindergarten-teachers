@@ -38,7 +38,7 @@ public class ReviewSeedService {
         String idea = block.isEmpty() ? base : truncate(base, MAX_IDEA_LENGTH - block.length()) + block;
         return new GenerateGameRequest(request.subject(), request.gradeLevel(), idea,
                 request.randomTopic(), request.gameType(), request.mode(), request.sceneImageUrl(),
-                request.optionImages(), request.voice(), null);
+                request.optionImages(), request.voice(), null, request.classroomId());
     }
 
     /** Rỗng khi không có dòng số liệu nào (không để AI nhận lời dặn về dữ liệu mà bên dưới không có gì). */

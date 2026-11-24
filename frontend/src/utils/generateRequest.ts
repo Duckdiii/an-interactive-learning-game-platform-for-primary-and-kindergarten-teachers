@@ -27,6 +27,7 @@ export interface GenerateForm {
   optionImages?: { imageUrl: string; visualPrompt: string }[]
   /** Game ôn tập: các câu của game cũ cần ôn lại (Backend tự đưa số liệu lớp làm sai vào lời nhắc AI). */
   reviewFrom?: ReviewFrom
+  classroomId?: string
 }
 
 export interface ReviewFrom {
@@ -67,6 +68,7 @@ export interface GenerateGameRequest {
   voice: { region: string; gender: string }
   theme?: string
   reviewFrom?: ReviewFrom
+  classroomId?: string
 }
 
 export type GenerateProblem = 'needIdea'
@@ -97,6 +99,7 @@ export function buildGenerateRequest(
   if (gameType) request.gameType = gameType
   if (form.theme && form.theme !== 'AUTO') request.theme = form.theme
   if (form.reviewFrom) request.reviewFrom = form.reviewFrom
+  if (form.classroomId) request.classroomId = form.classroomId
 
   if (mode === 'random') request.randomTopic = true
   else if (hasValidIdea(form.idea)) request.idea = form.idea.trim()

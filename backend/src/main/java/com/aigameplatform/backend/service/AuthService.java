@@ -11,6 +11,8 @@ import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.exception.LoginTemporarilyLockedException;
+import com.aigameplatform.backend.exception.UnsafeContentException;
+import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.repository.RefreshTokenRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.security.JwtService;
@@ -42,6 +44,7 @@ public class AuthService {
     static final Duration LOGIN_LOCK_DURATION = Duration.ofMinutes(15);
 
     private final TeacherRepository teacherRepository;
+    private final BlockedWordList blockedWords;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -59,6 +62,7 @@ public class AuthService {
             JwtService jwtService,
             RefreshTokenCodec refreshTokenCodec,
             Clock clock,
+            BlockedWordList blockedWords,
             @Value("${app.jwt.refresh-token-ttl-hours}") long refreshTtlHours,
             @Value("${app.jwt.remember-me-refresh-token-ttl-days}") long rememberMeTtlDays) {
         this.teacherRepository = teacherRepository;
@@ -67,6 +71,7 @@ public class AuthService {
         this.jwtService = jwtService;
         this.refreshTokenCodec = refreshTokenCodec;
         this.clock = clock;
+        this.blockedWords = blockedWords;
         this.refreshTtlHours = refreshTtlHours;
         this.rememberMeTtlDays = rememberMeTtlDays;
         this.dummyPasswordHash = passwordEncoder.encode(UUID.randomUUID().toString());
@@ -78,7 +83,12 @@ public class AuthService {
         if (teacherRepository.existsByEmail(email)) {
             throw emailAlreadyRegistered();
         }
+        String school = request.school() == null ? "" : request.school().strip();
+        if (blockedWords.findIn(school).isPresent()) {
+            throw new UnsafeContentException("Nội dung chưa đạt chuẩn an toàn dành cho học sinh. Vui lòng điều chỉnh lại.");
+        }
         Teacher teacher = new Teacher();
+        teacher.setSchool(school.isEmpty() ? null : school);
         teacher.setFullName(request.fullName().trim());
         teacher.setEmail(email);
         teacher.setPasswordHash(passwordEncoder.encode(request.password()));

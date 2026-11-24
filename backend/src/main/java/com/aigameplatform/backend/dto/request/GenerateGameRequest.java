@@ -15,7 +15,7 @@ import tools.jackson.databind.JsonNode;
  * {@code GenerateGameRequest} của openapi.yaml (bản JSON đồng bộ). Phải có ít nhất một trong {@code idea},
  * {@code randomTopic}; {@code CUSTOM} bắt buộc {@code idea}. {@code mode=IMAGE} chỉ dùng cho VISUAL_CLOZE (cần
  * {@code sceneImageUrl} và {@code optionImages}), ODD_ONE_OUT và AUDIO_VISUAL_MATCH (chọn hình từ thư viện Noto).
- * Tệp giáo án và giọng đọc chưa cài: {@code voice} được nhận nhưng bỏ qua.
+ * Giọng đọc dùng thuộc tính gender nếu nhà cung cấp TTS hỗ trợ.
  */
 public record GenerateGameRequest(
         @NotNull(message = "Vui lòng chọn môn học") Subject subject,
@@ -27,7 +27,14 @@ public record GenerateGameRequest(
         @Size(max = 2048) String sceneImageUrl,
         @Size(max = 8) List<@Valid OptionImage> optionImages,
         JsonNode voice,
-        @Valid ReviewFrom reviewFrom) {
+        @Valid ReviewFrom reviewFrom,
+        @Size(max = 64, message = "Mã lớp không hợp lệ") String classroomId) {
+
+    public GenerateGameRequest(Subject subject, GradeLevel gradeLevel, String idea, Boolean randomTopic,
+            GameType gameType, VisualClozeMode mode, String sceneImageUrl, List<OptionImage> optionImages,
+            JsonNode voice, ReviewFrom reviewFrom) {
+        this(subject, gradeLevel, idea, randomTopic, gameType, mode, sceneImageUrl, optionImages, voice, reviewFrom, null);
+    }
 
     public GenerateGameRequest(Subject subject, GradeLevel gradeLevel, String idea, Boolean randomTopic,
             GameType gameType, JsonNode voice) {

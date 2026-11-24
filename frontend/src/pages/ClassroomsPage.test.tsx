@@ -2,11 +2,11 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AxiosError } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createClassroom, deleteClassroom, fetchClassrooms } from '../api/classroomsApi'
+import { createClassroom, deleteClassroom, fetchClassrooms, updateClassroom } from '../api/classroomsApi'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import ClassroomsPage from './ClassroomsPage'
 
-vi.mock('../api/classroomsApi', () => ({ fetchClassrooms: vi.fn(), createClassroom: vi.fn(), deleteClassroom: vi.fn() }))
+vi.mock('../api/classroomsApi', () => ({ fetchClassrooms: vi.fn(), createClassroom: vi.fn(), deleteClassroom: vi.fn(), updateClassroom: vi.fn() }))
 
 const mockedFetch = vi.mocked(fetchClassrooms)
 const mockedCreate = vi.mocked(createClassroom)
@@ -93,6 +93,30 @@ describe('Trang Lớp học', () => {
     expect(
       await screen.findByText('Nội dung chưa đạt chuẩn an toàn dành cho học sinh. Vui lòng điều chỉnh lại.'),
     ).toBeInTheDocument()
+  })
+
+  it('sửa lớp, giữ dữ liệu khi lưu thất bại và gửi đúng hồ sơ lớp khi thử lại', async () => {
+    const user = userEvent.setup()
+    vi.mocked(updateClassroom)
+      .mockRejectedValueOnce(new Error('Lỗi máy chủ'))
+      .mockResolvedValueOnce(CLASS_1A)
+    renderWithProviders(<ClassroomsPage />)
+
+    await user.click(await screen.findByRole('button', { name: 'Sửa lớp Lớp 1A' }))
+    expect(screen.getByLabelText(/Tên lớp/)).toHaveValue('Lớp 1A')
+    await user.selectOptions(screen.getByLabelText('Khối lớp'), 'GRADE_1')
+    await user.type(screen.getByLabelText('Sĩ số'), '24')
+    await user.type(screen.getByLabelText('Phạm vi kiến thức đã học'), 'Đếm đến 10')
+    await user.click(screen.getByRole('button', { name: 'Lưu lớp' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('chưa lưu được lớp')
+    expect(screen.getByLabelText('Sĩ số')).toHaveValue(24)
+    expect(screen.getByLabelText('Phạm vi kiến thức đã học')).toHaveValue('Đếm đến 10')
+    await user.click(screen.getByRole('button', { name: 'Lưu lớp' }))
+    expect(await screen.findByText('Đã lưu lớp học.')).toBeInTheDocument()
+    expect(updateClassroom).toHaveBeenLastCalledWith('c1', expect.objectContaining({
+      learningProfile: expect.objectContaining({ gradeLevel: 'GRADE_1', studentCount: 24, knowledgeScope: 'Đếm đến 10' }),
+    }))
   })
 
   it('xóa lớp phải xác nhận, có thể giữ lại, xác nhận thì gọi xóa', async () => {
