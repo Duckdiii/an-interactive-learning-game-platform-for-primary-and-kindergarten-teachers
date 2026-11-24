@@ -380,7 +380,7 @@ export default function AIConfigPage() {
                     className="w-full accent-indigo-600"
                   />
                   <p id="moderation-threshold-help" className="text-[11px] text-slate-500">
-                    Chặn văn bản có điểm kiểm duyệt đạt ngưỡng (mặc định 0,85). Nội dung bị dịch vụ gắn cờ luôn bị chặn.
+                    Áp dụng cho văn bản, ảnh và phần lời phiên âm từ MP3 (mặc định 0,85). Nội dung bị dịch vụ gắn cờ luôn bị chặn.
                   </p>
                 </div>
               </div>

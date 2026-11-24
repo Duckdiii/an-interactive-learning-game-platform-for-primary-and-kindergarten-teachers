@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.media;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.service.game.AiRequestRateLimiter;
+import com.aigameplatform.backend.service.validation.ContentSafetyCheck;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.service.validation.safety.ModerationUnavailableException;
 import com.aigameplatform.backend.service.validation.safety.OpenAiModerationClient;
@@ -27,14 +28,16 @@ public class MediaUploadService {
 
     private final MediaStorageService storage;
     private final OpenAiModerationClient moderation;
+    private final ContentSafetyCheck safety;
     private final BlockedWordList blockedWords;
     private final AiRequestRateLimiter requests;
     private final SceneImagePolicy imagePolicy;
 
     public MediaUploadService(MediaStorageService storage, OpenAiModerationClient moderation, BlockedWordList blockedWords,
-            AiRequestRateLimiter requests, SceneImagePolicy imagePolicy) {
+            AiRequestRateLimiter requests, SceneImagePolicy imagePolicy, ContentSafetyCheck safety) {
         this.storage = storage;
         this.moderation = moderation;
+        this.safety = safety;
         this.blockedWords = blockedWords;
         this.requests = requests;
         this.imagePolicy = imagePolicy;
@@ -54,7 +57,7 @@ public class MediaUploadService {
                 return store(audio, "mp3", "audio/mpeg", Kind.AUDIO);
             }
             CheckedImage image = normalizeImage(bytes);
-            if (moderation.moderateImage(image.bytes(), image.mimeType()).flagged()) throw unsafe();
+            if (safety.isUnsafe(moderation.moderateImage(image.bytes(), image.mimeType()))) throw unsafe();
             return store(image.bytes(), image.extension(), image.mimeType(), Kind.IMAGE);
         } catch (ModerationUnavailableException ex) {
             throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE,
@@ -70,7 +73,7 @@ public class MediaUploadService {
             throw new ApiException(ErrorCode.FILE_TOO_LARGE_OR_INVALID_FORMAT,
                     "Không nhận diện được lời đọc trong tệp MP3. Vui lòng chọn bản ghi có lời đọc rõ hơn.");
         }
-        if (blockedWords.findIn(transcript).isPresent() || moderation.moderateTranscript(transcript).flagged()) {
+        if (blockedWords.findIn(transcript).isPresent() || safety.isUnsafe(moderation.moderateTranscript(transcript))) {
             throw unsafe();
         }
     }

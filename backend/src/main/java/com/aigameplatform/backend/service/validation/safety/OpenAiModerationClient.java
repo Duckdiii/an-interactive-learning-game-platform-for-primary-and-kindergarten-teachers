@@ -104,7 +104,7 @@ public class OpenAiModerationClient implements ContentModerationClient {
 
     public ModerationResult moderateImage(byte[] image, String mediaType) {
         String url = "data:" + mediaType + ";base64," + Base64.getEncoder().encodeToString(image);
-        return requestModeration(List.of(Map.of("type", "image_url", "image_url", Map.of("url", url))), 1, false)
+        return requestModeration(List.of(Map.of("type", "image_url", "image_url", Map.of("url", url))), 1, true)
                 .getFirst();
     }
 
@@ -149,10 +149,10 @@ public class OpenAiModerationClient implements ContentModerationClient {
     }
 
     private List<ModerationResult> moderateBatch(List<String> batch) {
-        return requestModeration(batch, batch.size(), true);
+        return requestModeration(batch, batch.size(), false);
     }
 
-    private List<ModerationResult> requestModeration(List<?> input, int resultCount, boolean requireScores) {
+    private List<ModerationResult> requestModeration(List<?> input, int resultCount, boolean imageOnly) {
         requireConfigured();
         JsonNode response;
         try {
@@ -179,26 +179,40 @@ public class OpenAiModerationClient implements ContentModerationClient {
                 throw new ModerationUnavailableException("Kết quả kiểm duyệt thiếu trạng thái hợp lệ");
             }
             boolean isFlagged = flagged.asBoolean();
-            Map<String, Double> scores = requireScores && !isFlagged ? readScores(result) : Map.of();
+            Map<String, Double> scores = isFlagged ? Map.of() : readScores(result, imageOnly);
             parsed.add(new ModerationResult(isFlagged, flaggedCategories(result), scores));
         }
         return parsed;
     }
 
-    private static Map<String, Double> readScores(JsonNode result) {
+    private static Map<String, Double> readScores(JsonNode result, boolean imageOnly) {
         JsonNode scores = result.path("category_scores");
-        if (!scores.isObject() || scores.isEmpty()) {
+        JsonNode inputTypes = result.path("category_applied_input_types");
+        Map<String, Double> parsed = new HashMap<>();
+        if (scores.isObject()) {
+            for (var entry : scores.properties()) {
+                if (imageOnly && !appliesToImage(inputTypes.path(entry.getKey()))) continue;
+                JsonNode value = entry.getValue();
+                if (!value.isNumber() || !(value.asDouble() >= 0 && value.asDouble() <= 1)) {
+                    throw new ModerationUnavailableException("Điểm kiểm duyệt ngoài phạm vi hợp lệ");
+                }
+                parsed.put(entry.getKey(), value.asDouble());
+            }
+        }
+        if (parsed.isEmpty()) {
             throw new ModerationUnavailableException("Kết quả kiểm duyệt thiếu điểm theo nhóm");
         }
-        Map<String, Double> parsed = new HashMap<>();
-        scores.properties().forEach(entry -> {
-            JsonNode value = entry.getValue();
-            if (!value.isNumber() || !(value.asDouble() >= 0 && value.asDouble() <= 1)) {
-                throw new ModerationUnavailableException("Điểm kiểm duyệt ngoài phạm vi hợp lệ");
-            }
-            parsed.put(entry.getKey(), value.asDouble());
-        });
         return parsed;
+    }
+
+    private static boolean appliesToImage(JsonNode inputTypes) {
+        if (!inputTypes.isArray()) {
+            throw new ModerationUnavailableException("Kết quả kiểm duyệt thiếu thông tin về nhóm áp dụng cho ảnh");
+        }
+        for (JsonNode type : inputTypes) {
+            if ("image".equals(type.asString())) return true;
+        }
+        return false;
     }
 
     private static List<String> flaggedCategories(JsonNode result) {

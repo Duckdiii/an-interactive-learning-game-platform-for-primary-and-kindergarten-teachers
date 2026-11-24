@@ -2,6 +2,7 @@ package com.aigameplatform.backend.service.media;
 
 import com.aigameplatform.backend.entity.question.QuestionGame;
 import com.aigameplatform.backend.entity.question.SpotTheTargetQuestion;
+import com.aigameplatform.backend.service.validation.ContentSafetyCheck;
 import com.aigameplatform.backend.service.validation.safety.ModerationUnavailableException;
 import com.aigameplatform.backend.service.validation.safety.OpenAiModerationClient;
 import java.net.URI;
@@ -13,11 +14,14 @@ public class RegenerationIllustrations {
     private final PexelsClient photos;
     private final SceneImageLoader images;
     private final OpenAiModerationClient moderation;
+    private final ContentSafetyCheck safety;
 
-    public RegenerationIllustrations(PexelsClient photos, SceneImageLoader images, OpenAiModerationClient moderation) {
+    public RegenerationIllustrations(PexelsClient photos, SceneImageLoader images, OpenAiModerationClient moderation,
+            ContentSafetyCheck safety) {
         this.photos = photos;
         this.images = images;
         this.moderation = moderation;
+        this.safety = safety;
     }
 
     public void enrich(List<? extends QuestionGame> questions) {
@@ -32,7 +36,7 @@ public class RegenerationIllustrations {
                     if (!"https".equalsIgnoreCase(url.getScheme())
                             || !"images.pexels.com".equalsIgnoreCase(url.getHost())) continue;
                     LoadedSceneImage image = images.load(url);
-                    if (!moderation.moderateImage(image.bytes(), image.mediaType()).flagged()) {
+                    if (!safety.isUnsafe(moderation.moderateImage(image.bytes(), image.mediaType()))) {
                         question.setImageUrl(url.toString());
                         break;
                     }

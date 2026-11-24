@@ -69,6 +69,35 @@ class OpenAiModerationClientTest {
     }
 
     @Test
+    void imageReadsOnlyScoresThatApplyToImages() {
+        server.expect(requestTo(URL)).andRespond(withSuccess(response("""
+                {"flagged":false,"category_scores":{"violence":0.6,"harassment":0},
+                 "category_applied_input_types":{"violence":["image"],"harassment":[]}}
+                """), MediaType.APPLICATION_JSON));
+
+        assertThat(client.moderateImage(new byte[] {1, 2}, "image/png").categoryScores())
+                .containsOnlyKeys("violence").containsEntry("violence", 0.6);
+        server.verify();
+    }
+
+    @Test
+    void imageWithoutApplicableScoresOrTranscriptWithoutScoresIsUnavailable() {
+        server.expect(requestTo(URL)).andRespond(withSuccess(response("""
+                {"flagged":false,"category_scores":{"harassment":0},
+                 "category_applied_input_types":{"harassment":[]}}
+                """), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(URL)).andRespond(withSuccess(response("""
+                {"flagged":false,"categories":{"violence":false}}
+                """), MediaType.APPLICATION_JSON));
+
+        assertThatThrownBy(() -> client.moderateImage(new byte[] {1, 2}, "image/png"))
+                .isInstanceOf(ModerationUnavailableException.class);
+        assertThatThrownBy(() -> client.moderateTranscript("Con mèo."))
+                .isInstanceOf(ModerationUnavailableException.class);
+        server.verify();
+    }
+
+    @Test
     void postsNamedMp3ToTranscriptionsAndModeratesItWithoutCache() {
         server.expect(requestTo("https://api.openai.com/v1/audio/transcriptions"))
                 .andExpect(method(HttpMethod.POST))
@@ -84,7 +113,7 @@ class OpenAiModerationClientTest {
         }
 
         String transcript = client.transcribeMp3(new byte[] {1, 2});
-        assertThat(client.moderateTranscript(transcript).flagged()).isFalse();
+        assertThat(client.moderateTranscript(transcript).categoryScores()).containsEntry("violence", 0.6);
         assertThat(client.moderateTranscript(transcript).flagged()).isFalse();
         server.verify();
     }

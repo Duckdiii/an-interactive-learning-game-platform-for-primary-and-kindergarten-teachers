@@ -12,7 +12,9 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionException;
 
 /**
  * Kiểm an toàn cho một danh sách đoạn chữ (Layer 3): danh sách từ cấm trước, sạch mới gửi một lần lên OpenAI Moderation.
@@ -62,7 +64,9 @@ public class ContentSafetyCheck {
         }
 
         List<ModerationResult> results;
+        double threshold;
         try {
+            threshold = activeThreshold();
             results = moderationClient.moderate(texts.stream().map(TextEntry::text).toList());
         } catch (ModerationUnavailableException e) {
             log.error("Không kiểm tra được độ an toàn: {}", e.getMessage());
@@ -75,15 +79,10 @@ public class ContentSafetyCheck {
             return List.of(new ValidationError("$", UNAVAILABLE_MESSAGE, ValidationError.Kind.UNAVAILABLE));
         }
 
-        double threshold = aiConfigService == null ? AiConfigService.DEFAULT_MODERATION_THRESHOLD
-                : aiConfigService.getActiveConfig().moderationThreshold();
         List<ValidationError> flagged = new ArrayList<>();
         for (int i = 0; i < results.size(); i++) {
             ModerationResult result = results.get(i);
-            List<String> categories = result.flagged() ? result.categories() : result.categoryScores().entrySet().stream()
-                    .filter(entry -> entry.getValue() >= threshold)
-                    .map(Map.Entry::getKey)
-                    .sorted().toList();
+            List<String> categories = result.flagged() ? result.categories() : categoriesAtThreshold(result, threshold);
             if (result.flagged() || !categories.isEmpty()) {
                 String message = categories.isEmpty() ? UNSAFE_MESSAGE
                         : UNSAFE_MESSAGE + " (" + String.join(", ", categories) + ")";
@@ -91,5 +90,25 @@ public class ContentSafetyCheck {
             }
         }
         return flagged;
+    }
+
+    public boolean isUnsafe(ModerationResult result) {
+        return result.flagged() || !categoriesAtThreshold(result, activeThreshold()).isEmpty();
+    }
+
+    private double activeThreshold() {
+        try {
+            return aiConfigService == null ? AiConfigService.DEFAULT_MODERATION_THRESHOLD
+                    : aiConfigService.getActiveConfig().moderationThreshold();
+        } catch (DataAccessException | TransactionException e) {
+            throw new ModerationUnavailableException("Không đọc được ngưỡng kiểm duyệt đang áp dụng", e);
+        }
+    }
+
+    private static List<String> categoriesAtThreshold(ModerationResult result, double threshold) {
+        return result.categoryScores().entrySet().stream()
+                .filter(entry -> entry.getValue() >= threshold)
+                .map(Map.Entry::getKey)
+                .sorted().toList();
     }
 }
