@@ -249,6 +249,7 @@ public class SessionService {
 
         session.setStatus(SessionStatus.PAUSED);
         sessions.save(session);
+        liveArenaService.pauseQuestionClock(sessionId);
 
         messagingTemplate.convertAndSend("/topic/session/" + sessionId + "/state",
                 (Object) Map.of("status", "PAUSED"));
@@ -269,6 +270,7 @@ public class SessionService {
 
         session.setStatus(SessionStatus.ACTIVE);
         sessions.save(session);
+        liveArenaService.resumeQuestionClock(sessionId);
 
         messagingTemplate.convertAndSend("/topic/session/" + sessionId + "/state",
                 (Object) Map.of("status", "ACTIVE", "phase", "QUESTION"));
@@ -311,7 +313,7 @@ public class SessionService {
                 .map(p -> new ParticipantDetailDto(
                         p.getId(),
                         p.getStudentNickname(),
-                        p.getCompletedAt() != null ? "COMPLETED" : "PLAYING",
+                        participantStatus(p),
                         p.getScore(),
                         p.getPlayInteractionDetails().size(),
                         p.getTeam() != null ? p.getTeam().getId() : null))
@@ -512,9 +514,15 @@ public class SessionService {
                 assignedTeam = ts.getTeams().stream()
                         .filter(t -> t.getId().equals(req.teamId()))
                         .findFirst()
+                        .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy đội trong phiên"));
+            } else if (ts.getGroupingStrategy() == ChoosingStrategy.RANDOM && session.getStatus() != SessionStatus.WAITING) {
+                assignedTeam = ts.getTeams().stream()
+                        .min(Comparator.comparingLong(team -> ts.getParticipants().stream()
+                                .filter(member -> member.getTeam() != null && team.getId().equals(member.getTeam().getId()))
+                                .count()))
                         .orElse(null);
-                participant.setTeam(assignedTeam);
             }
+            participant.setTeam(assignedTeam);
         }
 
         session.getParticipants().add(participant);
@@ -656,7 +664,7 @@ public class SessionService {
         return new MyResultDto(
                 participant.getId(),
                 participant.getStudentNickname(),
-                participant.getCompletedAt() != null ? "COMPLETED" : "PLAYING",
+                participantStatus(participant),
                 participant.getScore(),
                 correct,
                 incorrect,
@@ -664,6 +672,11 @@ public class SessionService {
                 answered,
                 rank,
                 teamInfo);
+    }
+
+    private String participantStatus(Participant participant) {
+        if (Participant.ENDED_BY_CLOSE_NOTE.equals(participant.getNote())) return "ENDED";
+        return participant.getCompletedAt() != null ? "COMPLETED" : "PLAYING";
     }
 
     private GameSession getAuthorizedSession(String sessionId, AuthenticatedTeacher teacher) {
@@ -697,7 +710,7 @@ public class SessionService {
     private String generateUniquePin() {
         for (int i = 0; i < 10; i++) {
             String pin = String.format("%06d", random.nextInt(1_000_000));
-            if (!sessions.existsByAccessCodeAndStatusNot(pin, SessionStatus.CLOSED)) {
+            if (!sessions.existsByAccessCode(pin)) {
                 return pin;
             }
         }

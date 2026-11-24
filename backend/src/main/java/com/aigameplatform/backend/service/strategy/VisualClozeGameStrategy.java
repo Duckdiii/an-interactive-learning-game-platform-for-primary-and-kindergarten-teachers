@@ -103,7 +103,7 @@ public class VisualClozeGameStrategy extends GameContentStrategy<VisualClozeQues
                 || entity.getBlanks() != null && !entity.getBlanks().isEmpty()
                 || entity.getOptions() != null && !entity.getOptions().isEmpty()) {
             return new VisualClozeQuestionDsl(questionId, entity.getTimeLimit(), entity.getPoint(), entity.getAudioText(),
-                    null, null, null, null, null, null, entity.getQuestionText(),
+                    entity.getAudioUrl(), null, null, null, null, null, entity.getQuestionText(),
                     entity.getImageUrl(), entity.getSceneWidth(), entity.getSceneHeight(),
                     entity.getBlanks().stream().map(blank -> new VisualClozeBlankDsl(blank.getBlankId(), blank.getX(),
                             blank.getY(), blank.getCorrectOptionId())).toList(),
@@ -135,8 +135,12 @@ public class VisualClozeGameStrategy extends GameContentStrategy<VisualClozeQues
                 ? VisualClozeMode.IMAGE
                 : game.effectiveVisualClozeMode();
         if (persistedMode == VisualClozeMode.IMAGE) {
-            return new VisualClozeGameDsl(GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_VERSION, GameType.VISUAL_CLOZE,
-                    VisualClozeMode.IMAGE, metadata, settings, questions);
+            String version = GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_AUDIO_VERSION.equals(game.getSchemaVersion())
+                    ? GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_AUDIO_VERSION
+                    : GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_VERSION;
+            List<VisualClozeQuestionDsl> visible = GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_AUDIO_VERSION.equals(version)
+                    ? questions : questions.stream().map(VisualClozeGameStrategy::withoutImageAudio).toList();
+            return new VisualClozeGameDsl(version, GameType.VISUAL_CLOZE, VisualClozeMode.IMAGE, metadata, settings, visible);
         }
         String persistedVersion = GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_VERSION.equals(game.getSchemaVersion())
                 ? GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_VERSION
@@ -146,6 +150,12 @@ public class VisualClozeGameStrategy extends GameContentStrategy<VisualClozeQues
         }
         return new VisualClozeGameDsl(persistedVersion, GameType.VISUAL_CLOZE, VisualClozeMode.TEXT,
                 metadata, settings, questions);
+    }
+
+    private static VisualClozeQuestionDsl withoutImageAudio(VisualClozeQuestionDsl q) {
+        return new VisualClozeQuestionDsl(q.id(), q.timeLimitSeconds(), q.points(), q.audioText(), null,
+                q.visualPrompt(), q.imageUrl(), q.sentenceTemplate(), q.correctAnswer(), q.distractors(),
+                q.questionText(), q.sceneImageUrl(), q.sceneWidth(), q.sceneHeight(), q.blanks(), q.options());
     }
 
     @Override

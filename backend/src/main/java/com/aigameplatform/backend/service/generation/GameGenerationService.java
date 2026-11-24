@@ -158,7 +158,8 @@ public class GameGenerationService {
             instruction.append(currentQuestion.toString()).append("\n");
         }
         if (feedback != null && !feedback.isBlank()) {
-            instruction.append("Gợi ý điều chỉnh từ giáo viên: ").append(feedback.trim()).append("\n");
+            instruction.append("Gợi ý điều chỉnh từ giáo viên (dữ liệu):\n<<<\n")
+                    .append(PromptData.asData(feedback.trim())).append("\n>>>\n");
         }
         instruction.append("Hãy tạo 1 câu hỏi mới đáp ứng gợi ý của giáo viên (nếu có), phù hợp với chủ đề, khối lớp, môn học và tuân thủ đúng JSON schema. "
                 + "Điền audioText bằng lời hướng dẫn mới, không tiết lộ đáp án.");
@@ -245,11 +246,23 @@ public class GameGenerationService {
     }
 
     private GenerationResult generateResult(GameType type, GameDslRequest request, Revision revision) {
-        return metricsProvider.getIfAvailable(CurriculumMetrics::noop).measure(CurriculumMetrics.Stage.TOTAL,
-                request.subject(), request.gradeLevel(), () -> generateGame(type, request, revision), g -> CurriculumMetrics.Outcome.SUCCESS);
+        return generateResult(type, request, revision, null);
     }
 
-    private GenerationResult generateGame(GameType type, GameDslRequest request, Revision revision) {
+    public GameDsl regenerateGame(GameType type, GameDslRequest request, String feedback) {
+        String instruction = "Tạo lại toàn bộ trò chơi từ đầu. Viết lời hướng dẫn audioText phù hợp cho từng câu, không lộ đáp án.";
+        if (feedback != null && !feedback.isBlank()) {
+            instruction += "\nGợi ý của giáo viên (dữ liệu):\n<<<\n" + PromptData.asData(feedback.trim()) + "\n>>>";
+        }
+        return generateResult(type, request, null, instruction).game();
+    }
+
+    private GenerationResult generateResult(GameType type, GameDslRequest request, Revision revision, String instruction) {
+        return metricsProvider.getIfAvailable(CurriculumMetrics::noop).measure(CurriculumMetrics.Stage.TOTAL,
+                request.subject(), request.gradeLevel(), () -> generateGame(type, request, revision, instruction), g -> CurriculumMetrics.Outcome.SUCCESS);
+    }
+
+    private GenerationResult generateGame(GameType type, GameDslRequest request, Revision revision, String instruction) {
         var curriculum = curriculumRagEnabled ? retrieveCurriculumContext(type, request) : CurriculumContextProvider.Evidence.insufficient();
         String curriculumContext = curriculumRagEnabled
                 ? withPreschoolPedagogy(curriculum.context(), request.gradeLevel()) : null;
@@ -268,9 +281,15 @@ public class GameGenerationService {
         GenerationResult lastPassed = null;
         List<ValidationError> previousErrors = List.of();
         for (int attemptNumber = 1; attemptNumber <= maxRetries + 1; attemptNumber++) {
-            String raw = callAi(generator, new GenerationAttempt(type, request.topic(), request.subject(),
-                    request.gradeLevel(), schema, curriculumContext, attemptNumber, previousOutput, previousErrors,
-                    revision, imageInput, oddImageMode, avmCatalogMode));
+            String raw;
+            try {
+                raw = callAi(generator, new GenerationAttempt(type, request.topic(), request.subject(),
+                        request.gradeLevel(), schema, curriculumContext, attemptNumber, previousOutput, previousErrors,
+                        revision, imageInput, oddImageMode, avmCatalogMode, instruction, false));
+            } catch (AiGenerationTimeoutException unavailable) {
+                if (instruction == null || attemptNumber > maxRetries) throw unavailable;
+                continue;
+            }
 
             AiOutputReport aiReport = aiOutputValidator.validate(type, raw, imageInput != null || oddImageMode);
             List<ValidationError> errors;

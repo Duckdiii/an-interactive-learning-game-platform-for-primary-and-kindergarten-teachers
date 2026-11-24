@@ -64,6 +64,23 @@ class GamesControllerRegenerateTest {
     }
 
     @Test
+    void regenerateGameReturnsAWholePreviewAndAcceptsSelectedVoice() throws Exception {
+        var preview = tools.jackson.databind.json.JsonMapper.builder().build().createObjectNode()
+                .put("gameId", "g1").put("gameType", "CUSTOM");
+        var request = new com.aigameplatform.backend.dto.request.RegenerateGameRequest(
+                null, "dễ hơn", com.aigameplatform.backend.dto.media.SpeechVoice.MALE);
+        when(games.regenerate("teacher-1", "g1", request)).thenReturn(preview);
+
+        mockMvc.perform(post("/api/games/g1/regenerate")
+                .contentType("application/json").content("""
+                    {"feedback":"dễ hơn","voice":"MALE"}
+                    """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.gameId").value("g1"))
+                .andExpect(jsonPath("$.data.gameType").value("CUSTOM"));
+    }
+
+    @Test
     void regenerateQuestionReturns200WithQuestionEnvelope() throws Exception {
         var question = new QuizQuestionDsl("q2", 30, 10, "Nghe", "https://audio.mp3", null, null,
                 "Câu hỏi mới", List.of(new TextChoiceDsl("opt_0", "Đáp án A")), "opt_0");

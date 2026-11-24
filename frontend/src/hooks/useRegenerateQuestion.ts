@@ -17,7 +17,7 @@ interface Options {
   // Câu HIỆN HÀNH của thẻ (từ bản đang soạn), hoặc undefined nếu thẻ không còn.
   getQuestion: (index: number, questionId: string) => QuestionDsl | undefined
   // Đưa câu mới vào bản đang soạn (xem `useGameEditor.applyRegenerated`): tự kiểm tra, không hợp lệ thì không áp.
-  applyRegenerated: (index: number, questionId: string, question: QuestionDsl) => ApplyRegeneratedResult
+  applyRegenerated: (index: number, questionId: string, question: QuestionDsl, schemaVersion?: '1.2.0') => ApplyRegeneratedResult
 }
 
 const text = viText.editor.regenerate
@@ -59,7 +59,9 @@ export function useRegenerateQuestion({ gameId, gameType, voice, getQuestion, ap
         return 'failed'
       }
 
-      const applied = applyRegenerated(index, questionId, result.question)
+      const applied = result.schemaVersion
+        ? applyRegenerated(index, questionId, result.question, result.schemaVersion)
+        : applyRegenerated(index, questionId, result.question)
 
       if (!applied.ok) {
         setRejected(applied.reason === 'invalid' ? { kind: 'invalid', message: text.invalidResult } : { kind: 'other', message: text.fallback })

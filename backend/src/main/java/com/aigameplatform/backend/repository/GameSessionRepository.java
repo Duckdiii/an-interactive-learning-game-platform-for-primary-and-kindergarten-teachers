@@ -25,7 +25,7 @@ public interface GameSessionRepository extends JpaRepository<GameSession, String
 
     Optional<GameSession> findByAccessCode(String accessCode);
 
-    boolean existsByAccessCodeAndStatusNot(String accessCode, SessionStatus status);
+    boolean existsByAccessCode(String accessCode);
 
     List<GameSession> findByGame_IdOrderByCreatedAtDesc(String gameId);
 

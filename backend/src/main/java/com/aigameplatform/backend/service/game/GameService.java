@@ -1,6 +1,8 @@
 package com.aigameplatform.backend.service.game;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
+import com.aigameplatform.backend.dto.media.SpeechVoice;
 import com.aigameplatform.backend.dto.request.ReviseGameRequest;
 import com.aigameplatform.backend.dto.response.GameSummaryResponse;
 import com.aigameplatform.backend.entity.EditLog;
@@ -199,19 +201,40 @@ public class GameService {
         }
     }
 
+    public ObjectNode regenerate(String teacherId, String gameId, RegenerateGameRequest input) {
+        StoredGame stored = transactions.execute(status -> {
+            Game game = owned(teacherId, gameId);
+            requireNoUnfinishedSession(gameId);
+            return new StoredGame(game.getGameType(), toResponse(game));
+        });
+        RegenerateGameRequest request = input == null ? new RegenerateGameRequest(null, null, null) : input;
+        try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
+            ObjectNode preview = handlerFor(stored.type()).regenerate(stored.response(), request);
+            GameReports.MANAGEMENT_FIELDS.forEach(field -> preview.set(field, stored.response().get(field)));
+            return preview;
+        }
+    }
+
     /**
      * POST /games/{gameId}/questions/{questionId}/regenerate: AI làm lại một câu, KHÔNG lưu (trình soạn cho giáo viên xem,
      * hoàn tác, rồi lưu bằng PUT). Cùng khuôn với {@link #revise}: kiểm quyền và phiên đang chạy trong transaction ngắn,
      * gọi AI ngoài transaction.
      */
     public RegeneratedQuestionDto regenerateQuestion(String teacherId, String gameId, String questionId, String feedback) {
+        return regenerateQuestion(teacherId, gameId, questionId, feedback, null);
+    }
+
+    public RegeneratedQuestionDto regenerateQuestion(String teacherId, String gameId, String questionId, String feedback,
+            SpeechVoice voice) {
         StoredGame stored = transactions.execute(status -> {
             Game game = owned(teacherId, gameId);
             requireNoUnfinishedSession(gameId);
             return new StoredGame(game.getGameType(), toResponse(game));
         });
         try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
-            return handlerFor(stored.type()).regenerateQuestion(stored.response(), questionId, feedback);
+            GameContentHandler handler = handlerFor(stored.type());
+            return voice == null ? handler.regenerateQuestion(stored.response(), questionId, feedback)
+                    : handler.regenerateQuestion(stored.response(), questionId, feedback, voice);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.aigameplatform.backend.service.media;
 
+import com.aigameplatform.backend.dto.media.SpeechVoice;
+
 import com.google.cloud.texttospeech.v1.AudioConfig;
 import com.google.cloud.texttospeech.v1.AudioEncoding;
 import com.google.cloud.texttospeech.v1.SsmlVoiceGender;
@@ -20,6 +22,11 @@ public class GoogleCloudTtsService implements TtsService {
 
     @Override
     public byte[] synthesizeSpeech(String text, String languageCode) {
+        return synthesizeSpeech(text, languageCode, SpeechVoice.FEMALE);
+    }
+
+    @Override
+    public byte[] synthesizeSpeech(String text, String languageCode, SpeechVoice gender) {
         if (text == null || text.isBlank()) {
             return new byte[0];
         }
@@ -27,8 +34,8 @@ public class GoogleCloudTtsService implements TtsService {
         SynthesisInput input = SynthesisInput.newBuilder().setText(text).build();
         VoiceSelectionParams voice = VoiceSelectionParams.newBuilder()
                 .setLanguageCode(lang)
-                .setName("vi-VN-Wavenet-A")
-                .setSsmlGender(SsmlVoiceGender.FEMALE)
+                .setName(gender == SpeechVoice.MALE ? "vi-VN-Wavenet-B" : "vi-VN-Wavenet-A")
+                .setSsmlGender(gender == SpeechVoice.MALE ? SsmlVoiceGender.MALE : SsmlVoiceGender.FEMALE)
                 .build();
         AudioConfig audioConfig = AudioConfig.newBuilder()
                 .setAudioEncoding(AudioEncoding.MP3)

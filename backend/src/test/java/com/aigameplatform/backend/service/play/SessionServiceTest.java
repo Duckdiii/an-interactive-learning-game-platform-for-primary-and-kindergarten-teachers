@@ -253,9 +253,11 @@ class SessionServiceTest {
 
         SessionControlSuccess pauseRes = service.pauseSession("session-1", teacherAuth);
         assertThat(pauseRes.status()).isEqualTo(SessionStatus.PAUSED);
+        verify(liveArenaService).pauseQuestionClock("session-1");
 
         SessionControlSuccess resumeRes = service.resumeSession("session-1", teacherAuth);
         assertThat(resumeRes.status()).isEqualTo(SessionStatus.ACTIVE);
+        verify(liveArenaService).resumeQuestionClock("session-1");
     }
 
     @Test
@@ -278,6 +280,9 @@ class SessionServiceTest {
         assertThat(closeRes.status()).isEqualTo(SessionStatus.CLOSED);
         assertThat(p.getCompletedAt()).isNotNull();
         assertThat(p.getNote()).isEqualTo("ENDED");
+        MyResultDto result = service.getMyResult("session-1", "p1");
+        assertThat(result.status()).isEqualTo("ENDED");
+        assertThat(result.score()).isEqualTo(1500);
         verify(liveArenaService).endSessionAndPersistScores("session-1");
     }
 
@@ -301,6 +306,27 @@ class SessionServiceTest {
         assertThat(result.participantId()).isNotNull();
         assertThat(session.getParticipants()).hasSize(1);
         verify(liveArenaService).addParticipant(eq("session-1"), any());
+    }
+
+    @Test
+    void lateRandomJoinGoesToTheSmallestTeam() {
+        Team firstTeam = new Team();
+        firstTeam.setId("team-1");
+        Team secondTeam = new Team();
+        secondTeam.setId("team-2");
+        TeamSession session = new TeamSession();
+        session.setStatus(SessionStatus.ACTIVE);
+        session.setGroupingStrategy(ChoosingStrategy.RANDOM);
+        session.setTeams(List.of(firstTeam, secondTeam));
+        Participant existing = new Participant();
+        existing.setStudentNickname("An");
+        existing.setTeam(firstTeam);
+        session.getParticipants().add(existing);
+        when(sessions.findById("session-1")).thenReturn(Optional.of(session));
+
+        JoinResult result = service.joinSession("session-1", new JoinRequest("Bình", null));
+
+        assertThat(result.team().teamId()).isEqualTo("team-2");
     }
 
     @Test

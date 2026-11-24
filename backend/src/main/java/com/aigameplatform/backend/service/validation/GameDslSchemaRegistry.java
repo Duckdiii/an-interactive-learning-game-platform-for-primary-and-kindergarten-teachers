@@ -21,6 +21,8 @@ public class GameDslSchemaRegistry {
     public static final String SUPPORTED_VERSION = "1.0.0";
     public static final String VISUAL_CLOZE_IMAGE_VERSION = "1.1.0";
 
+    public static final String VISUAL_CLOZE_IMAGE_AUDIO_VERSION = "1.2.0";
+
     private final Map<GameType, Schema> schemas = new EnumMap<>(GameType.class);
     private final Map<String, Map<GameType, Schema>> versionedSchemas = new java.util.HashMap<>();
 
@@ -39,6 +41,8 @@ public class GameDslSchemaRegistry {
         v1_1Schemas.put(GameType.VISUAL_CLOZE, load(registry, VISUAL_CLOZE_IMAGE_VERSION, GameType.VISUAL_CLOZE));
         v1_1Schemas.put(GameType.ODD_ONE_OUT, load(registry, VISUAL_CLOZE_IMAGE_VERSION, GameType.ODD_ONE_OUT));
         versionedSchemas.put(VISUAL_CLOZE_IMAGE_VERSION, v1_1Schemas);
+        versionedSchemas.put(VISUAL_CLOZE_IMAGE_AUDIO_VERSION,
+                Map.of(GameType.VISUAL_CLOZE, load(registry, VISUAL_CLOZE_IMAGE_AUDIO_VERSION, GameType.VISUAL_CLOZE)));
     }
 
     public Schema schemaFor(GameType type) {

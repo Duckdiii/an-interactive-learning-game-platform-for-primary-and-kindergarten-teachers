@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { postRegenerateGame } from '../api/gamesApi'
 import { regenerateQuestion } from '../services/aiService'
 import { buildMockGameContents } from '../services/mock/gameFixtures'
 import { mockApiError } from '../services/mock/mockErrors'
@@ -10,6 +11,10 @@ import type { QuestionDsl, VisualClozeImageQuestionDsl } from '../types/game-dsl
 import WorkspaceEditor from './WorkspaceEditor'
 
 // A6.3: hộp thoại làm việc với dịch vụ AI do test điều khiển (kết quả không hợp lệ, hủy, Esc, không tự thử lại, khóa khi còn chữ chưa áp).
+vi.mock('../api/gamesApi', async (importOriginal) => ({
+  ...await importOriginal<typeof import('../api/gamesApi')>(),
+  postRegenerateGame: vi.fn(),
+}))
 vi.mock('../services/aiService', () => ({ regenerateQuestion: vi.fn() }))
 
 const mockedRegenerate = vi.mocked(regenerateQuestion)
@@ -52,6 +57,26 @@ afterEach(() => {
   vi.stubEnv('VITE_MOCK_LATENCY_MS', '0')
   localStorage.clear()
   vi.clearAllMocks()
+})
+
+it('xem trước toàn bộ game và chỉ lưu khi nhấn Lưu bản nháp', async () => {
+  vi.stubEnv('VITE_USE_MOCK', 'editor')
+  const original = getMockGame(GAME_ID)
+  vi.mocked(postRegenerateGame).mockResolvedValue({
+    ...original,
+    metadata: { ...original.metadata, title: 'Bản AI xem trước' },
+  })
+  const user = userEvent.setup()
+  renderWithProviders(<WorkspaceEditor />, `/workspace/editor?gameId=${GAME_ID}`)
+  await user.click(await screen.findByRole('button', { name: 'Tạo lại toàn bộ trò chơi' }, SLOW))
+  const confirmation = screen.getByRole('dialog', { name: 'Tạo lại toàn bộ trò chơi' })
+  await user.selectOptions(within(confirmation).getByRole('combobox', { name: 'Giọng đọc' }), 'MALE')
+  await user.click(within(confirmation).getByRole('button', { name: 'Xác nhận làm lại tất cả' }))
+  await screen.findByRole('heading', { name: 'Bản AI xem trước' }, SLOW)
+  expect(postRegenerateGame).toHaveBeenCalledWith(GAME_ID, '', 'MALE', expect.any(AbortSignal))
+  expect(getMockGame(GAME_ID).metadata.title).toBe(original.metadata.title)
+  await user.click(screen.getByRole('button', { name: 'Lưu bản nháp' }))
+  await waitFor(() => expect(getMockGame(GAME_ID).metadata.title).toBe('Bản AI xem trước'))
 })
 
 describe('yêu cầu gửi đi', () => {

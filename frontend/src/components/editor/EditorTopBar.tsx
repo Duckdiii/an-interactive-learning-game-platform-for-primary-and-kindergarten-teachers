@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { gameStatusLabel, gameTypeLabel, gradeLevelLabel, subjectLabel } from '../../constants/labels'
 import { viText } from '../../constants/viText'
@@ -31,6 +32,9 @@ interface EditorTopBarProps {
   playing: boolean
   // Lưu lỗi nhưng thử lại vô ích (ví dụ phòng chơi chưa kết thúc): chỉ báo, không mời thử lại.
   canRetry: boolean
+  manualSaveRequired?: boolean
+  onSaveDraft?: () => void
+  regenerateAction?: ReactNode
   onViewIssues: () => void
   onRetry: () => void
   onPublish: () => void
@@ -54,6 +58,9 @@ export default function EditorTopBar({
   saving,
   playing,
   canRetry,
+  manualSaveRequired,
+  onSaveDraft,
+  regenerateAction,
   onViewIssues,
   onRetry,
   onPublish,
@@ -86,6 +93,8 @@ export default function EditorTopBar({
     label = text.autosaveFailed
     dot = 'bg-warn-ink'
     tone = 'text-warn-ink'
+  } else if (autosave === 'manualSave') {
+    label = 'Đang xem bản AI · Chưa lưu'
   } else if (autosave === 'waitingRestore') {
     label = text.autosaveWaitingRestore
   } else {
@@ -139,12 +148,16 @@ export default function EditorTopBar({
           </button>
         ) : null}
       </div>
-      <div className="flex gap-3 sm:ml-auto">
+      <div className="flex flex-wrap gap-3 sm:ml-auto">
+        {regenerateAction}
+        {manualSaveRequired ? (
+          <Button type="button" onClick={onSaveDraft} disabled={saving || applying}>Lưu bản nháp</Button>
+        ) : null}
         <Button id="play-test-button" type="button" variant="secondary" disabled={applying} onClick={onPlayTest}>
           <Icon name="play" className="mr-2 h-4 w-4" />
           {viText.editor.play.button}
         </Button>
-        <Button id="publish-button" type="button" onClick={onPublish} disabled={saving || applying}>
+        <Button id="publish-button" type="button" onClick={onPublish} disabled={saving || applying || manualSaveRequired}>
           {publishing ? viText.editor.publish.publishing : isPublished ? viText.editor.publish.buttonAgain : viText.editor.publish.button}
         </Button>
       </div>

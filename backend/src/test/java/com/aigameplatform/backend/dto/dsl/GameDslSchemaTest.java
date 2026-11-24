@@ -70,6 +70,22 @@ class GameDslSchemaTest {
         return schemaOf(type).validate(json);
     }
 
+    @Test
+    void visualClozeAudioRequiresVersion12AndStillReadsExistingImageGames() throws IOException {
+        var schemas = new com.aigameplatform.backend.service.validation.GameDslSchemaRegistry();
+        try (InputStream in = getClass().getResourceAsStream("/dsl-examples/visual-cloze-image-v1.1.json")) {
+            ObjectNode game = (ObjectNode) MAPPER.readTree(in);
+            var oldSchema = schemas.schemaFor("1.1.0", GameType.VISUAL_CLOZE);
+            assertThat(oldSchema.validate(game)).isEmpty();
+            question(game, 0).put("audioUrl", "https://storage.example/voice.mp3");
+            assertThat(oldSchema.validate(game)).isNotEmpty();
+            game.put("schemaVersion", "1.2.0");
+            assertThat(schemas.schemaFor("1.2.0", GameType.VISUAL_CLOZE).validate(game)).isEmpty();
+            assertThat(MAPPER.treeToValue(game, GameDsl.class).questions().getFirst().audioUrl())
+                    .isEqualTo("https://storage.example/voice.mp3");
+        }
+    }
+
     // ---- ví dụ hợp lệ ----
 
     @ParameterizedTest

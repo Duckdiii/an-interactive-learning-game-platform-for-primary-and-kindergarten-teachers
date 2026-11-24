@@ -640,13 +640,12 @@ paths:
       operationId: regenerateGame
       summary: Làm lại toàn bộ trò chơi (UC-06 4a)
       description: |
-        Giữ nguyên `gameId`, **thay toàn bộ `questions[]` và lưu**, `status` đặt về `DRAFT`. Giáo viên
-        chọn chức năng này là chủ ý bỏ nội dung đang có. Bị từ chối 409 `CONFLICT` nếu game đang có phiên
-        chưa kết thúc. Hỗ trợ `Accept: text/event-stream` như `generate`. Giới hạn 10 yêu cầu mỗi phút.
-
-        Game `CUSTOM`: thay toàn bộ `cpf` (AI lập lại kế hoạch và sinh game CPF mới), kiểm duyệt như
-        `generate`.
-      x-status: planned
+        Giữ nguyên gameId, loại và trạng thái game. Trả bản xem trước đã kiểm duyệt.
+        Bấm Lưu bản nháp để lưu bằng PUT. Bị từ chối 409 khi game có phiên chưa kết thúc.
+        Game CUSTOM sinh lại toàn bộ nội dung CPF. Khối lớp và môn học lấy từ game đã lưu.
+        Voice áp dụng cho câu hỏi DSL khi có dịch vụ giọng đọc. Điền hình lấy bộ ảnh của câu đầu làm mẫu khi tạo lại cả game.
+        Giới hạn 10 yêu cầu mỗi phút.
+      x-status: implemented
       security:
         - bearerAuth: []
       requestBody:
@@ -656,6 +655,9 @@ paths:
             schema:
               type: object
               properties:
+                voice:
+                  type: string
+                  enum: [MALE, FEMALE]
                 idea:
                   type: string
                   minLength: 10
@@ -779,9 +781,9 @@ paths:
       summary: Làm lại một thẻ câu hỏi (UC-06 4b, FLD-14)
       description: |
         Trả câu mới theo DSL, giữ nguyên `id` của thẻ, đã qua kiểm duyệt, có ảnh và giọng đọc.
-        Frontend ghép câu mới vào bản đang soạn rồi tự lưu bằng `PUT`. Cách này bảo toàn chỉnh sửa
+        Frontend ghép câu mới vào bản đang soạn và chờ giáo viên bấm Lưu bản nháp để gửi PUT. Cách này bảo toàn chỉnh sửa
         tay chưa lưu ở các thẻ khác. Endpoint làm lại câu không ghi vào kho.
-        Giới hạn 10 yêu cầu mỗi phút.
+        Giới hạn 10 yêu cầu mỗi phút. Voice mặc định là FEMALE khi không gửi lựa chọn.
 
         Game `CUSTOM` không có thẻ câu hỏi DSL: trả 400 `VALIDATION_ERROR` (dùng `regenerate` toàn game).
         Game chế độ hình ảnh giữ nguyên chế độ chơi và dùng tài nguyên ảnh của câu hoặc thư viện
@@ -796,6 +798,9 @@ paths:
             schema:
               type: object
               properties:
+                voice:
+                  type: string
+                  enum: [MALE, FEMALE]
                 feedback:
                   type: string
                   maxLength: 500
@@ -814,6 +819,10 @@ paths:
                     type: object
                     required: [question, gameType]
                     properties:
+                      schemaVersion:
+                        type: string
+                        enum: ['1.2.0']
+                        description: Phiên bản Điền hình có URL giọng đọc.
                       question:
                         $ref: '#/components/schemas/Question'
                       gameType:
@@ -3482,7 +3491,7 @@ components:
           format: date-time
         schemaVersion:
           type: string
-          enum: ['1.0.0', '1.1.0']
+          enum: ['1.0.0', '1.1.0', '1.2.0']
         gameType:
           allOf:
             - $ref: '#/components/schemas/GameType'
@@ -3862,7 +3871,7 @@ components:
       properties:
         schemaVersion:
           type: string
-          enum: ['1.0.0', '1.1.0']
+          enum: ['1.0.0', '1.1.0', '1.2.0']
         gameType:
           $ref: '#/components/schemas/GameType'
         mode:
@@ -4028,6 +4037,7 @@ components:
       properties:
         id: { type: string }
         questionText: { type: string }
+        audioUrl: { type: string }
         acceptedPlacements:
           type: array
           description: Blank-option pairs that the backend has already confirmed correct for an in-progress question.

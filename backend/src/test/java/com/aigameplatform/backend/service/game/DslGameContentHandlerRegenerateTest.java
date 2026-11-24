@@ -23,6 +23,8 @@ import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.service.generation.GameGenerationService;
 import com.aigameplatform.backend.service.media.GameAudioEnricher;
+import com.aigameplatform.backend.dto.media.SpeechVoice;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
 import com.aigameplatform.backend.service.validation.GameValidationService;
@@ -59,6 +61,25 @@ class DslGameContentHandlerRegenerateTest {
         }
     }
 
+    @Test
+    void wholeGameUsesSavedSubjectAndGradeAndReturnsGeneratedQuestions() throws Exception {
+        var saved = quizResponse();
+        var payload = saved.deepCopy();
+        payload.remove(List.of("gameId", "status", "updatedAt"));
+        var generated = MAPPER.treeToValue(payload, GameDsl.class);
+        when(generation.regenerateGame(eq(GameType.QUIZ), any(), eq("de hon"))).thenReturn(generated);
+
+        ObjectNode preview = handler.regenerate(saved, new RegenerateGameRequest("Chủ đề mới hôm nay", "de hon", SpeechVoice.MALE));
+
+        assertThat(preview.path("questions").size()).isEqualTo(generated.questions().size());
+        var input = org.mockito.ArgumentCaptor.forClass(GameDslRequest.class);
+        verify(generation).regenerateGame(eq(GameType.QUIZ), input.capture(), eq("de hon"));
+        assertThat(input.getValue().topic()).isEqualTo("Chủ đề mới hôm nay");
+        assertThat(input.getValue().subject()).isEqualTo(generated.metadata().subject());
+        assertThat(input.getValue().gradeLevel()).isEqualTo(generated.metadata().gradeLevel());
+        verify(enricher).enrichAllQuestionsWithAudio(any(), eq(SpeechVoice.MALE));
+    }
+
     private static QuizQuestionDsl candidate(String id) {
         return new QuizQuestionDsl(id, 30, 10, "Tính nhẩm: 3 + 3 = ?", null, null, null, "3 + 3 = ?",
                 List.of(new TextChoiceDsl("opt_0", "6"), new TextChoiceDsl("opt_1", "7")), "opt_0");
@@ -73,7 +94,7 @@ class DslGameContentHandlerRegenerateTest {
             List<QuestionGame> questions = inv.getArgument(0);
             questions.forEach(q -> q.setAudioUrl("https://storage.example/audio.mp3"));
             return null;
-        }).when(enricher).enrichAllQuestionsWithAudio(any());
+        }).when(enricher).enrichAllQuestionsWithAudio(any(), eq(SpeechVoice.FEMALE));
 
         RegeneratedQuestionDto result = handler.regenerateQuestion(quizResponse(), "q1", "làm dễ hơn");
 
@@ -99,10 +120,17 @@ class DslGameContentHandlerRegenerateTest {
             when(generation.regenerateQuestion(eq(GameType.VISUAL_CLOZE), any(), eq(original), eq("Đổi vị trí"),
                     eq("q1"), eq(game))).thenReturn(original);
 
-            var result = handler.regenerateQuestion(response, "q1", "Đổi vị trí");
+            doAnswer(inv -> {
+                List<QuestionGame> questions = inv.getArgument(0);
+                questions.getFirst().setAudioUrl("https://storage.example/voice.mp3");
+                return null;
+            }).when(enricher).enrichAllQuestionsWithAudio(any(), eq(SpeechVoice.MALE));
 
-            assertThat(result.question()).isEqualTo(original);
-            verify(enricher, never()).enrichAllQuestionsWithAudio(any());
+            var result = handler.regenerateQuestion(response, "q1", "Đổi vị trí", SpeechVoice.MALE);
+
+            assertThat(result.schemaVersion()).isEqualTo("1.2.0");
+            assertThat(result.question().audioUrl()).isEqualTo("https://storage.example/voice.mp3");
+            assertThat(((VisualClozeQuestionDsl) result.question()).options()).isEqualTo(original.options());
             var request = org.mockito.ArgumentCaptor.forClass(GameDslRequest.class);
             verify(generation).regenerateQuestion(eq(GameType.VISUAL_CLOZE), request.capture(), eq(original),
                     eq("Đổi vị trí"), eq("q1"), eq(game));

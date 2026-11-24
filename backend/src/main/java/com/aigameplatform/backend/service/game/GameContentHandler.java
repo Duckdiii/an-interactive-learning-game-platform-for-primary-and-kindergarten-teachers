@@ -3,6 +3,8 @@ package com.aigameplatform.backend.service.game;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.GamePresentation;
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
+import com.aigameplatform.backend.dto.media.SpeechVoice;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.OddOneOutMode;
 import com.aigameplatform.backend.entity.enums.VisualClozeMode;
@@ -36,6 +38,13 @@ public interface GameContentHandler {
      * sửa cùng dạng (chưa có ba trường quản lý), đã qua đủ 3 lớp kiểm duyệt. Không đổi loại game, không lưu.
      */
     ObjectNode revise(ObjectNode current, String instruction, List<ChatTurn> history);
+
+    ObjectNode regenerate(ObjectNode current, RegenerateGameRequest request);
+
+    default com.aigameplatform.backend.dto.response.RegeneratedQuestionDto regenerateQuestion(ObjectNode current,
+            String questionId, String feedback, SpeechVoice voice) {
+        return regenerateQuestion(current, questionId, feedback);
+    }
 
     /**
      * Làm lại đúng một câu hỏi bằng AI (POST /games/{gameId}/questions/{questionId}/regenerate): nhận {@code GameResponse}

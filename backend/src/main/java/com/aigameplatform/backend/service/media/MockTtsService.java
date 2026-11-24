@@ -1,5 +1,7 @@
 package com.aigameplatform.backend.service.media;
 
+import com.aigameplatform.backend.dto.media.SpeechVoice;
+
 import java.nio.charset.StandardCharsets;
 
 public class MockTtsService implements TtsService {
@@ -8,6 +10,11 @@ public class MockTtsService implements TtsService {
             (byte) 0xFF, (byte) 0xFB, (byte) 0x90, (byte) 0x64,
             0, 0, 0, 0, 0, 0, 0, 0
     };
+
+    @Override
+    public byte[] synthesizeSpeech(String text, String languageCode, SpeechVoice voice) {
+        return new byte[0];
+    }
 
     @Override
     public byte[] synthesizeSpeech(String text, String languageCode) {

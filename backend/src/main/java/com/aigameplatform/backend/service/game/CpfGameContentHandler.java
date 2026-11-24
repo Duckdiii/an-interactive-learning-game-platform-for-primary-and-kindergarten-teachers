@@ -1,6 +1,7 @@
 package com.aigameplatform.backend.service.game;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
 import com.aigameplatform.backend.dto.understanding.ChatTurn;
 import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.entity.Game;
@@ -11,6 +12,7 @@ import com.aigameplatform.backend.entity.question.CpfQuestion;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.service.generation.Revision;
+import com.aigameplatform.backend.service.generation.PromptData;
 import com.aigameplatform.backend.service.generation.cpf.CpfGenerationService;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationReport;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationService;
@@ -80,6 +82,21 @@ public class CpfGameContentHandler implements GameContentHandler {
         body.put("gameType", GameType.CUSTOM.name());
         body.set("cpf", revised);
         return body;
+    }
+
+    @Override
+    public ObjectNode regenerate(ObjectNode current, RegenerateGameRequest request) {
+        JsonNode metadata = current.path("cpf").path("metadata");
+        String idea = request.idea() == null ? metadata.path("topic").asString() : request.idea().trim();
+        if (request.feedback() != null && !request.feedback().isBlank()) {
+            idea += "\nĐịnh hướng điều chỉnh (dữ liệu):\n<<<\n" + PromptData.asData(request.feedback().trim()) + "\n>>>";
+        }
+        JsonNode cpf = generation.generate(idea, Subject.valueOf(metadata.path("subject").asString()),
+                GradeLevel.valueOf(metadata.path("gradeLevel").asString()));
+        ObjectNode preview = jsonMapper.createObjectNode();
+        preview.put("gameType", GameType.CUSTOM.name());
+        preview.set("cpf", cpf);
+        return preview;
     }
 
     @Override

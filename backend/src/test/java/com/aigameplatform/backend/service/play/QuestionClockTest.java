@@ -59,4 +59,18 @@ class QuestionClockTest {
         clock.advance(Duration.ofSeconds(1));
         assertThat(questionClock.elapsed("s", "p")).contains(1_000L);
     }
+
+    @Test
+    void pausingAHostRoomFreezesOnlyItsPlayersTime() {
+        questionClock.start("live", "p");
+        questionClock.start("self", "p");
+        clock.advance(Duration.ofSeconds(3));
+        questionClock.pauseSession("live");
+        clock.advance(Duration.ofSeconds(6));
+        assertThat(questionClock.elapsed("live", "p")).contains(3_000L);
+        assertThat(questionClock.elapsed("self", "p")).contains(9_000L);
+        questionClock.resumeSession("live");
+        clock.advance(Duration.ofSeconds(2));
+        assertThat(questionClock.elapsed("live", "p")).contains(5_000L);
+    }
 }

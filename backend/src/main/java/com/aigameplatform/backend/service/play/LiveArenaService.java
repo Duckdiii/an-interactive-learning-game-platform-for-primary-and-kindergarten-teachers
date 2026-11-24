@@ -49,6 +49,14 @@ public class LiveArenaService {
         questionClock.start(sessionId, participantId);
     }
 
+    public void pauseQuestionClock(String sessionId) {
+        questionClock.pauseSession(sessionId);
+    }
+
+    public void resumeQuestionClock(String sessionId) {
+        questionClock.resumeSession(sessionId);
+    }
+
     /**
      * Chấm điểm một câu trả lời bằng giờ server rồi phát bảng xếp hạng. Câu gửi lại hoặc chưa tải đề
      * thì không cộng điểm. participantId phải đã được StudentPlayService xác thực.

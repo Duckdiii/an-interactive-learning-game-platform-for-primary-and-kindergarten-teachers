@@ -19,8 +19,7 @@ import org.springframework.stereotype.Component;
 public class QuestionClock {
 
     private final Clock clock;
-    // sessionId -> (participantId -> trạng thái)
-    private final Map<String, Map<String, State>> states = new ConcurrentHashMap<>();
+    private final Map<String, SessionClock> states = new ConcurrentHashMap<>();
 
     public QuestionClock(Clock clock) {
         this.clock = clock;
@@ -28,7 +27,8 @@ public class QuestionClock {
 
     /** Gọi khi học sinh tải câu hỏi: chỉ đặt mốc lần đầu để tải lại trang không làm lại đồng hồ. */
     public void start(String sessionId, String participantId) {
-        state(sessionId, participantId).startIfAbsent(clock.instant());
+        SessionClock session = session(sessionId);
+        session.participant(participantId).startIfAbsent(session.activeTime(clock));
     }
 
     /**
@@ -36,7 +36,8 @@ public class QuestionClock {
      * rồi (gửi lại) hoặc chưa từng có mốc bắt đầu, khi đó không được cộng điểm.
      */
     public Optional<Long> lap(String sessionId, String participantId, String questionId) {
-        return state(sessionId, participantId).lap(questionId, clock.instant());
+        SessionClock session = session(sessionId);
+        return session.participant(participantId).lap(questionId, session.activeTime(clock));
     }
 
     /**
@@ -45,20 +46,53 @@ public class QuestionClock {
      * gửi một yêu cầu sai không "đặt lại đồng hồ" cho lần nộp thật.
      */
     public Optional<Long> elapsed(String sessionId, String participantId) {
-        return state(sessionId, participantId).elapsed(clock.instant());
+        SessionClock session = session(sessionId);
+        return session.participant(participantId).elapsed(session.activeTime(clock));
     }
 
     public void advance(String sessionId, String participantId) {
-        state(sessionId, participantId).advance(clock.instant());
+        SessionClock session = session(sessionId);
+        session.participant(participantId).advance(session.activeTime(clock));
+    }
+
+    public void pauseSession(String sessionId) {
+        session(sessionId).pause(clock);
+    }
+
+    public void resumeSession(String sessionId) {
+        session(sessionId).resume(clock);
     }
 
     public void clearSession(String sessionId) {
         if (sessionId != null) states.remove(sessionId);
     }
 
-    private State state(String sessionId, String participantId) {
-        return states.computeIfAbsent(sessionId, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(participantId, k -> new State());
+    private SessionClock session(String sessionId) {
+        return states.computeIfAbsent(sessionId, k -> new SessionClock());
+    }
+
+    private static final class SessionClock {
+        private final Map<String, State> participants = new ConcurrentHashMap<>();
+        private Instant pausedAt;
+        private Duration pausedTime = Duration.ZERO;
+
+        State participant(String participantId) {
+            return participants.computeIfAbsent(participantId, k -> new State());
+        }
+
+        synchronized Instant activeTime(Clock clock) {
+            return (pausedAt == null ? clock.instant() : pausedAt).minus(pausedTime);
+        }
+
+        synchronized void pause(Clock clock) {
+            if (pausedAt == null) pausedAt = clock.instant();
+        }
+
+        synchronized void resume(Clock clock) {
+            if (pausedAt == null) return;
+            pausedTime = pausedTime.plus(Duration.between(pausedAt, clock.instant()));
+            pausedAt = null;
+        }
     }
 
     private static final class State {
