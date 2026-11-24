@@ -78,7 +78,5 @@ Bật git hook của repo (một lần, cần Node): `git config core.hooksPath 
 
 ## Tài liệu
 
-- Đặc tả yêu cầu phần mềm: [SRS v3](docs/SRS-full.md) (xem theo mục trong [`docs/srs/`](docs/srs/README.md))
-- Đặc tả Game JSON DSL: [`docs/game-json-dsl-v1.0.0.md`](docs/game-json-dsl-v1.0.0.md)
-- Hợp đồng REST API (OpenAPI): [`docs/openapi/openapi.yaml`](docs/openapi/openapi.yaml)
+- [Mục lục tài liệu](docs/README.md) dẫn tới yêu cầu, hợp đồng API, DSL, code và test theo tác vụ.
 - Hướng dẫn cho AI agent trong repo: [`AGENTS.md`](AGENTS.md) (mọi agent), [`CLAUDE.md`](CLAUDE.md) (Claude Code)

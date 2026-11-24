@@ -12,9 +12,9 @@ const MAP = `# FEATURE-MAP
 
 ## Frontend gọi nhưng backend chưa có
 
-| Tính năng | Endpoint | Frontend | OA |
-|---|---|---|---|
-| Xuất bản | \`POST /api/games/{gameId}/publish\` | \`F/api/gamesApi.ts:120\` | \`OA:542\` |
+| Tính năng | Endpoint | Frontend |
+|---|---|---|
+| Xuất bản | \`POST /api/games/{gameId}/publish\` | \`F/api/gamesApi.ts:120\` |
 
 ## Đối chiếu
 
@@ -24,7 +24,6 @@ const FILES = {
   "backend/src/main/java/com/aigameplatform/backend/controller/GamesController.java": 80,
   "frontend/src/api/gamesApi.ts": 130,
   "backend/src/test/java/com/aigameplatform/backend/flow/AbstractTeacherFlowTest.java": 200,
-  "docs/openapi/openapi.yaml": 4000,
 };
 const lineCount = (p) => FILES[p] ?? null;
 const GET = { method: "GET", path: "/api/games/{id}", file: "C.java", line: 53 };
@@ -52,7 +51,12 @@ test("trích dẫn tới file không có hoặc vượt độ dài file; bỏ qu
   assert.equal(errors.length, 2, errors.join("\n"));
   assert.ok(errors.every((e) => /F\/api\/gamesApi\.ts:\d+ trỏ tới file không có/.test(e)));
   assert.match(checkFeatureMap(MAP, [GET], (p) => (p.endsWith("GamesController.java") ? 50 : lineCount(p)))[0], /:53 vượt độ dài file \(50 dòng\)/);
-  assert.match(checkFeatureMap(MAP, [GET], (p) => (p.endsWith("openapi.yaml") ? 100 : lineCount(p)))[0], /OA:542 vượt độ dài openapi\.yaml/);
+});
+
+test("số dòng OpenAPI viết tay phải được thay bằng tra cứu endpoint", () => {
+  const errors = checkFeatureMap(MAP + "\nOA:542", [GET], lineCount);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /phương thức và đường dẫn trong INDEX\.md/);
 });
 
 test("countLines khớp wc -l, kể cả dòng cuối không có xuống dòng (reviewer: trích dẫn N+1 từng lọt)", () => {

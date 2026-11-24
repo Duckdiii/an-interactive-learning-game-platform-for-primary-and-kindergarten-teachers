@@ -1,5 +1,7 @@
 # Quy tắc làm việc trong repository
 
+Bắt đầu ở [mục lục tài liệu](docs/README.md) để tìm UC, hợp đồng, code và test theo tác vụ.
+
 ## Brainstorming phải xác định kết quả nghiệp vụ
 
 Áp dụng khi thiết kế tính năng, sửa hành vi hoặc lập kế hoạch triển khai. Đọc mã và tài liệu liên quan trước khi kết luận hiện trạng.
