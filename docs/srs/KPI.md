@@ -1,6 +1,6 @@
 # 1.2.3. Các Chỉ số KPI Nghiệp vụ Định lượng (Key Business KPIs)
 
-> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[srs/SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
+> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
 
 
 
