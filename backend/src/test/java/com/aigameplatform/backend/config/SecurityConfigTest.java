@@ -17,10 +17,13 @@ import com.aigameplatform.backend.controller.MediaController;
 import com.aigameplatform.backend.dto.response.AuthResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
 import com.aigameplatform.backend.entity.enums.UserRole;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.exception.GlobalExceptionHandler;
+import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.security.JwtService;
 import com.aigameplatform.backend.security.RefreshCookieFactory;
 import com.aigameplatform.backend.security.RestSecurityErrorHandler;
+import com.aigameplatform.backend.security.TeacherAccessAuthenticator;
 import com.aigameplatform.backend.service.AuthResult;
 import com.aigameplatform.backend.service.AuthService;
 import com.aigameplatform.backend.service.PasswordResetService;
@@ -31,6 +34,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -42,7 +46,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest({AuthController.class, MediaController.class})
 @Import({SecurityConfig.class, ClockConfig.class, JwtService.class, RefreshCookieFactory.class,
-        RestSecurityErrorHandler.class, GlobalExceptionHandler.class})
+        RestSecurityErrorHandler.class, GlobalExceptionHandler.class, TeacherAccessAuthenticator.class})
 @TestPropertySource(properties = {
         "app.jwt.secret=0123456789abcdef0123456789abcdef-test-secret",
         "app.jwt.access-token-ttl-minutes=15",
@@ -73,6 +77,15 @@ class SecurityConfigTest {
 
     @MockitoBean
     private LocalMediaStorageService mediaStorage;
+
+    @MockitoBean
+    private TeacherRepository teachers;
+
+    @BeforeEach
+    void activeAccounts() {
+        when(teachers.existsByIdAndStatusAndSessionVersion("teacher-1", TeacherStatus.ACTIVE, 0)).thenReturn(true);
+        when(teachers.existsByIdAndStatusAndSessionVersion("admin-1", TeacherStatus.ACTIVE, 0)).thenReturn(true);
+    }
 
     @Test
     void uploadRequiresTeacherRoleAndPublicMediaAllowsCrossOriginReads() throws Exception {

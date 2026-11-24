@@ -1,8 +1,8 @@
 package com.aigameplatform.backend.config;
 
 import com.aigameplatform.backend.security.JwtAuthenticationFilter;
-import com.aigameplatform.backend.security.JwtService;
 import com.aigameplatform.backend.security.RestSecurityErrorHandler;
+import com.aigameplatform.backend.security.TeacherAccessAuthenticator;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http, JwtService jwtService, RestSecurityErrorHandler errorHandler) throws Exception {
+            HttpSecurity http, TeacherAccessAuthenticator authenticator, RestSecurityErrorHandler errorHandler) throws Exception {
         http
             // API xác thực bằng header Authorization (không dựa vào cookie), nên bỏ kiểm tra CSRF cho đường dẫn API/WebSocket.
             // Cookie refresh token chỉ gửi tới /api/auth, kèm SameSite=Strict.
@@ -60,7 +60,7 @@ public class SecurityConfig {
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)
                 .accessDeniedHandler(errorHandler))
-            .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtAuthenticationFilter(authenticator), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

@@ -22,6 +22,7 @@ import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.RefreshTokenRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +61,7 @@ class TeacherAdminServiceTest {
                 teacherRepository,
                 refreshTokenRepository,
                 passwordEncoder,
-                auditLogService);
+                auditLogService, Clock.systemUTC());
     }
 
     @Test
@@ -91,7 +92,7 @@ class TeacherAdminServiceTest {
         t.setFullName("Nguyen Van A");
         t.setEmail("a@school.vn");
         t.setSchool("TH Chu Van An");
-        when(teacherRepository.findById("t-1")).thenReturn(Optional.of(t));
+        when(teacherRepository.findByIdAndRole("t-1", UserRole.ROLE_TEACHER)).thenReturn(Optional.of(t));
 
         AdminTeacherDto dto = service.getTeacher("t-1");
 
@@ -101,7 +102,7 @@ class TeacherAdminServiceTest {
 
     @Test
     void getTeacher_whenNotFound_throwsNotFound() {
-        when(teacherRepository.findById("t-none")).thenReturn(Optional.empty());
+        when(teacherRepository.findByIdAndRole("t-none", UserRole.ROLE_TEACHER)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getTeacher("t-none"))
                 .isInstanceOf(ApiException.class)
@@ -161,7 +162,7 @@ class TeacherAdminServiceTest {
         t.setEmail("a@school.vn");
         t.setSchool("Old School");
 
-        when(teacherRepository.findById("t-1")).thenReturn(Optional.of(t));
+        when(teacherRepository.findByIdAndRole("t-1", UserRole.ROLE_TEACHER)).thenReturn(Optional.of(t));
         when(teacherRepository.save(any(Teacher.class))).thenAnswer(inv -> inv.getArgument(0));
 
         AdminUpdateTeacherRequest req = new AdminUpdateTeacherRequest("New Name", "New School");
@@ -182,12 +183,12 @@ class TeacherAdminServiceTest {
         t.setEmail("a@school.vn");
         t.setStatus(TeacherStatus.ACTIVE);
 
-        when(teacherRepository.findById("t-1")).thenReturn(Optional.of(t));
+        when(teacherRepository.findByIdAndRole("t-1", UserRole.ROLE_TEACHER)).thenReturn(Optional.of(t));
 
         TeacherStatusResultDto result = service.lockTeacher("t-1", admin, "127.0.0.1");
 
         assertThat(result.status()).isEqualTo(TeacherStatus.LOCKED);
-        assertThat(t.getStatus()).isEqualTo(TeacherStatus.LOCKED);
+        verify(teacherRepository).lockTeacherAccount("t-1");
         verify(refreshTokenRepository).revokeAllByTeacherId(eq("t-1"), any(LocalDateTime.class));
         verify(auditLogService).logAction(
                 eq("admin-id"), eq("ROLE_ADMIN"), eq("127.0.0.1"),
@@ -197,10 +198,6 @@ class TeacherAdminServiceTest {
 
     @Test
     void lockTeacher_whenSelfLock_throwsValidationError() {
-        Teacher t = new Teacher();
-        t.setId("admin-id");
-        when(teacherRepository.findById("admin-id")).thenReturn(Optional.of(t));
-
         assertThatThrownBy(() -> service.lockTeacher("admin-id", admin, "127.0.0.1"))
                 .isInstanceOf(ApiException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.VALIDATION_ERROR);
@@ -213,12 +210,12 @@ class TeacherAdminServiceTest {
         t.setEmail("a@school.vn");
         t.setStatus(TeacherStatus.LOCKED);
 
-        when(teacherRepository.findById("t-1")).thenReturn(Optional.of(t));
+        when(teacherRepository.findByIdAndRole("t-1", UserRole.ROLE_TEACHER)).thenReturn(Optional.of(t));
 
         TeacherStatusResultDto result = service.unlockTeacher("t-1", admin, "127.0.0.1");
 
         assertThat(result.status()).isEqualTo(TeacherStatus.ACTIVE);
-        assertThat(t.getStatus()).isEqualTo(TeacherStatus.ACTIVE);
+        verify(teacherRepository).unlockTeacherAccount("t-1");
         verify(auditLogService).logAction(
                 eq("admin-id"), eq("ROLE_ADMIN"), eq("127.0.0.1"),
                 eq("POST /api/admin/teachers/t-1/unlock"), eq(AuditResult.SUCCESS),

@@ -21,6 +21,7 @@ public class JwtService {
     // "sid" = mã phiên đăng nhập (family của refresh token), dùng để logout thu hồi đúng phiên.
     private static final String CLAIM_SESSION_ID = "sid";
     private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_SESSION_VERSION = "sv";
 
     private final SecretKey key;
     private final Duration accessTokenTtl;
@@ -40,12 +41,17 @@ public class JwtService {
     }
 
     public String generateAccessToken(String teacherId, String email, String sessionId, String role) {
+        return generateAccessToken(teacherId, email, sessionId, role, 0);
+    }
+
+    public String generateAccessToken(String teacherId, String email, String sessionId, String role, long sessionVersion) {
         Instant now = clock.instant();
         return Jwts.builder()
                 .subject(teacherId)
                 .claim(CLAIM_EMAIL, email)
                 .claim(CLAIM_SESSION_ID, sessionId)
                 .claim(CLAIM_ROLE, role)
+                .claim(CLAIM_SESSION_VERSION, sessionVersion)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(accessTokenTtl)))
                 .signWith(key, Jwts.SIG.HS256)
@@ -68,11 +74,12 @@ public class JwtService {
         if (role == null || role.isBlank()) {
             role = "ROLE_TEACHER";
         }
+        Long sessionVersion = claims.get(CLAIM_SESSION_VERSION, Long.class);
         return new AuthenticatedTeacher(
                 claims.getSubject(),
                 claims.get(CLAIM_EMAIL, String.class),
                 claims.get(CLAIM_SESSION_ID, String.class),
-                role);
+                role, sessionVersion == null ? 0 : sessionVersion);
     }
 
     public long getAccessTokenTtlSeconds() {

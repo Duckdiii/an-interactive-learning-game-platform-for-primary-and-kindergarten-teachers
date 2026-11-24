@@ -14,6 +14,7 @@ import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.RefreshTokenRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
@@ -31,16 +32,19 @@ public class TeacherAdminService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
+    private final Clock clock;
 
     public TeacherAdminService(
             TeacherRepository teacherRepository,
             RefreshTokenRepository refreshTokenRepository,
             PasswordEncoder passwordEncoder,
-            AuditLogService auditLogService) {
+            AuditLogService auditLogService,
+            Clock clock) {
         this.teacherRepository = teacherRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditLogService = auditLogService;
+        this.clock = clock;
     }
 
     @Transactional(readOnly = true)
@@ -59,12 +63,11 @@ public class TeacherAdminService {
 
     @Transactional(readOnly = true)
     public AdminTeacherDto getTeacher(String teacherId) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy giáo viên với mã: " + teacherId));
-        return toDto(teacher);
+        return toDto(requireTeacher(teacherId));
     }
 
-    @Transactional
+    // Lỗi email trùng chỉ xảy ra trước khi tạo tài khoản, giữ lại bản ghi FAILURE khi trả về 409.
+    @Transactional(noRollbackFor = ApiException.class)
     public AdminTeacherDto createTeacher(
             AdminCreateTeacherRequest req, AuthenticatedTeacher admin, String ip) {
         String email = req.email().trim().toLowerCase(Locale.ROOT);
@@ -105,10 +108,9 @@ public class TeacherAdminService {
     @Transactional
     public AdminTeacherDto updateTeacher(
             String teacherId, AdminUpdateTeacherRequest req, AuthenticatedTeacher admin, String ip) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy giáo viên với mã: " + teacherId));
+        Teacher teacher = requireTeacher(teacherId);
 
-        if (req.fullName() != null && !req.fullName().isBlank()) {
+        if (req.fullName() != null) {
             teacher.setFullName(req.fullName().trim());
         }
         if (req.school() != null) {
@@ -131,18 +133,14 @@ public class TeacherAdminService {
     @Transactional
     public TeacherStatusResultDto lockTeacher(
             String teacherId, AuthenticatedTeacher admin, String ip) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy giáo viên với mã: " + teacherId));
-
         if (admin != null && teacherId.equals(admin.teacherId())) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Không thể tự khoá tài khoản của chính mình");
         }
+        Teacher teacher = requireTeacher(teacherId);
 
-        teacher.setStatus(TeacherStatus.LOCKED);
-        teacherRepository.save(teacher);
+        teacherRepository.lockTeacherAccount(teacherId);
 
-        // Thu hồi toàn bộ refresh token để buộc đăng xuất tức thì
-        refreshTokenRepository.revokeAllByTeacherId(teacherId, LocalDateTime.now());
+        refreshTokenRepository.revokeAllByTeacherId(teacherId, LocalDateTime.now(clock));
 
         auditLogService.logAction(
                 admin != null ? admin.teacherId() : null,
@@ -159,11 +157,8 @@ public class TeacherAdminService {
     @Transactional
     public TeacherStatusResultDto unlockTeacher(
             String teacherId, AuthenticatedTeacher admin, String ip) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy giáo viên với mã: " + teacherId));
-
-        teacher.setStatus(TeacherStatus.ACTIVE);
-        teacherRepository.save(teacher);
+        Teacher teacher = requireTeacher(teacherId);
+        teacherRepository.unlockTeacherAccount(teacherId);
 
         auditLogService.logAction(
                 admin != null ? admin.teacherId() : null,
@@ -175,6 +170,11 @@ public class TeacherAdminService {
                 "Mở khóa tài khoản giáo viên: " + teacher.getEmail());
 
         return new TeacherStatusResultDto(teacherId, TeacherStatus.ACTIVE);
+    }
+
+    private Teacher requireTeacher(String teacherId) {
+        return teacherRepository.findByIdAndRole(teacherId, UserRole.ROLE_TEACHER)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy giáo viên với mã: " + teacherId));
     }
 
     private AdminTeacherDto toDto(Teacher t) {

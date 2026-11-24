@@ -28,6 +28,9 @@ public class RefreshToken {
     @Column(nullable = false)
     private String familyId;
 
+    @Column(nullable = false)
+    private long sessionVersion;
+
     // Toàn bộ thời gian trong bảng này là UTC.
     @Column(nullable = false)
     private LocalDateTime expiresAt;
