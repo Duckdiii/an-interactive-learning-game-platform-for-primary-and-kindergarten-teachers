@@ -378,12 +378,10 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '413':
-          description: Tệp vượt giới hạn kích thước.
         '422':
           $ref: '#/components/responses/UnprocessableContent'
         '503':
-          description: Bộ trích xuất hoặc bước kiểm tra an toàn bắt buộc không sẵn sàng.
+          $ref: '#/components/responses/ServiceUnavailable'
         '504':
           $ref: '#/components/responses/AiTimeout'
 
@@ -448,6 +446,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '504':
           $ref: '#/components/responses/AiTimeout'
 
@@ -2981,6 +2981,7 @@ components:
     UnprocessableContent:
       description: |
         Một trong các mã 422:
+        - `LESSON_CLARIFICATION_REQUIRED`: chưa xác định được một mục tiêu học tập rõ ràng từ giáo án.
         - `UNSAFE_CONTENT`: ý tưởng, giáo án, nội dung AI sinh ra hoặc nội dung sửa tay không an toàn.
           Backend **không** tự sinh lại; khi sửa tay thì giữ nguyên bản cũ.
         - `FILE_TOO_LARGE_OR_INVALID_FORMAT`: tệp giáo án sai định dạng hoặc quá 10MB.
@@ -2995,6 +2996,16 @@ components:
       description: |
         `AI_GENERATION_TIMEOUT`: dịch vụ AI timeout sau khi Backend đã gọi lại tối đa 2 lần.
         Frontend giữ lại ý tưởng đã nhập để thử lại không phải nhập lại.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: |
+        Một trong các mã 503:
+        - `LESSON_PROCESSING_UNAVAILABLE`: bộ trích xuất hoặc dịch vụ Gemini chuẩn bị ý tưởng chưa sẵn sàng.
+        - `INPUT_SAFETY_UNAVAILABLE`: chưa kiểm tra được an toàn đầu vào.
+        - `SERVICE_UNAVAILABLE`: dịch vụ AI tạm thời không khả dụng, gồm trường hợp chạm trần chi phí.
       content:
         application/json:
           schema:
@@ -3026,6 +3037,7 @@ components:
         | `FORBIDDEN` | 403 | đã cài | Sai vai trò, tài nguyên của người khác |
         | `NOT_FOUND` | 404 | đã cài | Game/session/mã không tồn tại |
         | `FILE_TOO_LARGE_OR_INVALID_FORMAT` | 422 | đã cài | Sai định dạng hoặc dung lượng tệp |
+        | `LESSON_CLARIFICATION_REQUIRED` | 422 | đã cài | Chưa xác định được một mục tiêu học tập rõ ràng từ giáo án |
         | `UNSAFE_CONTENT` | 422 | đã cài | Nội dung không an toàn |
         | `AI_GENERATION_TIMEOUT` | 504 | đã cài | Dịch vụ AI timeout sau khi retry |
         | `INTERNAL_ERROR` | 500 | đã cài | Lỗi không xác định |
@@ -3035,12 +3047,15 @@ components:
         | `LOGIN_TEMPORARILY_LOCKED` | 429 | đã cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
         | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |
         | `SERVICE_UNAVAILABLE` | 503 | đã cài | Dịch vụ tạm thời không khả dụng (chạm trần chi phí AI, circuit breaker) |
+        | `LESSON_PROCESSING_UNAVAILABLE` | 503 | đã cài | Không trích xuất hoặc chuẩn bị được ý tưởng từ giáo án |
+        | `INPUT_SAFETY_UNAVAILABLE` | 503 | đã cài | Chưa kiểm tra được an toàn đầu vào |
       enum:
         - VALIDATION_ERROR
         - UNAUTHORIZED
         - FORBIDDEN
         - NOT_FOUND
         - FILE_TOO_LARGE_OR_INVALID_FORMAT
+        - LESSON_CLARIFICATION_REQUIRED
         - UNSAFE_CONTENT
         - AI_GENERATION_TIMEOUT
         - INTERNAL_ERROR
@@ -3050,6 +3065,8 @@ components:
         - LOGIN_TEMPORARILY_LOCKED
         - CONTENT_NOT_AGE_APPROPRIATE
         - SERVICE_UNAVAILABLE
+        - LESSON_PROCESSING_UNAVAILABLE
+        - INPUT_SAFETY_UNAVAILABLE
 
     ErrorBody:
       type: object

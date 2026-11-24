@@ -61,7 +61,8 @@ public class ContentSafetyCheck {
                 blocked.add(new ValidationError(entry.path(), UNSAFE_MESSAGE, ValidationError.Kind.UNSAFE));
             }
         }
-        if (!blocked.isEmpty() || texts.isEmpty() || !moderationRequired || !moderationClient.isConfigured()) {
+        // `required` controls startup when no key exists; it does not disable moderation when a client is configured.
+        if (!blocked.isEmpty() || texts.isEmpty() || !moderationClient.isConfigured()) {
             return blocked;
         }
 

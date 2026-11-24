@@ -51,7 +51,8 @@ class GameServiceRegenerateTest {
         when(dsl.toResponse(any(), any())).thenAnswer(inv -> ((ObjectNode) inv.getArgument(1)).put("kind", "DSL"));
         service = new GameService(games, mock(TeacherRepository.class), List.of(dsl), JsonMapper.builder().build(),
                 mock(AiRequestRateLimiter.class), TransactionOperations.withoutTransaction(),
-                mock(GameCurriculumReviewService.class), mock(ObjectProvider.class), new java.util.Random(7), null, sessions, null, null);
+                mock(GameCurriculumReviewService.class), mock(ObjectProvider.class), new java.util.Random(7), null,
+                sessions, null, null, mock(com.aigameplatform.backend.service.lesson.GameInputGuard.class));
     }
 
     private static Game game(String authorId) {

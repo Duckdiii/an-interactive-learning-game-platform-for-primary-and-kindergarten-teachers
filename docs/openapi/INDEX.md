@@ -9,7 +9,7 @@
 - `servers`: dòng 27–30
 - `tags`: dòng 31–73
 - `paths`: dòng 74–2700
-- `components`: dòng 2701–5004
+- `components`: dòng 2701–5021
 
 ## Operation
 
@@ -22,8 +22,8 @@
 | POST | `/auth/forgot-password` | forgotPassword | implemented | 211–261 |
 | POST | `/auth/reset-password` | resetPassword | implemented | 264–295 |
 | GET | `/catalog/noto` |  | implemented | 298–326 |
-| POST | `/games/prepare` | prepareLessonIdea | implemented | 329–388 |
-| POST | `/games/generate` | generateGame | extended-pending | 391–452 |
+| POST | `/games/prepare` | prepareLessonIdea | implemented | 329–386 |
+| POST | `/games/generate` | generateGame | extended-pending | 389–452 |
 | POST | `/games/understand` | understandGameRequest | implemented | 455–494 |
 | GET | `/games` | listGames | extended-pending | 497–535 |
 | GET | `/games/{gameId}` | getGame | implemented | 540–557 |
@@ -117,91 +117,92 @@
 | responses | `Forbidden` | 2960–2966 |
 | responses | `NotFound` | 2967–2972 |
 | responses | `Conflict` | 2973–2980 |
-| responses | `UnprocessableContent` | 2981–2993 |
-| responses | `AiTimeout` | 2994–3001 |
-| responses | `RateLimited` | 3002–3010 |
-| responses | `InternalError` | 3011–3016 |
-| schemas | `ErrorCode` | 3019–3052 |
-| schemas | `ErrorBody` | 3054–3085 |
-| schemas | `ErrorResponse` | 3087–3093 |
-| schemas | `Password` | 3095–3102 |
-| schemas | `Role` | 3104–3106 |
-| schemas | `RegisterRequest` | 3108–3131 |
-| schemas | `RegisterResult` | 3133–3142 |
-| schemas | `LoginRequest` | 3144–3157 |
-| schemas | `TeacherInfo` | 3159–3175 |
-| schemas | `AuthData` | 3177–3189 |
-| schemas | `Subject` | 3191–3193 |
-| schemas | `GradeLevel` | 3195–3197 |
-| schemas | `GameType` | 3199–3215 |
-| schemas | `GameStatus` | 3217–3219 |
-| schemas | `Voice` | 3221–3232 |
-| schemas | `GenerateGameRequest` | 3234–3301 |
-| schemas | `UnderstandGameRequest` | 3303–3320 |
-| schemas | `ReviseGameRequest` | 3322–3336 |
-| schemas | `ChatTurn` | 3338–3348 |
-| schemas | `GameUnderstanding` | 3350–3402 |
-| schemas | `GameUnderstandingResponse` | 3404–3433 |
-| schemas | `GameUnderstandingResult` | 3435–3443 |
-| schemas | `GameEnvelope` | 3445–3462 |
-| schemas | `CpfGameEnvelope` | 3464–3469 |
-| schemas | `Question` | 3471–3485 |
-| schemas | `GameResponse` | 3487–3493 |
-| schemas | `CpfGameResponse` | 3495–3514 |
-| schemas | `DslGameResponse` | 3516–3597 |
-| schemas | `GameResult` | 3599–3605 |
-| schemas | `GameSummary` | 3607–3644 |
-| schemas | `CurriculumReview` | 3646–3688 |
-| schemas | `PublishResult` | 3690–3706 |
-| schemas | `SessionType` | 3708–3713 |
-| schemas | `SessionStatus` | 3715–3717 |
-| schemas | `ParticipantStatus` | 3719–3724 |
-| schemas | `InteractionStatus` | 3726–3728 |
-| schemas | `GroupingStrategy` | 3730–3732 |
-| schemas | `TeamInfo` | 3734–3747 |
-| schemas | `TeamInput` | 3749–3757 |
-| schemas | `CreateSessionRequest` | 3759–3787 |
-| schemas | `ClassroomInput` | 3789–3802 |
-| schemas | `Classroom` | 3804–3815 |
-| schemas | `CreateSessionResult` | 3817–3841 |
-| schemas | `SessionByCode` | 3843–3862 |
-| schemas | `JoinRequest` | 3864–3876 |
-| schemas | `JoinResult` | 3878–3896 |
-| schemas | `TeamAssignRequest` | 3898–3904 |
-| schemas | `StudentGameResponse` | 3906–3969 |
-| schemas | `StudentOddOneOutImageQuestion` | 3971–3992 |
-| schemas | `MatchingStudentItem` | 3994–4019 |
-| schemas | `MatchingStudentQuestion` | 4021–4077 |
-| schemas | `StudentVisualClozeImageQuestion` | 4079–4124 |
-| schemas | `InteractionBase` | 4126–4137 |
-| schemas | `InteractionRequest` | 4139–4287 |
-| schemas | `InteractionResult` | 4289–4325 |
-| schemas | `LeaderboardParticipant` | 4327–4344 |
-| schemas | `LeaderboardTeam` | 4346–4366 |
-| schemas | `Leaderboard` | 4368–4380 |
-| schemas | `MyResult` | 4382–4427 |
-| schemas | `SharedGameInfo` | 4429–4439 |
-| schemas | `PlayRequest` | 4441–4449 |
-| schemas | `PlayResult` | 4451–4470 |
-| schemas | `SessionListItem` | 4472–4490 |
-| schemas | `SessionDetail` | 4492–4537 |
-| schemas | `SessionResults` | 4539–4596 |
-| schemas | `QuestionInsightDetail` | 4598–4637 |
-| schemas | `ReviewNeeded` | 4639–4662 |
-| schemas | `GameInsights` | 4664–4694 |
-| schemas | `QuestionInsight` | 4696–4728 |
-| schemas | `ParticipantInteraction` | 4730–4753 |
-| schemas | `PageInfo` | 4755–4770 |
-| schemas | `TeacherAccountStatus` | 4772–4774 |
-| schemas | `AdminBudgetConfig` | 4776–4785 |
-| schemas | `AdminTeacher` | 4786–4804 |
-| schemas | `AdminCreateTeacherRequest` | 4806–4821 |
-| schemas | `AuditResult` | 4823–4825 |
-| schemas | `AuditLogEntry` | 4827–4850 |
-| schemas | `ServiceName` | 4852–4854 |
-| schemas | `ServiceUsage` | 4856–4887 |
-| schemas | `UsageReport` | 4889–4919 |
-| schemas | `SystemStatus` | 4921–4944 |
-| schemas | `AiConfigInput` | 4946–4967 |
-| schemas | `AiConfigVersion` | 4969–4994 |
-| schemas | `BlockedWords` | 4996–5003 |
+| responses | `UnprocessableContent` | 2981–2994 |
+| responses | `AiTimeout` | 2995–3002 |
+| responses | `ServiceUnavailable` | 3003–3012 |
+| responses | `RateLimited` | 3013–3021 |
+| responses | `InternalError` | 3022–3027 |
+| schemas | `ErrorCode` | 3030–3069 |
+| schemas | `ErrorBody` | 3071–3102 |
+| schemas | `ErrorResponse` | 3104–3110 |
+| schemas | `Password` | 3112–3119 |
+| schemas | `Role` | 3121–3123 |
+| schemas | `RegisterRequest` | 3125–3148 |
+| schemas | `RegisterResult` | 3150–3159 |
+| schemas | `LoginRequest` | 3161–3174 |
+| schemas | `TeacherInfo` | 3176–3192 |
+| schemas | `AuthData` | 3194–3206 |
+| schemas | `Subject` | 3208–3210 |
+| schemas | `GradeLevel` | 3212–3214 |
+| schemas | `GameType` | 3216–3232 |
+| schemas | `GameStatus` | 3234–3236 |
+| schemas | `Voice` | 3238–3249 |
+| schemas | `GenerateGameRequest` | 3251–3318 |
+| schemas | `UnderstandGameRequest` | 3320–3337 |
+| schemas | `ReviseGameRequest` | 3339–3353 |
+| schemas | `ChatTurn` | 3355–3365 |
+| schemas | `GameUnderstanding` | 3367–3419 |
+| schemas | `GameUnderstandingResponse` | 3421–3450 |
+| schemas | `GameUnderstandingResult` | 3452–3460 |
+| schemas | `GameEnvelope` | 3462–3479 |
+| schemas | `CpfGameEnvelope` | 3481–3486 |
+| schemas | `Question` | 3488–3502 |
+| schemas | `GameResponse` | 3504–3510 |
+| schemas | `CpfGameResponse` | 3512–3531 |
+| schemas | `DslGameResponse` | 3533–3614 |
+| schemas | `GameResult` | 3616–3622 |
+| schemas | `GameSummary` | 3624–3661 |
+| schemas | `CurriculumReview` | 3663–3705 |
+| schemas | `PublishResult` | 3707–3723 |
+| schemas | `SessionType` | 3725–3730 |
+| schemas | `SessionStatus` | 3732–3734 |
+| schemas | `ParticipantStatus` | 3736–3741 |
+| schemas | `InteractionStatus` | 3743–3745 |
+| schemas | `GroupingStrategy` | 3747–3749 |
+| schemas | `TeamInfo` | 3751–3764 |
+| schemas | `TeamInput` | 3766–3774 |
+| schemas | `CreateSessionRequest` | 3776–3804 |
+| schemas | `ClassroomInput` | 3806–3819 |
+| schemas | `Classroom` | 3821–3832 |
+| schemas | `CreateSessionResult` | 3834–3858 |
+| schemas | `SessionByCode` | 3860–3879 |
+| schemas | `JoinRequest` | 3881–3893 |
+| schemas | `JoinResult` | 3895–3913 |
+| schemas | `TeamAssignRequest` | 3915–3921 |
+| schemas | `StudentGameResponse` | 3923–3986 |
+| schemas | `StudentOddOneOutImageQuestion` | 3988–4009 |
+| schemas | `MatchingStudentItem` | 4011–4036 |
+| schemas | `MatchingStudentQuestion` | 4038–4094 |
+| schemas | `StudentVisualClozeImageQuestion` | 4096–4141 |
+| schemas | `InteractionBase` | 4143–4154 |
+| schemas | `InteractionRequest` | 4156–4304 |
+| schemas | `InteractionResult` | 4306–4342 |
+| schemas | `LeaderboardParticipant` | 4344–4361 |
+| schemas | `LeaderboardTeam` | 4363–4383 |
+| schemas | `Leaderboard` | 4385–4397 |
+| schemas | `MyResult` | 4399–4444 |
+| schemas | `SharedGameInfo` | 4446–4456 |
+| schemas | `PlayRequest` | 4458–4466 |
+| schemas | `PlayResult` | 4468–4487 |
+| schemas | `SessionListItem` | 4489–4507 |
+| schemas | `SessionDetail` | 4509–4554 |
+| schemas | `SessionResults` | 4556–4613 |
+| schemas | `QuestionInsightDetail` | 4615–4654 |
+| schemas | `ReviewNeeded` | 4656–4679 |
+| schemas | `GameInsights` | 4681–4711 |
+| schemas | `QuestionInsight` | 4713–4745 |
+| schemas | `ParticipantInteraction` | 4747–4770 |
+| schemas | `PageInfo` | 4772–4787 |
+| schemas | `TeacherAccountStatus` | 4789–4791 |
+| schemas | `AdminBudgetConfig` | 4793–4802 |
+| schemas | `AdminTeacher` | 4803–4821 |
+| schemas | `AdminCreateTeacherRequest` | 4823–4838 |
+| schemas | `AuditResult` | 4840–4842 |
+| schemas | `AuditLogEntry` | 4844–4867 |
+| schemas | `ServiceName` | 4869–4871 |
+| schemas | `ServiceUsage` | 4873–4904 |
+| schemas | `UsageReport` | 4906–4936 |
+| schemas | `SystemStatus` | 4938–4961 |
+| schemas | `AiConfigInput` | 4963–4984 |
+| schemas | `AiConfigVersion` | 4986–5011 |
+| schemas | `BlockedWords` | 5013–5020 |

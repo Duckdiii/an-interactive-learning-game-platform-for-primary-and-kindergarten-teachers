@@ -138,12 +138,13 @@ class SafetyGameValidatorTest {
     }
 
     @Test
-    void localOnlyModeDoesNotCallConfiguredModerationClient() throws IOException {
+    void optionalModerationStillRunsWhenTheClientIsConfigured() throws IOException {
         when(client.isConfigured()).thenReturn(true);
+        when(client.moderate(anyList())).thenAnswer(inv -> allClean(((List<?>) inv.getArgument(0)).size()));
         SafetyGameValidator validator = new SafetyGameValidator(new ContentSafetyCheck(blockedWords, client, false));
 
         assertThat(validator.validate(new GameValidationContext(quiz()))).isEmpty();
-        verify(client, never()).moderate(anyList());
+        verify(client).moderate(anyList());
     }
 
     @Test

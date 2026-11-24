@@ -56,7 +56,8 @@ class GameServiceCostCapTest {
         GameService service = new GameService(games, teachers, List.of(handler),
                 JsonMapper.builder().build(), mock(AiRequestRateLimiter.class), TransactionOperations.withoutTransaction(),
                 mock(GameCurriculumReviewService.class), mock(ObjectProvider.class), new java.util.Random(7), null,
-                mock(GameSessionRepository.class), costProvider, null);
+                mock(GameSessionRepository.class), costProvider, null,
+                mock(com.aigameplatform.backend.service.lesson.GameInputGuard.class));
         var request = new GenerateGameRequest(Subject.MATH, GradeLevel.GRADE_1, "Phép cộng trong phạm vi 10", false,
                 GameType.QUIZ, null);
 

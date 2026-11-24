@@ -27,6 +27,7 @@ import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
 import com.aigameplatform.backend.service.generation.GenerationResult;
+import com.aigameplatform.backend.service.lesson.GameInputGuard;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +56,7 @@ class GameServiceTest {
             mock(com.aigameplatform.backend.repository.GameSessionRepository.class);
     private final com.aigameplatform.backend.repository.EditLogRepository editLogs =
             mock(com.aigameplatform.backend.repository.EditLogRepository.class);
+    private final GameInputGuard inputGuard = mock(GameInputGuard.class);
     private GameService service;
 
     @BeforeEach
@@ -72,7 +74,7 @@ class GameServiceTest {
         when(teachers.getReferenceById(anyString())).thenAnswer(inv -> teacher(inv.getArgument(0)));
         when(curriculumReviews.saveEditedGame(any(), anyString())).thenAnswer(inv -> inv.getArgument(0));
         service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews, catalogs, new java.util.Random(7), null, sessions, null, editLogs);
+                curriculumReviews, catalogs, new java.util.Random(7), null, sessions, null, editLogs, inputGuard);
     }
 
     private static Teacher teacher(String id) {
@@ -126,11 +128,9 @@ class GameServiceTest {
 
     @Test
     void unsafeTeacherIdeaIsRejectedBeforeTheGeneratorRuns() {
-        var guard = mock(com.aigameplatform.backend.service.lesson.GameInputGuard.class);
         String idea = "Nội dung bạo lực không phù hợp cho trẻ";
         doThrow(new ApiException(ErrorCode.UNSAFE_CONTENT, "Nội dung không an toàn"))
-                .when(guard).requireSafe(eq(idea), eq((String) null), any(String[].class));
-        service.setGameInputGuard(guard);
+                .when(inputGuard).requireSafe(eq(idea), eq((String) null), any(String[].class));
 
         assertThatThrownBy(() -> service.generate(OWNER, request(idea, null, GameType.QUIZ)))
                 .isInstanceOfSatisfying(ApiException.class,
@@ -138,6 +138,14 @@ class GameServiceTest {
 
         verify(dsl, never()).generate(any(), anyString(), any());
         verify(games, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void inputGuardIsRequiredAtConstruction() {
+        assertThatThrownBy(() -> new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter,
+                TransactionOperations.withoutTransaction(), curriculumReviews, catalogs, new java.util.Random(7),
+                null, sessions, null, editLogs, null))
+                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -371,7 +379,7 @@ class GameServiceTest {
     void aFailedRevisionFreesTheTeachersSlotForTheNextOne() {
         var realLimiter = new AiRequestRateLimiter(java.time.Clock.systemUTC());
         var withLimiter = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, realLimiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews, catalogs, new java.util.Random(7));
+                curriculumReviews, catalogs, new java.util.Random(7), null, sessions, null, editLogs, inputGuard);
         when(games.findById("g1")).thenReturn(Optional.of(game("g1", OWNER, GameType.QUIZ)));
         when(dsl.revise(any(), any(), any())).thenThrow(new ApiException(ErrorCode.UNSAFE_CONTENT, "x"))
                 .thenReturn(MAPPER.createObjectNode().put("gameType", "QUIZ"));

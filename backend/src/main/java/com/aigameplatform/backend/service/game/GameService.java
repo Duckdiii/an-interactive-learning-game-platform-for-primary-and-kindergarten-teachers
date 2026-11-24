@@ -66,22 +66,15 @@ public class GameService {
     private final ObjectProvider<GameAudioEnricher> audioEnrichers;
     private final GameSessionRepository sessions;
     private final ObjectProvider<CostMonitoringService> costMonitoring;
-    private GameInputGuard gameInputGuard;
-
-    public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
-            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
-            GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
-            RandomGenerator random) {
-        this(games, teachers, handlers, jsonMapper, rateLimiter, transactions, curriculumReviews, curriculumCatalog,
-                random, null, null, null, null);
-    }
+    private final GameInputGuard gameInputGuard;
 
     @Autowired
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
             RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
-            ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs) {
+            ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs,
+            GameInputGuard gameInputGuard) {
         this.editLogs = editLogs;
         this.costMonitoring = costMonitoring;
         this.sessions = sessions;
@@ -95,6 +88,7 @@ public class GameService {
         this.rateLimiter = rateLimiter;
         this.transactions = transactions;
         this.curriculumReviews = curriculumReviews;
+        this.gameInputGuard = java.util.Objects.requireNonNull(gameInputGuard, "gameInputGuard");
     }
 
     /**
@@ -107,13 +101,10 @@ public class GameService {
         requireBudgetAvailable();
         GameType type = request.gameType() != null ? request.gameType() : GameType.QUIZ;
         String idea = ideaOf(request, type);
-        GameInputGuard guard = gameInputGuard;
-        if (guard != null) {
-            String[] visualPrompts = request.optionImages() == null ? new String[0]
-                    : request.optionImages().stream().filter(java.util.Objects::nonNull)
-                            .map(GenerateGameRequest.OptionImage::visualPrompt).toArray(String[]::new);
-            guard.requireSafe(idea, null, visualPrompts);
-        }
+        String[] visualPrompts = request.optionImages() == null ? new String[0]
+                : request.optionImages().stream().filter(java.util.Objects::nonNull)
+                        .map(GenerateGameRequest.OptionImage::visualPrompt).toArray(String[]::new);
+        gameInputGuard.requireSafe(idea, null, visualPrompts);
 
         GameContentHandler handler = handlerFor(type);
         GameContentHandler.GeneratedContent content = handler.generate(type, idea, request);
@@ -348,11 +339,5 @@ public class GameService {
         if (teacherId == null || teacherId.isBlank()) {
             throw new ApiException(ErrorCode.UNAUTHORIZED, "Cần đăng nhập tài khoản giáo viên");
         }
-    }
-
-    /** Check teacher supplied generation text before calling any AI handler. */
-    @Autowired(required = false)
-    public void setGameInputGuard(GameInputGuard guard) {
-        this.gameInputGuard = guard;
     }
 }
