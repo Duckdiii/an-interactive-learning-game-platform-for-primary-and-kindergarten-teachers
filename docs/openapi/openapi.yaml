@@ -3270,7 +3270,9 @@ components:
         school:
           type: string
           maxLength: 255
-          description: Tên trường tùy chọn, dùng để điền sẵn hồ sơ giảng dạy.
+          description: |
+            Tên trường tùy chọn, dùng để điền sẵn hồ sơ giảng dạy.
+            Vượt quá 255 ký tự trả 400 với lỗi ở trường school.
           examples: [Trường Tiểu học ABC]
         acceptedPolicy:
           type: boolean
@@ -3430,7 +3432,10 @@ components:
         classroomId:
           type: string
           maxLength: 64
-          description: Lớp của giáo viên dùng làm ngữ cảnh sư phạm bổ sung. Lớp của người khác trả 404, khối không khớp trả 400.
+          description: |
+            Mã lớp tùy chọn, dùng làm ngữ cảnh sư phạm bổ sung.
+            Khi truyền mã lớp, subject và gradeLevel vẫn bắt buộc. Thiếu gradeLevel trả 400 với lỗi ở trường gradeLevel.
+            Nếu lớp đã khai báo khối, gradeLevel phải khớp. Lớp của giáo viên khác trả 404.
         reviewFrom:
           type: object
           description: |
@@ -3952,6 +3957,7 @@ components:
           type: [string, 'null']
           maxLength: 100
         learningProfile:
+          description: Tùy chọn. Khi sửa lớp, bỏ trường này hoặc gửi null để giữ hồ sơ lớp hiện có.
           oneOf:
             - $ref: '#/components/schemas/ClassroomLearningProfile'
             - type: 'null'

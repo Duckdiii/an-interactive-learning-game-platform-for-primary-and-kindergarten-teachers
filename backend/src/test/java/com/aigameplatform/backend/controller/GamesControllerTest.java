@@ -119,6 +119,15 @@ class GamesControllerTest {
     }
 
     @Test
+    void generateWithClassroomButWithoutGradeReportsTheMissingField() throws Exception {
+        mvc.perform(post("/api/games/generate").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"subject\":\"MATH\",\"classroomId\":\"c1\",\"randomTopic\":true}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.details.gradeLevel").value("Vui lòng chọn khối lớp"));
+        org.mockito.Mockito.verifyNoInteractions(games);
+    }
+
+    @Test
     void generateWithTooShortIdeaIs400() throws Exception {
         mvc.perform(post("/api/games/generate").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"subject\":\"MATH\",\"gradeLevel\":\"GRADE_1\",\"idea\":\"ngắn\"}"))

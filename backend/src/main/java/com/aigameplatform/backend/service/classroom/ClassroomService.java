@@ -82,6 +82,9 @@ public class ClassroomService {
     @Transactional(readOnly = true)
     public String generationContext(String teacherId, String classroomId, GradeLevel gradeLevel) {
         Classroom classroom = owned(teacherId, classroomId);
+        if (gradeLevel == null) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Vui lòng chọn khối lớp");
+        }
         if (classroom.getGradeLevel() != null && classroom.getGradeLevel() != gradeLevel) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Khối lớp đã chọn không khớp với lớp học");
         }
