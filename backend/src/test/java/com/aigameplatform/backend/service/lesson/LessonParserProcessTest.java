@@ -76,6 +76,42 @@ class LessonParserProcessTest {
         } finally { release.countDown(); Files.delete(temp); }
     }
 
+    @Test void extractorRejectsBeforeBufferingWhenAllParserSlotsAreBusy() throws Exception {
+        var entered = new CountDownLatch(1); var release = new CountDownLatch(1);
+        var temp = Files.createTempDirectory("lesson-upload-slot-test-");
+        var runner = new LessonParserProcess(1000, 1, (dir, type) -> {
+            entered.countDown();
+            try { release.await(); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
+            throw new java.io.IOException("stop");
+        }, temp);
+        var extractor = new LessonDocumentExtractor(runner);
+        var reads = new java.util.concurrent.atomic.AtomicInteger();
+        var uploadBytes = new byte[]{1, 2, 3};
+        var upload = new org.springframework.mock.web.MockMultipartFile("file", "lesson.pdf", "application/pdf", new byte[]{1, 2, 3}) {
+            @Override public java.io.InputStream getInputStream() {
+                return new java.io.FilterInputStream(new java.io.ByteArrayInputStream(uploadBytes)) {
+                    @Override public int read() throws java.io.IOException { reads.incrementAndGet(); return super.read(); }
+                    @Override public int read(byte[] bytes, int offset, int length) throws java.io.IOException {
+                        reads.incrementAndGet(); return super.read(bytes, offset, length);
+                    }
+                };
+            }
+        };
+        Thread first = Thread.ofVirtual().start(() -> assertThatThrownBy(() -> runner.parse(new byte[]{1}, "pdf"))
+                .isInstanceOf(com.aigameplatform.backend.exception.ApiException.class));
+        try {
+            assertThat(entered.await(2, TimeUnit.SECONDS)).isTrue();
+            assertThatThrownBy(() -> extractor.extract(upload))
+                    .isInstanceOfSatisfying(com.aigameplatform.backend.exception.ApiException.class,
+                            error -> assertThat(error.getErrorCode()).isEqualTo(
+                                    com.aigameplatform.backend.exception.ErrorCode.LESSON_PROCESSING_UNAVAILABLE));
+            assertThat(reads.get()).as("upload bytes are not buffered without a reserved parser slot").isZero();
+        } finally {
+            release.countDown(); first.join(2000);
+            try (var paths = Files.walk(temp)) { for (var p : paths.sorted(java.util.Comparator.reverseOrder()).toList()) Files.deleteIfExists(p); }
+        }
+    }
+
     static List<String> javaCommand(Class<?> main) {
         return List.of(System.getProperty("java.home") + "/bin/java", "-cp", System.getProperty("java.class.path"), main.getName());
     }

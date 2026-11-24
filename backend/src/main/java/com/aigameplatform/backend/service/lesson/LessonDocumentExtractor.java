@@ -22,9 +22,7 @@ public class LessonDocumentExtractor {
         String type = name.endsWith(".pdf") ? "pdf" : name.endsWith(".docx") ? "docx" : null;
         if (type == null) throw invalid("Vui lòng gửi file docx hoặc pdf.");
         try (var stream = file.getInputStream()) {
-            byte[] bytes = stream.readNBytes(MAX_FILE_BYTES + 1);
-            if (bytes.length > MAX_FILE_BYTES) throw invalid("Tệp tài liệu vượt quá dung lượng cho phép (tối đa 10MB).");
-            return new ExtractedLesson(process.parse(bytes, type));
+            return new ExtractedLesson(process.parse(stream, type, MAX_FILE_BYTES));
         } catch (IOException e) {
             throw invalid("Không đọc được tệp giáo án. Vui lòng chọn lại tệp.");
         }

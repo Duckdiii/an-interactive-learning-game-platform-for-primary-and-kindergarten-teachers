@@ -33,6 +33,26 @@ public class LessonParserProcess {
 
     public String parse(byte[] bytes, String type) {
         if (!slots.tryAcquire()) throw unavailable("Hệ thống đọc giáo án đang bận. Vui lòng thử lại sau.");
+        try { return parseAcquired(bytes, type); }
+        finally { slots.release(); }
+    }
+
+    /** Reserves a parser worker before allocating the bounded upload buffer. */
+    public String parse(InputStream input, String type, int maxBytes) {
+        if (!slots.tryAcquire()) throw unavailable("Hệ thống đọc giáo án đang bận. Vui lòng thử lại sau.");
+        try {
+            if (maxBytes < 0) throw new IllegalArgumentException("maxBytes must not be negative");
+            byte[] bytes = input.readNBytes(maxBytes + 1);
+            if (bytes.length > maxBytes) throw LessonDocumentExtractor.invalid("Tệp tài liệu vượt quá dung lượng cho phép (tối đa 10MB).");
+            return parseAcquired(bytes, type);
+        } catch (IOException e) {
+            throw LessonDocumentExtractor.invalid("Không đọc được tệp giáo án. Vui lòng chọn lại tệp.");
+        } finally {
+            slots.release();
+        }
+    }
+
+    private String parseAcquired(byte[] bytes, String type) {
         Path directory = null; Process child = null;
         var io = Executors.newVirtualThreadPerTaskExecutor();
         try {
@@ -70,7 +90,6 @@ public class LessonParserProcess {
             io.shutdownNow();
             io.close();
             if (directory != null) cleanup(directory);
-            slots.release();
         }
     }
 

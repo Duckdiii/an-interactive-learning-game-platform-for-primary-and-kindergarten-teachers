@@ -56,6 +56,24 @@ class LessonDocumentExtractorTest {
                 .isInstanceOf(ApiException.class).hasMessageContaining("20.000");
     }
 
+    @Test void rejectsDocxWithExpandedContentOverTwentyMiB() throws Exception {
+        byte[] bytes = docxWithExpandedContentOverLimit();
+        assertThat(bytes).hasSizeLessThan(LessonDocumentExtractor.MAX_FILE_BYTES);
+        assertThatThrownBy(() -> extractor.extract(file("expanded.docx", bytes)))
+                .isInstanceOf(ApiException.class)
+                .extracting(e -> ((ApiException)e).getErrorCode().name())
+                .isEqualTo("FILE_TOO_LARGE_OR_INVALID_FORMAT");
+    }
+
+    @Test void rejectsDocxWithMoreThan256ZipEntries() throws Exception {
+        byte[] bytes = docxWithExtraEntries(254);
+        assertThat(bytes).hasSizeLessThan(LessonDocumentExtractor.MAX_FILE_BYTES);
+        assertThatThrownBy(() -> extractor.extract(file("many-entries.docx", bytes)))
+                .isInstanceOf(ApiException.class)
+                .extracting(e -> ((ApiException)e).getErrorCode().name())
+                .isEqualTo("FILE_TOO_LARGE_OR_INVALID_FORMAT");
+    }
+
     @Test void rejectsOverTenMiBBeforeStartingWorker() {
         assertThatThrownBy(() -> extractor.extract(file("large.pdf", new byte[10 * 1024 * 1024 + 1])))
                 .isInstanceOf(ApiException.class).hasMessageContaining("10MB");
@@ -82,15 +100,45 @@ class LessonDocumentExtractorTest {
     static byte[] docx(String text) throws Exception {
         var out = new ByteArrayOutputStream();
         try (var zip = new ZipOutputStream(out)) {
-            part(zip, "[Content_Types].xml", """
-                    <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>
-                    """);
-            part(zip, "_rels/.rels", """
-                    <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>
-                    """);
+            docxPreamble(zip);
             part(zip, "word/document.xml", "<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body><w:p><w:r><w:t>" + text + "</w:t></w:r></w:p></w:body></w:document>");
         }
         return out.toByteArray();
+    }
+    private static byte[] docxWithExtraEntries(int extraEntries) throws Exception {
+        var out = new ByteArrayOutputStream();
+        try (var zip = new ZipOutputStream(out)) {
+            docxPreamble(zip);
+            for (int i = 0; i < extraEntries; i++) part(zip, "extras/entry-" + i, "x");
+            part(zip, "word/document.xml", "<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body><w:p><w:r><w:t>Count lesson text</w:t></w:r></w:p></w:body></w:document>");
+        }
+        return out.toByteArray();
+    }
+    private static byte[] docxWithExpandedContentOverLimit() throws Exception {
+        var out = new ByteArrayOutputStream();
+        try (var zip = new ZipOutputStream(out)) {
+            docxPreamble(zip);
+            zip.putNextEntry(new ZipEntry("word/document.xml"));
+            zip.write("<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body><w:p><w:r><w:t>".getBytes(StandardCharsets.UTF_8));
+            byte[] chunk = "x".repeat(8192).getBytes(StandardCharsets.UTF_8);
+            long remaining = 20L * 1024 * 1024 + 1;
+            while (remaining > 0) {
+                int count = (int) Math.min(chunk.length, remaining);
+                zip.write(chunk, 0, count);
+                remaining -= count;
+            }
+            zip.write("</w:t></w:r></w:p></w:body></w:document>".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+        return out.toByteArray();
+    }
+    private static void docxPreamble(ZipOutputStream zip) throws Exception {
+        part(zip, "[Content_Types].xml", """
+                <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>
+                """);
+        part(zip, "_rels/.rels", """
+                <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>
+                """);
     }
     private static void part(ZipOutputStream zip, String path, String content) throws Exception {
         zip.putNextEntry(new ZipEntry(path)); zip.write(content.getBytes(StandardCharsets.UTF_8)); zip.closeEntry();
