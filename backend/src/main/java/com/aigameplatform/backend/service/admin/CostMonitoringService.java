@@ -16,11 +16,11 @@ import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.BudgetConfigRepository;
 import com.aigameplatform.backend.repository.ServiceUsageRecordRepository;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
+import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,165 +29,131 @@ import org.springframework.transaction.annotation.Transactional;
 public class CostMonitoringService {
 
     public static final String DEFAULT_BUDGET_ID = "default-budget";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final BudgetConfigRepository budgetConfigRepository;
     private final ServiceUsageRecordRepository serviceUsageRecordRepository;
     private final AuditLogService auditLogService;
+    private final Clock clock;
 
     public CostMonitoringService(
             BudgetConfigRepository budgetConfigRepository,
             ServiceUsageRecordRepository serviceUsageRecordRepository,
-            AuditLogService auditLogService) {
+            AuditLogService auditLogService, Clock clock) {
         this.budgetConfigRepository = budgetConfigRepository;
         this.serviceUsageRecordRepository = serviceUsageRecordRepository;
         this.auditLogService = auditLogService;
+        this.clock = clock;
     }
 
     @Transactional(readOnly = true)
     public UsageReportDto getUsageReport(String range, Instant from, Instant to, ServiceName serviceFilter) {
-        String rangeKey = (range != null && !range.isBlank()) ? range.toUpperCase() : "7D";
-        LocalDate fromDate;
-        LocalDate toDate = LocalDate.now(ZoneOffset.UTC);
-
+        String rangeKey = range == null || range.isBlank() ? "7D" : range.toUpperCase(Locale.ROOT);
+        Instant resolvedTo = clock.instant();
+        LocalDate toDate = resolvedTo.atZone(ZoneOffset.UTC).toLocalDate();
         Instant resolvedFrom;
-        Instant resolvedTo = to != null ? to : Instant.now();
-
-        switch (rangeKey) {
-            case "TODAY" -> {
-                fromDate = toDate;
-                resolvedFrom = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        if (rangeKey.equals("CUSTOM")) {
+            if (from == null || to == null || from.isAfter(to)) {
+                throw new ApiException(ErrorCode.VALIDATION_ERROR,
+                        "from và to là bắt buộc khi range=CUSTOM và from không được sau to");
             }
-            case "30D" -> {
-                fromDate = toDate.minusDays(30);
-                resolvedFrom = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
-            }
-            case "CUSTOM" -> {
-                if (from == null || to == null) {
-                    throw new ApiException(ErrorCode.VALIDATION_ERROR, "from và to là bắt buộc khi range=CUSTOM");
-                }
-                fromDate = from.atZone(ZoneOffset.UTC).toLocalDate();
-                toDate = to.atZone(ZoneOffset.UTC).toLocalDate();
-                resolvedFrom = from;
-            }
-            default -> { // "7D"
-                fromDate = toDate.minusDays(7);
-                resolvedFrom = fromDate.atStartOfDay(ZoneOffset.UTC).toInstant();
-            }
+            resolvedFrom = from;
+            resolvedTo = to;
+            toDate = to.atZone(ZoneOffset.UTC).toLocalDate();
+        } else {
+            int previousDays = switch (rangeKey) {
+                case "TODAY" -> 0;
+                case "7D" -> 6;
+                case "30D" -> 29;
+                default -> throw new ApiException(ErrorCode.VALIDATION_ERROR, "Khoảng thống kê không hợp lệ");
+            };
+            resolvedFrom = toDate.minusDays(previousDays).atStartOfDay(ZoneOffset.UTC).toInstant();
         }
 
-        List<ServiceUsageRecord> records = serviceUsageRecordRepository
-                .findByRecordDateBetweenOrderByRecordDateAsc(fromDate, toDate);
-
+        List<ServiceUsageRecord> records = serviceUsageRecordRepository.findByRecordDateBetweenOrderByRecordDateAsc(
+                resolvedFrom.atZone(ZoneOffset.UTC).toLocalDate(), toDate);
         Map<ServiceName, List<ServiceUsageRecord>> grouped = new EnumMap<>(ServiceName.class);
-        Map<LocalDate, Integer> dailyRequests = new TreeMap<>();
-
-        // Initialize daily map
-        long daysBetween = ChronoUnit.DAYS.between(fromDate, toDate);
-        for (int i = 0; i <= daysBetween; i++) {
-            dailyRequests.put(fromDate.plusDays(i), 0);
-        }
-
+        Map<LocalDate, List<ServiceUsageRecord>> byDay = new TreeMap<>();
         for (ServiceUsageRecord record : records) {
-            grouped.computeIfAbsent(record.getServiceName(), k -> new ArrayList<>()).add(record);
-            dailyRequests.compute(record.getRecordDate(), (d, count) -> (count != null ? count : 0) + record.getRequests());
+            if (serviceFilter != null && record.getServiceName() != serviceFilter) {
+                continue;
+            }
+            grouped.computeIfAbsent(record.getServiceName(), key -> new ArrayList<>()).add(record);
+            byDay.computeIfAbsent(record.getRecordDate(), key -> new ArrayList<>()).add(record);
         }
 
-        List<ServiceUsageDto> serviceDtos = new ArrayList<>();
         ServiceName[] targets = serviceFilter != null ? new ServiceName[]{serviceFilter} : ServiceName.values();
-
-        for (ServiceName s : targets) {
-            List<ServiceUsageRecord> sRecords = grouped.getOrDefault(s, List.of());
-            if (!sRecords.isEmpty()) {
-                int totalReq = sRecords.stream().mapToInt(ServiceUsageRecord::getRequests).sum();
-                int success = sRecords.stream().mapToInt(ServiceUsageRecord::getSuccessCount).sum();
-                int fail = sRecords.stream().mapToInt(ServiceUsageRecord::getFailureCount).sum();
-                int tokens = sRecords.stream().mapToInt(r -> r.getTokensUsed() != null ? r.getTokensUsed() : 0).sum();
-                double cost = sRecords.stream().mapToDouble(r -> r.getCost() != null ? r.getCost() : 0.0).sum();
-
-                serviceDtos.add(new ServiceUsageDto(
-                        s,
-                        totalReq,
-                        success,
-                        fail,
-                        s == ServiceName.GENERATIVE_AI ? tokens : null,
-                        s == ServiceName.GENERATIVE_AI ? 15.0 : null,
-                        s == ServiceName.IMAGE_API ? null : cost,
-                        s == ServiceName.IMAGE_API ? null : "USD",
-                        s == ServiceName.IMAGE_API ? CostSource.UNAVAILABLE : CostSource.ESTIMATED,
-                        ServiceStatus.OPERATIONAL
-                ));
-            } else {
-                // Realistic fallback usage data if no calls logged in DB yet
-                serviceDtos.add(defaultUsageFor(s));
-            }
+        List<ServiceUsageDto> services = new ArrayList<>();
+        for (ServiceName target : targets) {
+            List<ServiceUsageRecord> rows = grouped.getOrDefault(target, List.of());
+            Integer tokens = rows.stream().map(ServiceUsageRecord::getTokensUsed).filter(Objects::nonNull)
+                    .reduce(Integer::sum).orElse(null);
+            Double cost = costOf(rows).map(BigDecimal::doubleValue).orElse(null);
+            services.add(new ServiceUsageDto(target,
+                    rows.stream().mapToInt(ServiceUsageRecord::getRequests).sum(),
+                    rows.stream().mapToInt(ServiceUsageRecord::getSuccessCount).sum(),
+                    rows.stream().mapToInt(ServiceUsageRecord::getFailureCount).sum(),
+                    tokens, null, cost, cost == null ? null : "USD",
+                    cost == null ? CostSource.UNAVAILABLE : CostSource.ESTIMATED,
+                    ServiceStatus.UNKNOWN));
         }
-
-        List<TimeseriesPointDto> timeseries = new ArrayList<>();
-        for (Map.Entry<LocalDate, Integer> entry : dailyRequests.entrySet()) {
-            int requests = entry.getValue();
-            // If DB records empty, give realistic sample requests for chart rendering
-            if (requests == 0 && records.isEmpty()) {
-                requests = 20 + (entry.getKey().getDayOfMonth() % 15);
-            }
-            timeseries.add(new TimeseriesPointDto(entry.getKey().format(DATE_FORMATTER), requests));
-        }
-
-        return new UsageReportDto(new UsageRangeDto(resolvedFrom, resolvedTo), serviceDtos, timeseries);
+        List<TimeseriesPointDto> timeseries = byDay.entrySet().stream()
+                .map(entry -> new TimeseriesPointDto(entry.getKey().toString(),
+                        entry.getValue().stream().mapToInt(ServiceUsageRecord::getRequests).sum(),
+                        costOf(entry.getValue()).map(BigDecimal::doubleValue).orElse(null)))
+                .toList();
+        return new UsageReportDto(new UsageRangeDto(resolvedFrom, resolvedTo), services, timeseries);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public BudgetConfigDto getBudgetConfig() {
-        BudgetConfig config = budgetConfigRepository.findById(DEFAULT_BUDGET_ID)
-                .orElseGet(this::initDefaultBudget);
+        return budgetReport(budgetConfigRepository.findById(DEFAULT_BUDGET_ID).orElseGet(this::defaultBudget));
+    }
 
-        LocalDate startOfMonth = LocalDate.now(ZoneOffset.UTC).withDayOfMonth(1);
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        List<ServiceUsageRecord> monthRecords = serviceUsageRecordRepository
-                .findByRecordDateBetweenOrderByRecordDateAsc(startOfMonth, today);
+    private BudgetConfigDto budgetReport(BudgetConfig config) {
+        Optional<BigDecimal> cost = currentMonthCost();
+        Double percent = cost.isPresent() && config.getMonthlyBudget() > 0
+                ? cost.get().doubleValue() / config.getMonthlyBudget() * 100 : null;
+        return new BudgetConfigDto(config.getMonthlyBudget(), config.getYellowPct(), config.getRedPct(),
+                isAtCap(config, cost), cost.map(BigDecimal::doubleValue).orElse(null), percent);
+    }
 
-        double currentMonthCost = monthRecords.stream()
-                .mapToDouble(r -> r.getCost() != null ? r.getCost() : 0.0)
-                .sum();
+    private Optional<BigDecimal> currentMonthCost() {
+        LocalDate today = clock.instant().atZone(ZoneOffset.UTC).toLocalDate();
+        return costOf(serviceUsageRecordRepository.findByRecordDateBetweenOrderByRecordDateAsc(today.withDayOfMonth(1), today));
+    }
 
-        // Realistic estimated fallback if no usage records exist
-        if (currentMonthCost == 0.0 && monthRecords.isEmpty()) {
-            currentMonthCost = 3.25; // USD
-        }
+    private static Optional<BigDecimal> costOf(List<ServiceUsageRecord> records) {
+        return records.stream().map(ServiceUsageRecord::getCost).filter(Objects::nonNull)
+                .map(BigDecimal::valueOf).reduce(BigDecimal::add);
+    }
 
-        double usedPercent = (currentMonthCost / config.getMonthlyBudget()) * 100.0;
-        boolean capExceeded = currentMonthCost >= config.getMonthlyBudget();
-
-        if (capExceeded != config.isCostCapExceeded()) {
-            config.setCostCapExceeded(capExceeded);
-            config.setUpdatedAt(Instant.now());
-            budgetConfigRepository.save(config);
-        }
-
-        return new BudgetConfigDto(
-                config.getMonthlyBudget(),
-                config.getYellowPct(),
-                config.getRedPct(),
-                capExceeded,
-                currentMonthCost,
-                Math.round(usedPercent * 100.0) / 100.0
-        );
+    private static boolean isAtCap(BudgetConfig config, Optional<BigDecimal> cost) {
+        return config.getMonthlyBudget() > 0
+                && cost.filter(value -> value.compareTo(BigDecimal.valueOf(config.getMonthlyBudget())) >= 0).isPresent();
     }
 
     @Transactional
     public BudgetConfigDto updateBudgetConfig(BudgetConfigDto request, AuthenticatedTeacher actor, String ip) {
-        if (request == null || request.monthlyBudget() == null || request.monthlyBudget() < 0) {
-            throw new ApiException(ErrorCode.VALIDATION_ERROR, "monthlyBudget phải lớn hơn hoặc bằng 0");
+        if (request == null || request.monthlyBudget() == null || !Double.isFinite(request.monthlyBudget())
+                || request.monthlyBudget() <= 0) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "monthlyBudget phải lớn hơn 0");
         }
 
+        double yellow = request.resolvedYellowPct();
+        double red = request.resolvedRedPct();
+        if (!(yellow > 0 && yellow < red && red <= 100)) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Ngưỡng phải thỏa 0 < vàng < đỏ ≤ 100");
+        }
         BudgetConfig config = budgetConfigRepository.findById(DEFAULT_BUDGET_ID)
-                .orElseGet(this::initDefaultBudget);
+                .orElseGet(this::defaultBudget);
 
         config.setMonthlyBudget(request.monthlyBudget());
-        config.setYellowPct(request.resolvedYellowPct());
-        config.setRedPct(request.resolvedRedPct());
-        config.setUpdatedAt(Instant.now());
+        config.setYellowPct(yellow);
+        config.setRedPct(red);
+        config.setUpdatedAt(clock.instant());
 
+        BudgetConfigDto report = budgetReport(config);
+        config.setCostCapExceeded(report.costCapExceeded());
         BudgetConfig saved = budgetConfigRepository.save(config);
 
         String actorId = actor != null ? actor.teacherId() : "system";
@@ -203,42 +169,22 @@ public class CostMonitoringService {
                 "Updated budget: " + saved.getMonthlyBudget() + " USD (Yellow: " + saved.getYellowPct() + "%, Red: " + saved.getRedPct() + "%)"
         );
 
-        return getBudgetConfig();
+        return report;
     }
 
     @Transactional(readOnly = true)
     public boolean isCostCapExceeded() {
-        return budgetConfigRepository.findById(DEFAULT_BUDGET_ID)
-                .map(BudgetConfig::isCostCapExceeded)
-                .orElse(false);
+        return isAtCap(budgetConfigRepository.findById(DEFAULT_BUDGET_ID)
+                .orElseGet(this::defaultBudget), currentMonthCost());
     }
 
-    private BudgetConfig initDefaultBudget() {
-        BudgetConfig def = BudgetConfig.builder()
+    private BudgetConfig defaultBudget() {
+        return BudgetConfig.builder()
                 .id(DEFAULT_BUDGET_ID)
-                .monthlyBudget(100.0) // $100
+                .monthlyBudget(100.0)
                 .yellowPct(70.0)
                 .redPct(90.0)
-                .costCapExceeded(false)
-                .updatedAt(Instant.now())
+                .updatedAt(clock.instant())
                 .build();
-        return budgetConfigRepository.save(def);
-    }
-
-    private ServiceUsageDto defaultUsageFor(ServiceName s) {
-        return switch (s) {
-            case GENERATIVE_AI -> new ServiceUsageDto(
-                    s, 120, 118, 2, 48500, 12.5, 1.45, "USD", CostSource.ESTIMATED, ServiceStatus.OPERATIONAL
-            );
-            case IMAGE_API -> new ServiceUsageDto(
-                    s, 340, 338, 2, null, null, null, null, CostSource.UNAVAILABLE, ServiceStatus.OPERATIONAL
-            );
-            case TTS -> new ServiceUsageDto(
-                    s, 85, 85, 0, null, null, 0.35, "USD", CostSource.ESTIMATED, ServiceStatus.OPERATIONAL
-            );
-            case MODERATION -> new ServiceUsageDto(
-                    s, 420, 420, 0, null, null, 0.0, "USD", CostSource.ESTIMATED, ServiceStatus.OPERATIONAL
-            );
-        };
     }
 }

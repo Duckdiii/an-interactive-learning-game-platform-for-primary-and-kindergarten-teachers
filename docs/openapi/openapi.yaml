@@ -2336,7 +2336,7 @@ paths:
       description: |
         Một dịch vụ lỗi vẫn trả dữ liệu các dịch vụ khác (UC-12 2a). `costSource: UNAVAILABLE` thì `cost`
         là `null`; Frontend hiển thị "Chưa có dữ liệu chi phí", không tự đưa giá trị giả định (UC-12 3b).
-        Đợt (b) phụ thuộc số liệu sử dụng dịch vụ.
+        Khi chưa có bản ghi, chuỗi thời gian rỗng và trạng thái dịch vụ là UNKNOWN.
       x-status: implemented
       x-phase: b
       security:
@@ -4729,12 +4729,12 @@ components:
       type: object
       required: [monthlyBudget]
       properties:
-        monthlyBudget: { type: number, minimum: 0, description: Trần chi phí AI mỗi tháng (USD). }
-        yellowPct: { type: number, minimum: 0, default: 70, description: Mức cảnh báo vàng (% trần). }
-        redPct: { type: number, minimum: 0, default: 90, description: Mức cảnh báo đỏ (% trần). }
+        monthlyBudget: { type: number, exclusiveMinimum: 0, description: Trần chi phí AI mỗi tháng (USD). }
+        yellowPct: { type: number, exclusiveMinimum: 0, exclusiveMaximum: 100, default: 70, description: Mức cảnh báo vàng (% trần). }
+        redPct: { type: number, exclusiveMinimum: 0, maximum: 100, default: 90, description: Mức cảnh báo đỏ (% trần) phải lớn hơn ngưỡng vàng. }
         costCapExceeded: { type: boolean, readOnly: true }
-        currentMonthCost: { type: number, readOnly: true }
-        budgetUsedPercent: { type: number, readOnly: true }
+        currentMonthCost: { type: number, readOnly: true, description: Bỏ qua trường này khi chưa có dữ liệu chi phí tháng. }
+        budgetUsedPercent: { type: number, readOnly: true, description: Bỏ qua trường này khi chưa tính được tỷ lệ sử dụng. }
     AdminTeacher:
       type: object
       required: [teacherId, fullName, email, status, createdAt]
