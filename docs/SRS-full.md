@@ -1,5 +1,7 @@
 # CHƯƠNG 1. GIỚI THIỆU (INTRODUCTION)
 
+> **Bản đặc tả gốc SRS v3.** Nội dung chuyển từ Word TLCN/KLTN. Đọc [mục lục UC của project](srs/README.md) để theo danh mục đang dùng, gồm [UC-10](srs/UC-10.md). Phần trạng thái trong bản gốc ghi nhận thời điểm biên soạn. Xem [ghi chú triển khai Workspace Editor](srs/UC-04-implementation.md) và [FEATURE-MAP](FEATURE-MAP.md) để tra hiện trạng.
+
 ## 1.1. Mục đích tài liệu (Purpose)
 
 Tài liệu Đặc tả Yêu cầu Phần mềm (SRS) này xác định đầy đủ, chi tiết và chính thức các yêu cầu chức năng, phi chức năng, quy trình kiểm thử, kế hoạch bảo trì và mô hình hóa hệ thống của Nền tảng sáng tạo trò chơi học tập tương tác từ ngôn ngữ tiếng Việt. Tài liệu làm căn cứ kỹ thuật tối cao giữa Nhóm phát triển, Giảng viên hướng dẫn và Hội đồng phản biện.

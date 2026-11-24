@@ -1,6 +1,6 @@
 # Khảo sát 7 Nhóm Nền tảng Đối thủ
 
-> **Nguồn tài liệu gốc**: `docs/research/khảo sát các nền tảng khác/` (Trọn bộ 14 báo cáo khảo sát và nghiên cứu chuyên sâu)  
+> **Nguồn tài liệu gốc**: [Khảo sát các nền tảng khác](<../khảo sát các nền tảng khác/>) (Trọn bộ 14 báo cáo khảo sát và nghiên cứu chuyên sâu)
 > **Cập nhật**: 2026-11-04  
 > **Liên kết liên quan**: [[So sánh với web tool]], [[Cơ sở khoa học và GamED-AI]], [[Tổng quan đề tài]], [[Góp ý Thầy Thanh và 8 vấn đề]], [[index]]
 

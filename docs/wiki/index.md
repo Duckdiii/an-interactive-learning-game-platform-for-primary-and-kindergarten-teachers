@@ -60,9 +60,9 @@ Khi viết code hay test, đọc ở đây, không đọc bản tóm tắt.
 | Yêu cầu phi chức năng | [[NFR]] |
 | Trường giao diện FLD | [[FLD]] (FLD-01 đến FLD-53) |
 | KPI | [[KPI]] |
-| SRS đầy đủ v3 | [[SRS-full]]; bản Word gốc lưu bên TLCN/KLTN |
+| SRS v3 gốc | [[SRS-full]]; bản Word gốc lưu bên TLCN/KLTN |
 | Định hướng đề tài v10 | [[Dinh_huong_de_tai]] |
-| Cơ sở khoa học & Dẫn chứng | [[Cơ sở khoa học và Dẫn chứng Kiến trúc]]; bản gốc `docs/Co_so_khoa_hoc.docx` |
+| Cơ sở khoa học & Dẫn chứng | [[Cơ sở khoa học và Dẫn chứng Kiến trúc]] |
 | Góp ý Thầy Thanh & 8 Vấn đề | [[Góp ý Thầy Thanh và 8 vấn đề]]; trích xuất chi tiết tại `docs/Vấn đề tìm thấy sau khi được góp ý/` |
 | 14 Báo cáo khảo sát đối thủ | [[Khảo sát 7 nhóm nền tảng đối thủ]]; trích xuất chi tiết tại `docs/khảo sát các nền tảng khác/` |
 | Kiến trúc CPF & Cơ chế game ngoài danh mục | [[Mô tả ngoài danh mục game]]; chi tiết tại `docs/Giáo viên mô tả ngoài danh sách game có sẵn/` (`vấn đề/` & `giải pháp/`) |

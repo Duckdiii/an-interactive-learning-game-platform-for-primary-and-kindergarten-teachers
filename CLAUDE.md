@@ -122,22 +122,9 @@ Bảng chỉ còn agent cho việc cần phán đoán; luật nào đã có scri
 
 Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.md` hay docs không cần `test-verifier`.
 
-## Wiki kiến thức (`docs/wiki/`)
+## Tra cứu tài liệu
 
-`docs/wiki/index.md` là cửa vào của kho tài liệu (vault Obsidian là `docs/`). Wiki chỉ để định hướng: tóm tắt, nối các tài liệu lại với nhau, có thể chậm hơn nguồn. **Trước khi viết code hay test phải đọc nguồn gốc theo bảng dưới; wiki khác nguồn thì tin nguồn.** Phiên chính ghi wiki khi người dùng yêu cầu, theo `docs/wiki/README.md`; subagent chỉ đọc.
-
-| Cần biết | Đọc |
-|---|---|
-| Tổng quan, trạng thái, lý do quyết định, điểm lệch | `docs/wiki/index.md` |
-| Luồng đầy đủ của một ca sử dụng | `docs/srs/UC-xx.md` |
-| Yêu cầu chức năng, phi chức năng | `docs/srs/FR-summary.md`, `docs/srs/NFR.md` |
-| Trường FLD, KPI | `docs/srs/FLD.md`, `docs/srs/KPI.md` |
-| Các mục SRS khác | `docs/SRS-full.md`; hình đi kèm ở `docs/srs-v3-assets/` |
-| Sơ đồ kiến trúc, use case, class, tuần tự | `docs/wiki/Sơ đồ hệ thống.md`, `docs/diagrams/` (chỉ lấy nhãn, không đọc nguyên file `.drawio`) |
-| Định hướng đề tài | `docs/Dinh_huong_de_tai.md` |
-| Field DSL | `docs/game-json-dsl-v1.0.0.md` |
-| Endpoint, mã lỗi | `docs/openapi/openapi.yaml` |
-| Thiết kế màn hình | `docs/ui/SPEC.md`, `docs/ui/wireframes/` |
+Bắt đầu ở [mục lục tài liệu](docs/README.md). Đọc đúng UC, hợp đồng hoặc schema liên quan và đối chiếu code cùng test trước khi sửa. [Wiki](docs/wiki/index.md) tóm tắt bối cảnh. Quy tắc cập nhật nằm trong [hướng dẫn wiki](docs/wiki/README.md).
 
 ## Học từ lỗi của agent
 
