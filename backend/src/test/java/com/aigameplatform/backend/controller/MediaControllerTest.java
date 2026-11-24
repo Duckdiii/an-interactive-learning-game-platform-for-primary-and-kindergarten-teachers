@@ -17,6 +17,7 @@ import com.aigameplatform.backend.service.game.AiRequestRateLimiter;
 import com.aigameplatform.backend.service.media.LocalMediaStorageService;
 import com.aigameplatform.backend.service.media.MediaUploadService;
 import com.aigameplatform.backend.service.media.SceneImagePolicy;
+import com.aigameplatform.backend.service.validation.ContentSafetyCheck;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.service.validation.safety.ModerationResult;
 import com.aigameplatform.backend.service.validation.safety.OpenAiModerationClient;
@@ -53,8 +54,9 @@ class MediaControllerTest {
         when(moderation.moderateImage(any(), eq("image/png"))).thenReturn(new ModerationResult(false, List.of()));
         var policy = new SceneImagePolicy(8388608, 10000, 8000000, 67108864, 4, 3,
                 Duration.ofSeconds(5), Duration.ofSeconds(12));
-        var uploads = new MediaUploadService(storage, moderation, new BlockedWordList(List.of()),
-                new AiRequestRateLimiter(Clock.systemUTC()), policy);
+        var blockedWords = new BlockedWordList(List.of());
+        var uploads = new MediaUploadService(storage, moderation, blockedWords,
+                new AiRequestRateLimiter(Clock.systemUTC()), policy, new ContentSafetyCheck(blockedWords, moderation, false));
         var mvc = MockMvcBuilders.standaloneSetup(new MediaController(uploads, storage))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())

@@ -4,13 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.aigameplatform.backend.dto.admin.AiConfigVersionDto;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
+import com.aigameplatform.backend.service.admin.AiConfigService;
 import com.aigameplatform.backend.service.game.AiRequestRateLimiter;
+import com.aigameplatform.backend.service.validation.ContentSafetyCheck;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.service.validation.safety.ModerationResult;
 import com.aigameplatform.backend.service.validation.safety.ModerationUnavailableException;
@@ -24,8 +28,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,13 +48,19 @@ class MediaUploadServiceTest {
     private LocalMediaStorageService storage;
     private OpenAiModerationClient moderation;
     private MediaUploadService upload;
+    private AiConfigService configs;
 
     @BeforeEach
     void setUp() {
         storage = new LocalMediaStorageService(mediaDirectory.toString(), BASE_URL);
         moderation = mock(OpenAiModerationClient.class);
-        upload = new MediaUploadService(storage, moderation, new BlockedWordList(List.of("từ cấm")),
-                new AiRequestRateLimiter(Clock.systemUTC()), IMAGE_POLICY);
+        configs = mock(AiConfigService.class);
+        threshold(0.85);
+        var blockedWords = new BlockedWordList(List.of("từ cấm"));
+        upload = new MediaUploadService(storage, moderation, blockedWords,
+                new AiRequestRateLimiter(Clock.systemUTC()), IMAGE_POLICY,
+                new ContentSafetyCheck(blockedWords, moderation, false, configs));
+        clearInvocations(moderation);
     }
 
     @Test
@@ -123,6 +135,35 @@ class MediaUploadServiceTest {
     }
 
     @Test
+    void imageAndTranscribedSpeechFollowTheCurrentAdminThreshold() throws IOException {
+        var image = file("image.png", "image/png", png());
+        byte[] frames = mp3Frames();
+        var audio = file("voice.mp3", "audio/mpeg", frames);
+        var scored = new ModerationResult(false, List.of(), Map.of("violence", 0.60));
+        when(moderation.moderateImage(any(), eq("image/png"))).thenReturn(scored);
+        when(moderation.transcribeMp3(frames)).thenReturn("Một con mèo.");
+        when(moderation.moderateTranscript("Một con mèo.")).thenReturn(scored);
+
+        threshold(0.60);
+        assertCode(ErrorCode.UNSAFE_CONTENT, image);
+        assertCode(ErrorCode.UNSAFE_CONTENT, audio);
+        assertDirectoryEmpty();
+
+        threshold(0.85);
+        assertThat(upload.upload(image, "teacher").mediaType()).isEqualTo(MediaUploadService.Kind.IMAGE);
+        assertThat(upload.upload(audio, "teacher").mediaType()).isEqualTo(MediaUploadService.Kind.AUDIO);
+    }
+
+    @Test
+    void unavailableThresholdNeverWritesAPublicFile() throws IOException {
+        when(configs.getActiveConfig()).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("db offline"));
+        when(moderation.moderateImage(any(), eq("image/png"))).thenReturn(SAFE);
+
+        assertCode(ErrorCode.SERVICE_UNAVAILABLE, file("image.png", "image/png", png()));
+        assertDirectoryEmpty();
+    }
+
+    @Test
     void unsafeOrUnrecognizableSpeechIsRejected() throws IOException {
         byte[] frames = mp3Frames();
         when(moderation.transcribeMp3(frames)).thenReturn("Chứa từ cấm", "");
@@ -131,6 +172,11 @@ class MediaUploadServiceTest {
         assertCode(ErrorCode.UNSAFE_CONTENT, file);
         assertCode(ErrorCode.FILE_TOO_LARGE_OR_INVALID_FORMAT, file);
         assertDirectoryEmpty();
+    }
+
+    private void threshold(double threshold) {
+        when(configs.getActiveConfig()).thenReturn(new AiConfigVersionDto("active", "Prompt", 0.3, 2000, threshold,
+                null, false, true, "test-hash", Instant.EPOCH, "admin"));
     }
 
     private void assertCode(ErrorCode code, MockMultipartFile file) {

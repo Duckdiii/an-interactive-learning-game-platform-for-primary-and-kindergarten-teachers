@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.service.generation.cpf;
 
+import com.aigameplatform.backend.service.admin.AiConfigService;
 import com.aigameplatform.backend.service.generation.AiServiceUnavailableException;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -28,10 +29,13 @@ public class GeminiCpfContentGenerator implements CpfContentGenerator {
     private final ChatModel model;
     private final CpfPromptBuilder prompts;
     private final ResponseFormat responseFormat;
+    private final AiConfigService aiConfigService;
 
-    public GeminiCpfContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model, CpfPromptBuilder prompts) {
+    public GeminiCpfContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model, CpfPromptBuilder prompts,
+            AiConfigService aiConfigService) {
         this.model = model;
         this.prompts = prompts;
+        this.aiConfigService = aiConfigService;
         this.responseFormat = ResponseFormat.builder().type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder().rootElement(JsonRawSchema.builder().schema(loadSchema()).build()).build())
                 .build();
@@ -49,9 +53,16 @@ public class GeminiCpfContentGenerator implements CpfContentGenerator {
     @Override
     public String generate(CpfGenerationAttempt attempt) {
         try {
+            var config = aiConfigService.getActiveConfig();
+            var parameters = ChatRequestParameters.builder()
+                    .responseFormat(responseFormat)
+                    .temperature(config.temperature())
+                    .maxOutputTokens(config.maxTokens())
+                    .build();
+            String systemPrompt = config.systemPrompt() + "\n\n" + prompts.systemPrompt(attempt);
             var response = model.chat(ChatRequest.builder()
-                    .messages(SystemMessage.from(prompts.systemPrompt(attempt)), UserMessage.from(prompts.userPrompt(attempt)))
-                    .parameters(ChatRequestParameters.builder().responseFormat(responseFormat).build())
+                    .messages(SystemMessage.from(systemPrompt), UserMessage.from(prompts.userPrompt(attempt)))
+                    .parameters(parameters)
                     .build());
             if (response == null || response.aiMessage() == null || response.aiMessage().text() == null) {
                 throw new AiServiceUnavailableException("Gemini trả về rỗng");
