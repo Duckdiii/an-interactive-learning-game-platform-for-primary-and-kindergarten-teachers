@@ -56,6 +56,7 @@ app:
     browser-origin: ${PLAYER_ORIGIN:http://localhost:5173}
     share-base-url: ${PLAYER_SHARE_BASE_URL:http://localhost:5173/play}
   narration:
+    feedback-cache-version: ${TTS_FEEDBACK_CACHE_VERSION:1}
     viettel:
       token: ${VIETTEL_TTS_TOKEN:}
     elevenlabs:

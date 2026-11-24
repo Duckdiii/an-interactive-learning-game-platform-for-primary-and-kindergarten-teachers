@@ -46,15 +46,15 @@
 - Consumes: `Game.subject`, `QuestionGame.audioText`, `Mp3AudioValidator`, `SupabaseNarrationStorage`.
 - Produces: shared `SynthesizedAudio(byte[] audio, double durationSeconds)`; `ElevenLabsTtsClient.synthesizeEnglish(String): SynthesizedAudio`; `GameNarrationService.generate(...)` selects the provider from persisted subject; fingerprint includes provider, voice, model and normalized text.
 
-- [ ] **Step 1: Write failing tests** for ElevenLabs request URL/header/body, valid MP3 validation, empty key, HTTP error and over-limit response; add routing assertions for ENGLISH versus MATH/VIETNAMESE and cache fingerprint provider changes.
-- [ ] **Step 2: Run targeted tests to verify RED**
+- [x] **Step 1: Write failing tests** for ElevenLabs request URL/header/body, valid MP3 validation, empty key, HTTP error and over-limit response; add routing assertions for ENGLISH versus MATH/VIETNAMESE and cache fingerprint provider changes.
+- [x] **Step 2: Run targeted tests to verify RED**
 
 Run in `backend`: `./mvnw.cmd -Dtest=ElevenLabsTtsClientTest,ViettelTtsClientTest,GameNarrationServiceTest test`
 
 Expected: compile/test failure because client/config/routing are absent.
 
-- [ ] **Step 3: Implement** the server-only client using `xi-api-key`, explicit model `eleven_flash_v2_5`, configurable voice/model, bounded response read, existing MP3 validator and bounded timeout. Keep Viettel path and its existing validations.
-- [ ] **Step 4: Run targeted tests to verify GREEN**
+- [x] **Step 3: Implement** the server-only client using `xi-api-key`, explicit model `eleven_flash_v2_5`, configurable voice/model, bounded response read, existing MP3 validator and bounded timeout. Keep Viettel path and its existing validations.
+- [x] **Step 4: Run targeted tests to verify GREEN**
 
 Run in `backend`: `./mvnw.cmd -Dtest=ElevenLabsTtsClientTest,ViettelTtsClientTest,GameNarrationServiceTest test`
 
@@ -76,15 +76,15 @@ Expected: all tests pass; no credential appears in assertion output.
 - Consumes: persisted game subject/owner, provider routing from Task 1, private Storage, `Mp3AudioValidator`.
 - Produces: authenticated `POST /api/games/{gameId}/narration/feedback` returning `{ correctAudioUrl, wrongAudioUrl }`; the server derives language from owned game and generates/caches only fixed approved phrases.
 
-- [ ] **Step 1: Write failing tests** for cache miss synthesis/upload, cache hit without provider call, provider-specific key separation, invalid game/owner, malformed response and Storage failure.
-- [ ] **Step 2: Run targeted tests to verify RED**
+- [x] **Step 1: Write failing tests** for cache miss synthesis/upload, cache hit without provider call, provider-specific key separation, invalid game/owner, malformed response and Storage failure.
+- [x] **Step 2: Run targeted tests to verify RED**
 
 Run in `backend`: `./mvnw.cmd -Dtest=NarrationFeedbackServiceTest,GameNarrationControllerTest test`
 
 Expected: test compilation fails because cache/API types do not exist.
 
-- [ ] **Step 3: Add V24** with unique cache key over language, provider, voice, model and phrase version; add bounded MP3 metadata/path columns and foreign-key-free shared scope. Implement service/controller; return URLs signed for at most 600 seconds. Do not store phrase text or user prompt in logs.
-- [ ] **Step 4: Run targeted tests to verify GREEN**
+- [x] **Step 3: Add V24** with unique cache key over language, provider, voice, model and phrase version; add bounded MP3 metadata/path columns and foreign-key-free shared scope. Implement service/controller; return URLs signed for at most 600 seconds. Do not store phrase text or user prompt in logs.
+- [x] **Step 4: Run targeted tests to verify GREEN**
 
 Run in `backend`: `./mvnw.cmd -Dtest=NarrationFeedbackServiceTest,GameNarrationControllerTest test`
 
