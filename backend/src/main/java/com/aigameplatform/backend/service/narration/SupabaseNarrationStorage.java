@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.narration;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ public class SupabaseNarrationStorage {
     private final String serviceRoleKey;
     private final String bucket;
 
-    public SupabaseNarrationStorage(RestClient.Builder builder,
+    public SupabaseNarrationStorage(@Qualifier("narrationRestClientBuilder") RestClient.Builder builder,
             @Value("${app.narration.storage.url:}") String storageUrl,
             @Value("${app.narration.storage.service-role-key:}") String serviceRoleKey,
             @Value("${app.narration.storage.bucket:game-narration}") String bucket) {

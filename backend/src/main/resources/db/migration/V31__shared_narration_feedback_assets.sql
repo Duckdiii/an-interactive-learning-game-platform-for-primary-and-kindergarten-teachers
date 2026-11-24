@@ -1,4 +1,4 @@
-CREATE TABLE shared_narration_assets (
+CREATE TABLE IF NOT EXISTS shared_narration_assets (
     id VARCHAR(36) PRIMARY KEY,
     cache_key CHAR(64) NOT NULL UNIQUE,
     language VARCHAR(8) NOT NULL CHECK (language IN ('vi', 'en')),
@@ -13,5 +13,5 @@ CREATE TABLE shared_narration_assets (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_shared_narration_provider_language
+CREATE INDEX IF NOT EXISTS idx_shared_narration_provider_language
     ON shared_narration_assets(provider, language);

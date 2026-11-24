@@ -132,7 +132,7 @@ Phản hồi đúng/sai có thể được tạo mỗi lượt hoặc cache. Đ�
 | Nghiệp vụ | Thành phần dự kiến | Task | Bằng chứng |
 |---|---|---|---|
 | BR-01 | `GameNarrationService`, `ElevenLabsTtsClient`, config | Task 1 | Unit test routing/MP3/errors; live synthesis |
-| BR-04 | Shared feedback asset entity/repository, V24, service/API | Task 2 | Cache hit/miss/failure tests; Supabase upload/signed-download |
+| BR-04 | Shared feedback asset entity/repository, V31, service/API | Task 2 | Cache hit/miss/failure tests; Supabase upload/signed-download |
 | BR-02, BR-03, BR-05 | `NarrationPreviewControl`, `WorkspaceEditor`, `PlayTestPanel`, `gamesApi` | Task 3 | Component test cho stale URL, auto/replay, feedback, lỗi, no session API |
 | Tất cả | frontend/backend regression + live test | Task 4 | Lệnh test, log tổng hợp không chứa secret, asset test đã xóa |
 
@@ -141,5 +141,5 @@ Phản hồi đúng/sai có thể được tạo mỗi lượt hoặc cache. Đ�
 - Local: backend test liên quan narration/migration và frontend test PlayTest/editor/build đều đạt; test xác nhận không thay đổi luật ở renderer đã hỗ trợ.
 - Live: với `ELEVENLABS_API_KEY` thật và Supabase thật, tạo audio EN, lưu signed asset, tải bytes MP3 thành công; tái sử dụng cache phản hồi không tạo thêm bản synthesis; xóa object test.
 - Bằng chứng: kết quả lệnh test và báo cáo smoke test chỉ ghi status, provider, kích thước/thời lượng và object test; không ghi key hay lời đọc riêng của giáo viên.
-- Kiểm tra schema: backend/Flyway áp dụng V24 thành công trước test live cache.
+- Kiểm tra schema: backend/Flyway áp dụng V31 thành công trước test live cache.
 - Giới hạn: chất lượng giọng, latency và mức tiêu thụ credit phụ thuộc tài khoản/voice/provider; chưa đo và không cam kết SLA. Autoplay có thể bị browser chặn; UI phải cho phép nghe lại thủ công.

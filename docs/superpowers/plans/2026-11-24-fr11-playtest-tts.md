@@ -67,7 +67,7 @@ Expected: all tests pass; no credential appears in assertion output.
 - Create: `backend/src/main/java/com/aigameplatform/backend/repository/SharedNarrationAssetRepository.java`
 - Create: `backend/src/main/java/com/aigameplatform/backend/service/narration/NarrationFeedbackService.java`
 - Create: `backend/src/test/java/com/aigameplatform/backend/service/narration/NarrationFeedbackServiceTest.java`
-- Create: `backend/src/main/resources/db/migration/V24__shared_narration_feedback_assets.sql`
+- Create: `backend/src/main/resources/db/migration/V31__shared_narration_feedback_assets.sql`
 - Modify: `backend/src/main/java/com/aigameplatform/backend/controller/GameNarrationController.java`
 - Create: `backend/src/test/java/com/aigameplatform/backend/controller/GameNarrationControllerTest.java`
 - Modify: `backend/src/main/resources/application.yml`
@@ -83,7 +83,7 @@ Run in `backend`: `./mvnw.cmd -Dtest=NarrationFeedbackServiceTest,GameNarrationC
 
 Expected: test compilation fails because cache/API types do not exist.
 
-- [x] **Step 3: Add V24** with unique cache key over language, provider, voice, model and phrase version; add bounded MP3 metadata/path columns and foreign-key-free shared scope. Implement service/controller; return URLs signed for at most 600 seconds. Do not store phrase text or user prompt in logs.
+- [x] **Step 3: Add V31** with unique cache key over language, provider, voice, model and phrase version; add bounded MP3 metadata/path columns and foreign-key-free shared scope. Implement service/controller; return URLs signed for at most 600 seconds. Do not store phrase text or user prompt in logs.
 - [x] **Step 4: Run targeted tests to verify GREEN**
 
 Run in `backend`: `./mvnw.cmd -Dtest=NarrationFeedbackServiceTest,GameNarrationControllerTest test`
@@ -129,10 +129,10 @@ Expected: tests and TypeScript/Vite build pass; tests confirm PlayTest makes no 
 
 **Interfaces:**
 - Consumes: TTS and Storage properties imported from `backend/.env` by Spring; `FR11_SUPABASE_EXPECTED_DB_HOST` may be provided to guard the live database target. Never print values.
-- Produces: opt-in end-to-end evidence for real English TTS, V24 cache persistence, Supabase signed HTTP download, validator acceptance and cache reuse; synthetic game rows and per-game test audio are removed. Two fixed shared feedback clips may remain as intentional cache entries; no mock is used in this smoke test.
+- Produces: opt-in end-to-end evidence for real English TTS, V31 cache persistence, Supabase signed HTTP download, validator acceptance and cache reuse; synthetic game rows, per-game audio and unique test cache entries are removed. No mock is used in this smoke test.
 
-- [ ] **Step 1: Extend the existing opt-in Supabase integration fixture** to test an owned ENGLISH game, an English `audioText`, ElevenLabs synthesis and V24 feedback cache miss/hit; assert bounded MP3, signed URL HTTP 200, downloaded bytes validate, the second request reuses the cached asset, and synthetic game rows/per-game objects are absent after cleanup. Read `.env`-backed Spring properties without printing them.
-- [ ] **Step 2: Run offline targeted suites**
+- [x] **Step 1: Extend the existing opt-in Supabase integration fixture** to test an owned ENGLISH game, an English `audioText`, ElevenLabs synthesis and V31 feedback cache miss/hit; assert bounded MP3, signed URL HTTP 200, downloaded bytes validate, the second request reuses the cached asset, and synthetic game rows/per-game objects are absent after cleanup. Read `.env`-backed Spring properties without printing them.
+- [x] **Step 2: Run offline targeted suites**
 
 Run in `backend`: `./mvnw.cmd -Dtest=ElevenLabsTtsClientTest,GameNarrationServiceTest,NarrationFeedbackServiceTest,GameNarrationControllerTest test`
 
@@ -140,13 +140,15 @@ Run in `frontend`: `npm test -- src/components/editor/NarrationPreviewControl.te
 
 Expected: all local tests pass; live test remains skipped unless its explicit property is enabled.
 
-- [ ] **Step 3: Run live test against real services** after Flyway V24 has applied
+- [ ] **Step 3: Run live test against real services** after Flyway V31 has applied
 
 Run in `backend`: `./mvnw.cmd -Dtest=GameNarrationSupabaseLiveTest -Dfr11.supabase.live=true test`
 
-Expected: real ElevenLabs synthesis succeeds, V24 cache is persisted/reused, Supabase signed download passes MP3 validation, and cleanup confirms synthetic game rows/per-game audio were removed. Fixed shared feedback audio may remain as the intended cache. If provider quota/key or live DB is unavailable, report the specific blocked live check; do not claim it passed.
+Expected: real ElevenLabs synthesis succeeds, V31 cache is persisted/reused, Supabase signed download passes MP3 validation, and cleanup confirms synthetic game rows/per-game audio/test cache were removed. If provider quota/key or live DB is unavailable, report the specific blocked live check; do not claim it passed.
 
-- [ ] **Step 4: Regression check every supported PlayTest renderer**
+Observed live run: Supabase applied V31 and the app context plus synthetic fixture setup succeeded. The real ElevenLabs preview returned HTTP 503 (NARRATION_UNAVAILABLE) with upstream HTTP 401, so upload, signed download and feedback-cache checks were not reached. Cleanup removed the synthetic teacher/game rows and confirmed no per-game Storage objects remained. Rerun live acceptance after correcting the server-side provider key; this step is still blocked. Integration blocker: local `main` already defines V23 as admin foundation while this feature branch adds game narration at V23; reconcile migration history before merging. V31 avoids main V24–V28 and the observed Supabase current version 30, but does not resolve the separate V23 collision.
+
+- [x] **Step 4: Regression check every supported PlayTest renderer**
 
 Run in `frontend`: `npm test -- src/components/editor/PlayTestPanel.test.tsx src/pages/WorkspaceEditorPlay.test.tsx src/pages/WorkspaceEditorQuiz.test.tsx src/pages/WorkspaceEditorMatching.test.tsx src/pages/WorkspaceEditorOddOneOut.test.tsx src/pages/WorkspaceEditorAudioVisualMatch.test.tsx src/pages/WorkspaceEditorVisualCloze.test.tsx`
 

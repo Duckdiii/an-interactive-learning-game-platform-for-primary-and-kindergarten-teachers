@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.Normalizer;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ public class ViettelTtsClient {
     private final String token;
     private final Mp3AudioValidator validator;
 
-    public ViettelTtsClient(RestClient.Builder builder,
+    public ViettelTtsClient(@Qualifier("narrationRestClientBuilder") RestClient.Builder builder,
             @Value("${app.narration.viettel.token:}") String token,
             Mp3AudioValidator validator) {
         this.restClient = builder.build();
