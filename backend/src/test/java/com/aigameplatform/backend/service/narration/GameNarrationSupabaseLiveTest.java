@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
@@ -63,11 +64,20 @@ import tools.jackson.databind.node.ObjectNode;
         "app.moderation.required=false",
         "app.ai.gemini.game-generation.enabled=false"
 })
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(print = MockMvcPrint.NONE)
 class GameNarrationSupabaseLiveTest {
     private static final Pattern UPSTREAM_HTTP_STATUS = Pattern.compile("\\bHTTP\\s+(\\d{3})\\b", Pattern.CASE_INSENSITIVE);
+    private static final Map<String, String> SAFE_AUDIO_FAILURES = Map.of(
+            "TTS response is empty", "empty_audio",
+            "MP3 exceeds 256 KiB per file", "audio_size_limit",
+            "TTS response contains an invalid or truncated MP3 frame", "invalid_mp3_frame",
+            "MP3 exceeds 30 seconds per file", "audio_duration_limit",
+            "TTS response contains trailing bytes outside the MP3 stream", "invalid_mp3_trailing_bytes",
+            "TTS response is not a valid MP3", "invalid_mp3",
+            "Unable to read ElevenLabs TTS audio response", "audio_read_failed");
     private static final String AUDIO_TEXT = "Choose the correct answer: two plus two.";
-    private static final String FEEDBACK_CACHE_VERSION = "fr11-live-" + UUID.randomUUID().toString().replace("-", "");
+    private static final String FEEDBACK_CACHE_VERSION = "fr11-live-"
+            + UUID.randomUUID().toString().replace("-", "").substring(0, 22);
 
     @DynamicPropertySource
     static void useIsolatedFeedbackCacheVersion(DynamicPropertyRegistry properties) {
@@ -285,16 +295,24 @@ class GameNarrationSupabaseLiveTest {
 
     private static MvcResult requireOk(MvcResult result, String operation) {
         if (result.getResponse().getStatus() == 200) return result;
-        Throwable failure = result.getResolvedException();
-        Throwable cause = failure == null ? null : failure.getCause();
-        String detail = cause == null ? "cause unavailable" : cause.getClass().getSimpleName();
-        if (cause instanceof RestClientResponseException responseFailure) {
-            detail += " upstreamStatus=" + responseFailure.getStatusCode().value();
-        } else if (cause != null && cause.getMessage() != null) {
-            Matcher status = UPSTREAM_HTTP_STATUS.matcher(cause.getMessage());
-            if (status.find()) detail += " upstreamStatus=" + status.group(1);
-        }
+        String detail = safeFailureDetail(result.getResolvedException());
         throw new AssertionError(operation + " returned HTTP " + result.getResponse().getStatus() + " (" + detail + ")");
+    }
+
+    private static String safeFailureDetail(Throwable failure) {
+        List<String> causeTypes = new ArrayList<>();
+        for (Throwable cause = failure; cause != null && causeTypes.size() < 8; cause = cause.getCause()) {
+            causeTypes.add(cause.getClass().getSimpleName());
+            if (cause instanceof RestClientResponseException responseFailure) {
+                return String.join(" -> ", causeTypes) + " upstreamStatus=" + responseFailure.getStatusCode().value();
+            }
+            if (cause.getMessage() == null) continue;
+            String safeAudioFailure = SAFE_AUDIO_FAILURES.get(cause.getMessage());
+            if (safeAudioFailure != null) return String.join(" -> ", causeTypes) + " reason=" + safeAudioFailure;
+            Matcher status = UPSTREAM_HTTP_STATUS.matcher(cause.getMessage());
+            if (status.find()) return String.join(" -> ", causeTypes) + " upstreamStatus=" + status.group(1);
+        }
+        return causeTypes.isEmpty() ? "cause unavailable" : String.join(" -> ", causeTypes);
     }
 
     private byte[] downloadAndValidate(String signedUrl) throws Exception {

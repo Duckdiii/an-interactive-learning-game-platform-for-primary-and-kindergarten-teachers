@@ -9,7 +9,7 @@ public final class Mp3AudioValidator {
     public static final double MAX_DURATION_SECONDS = 30.0;
 
     private static final int[][] MPEG1_LAYER_III_KBPS = {
-            {}, {32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320},
+            {}, {0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320},
     };
     private static final int[] MPEG2_LAYER_III_KBPS = {
             0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160,

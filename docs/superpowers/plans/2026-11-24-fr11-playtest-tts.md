@@ -131,22 +131,22 @@ Expected: tests and TypeScript/Vite build pass; tests confirm PlayTest makes no 
 - Consumes: TTS and Storage properties imported from `backend/.env` by Spring; `FR11_SUPABASE_EXPECTED_DB_HOST` may be provided to guard the live database target. Never print values.
 - Produces: opt-in end-to-end evidence for real English TTS, V31 cache persistence, Supabase signed HTTP download, validator acceptance and cache reuse; synthetic game rows, per-game audio and unique test cache entries are removed. No mock is used in this smoke test.
 
-- [x] **Step 1: Extend the existing opt-in Supabase integration fixture** to test an owned ENGLISH game, an English `audioText`, ElevenLabs synthesis and V31 feedback cache miss/hit; assert bounded MP3, signed URL HTTP 200, downloaded bytes validate, the second request reuses the cached asset, and synthetic game rows/per-game objects are absent after cleanup. Read `.env`-backed Spring properties without printing them.
+- [x] **Step 1: Extend the existing opt-in Supabase integration fixture** to test an owned ENGLISH game, an English `audioText`, ElevenLabs synthesis and V31 feedback cache miss/hit; assert bounded MP3, signed URL HTTP 200, downloaded bytes validate, the second request reuses the cached asset, and synthetic teacher/game rows and per-game/shared test Storage objects are absent after cleanup. Read `.env`-backed Spring properties without printing them.
 - [x] **Step 2: Run offline targeted suites**
 
-Run in `backend`: `./mvnw.cmd -Dtest=ElevenLabsTtsClientTest,GameNarrationServiceTest,NarrationFeedbackServiceTest,GameNarrationControllerTest test`
+Run in `backend`: `./mvnw.cmd -Dtest=ElevenLabsTtsClientTest,GameNarrationServiceTest,NarrationFeedbackServiceTest,GameNarrationControllerTest,Mp3AudioValidatorTest test`
 
 Run in `frontend`: `npm test -- src/components/editor/NarrationPreviewControl.test.tsx src/components/editor/PlayTestPanel.test.tsx src/pages/WorkspaceEditorPlay.test.tsx`
 
 Expected: all local tests pass; live test remains skipped unless its explicit property is enabled.
 
-- [ ] **Step 3: Run live test against real services** after Flyway V31 has applied
+- [x] **Step 3: Run live test against real services** after Flyway V31 has applied
 
 Run in `backend`: `./mvnw.cmd -Dtest=GameNarrationSupabaseLiveTest -Dfr11.supabase.live=true test`
 
 Expected: real ElevenLabs synthesis succeeds, V31 cache is persisted/reused, Supabase signed download passes MP3 validation, and cleanup confirms synthetic game rows/per-game audio/test cache were removed. If provider quota/key or live DB is unavailable, report the specific blocked live check; do not claim it passed.
 
-Observed live run: Supabase applied V31 and the app context plus synthetic fixture setup succeeded. The real ElevenLabs preview returned HTTP 503 (NARRATION_UNAVAILABLE) with upstream HTTP 401, so upload, signed download and feedback-cache checks were not reached. Cleanup removed the synthetic teacher/game rows and confirmed no per-game Storage objects remained. Rerun live acceptance after correcting the server-side provider key; this step is still blocked. Integration blocker: local `main` already defines V23 as admin foundation while this feature branch adds game narration at V23; reconcile migration history before merging. V31 avoids main V24–V28 and the observed Supabase current version 30, but does not resolve the separate V23 collision.
+Final live run: 1/1 Supabase/ElevenLabs test passed against schema V31. The app generated and validated real English question audio, uploaded it to Supabase Storage, downloaded the signed URL successfully, generated and cached both feedback clips, confirmed the second feedback request reused the cached assets, and verified game/shared Storage objects plus synthetic database rows were removed by teardown. The MPEG-1 bitrate table fix is covered by a regression test; the unique cache version now fits the 32-character schema limit. The TTS POST accepted the key and returned HTTP 200 with audio/mpeg; GET /v1/user returned 401, consistent with an endpoint-scope restriction and not a TTS failure. The live fixture keeps Flyway history overrides test-only because this checkout lacks historical migrations. Integration blocker remains: local `main` defines V23 as admin foundation while this feature branch adds game narration at V23; reconcile migration history before merge. V31 avoids main V24-V28 and the observed Supabase current version 30, but does not resolve the separate V23 collision.
 
 - [x] **Step 4: Regression check every supported PlayTest renderer**
 
