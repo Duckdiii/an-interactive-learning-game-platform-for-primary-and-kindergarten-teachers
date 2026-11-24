@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,7 +46,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -53,6 +58,12 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 @Import(AdminAiConfigPostgresTest.GeneratorConfiguration.class)
 class AdminAiConfigPostgresTest extends AbstractPostgresTest {
+
+    @DynamicPropertySource
+    static void enableModerationThresholdTest(DynamicPropertyRegistry registry) {
+        registry.add("app.moderation.required", () -> "true");
+        registry.add("app.moderation.openai.api-key", () -> "ci-test-only-key");
+    }
 
     private static final String CONFIG = "/api/admin/ai-config";
     private static final String VERSIONS = CONFIG + "/versions";
@@ -64,7 +75,7 @@ class AdminAiConfigPostgresTest extends AbstractPostgresTest {
     @Autowired private AuthService auth;
     @Autowired private JsonMapper json;
     @MockitoBean(name = "uc14ChatModel") private ChatModel model;
-    @MockitoBean private OpenAiModerationClient moderation;
+    @MockitoSpyBean private OpenAiModerationClient moderation;
 
     @Test
     void savedAndRestoredVersionsDriveTheNextTeacherGeneration() throws Exception {
@@ -72,9 +83,10 @@ class AdminAiConfigPostgresTest extends AbstractPostgresTest {
         String teacher = login("config-teacher", UserRole.ROLE_TEACHER);
         String rawQuiz = new ClassPathResource("ai-output-examples/quiz.json").getContentAsString(StandardCharsets.UTF_8);
         when(model.chat(any(ChatRequest.class))).thenReturn(ChatResponse.builder().aiMessage(AiMessage.from(rawQuiz)).build());
-        when(moderation.isConfigured()).thenReturn(true);
-        when(moderation.moderate(any())).thenAnswer(call -> call.<List<String>>getArgument(0).stream()
-                .map(text -> new ModerationResult(false, List.of(), Map.of("violence", 0.60))).toList());
+        doReturn(true).when(moderation).isConfigured();
+        doAnswer(call -> call.<List<String>>getArgument(0).stream()
+                .map(text -> new ModerationResult(false, List.of(), Map.of("violence", 0.60))).toList())
+                .when(moderation).moderate(any());
 
         mvc.perform(get(CONFIG).header("Authorization", teacher)).andExpect(status().isForbidden());
         String previous = create(admin, "Ưu tiên câu ngắn.", 0.20, 2200, 0.90);
