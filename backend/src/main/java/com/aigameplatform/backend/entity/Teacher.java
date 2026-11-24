@@ -1,11 +1,16 @@
 package com.aigameplatform.backend.entity;
 
+import com.aigameplatform.backend.dto.media.SpeechVoice;
+import com.aigameplatform.backend.entity.enums.GradeLevel;
+import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.entity.enums.UserRole;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,6 +36,23 @@ public class Teacher {
     private String fullName;
 
     private String school;
+    private String profileSchool;
+    private String textbook;
+
+    @Enumerated(EnumType.STRING)
+    private SpeechVoice preferredVoice;
+
+    @Enumerated(EnumType.STRING)
+    private Subject preferredSubject;
+
+    @Enumerated(EnumType.STRING)
+    private GradeLevel preferredGradeLevel;
+
+    @ElementCollection
+    @CollectionTable(name = "teacher_suggestions", joinColumns = @JoinColumn(name = "teacher_id"))
+    @MapKeyColumn(name = "suggestion_id", length = 36)
+    @Column(name = "topic", nullable = false, length = 200)
+    private Map<String, String> suggestions = new HashMap<>();
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -18,6 +18,7 @@ import com.aigameplatform.backend.repository.EditLogRepository;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
+import com.aigameplatform.backend.service.classroom.ClassroomService;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class GameService {
     private static final List<SessionStatus> UNFINISHED = List.of(SessionStatus.WAITING, SessionStatus.ACTIVE, SessionStatus.PAUSED);
 
     private final GameRepository games;
+    private final ClassroomService classrooms;
     private final EditLogRepository editLogs;
     private final TeacherRepository teachers;
     private final List<GameContentHandler> handlers;
@@ -74,12 +76,22 @@ public class GameService {
                 random, null, null, null, null);
     }
 
-    @Autowired
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
             RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
             ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs) {
+        this(games, teachers, handlers, jsonMapper, rateLimiter, transactions, curriculumReviews, curriculumCatalog,
+                random, audioEnrichers, sessions, costMonitoring, editLogs, null);
+    }
+
+    @Autowired
+    public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
+            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
+            GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
+            RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
+            ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs, ClassroomService classrooms) {
+        this.classrooms = classrooms;
         this.editLogs = editLogs;
         this.costMonitoring = costMonitoring;
         this.sessions = sessions;
@@ -104,10 +116,13 @@ public class GameService {
         requireTeacher(teacherId);
         requireBudgetAvailable();
         GameType type = request.gameType() != null ? request.gameType() : GameType.QUIZ;
+        String context = request.classroomId() == null ? null
+                : classrooms.generationContext(teacherId, request.classroomId(), request.gradeLevel());
         String idea = ideaOf(request, type);
 
         GameContentHandler handler = handlerFor(type);
-        GameContentHandler.GeneratedContent content = handler.generate(type, idea, request);
+        GameContentHandler.GeneratedContent content = context == null
+                ? handler.generate(type, idea, request) : handler.generate(type, idea, request, context);
 
         Game game = new Game();
         game.setAuthor(teachers.getReferenceById(teacherId));
@@ -124,7 +139,14 @@ public class GameService {
         // Sinh giọng đọc TTS cho câu hỏi; lỗi dịch vụ ngoài không làm hỏng luồng tạo game (enricher tự nuốt lỗi).
         GameAudioEnricher enricher = audioEnrichers != null ? audioEnrichers.getIfAvailable() : null;
         if (enricher != null) {
-            enricher.enrichAllQuestionsWithAudio(content.questions());
+            String gender = request.voice() == null ? "" : request.voice().path("gender").asString("");
+            if ("MALE".equals(gender)) {
+                enricher.enrichAllQuestionsWithAudio(content.questions(), SpeechVoice.MALE);
+            } else if ("FEMALE".equals(gender)) {
+                enricher.enrichAllQuestionsWithAudio(content.questions(), SpeechVoice.FEMALE);
+            } else {
+                enricher.enrichAllQuestionsWithAudio(content.questions());
+            }
         }
         game.replaceQuestions(content.questions());
         game.setQuestionNum(content.questions().size());

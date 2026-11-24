@@ -48,10 +48,16 @@ public class CpfGameContentHandler implements GameContentHandler {
 
     @Override
     public GeneratedContent generate(GameType type, String idea, GenerateGameRequest request) {
+        return generate(type, idea, request, null);
+    }
+
+    @Override
+    public GeneratedContent generate(GameType type, String idea, GenerateGameRequest request, String classroomContext) {
         if (request.effectiveMode() != VisualClozeMode.TEXT) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Trò chơi ngoài danh mục chưa hỗ trợ chế độ hình ảnh");
         }
-        JsonNode cpf = generation.generate(idea, request.subject(), request.gradeLevel());
+        JsonNode cpf = classroomContext == null ? generation.generate(idea, request.subject(), request.gradeLevel())
+                : generation.generateWithClassroom(idea, request.subject(), request.gradeLevel(), classroomContext);
         return new GeneratedContent(cpf.path("metadata").path("title").asString(), SCHEMA_VERSION, List.of(question(cpf)), null);
     }
 

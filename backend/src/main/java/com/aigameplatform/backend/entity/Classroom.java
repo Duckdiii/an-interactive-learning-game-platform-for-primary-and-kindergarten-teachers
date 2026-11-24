@@ -1,5 +1,6 @@
 package com.aigameplatform.backend.entity;
 
+import com.aigameplatform.backend.entity.enums.GradeLevel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,4 +23,12 @@ public class Classroom {
     private String schoolYear;
 
     private String schoolName;
+
+    @Enumerated(EnumType.STRING)
+    private GradeLevel gradeLevel;
+
+    private Integer studentCount;
+    private String knowledgeScope;
+    private String characteristics;
+    private String favoriteTopics;
 }

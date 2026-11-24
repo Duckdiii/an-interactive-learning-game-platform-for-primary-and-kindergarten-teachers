@@ -30,6 +30,10 @@ public interface GameContentHandler {
      */
     GeneratedContent generate(GameType type, String idea, GenerateGameRequest request);
 
+    default GeneratedContent generate(GameType type, String idea, GenerateGameRequest request, String classroomContext) {
+        return generate(type, idea, request);
+    }
+
     /** Kiểm duyệt lại đủ 3 lớp nội dung giáo viên sửa rồi áp vào game (chưa lưu). Sai thì ném lỗi 400/422. */
     void replaceContent(Game game, JsonNode body);
 

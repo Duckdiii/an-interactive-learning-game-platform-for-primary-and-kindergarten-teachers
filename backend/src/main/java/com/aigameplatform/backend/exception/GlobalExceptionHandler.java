@@ -1,6 +1,9 @@
 package com.aigameplatform.backend.exception;
 
+import com.aigameplatform.backend.dto.response.ApiError;
 import com.aigameplatform.backend.dto.response.ApiResponse;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -65,8 +68,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String message = fieldError != null && fieldError.getDefaultMessage() != null
                 ? fieldError.getDefaultMessage()
                 : "Dữ liệu không hợp lệ";
+        Map<String, String> details = new LinkedHashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            if (error.getDefaultMessage() != null) details.putIfAbsent(error.getField(), error.getDefaultMessage());
+        }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(ErrorCode.VALIDATION_ERROR.name(), message));
+                .body(new ApiResponse<>(false, null, new ApiError(ErrorCode.VALIDATION_ERROR.name(), message, details)));
     }
 
     // Các lỗi MVC chuẩn (sai JSON, sai method, không tìm thấy đường dẫn...) cũng đi qua envelope.

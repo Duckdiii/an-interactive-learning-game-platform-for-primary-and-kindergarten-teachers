@@ -120,6 +120,31 @@ class AuthControllerTest {
     }
 
     @Test
+    void registerAcceptsSchoolAtTheLengthLimit() throws Exception {
+        String school = "a".repeat(255);
+        when(authService.register(any())).thenReturn(new RegisterResponse("teacher-1", "a@school.edu.vn"));
+
+        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content(registerBodyWithSchool(school)))
+                .andExpect(status().isCreated());
+        verify(authService).register(org.mockito.ArgumentMatchers.argThat(request -> school.equals(request.school())));
+    }
+
+    @Test
+    void registerRejectsOversizeSchoolBeforeCallingAuthService() throws Exception {
+        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content(registerBodyWithSchool("a".repeat(256))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.error.details.school").value("Tên trường tối đa 255 ký tự"));
+        verifyNoInteractions(authService);
+    }
+
+    private static String registerBodyWithSchool(String school) {
+        return VALID_REGISTER.substring(0, VALID_REGISTER.length() - 1) + ",\"school\":\"" + school + "\"}";
+    }
+
+    @Test
     void registerWithWeakPasswordReturnsValidationError() throws Exception {
         String body = "{\"fullName\":\"A\",\"email\":\"a@school.edu.vn\",\"password\":\"weak\"}";
 

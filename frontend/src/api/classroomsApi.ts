@@ -16,6 +16,12 @@ export async function createClassroom(input: ClassroomInput) {
   return response.data.data
 }
 
+export async function updateClassroom(classroomId: string, input: ClassroomInput) {
+  const response = await axiosInstance.put<ApiSuccessResponse<Classroom>>('/classrooms/' + encodeURIComponent(classroomId), input)
+
+  return response.data.data
+}
+
 /** DELETE /classrooms/{classroomId}: xóa lớp; trò chơi và phiên đã có không bị ảnh hưởng. */
 export async function deleteClassroom(classroomId: string) {
   await axiosInstance.delete(`/classrooms/${encodeURIComponent(classroomId)}`)

@@ -14,6 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.aigameplatform.backend.controller.AuthController;
 import com.aigameplatform.backend.controller.MediaController;
+import com.aigameplatform.backend.controller.TeacherProfileController;
+import com.aigameplatform.backend.dto.profile.TeacherProfileInput;
+import com.aigameplatform.backend.service.profile.TeacherProfileService;
 import com.aigameplatform.backend.dto.response.AuthResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
 import com.aigameplatform.backend.entity.enums.UserRole;
@@ -44,7 +47,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest({AuthController.class, MediaController.class})
+@WebMvcTest({AuthController.class, MediaController.class, TeacherProfileController.class})
 @Import({SecurityConfig.class, ClockConfig.class, JwtService.class, RefreshCookieFactory.class,
         RestSecurityErrorHandler.class, GlobalExceptionHandler.class, TeacherAccessAuthenticator.class})
 @TestPropertySource(properties = {
@@ -81,6 +84,9 @@ class SecurityConfigTest {
     @MockitoBean
     private TeacherRepository teachers;
 
+    @MockitoBean
+    private TeacherProfileService profiles;
+
     @BeforeEach
     void activeAccounts() {
         when(teachers.existsByIdAndStatusAndSessionVersion("teacher-1", TeacherStatus.ACTIVE, 0)).thenReturn(true);
@@ -110,6 +116,20 @@ class SecurityConfigTest {
         mockMvc.perform(post("/api/games/validate-text")).andExpect(status().isUnauthorized());
         mockMvc.perform(post("/api/games/validate-text").header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void teacherProfileRequiresTeacherRoleAndUsesTokenIdentity() throws Exception {
+        String admin = new JwtService(SECRET, 15, Clock.systemUTC())
+                .generateAccessToken("admin-1", "admin@school.edu.vn", "session-admin", "ROLE_ADMIN");
+        when(profiles.get("teacher-1")).thenReturn(new TeacherProfileInput("Hoa Mai", null, null, null, null));
+
+        mockMvc.perform(get("/api/teacher/profile")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/teacher/profile").header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/teacher/profile").header(HttpHeaders.AUTHORIZATION, "Bearer " + validAccessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.school").value("Hoa Mai"));
     }
 
     private static String validAccessToken() {
