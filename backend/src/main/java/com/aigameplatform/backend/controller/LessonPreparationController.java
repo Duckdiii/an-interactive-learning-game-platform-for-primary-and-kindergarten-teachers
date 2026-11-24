@@ -9,6 +9,7 @@ import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.service.lesson.LessonPreparationService;
 import com.aigameplatform.backend.service.lesson.PreparedLesson;
 import java.util.List;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ public class LessonPreparationController {
 
     public LessonPreparationController(LessonPreparationService lessons) { this.lessons = lessons; }
 
-    @PostMapping(value = "/prepare", consumes = "multipart/form-data")
+    @PostMapping(path = "/prepare", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<PreparedLesson> prepare(@RequestParam Subject subject,
             @RequestParam GradeLevel gradeLevel, @RequestParam(required = false) String idea,
             @RequestParam("file") List<MultipartFile> files,
