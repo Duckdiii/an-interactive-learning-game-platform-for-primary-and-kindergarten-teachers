@@ -12,6 +12,8 @@ export interface PlayTestProps {
   subject: Subject
   /** Báo kết quả (đúng/sai) ngay sau khi giáo viên trả lời xong câu. */
   onResult: (isCorrect: boolean) => void
+  /** Audio đã được PlayTest quản lý để tránh trình duyệt đọc chồng lên MP3 TTS. */
+  playQuestionAudio?: () => void
 }
 
 // Bảng loại game đến bộ chơi thử (không rẽ nhánh bằng if/switch). Loại nào chưa có renderer thì KHÔNG có mặt ở đây và panel

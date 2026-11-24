@@ -12,6 +12,9 @@ import type { GameFilters, GameSummary } from '../types/game-summary.types'
 export const GAMES_REQUEST_TIMEOUT_MS = 10_000
 // Mở và lưu một game: nội dung lớn hơn danh sách nên cho dài hơn một chút.
 export const GAME_REQUEST_TIMEOUT_MS = 15_000
+export const NARRATION_REQUEST_TIMEOUT_MS = 30_000
+// A cache miss can synthesize two fixed clips sequentially (up to two provider read timeouts).
+export const NARRATION_FEEDBACK_REQUEST_TIMEOUT_MS = 65_000
 
 // Hằng số thời gian chờ của lời gọi AI nằm ở `constants/aiLimits.ts` (dùng chung với AI mô phỏng); xuất lại ở đây cho nơi dùng API.
 export { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS }
@@ -96,6 +99,40 @@ export async function postPublishGame(gameId: string, body: GameEnvelopeBody, si
     `/games/${encodeURIComponent(gameId)}/publish`,
     body,
     { timeout: PUBLISH_REQUEST_TIMEOUT_MS, signal },
+  )
+
+  return response.data.data
+}
+
+export interface NarrationPreview {
+  questionId: string
+  audioUrl: string
+  bytes: number
+  durationMillis: number
+}
+
+/** POST /games/{gameId}/narration/preview: synthesize the server-owned audioText and return a temporary preview URL. */
+export async function postGenerateNarrationPreview(gameId: string, questionId: string, signal?: AbortSignal) {
+  const response = await axiosInstance.post<ApiSuccessResponse<NarrationPreview>>(
+    `/games/${encodeURIComponent(gameId)}/narration/preview`,
+    { questionId },
+    { timeout: NARRATION_REQUEST_TIMEOUT_MS, signal },
+  )
+
+  return response.data.data
+}
+
+export interface NarrationFeedbackAudioUrls {
+  correctAudioUrl: string
+  wrongAudioUrl: string
+}
+
+/** POST /games/{gameId}/narration/feedback: returns the fixed correct/wrong clips for this game's subject. */
+export async function postGenerateNarrationFeedback(gameId: string, signal?: AbortSignal) {
+  const response = await axiosInstance.post<ApiSuccessResponse<NarrationFeedbackAudioUrls>>(
+    `/games/${encodeURIComponent(gameId)}/narration/feedback`,
+    undefined,
+    { timeout: NARRATION_FEEDBACK_REQUEST_TIMEOUT_MS, signal },
   )
 
   return response.data.data

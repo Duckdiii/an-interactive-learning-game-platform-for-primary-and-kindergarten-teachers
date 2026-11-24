@@ -33,6 +33,16 @@ vi.mock('../api/axiosInstance', () => ({
 // mock-game-1 là QUIZ, mock-game-5 là ORDERING (chưa có renderer chơi thử).
 const QUIZ_ID = 'mock-game-1'
 const ORDERING_ID = 'mock-game-5'
+const narrationUrls: string[] = []
+class TestHtmlAudio {
+  readonly src: string
+  onended: (() => void) | null = null
+  onerror: (() => void) | null = null
+  currentTime = 0
+  play = vi.fn(async () => undefined)
+  pause = vi.fn()
+  constructor(src: string) { this.src = src; narrationUrls.push(src) }
+}
 const titleBox = () => screen.getByRole('textbox', { name: /Tên trò chơi/ })
 const playButton = () => screen.getByRole('button', { name: 'Chơi thử' })
 
@@ -50,6 +60,8 @@ beforeEach(() => {
   vi.stubEnv('VITE_USE_MOCK', 'editor')
   loginAsTeacher()
   resetMockGames()
+  narrationUrls.length = 0
+  vi.stubGlobal('Audio', TestHtmlAudio)
 })
 afterEach(() => {
   vi.restoreAllMocks()
@@ -82,7 +94,11 @@ describe('trình soạn thảo: Chơi thử', () => {
     await waitFor(() => expect(playButton()).toHaveFocus())
     // Chơi thử không lưu gì: kho vẫn giữ tên cũ và không có yêu cầu mạng nào.
     expect(getMockGame(QUIZ_ID).metadata.title).toBe(before)
-    for (const method of Object.values(axiosInstance)) expect(method).not.toHaveBeenCalled()
+    expect(axiosInstance.post).toHaveBeenCalledTimes(1)
+    expect(axiosInstance.post).toHaveBeenCalledWith(`/games/${QUIZ_ID}/narration/feedback`, undefined, expect.any(Object))
+    for (const [name, method] of Object.entries(axiosInstance)) {
+      if (name !== 'post') expect(method).not.toHaveBeenCalled()
+    }
   })
 
   it('dữ liệu chưa đủ (UC-03 2a): từ chối mở màn chơi thử, hiện đúng câu của SRS, sửa xong thì mở được', async () => {
@@ -150,5 +166,43 @@ describe('trình soạn thảo: tải màn chơi thử bị lỗi (UC-03 3b)', (
     await user.click(playButton())
     expect(await screen.findByText('Câu 1 trên 3', {}, { timeout: 10_000 })).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+describe('FR-11 PlayTest narration integration', () => {
+  it('passes a generated saved-question URL into PlayTest and requests only fixed feedback audio', async () => {
+    const user = userEvent.setup()
+    const questionId = getMockGame(QUIZ_ID).questions[0].id
+    const previewUrl = 'https://storage.test/saved-question.mp3'
+    vi.mocked(axiosInstance.post).mockImplementation(async (url) => {
+      if (String(url).endsWith('/narration/preview')) {
+        return { data: { success: true, data: { questionId, audioUrl: previewUrl, bytes: 400, durationMillis: 800 } } } as never
+      }
+      if (String(url).endsWith('/narration/feedback')) {
+        return { data: { success: true, data: {
+          correctAudioUrl: 'https://storage.test/correct.mp3', wrongAudioUrl: 'https://storage.test/wrong.mp3',
+        } } } as never
+      }
+      throw new Error(`Unexpected PlayTest request: ${String(url)}`)
+    })
+
+    await openLoaded(QUIZ_ID)
+    const createVoice = await screen.findByRole('button', { name: /Tạo giọng đọc/ })
+    await waitFor(() => expect(createVoice).toBeEnabled())
+    await user.click(createVoice)
+    await waitFor(() => expect(axiosInstance.post).toHaveBeenCalledWith(
+      `/games/${QUIZ_ID}/narration/preview`, { questionId }, expect.any(Object),
+    ))
+
+    await user.click(playButton())
+    expect(await screen.findByRole('button', { name: 'Nghe lại câu hỏi' }, { timeout: 10_000 })).toBeInTheDocument()
+    await waitFor(() => expect(narrationUrls).toContain(previewUrl))
+    await waitFor(() => expect(axiosInstance.post).toHaveBeenCalledWith(
+      `/games/${QUIZ_ID}/narration/feedback`, undefined, expect.any(Object),
+    ))
+    expect(vi.mocked(axiosInstance.post).mock.calls.map(([url]) => url)).toEqual([
+      `/games/${QUIZ_ID}/narration/preview`,
+      `/games/${QUIZ_ID}/narration/feedback`,
+    ])
   })
 })

@@ -22,6 +22,8 @@ import type { VoiceGender } from '../services/mediaService'
 import QuestionList from '../components/editor/QuestionList'
 import EditorTopBar from '../components/editor/EditorTopBar'
 import PublishDialog from '../components/editor/PublishDialog'
+import NarrationPreviewControl from '../components/editor/NarrationPreviewControl'
+import type { PlayTestQuestionNarration } from '../components/editor/usePlayTestNarrationAudio'
 import ErrorNotice from '../components/ui/ErrorNotice'
 import LetterTiles from '../components/ui/LetterTiles'
 import MockBadge from '../components/ui/MockBadge'
@@ -97,6 +99,15 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
   const [playing, setPlaying] = useState(false)
+  const [questionNarrations, setQuestionNarrations] = useState<Record<string, PlayTestQuestionNarration>>({})
+  const setQuestionNarration = useCallback((questionId: string, narration?: PlayTestQuestionNarration) => {
+    setQuestionNarrations((currentNarrations) => {
+      const next = { ...currentNarrations }
+      if (narration) next[questionId] = narration
+      else delete next[questionId]
+      return next
+    })
+  }, [])
   // Vừa nhờ AI làm lại (hoặc vừa hoàn tác) câu nào: để hiện thông báo kèm nút Hoàn tác. Nằm ở đây vì thẻ sửa câu được dựng lại sau khi áp câu mới.
   const [regenNotice, setRegenNotice] = useState<{ kind: 'applied' | 'undone'; questionId: string } | null>(null)
   const beginEdit = useCallback(() => {
@@ -114,6 +125,12 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   // Đã bấm "Chơi thử" mà dữ liệu chưa đủ: lỗi được tính lại theo từng lần sửa để sửa xong là hết.
   const [playAttempted, setPlayAttempted] = useState(false)
   const summaries = useMemo(() => summarizeQuestions(draft), [draft])
+  const playableNarrations = useMemo(() => Object.fromEntries(draft.questions.flatMap((question) => {
+    const narration = questionNarrations[question.id]
+    if (!narration || narration.gameId !== game.gameId || narration.audioText !== question.audioText
+        || question.audioUrl?.trim()) return []
+    return [[question.id, narration] as const]
+  })), [draft.questions, game.gameId, questionNarrations])
   // Câu nào còn lỗi (tính trực tiếp, không đợi bấm Lưu) thì danh sách đánh dấu "Cần sửa".
   const gameDefaults = useMemo(
     () => ({ timeLimitSeconds: gameDefault(draft.questions, 'timeLimitSeconds'), points: gameDefault(draft.questions, 'points') }),
@@ -297,6 +314,18 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
           }
         />
       ) : null}
+      {current ? (
+        <NarrationPreviewControl
+            key={`${game.gameId}-${draft.questions[index].id}`}
+          gameId={game.gameId}
+          questionId={draft.questions[index].id}
+            audioText={draft.questions[index].audioText}
+          subject={draft.metadata.subject}
+          onAudioReady={setQuestionNarration}
+          hasSourceAudio={Boolean(draft.questions[index].audioUrl?.trim())}
+          saved={editor.savedQuestionIds.has(draft.questions[index].id) && editor.autosave === 'saved'}
+        />
+      ) : null}
     </div>
   )
 
@@ -365,7 +394,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
               </div>
             }
           >
-            <PlayTestPanel game={editor.draft} onExit={exitPlay} />
+            <PlayTestPanel game={editor.draft} gameId={game.gameId} questionNarrations={playableNarrations} onExit={exitPlay} />
           </Suspense>
         </PlayTestBoundary>
       ) : (
