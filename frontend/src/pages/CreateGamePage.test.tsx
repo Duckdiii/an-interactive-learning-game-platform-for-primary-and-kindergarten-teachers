@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { IDEAS } from '../constants/createIdeas'
 import { gameTypeLabel } from '../constants/labels'
 import { rankGameTypes, suggestGameTypes } from '../services/gameTypeSuggestionService'
@@ -22,9 +22,12 @@ const mockedSuggest = vi.mocked(suggestGameTypes)
 const mockedUnderstand = vi.mocked(understandGame)
 
 beforeEach(() => {
+  vi.stubEnv('VITE_USE_MOCK', 'all')
   mockedSuggest.mockReset()
   mockedSuggest.mockImplementation(async (input) => rankGameTypes(input))
 })
+
+afterEach(() => vi.unstubAllEnvs())
 
 const renderPage = (path = '/games/new') => renderWithProviders(<CreateGamePage />, path)
 

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -121,6 +122,22 @@ class GameServiceTest {
     void customGameNeedsAnIdea() {
         assertThatThrownBy(() -> service.generate(OWNER, request(null, true, GameType.CUSTOM)))
                 .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR));
+    }
+
+    @Test
+    void unsafeTeacherIdeaIsRejectedBeforeTheGeneratorRuns() {
+        var guard = mock(com.aigameplatform.backend.service.lesson.GameInputGuard.class);
+        String idea = "Nội dung bạo lực không phù hợp cho trẻ";
+        doThrow(new ApiException(ErrorCode.UNSAFE_CONTENT, "Nội dung không an toàn"))
+                .when(guard).requireSafe(eq(idea), eq((String) null), any(String[].class));
+        service.setGameInputGuard(guard);
+
+        assertThatThrownBy(() -> service.generate(OWNER, request(idea, null, GameType.QUIZ)))
+                .isInstanceOfSatisfying(ApiException.class,
+                        error -> assertThat(error.getErrorCode()).isEqualTo(ErrorCode.UNSAFE_CONTENT));
+
+        verify(dsl, never()).generate(any(), anyString(), any());
+        verify(games, never()).saveAndFlush(any());
     }
 
     @Test

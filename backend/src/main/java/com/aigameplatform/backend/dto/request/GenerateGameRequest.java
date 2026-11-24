@@ -15,7 +15,8 @@ import tools.jackson.databind.JsonNode;
  * {@code GenerateGameRequest} của openapi.yaml (bản JSON đồng bộ). Phải có ít nhất một trong {@code idea},
  * {@code randomTopic}; {@code CUSTOM} bắt buộc {@code idea}. {@code mode=IMAGE} chỉ dùng cho VISUAL_CLOZE (cần
  * {@code sceneImageUrl} và {@code optionImages}), ODD_ONE_OUT và AUDIO_VISUAL_MATCH (chọn hình từ thư viện Noto).
- * Tệp giáo án và giọng đọc chưa cài: {@code voice} được nhận nhưng bỏ qua.
+ * Lesson documents are prepared separately through {@code POST /api/games/prepare}; only teacher-confirmed ideas
+ * are sent to this generation request. Voice generation belongs to the existing media pipeline.
  */
 public record GenerateGameRequest(
         @NotNull(message = "Vui lòng chọn môn học") Subject subject,

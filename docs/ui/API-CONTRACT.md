@@ -426,3 +426,8 @@ Phía Frontend khi cài `RealPlayerApi`: dùng một axios instance **riêng cho
 - Tiêu chuẩn đồ họa: [[Tiêu chuẩn Đồ họa và Asset Pipeline]]
 - Sơ đồ hệ thống: [[Sơ đồ hệ thống]]
 - Mục lục giao diện: [[ui/SPEC|Đặc tả UI]]
+
+
+## Cập nhật triển khai FR-02 (2026-11-24)
+
+Luồng upload giáo án đã được tách khỏi API sinh game: `POST /games/prepare` nhận multipart gồm môn, khối, đúng một file DOCX/PDF (tối đa 10 MiB) và ý tưởng tùy chọn; backend trích xuất giới hạn bằng Apache Tika, kiểm tra nội dung rồi gọi Gemini để chuẩn bị ý tưởng. Endpoint không lưu file, văn bản trích xuất hay game. Giáo viên phải duyệt/sửa và xác nhận ý tưởng trước khi frontend gọi luồng đề xuất kiểu game và `POST /games/generate`. Các chi tiết request/response và lỗi nằm trong `docs/openapi/openapi.yaml`.

@@ -31,6 +31,7 @@ public class ContentSafetyCheck {
     private final BlockedWordList blockedWords;
     private final ContentModerationClient moderationClient;
     private final AiConfigService aiConfigService;
+    private final boolean moderationRequired;
 
     public ContentSafetyCheck(BlockedWordList blockedWords, ContentModerationClient moderationClient,
             boolean moderationRequired) {
@@ -43,6 +44,7 @@ public class ContentSafetyCheck {
         this.blockedWords = blockedWords;
         this.moderationClient = moderationClient;
         this.aiConfigService = aiConfigService;
+        this.moderationRequired = moderationRequired;
         if (!moderationClient.isConfigured()) {
             if (moderationRequired) {
                 throw new IllegalStateException(
@@ -59,7 +61,7 @@ public class ContentSafetyCheck {
                 blocked.add(new ValidationError(entry.path(), UNSAFE_MESSAGE, ValidationError.Kind.UNSAFE));
             }
         }
-        if (!blocked.isEmpty() || texts.isEmpty() || !moderationClient.isConfigured()) {
+        if (!blocked.isEmpty() || texts.isEmpty() || !moderationRequired || !moderationClient.isConfigured()) {
             return blocked;
         }
 

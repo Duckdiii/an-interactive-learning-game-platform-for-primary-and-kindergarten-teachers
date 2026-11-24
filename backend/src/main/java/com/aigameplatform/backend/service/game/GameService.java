@@ -31,6 +31,7 @@ import com.aigameplatform.backend.entity.enums.SessionStatus;
 import com.aigameplatform.backend.repository.GameSessionRepository;
 import com.aigameplatform.backend.service.admin.CostMonitoringService;
 import com.aigameplatform.backend.service.media.GameAudioEnricher;
+import com.aigameplatform.backend.service.lesson.GameInputGuard;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -65,6 +66,7 @@ public class GameService {
     private final ObjectProvider<GameAudioEnricher> audioEnrichers;
     private final GameSessionRepository sessions;
     private final ObjectProvider<CostMonitoringService> costMonitoring;
+    private GameInputGuard gameInputGuard;
 
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
@@ -105,6 +107,13 @@ public class GameService {
         requireBudgetAvailable();
         GameType type = request.gameType() != null ? request.gameType() : GameType.QUIZ;
         String idea = ideaOf(request, type);
+        GameInputGuard guard = gameInputGuard;
+        if (guard != null) {
+            String[] visualPrompts = request.optionImages() == null ? new String[0]
+                    : request.optionImages().stream().filter(java.util.Objects::nonNull)
+                            .map(GenerateGameRequest.OptionImage::visualPrompt).toArray(String[]::new);
+            guard.requireSafe(idea, null, visualPrompts);
+        }
 
         GameContentHandler handler = handlerFor(type);
         GameContentHandler.GeneratedContent content = handler.generate(type, idea, request);
@@ -339,5 +348,11 @@ public class GameService {
         if (teacherId == null || teacherId.isBlank()) {
             throw new ApiException(ErrorCode.UNAUTHORIZED, "Cần đăng nhập tài khoản giáo viên");
         }
+    }
+
+    /** Check teacher supplied generation text before calling any AI handler. */
+    @Autowired(required = false)
+    public void setGameInputGuard(GameInputGuard guard) {
+        this.gameInputGuard = guard;
     }
 }
