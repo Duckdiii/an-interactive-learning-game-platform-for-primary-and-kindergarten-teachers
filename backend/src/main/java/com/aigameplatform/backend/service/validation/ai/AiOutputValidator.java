@@ -100,6 +100,7 @@ public class AiOutputValidator {
         }
 
         List<ValidationError> problems = new ArrayList<>();
+        problems.addAll(sentencePunctuationProblems(type, json));
         List<? extends AiQuestion> questions = output.questions();
         for (int i = 0; i < questions.size(); i++) {
             for (String problem : questions.get(i).problems()) {
@@ -107,6 +108,45 @@ public class AiOutputValidator {
             }
         }
         return new AiOutputReport(problems, problems.isEmpty() ? output : null);
+    }
+
+    /** Checks complete student-facing sentences without changing word-level content or answer labels. */
+    private static List<ValidationError> sentencePunctuationProblems(GameType type, JsonNode json) {
+        List<ValidationError> problems = new ArrayList<>();
+        JsonNode questions = json.path("questions");
+        for (int i = 0; i < questions.size(); i++) {
+            JsonNode question = questions.get(i);
+            for (String field : List.of("text", "questionText", "sentenceTemplate")) {
+                addPunctuationProblem(problems, question, i, field);
+            }
+
+            // AUDIO_VISUAL_MATCH uses audioText for isolated vocabulary such as "cat" or "Quả táo".
+            if (type != GameType.AUDIO_VISUAL_MATCH) {
+                addPunctuationProblem(problems, question, i, "audioText");
+            }
+        }
+        return problems;
+    }
+
+    private static void addPunctuationProblem(List<ValidationError> problems, JsonNode question, int index,
+            String field) {
+        JsonNode value = question.get(field);
+        if (value == null || !value.isString() || value.asString().isBlank()) return;
+        if (!endsWithSentencePunctuation(value.asString())) {
+            problems.add(new ValidationError("$.questions[" + index + "]." + field,
+                    "Câu hỏi hoặc lời đọc hoàn chỉnh phải kết thúc bằng dấu câu phù hợp"));
+        }
+    }
+
+    private static boolean endsWithSentencePunctuation(String source) {
+        String text = source.stripTrailing();
+        int index = text.length() - 1;
+        while (index >= 0 && isClosingDelimiter(text.charAt(index))) index--;
+        return index >= 0 && ".?!…。？！".indexOf(text.charAt(index)) >= 0;
+    }
+
+    private static boolean isClosingDelimiter(char value) {
+        return "\"'’”»)]}".indexOf(value) >= 0;
     }
 
     private static AiOutputReport failed(String message) {

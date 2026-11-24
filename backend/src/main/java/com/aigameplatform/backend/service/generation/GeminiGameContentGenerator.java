@@ -29,6 +29,15 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
 
     private static final tools.jackson.databind.json.JsonMapper SCHEMA_MAPPER = new tools.jackson.databind.json.JsonMapper();
 
+    private static final String STUDENT_TEXT_PUNCTUATION_GUIDANCE = """
+            QUY TẮC DẤU CÂU CHO CÂU HỎI VÀ GIỌNG ĐỌC:
+            Với các trường text, questionText, sentenceTemplate và audioText, nếu nội dung là câu hỏi, câu hướng dẫn,
+            hoặc câu nói hoàn chỉnh thì phải đặt dấu kết thúc phù hợp với ngữ điệu: dấu hỏi (?) cho câu hỏi, dấu chấm (.)
+            cho câu kể/hướng dẫn, hoặc dấu chấm than (!) khi nội dung thực sự cần nhấn mạnh. Ví dụ: "Hãy lật thẻ để tìm các cặp phép tính và kết quả đúng trong phạm vi 100." Giữ dấu câu ở cuối câu, kể cả câu có chỗ trống.
+            Không thêm dấu câu vào từ vựng đứng riêng, nhãn, phương án trả lời, tên thẻ, hoặc biểu thức toán học chỉ để
+            làm đẹp. Không đổi nội dung, đáp án, cấu trúc DSL hay luật chơi; chỉ trình bày dấu câu phù hợp.
+            """;
+
     private static final String VERIFIED_ARITHMETIC_FORMAT = """
             ĐỊNH DẠNG KIỂM CHỨNG CHO PHÉP CỘNG/TRỪ CỦA PILOT:
             Giữ nguyên kỹ năng và phạm vi trong yêu cầu của giáo viên. Mỗi questionText phải ghi đúng một phép tính
@@ -91,6 +100,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;
+        systemPrompt += "\n\n" + STUDENT_TEXT_PUNCTUATION_GUIDANCE;
         String userPrompt = attempt.isRetry()
                 ? retryPrompt(attempt)
                 : "Tạo nội dung game theo yêu cầu trong system prompt. Chỉ trả về JSON theo schema đã cung cấp.";
