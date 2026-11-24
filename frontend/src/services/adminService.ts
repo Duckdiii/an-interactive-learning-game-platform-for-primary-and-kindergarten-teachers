@@ -189,9 +189,9 @@ export interface ServiceUsageItem {
   successCount: number
   failureCount: number
   tokensUsed: number | null
-  avgLatencyMs: number | null
+  quotaUsedPercent: number | null
   cost: number | null
-  costUnit: string | null
+  costCurrency: string | null
   costSource: 'BILLING' | 'ESTIMATED' | 'UNAVAILABLE'
   status: 'OPERATIONAL' | 'UNREACHABLE' | 'UNKNOWN'
 }
@@ -204,6 +204,7 @@ export interface UsageRange {
 export interface TimeseriesPoint {
   date: string
   requests: number
+  cost?: number | null
 }
 
 export interface UsageReport {
@@ -214,12 +215,12 @@ export interface UsageReport {
 
 export interface SystemStatus {
   server: {
-    cpu: number
-    memory: number
+    cpuUsagePercent?: number
+    heapUsagePercent: number
     activeThreads: number
   }
   database: {
-    connectionPoolUsage: number
+    poolUsagePercent?: number
   }
   liveArena: {
     activeSessions: number
@@ -233,7 +234,7 @@ export interface BudgetConfig {
   redPct: number
   costCapExceeded: boolean
   currentMonthCost?: number
-  usedPercent?: number
+  budgetUsedPercent?: number
 }
 
 export interface UpdateBudgetPayload {
@@ -246,7 +247,7 @@ export async function getUsageReport(params?: {
   range?: string
   from?: string
   to?: string
-  service?: string
+  service?: ServiceUsageItem['service']
 }) {
   const response = await axiosInstance.get<ApiSuccessResponse<UsageReport>>('/admin/usage', {
     params,

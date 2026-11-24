@@ -102,12 +102,7 @@ public class GameService {
      */
     public ObjectNode generate(String teacherId, GenerateGameRequest request) {
         requireTeacher(teacherId);
-        // Circuit breaker (FR-12): chạm trần chi phí AI tháng thì ngừng nhận yêu cầu sinh game.
-        CostMonitoringService cost = costMonitoring == null ? null : costMonitoring.getIfAvailable();
-        if (cost != null && cost.isCostCapExceeded()) {
-            throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE,
-                    "Hệ thống AI tạm thời ngưng nhận yêu cầu sinh game do đã chạm trần chi phí tháng. Vui lòng liên hệ Quản trị viên.");
-        }
+        requireBudgetAvailable();
         GameType type = request.gameType() != null ? request.gameType() : GameType.QUIZ;
         String idea = ideaOf(request, type);
 
@@ -194,6 +189,7 @@ public class GameService {
             return new StoredGame(game.getGameType(), toResponse(game));
         });
         // Kiểm quyền (403/404) trước khi tính vào hạn mức, để lỗi sai game không ăn mất lượt của giáo viên.
+        requireBudgetAvailable();
         try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
             ObjectNode revised = handlerFor(stored.type()).revise(stored.response(), request.instruction().trim(), request.history());
             GameReports.MANAGEMENT_FIELDS.forEach(field -> revised.set(field, stored.response().get(field)));
@@ -208,6 +204,7 @@ public class GameService {
             return new StoredGame(game.getGameType(), toResponse(game));
         });
         RegenerateGameRequest request = input == null ? new RegenerateGameRequest(null, null, null) : input;
+        requireBudgetAvailable();
         try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
             ObjectNode preview = handlerFor(stored.type()).regenerate(stored.response(), request);
             GameReports.MANAGEMENT_FIELDS.forEach(field -> preview.set(field, stored.response().get(field)));
@@ -231,6 +228,7 @@ public class GameService {
             requireNoUnfinishedSession(gameId);
             return new StoredGame(game.getGameType(), toResponse(game));
         });
+        requireBudgetAvailable();
         try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
             GameContentHandler handler = handlerFor(stored.type());
             return voice == null ? handler.regenerateQuestion(stored.response(), questionId, feedback)
@@ -259,6 +257,15 @@ public class GameService {
             }
         } else {
             changes.add(path);
+        }
+    }
+
+    private void requireBudgetAvailable() {
+        // Circuit breaker (FR-12): chạm trần chi phí AI tháng thì ngừng nhận yêu cầu sinh game.
+        CostMonitoringService cost = costMonitoring == null ? null : costMonitoring.getIfAvailable();
+        if (cost != null && cost.isCostCapExceeded()) {
+            throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE,
+                    "Hệ thống AI tạm thời ngưng nhận yêu cầu sinh game do đã chạm trần chi phí tháng. Vui lòng liên hệ Quản trị viên.");
         }
     }
 

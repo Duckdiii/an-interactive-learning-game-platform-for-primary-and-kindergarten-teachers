@@ -79,7 +79,7 @@ class AdminUsageControllerTest {
                         ServiceName.GENERATIVE_AI, 100, 98, 2, 50000, 10.0, 1.5, "USD",
                         CostSource.ESTIMATED, ServiceStatus.OPERATIONAL
                 )),
-                List.of(new TimeseriesPointDto("2026-11-20", 15))
+                List.of(new TimeseriesPointDto("2026-11-20", 15, null))
         );
 
         when(costMonitoringService.getUsageReport(eq("7D"), any(), any(), any()))

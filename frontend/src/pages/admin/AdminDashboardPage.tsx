@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import Dialog from '../../components/ui/Dialog'
 import Icon from '../../components/ui/Icon'
 import {
   getUsageReport,
@@ -11,13 +12,34 @@ import {
   type ServiceUsageItem,
 } from '../../services/adminService'
 
+const SERVICE_LABELS = {
+  GENERATIVE_AI: 'AI tạo nội dung',
+  IMAGE_API: 'API hình ảnh',
+  TTS: 'Chuyển văn bản thành giọng nói',
+  MODERATION: 'Kiểm duyệt nội dung',
+} satisfies Record<ServiceUsageItem['service'], string>
+
+const SERVICE_STATUS_LABELS = {
+  OPERATIONAL: 'Đang hoạt động',
+  UNREACHABLE: 'Không thể kết nối',
+  UNKNOWN: 'Chưa xác định trạng thái',
+} satisfies Record<ServiceUsageItem['status'], string>
+
+type Range = 'TODAY' | '7D' | '30D' | 'CUSTOM'
+
 export default function AdminDashboardPage() {
-  const [range, setRange] = useState<'TODAY' | '7D' | '30D'>('7D')
+  const [range, setRange] = useState<Range>('7D')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+  const [service, setService] = useState<ServiceUsageItem['service'] | ''>('')
+  const [refresh, setRefresh] = useState(0)
   const [report, setReport] = useState<UsageReport | null>(null)
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null)
   const [budgetConfig, setBudgetConfig] = useState<BudgetConfig | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [reportState, setReportState] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [systemError, setSystemError] = useState(false)
+  const [budgetError, setBudgetError] = useState(false)
+  const invalidDates = range === 'CUSTOM' && (!fromDate || !toDate || fromDate > toDate)
 
   // Budget Modal state
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -25,98 +47,93 @@ export default function AdminDashboardPage() {
   const [yellowPct, setYellowPct] = useState(70)
   const [redPct, setRedPct] = useState(90)
   const [savingBudget, setSavingBudget] = useState(false)
-  const [modalSuccess, setModalSuccess] = useState<string | null>(null)
-
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const [rep, sys, bud] = await Promise.all([
-        getUsageReport({ range }),
-        getSystemStatus(),
-        getBudgetConfig(),
-      ])
-      setReport(rep)
-      setSystemStatus(sys)
-      setBudgetConfig(bud)
-      setMonthlyBudget(bud.monthlyBudget)
-      setYellowPct(bud.yellowPct)
-      setRedPct(bud.redPct)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Không thể tải dữ liệu giám sát'
-      setError(msg)
-    } finally {
-      setLoading(false)
-    }
-  }, [range])
+  const [modalError, setModalError] = useState<string | null>(null)
 
   useEffect(() => {
-    // eslint-disable-next-line react/set-state-in-effect -- tải dữ liệu khi mở trang hoặc đổi khoảng thời gian
-    void fetchData()
-  }, [fetchData])
+    if (invalidDates) return
+    let active = true
+    void getUsageReport({
+      range,
+      service: service || undefined,
+      ...(range === 'CUSTOM' ? {
+        from: fromDate + 'T00:00:00Z',
+        to: toDate + 'T23:59:59Z',
+      } : {}),
+    }).then((data) => {
+      if (!active) return
+      setReport(data)
+      setReportState('ready')
+    }, () => {
+      if (active) setReportState('error')
+    })
+    return () => { active = false }
+  }, [range, fromDate, toDate, service, refresh, invalidDates])
+
+  useEffect(() => {
+    let active = true
+    void getSystemStatus().then((data) => {
+      if (!active) return
+      setSystemStatus(data)
+      setSystemError(false)
+    }, () => {
+      if (active) setSystemError(true)
+    })
+    void getBudgetConfig().then((data) => {
+      if (!active) return
+      setBudgetConfig(data)
+      setBudgetError(false)
+    }, () => {
+      if (active) setBudgetError(true)
+    })
+    return () => { active = false }
+  }, [refresh])
+
+  const openBudget = () => {
+    if (!budgetConfig) return
+    setMonthlyBudget(budgetConfig.monthlyBudget)
+    setYellowPct(budgetConfig.yellowPct)
+    setRedPct(budgetConfig.redPct)
+    setModalError(null)
+    setIsModalOpen(true)
+  }
 
   const handleSaveBudget = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!(monthlyBudget > 0 && yellowPct > 0 && yellowPct < redPct && redPct <= 100)) {
+      setModalError('Nhập ngân sách lớn hơn 0 và ngưỡng thỏa 0 < vàng < đỏ ≤ 100.')
+      return
+    }
     try {
       setSavingBudget(true)
-      setModalSuccess(null)
+      setModalError(null)
       const updated = await updateBudgetConfig({
         monthlyBudget,
         yellowPct,
         redPct,
       })
       setBudgetConfig(updated)
-      setModalSuccess('Đã cập nhật định mức ngân sách thành công!')
-      setTimeout(() => {
-        setIsModalOpen(false)
-        setModalSuccess(null)
-      }, 1000)
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Lỗi khi cập nhật cấu hình ngân sách')
+      setIsModalOpen(false)
+    } catch {
+      setModalError('Không thể lưu cấu hình ngân sách. Vui lòng thử lại.')
     } finally {
       setSavingBudget(false)
     }
   }
 
-  // Derive metrics
-  const aiService = report?.services.find((s) => s.service === 'GENERATIVE_AI')
-  const totalTokens = aiService?.tokensUsed ?? 0
-  const aiTotalReq = aiService?.requests ?? 0
-  const aiSuccessReq = aiService?.successCount ?? 0
-  const aiSuccessRate =
-    aiTotalReq > 0 ? ((aiSuccessReq / aiTotalReq) * 100).toFixed(1) : '100.0'
+  const visibleReport = !invalidDates && reportState === 'ready' ? report : null
+  const aiService = visibleReport?.services.find((row) => row.service === 'GENERATIVE_AI')
+  const aiSuccessRate = aiService && aiService.requests > 0
+    ? (aiService.successCount / aiService.requests * 100).toFixed(1) + '%'
+    : '—'
 
-  const currentCost = budgetConfig?.currentMonthCost ?? 0
-  const budgetLimit = budgetConfig?.monthlyBudget ?? 100
-  const usedPercent = budgetConfig?.usedPercent ?? 0
+  const currentCost = budgetConfig?.currentMonthCost
+  const budgetLimit = budgetConfig?.monthlyBudget
+  const usedPercent = budgetConfig?.budgetUsedPercent
   const isCapExceeded = budgetConfig?.costCapExceeded ?? false
+  const isRed = usedPercent != null && usedPercent >= (budgetConfig?.redPct ?? 90)
+  const isYellow = usedPercent != null && usedPercent >= (budgetConfig?.yellowPct ?? 70)
 
-  const getBudgetStatusBadge = () => {
-    if (isCapExceeded || usedPercent >= (budgetConfig?.redPct ?? 90)) {
-      return {
-        label: isCapExceeded ? 'ĐÃ CHẠM TRẦN (CIRCUIT BREAKER)' : 'MỨC ĐỎ (BÁO ĐỘNG)',
-        color: 'bg-rose-100 text-rose-800 border-rose-200',
-      }
-    }
-    if (usedPercent >= (budgetConfig?.yellowPct ?? 70)) {
-      return {
-        label: 'MỨC VÀNG (CẢNH BÁO)',
-        color: 'bg-amber-100 text-amber-800 border-amber-200',
-      }
-    }
-    return {
-      label: 'MỨC XANH (AN TOÀN)',
-      color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-    }
-  }
-
-  const budgetBadge = getBudgetStatusBadge()
-
-  // Calculate SVG dimensions for timeseries
-  const timeseries = report?.timeseries ?? []
-  const maxRequests = Math.max(...timeseries.map((t) => t.requests), 10)
-  const chartHeight = 120
-  const chartWidth = 500
+  const timeseries = visibleReport?.timeseries ?? []
 
   return (
     <div className="space-y-6">
@@ -127,52 +144,59 @@ export default function AdminDashboardPage() {
             Giám sát Hạ tầng & Chi phí AI
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Theo dõi ngân sách, số lượng yêu cầu, sức khoẻ máy chủ và hạn ngạch các dịch vụ bên ngoài
+            Theo dõi ngân sách, số lượng yêu cầu, sức khoẻ máy chủ và tình trạng các dịch vụ bên ngoài
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
-          {/* Range Picker */}
-          <div className="bg-slate-100 p-1 rounded-xl flex items-center space-x-1 border border-slate-200 text-xs font-semibold">
-            {(['TODAY', '7D', '30D'] as const).map((r) => (
-              <button
-                key={r}
-                onClick={() => setRange(r)}
-                className={`px-3 py-1.5 rounded-lg transition-colors ${
-                  range === r
-                    ? 'bg-white text-indigo-700 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {r === 'TODAY' ? 'Hôm nay' : r === '7D' ? '7 ngày' : '30 ngày'}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => void fetchData()}
-            disabled={loading}
-            className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-xs transition disabled:opacity-50"
-          >
-            {loading ? 'Đang tải...' : 'Làm mới'}
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-sm">
+            Khoảng thời gian
+            <select className="ml-2 rounded-lg border border-slate-300 p-2" value={range}
+              onChange={(event) => { setReportState('loading'); setRange(event.target.value as Range) }}>
+              <option value="TODAY">Hôm nay</option>
+              <option value="7D">7 ngày</option>
+              <option value="30D">30 ngày</option>
+              <option value="CUSTOM">Tùy chỉnh</option>
+            </select>
+          </label>
+          <label className="text-sm">
+            Dịch vụ
+            <select className="ml-2 rounded-lg border border-slate-300 p-2" value={service}
+              onChange={(event) => {
+                setReportState('loading')
+                setService(event.target.value as ServiceUsageItem['service'] | '')
+              }}>
+              <option value="">Tất cả</option>
+              {Object.entries(SERVICE_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+            </select>
+          </label>
+          <button type="button" onClick={() => {
+            setReportState('loading')
+            setRefresh((value) => value + 1)
+          }} className="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+            Làm mới
           </button>
-
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs transition shadow-sm"
-          >
+          <button type="button" onClick={openBudget} disabled={!budgetConfig}
+            className="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-xl text-sm disabled:opacity-50">
             Cấu hình ngân sách
           </button>
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm">
-          {error}
+      {range === 'CUSTOM' && (
+        <div className="flex flex-wrap gap-3 text-sm">
+          <label>Từ ngày <input type="date" className="rounded-lg border border-slate-300 p-2" value={fromDate}
+            onChange={(event) => { setReportState('loading'); setFromDate(event.target.value) }} /></label>
+          <label>Đến ngày <input type="date" className="rounded-lg border border-slate-300 p-2" value={toDate}
+            onChange={(event) => { setReportState('loading'); setToDate(event.target.value) }} /></label>
+          {invalidDates && <p role="status">Chọn ngày bắt đầu và ngày kết thúc hợp lệ.</p>}
         </div>
       )}
+
+      {!invalidDates && reportState === 'loading' && <p role="status">Đang tải báo cáo sử dụng…</p>}
+      {!invalidDates && reportState === 'error' && <p role="alert">Không thể tải báo cáo sử dụng.</p>}
+      {systemError && <p role="alert">Không thể tải chỉ số hạ tầng.</p>}
+      {budgetError && <p role="alert">Không thể tải ngân sách.</p>}
 
       {/* Top Overview Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -180,187 +204,82 @@ export default function AdminDashboardPage() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase text-slate-500">Ngân sách tháng</span>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${budgetBadge.color}`}>
-              {budgetBadge.label}
-            </span>
           </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-slate-900">
-              ${currentCost.toFixed(2)}
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-lg font-bold text-slate-900">
+              {currentCost != null ? '$' + currentCost.toFixed(2) : 'Chưa có dữ liệu chi phí'}
             </span>
-            <span className="text-sm font-medium text-slate-400">
-              / ${budgetLimit.toFixed(2)} USD
-            </span>
+            {budgetLimit != null && <span className="text-sm text-slate-500">/ ${budgetLimit.toFixed(2)} USD</span>}
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
-            <div
-              className={`h-full transition-all duration-500 ${
-                isCapExceeded || usedPercent >= 90
-                  ? 'bg-rose-500'
-                  : usedPercent >= 70
-                  ? 'bg-amber-500'
-                  : 'bg-emerald-500'
-              }`}
-              style={{ width: `${Math.min(usedPercent, 100)}%` }}
-            />
-          </div>
-          <p className="text-[11px] text-slate-500 mt-2">
-            Đã tiêu thụ <strong>{usedPercent.toFixed(1)}%</strong> ngân sách tháng
-          </p>
+          {usedPercent != null && (
+            <div className="mt-3 space-y-2">
+              <progress className="w-full" aria-label="Tỷ lệ sử dụng ngân sách" value={Math.min(usedPercent, 100)} max={100} />
+              <p className="text-xs text-slate-600">Đã sử dụng {usedPercent.toFixed(1)}% ngân sách tháng</p>
+              {(isCapExceeded || isRed || isYellow) && (
+                <p role="alert" className={'text-xs font-semibold ' + (isRed || isCapExceeded ? 'text-rose-700' : 'text-amber-800')}>
+                  {isCapExceeded ? 'Đã chạm trần. Tạm dừng tạo và làm lại game bằng AI.'
+                    : isRed ? 'Cảnh báo đỏ: chi phí đã chạm ngưỡng báo động.'
+                    : 'Cảnh báo vàng: chi phí đã chạm ngưỡng cảnh báo.'}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Card 2: AI Tokens */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-slate-500">Tổng AI Tokens</span>
-            <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">
-              Gemini 1.5 Flash
-            </span>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-bold text-slate-900">
-              {totalTokens.toLocaleString('vi-VN')}
-            </span>
-            <span className="text-xs text-slate-500 ml-1">tokens</span>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-3">
-            Đơn giá: $0.075 / 1M prompt token, $0.30 / 1M response token
-          </p>
+          <span className="text-xs font-semibold uppercase text-slate-500">Tổng token AI</span>
+          <p className="mt-3 text-2xl font-bold text-slate-900">{aiService?.tokensUsed?.toLocaleString('vi-VN') ?? '—'}</p>
         </div>
 
-        {/* Card 3: Success Rate */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-slate-500">Tỷ lệ thành công AI</span>
-            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-              Độ trễ ~{aiService?.avgLatencyMs ?? 1.45}s
-            </span>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-bold text-slate-900">{aiSuccessRate}%</span>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-3">
-            Thành công <strong>{aiSuccessReq}</strong> / {aiTotalReq} yêu cầu
-          </p>
+          <span className="text-xs font-semibold uppercase text-slate-500">Tỷ lệ thành công AI</span>
+          <p className="mt-3 text-2xl font-bold text-slate-900">{aiSuccessRate}</p>
+          {aiService && aiService.requests > 0 && (
+            <p className="mt-2 text-xs text-slate-600">{aiService.successCount} / {aiService.requests} yêu cầu thành công</p>
+          )}
         </div>
 
         {/* Card 4: System Health */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase text-slate-500">Sức khoẻ máy chủ</span>
-            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-              Healthy
-            </span>
           </div>
           <div className="mt-3 flex items-baseline space-x-3">
             <div>
               <span className="text-xs text-slate-400">CPU</span>
               <p className="text-lg font-bold text-slate-800">
-                {systemStatus?.server.cpu ?? 18.5}%
+                {formatPercent(systemStatus?.server.cpuUsagePercent)}
               </p>
             </div>
             <div>
               <span className="text-xs text-slate-400">RAM (Heap)</span>
               <p className="text-lg font-bold text-slate-800">
-                {systemStatus?.server.memory ?? 34.2}%
+                {formatPercent(systemStatus?.server.heapUsagePercent)}
               </p>
             </div>
             <div>
               <span className="text-xs text-slate-400">Threads</span>
               <p className="text-lg font-bold text-slate-800">
-                {systemStatus?.server.activeThreads ?? 42}
+                {systemStatus?.server.activeThreads ?? '—'}
               </p>
             </div>
           </div>
           <p className="text-[11px] text-slate-500 mt-2">
-            PostgreSQL DB Pool: <strong>{systemStatus?.database.connectionPoolUsage ?? 14}%</strong>
+            PostgreSQL DB Pool: <strong>{formatPercent(systemStatus?.database.poolUsagePercent)}</strong>
           </p>
         </div>
       </div>
 
-      {/* Timeseries Chart Card */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-bold text-slate-800 text-base">Lưu lượng Yêu cầu theo Ngày</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Số lượng request gọi tới hệ thống trong khoảng thời gian đã chọn</p>
-          </div>
-          <div className="text-xs text-slate-500 font-medium">
-            Đỉnh: <span className="font-bold text-indigo-700">{maxRequests} req/ngày</span>
-          </div>
+      {visibleReport && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <DailyChart title="Lưu lượng theo ngày" empty="Chưa có dữ liệu lưu lượng"
+            points={timeseries.map(({ date, requests }) => ({ date, value: requests }))}
+            format={(value) => value.toLocaleString('vi-VN') + ' yêu cầu'} />
+          <DailyChart title="Chi phí theo ngày" empty="Chưa có dữ liệu chi phí"
+            points={timeseries.flatMap(({ date, cost }) => cost == null ? [] : [{ date, value: cost }])}
+            format={(value) => '$' + value.toLocaleString('en-US', { maximumFractionDigits: 4 })} />
         </div>
-
-        {timeseries.length === 0 ? (
-          <div className="py-12 text-center text-sm text-slate-400">Chưa có dữ liệu lưu lượng</div>
-        ) : (
-          <div className="w-full overflow-x-auto">
-            <div className="min-w-[480px]">
-              <svg
-                viewBox={`0 0 ${chartWidth} ${chartHeight + 30}`}
-                className="w-full h-44 overflow-visible"
-              >
-                {/* Horizontal grid lines */}
-                <line
-                  x1="0"
-                  y1={chartHeight}
-                  x2={chartWidth}
-                  y2={chartHeight}
-                  stroke="#e2e8f0"
-                  strokeWidth="1"
-                />
-                <line
-                  x1="0"
-                  y1={chartHeight / 2}
-                  x2={chartWidth}
-                  y2={chartHeight / 2}
-                  stroke="#f1f5f9"
-                  strokeDasharray="4 4"
-                  strokeWidth="1"
-                />
-
-                {/* Bars */}
-                {timeseries.map((pt, i) => {
-                  const barWidth = Math.max(chartWidth / timeseries.length - 8, 12)
-                  const x = i * (chartWidth / timeseries.length) + 4
-                  const h = (pt.requests / maxRequests) * (chartHeight - 10)
-                  const y = chartHeight - h
-
-                  return (
-                    <g key={pt.date} className="group cursor-pointer">
-                      <rect
-                        x={x}
-                        y={y}
-                        width={barWidth}
-                        height={h}
-                        rx="4"
-                        className="fill-indigo-500 hover:fill-indigo-600 transition-colors"
-                      />
-                      {/* Tooltip on hover */}
-                      <text
-                        x={x + barWidth / 2}
-                        y={y - 6}
-                        textAnchor="middle"
-                        className="text-[10px] font-bold fill-slate-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        {pt.requests}
-                      </text>
-                      {/* X Label */}
-                      <text
-                        x={x + barWidth / 2}
-                        y={chartHeight + 18}
-                        textAnchor="middle"
-                        className="text-[9px] fill-slate-400 font-medium"
-                      >
-                        {pt.date.slice(5)}
-                      </text>
-                    </g>
-                  )
-                })}
-              </svg>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Grid: Services Table & Live Arena Info */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -368,7 +287,6 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-slate-800 text-base">Trạng thái Dịch vụ Ngoại vi</h3>
-            <span className="text-xs text-slate-400">4 dịch vụ tích hợp</span>
           </div>
 
           <div className="overflow-x-auto">
@@ -377,40 +295,35 @@ export default function AdminDashboardPage() {
                 <tr className="border-b border-slate-100 text-slate-400 uppercase text-[10px] font-semibold">
                   <th className="py-2.5 px-3">Dịch vụ</th>
                   <th className="py-2.5 px-3">Trạng thái</th>
-                  <th className="py-2.5 px-3 text-right">Requests</th>
+                  <th className="py-2.5 px-3 text-right">Yêu cầu</th>
                   <th className="py-2.5 px-3 text-right">Thành công</th>
-                  <th className="py-2.5 px-3 text-right">Chi phí ước tính</th>
+                  <th className="py-2.5 px-3 text-right">Thất bại</th>
+                  <th className="py-2.5 px-3 text-right">Chi phí</th>
                   <th className="py-2.5 px-3 text-center">Nguồn chi phí</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 text-slate-700">
-                {(report?.services ?? []).map((s: ServiceUsageItem) => (
+                {(visibleReport?.services ?? []).map((s) => (
                   <tr key={s.service} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-3 px-3 font-medium text-slate-900">
                       <div className="flex items-center space-x-2">
                         <span className="font-semibold">
-                          {s.service === 'GENERATIVE_AI'
-                            ? 'Gemini 1.5 Flash'
-                            : s.service === 'IMAGE_API'
-                            ? 'Pexels Image API'
-                            : s.service === 'TTS'
-                            ? 'Google Cloud TTS'
-                            : 'School Safety Moderation'}
+                          {SERVICE_LABELS[s.service]}
                         </span>
                       </div>
                     </td>
                     <td className="py-3 px-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />
-                        Đang hoạt động
+                      <span className={s.status === 'UNREACHABLE' ? 'font-semibold text-rose-700' : 'text-slate-600'}>
+                        {SERVICE_STATUS_LABELS[s.status]}
                       </span>
                     </td>
                     <td className="py-3 px-3 text-right font-medium">{s.requests}</td>
                     <td className="py-3 px-3 text-right text-emerald-600 font-medium">
                       {s.successCount}
                     </td>
+                    <td className="py-3 px-3 text-right">{s.failureCount}</td>
                     <td className="py-3 px-3 text-right font-semibold text-slate-900">
-                      {s.cost != null ? `$${s.cost.toFixed(2)} USD` : '—'}
+                      {s.cost != null ? '$' + s.cost.toFixed(2) + ' ' + (s.costCurrency ?? 'USD') : 'Chưa có dữ liệu chi phí'}
                     </td>
                     <td className="py-3 px-3 text-center">
                       <span
@@ -422,7 +335,7 @@ export default function AdminDashboardPage() {
                             : 'bg-slate-100 text-slate-500'
                         }`}
                       >
-                        {s.costSource}
+                        {s.costSource === 'BILLING' ? 'Nhà cung cấp' : s.costSource === 'ESTIMATED' ? 'Ước tính' : '—'}
                       </span>
                     </td>
                   </tr>
@@ -432,7 +345,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Right Column: Live Arena & Circuit Breaker info */}
+        {/* Live Arena metrics */}
         <div className="space-y-6">
           {/* Live Arena Metrics */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
@@ -444,80 +357,56 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                 <span className="text-xs text-slate-600 font-medium">Phiên chơi đang hoạt động</span>
                 <span className="text-base font-bold text-indigo-700">
-                  {systemStatus?.liveArena.activeSessions ?? 0}
+                  {systemStatus?.liveArena.activeSessions ?? '—'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                 <span className="text-xs text-slate-600 font-medium">Học sinh kết nối realtime</span>
                 <span className="text-base font-bold text-indigo-700">
-                  {systemStatus?.liveArena.connectedClients ?? 0}
+                  {systemStatus?.liveArena.connectedClients ?? '—'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Circuit Breaker Info */}
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-5">
-            <h4 className="font-bold text-indigo-950 text-xs uppercase tracking-wider mb-2 flex items-center space-x-1.5">
-              <Icon name="check" className="w-4 h-4 text-indigo-600" />
-              <span>Circuit Breaker An toàn</span>
-            </h4>
-            <p className="text-xs text-indigo-800 leading-relaxed">
-              Hệ thống giám sát định mức tự động ngắt tính năng sinh game mới nếu chi phí chạm trần ($
-              {budgetLimit} USD) nhằm tránh phát sinh chi phí ngoài kế hoạch.
-            </p>
-          </div>
         </div>
       </div>
 
       {/* Budget Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800">Cấu hình Ngân sách & Định mức Cảnh báo</h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg leading-none"
-              >
-                &times;
-              </button>
-            </div>
-
-            {modalSuccess && (
-              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium">
-                {modalSuccess}
-              </div>
-            )}
+        <Dialog title="Cấu hình ngân sách và cảnh báo" initialFocusId="monthly-budget"
+          onEscape={() => { if (!savingBudget) setIsModalOpen(false) }}>
+            {modalError && <p role="alert" className="mb-4 text-sm text-rose-700">{modalError}</p>}
 
             <form onSubmit={handleSaveBudget} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label htmlFor="monthly-budget" className="block font-semibold text-slate-700 mb-1">
                   Trần ngân sách tháng ($ USD)
                 </label>
-                <input
+                <input id="monthly-budget"
                   type="number"
-                  min="0"
-                  step="5"
+                  min="0.01"
+                  step="0.01"
                   value={monthlyBudget}
                   onChange={(e) => setMonthlyBudget(Number(e.target.value))}
                   className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   required
                 />
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Khi chi phí lũy kế đạt 100% trần này, Circuit Breaker sẽ ngắt tính năng sinh game.
+                  Khi chi phí lũy kế đạt 100% trần này, hệ thống sẽ tạm dừng tạo và làm lại game bằng AI.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label htmlFor="yellow-budget" className="block font-semibold text-slate-700 mb-1">
                     Ngưỡng Vàng (%)
                   </label>
-                  <input
+                  <input id="yellow-budget"
                     type="number"
-                    min="1"
-                    max="99"
+                    min="0.01"
+                    step="0.01"
+                    max="99.99"
                     value={yellowPct}
                     onChange={(e) => setYellowPct(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -527,12 +416,13 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label htmlFor="red-budget" className="block font-semibold text-slate-700 mb-1">
                     Ngưỡng Đỏ (%)
                   </label>
-                  <input
+                  <input id="red-budget"
                     type="number"
-                    min="1"
+                    min="0.01"
+                    step="0.01"
                     max="100"
                     value={redPct}
                     onChange={(e) => setRedPct(Number(e.target.value))}
@@ -561,9 +451,41 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </Dialog>
       )}
     </div>
+  )
+}
+
+function formatPercent(value?: number) {
+  return value == null ? '—' : value.toFixed(1) + '%'
+}
+
+function DailyChart({ title, empty, points, format }: {
+  title: string
+  empty: string
+  points: { date: string; value: number }[]
+  format: (value: number) => string
+}) {
+  const max = points.reduce((highest, point) => Math.max(highest, point.value), 0) || 1
+  return (
+    <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <h3 className="font-bold text-slate-800">{title}</h3>
+      {points.length === 0 ? (
+        <p className="py-8 text-center text-sm text-slate-600">{empty}</p>
+      ) : (
+        <ul className="mt-4 max-h-64 space-y-2 overflow-y-auto">
+          {points.map(({ date, value }) => (
+            <li key={date} className="grid grid-cols-[5.5rem_1fr_auto] items-center gap-3 text-xs">
+              <time dateTime={date}>{date}</time>
+              <div aria-hidden="true" className="h-2 rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-indigo-600" style={{ width: (value / max * 100) + '%' }} />
+              </div>
+              <span>{format(value)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   )
 }

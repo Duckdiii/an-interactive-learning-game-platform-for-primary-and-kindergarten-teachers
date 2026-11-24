@@ -1,6 +1,8 @@
 package com.aigameplatform.backend.dto.admin;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public record DatabaseMetricsDto(
-        Double poolUsagePercent
+        @JsonInclude(JsonInclude.Include.NON_NULL) Double poolUsagePercent
 ) {
 }

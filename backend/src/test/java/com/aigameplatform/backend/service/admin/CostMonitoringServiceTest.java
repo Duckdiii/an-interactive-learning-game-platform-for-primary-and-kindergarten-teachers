@@ -16,6 +16,7 @@ import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.repository.BudgetConfigRepository;
 import com.aigameplatform.backend.repository.ServiceUsageRecordRepository;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -41,15 +42,18 @@ class CostMonitoringServiceTest {
     @Mock
     private AuditLogService auditLogService;
 
+    private static final Instant NOW = Instant.parse("2026-11-24T10:00:00Z");
+    private static final LocalDate TODAY = LocalDate.of(2026, 11, 24);
     private CostMonitoringService service;
 
     @BeforeEach
     void setUp() {
-        service = new CostMonitoringService(budgetConfigRepository, serviceUsageRecordRepository, auditLogService);
+        service = new CostMonitoringService(budgetConfigRepository, serviceUsageRecordRepository, auditLogService,
+                Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
     @Test
-    @DisplayName("getUsageReport with 7D range should return report with services and timeseries")
+    @DisplayName("getUsageReport without recorded usage reports no traffic, cost or service health")
     void getUsageReport_default7D_returnsReport() {
         when(serviceUsageRecordRepository.findByRecordDateBetweenOrderByRecordDateAsc(any(), any()))
                 .thenReturn(List.of());
@@ -58,7 +62,14 @@ class CostMonitoringServiceTest {
 
         assertThat(report).isNotNull();
         assertThat(report.services()).hasSize(4);
-        assertThat(report.timeseries()).isNotEmpty();
+        assertThat(report.range().from()).isEqualTo(TODAY.minusDays(6).atStartOfDay().toInstant(ZoneOffset.UTC));
+        assertThat(report.services()).allSatisfy(row -> {
+            assertThat(row.requests()).isZero();
+            assertThat(row.tokensUsed()).isNull();
+            assertThat(row.cost()).isNull();
+            assertThat(row.status().name()).isEqualTo("UNKNOWN");
+        });
+        assertThat(report.timeseries()).isEmpty();
     }
 
     @Test
@@ -70,12 +81,10 @@ class CostMonitoringServiceTest {
     }
 
     @Test
-    @DisplayName("getBudgetConfig creates default config if not existing")
-    void getBudgetConfig_createsDefaultIfNotFound() {
+    @DisplayName("getBudgetConfig returns default config without recording fake spending")
+    void getBudgetConfig_returnsDefaultWithoutFabricatingUsage() {
         when(budgetConfigRepository.findById(CostMonitoringService.DEFAULT_BUDGET_ID))
                 .thenReturn(Optional.empty());
-        when(budgetConfigRepository.save(any(BudgetConfig.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
         when(serviceUsageRecordRepository.findByRecordDateBetweenOrderByRecordDateAsc(any(), any()))
                 .thenReturn(List.of());
 
@@ -86,6 +95,9 @@ class CostMonitoringServiceTest {
         assertThat(config.yellowPct()).isEqualTo(70.0);
         assertThat(config.redPct()).isEqualTo(90.0);
         assertThat(config.costCapExceeded()).isFalse();
+        assertThat(config.currentMonthCost()).isNull();
+        assertThat(config.budgetUsedPercent()).isNull();
+        verify(budgetConfigRepository, never()).save(any());
     }
 
     @Test
@@ -131,21 +143,48 @@ class CostMonitoringServiceTest {
 
         assertThatThrownBy(() -> service.updateBudgetConfig(invalid, actor, "127.0.0.1"))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("monthlyBudget phải lớn hơn hoặc bằng 0");
+                .hasMessageContaining("monthlyBudget phải lớn hơn 0");
     }
 
     @Test
-    @DisplayName("isCostCapExceeded returns true when cost cap is reached")
-    void isCostCapExceeded_returnsCorrectState() {
-        BudgetConfig config = BudgetConfig.builder()
-                .id(CostMonitoringService.DEFAULT_BUDGET_ID)
-                .monthlyBudget(100.0)
-                .costCapExceeded(true)
-                .build();
+    void customServiceFilterAlsoFiltersTrafficAndCost() {
+        var start = TODAY.minusDays(1);
+        when(serviceUsageRecordRepository.findByRecordDateBetweenOrderByRecordDateAsc(start, TODAY))
+                .thenReturn(List.of(record(ServiceName.GENERATIVE_AI, 3, 0.12), record(ServiceName.TTS, 8, null)));
+        var report = service.getUsageReport("CUSTOM", start.atStartOfDay().toInstant(ZoneOffset.UTC), NOW, ServiceName.TTS);
+        assertThat(report.services()).singleElement().satisfies(row -> {
+            assertThat(row.service()).isEqualTo(ServiceName.TTS);
+            assertThat(row.cost()).isNull();
+        });
+        assertThat(report.timeseries()).singleElement().satisfies(point -> {
+            assertThat(point.requests()).isEqualTo(8);
+            assertThat(point.cost()).isNull();
+        });
+    }
 
+    @Test
+    void capUsesCurrentMonthRecordsEvenWithoutDashboardVisitAndIgnoresStaleFlag() {
+        var budget = BudgetConfig.builder().monthlyBudget(0.3).costCapExceeded(false).build();
         when(budgetConfigRepository.findById(CostMonitoringService.DEFAULT_BUDGET_ID))
-                .thenReturn(Optional.of(config));
-
+                .thenReturn(Optional.of(budget));
+        when(serviceUsageRecordRepository.findByRecordDateBetweenOrderByRecordDateAsc(TODAY.withDayOfMonth(1), TODAY))
+                .thenReturn(List.of(record(ServiceName.GENERATIVE_AI, 3, 0.1), record(ServiceName.TTS, 8, 0.2)))
+                .thenReturn(List.of());
         assertThat(service.isCostCapExceeded()).isTrue();
+        budget.setCostCapExceeded(true);
+        assertThat(service.isCostCapExceeded()).isFalse();
+    }
+
+    @Test
+    void invalidThresholdsAreRejectedBeforeWriting() {
+        assertThatThrownBy(() -> service.updateBudgetConfig(
+                new BudgetConfigDto(100.0, 95.0, 90.0, null, null, null), null, null))
+                .isInstanceOf(ApiException.class);
+        verifyNoInteractions(budgetConfigRepository, auditLogService);
+    }
+
+    private ServiceUsageRecord record(ServiceName name, int requests, Double cost) {
+        return ServiceUsageRecord.builder().serviceName(name).recordDate(TODAY)
+                .requests(requests).successCount(requests).failureCount(0).cost(cost).build();
     }
 }
