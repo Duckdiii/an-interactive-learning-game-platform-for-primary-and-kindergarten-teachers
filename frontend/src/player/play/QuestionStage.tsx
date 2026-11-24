@@ -148,6 +148,7 @@ export default function QuestionStage({ gameType, subject, api, sessionId, title
     // Nộp lại sau khi đã có kết quả (ví dụ chạm sau khi hết giờ) trả kết quả cũ, như máy chủ.
     if (result) return Promise.resolve(result)
     if (inFlight.current) return inFlight.current
+    if (halted) return Promise.reject(new Error('Question is paused'))
 
     const pending = send(answer).finally(() => {
       inFlight.current = null
@@ -240,7 +241,7 @@ export default function QuestionStage({ gameType, subject, api, sessionId, title
         <div className="question-in h-full w-full">
           <Renderer question={question} profile={profile} onSubmit={submit} playAudio={isAudioVisual ? replayPrompt : undefined}
             answerDisabled={
-              (isAudioVisual && (remaining === 0 || result?.status === 'TIMEOUT' || result?.status === 'SKIPPED')) ||
+              halted || (isAudioVisual && (remaining === 0 || result?.status === 'TIMEOUT' || result?.status === 'SKIPPED')) ||
               (gameType === 'MEMORY_CARD' && (remaining === 0 || result !== null))
             } />
         </div>

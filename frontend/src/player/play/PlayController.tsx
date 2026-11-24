@@ -28,6 +28,7 @@ import type { StoredProgress, StoredSession } from './sessionStore'
 interface PlayControllerProps {
   shareCode: string
   info: PublishInfo
+  covered?: boolean
   room?: { session: PlayerSession; game: StudentGame; progress?: StoredProgress }
 }
 
@@ -52,7 +53,7 @@ const isSessionGone = (error: unknown) => axios.isAxiosError(error) && [404, 409
 const sessionFromStored = (stored: StoredSession): PlayerSession => ({ ...stored, sessionType: 'SELF', status: 'ACTIVE', expiresAt: '' })
 
 /** Nối PlayerApi với renderer: biệt danh, màn vào theo khung, vào chơi (tạo phiên, tải câu hỏi), từng câu, màn xong. Chạy bên trong UiProfileProvider. */
-export default function PlayController({ shareCode, info, room }: PlayControllerProps) {
+export default function PlayController({ shareCode, info, room, covered = false }: PlayControllerProps) {
   const profile = useUiProfile()
   const [state, dispatch] = useReducer(playReducer, room, (joined) => joined
     ? playReducer({ phase: 'starting' }, { type: 'STARTED', ...joined })
@@ -246,11 +247,11 @@ export default function PlayController({ shareCode, info, room }: PlayController
       // Nhắc xoay máy là lớp phủ, không thay câu: lỡ xoay dọc giữa câu không mất cặp đã nối hay lần nộp đang chờ.
       return (
         <>
-        {needsRotate ? <RotatePrompt onStayPortrait={() => setStayPortrait(true)} /> : null}
+        {needsRotate && !covered ? <RotatePrompt onStayPortrait={() => setStayPortrait(true)} /> : null}
         <QuestionStage
           gameType={info.gameType}
           subject={info.metadata.subject}
-          covered={needsRotate}
+          covered={needsRotate || covered}
           key={question.id}
           api={api}
           sessionId={state.session.sessionId}
