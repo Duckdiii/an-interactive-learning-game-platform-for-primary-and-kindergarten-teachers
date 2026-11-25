@@ -22,6 +22,7 @@ import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.GameSessionRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
+import com.aigameplatform.backend.service.classroom.ClassroomService;
 import com.aigameplatform.backend.service.curriculum.CurriculumCatalog;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
 import java.time.Instant;
@@ -51,7 +52,8 @@ class GameServiceRegenerateTest {
         when(dsl.toResponse(any(), any())).thenAnswer(inv -> ((ObjectNode) inv.getArgument(1)).put("kind", "DSL"));
         service = new GameService(games, mock(TeacherRepository.class), List.of(dsl), JsonMapper.builder().build(),
                 mock(AiRequestRateLimiter.class), TransactionOperations.withoutTransaction(),
-                mock(GameCurriculumReviewService.class), mock(ObjectProvider.class), new java.util.Random(7), null, sessions, null, null);
+                mock(GameCurriculumReviewService.class), mock(ObjectProvider.class), new java.util.Random(7), null,
+                sessions, null, null, mock(ClassroomService.class), mock(com.aigameplatform.backend.service.lesson.GameInputGuard.class));
     }
 
     private static Game game(String authorId) {

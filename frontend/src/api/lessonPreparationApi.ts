@@ -14,8 +14,8 @@ export interface PrepareLessonInput {
   file: File
 }
 
-/** POST /games/prepare extracts a lesson and returns editable text; it does not create a game. */
-export async function postPrepareLesson(input: PrepareLessonInput, signal?: AbortSignal) {
+/** Extracts one PDF/DOCX and asks Gemini for a teacher-reviewable idea; it does not save a game. */
+export async function postPrepareLesson(input: PrepareLessonInput, signal?: AbortSignal): Promise<PreparedLesson> {
   const body = new FormData()
   body.append('subject', input.subject)
   body.append('gradeLevel', input.gradeLevel)

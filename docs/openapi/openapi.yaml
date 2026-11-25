@@ -330,21 +330,80 @@ paths:
         '401':
           description: Cần đăng nhập tài khoản giáo viên.
 
+  /games/prepare:
+    post:
+      tags: [Games]
+      operationId: prepareLessonIdea
+      summary: Đọc giáo án và chuẩn bị ý tưởng game để giáo viên duyệt (FR-02)
+      description: |
+        Nhận đúng một tệp `.docx` hoặc `.pdf` (tối đa 10 MiB), môn học, khối lớp và ý tưởng tùy chọn.
+        Backend trích xuất văn bản có giới hạn tài nguyên, kiểm tra đầu vào và dùng Gemini để tạo ý tưởng
+        có thể chỉnh sửa. Giáo viên phải xem và xác nhận ý tưởng trước khi gọi `POST /games/generate`.
+        Endpoint không tạo/lưu game và không lưu tệp giáo án hay nội dung trích xuất.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [subject, gradeLevel, file]
+              properties:
+                subject:
+                  $ref: '#/components/schemas/Subject'
+                gradeLevel:
+                  $ref: '#/components/schemas/GradeLevel'
+                idea:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+                  description: Ý tưởng gợi ý thêm cho AI; có thể bỏ trống.
+                file:
+                  type: string
+                  format: binary
+                  description: Đúng một giáo án `.docx` hoặc `.pdf`, tối đa 10 MiB.
+      responses:
+        '200':
+          description: Ý tưởng nháp để giáo viên xem, sửa và xác nhận.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { type: boolean, const: true }
+                  data:
+                    type: object
+                    required: [idea]
+                    properties:
+                      idea: { type: string, minLength: 10, maxLength: 2000 }
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+
   /games/generate:
     post:
       tags: [Games]
       operationId: generateGame
       summary: AI sinh game (UC-02)
       description: |
-        Nhận `application/json`, hoặc `multipart/form-data` khi đính kèm tệp giáo án.
-        Phải có **ít nhất một** trong `idea`, `file`, `randomTopic`; thiếu cả ba thì 400
-        "Vui lòng nhập ý tưởng hoặc tải giáo án". Có `idea` và `file` cùng lúc thì dùng cả hai.
+        Nhận `application/json`. Phải có ít nhất một trong `idea` hoặc `randomTopic`; thiếu cả hai thì 400.
+        Giáo án được xử lý riêng qua `POST /games/prepare`; chỉ gửi ý tưởng đã được giáo viên xem và xác nhận.
         `metadata.topic` và `metadata.title` do hệ thống rút ra từ ý tưởng.
 
         Khi có `voice.gender`, dùng giọng TTS nam hoặc nữ nếu khả dụng. Vùng giọng đọc chưa áp dụng.
 
-        Kết quả là `GameResponse` với `status: DRAFT` (đã lưu vào kho học liệu), đã qua đủ 3 lớp
-        kiểm duyệt, media đã gắn (`imageUrl` từ Pexels, `audioUrl` từ TTS) khi có thể.
+        Kết quả là `GameResponse` với `status: DRAFT` (đã lưu vào kho học liệu), đã qua pipeline kiểm tra hiện có,
+        media được gắn khi dịch vụ tương ứng khả dụng.
 
         **Tiến trình (NFR-01):** nếu gửi `Accept: text/event-stream`, response là luồng SSE thay cho
         JSON: sự kiện `progress` (`{ "step", "percent" }`, `step` thuộc `ANALYZING, VALIDATING,
@@ -356,12 +415,12 @@ paths:
         Giới hạn 10 yêu cầu mỗi phút mỗi người dùng (NFR-04).
 
         **Game ngoài danh mục (`gameType: CUSTOM`):** AI đọc `idea`, tự lập kế hoạch cách chơi và sinh
-        game CPF Game v2.0.0 (`docs/cpf-game-v2.0.0.md`) thay cho DSL v1.0.0; kiểm duyệt 3 lớp theo mục 4
+        game CPF Game v2.0.0 (`docs/cpf-game-v2.0.0.md`) thay cho DSL v1.0.0; kiểm duyệt theo mục 4
         của tài liệu đó. Kết quả là nhánh CPF của `GameResponse`. `CUSTOM` do hệ thống đề xuất khi mô tả
         nằm ngoài 10 loại (`suggest-game-types` trả `CUSTOM`); client gửi `gameType: CUSTOM` khi giáo viên
         chấp nhận đề xuất đó, giao diện không có `CUSTOM` trong danh sách chọn tay. Backend không phân
         biệt hai đường này. Với `CUSTOM`, `idea` là bắt buộc (thiếu thì 400).
-      x-status: extended-pending  # đã cài bản JSON đồng bộ (cả CUSTOM); chưa: SSE, tệp giáo án, chọn vùng giọng đọc
+      x-status: extended-pending  # JSON đồng bộ đã có; SSE và chọn vùng giọng đọc còn pending
       security:
         - bearerAuth: []
       requestBody:
@@ -370,19 +429,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GenerateGameRequest'
-          multipart/form-data:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/GenerateGameRequest'
-                - type: object
-                  properties:
-                    file:
-                      type: string
-                      format: binary
-                      description: Giáo án `.docx` hoặc `.pdf`, tối đa 10MB (FLD-04).
-            encoding:
-              voice:
-                contentType: application/json
       responses:
         '200':
           description: |
@@ -407,6 +453,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '504':
           $ref: '#/components/responses/AiTimeout'
 
@@ -583,47 +631,6 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalError'
-
-  /games/prepare:
-    post:
-      tags: [Games]
-      operationId: prepareLesson
-      summary: Phân tích một tệp PDF hoặc DOCX tối đa 10 MiB để giáo viên duyệt ý tưởng
-      x-status: implemented
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required: [subject, gradeLevel, file]
-              properties:
-                subject: { $ref: '#/components/schemas/Subject' }
-                gradeLevel: { $ref: '#/components/schemas/GradeLevel' }
-                idea: { type: string, description: 'Ý tưởng bổ sung, từ 10 đến 2.000 ký tự khi có nội dung.' }
-                file: { type: string, format: binary }
-      responses:
-        '200':
-          description: Ý tưởng đề xuất để giáo viên xem lại.
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [success, data]
-                properties:
-                  success: { const: true }
-                  data:
-                    type: object
-                    required: [idea]
-                    properties:
-                      idea: { type: string }
-        '400': { $ref: '#/components/responses/ValidationError' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-        '422': { description: Tệp quá lớn, sai định dạng hoặc giáo án cần làm rõ. }
-        '503': { description: Dịch vụ xử lý giáo án chưa sẵn sàng. }
-        '504': { $ref: '#/components/responses/AiTimeout' }
 
   /games/{gameId}/narration/preview:
     parameters:
@@ -3242,6 +3249,7 @@ components:
     UnprocessableContent:
       description: |
         Một trong các mã 422:
+        - `LESSON_CLARIFICATION_REQUIRED`: chưa xác định được một mục tiêu học tập rõ ràng từ giáo án.
         - `UNSAFE_CONTENT`: ý tưởng, giáo án, nội dung AI sinh ra hoặc nội dung sửa tay không an toàn.
           Backend **không** tự sinh lại; khi sửa tay thì giữ nguyên bản cũ.
         - `FILE_TOO_LARGE_OR_INVALID_FORMAT`: tệp giáo án sai định dạng hoặc quá 10MB.
@@ -3256,6 +3264,16 @@ components:
       description: |
         `AI_GENERATION_TIMEOUT`: dịch vụ AI timeout sau khi Backend đã gọi lại tối đa 2 lần.
         Frontend giữ lại ý tưởng đã nhập để thử lại không phải nhập lại.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: |
+        Một trong các mã 503:
+        - `LESSON_PROCESSING_UNAVAILABLE`: bộ trích xuất hoặc dịch vụ Gemini chuẩn bị ý tưởng chưa sẵn sàng.
+        - `INPUT_SAFETY_UNAVAILABLE`: chưa kiểm tra được an toàn đầu vào.
+        - `SERVICE_UNAVAILABLE`: dịch vụ AI tạm thời không khả dụng, gồm trường hợp chạm trần chi phí.
       content:
         application/json:
           schema:
@@ -3287,6 +3305,7 @@ components:
         | `FORBIDDEN` | 403 | đã cài | Sai vai trò, tài nguyên của người khác |
         | `NOT_FOUND` | 404 | đã cài | Game/session/mã không tồn tại |
         | `FILE_TOO_LARGE_OR_INVALID_FORMAT` | 422 | đã cài | Sai định dạng hoặc dung lượng tệp |
+        | `LESSON_CLARIFICATION_REQUIRED` | 422 | đã cài | Chưa xác định được một mục tiêu học tập rõ ràng từ giáo án |
         | `UNSAFE_CONTENT` | 422 | đã cài | Nội dung không an toàn |
         | `AI_GENERATION_TIMEOUT` | 504 | đã cài | Dịch vụ AI timeout sau khi retry |
         | `INTERNAL_ERROR` | 500 | đã cài | Lỗi không xác định |
@@ -3296,12 +3315,15 @@ components:
         | `LOGIN_TEMPORARILY_LOCKED` | 429 | đã cài | Đăng nhập sai quá 5 lần, khoá 15 phút |
         | `CONTENT_NOT_AGE_APPROPRIATE` | 422 | chưa cài | Nội dung chưa phù hợp lứa tuổi |
         | `SERVICE_UNAVAILABLE` | 503 | đã cài | Dịch vụ tạm thời không khả dụng (chạm trần chi phí AI, circuit breaker) |
+        | `LESSON_PROCESSING_UNAVAILABLE` | 503 | đã cài | Không trích xuất hoặc chuẩn bị được ý tưởng từ giáo án |
+        | `INPUT_SAFETY_UNAVAILABLE` | 503 | đã cài | Chưa kiểm tra được an toàn đầu vào |
       enum:
         - VALIDATION_ERROR
         - UNAUTHORIZED
         - FORBIDDEN
         - NOT_FOUND
         - FILE_TOO_LARGE_OR_INVALID_FORMAT
+        - LESSON_CLARIFICATION_REQUIRED
         - UNSAFE_CONTENT
         - AI_GENERATION_TIMEOUT
         - INTERNAL_ERROR
@@ -3311,6 +3333,8 @@ components:
         - LOGIN_TEMPORARILY_LOCKED
         - CONTENT_NOT_AGE_APPROPRIATE
         - SERVICE_UNAVAILABLE
+        - LESSON_PROCESSING_UNAVAILABLE
+        - INPUT_SAFETY_UNAVAILABLE
 
     ErrorBody:
       type: object

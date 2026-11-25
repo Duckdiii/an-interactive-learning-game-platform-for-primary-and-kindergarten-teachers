@@ -689,7 +689,8 @@ class GameGenerationServiceTest {
         } catch (IOException e) { throw new java.io.UncheckedIOException(e); }
         List<AbstractGameValidator> validators = new ArrayList<>(GameTestFixtures.schemaAndBusinessRuleValidators(MAPPER));
         validators.add(new SafetyGameValidator(new com.aigameplatform.backend.service.validation.ContentSafetyCheck(
-                new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")), moderation, false)));
+                new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")), moderation,
+                moderation.isConfigured())));
         GameValidationService validation = new GameValidationService(validators, MAPPER);
         Random random = new Random(7);
         return new GameGenerationService(beans.getBeanProvider(GameContentGenerator.class),

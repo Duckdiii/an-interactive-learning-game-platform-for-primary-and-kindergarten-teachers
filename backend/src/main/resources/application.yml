@@ -5,8 +5,8 @@ spring:
     name: aigame-backend
   servlet:
     multipart:
-      max-file-size: ${LESSON_MAX_FILE_SIZE:10MB}
-      max-request-size: ${LESSON_MAX_REQUEST_SIZE:11MB}
+      max-file-size: 10MB
+      max-request-size: 11MB
 
   # SMTP cho thư đặt lại mật khẩu; chỉ dùng khi app.mail.enabled=true (MAIL_ENABLED).
   mail:

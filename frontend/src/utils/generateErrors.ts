@@ -22,7 +22,7 @@ export class GenerateBlockedError extends Error {
 /** Đổi lỗi của một lần sinh game thành loại lỗi và câu hiển thị (câu theo bảng mã lỗi chung, không thêm câu mới trừ needLesson). */
 export function describeGenerateError(error: unknown): GenerateFailure {
   if (axios.isCancel(error)) return { kind: 'canceled', message: '' }
-  if (error instanceof GenerateBlockedError) return { kind: 'needLesson', message: viText.generator.needLessonForServer }
+  if (error instanceof GenerateBlockedError) return { kind: 'needLesson', message: viText.generator.needLessonForGenerate }
   if (!axios.isAxiosError(error)) return { kind: 'other', message: viText.generator.createFailed }
 
   const parsed = parseApiError(error, viText.generator.createFailed)

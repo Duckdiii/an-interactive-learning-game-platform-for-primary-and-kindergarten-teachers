@@ -15,7 +15,7 @@ import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
-import com.aigameplatform.backend.security.JwtService;
+import com.aigameplatform.backend.service.game.GameService;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -30,18 +30,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.json.JsonMapper;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Opt-in live smoke: real Supabase PostgreSQL and Gemini with local-only safety checks;
@@ -53,12 +44,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.jpa.hibernate.ddl-auto=validate",
         "app.curriculum-rag.enabled=false",
         "app.moderation.required=false",
+        "app.moderation.openai.api-key=",
         "app.ai.gemini.game-generation.enabled=true",
         "debug=false",
         "logging.level.org.hibernate.orm.connections.pooling=OFF",
         "logging.level.org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLogger=OFF"
 })
-@AutoConfigureMockMvc
 class Fr02SupabaseLiveTest {
     private static final String LESSON_TEXT = "Lesson plan. Grade 2 Mathematics. Learning objective: identify squares and triangles in classroom objects. Practice counting up to five objects. Use only the shapes and number range stated here.";
     private static final String TEACHER_ID_QUERY = "select count(g) from Game g where g.author.id = :teacherId";
@@ -66,15 +57,12 @@ class Fr02SupabaseLiveTest {
     @Autowired private TeacherRepository teachers;
     @Autowired private GameRepository games;
     @Autowired private LessonPreparationService lessonPreparation;
+    @Autowired private GameService gameService;
     @Autowired private EntityManager entityManager;
     @Autowired private DataSource dataSource;
-    @Autowired private MockMvc mvc;
-    @Autowired private JsonMapper mapper;
-    @Autowired private JwtService jwtService;
 
     private Teacher teacher;
     private AuthenticatedTeacher principal;
-    private String accessToken;
 
     @BeforeEach
     void createSyntheticTeacher() throws Exception {
@@ -94,7 +82,6 @@ class Fr02SupabaseLiveTest {
         candidate.setPasswordHash("not-a-login-credential");
         teacher = teachers.saveAndFlush(candidate);
         principal = new AuthenticatedTeacher(teacher.getId(), email, "fr02-live-" + UUID.randomUUID());
-        accessToken = jwtService.generateAccessToken(teacher.getId(), email, "fr02-live-" + UUID.randomUUID());
     }
 
     @AfterEach
@@ -119,39 +106,22 @@ class Fr02SupabaseLiveTest {
         var upload = new MockMultipartFile("file", "fr02-synthetic-lesson.docx",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document", syntheticDocx());
 
-        var prepareResponse = mvc.perform(multipart("/api/games/prepare").file(upload)
-                        .param("subject", Subject.MATH.name())
-                        .param("gradeLevel", GradeLevel.GRADE_2.name())
-                        .param("idea", "Create a simple quiz about squares and triangles, limited to the lesson objective.")
-                        .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.idea").isString())
-                .andReturn();
-        String preparedIdea = mapper.readTree(prepareResponse.getResponse().getContentAsString())
-                .path("data").path("idea").asText();
+        var prepared = lessonPreparation.prepare(Subject.MATH, GradeLevel.GRADE_2,
+                "Create a simple quiz about squares and triangles, limited to the lesson objective.", upload, principal);
 
-        assertThat(preparedIdea).isNotBlank()
+        assertThat(prepared.idea()).isNotBlank()
                 .hasSizeGreaterThanOrEqualTo(LessonPreparationService.IDEA_MIN_LENGTH)
                 .hasSizeLessThanOrEqualTo(LessonPreparationService.IDEA_MAX_LENGTH);
         assertThat(gamesForSyntheticTeacher()).as("prepare must not save a game before teacher confirmation")
                 .isEqualTo(gamesBefore);
 
-        var request = new GenerateGameRequest(Subject.MATH, GradeLevel.GRADE_2, preparedIdea, false,
-                GameType.QUIZ, null, null, null, mapper.createObjectNode().put("region", "NORTH").put("gender", "FEMALE"));
-        var generateResponse = mvc.perform(post("/api/games/generate")
-                        .header("Authorization", "Bearer " + accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsBytes(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.status").value("DRAFT"))
-                .andReturn();
-        var response = mapper.readTree(generateResponse.getResponse().getContentAsString()).path("data");
+        var request = new GenerateGameRequest(Subject.MATH, GradeLevel.GRADE_2, prepared.idea(), false,
+                GameType.QUIZ, null);
+        var response = gameService.generate(teacher.getId(), request);
 
-        String gameId = response.path("gameId").asText();
+        String gameId = response.path("gameId").asString();
         assertThat(gameId).isNotBlank();
-        assertThat(response.path("status").asText()).isEqualTo("DRAFT");
+        assertThat(response.path("status").asString()).isEqualTo("DRAFT");
         Game persisted = games.findByIdAndAuthor_Id(gameId, teacher.getId()).orElseThrow();
         assertThat(persisted.getStatus()).isEqualTo(GameStatus.DRAFT);
         assertThat(persisted.getAuthor().getId()).isEqualTo(teacher.getId());

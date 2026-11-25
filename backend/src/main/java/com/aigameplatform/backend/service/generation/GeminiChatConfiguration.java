@@ -32,9 +32,6 @@ public class GeminiChatConfiguration {
     ChatModel lessonPreparationChatModel(@Value("${app.ai.gemini.api-key:}") String apiKey,
             @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName,
             @Value("${app.ai.gemini.lesson-preparation.timeout-seconds:30}") long timeoutSeconds) {
-        if (apiKey.isBlank()) {
-            throw new IllegalStateException("GEMINI_API_KEY is required when Gemini lesson preparation is enabled");
-        }
         if (timeoutSeconds <= 0) throw new IllegalArgumentException("Lesson preparation timeout must be positive");
         return modelBuilder(apiKey, modelName).timeout(Duration.ofSeconds(timeoutSeconds))
                 .logRequestsAndResponses(false).build();

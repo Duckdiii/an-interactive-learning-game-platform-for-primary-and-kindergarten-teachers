@@ -38,7 +38,7 @@
 		<pitest-junit5.version>1.2.3</pitest-junit5.version>
 	</properties>
 	<dependencies>
-		<!-- Parse the supported DOCX and PDF lesson formats in an isolated worker. -->
+		<!-- PDF and DOCX text extraction for lesson plans; OCR is intentionally not included. -->
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>

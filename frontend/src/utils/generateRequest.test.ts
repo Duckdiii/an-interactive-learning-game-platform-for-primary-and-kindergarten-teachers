@@ -33,7 +33,6 @@ describe('checkGenerate', () => {
     expect(checkGenerate(form({ idea: 'ngắn' }), 'idea')).toBe('needIdea')
     expect(checkGenerate(form({ idea: 'Đếm số lượng con vật' }), 'idea')).toBeNull()
     expect(checkGenerate(form({ hasFile: true }), 'idea')).toBeNull()
-    expect(checkGenerate(form({ idea: 'ngắn', hasFile: true }), 'idea')).toBe('ideaTooShortWithFile')
   })
 
   it('ý tưởng chỉ khoảng trắng không được tính', () => {

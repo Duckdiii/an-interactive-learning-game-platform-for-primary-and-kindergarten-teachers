@@ -66,11 +66,16 @@ class TextSafetyControllerTest {
                 .thenReturn(List.of(new ModerationResult(false, List.of())))
                 .thenReturn(List.of(new ModerationResult(true, List.of("violence"))))
                 .thenThrow(new ModerationUnavailableException("Không khả dụng"));
-        mvc.perform(request("{\"texts\":[\"con mèo\"]}")).andExpect(status().isOk())
+        MockMvc moderationMvc = MockMvcBuilders.standaloneSetup(new TextSafetyController(
+                        new ContentSafetyCheck(new BlockedWordList(List.of("từ cấm")), moderation, true), requests))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+                .build();
+        moderationMvc.perform(request("{\"texts\":[\"con mèo\"]}")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.safe").value(true));
-        mvc.perform(request("{\"texts\":[\"câu bị gắn cờ\"]}")).andExpect(status().isUnprocessableContent())
+        moderationMvc.perform(request("{\"texts\":[\"câu bị gắn cờ\"]}")).andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.error.code").value("UNSAFE_CONTENT"));
-        mvc.perform(request("{\"texts\":[\"con cá\"]}")).andExpect(status().isServiceUnavailable())
+        moderationMvc.perform(request("{\"texts\":[\"con cá\"]}")).andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.error.code").value("SERVICE_UNAVAILABLE"));
     }
 

@@ -44,7 +44,7 @@ class SafetyGameValidatorTest {
 
     private SafetyGameValidator validator(boolean configured) {
         when(client.isConfigured()).thenReturn(configured);
-        return new SafetyGameValidator(new ContentSafetyCheck(blockedWords, client, false));
+        return new SafetyGameValidator(new ContentSafetyCheck(blockedWords, client, configured));
     }
 
     private static List<ModerationResult> allClean(int count) {
@@ -135,6 +135,16 @@ class SafetyGameValidatorTest {
 
         assertThat(validator.validate(new GameValidationContext(quiz()))).isEmpty();
         verify(client, never()).moderate(anyList());
+    }
+
+    @Test
+    void optionalModerationStillRunsWhenTheClientIsConfigured() throws IOException {
+        when(client.isConfigured()).thenReturn(true);
+        when(client.moderate(anyList())).thenAnswer(inv -> allClean(((List<?>) inv.getArgument(0)).size()));
+        SafetyGameValidator validator = new SafetyGameValidator(new ContentSafetyCheck(blockedWords, client, false));
+
+        assertThat(validator.validate(new GameValidationContext(quiz()))).isEmpty();
+        verify(client).moderate(anyList());
     }
 
     @Test

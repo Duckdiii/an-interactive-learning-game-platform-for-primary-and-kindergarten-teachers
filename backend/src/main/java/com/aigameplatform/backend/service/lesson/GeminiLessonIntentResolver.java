@@ -12,6 +12,8 @@ import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
@@ -19,6 +21,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Component
 @ConditionalOnProperty(name = "app.ai.gemini.game-generation.enabled", havingValue = "true")
 public class GeminiLessonIntentResolver implements LessonIntentResolver {
+    private static final Logger log = LoggerFactory.getLogger(GeminiLessonIntentResolver.class);
     private static final String SCHEMA = """
             {"type":"object","additionalProperties":false,"required":["status","preparedIdea"],"properties":{
               "status":{"type":"string","enum":["READY","CLARIFICATION_REQUIRED"]},
@@ -65,6 +68,9 @@ public class GeminiLessonIntentResolver implements LessonIntentResolver {
             String prepared = output.path("preparedIdea").asString("");
             return new Resolution(status, status == Status.READY ? prepared : "");
         } catch (RuntimeException e) {
+            Throwable cause = e.getCause();
+            log.warn("Gemini lesson preparation failed (exception={}, cause={})",
+                    e.getClass().getSimpleName(), cause == null ? "none" : cause.getClass().getSimpleName());
             throw new AiGenerationTimeoutException("AI chưa phân tích được giáo án. Vui lòng thử lại sau.");
         }
     }
