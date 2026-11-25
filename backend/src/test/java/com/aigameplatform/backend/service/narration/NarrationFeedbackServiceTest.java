@@ -43,8 +43,7 @@ class NarrationFeedbackServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new NarrationFeedbackService(games, assets, viettel, elevenLabs, storage,
-                new Mp3AudioValidator(), "1");
+        service = new NarrationFeedbackService(games, assets, viettel, elevenLabs, storage, "1");
         lenient().when(assets.findByCacheKey(anyString())).thenAnswer(call ->
                 Optional.ofNullable(cache.get(call.getArgument(0))));
         lenient().when(assets.saveAndFlush(any(SharedNarrationAsset.class))).thenAnswer(call -> {
@@ -143,7 +142,7 @@ class NarrationFeedbackServiceTest {
     void rejectsMalformedProviderAudioWithoutSavingOrUploadingIt() {
         when(games.findByIdAndAuthor_Id("game-1", "teacher-1"))
                 .thenReturn(Optional.of(game("game-1", Subject.MATH)));
-        when(viettel.synthesizeVietnamese("Đúng rồi!")).thenReturn(new SynthesizedAudio(new byte[] {1, 2, 3}, 1));
+        when(viettel.synthesizeVietnamese("Đúng rồi!")).thenThrow(new IllegalArgumentException("Invalid MP3"));
 
         assertUnavailable(() -> service.getFeedbackAudioUrls("game-1", TEACHER));
         verify(storage, never()).upload(anyString(), any(byte[].class));
@@ -160,6 +159,27 @@ class NarrationFeedbackServiceTest {
 
         assertUnavailable(() -> service.getFeedbackAudioUrls("game-1", TEACHER));
         verify(storage, never()).createSignedUrl(anyString(), org.mockito.ArgumentMatchers.anyInt());
+    }
+
+    @Test
+    void losingConcurrentInsertCleansOnlyItsOwnUploadAndUsesWinner() {
+        when(games.findByIdAndAuthor_Id("game-1", "teacher-1"))
+                .thenReturn(Optional.of(game("game-1", Subject.MATH)));
+        when(viettel.synthesizeVietnamese(anyString())).thenReturn(audio());
+        java.util.ArrayList<String> discarded = new java.util.ArrayList<>();
+        when(assets.saveAndFlush(any(SharedNarrationAsset.class))).thenAnswer(call -> {
+            SharedNarrationAsset candidate = call.getArgument(0);
+            discarded.add(candidate.getStoragePath());
+            SharedNarrationAsset winner = new SharedNarrationAsset();
+            winner.setStoragePath("winner/" + candidate.getPhraseKey() + ".mp3");
+            cache.put(candidate.getCacheKey(), winner);
+            throw new org.springframework.dao.DataIntegrityViolationException("duplicate cache key");
+        });
+        var result = service.getFeedbackAudioUrls("game-1", TEACHER);
+        assertThat(result.correctAudioUrl()).endsWith("winner/correct.mp3");
+        assertThat(result.wrongAudioUrl()).endsWith("winner/wrong.mp3");
+        assertThat(discarded).hasSize(2).allMatch(path -> path.startsWith("shared/feedback/"));
+        discarded.forEach(path -> verify(storage).delete(java.util.List.of(path)));
     }
 
     private static void assertUnavailable(Runnable action) {

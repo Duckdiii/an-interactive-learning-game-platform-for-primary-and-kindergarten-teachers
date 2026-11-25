@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.narration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,10 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionOperations;
+import org.springframework.transaction.support.TransactionTemplate;
 
 class GameNarrationServiceTest {
     @Test
@@ -43,14 +48,27 @@ class GameNarrationServiceTest {
         when(storage.createSignedUrl(any(String.class), org.mockito.ArgumentMatchers.eq(600)))
                 .thenReturn("https://storage.test/audio");
         when(assets.saveAndFlush(any(GameNarrationAsset.class))).thenAnswer(call -> call.getArgument(0));
+        PlatformTransactionManager database = mock(PlatformTransactionManager.class);
+        TransactionStatus snapshot = mock(TransactionStatus.class);
+        TransactionStatus write = mock(TransactionStatus.class);
+        when(database.getTransaction(any())).thenReturn(snapshot, write);
 
-        var result = new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class), storage)
+        var result = new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class), storage,
+                new TransactionTemplate(database))
                 .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session"));
 
         assertThat(result.audioUrl()).isEqualTo("https://storage.test/audio");
         assertThat(result.bytes()).isEqualTo(3);
-        verify(storage).upload(any(String.class), any(byte[].class));
-        verify(assets).saveAndFlush(any(GameNarrationAsset.class));
+        var calls = inOrder(database, games, tts, storage, assets);
+        calls.verify(games).findByIdAndAuthor_IdForUpdate("game-1", "teacher-1");
+        calls.verify(database).commit(snapshot);
+        calls.verify(tts).synthesizeVietnamese("Chào các em");
+        calls.verify(storage).upload(any(String.class), any(byte[].class));
+        calls.verify(database).getTransaction(any());
+        calls.verify(games).findByIdAndAuthor_IdForUpdate("game-1", "teacher-1");
+        calls.verify(assets).saveAndFlush(any(GameNarrationAsset.class));
+        calls.verify(database).commit(write);
+        calls.verify(storage).createSignedUrl(any(String.class), org.mockito.ArgumentMatchers.eq(600));
     }
 
     @Test
@@ -62,7 +80,8 @@ class GameNarrationServiceTest {
         when(games.findByIdAndAuthor_IdForUpdate("game-1", "teacher-1")).thenReturn(Optional.of(game));
 
         assertThatThrownBy(() -> new GameNarrationService(games, mock(GameNarrationAssetRepository.class),
-                mock(ViettelTtsClient.class), mock(ElevenLabsTtsClient.class), mock(SupabaseNarrationStorage.class))
+                mock(ViettelTtsClient.class), mock(ElevenLabsTtsClient.class), mock(SupabaseNarrationStorage.class),
+                TransactionOperations.withoutTransaction())
                 .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session")))
                 .isInstanceOfSatisfying(ApiException.class, error -> {
                     assertThat(error.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR);
@@ -83,7 +102,8 @@ class GameNarrationServiceTest {
                 .mapToObj(ignored -> mock(GameNarrationAsset.class)).toList());
 
         assertThatThrownBy(() -> new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class),
-                mock(SupabaseNarrationStorage.class))
+                mock(SupabaseNarrationStorage.class),
+                TransactionOperations.withoutTransaction())
                 .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session")))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("20");
@@ -99,7 +119,8 @@ class GameNarrationServiceTest {
         when(games.findByIdAndAuthor_IdForUpdate("game-1", "teacher-1")).thenReturn(Optional.of(game));
 
         assertThatThrownBy(() -> new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class),
-                mock(SupabaseNarrationStorage.class))
+                mock(SupabaseNarrationStorage.class),
+                TransactionOperations.withoutTransaction())
                 .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session")))
                 .isInstanceOfSatisfying(ApiException.class, error -> {
                     assertThat(error.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR);
@@ -121,7 +142,8 @@ class GameNarrationServiceTest {
         when(tts.synthesizeVietnamese("Read this prompt")).thenThrow(new IllegalStateException("private provider detail"));
 
         assertThatThrownBy(() -> new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class),
-                mock(SupabaseNarrationStorage.class))
+                mock(SupabaseNarrationStorage.class),
+                TransactionOperations.withoutTransaction())
                 .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session")))
                 .isInstanceOfSatisfying(ApiException.class, error -> {
                     assertThat(error.getErrorCode()).isEqualTo(ErrorCode.NARRATION_UNAVAILABLE);
@@ -146,7 +168,8 @@ class GameNarrationServiceTest {
         org.mockito.Mockito.doThrow(new IllegalStateException("private storage detail"))
                 .when(storage).upload(any(String.class), any(byte[].class));
 
-        assertThatThrownBy(() -> new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class), storage)
+        assertThatThrownBy(() -> new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class), storage,
+                TransactionOperations.withoutTransaction())
                 .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session")))
                 .isInstanceOfSatisfying(ApiException.class, error -> {
                     assertThat(error.getErrorCode()).isEqualTo(ErrorCode.NARRATION_UNAVAILABLE);
@@ -174,7 +197,8 @@ class GameNarrationServiceTest {
         when(assets.findByGame_IdAndQuestion_Id("game-1", question.getId())).thenReturn(Optional.of(existing));
         when(storage.createSignedUrl(existing.getStoragePath(), 600)).thenReturn("https://storage.test/cached");
 
-        var result = new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class), storage)
+        var result = new GameNarrationService(games, assets, tts, mock(ElevenLabsTtsClient.class), storage,
+                TransactionOperations.withoutTransaction())
                 .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session"));
 
         assertThat(result.audioUrl()).isEqualTo("https://storage.test/cached");
@@ -196,7 +220,8 @@ class GameNarrationServiceTest {
         when(assets.findAllByGame_Id("game-1")).thenReturn(List.of(stale));
 
         assertThat(new GameNarrationService(mock(GameRepository.class), assets,
-                mock(ViettelTtsClient.class), mock(ElevenLabsTtsClient.class), storage).signedUrls("game-1")).isEmpty();
+                mock(ViettelTtsClient.class), mock(ElevenLabsTtsClient.class), storage,
+                TransactionOperations.withoutTransaction()).signedUrls("game-1")).isEmpty();
         verify(storage, never()).createSignedUrl(any(String.class), org.mockito.ArgumentMatchers.anyInt());
     }
 
@@ -227,7 +252,8 @@ class GameNarrationServiceTest {
                 .thenReturn("https://storage.test/english-audio");
         when(assets.saveAndFlush(any(GameNarrationAsset.class))).thenAnswer(call -> call.getArgument(0));
 
-        var result = new GameNarrationService(games, assets, viettel, elevenLabs, storage)
+        var result = new GameNarrationService(games, assets, viettel, elevenLabs, storage,
+                TransactionOperations.withoutTransaction())
                 .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session"));
 
         assertThat(result.audioUrl()).isEqualTo("https://storage.test/english-audio");
@@ -235,6 +261,28 @@ class GameNarrationServiceTest {
         verify(viettel, never()).synthesizeVietnamese(any(String.class));
         verify(storage).upload(any(String.class), org.mockito.ArgumentMatchers.argThat(bytes ->
                 java.util.Arrays.equals(bytes, new byte[] {4, 5, 6})));
+    }
+
+    @Test
+    void rejectsAQuestionEditedWhileTheProviderWasWorking() {
+        Game game = gameWithAudioText("First prompt");
+        GameRepository games = mock(GameRepository.class);
+        GameNarrationAssetRepository assets = mock(GameNarrationAssetRepository.class);
+        ViettelTtsClient provider = mock(ViettelTtsClient.class);
+        SupabaseNarrationStorage storage = mock(SupabaseNarrationStorage.class);
+        when(games.findByIdAndAuthor_IdForUpdate("game-1", "teacher-1")).thenReturn(Optional.of(game));
+        when(provider.synthesizeVietnamese("First prompt")).thenAnswer(invocation -> {
+            game.getQuestions().getFirst().setAudioText("Updated prompt");
+            return new SynthesizedAudio(new byte[]{1}, 1);
+        });
+        var service = new GameNarrationService(games, assets, provider, mock(ElevenLabsTtsClient.class),
+                storage, TransactionOperations.withoutTransaction());
+        assertThatThrownBy(() -> service.generate("game-1", "q1",
+                new AuthenticatedTeacher("teacher-1", "teacher@test", "session")))
+                .isInstanceOfSatisfying(ApiException.class,
+                        error -> assertThat(error.getErrorCode()).isEqualTo(ErrorCode.CONFLICT));
+        verify(assets, never()).saveAndFlush(any());
+        verify(storage).delete(any());
     }
 
     private static Game gameWithAudioText(String text) {

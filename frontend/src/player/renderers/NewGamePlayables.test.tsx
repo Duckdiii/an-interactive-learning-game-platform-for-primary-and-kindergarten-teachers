@@ -5,11 +5,7 @@ import { getSelfPracticeRenderer } from './index'
 import { PROFILES } from '../profile/profiles'
 import type { AnswerResult } from '../../types/game-student.types'
 
-vi.mock('../../games/ordering/OrderingRenderer', () => ({
-  default: ({ onAnswered }: { onAnswered: (answer: { order: string[] }) => void }) => (
-    <button type="button" onClick={() => onAnswered({ order: ['s2', 's1'] })}>Submit ordering</button>
-  ),
-}))
+vi.mock('../../games/common/sound', () => ({ playSound: vi.fn() }))
 
 const result: AnswerResult = {
   status: 'CORRECT', isCorrect: true, pointsEarned: 10, totalScore: 10, correctAnswer: null,
@@ -32,7 +28,7 @@ describe('the remaining three self-practice game renderers', () => {
       id: 'q1', timeLimitSeconds: 30, points: 10, visualPrompt: 'a farm scene', targetDescription: 'rooster',
     }} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /find the target/i }), { clientX: 40, clientY: 70 })
+    fireEvent.click(screen.getByRole('button', { name: 'Bức tranh tìm kiếm rooster' }), { clientX: 40, clientY: 70 })
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ x: 0.3, y: 0.5 }))
   })
@@ -48,11 +44,11 @@ describe('the remaining three self-practice game renderers', () => {
       ],
     }} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
 
-    for (const label of ['Reveal cat card 1', 'Reveal cat card 2', 'Reveal dog card 1', 'Reveal dog card 2']) {
-      fireEvent.click(screen.getByRole('button', { name: label }))
+    for (const position of [1, 3, 2, 4]) {
+      fireEvent.click(screen.getByRole('button', { name: `Thẻ chưa lật số ${position}` }))
     }
 
-    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ matchedPairIds: ['p1', 'p2'], flips: 4 }))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ matchedPairIds: ['p1', 'p2'], flips: 4, wrongPairs: [] }))
     expect(onSubmit).toHaveBeenCalledTimes(1)
   })
 
@@ -63,7 +59,9 @@ describe('the remaining three self-practice game renderers', () => {
     render(<Ordering question={{
       id: 'q1', timeLimitSeconds: 30, points: 10, steps: [{ id: 's1', text: 'first' }, { id: 's2', text: 'second' }],
     }} profile={PROFILES.hocSinh} onSubmit={onSubmit} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Submit ordering' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Vị trí 1: first' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Vị trí 2: second' }))
+    fireEvent.click(screen.getByRole('button', { name: /Xong rồi/ }))
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ order: ['s2', 's1'] }))
   })

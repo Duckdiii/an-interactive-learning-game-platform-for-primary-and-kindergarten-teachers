@@ -30,7 +30,7 @@ vi.mock('../api/axiosInstance', () => ({
   default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn(), request: vi.fn() },
 }))
 
-// mock-game-1 là QUIZ, mock-game-5 là ORDERING (chưa có renderer chơi thử).
+// mock-game-1 là QUIZ, mock-game-5 là ORDERING.
 const QUIZ_ID = 'mock-game-1'
 const ORDERING_ID = 'mock-game-5'
 const narrationUrls: string[] = []
@@ -39,6 +39,7 @@ class TestHtmlAudio {
   onended: (() => void) | null = null
   onerror: (() => void) | null = null
   currentTime = 0
+  canPlayType = () => 'probably'
   play = vi.fn(async () => undefined)
   pause = vi.fn()
   constructor(src: string) { this.src = src; narrationUrls.push(src) }
@@ -125,17 +126,17 @@ describe('trình soạn thảo: Chơi thử', () => {
     expect(await screen.findByText('Câu 1 trên 3', {}, { timeout: 10_000 })).toBeInTheDocument()
   })
 
-  it('loại game chưa có renderer: hiện ảnh tĩnh và thông báo, không để trống', async () => {
+  it('giáo viên có thể chơi thử game sắp xếp rồi quay lại bản nháp', async () => {
     const user = userEvent.setup()
 
     await openLoaded(ORDERING_ID)
     await user.click(playButton())
 
-    expect(await screen.findByRole('heading', { name: 'Loại game này chưa hỗ trợ chơi thử' }, { timeout: 10_000 })).toBeInTheDocument()
-    // Ảnh minh họa tĩnh nằm trong chính khung "chưa hỗ trợ", không phải biểu tượng nào đó trong trang.
-    expect(document.querySelector('section[aria-labelledby="play-unsupported-title"] svg')).not.toBeNull()
-
-    await user.click(screen.getByRole('button', { name: 'Quay lại chỉnh sửa' }))
+    await user.click(await screen.findByRole('button', { name: /^Vị trí 1:/ }))
+    await user.click(screen.getByRole('button', { name: /^Vị trí 2:/ }))
+    await user.click(screen.getByRole('button', { name: /Xong rồi/ }))
+    expect(await screen.findByRole('button', { name: 'Nghe lại phản hồi' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Thoát' }))
 
     expect(titleBox()).toBeInTheDocument()
   })

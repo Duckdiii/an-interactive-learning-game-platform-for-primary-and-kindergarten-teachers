@@ -143,6 +143,18 @@ describe('usePlayTestNarrationAudio', () => {
     expect(getFeedback).toHaveBeenCalledTimes(2)
   })
 
+  it('requests feedback again when play restarts after a failed request', async () => {
+    getFeedback.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(urls)
+    const { result, rerender } = renderHook((props) => usePlayTestNarrationAudio(props), { initialProps: options })
+    await waitFor(() => expect(result.current.feedbackError).toBeTruthy())
+
+    rerender({ ...options, enabled: false })
+    rerender(options)
+
+    await waitFor(() => expect(result.current.feedbackAvailable).toBe(true))
+    expect(getFeedback).toHaveBeenCalledTimes(2)
+  })
+
   it('reports browser playback failure while leaving replay available', async () => {
     getFeedback.mockResolvedValue(urls)
     const failingAudio = class extends MockAudio {

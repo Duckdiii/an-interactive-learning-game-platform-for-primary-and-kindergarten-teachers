@@ -117,21 +117,30 @@ export default function PlayTestPanel({ game, seed, gameId, questionNarrations, 
         </Button>
       </div>
 
-      {/* Dựng lại renderer từ đầu khi sang câu khác hoặc thử lại câu này. */}
-      <div className="mx-auto w-full max-w-3xl rounded-2xl bg-white sm:border-2 sm:border-ink/10 sm:p-4">
-        <UiProfileProvider profile={resolveUiProfile({ gradeLevel: game.metadata.gradeLevel })}>
-          <CloudFeedbackContext.Provider value={narrationAudio.feedbackAvailable}>
-          <Player
-            key={`${state.index}-${state.attempt}`}
-            question={question}
-            subject={game.metadata.subject}
-            onResult={(isCorrect) => dispatch({ type: 'answered', isCorrect })}
-            playQuestionAudio={playQuestionAudio}
-            playPairFeedback={narrationAudio.feedbackAvailable ? narrationAudio.playPairFeedback : undefined}
-          />
-          </CloudFeedbackContext.Provider>
-        </UiProfileProvider>
-      </div>
+          {/* Dựng lại renderer từ đầu khi sang câu khác hoặc thử lại câu này trong khung thế giới game */}
+          <div
+            className="relative mx-auto w-full max-w-3xl overflow-hidden rounded-3xl border-4 border-amber-900/15 bg-cover bg-center p-3 sm:p-5 shadow-xl"
+            style={{ backgroundImage: theme.bgUrl ? `url(${theme.bgUrl})` : undefined }}
+          >
+            {/* key ở khung: sang câu khác hoặc thử lại thì khung dựng lại nên hiệu ứng question-in chạy lại. */}
+            <div key={`${state.index}-${state.attempt}`} className="question-in relative z-10 rounded-2xl bg-white/95 p-3 sm:p-4 shadow-sm backdrop-blur-xs">
+              <CloudFeedbackContext.Provider value={narrationAudio.feedbackAvailable}>
+                <Player
+                question={question}
+                subject={game.metadata.subject}
+                onResult={(isCorrect) => dispatch({ type: 'answered', isCorrect })}
+                  playQuestionAudio={playQuestionAudio}
+                  playPairFeedback={narrationAudio.feedbackAvailable ? narrationAudio.playPairFeedback : undefined}
+                />
+              </CloudFeedbackContext.Provider>
+            </div>
+
+            {theme.mascotAvatar ? (
+              <div aria-hidden="true" className="pointer-events-none absolute bottom-2 right-2 z-20 select-none animate-mascot-idle">
+                <img src={theme.mascotAvatar} alt="" className="h-14 w-14 drop-shadow-md" />
+              </div>
+            ) : null}
+          </div>
 
       {narrationAudio.questionAudioAvailable ? (
         <div className="flex justify-center">

@@ -22,6 +22,7 @@ const mockedSuggest = vi.mocked(suggestGameTypes)
 const mockedUnderstand = vi.mocked(understandGame)
 
 beforeEach(() => {
+  vi.stubEnv('VITE_USE_MOCK', 'ai')
   mockedSuggest.mockReset()
   mockedSuggest.mockImplementation(async (input) => rankGameTypes(input))
 })
@@ -433,10 +434,12 @@ describe('Tạo game mới: AI đề xuất loại game', () => {
   })
 
   it('bước đề xuất luôn gắn nhãn "Dữ liệu mô phỏng" vì chưa có endpoint đề xuất thật, kể cả khi tắt mọi nhóm mô phỏng', async () => {
+    vi.stubEnv('VITE_USE_MOCK', 'none')
     const user = userEvent.setup()
     renderPage()
 
-    await toSuggestions(user)
+    await user.click(random())
+    await screen.findAllByRole('button', { name: /^Dùng kiểu này:/ })
 
     const step = within(screen.getByRole('region', { name: 'Các kiểu chơi AI đề xuất' }))
     expect(step.getByText('Dữ liệu mô phỏng')).toBeInTheDocument()

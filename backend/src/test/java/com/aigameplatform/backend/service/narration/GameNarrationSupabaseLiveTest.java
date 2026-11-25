@@ -58,8 +58,7 @@ import tools.jackson.databind.node.ObjectNode;
 @SpringBootTest(properties = {
         "spring.jpa.hibernate.ddl-auto=validate",
         "spring.datasource.hikari.maximum-pool-size=3",
-        "spring.flyway.validate-on-migrate=false",
-        "spring.flyway.ignore-migration-patterns=*:missing,*:future",
+        "spring.flyway.enabled=false",
         "app.curriculum-rag.enabled=false",
         "app.moderation.required=false",
         "app.ai.gemini.game-generation.enabled=false"
@@ -104,16 +103,12 @@ class GameNarrationSupabaseLiveTest {
         try (var connection = dataSource.getConnection()) {
             String jdbcUrl = connection.getMetaData().getURL().toLowerCase(Locale.ROOT);
             String expectedHost = environment.getProperty("FR11_SUPABASE_EXPECTED_DB_HOST");
-            if (expectedHost == null || expectedHost.isBlank()) {
-                expectedHost = URI.create(environment.getRequiredProperty("DB_URL").replaceFirst("^jdbc:", ""))
-                        .getHost();
-            }
             String actualHost = URI.create(jdbcUrl.replaceFirst("^jdbc:", "")).getHost();
             assertThat(jdbcUrl.contains("supabase") && !jdbcUrl.contains(":6543"))
                     .as("live test requires Supabase direct/session pooler; JDBC URL is redacted")
                     .isTrue();
             assertThat(expectedHost != null && !expectedHost.isBlank())
-                    .as("expected database host is derived from configured DB_URL or FR11_SUPABASE_EXPECTED_DB_HOST")
+                    .as("set FR11_SUPABASE_EXPECTED_DB_HOST to the approved live test host")
                     .isTrue();
             assertThat(actualHost != null && actualHost.equalsIgnoreCase(expectedHost))
                     .as("live test refuses an unexpected database host; host values are redacted")

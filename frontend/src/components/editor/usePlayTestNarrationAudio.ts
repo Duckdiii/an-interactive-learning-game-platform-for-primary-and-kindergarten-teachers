@@ -36,11 +36,14 @@ const QUESTION_AUDIO_START_DELAY_MS = 500
 
 export function usePlayTestNarrationAudio({ enabled, gameId, subject = 'VIETNAMESE', questionKey, question, narration, answered,
   isCorrect }: UsePlayTestNarrationAudioOptions) {
-  const [feedbackUrls, setFeedbackUrls] = useState<{ correctAudioUrl: string; wrongAudioUrl: string }>()
-  const [feedbackLoading, setFeedbackLoading] = useState(false)
-  const [feedbackError, setFeedbackError] = useState<string>()
+  const [feedback, setFeedback] = useState<{ key: string; urls?: { correctAudioUrl: string; wrongAudioUrl: string }; error?: string }>()
   const [playbackError, setPlaybackError] = useState<string>()
   const [retryVersion, setRetryVersion] = useState(0)
+  const feedbackKey = enabled && gameId ? JSON.stringify([gameId, subject, retryVersion]) : undefined
+  const currentFeedback = feedback?.key === feedbackKey ? feedback : undefined
+  const feedbackUrls = currentFeedback?.urls
+  const feedbackError = currentFeedback?.error
+  const feedbackLoading = Boolean(feedbackKey && !currentFeedback)
   const correctSpeechRate = subject === 'ENGLISH' ? ENGLISH_CORRECT_SPEECH_RATE : 1
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -58,7 +61,6 @@ export function usePlayTestNarrationAudio({ enabled, gameId, subject = 'VIETNAME
 
   const playUrl = useCallback(async (url: string, rate = 1) => {
     stopCurrentAudio()
-    setPlaybackError(undefined)
     const audio = new Audio(url)
     audio.playbackRate = rate
     audioRef.current = audio
@@ -73,6 +75,7 @@ export function usePlayTestNarrationAudio({ enabled, gameId, subject = 'VIETNAME
     }
     try {
       await audio.play()
+      if (audioRef.current === audio) setPlaybackError(undefined)
     } catch {
       if (audioRef.current === audio) {
         audioRef.current = null
@@ -82,35 +85,24 @@ export function usePlayTestNarrationAudio({ enabled, gameId, subject = 'VIETNAME
   }, [stopCurrentAudio])
 
   useEffect(() => {
-    if (!enabled || !gameId) {
-      setFeedbackUrls(undefined)
-      setFeedbackLoading(false)
-      setFeedbackError(undefined)
-      return
-    }
+    if (!feedbackKey || !gameId) return
 
     let active = true
-    const key = `${gameId}:${retryVersion}`
+    const key = feedbackKey
     let promise = requestRef.current?.key === key ? requestRef.current.promise : undefined
     if (!promise) {
       promise = postGenerateNarrationFeedback(gameId)
       requestRef.current = { key, promise }
     }
-    setFeedbackLoading(true)
-    setFeedbackError(undefined)
     promise.then((result) => {
-      if (active) setFeedbackUrls(result)
+      if (active) setFeedback({ key, urls: result })
     }).catch(() => {
-      if (active) {
-        setFeedbackUrls(undefined)
-        setFeedbackError(FEEDBACK_LOAD_ERROR)
-      }
-    }).finally(() => {
-      if (active) setFeedbackLoading(false)
+      if (requestRef.current?.promise === promise) requestRef.current = null
+      if (active) setFeedback({ key, error: FEEDBACK_LOAD_ERROR })
     })
 
     return () => { active = false }
-  }, [enabled, gameId, retryVersion])
+  }, [feedbackKey, gameId])
 
   const localUrl = question && narration
       && narration.gameId === gameId
@@ -155,11 +147,10 @@ export function usePlayTestNarrationAudio({ enabled, gameId, subject = 'VIETNAME
 
   useEffect(() => {
     if (!enabled || !feedbackUrl) return
-    if (isCorrect) {
-      feedbackTimer.current = setTimeout(() => void playUrl(feedbackUrl, correctSpeechRate), CORRECT_CHIME_MS)
-    } else {
-      void playUrl(feedbackUrl)
-    }
+    feedbackTimer.current = setTimeout(
+      () => void playUrl(feedbackUrl, isCorrect ? correctSpeechRate : 1),
+      isCorrect ? CORRECT_CHIME_MS : 0,
+    )
     return () => {
       clearTimeout(feedbackTimer.current)
       stopCurrentAudio()

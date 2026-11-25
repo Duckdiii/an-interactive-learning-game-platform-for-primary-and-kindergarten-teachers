@@ -18,6 +18,7 @@ import com.aigameplatform.backend.entity.session.Participant;
 import com.aigameplatform.backend.entity.session.SelfSession;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.repository.GameRepository;
+import com.aigameplatform.backend.repository.GameSessionRepository;
 import com.aigameplatform.backend.repository.SelfSessionRepository;
 import com.aigameplatform.backend.service.strategy.AudioVisualMatchGameStrategy;
 import com.aigameplatform.backend.service.strategy.DragDropGameStrategy;
@@ -50,7 +51,7 @@ class StudentPlayAllTypesTest {
     private static final Map<GameType, String> FIXTURES = Map.of(
             GameType.QUIZ, "quiz.json",
             GameType.AUDIO_VISUAL_MATCH, "audio-visual-match.json",
-            GameType.ODD_ONE_OUT, "odd-one-out.json",
+            GameType.ODD_ONE_OUT, "odd-one-out-image.json",
             GameType.SPOT_THE_TARGET, "spot-the-target.json",
             GameType.WORD_SCRAMBLE, "word-scramble.json",
             GameType.MATCHING, "matching.json",
@@ -69,7 +70,7 @@ class StudentPlayAllTypesTest {
             GameRepository games = mock(GameRepository.class);
             SelfSessionRepository sessions = mock(SelfSessionRepository.class);
             when(sessions.findById(SESSION_ID)).thenReturn(Optional.of(gameFixture.session()));
-            StudentPlayService service = new StudentPlayService(games, sessions, strategies, MAPPER);
+            StudentPlayService service = StudentPlayTestSupport.service(games, sessions, mock(), mock(), strategies, MAPPER);
 
             JsonNode response = service.questions(SESSION_ID, PARTICIPANT_ID);
 
@@ -130,63 +131,39 @@ class StudentPlayAllTypesTest {
                 interaction("q1", answerFor(GameType.QUIZ, sourceQuestion, studentQuestion, true)));
         fixture.session().setSessionExpiresAt(LocalDateTime.now().minusMinutes(1));
 
-        Map<String, Object> summary = service.myResult(SESSION_ID, PARTICIPANT_ID);
-
-        assertThat(summary).containsEntry("status", "ENDED").containsEntry("score", accepted.get("totalScore"))
-                .containsEntry("correctCount", 1).containsEntry("incorrectCount", 0)
-                .containsEntry("totalQuestions", fixture.session().getGame().getQuestions().size())
-                .containsEntry("answeredCount", 1).containsEntry("participantId", PARTICIPANT_ID);
-        assertThatThrownBy(() -> service.myResult(SESSION_ID, "other-participant"))
+        GameSessionRepository gameSessions = mock();
+        when(gameSessions.findById(SESSION_ID)).thenReturn(Optional.of(fixture.session()));
+        SessionService results = new SessionService(gameSessions, mock(), mock(), mock(), mock(), mock(),
+                mock(), mock(), mock(), mock(), mock());
+        var summary = results.getMyResult(SESSION_ID, PARTICIPANT_ID);
+        assertThat(summary.status()).isEqualTo("PLAYING");
+        assertThat(summary.score()).isEqualTo(accepted.get("totalScore"));
+        assertThat(summary.correctCount()).isEqualTo(1);
+        assertThat(summary.incorrectCount()).isZero();
+        assertThat(summary.totalQuestions()).isEqualTo(fixture.session().getGame().getQuestionNum());
+        assertThat(summary.answeredCount()).isEqualTo(1);
+        assertThat(summary.participantId()).isEqualTo(PARTICIPANT_ID);
+        assertThatThrownBy(() -> results.getMyResult(SESSION_ID, "other-participant"))
                 .isInstanceOf(ApiException.class);
     }
 
     @Test
-    void orderingPlacementChecksPreserveImmediateFeedbackWithoutScoringOrSavingAnswers() throws Exception {
-        GameContentStrategyRegistry strategies = strategies();
-        Fixture fixture = fixture(GameType.ORDERING, FIXTURES.get(GameType.ORDERING), strategies);
-        StudentPlayService service = service(fixture, strategies);
-        JsonNode sourceQuestion = MAPPER.valueToTree(fixture.dsl()).path("questions").get(0);
-        JsonNode studentQuestion = service.questions(SESSION_ID, PARTICIPANT_ID).path("questions").get(0);
-        JsonNode displayedStep = studentQuestion.path("steps").get(0);
-        JsonNode sourceStep = null;
-        for (JsonNode candidate : sourceQuestion.path("steps")) {
-            if (sameContent(candidate, displayedStep)) sourceStep = candidate;
+    void orderingRejectsMalformedOrdersAndUnauthorizedOrExpiredSubmissionsBeforeRecordingScore() throws Exception {
+        var strategies = strategies();
+        var fixture = fixture(GameType.ORDERING, FIXTURES.get(GameType.ORDERING), strategies);
+        var service = service(fixture, strategies);
+        var source = MAPPER.valueToTree(fixture.dsl()).path("questions").get(0);
+        var student = service.questions(SESSION_ID, PARTICIPANT_ID).path("questions").get(0);
+        var body = interaction("q1", answerFor(GameType.ORDERING, source, student, true));
+        assertThatThrownBy(() -> service.interact(SESSION_ID, "other-participant", body)).isInstanceOf(ApiException.class);
+        for (var invalid : List.of(List.of(), List.of("unknown"), List.of("s1", "s1"))) {
+            assertThatThrownBy(() -> service.interact(SESSION_ID, PARTICIPANT_ID,
+                    interaction("q1", Map.of("order", invalid)))).isInstanceOf(ApiException.class);
         }
-        assertThat(sourceStep).isNotNull();
-        int correctPosition = sourceStep.path("correctPosition").asInt();
-        int incorrectPosition = correctPosition == 1 ? 2 : 1;
-
-        assertThat(service.checkOrderingPlacement(SESSION_ID, PARTICIPANT_ID,
-                placementRequest("q1", displayedStep.path("id").asString(), correctPosition)))
-                .containsEntry("isCorrect", true);
-        assertThat(service.checkOrderingPlacement(SESSION_ID, PARTICIPANT_ID,
-                placementRequest("q1", displayedStep.path("id").asString(), incorrectPosition)))
-                .containsEntry("isCorrect", false);
+        fixture.session().setSessionExpiresAt(LocalDateTime.now().minusMinutes(1));
+        assertThatThrownBy(() -> service.interact(SESSION_ID, PARTICIPANT_ID, body)).isInstanceOf(ApiException.class);
         assertThat(fixture.session().getParticipants().get(0).getScore()).isZero();
         assertThat(fixture.session().getParticipants().get(0).getPlayInteractionDetails()).isEmpty();
-
-        assertThatThrownBy(() -> service.checkOrderingPlacement(SESSION_ID, "other-participant",
-                placementRequest("q1", displayedStep.path("id").asString(), correctPosition)))
-                .isInstanceOf(ApiException.class);
-        assertThatThrownBy(() -> service.checkOrderingPlacement(SESSION_ID, PARTICIPANT_ID,
-                placementRequest("q1", "unknown", 1))).isInstanceOf(ApiException.class);
-        assertThatThrownBy(() -> service.checkOrderingPlacement(SESSION_ID, PARTICIPANT_ID,
-                placementRequest("q1", displayedStep.path("id").asString(), 0))).isInstanceOf(ApiException.class);
-
-        service.interact(SESSION_ID, PARTICIPANT_ID, interaction("q1", Map.of("order", List.of())));
-        assertThatThrownBy(() -> service.checkOrderingPlacement(SESSION_ID, PARTICIPANT_ID,
-                placementRequest("q1", displayedStep.path("id").asString(), correctPosition)))
-                .isInstanceOf(ApiException.class);
-
-        Fixture expired = fixture(GameType.ORDERING, FIXTURES.get(GameType.ORDERING), strategies);
-        StudentPlayService expiredService = service(expired, strategies);
-        expired.session().setSessionExpiresAt(LocalDateTime.now().minusMinutes(1));
-        assertThatThrownBy(() -> expiredService.checkOrderingPlacement(SESSION_ID, PARTICIPANT_ID,
-                placementRequest("q1", "s1", 1))).isInstanceOf(ApiException.class);
-    }
-
-    private static ObjectNode placementRequest(String questionId, String stepId, int position) {
-        return MAPPER.createObjectNode().put("questionId", questionId).put("stepId", stepId).put("position", position);
     }
 
     private static StudentPlayService service(Fixture fixture, GameContentStrategyRegistry strategies) {
@@ -195,7 +172,7 @@ class StudentPlayAllTypesTest {
         when(sessions.findById(SESSION_ID)).thenReturn(Optional.of(fixture.session()));
         when(sessions.findByIdForUpdate(SESSION_ID)).thenReturn(Optional.of(fixture.session()));
         when(sessions.save(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> invocation.getArgument(0));
-        return new StudentPlayService(games, sessions, strategies, MAPPER);
+        return StudentPlayTestSupport.service(games, sessions, mock(), mock(), strategies, MAPPER);
     }
 
     private static ObjectNode interaction(String questionId, Map<String, Object> answer) {
@@ -209,12 +186,18 @@ class StudentPlayAllTypesTest {
 
     private static Map<String, Object> answerFor(GameType type, JsonNode source, JsonNode student, boolean correct) {
         return switch (type) {
+            case CUSTOM -> throw new IllegalArgumentException("CPF uses a separate player");
             case QUIZ -> Map.of("selectedOptionId", chooseDifferentOrCorrect(
                     student.path("options"), source.path("correctOptionId").asString(), correct));
             case AUDIO_VISUAL_MATCH -> Map.of("selectedOptionId", chooseDifferentOrCorrect(
                     student.path("options"), source.path("correct").path("visualPrompt").asString(), correct, "visualPrompt"));
-            case ODD_ONE_OUT -> Map.of("selectedItemId", chooseDifferentOrCorrect(
-                    student.path("items"), source.path("oddOneOutId").asString(), correct));
+            case ODD_ONE_OUT -> {
+                JsonNode target = java.util.stream.StreamSupport.stream(source.path("items").spliterator(), false)
+                        .filter(option -> option.path("id").asString().equals(source.path("oddOneOutId").asString()))
+                        .findFirst().orElseThrow();
+                yield Map.of("selectedItemId", chooseDifferentOrCorrect(
+                        student.path("items"), target.path("text").asString(), correct, "text"));
+            }
             case SPOT_THE_TARGET -> {
                 JsonNode region = source.path("hitRegion");
                 yield correct ? Map.of("x", region.path("x").doubleValue(), "y", region.path("y").doubleValue())
@@ -252,7 +235,7 @@ class StudentPlayAllTypesTest {
         JsonNode leftItems = student.path("leftItems");
         JsonNode rightItems = student.path("rightItems");
         for (int i = 0; i < pairs.size(); i++) {
-            String leftId = leftItems.get(i).path("id").asString();
+            String leftId = chooseDifferentOrCorrect(leftItems, pairs.get(i).path("left").path("text").asString(), true, "text");
             JsonNode wanted = pairs.get(i).path("right");
             String rightId = "";
             for (JsonNode candidate : rightItems) {

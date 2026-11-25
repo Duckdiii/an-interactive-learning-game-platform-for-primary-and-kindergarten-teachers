@@ -10,6 +10,7 @@ import com.aigameplatform.backend.service.play.grading.AudioVisualMatchHandler;
 import com.aigameplatform.backend.service.play.grading.OddOneOutImageHandler;
 import com.aigameplatform.backend.service.play.grading.DragDropHandler;
 import com.aigameplatform.backend.service.play.grading.MatchingHandler;
+import com.aigameplatform.backend.service.play.grading.MemoryCardHandler;
 import com.aigameplatform.backend.service.play.grading.OrderingHandler;
 import com.aigameplatform.backend.service.play.grading.PlayRecorder;
 import com.aigameplatform.backend.service.play.grading.QuizHandler;
@@ -59,7 +60,7 @@ final class StudentPlayTestSupport {
                         new AudioVisualMatchHandler(recorder, mapper), new OddOneOutImageHandler(recorder, mapper),
                         new VisualClozeTextHandler(recorder, mapper), new VisualClozeImageHandler(recorder, mapper),
                         new OrderingHandler(recorder), new DragDropHandler(recorder),
-                        new MatchingHandler(recorder, mapper), new SpotTheTargetHandler(recorder)),
+                        new MatchingHandler(recorder, mapper), new MemoryCardHandler(recorder), new SpotTheTargetHandler(recorder)),
                 recorder, questionClock, narration);
     }
 }

@@ -132,6 +132,15 @@ describe('PlayTestPanel: AVM TTS language', () => {
   })
 })
 
+it('shows the background and mascot of the world selected in the draft', () => {
+  const game = gameOf('QUIZ')
+  const draft = { ...game, metadata: { ...game.metadata, presentation: { world: 'ocean' as const } } }
+  const { container } = render(<PlayTestPanel game={draft} onExit={vi.fn()} />)
+
+  expect(container.querySelector('[style*="bg-ocean.svg"]')).toBeInTheDocument()
+  expect(container.querySelector('img[src="/assets/mascots/sam.svg"]')).toBeInTheDocument()
+})
+
 describe('PlayTestPanel: VISUAL_CLOZE', () => {
   it('plays legacy TEXT and reports its result locally', async () => {
     render(<PlayTestPanel game={gameOf('VISUAL_CLOZE')} onExit={vi.fn()} />)

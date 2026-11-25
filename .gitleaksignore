@@ -4,3 +4,5 @@
 a668384e6cbe12bc8aa0b5a89802f6ebde1fbb5a:backend/src/test/java/com/aigameplatform/backend/config/SecurityConfigTest.java:generic-api-key:40
 a668384e6cbe12bc8aa0b5a89802f6ebde1fbb5a:backend/src/test/java/com/aigameplatform/backend/config/SecurityConfigTest.java:generic-api-key:51
 8ef337da14d2520aeba52850b691bfb0bca0309b:backend/src/test/java/com/aigameplatform/backend/service/AuthServiceTest.java:generic-api-key:42
+# Giá trị mẫu đặt trong dấu <> để hướng dẫn cấu hình ElevenLabs trong commit này.
+bbae99f36756989b52d8bdfb95b175f080840b60:backend/.env.example:generic-api-key:36

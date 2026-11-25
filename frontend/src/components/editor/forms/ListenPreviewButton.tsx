@@ -7,20 +7,22 @@ import { useVoicePreference } from './VoiceContext'
  * khác giọng TTS thật khi có; máy không có giọng tiếng Việt thì báo rõ thay vì im lặng đọc sai.
  */
 export default function ListenPreviewButton({ id, text }: { id: string; text?: string }) {
-  const t = viText.editor.form
   const { language = 'vi-VN' } = useVoicePreference()
+  const content = text?.trim() ?? ''
+  return <SpeechButton key={JSON.stringify([language, content])} id={id} content={content} language={language} />
+}
+
+function SpeechButton({ id, content, language }: { id: string; content: string; language: 'vi-VN' | 'en-US' }) {
+  const t = viText.editor.form
   const [speaking, setSpeaking] = useState(false)
   const [note, setNote] = useState<string | null>(null)
   const supported = typeof window !== 'undefined' && 'speechSynthesis' in window
-  const content = text?.trim() ?? ''
 
   // Rời câu (component bị gỡ) khi đang đọc thì dừng, để không đọc đè lên câu khác.
   useEffect(() => {
-    setSpeaking(false)
-    setNote(null)
     if (!supported) return
     return () => window.speechSynthesis?.cancel()
-  }, [language, content, supported])
+  }, [supported])
 
   if (!supported) {
     return <p className="text-sm text-ink-soft">{t.listenUnsupported}</p>

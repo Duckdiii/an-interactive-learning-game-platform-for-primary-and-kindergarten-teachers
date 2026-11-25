@@ -15,7 +15,12 @@ type NarrationPreviewControlProps = {
   onAudioReady?: (questionId: string, narration?: PlayTestQuestionNarration) => void
 }
 
-export default function NarrationPreviewControl({ gameId, questionId, audioText, subject = 'VIETNAMESE',
+export default function NarrationPreviewControl(props: NarrationPreviewControlProps) {
+  const { gameId, questionId, audioText, subject, hasSourceAudio, saved } = props
+  return <PreviewRequest key={JSON.stringify([gameId, questionId, audioText, subject, hasSourceAudio, saved])} {...props} />
+}
+
+function PreviewRequest({ gameId, questionId, audioText, subject = 'VIETNAMESE',
   hasSourceAudio, saved, onAudioReady }: NarrationPreviewControlProps) {
   const [loading, setLoading] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string>()
@@ -23,12 +28,9 @@ export default function NarrationPreviewControl({ gameId, questionId, audioText,
   const requestVersion = useRef(0)
 
   useEffect(() => {
-    requestVersion.current += 1
-    setLoading(false)
-    setAudioUrl(undefined)
-    setError(undefined)
     onAudioReady?.(questionId)
-  }, [gameId, questionId, audioText, hasSourceAudio, saved, onAudioReady])
+    return () => { requestVersion.current += 1 }
+  }, [questionId, onAudioReady])
 
   if (!audioText?.trim() || hasSourceAudio) return null
 

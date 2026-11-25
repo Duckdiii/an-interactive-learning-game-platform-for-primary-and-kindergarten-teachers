@@ -137,6 +137,7 @@ describe('PresentPlay narration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Answer incorrectly' }))
     expect(screen.getByText(/Gần đúng rồi/)).toBeInTheDocument()
 
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
     expect(audioInstances.at(-1)?.src).toBe(narrationUrls.wrong)
   })
 

@@ -584,6 +584,120 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /games/prepare:
+    post:
+      tags: [Games]
+      operationId: prepareLesson
+      summary: Phân tích một tệp PDF hoặc DOCX tối đa 10 MiB để giáo viên duyệt ý tưởng
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [subject, gradeLevel, file]
+              properties:
+                subject: { $ref: '#/components/schemas/Subject' }
+                gradeLevel: { $ref: '#/components/schemas/GradeLevel' }
+                idea: { type: string, description: 'Ý tưởng bổ sung, từ 10 đến 2.000 ký tự khi có nội dung.' }
+                file: { type: string, format: binary }
+      responses:
+        '200':
+          description: Ý tưởng đề xuất để giáo viên xem lại.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [idea]
+                    properties:
+                      idea: { type: string }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { description: Tệp quá lớn, sai định dạng hoặc giáo án cần làm rõ. }
+        '503': { description: Dịch vụ xử lý giáo án chưa sẵn sàng. }
+        '504': { $ref: '#/components/responses/AiTimeout' }
+
+  /games/{gameId}/narration/preview:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [Games]
+      operationId: previewGameNarration
+      summary: Tạo hoặc lấy bản đọc câu hỏi của giáo viên
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [questionId]
+              properties:
+                questionId: { type: string, pattern: '^q[1-9][0-9]{0,2}$' }
+      responses:
+        '200':
+          description: Bản đọc câu hỏi đã sẵn sàng.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [questionId, audioUrl, bytes, durationMillis]
+                    properties:
+                      questionId: { type: string }
+                      audioUrl: { type: string }
+                      bytes: { type: integer }
+                      durationMillis: { type: integer }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '503': { description: Dịch vụ giọng đọc chưa sẵn sàng. }
+
+  /games/{gameId}/narration/feedback:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    post:
+      tags: [Games]
+      operationId: getNarrationFeedback
+      summary: Lấy âm thanh phản hồi đúng và sai cho game
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Âm thanh phản hồi đã sẵn sàng.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: object
+                    required: [correctAudioUrl, wrongAudioUrl]
+                    properties:
+                      correctAudioUrl: { type: string }
+                      wrongAudioUrl: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { description: Dịch vụ giọng đọc chưa sẵn sàng. }
+
   /games/{gameId}/publish:
     parameters:
       - $ref: '#/components/parameters/GameId'
