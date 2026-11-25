@@ -45,6 +45,9 @@ const RENDERERS: ReadonlyMap<GameType, AnyPlayableRenderer> = new Map([
 
 export const getPlayableRenderer = (gameType: GameType) => RENDERERS.get(gameType)
 
+/** Registry name used by the student self-practice flow. */
+export const getSelfPracticeRenderer = getPlayableRenderer
+
 /** Loại game cần màn ngang để chơi thoải mái (nối cặp, lật thẻ, kéo thả, sắp xếp). Khung Bé trên điện thoại dọc thì nhắc xoay máy (xem `device/RotatePrompt`). */
 export const PLAYABLE_ORIENTATION: Readonly<Record<GameType, 'any' | 'landscape'>> = {
   QUIZ: 'any',

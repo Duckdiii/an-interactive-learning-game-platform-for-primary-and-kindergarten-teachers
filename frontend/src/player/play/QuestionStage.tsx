@@ -239,6 +239,11 @@ export default function QuestionStage({ gameType, subject, api, sessionId, title
         mascot={profile.tokens.decoration ? <Mascot state={mascotStateFor(result)} /> : undefined}>
         {/* QuestionStage dựng lại theo từng câu (key ở cha) nên hiệu ứng question-in chạy mỗi lần sang câu mới. */}
         <div className="question-in h-full w-full">
+          {gameType === 'MEMORY_CARD' && question.audioUrl ? (
+            <div className="mb-3 flex justify-center">
+              <PlayButton onClick={replayPrompt}>{viText.player.questionAudioReplay}</PlayButton>
+            </div>
+          ) : null}
           <Renderer question={question} profile={profile} onSubmit={submit} playAudio={isAudioVisual ? replayPrompt : undefined}
             answerDisabled={
               halted || (isAudioVisual && (remaining === 0 || result?.status === 'TIMEOUT' || result?.status === 'SKIPPED')) ||

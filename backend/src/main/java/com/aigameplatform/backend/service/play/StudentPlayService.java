@@ -26,6 +26,7 @@ import com.aigameplatform.backend.service.play.grading.GradeContext;
 import com.aigameplatform.backend.service.play.grading.PlayRecorder;
 import com.aigameplatform.backend.service.play.grading.RedactContext;
 import com.aigameplatform.backend.service.play.grading.StudentGameHandler;
+import com.aigameplatform.backend.service.narration.GameNarrationService;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -60,12 +61,14 @@ public class StudentPlayService {
     private final List<StudentGameHandler> handlers;
     private final PlayRecorder recorder;
     private final QuestionClock questionClock;
+    private final GameNarrationService narration;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public StudentPlayService(GameRepository games, SelfSessionRepository sessions,
             GameSessionRepository liveSessions, ParticipantRepository participants,
             GameContentStrategyRegistry strategies, JsonMapper mapper,
-            List<StudentGameHandler> handlers, PlayRecorder recorder, QuestionClock questionClock) {
+            List<StudentGameHandler> handlers, PlayRecorder recorder, QuestionClock questionClock,
+            GameNarrationService narration) {
         this.questionClock = questionClock;
         this.games = games;
         this.sessions = sessions;
@@ -75,6 +78,7 @@ public class StudentPlayService {
         this.mapper = mapper;
         this.handlers = handlers;
         this.recorder = recorder;
+        this.narration = narration;
     }
 
     @Transactional(readOnly = true)
@@ -125,9 +129,23 @@ public class StudentPlayService {
         var dsl = strategies.get(game.getGameType()).toGameDsl(game);
         ObjectNode response = mapper.valueToTree(dsl);
         ArrayNode questionNodes = (ArrayNode) response.get("questions");
+        Map<String, String> narrationUrls = Map.of();
+        try {
+            Map<String, String> savedUrls = narration.signedUrlsForStudentPlay(game.getId());
+            if (savedUrls != null) narrationUrls = savedUrls;
+        } catch (RuntimeException ignored) {
+            // Audio is optional. A Storage or signing failure must leave the question playable.
+        }
         RedactContext context = new RedactContext(game, session.getStudentOptionSalt(), participant);
         for (int i = 0; i < questionNodes.size(); i++) {
-            handler.redact(context, (ObjectNode) questionNodes.get(i), game.getQuestions().get(i), i);
+            ObjectNode questionNode = (ObjectNode) questionNodes.get(i);
+            handler.redact(context, questionNode, game.getQuestions().get(i), i);
+            String existingAudioUrl = questionNode.path("audioUrl").asString("");
+            boolean mockAudioUrl = GameNarrationService.isMockAudioUrl(existingAudioUrl);
+            if (mockAudioUrl) questionNode.putNull("audioUrl");
+            String narrationUrl = narrationUrls.get("q" + (i + 1));
+            if ((existingAudioUrl.isBlank() || mockAudioUrl) && narrationUrl != null && !narrationUrl.isBlank())
+                questionNode.put("audioUrl", narrationUrl);
         }
         ArrayNode answered = mapper.createArrayNode();
         participant.getPlayInteractionDetails().stream()

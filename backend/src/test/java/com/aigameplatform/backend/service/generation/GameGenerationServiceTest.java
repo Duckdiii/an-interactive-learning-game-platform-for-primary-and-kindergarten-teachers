@@ -574,7 +574,7 @@ class GameGenerationServiceTest {
     @Test
     void regenerateQuestionThrowsUnsafeWhenContentUnsafe() {
         String unsafeContent = """
-                {"questions":[{"text":"Câu hỏi bạo lực súng đạn","options":["a","b"],"correctIndex":0}]}
+                {"questions":[{"text":"Câu hỏi bạo lực súng đạn?","options":["a","b"],"correctIndex":0}]}
                 """;
         var client = new ContentModerationClient() {
             @Override

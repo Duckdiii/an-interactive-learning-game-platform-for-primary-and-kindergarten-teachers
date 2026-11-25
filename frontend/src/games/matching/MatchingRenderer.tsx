@@ -66,7 +66,7 @@ type MatchingModeProps =
  * `minTouchPx` (cả 3 mode): vùng chạm tối thiểu SAU khi canvas co theo màn hình; có thì chiều cao hàng được nới để thẻ không thấp hơn số này.
  * Bỏ trống thì bố cục như cũ (trình soạn của giáo viên).
  */
-export type MatchingRendererProps = MatchingModeProps & { minTouchPx?: number }
+export type MatchingRendererProps = MatchingModeProps & { minTouchPx?: number; onPairLinked?: (correct: boolean) => void }
 
 const PAIR_MATCHED_SOUND = '/sounds/pair-matched.wav'
 
@@ -185,7 +185,13 @@ function MatchingBoard(props: MatchingRendererProps) {
   const handleTapRight = (id: string) => {
     if (!interactive) return
     // Âm «nối được» phát đúng lúc một cặp mới được tạo (đang chọn một ô trái và chạm ô phải).
-    if (state.phase === 'pairing' && state.selectedLeftId !== null) playSound(PAIR_MATCHED_SOUND)
+    if (state.phase === 'pairing' && state.selectedLeftId !== null) {
+      if (props.mode === 'preview' && props.onPairLinked) {
+        props.onPairLinked(isCorrectLocally([{ leftPairId: state.selectedLeftId, rightPairId: id }], 1))
+      } else {
+        playSound(PAIR_MATCHED_SOUND)
+      }
+    }
     dispatch({ type: 'tapRight', id })
   }
 

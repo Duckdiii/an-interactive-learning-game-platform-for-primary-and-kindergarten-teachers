@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from '../api/axiosInstance'
@@ -96,4 +96,28 @@ describe('FR-02 chuẩn bị ý tưởng từ giáo án', () => {
     expect(post).toHaveBeenCalledTimes(1)
   })
 
+  it('bỏ qua kết quả giáo án cũ khi giáo viên thay đổi ý tưởng', async () => {
+    const user = userEvent.setup()
+    let finish!: (response: { data: { data: { idea: string } } }) => void
+    post.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve }))
+    renderWithProviders(<CreateGamePage />, '/games/new')
+
+    await user.click(screen.getByRole('button', { name: 'Lớp 1' }))
+    await user.click(screen.getByRole('button', { name: 'Toán' }))
+    const idea = screen.getByLabelText('Ý tưởng bài học')
+    fireEvent.change(idea, { target: { value: 'Bài học về các hình cơ bản' } })
+    fireEvent.change(document.getElementById('create-file') as HTMLInputElement, {
+      target: { files: [new File(['lesson'], 'giao-an.pdf', { type: 'application/pdf' })] },
+    })
+    await user.click(screen.getByRole('button', { name: 'Để AI soạn giúp' }))
+    await waitFor(() => expect(post).toHaveBeenCalledTimes(1))
+
+    fireEvent.change(idea, { target: { value: 'Dạy bé đếm số từ một đến năm' } })
+    expect(post.mock.calls[0][2]?.signal?.aborted).toBe(true)
+    await act(async () => finish({ data: { data: { idea: 'Ý tưởng cũ về hình vuông.' } } }))
+
+    expect(idea).toHaveValue('Dạy bé đếm số từ một đến năm')
+    expect(screen.queryByRole('heading', { name: 'Xem lại ý tưởng AI chuẩn bị' })).toBeNull()
+    expect(suggest).not.toHaveBeenCalled()
+  })
 })

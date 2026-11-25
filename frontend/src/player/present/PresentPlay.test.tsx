@@ -36,7 +36,11 @@ vi.mock('../../games/common/OptionButton', () => ({
   default: ({ option, onClick }: { option: { text: string }; onClick: () => void }) => <button onClick={onClick}>{option.text}</button>,
 }))
 
-const replay = vi.fn()
+const replay = vi.hoisted(() => vi.fn())
+
+vi.mock('../../components/editor/usePlayTestNarrationAudio', () => ({
+  usePlayTestNarrationAudio: () => ({ replayQuestion: replay, feedbackAvailable: false }),
+}))
 
 vi.mock('../../games/common/useQuestionAudio', () => ({
   useQuestionAudio: (url: string | undefined) =>

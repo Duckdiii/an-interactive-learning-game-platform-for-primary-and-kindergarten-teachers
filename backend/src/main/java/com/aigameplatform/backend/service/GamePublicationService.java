@@ -78,10 +78,9 @@ public class GamePublicationService {
         if (game.getStatus() == GameStatus.PUBLISHED) return publishResult(game);
         if (game.getGameType() == com.aigameplatform.backend.entity.enums.GameType.CUSTOM)
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chưa hỗ trợ xuất bản trò chơi ngoài danh mục");
-        JsonNode candidate = body == null
-                ? mapper.valueToTree(strategies.get(game.getGameType()).toGameDsl(game))
-                : body;
-        boolean edited = body != null && !body.equals(mapper.valueToTree(strategies.get(game.getGameType()).toGameDsl(game)));
+        JsonNode savedContent = mapper.valueToTree(strategies.get(game.getGameType()).toGameDsl(game));
+        JsonNode candidate = body == null ? savedContent : body;
+        boolean edited = !candidate.equals(savedContent);
         if (!candidate.isObject()) throw new ApiException(ErrorCode.VALIDATION_ERROR, "Game DSL must be an object");
         ValidationReport report = validation.validate(candidate);
         if (!report.valid()) throw new ApiException(ErrorCode.VALIDATION_ERROR,
@@ -110,8 +109,10 @@ public class GamePublicationService {
         game.setGrade(dsl.metadata().gradeLevel());
         game.setSchemaVersion(dsl.schemaVersion());
         game.setQuestionNum(dsl.questions().size());
-        var replacementQuestions = strategies.get(dsl.gameType()).parseToQuestions(dsl);
-        game.replaceQuestions(replacementQuestions);
+        // Keep persisted question IDs and their narration assets when publishing the saved questions.
+        if (!candidate.path("questions").equals(savedContent.path("questions"))) {
+            game.replaceQuestions(strategies.get(dsl.gameType()).parseToQuestions(dsl));
+        }
         game.setStatus(GameStatus.PUBLISHED);
         game.setShareCode(uniqueShareCode());
         return publishResult(edited ? curriculumReviews.saveEditedGame(game, principal.teacherId()) : games.saveAndFlush(game));
