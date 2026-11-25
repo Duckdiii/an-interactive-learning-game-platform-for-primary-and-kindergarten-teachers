@@ -8,6 +8,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.GameNarrationAsset;
@@ -25,6 +28,9 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestClient;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionOperations;
@@ -204,6 +210,30 @@ class GameNarrationServiceTest {
         assertThat(result.audioUrl()).isEqualTo("https://storage.test/cached");
         assertThat(result.bytes()).isEqualTo(1200);
         verify(tts, never()).synthesizeVietnamese(any(String.class));
+    }
+
+    @Test
+    void studentPlaySignsSavedNarrationForTheSelfSessionLifetime() {
+        Game game = gameWithAudioText("Chào các em");
+        GameNarrationAsset asset = new GameNarrationAsset();
+        asset.setGame(game);
+        asset.setQuestion(game.getQuestions().getFirst());
+        asset.setContentSha256(fingerprint("Chào các em"));
+        asset.setStoragePath("game-1/question-1/audio.mp3");
+        GameNarrationAssetRepository assets = mock(GameNarrationAssetRepository.class);
+        when(assets.findAllByGame_Id("game-1")).thenReturn(List.of(asset));
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        SupabaseNarrationStorage storage = new SupabaseNarrationStorage(builder, "https://storage.test", "test-key", "narration");
+        server.expect(requestTo("https://storage.test/storage/v1/object/sign/narration/game-1/question-1/audio.mp3"))
+                .andExpect(content().json("{\"expiresIn\":86400}"))
+                .andRespond(withSuccess("{\"signedURL\":\"https://storage.test/signed-audio\"}", MediaType.APPLICATION_JSON));
+
+        var service = new GameNarrationService(mock(GameRepository.class), assets, mock(ViettelTtsClient.class),
+                mock(ElevenLabsTtsClient.class), storage, TransactionOperations.withoutTransaction());
+
+        assertThat(service.signedUrlsForStudentPlay("game-1")).containsEntry("q1", "https://storage.test/signed-audio");
+        server.verify();
     }
 
     @Test

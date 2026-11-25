@@ -17,6 +17,7 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.function.Function;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionOperations;
@@ -27,7 +28,6 @@ public class GameNarrationService {
     private static final int MAX_GAME_FILES = 20;
     private static final int MAX_GAME_BYTES = 5 * 1024 * 1024;
     private static final int SIGNED_URL_TTL_SECONDS = 600;
-    private static final int STUDENT_PLAY_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
     private final GameRepository games;
     private final GameNarrationAssetRepository assets;
     private final ViettelTtsClient tts;
@@ -133,23 +133,22 @@ public class GameNarrationService {
 
     @Transactional(readOnly = true)
     public Map<String, String> signedUrls(String gameId) {
-        return signedUrls(gameId, SIGNED_URL_TTL_SECONDS);
+        return signedUrls(gameId, path -> storage.createSignedUrl(path, SIGNED_URL_TTL_SECONDS));
     }
 
     @Transactional(readOnly = true)
     public Map<String, String> signedUrlsForStudentPlay(String gameId) {
-        return signedUrls(gameId, STUDENT_PLAY_SIGNED_URL_TTL_SECONDS);
+        return signedUrls(gameId, storage::createStudentPlaySignedUrl);
     }
 
-    private Map<String, String> signedUrls(String gameId, int expiresInSeconds) {
+    private Map<String, String> signedUrls(String gameId, Function<String, String> sign) {
         Map<String, String> result = new LinkedHashMap<>();
         for (GameNarrationAsset asset : assets.findAllByGame_Id(gameId)) {
             String audioText = asset.getQuestion().getAudioText();
             if (audioText == null || audioText.isBlank()
                     || !asset.getContentSha256().equals(fingerprint(asset.getGame(), audioText))) continue;
             try {
-                result.put("q" + (asset.getQuestion().getItemIndex() + 1), storage.createSignedUrl(
-                        asset.getStoragePath(), expiresInSeconds));
+                result.put("q" + (asset.getQuestion().getItemIndex() + 1), sign.apply(asset.getStoragePath()));
             } catch (RuntimeException ignored) {
                 // Audio is optional. A signing or Storage outage must leave the question playable.
             }

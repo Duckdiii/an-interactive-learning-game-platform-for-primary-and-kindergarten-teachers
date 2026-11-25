@@ -41,9 +41,17 @@ public class SupabaseNarrationStorage {
     }
 
     public String createSignedUrl(String objectPath, int expiresInSeconds) {
-        requireConfigured();
         if (expiresInSeconds < 1 || expiresInSeconds > 600)
             throw new IllegalArgumentException("Signed narration URLs may expire within 600 seconds");
+        return sign(objectPath, expiresInSeconds);
+    }
+
+    String createStudentPlaySignedUrl(String objectPath) {
+        return sign(objectPath, 24 * 60 * 60);
+    }
+
+    private String sign(String objectPath, int expiresInSeconds) {
+        requireConfigured();
         String path = validatedPath(objectPath);
         Map<?, ?> response = restClient.post()
                 .uri(storageUrl + "/storage/v1/object/sign/" + bucket + "/" + path)
