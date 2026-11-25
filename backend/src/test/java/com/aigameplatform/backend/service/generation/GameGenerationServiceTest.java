@@ -22,6 +22,7 @@ import com.aigameplatform.backend.service.strategy.WordScrambleGameStrategy;
 import com.aigameplatform.backend.service.validation.AbstractGameValidator;
 import com.aigameplatform.backend.service.validation.GameValidationService;
 import com.aigameplatform.backend.service.validation.SafetyGameValidator;
+import com.aigameplatform.backend.service.validation.ValidationError;
 import com.aigameplatform.backend.service.validation.ai.AiOutputValidator;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.service.validation.safety.ContentModerationClient;
@@ -58,7 +59,7 @@ class GameGenerationServiceTest {
             assertThat(suppliedTopic).isEqualTo(topic);
             return new GeneratedContentReviewer.Result(List.of(),
                     new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                            com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                            com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                             List.of(java.util.Map.of("chunkId", "math-g1-007", "claim", "Semantic review accepted fixture")), List.of("AUTOMATED_ONLY"), "fixture-semantic"));
         });
         assertThat(service.generateResult(GameType.QUIZ,
@@ -113,7 +114,7 @@ class GameGenerationServiceTest {
         var generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
         var service = service(generator, 0, moderation(false, false), provider, true, List.of(dataset));
         var review = new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                 List.of(java.util.Map.of("chunkId", chunk.chunkId())), List.of("AUTOMATED_REVIEW_ONLY_HUMAN_REVIEW_PENDING"), "test-model");
         var reviewCalls = new java.util.concurrent.atomic.AtomicInteger();
         service.setGeneratedContentReviewer((game, topic, curriculumEvidence) -> {
@@ -128,7 +129,7 @@ class GameGenerationServiceTest {
         assertThat(result.game().metadata().subject()).isEqualTo(Subject.ENGLISH);
         assertThat(result.evidence().datasetVersion()).isEqualTo(dataset.source().datasetVersion());
         assertThat(result.review().status()).isEqualTo(
-                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING);
+                com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING);
         assertThat(reviewCalls).hasValue(1);
         assertThat(result.evidence().chunks()).containsExactly(retrieved);
         assertThat(generator.attempts.getFirst().subject()).isEqualTo(Subject.ENGLISH);
@@ -198,7 +199,7 @@ class GameGenerationServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void ragContextAndTypeSchemaReachTheExistingGameOutputPipeline(GameType type) throws Exception {
         var datasets = com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadPackaged();
         var dataset = datasets.stream().filter(candidate -> candidate.chunks().stream()
@@ -224,7 +225,7 @@ class GameGenerationServiceTest {
         service.setGeneratedContentReviewer((game, topic, suppliedEvidence) ->
                 new GeneratedContentReviewer.Result(List.of(),
                         new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                                com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                                com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                                 List.of(java.util.Map.of("questionId", game.questions().getFirst().id(),
                                         "supportingChunkIds", List.of(chunk.chunkId()))),
                                 List.of("FIXTURE_REVIEW_ONLY"), "fixture")));
@@ -249,7 +250,7 @@ class GameGenerationServiceTest {
         var service = service(generator, 0, moderation(false, false), provider, true);
         service.setGeneratedContentReviewer((game, topic, evidence) -> new GeneratedContentReviewer.Result(List.of(),
                 new com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview(
-                        com.aigameplatform.backend.service.curriculum.review.CurriculumEvidenceReview.Status.PENDING,
+                        com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.PENDING,
                         List.of(java.util.Map.of("chunkId", "math-g1-001")), List.of("AUTOMATED_ONLY"), "fixture-semantic")));
         var result = service.generateResult(GameType.QUIZ, REQUEST);
         assertThat(result.review().reviewerModel()).isEqualTo("fixture-semantic");
@@ -330,7 +331,7 @@ class GameGenerationServiceTest {
         String output = """
                 {"questions":[{"questionText":"Which animal is in the scene?","blanks":[{"id":"b1","x":150,"y":120,"correctOptionId":"o1"}],"options":[{"id":"o1","visualPrompt":"cat","imageUrl":"https://images.example.edu/cat.png"},{"id":"o2","visualPrompt":"dog","imageUrl":"https://images.example.edu/dog.png"}]}]}
                 """;
-        ScriptedGenerator generator = new ScriptedGenerator(output);
+        ScriptedGenerator generator = new ScriptedGenerator(output, output.replace("Which animal is", "What animal is"));
         var service = service(generator, 0, moderation(false, false));
         service.setSceneImageLoader(new com.aigameplatform.backend.service.media.SceneImageLoader(
                 (host, deadline) -> List.of(java.net.InetAddress.getByAddress(new byte[] {(byte) 93, (byte) 184, (byte) 216, 34})),
@@ -389,6 +390,15 @@ class GameGenerationServiceTest {
         assertThat(game.questions().getFirst().sceneImageUrl()).isEqualTo(request.sceneImageUrl());
         assertThat(game.questions().getFirst().sceneWidth()).isEqualTo(400);
         assertThat(game.questions().getFirst().sceneHeight()).isEqualTo(300);
+
+        var current = game.questions().getFirst();
+        var regenerated = (com.aigameplatform.backend.dto.dsl.VisualClozeQuestionDsl) service.regenerateQuestion(
+                GameType.VISUAL_CLOZE, request, current, null, current.id(), game);
+        assertThat(regenerated.questionText()).startsWith("What animal");
+        assertThat(regenerated.sceneImageUrl()).isEqualTo(current.sceneImageUrl());
+        assertThat(regenerated.options()).isEqualTo(current.options());
+        assertThat(optionReviewer.get()).containsKeys("q1/o1", "q1/o2");
+        assertThat(imageReviewer.get().bytes()).isEqualTo(png);
     }
 
     @Test
@@ -397,7 +407,7 @@ class GameGenerationServiceTest {
                 {"questions":[{"questionText":"Hình nào không phải trái cây?",
                 "items":["apple","banana","grapes","carrot"],"oddOneOutIndex":3}]}
                 """;
-        var generator = new ScriptedGenerator(valid.replace("grapes", "invented"), valid);
+        var generator = new ScriptedGenerator(valid.replace("grapes", "invented"), valid, valid.replace("grapes", "strawberry"));
         var service = service(generator, 1);
         var reviews = new java.util.concurrent.atomic.AtomicInteger();
         service.setGeneratedContentReviewer((game, topic, evidence) -> {
@@ -412,7 +422,12 @@ class GameGenerationServiceTest {
         assertThat(generator.attempts.getFirst().oddImageMode()).isTrue();
         assertThat(generator.attempts.get(1).previousErrors()).isNotEmpty();
         assertThat(game.questions().getFirst().items()).hasSize(4);
-        assertThat(reviews).hasValue(1);
+        var current = game.questions().getFirst();
+        var replacement = (com.aigameplatform.backend.dto.dsl.OddOneOutQuestionDsl) service.regenerateQuestion(
+                GameType.ODD_ONE_OUT, request, current, "Đổi loại trái cây", current.id(), game);
+        assertThat(replacement.id()).isEqualTo(current.id());
+        assertThat(replacement.items()).extracting(option -> option.assetId()).contains("strawberry", "carrot");
+        assertThat(reviews).hasValue(2);
     }
 
     @Test
@@ -421,7 +436,7 @@ class GameGenerationServiceTest {
                 {"questions":[{"audioText":"cat","correct":{"visualPrompt":"cat-face"},
                  "distractors":[{"visualPrompt":"dog-face"},{"visualPrompt":"apple"}]}]}
                 """;
-        var generator = new ScriptedGenerator(valid);
+        var generator = new ScriptedGenerator(valid, valid.replace("dog-face", "carrot"));
         var service = service(generator, 0);
         var reviews = new java.util.concurrent.atomic.AtomicInteger();
         service.setGeneratedContentReviewer((game, topic, evidence) -> {
@@ -436,7 +451,12 @@ class GameGenerationServiceTest {
         assertThat(game.questions().getFirst().distractors()).allSatisfy(choice ->
                 assertThat(choice.imageUrl()).startsWith("/assets/noto/"));
         assertThat(generator.attempts.getFirst().avmCatalogMode()).isTrue();
-        assertThat(reviews).hasValue(1);
+        var current = game.questions().getFirst();
+        var replacement = (com.aigameplatform.backend.dto.dsl.AudioVisualMatchQuestionDsl) service.regenerateQuestion(
+                GameType.AUDIO_VISUAL_MATCH, request, current, "Đổi ảnh gây nhiễu", current.id(), game);
+        assertThat(replacement.distractors()).extracting(option -> option.imageUrl())
+                .contains("/assets/noto/emoji_u1f955.svg");
+        assertThat(reviews).hasValue(2);
     }
 
     @Test
@@ -465,6 +485,115 @@ class GameGenerationServiceTest {
         assertThatThrownBy(() -> service(new ScriptedGenerator(ambiguous), 0).generate(GameType.AUDIO_VISUAL_MATCH, request))
                 .isInstanceOfSatisfying(com.aigameplatform.backend.exception.ApiException.class, error ->
                         assertThat(error.getErrorCode()).isEqualTo(com.aigameplatform.backend.exception.ErrorCode.VALIDATION_ERROR));
+    }
+
+    @Test
+    void regenerateQuestionSucceedsOnSingleValidQuestion() throws Exception {
+        String singleQuiz = """
+                {"questions":[{"text":"1 + 1 bằng mấy?","options":["2","3"],"correctIndex":0,"audioText":"1 cộng 1 bằng mấy?"}]}
+                """;
+        var generator = new ScriptedGenerator(singleQuiz);
+        var service = service(generator, 0);
+
+        var current = new com.aigameplatform.backend.dto.dsl.QuizQuestionDsl("q1", 30, 10, null, null, null, null,
+                "Câu cũ", List.of(new com.aigameplatform.backend.dto.dsl.TextChoiceDsl("opt_0", "1")), "opt_0");
+        var baseGame = new com.aigameplatform.backend.dto.dsl.QuizGameDsl("1.0.0", GameType.QUIZ,
+                new com.aigameplatform.backend.dto.dsl.GameMetadata("Toán", Subject.MATH, GradeLevel.GRADE_1, "Toán"),
+                new com.aigameplatform.backend.dto.dsl.GameplaySettings(1), List.of(current));
+
+        var regenerated = (com.aigameplatform.backend.dto.dsl.QuizQuestionDsl) service.regenerateQuestion(
+                GameType.QUIZ, REQUEST, current, "làm dễ hơn", "q1", baseGame);
+
+        assertThat(regenerated.questionText()).isEqualTo("1 + 1 bằng mấy?");
+        assertThat(generator.attempts).hasSize(1);
+        assertThat(generator.attempts.getFirst().customInstruction()).contains("SINGLE QUESTION REGENERATION");
+        assertThat(generator.attempts.getFirst().customInstruction()).contains("làm dễ hơn");
+    }
+
+    @Test
+    void regenerateQuestionRetriesWhenFirstAttemptInvalid() throws Exception {
+        String invalid = "{\"questions\":[]}";
+        String valid = """
+                {"questions":[{"text":"2 + 2 bằng mấy?","options":["4","5"],"correctIndex":0}]}
+                """;
+        var generator = new ScriptedGenerator(invalid, valid);
+        var service = service(generator, 1);
+
+        var current = new com.aigameplatform.backend.dto.dsl.QuizQuestionDsl("q1", 30, 10, null, null, null, null,
+                "Câu cũ", List.of(new com.aigameplatform.backend.dto.dsl.TextChoiceDsl("opt_0", "1")), "opt_0");
+        var baseGame = new com.aigameplatform.backend.dto.dsl.QuizGameDsl("1.0.0", GameType.QUIZ,
+                new com.aigameplatform.backend.dto.dsl.GameMetadata("Toán", Subject.MATH, GradeLevel.GRADE_1, "Toán"),
+                new com.aigameplatform.backend.dto.dsl.GameplaySettings(1), List.of(current));
+
+        var regenerated = (com.aigameplatform.backend.dto.dsl.QuizQuestionDsl) service.regenerateQuestion(
+                GameType.QUIZ, REQUEST, current, null, "q1", baseGame);
+
+        assertThat(regenerated.questionText()).isEqualTo("2 + 2 bằng mấy?");
+        assertThat(generator.attempts).hasSize(2);
+        assertThat(generator.attempts.get(1).isRetry()).isTrue();
+    }
+
+    @Test
+    void regenerateQuestionSharesThreeAttemptBudgetBetweenProviderOutageAndInvalidQuestionCount() throws Exception {
+        var game = (com.aigameplatform.backend.dto.dsl.QuizGameDsl) MAPPER.readValue(
+                new ClassPathResource("dsl-examples/quiz.json").getInputStream(), GameDsl.class);
+        var target = game.questions().getLast();
+        String valid = """
+                {"questions":[{"text":"2 + 2 bằng mấy?","options":["4","5"],"correctIndex":0}]}
+                """;
+        var question = MAPPER.readTree(valid).path("questions").get(0);
+        var multiple = MAPPER.createObjectNode();
+        multiple.putArray("questions").add(question).add(question);
+        var generator = new ScriptedGenerator(new AiServiceUnavailableException("timeout"), multiple.toString(), valid);
+        var service = service(generator, 2);
+
+        var result = service.regenerateQuestion(GameType.QUIZ, REQUEST, target, null, target.id(), game);
+
+        assertThat(generator.attempts).extracting(GenerationAttempt::attemptNumber).containsExactly(1, 2, 3);
+        assertThat(generator.attempts.get(1).previousOutput()).isNull();
+        assertThat(generator.attempts.get(2).previousErrors()).extracting(ValidationError::path).contains("$.questions");
+        assertThat(result.id()).isEqualTo(target.id());
+        assertThat(result.points()).isEqualTo(target.points());
+        assertThat(result.timeLimitSeconds()).isEqualTo(target.timeLimitSeconds());
+    }
+
+    @Test
+    void regenerateQuestionStopsAfterThreeProviderOutages() throws Exception {
+        var game = (com.aigameplatform.backend.dto.dsl.QuizGameDsl) MAPPER.readValue(
+                new ClassPathResource("dsl-examples/quiz.json").getInputStream(), GameDsl.class);
+        var target = game.questions().getFirst();
+        var unavailable = new AiServiceUnavailableException("timeout");
+        var generator = new ScriptedGenerator(unavailable, unavailable, unavailable);
+        var service = service(generator, 2);
+
+        assertThatThrownBy(() -> service.regenerateQuestion(GameType.QUIZ, REQUEST, target, null, target.id(), game))
+                .isInstanceOf(AiGenerationTimeoutException.class).hasCause(unavailable);
+        assertThat(generator.attempts).hasSize(3);
+    }
+
+    @Test
+    void regenerateQuestionThrowsUnsafeWhenContentUnsafe() {
+        String unsafeContent = """
+                {"questions":[{"text":"Câu hỏi bạo lực súng đạn","options":["a","b"],"correctIndex":0}]}
+                """;
+        var client = new ContentModerationClient() {
+            @Override
+            public boolean isConfigured() { return true; }
+            @Override
+            public List<ModerationResult> moderate(List<String> texts) {
+                return texts.stream().map(t -> new ModerationResult(t.contains("bạo lực"), List.of("violence"))).toList();
+            }
+        };
+        var service = service(new ScriptedGenerator(unsafeContent), 1, client);
+
+        var current = new com.aigameplatform.backend.dto.dsl.QuizQuestionDsl("q1", 30, 10, null, null, null, null,
+                "Câu cũ", List.of(new com.aigameplatform.backend.dto.dsl.TextChoiceDsl("opt_0", "1")), "opt_0");
+        var baseGame = new com.aigameplatform.backend.dto.dsl.QuizGameDsl("1.0.0", GameType.QUIZ,
+                new com.aigameplatform.backend.dto.dsl.GameMetadata("Toán", Subject.MATH, GradeLevel.GRADE_1, "Toán"),
+                new com.aigameplatform.backend.dto.dsl.GameplaySettings(1), List.of(current));
+
+        assertThatThrownBy(() -> service.regenerateQuestion(GameType.QUIZ, REQUEST, current, null, "q1", baseGame))
+                .isInstanceOf(com.aigameplatform.backend.exception.UnsafeContentException.class);
     }
 
     private static byte[] scenePng(int width, int height) throws IOException {
@@ -533,9 +662,19 @@ class GameGenerationServiceTest {
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
             ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled,
             List<com.aigameplatform.backend.service.curriculum.CurriculumDataset> catalogDatasets) {
+        return service(generator, maxRetries, moderation, curriculum, ragEnabled, catalogDatasets, null, true);
+    }
+
+    private static GameGenerationService service(GameContentGenerator generator, int maxRetries,
+            ContentModerationClient moderation, CurriculumContextProvider curriculum, boolean ragEnabled,
+            List<com.aigameplatform.backend.service.curriculum.CurriculumDataset> catalogDatasets,
+            WordingReviewer wording, boolean wordingEnabled) {
         DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
+        if (wording != null) {
+            beans.registerSingleton("wordingReviewer", wording);
+        }
         beans.registerSingleton("catalog", new com.aigameplatform.backend.service.curriculum.CurriculumCatalog(
-                catalogDatasets, java.util.EnumSet.allOf(GameType.class)));
+                catalogDatasets, java.util.EnumSet.copyOf(java.util.List.of(GameType.dslTypes()))));
         if (generator != null) {
             beans.registerSingleton("generator", generator);
         }
@@ -549,8 +688,8 @@ class GameGenerationServiceTest {
                     new PilotQuizContentVerifier(constraints, constraints.sha256()));
         } catch (IOException e) { throw new java.io.UncheckedIOException(e); }
         List<AbstractGameValidator> validators = new ArrayList<>(GameTestFixtures.schemaAndBusinessRuleValidators(MAPPER));
-        validators.add(new SafetyGameValidator(
-                new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")), moderation, false));
+        validators.add(new SafetyGameValidator(new com.aigameplatform.backend.service.validation.ContentSafetyCheck(
+                new BlockedWordList(new ClassPathResource("moderation/blocked-words-vi.txt")), moderation, false)));
         GameValidationService validation = new GameValidationService(validators, MAPPER);
         Random random = new Random(7);
         return new GameGenerationService(beans.getBeanProvider(GameContentGenerator.class),
@@ -560,7 +699,17 @@ class GameGenerationServiceTest {
                 GameTestFixtures.factoryRegistry(random),
                 validation, MAPPER, beans.getBeanProvider(CurriculumContextProvider.class),
                 beans.getBeanProvider(com.aigameplatform.backend.service.curriculum.CurriculumCatalog.class),
-                beans.getBeanProvider(com.aigameplatform.backend.service.curriculum.CurriculumMetrics.class), ragEnabled, maxRetries);
+                beans.getBeanProvider(com.aigameplatform.backend.service.curriculum.CurriculumMetrics.class), ragEnabled, maxRetries,
+                beans.getBeanProvider(WordingReviewer.class), wordingEnabled, new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
+    }
+
+    /** Service có bước rà chính tả (giả) để kiểm vòng sinh lại. */
+    private static GameGenerationService service(GameContentGenerator generator, int maxRetries, WordingReviewer wording,
+            boolean wordingEnabled) {
+        try {
+            return service(generator, maxRetries, moderation(false, false), null, false,
+                    List.of(com.aigameplatform.backend.service.curriculum.CurriculumDataset.loadDefault()), wording, wordingEnabled);
+        } catch (IOException e) { throw new java.io.UncheckedIOException(e); }
     }
 
     private static GameGenerationService service(GameContentGenerator generator, int maxRetries) {
@@ -599,7 +748,7 @@ class GameGenerationServiceTest {
     // ---- thành công ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void aValidAnswerOnTheFirstTryBecomesAFullGame(GameType type) throws IOException {
         ScriptedGenerator generator = new ScriptedGenerator(validOutput(type));
 
@@ -642,6 +791,67 @@ class GameGenerationServiceTest {
         assertThat(second.isRetry()).isTrue();
         assertThat(second.previousOutput()).isEqualTo("{\"questions\":[]}");
         assertThat(second.previousErrors()).isNotEmpty();
+    }
+
+    // ---- rà chính tả (từ không có thật) ----
+
+    @Test
+    void aMisspelledWordFoundByTheWordingReviewIsSentBackAndTheNextTryIsReturned() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ), validOutput(GameType.QUIZ));
+        List<String> topics = new ArrayList<>();
+        Queue<List<ValidationError>> reviews = new LinkedList<>(List.of(
+                List.of(new ValidationError("$.questions[0].options[1].text", "Từ không có thật hoặc sai chính tả: \"dạp\"")),
+                List.of()));
+        GameGenerationService service = service(generator, 2, (game, topic) -> {
+            topics.add(topic);
+            return reviews.remove();
+        }, true);
+
+        service.generate(GameType.QUIZ, REQUEST);
+
+        assertThat(generator.attempts).hasSize(2);
+        assertThat(generator.attempts.get(1).previousErrors()).extracting(ValidationError::message)
+                .containsExactly("Từ không có thật hoặc sai chính tả: \"dạp\"");
+        assertThat(topics).containsOnly("Đếm con vật");
+    }
+
+    @Test
+    void theLastTryIsNotReviewedAndAFailingReviewIsSkippedSoGenerationStillSucceeds() throws IOException {
+        ScriptedGenerator lastTry = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        GameGenerationService noRetries = service(lastTry, 0, (game, topic) -> {
+            throw new AssertionError("lần thử cuối không được rà");
+        }, true);
+        assertThat(noRetries.generate(GameType.QUIZ, REQUEST).gameType()).isEqualTo(GameType.QUIZ);
+
+        ScriptedGenerator failingReview = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        GameGenerationService service = service(failingReview, 2, (game, topic) -> {
+            throw new AiServiceUnavailableException("503");
+        }, true);
+        assertThat(service.generate(GameType.QUIZ, REQUEST).gameType()).isEqualTo(GameType.QUIZ);
+        assertThat(failingReview.attempts).hasSize(1);
+    }
+
+    @Test
+    void ifTheRetriesAfterAWordingReviewAllFailTheEarlierValidGameIsReturnedInsteadOfAnError() throws IOException {
+        // Bước rà có thể báo nhầm: không được làm mất game đã qua 3 lớp chỉ vì các lần sinh lại hỏng.
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ), "{\"questions\":[]}", "không phải json");
+        GameGenerationService service = service(generator, 2,
+                (game, topic) -> List.of(new ValidationError("$.questions[0].questionText", "báo nhầm")), true);
+
+        GameDsl game = service.generate(GameType.QUIZ, REQUEST);
+
+        assertThat(game.gameType()).isEqualTo(GameType.QUIZ);
+        assertThat(generator.attempts).hasSize(3);
+    }
+
+    @Test
+    void theWordingReviewCanBeTurnedOff() throws IOException {
+        ScriptedGenerator generator = new ScriptedGenerator(validOutput(GameType.QUIZ));
+        GameGenerationService service = service(generator, 2, (game, topic) -> List.of(new ValidationError("$", "lỗi")), false);
+
+        service.generate(GameType.QUIZ, REQUEST);
+
+        assertThat(generator.attempts).hasSize(1);
     }
 
     @Test

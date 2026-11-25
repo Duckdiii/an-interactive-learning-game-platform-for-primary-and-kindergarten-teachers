@@ -5,5 +5,7 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record MemoryCardAiOutput(
-        List<MemoryCardAiQuestion> questions) implements AiGameOutput {
+        List<MemoryCardAiQuestion> questions,
+        String title,
+        AiPresentation presentation) implements AiGameOutput {
 }

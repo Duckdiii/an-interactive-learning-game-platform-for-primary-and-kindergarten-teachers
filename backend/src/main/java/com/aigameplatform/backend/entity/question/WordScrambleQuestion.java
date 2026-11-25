@@ -21,4 +21,9 @@ public class WordScrambleQuestion extends QuestionGame {
     private List<String> scrambledLetters = new ArrayList<>();
 
     private String correctWord;
+
+    @Override
+    public String insightLabel() {
+        return labelOrDefault(correctWord);
+    }
 }

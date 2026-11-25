@@ -8,7 +8,7 @@ export interface ResultProps {
   score: number
   /** Chuỗi câu đúng liên tiếp dài nhất trong lượt chơi. */
   bestStreak: number
-  onReplay: () => void
+  onReplay?: () => void
   /** Mở màn xem lại đáp án (chỉ khung Học sinh dùng). */
   /** Không có = không có gì để xem lại. */
   onReview?: () => void

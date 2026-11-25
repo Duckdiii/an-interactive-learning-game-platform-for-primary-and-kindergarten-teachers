@@ -1,0 +1,34 @@
+# Profile e2e (E2eBackendApplication): giá trị giả cho mọi placeholder bắt buộc, tắt mọi lệnh gọi AI và dịch vụ ngoài.
+# DB thật do @ServiceConnection (Testcontainers) cấp; backend/.env của máy dev (nếu có) bị các giá trị ở đây ghi đè.
+DB_URL: jdbc:postgresql://unused
+DB_USERNAME: unused
+DB_PASSWORD: unused
+JWT_SECRET: e2e-only-signing-key-not-valid-for-any-deployment
+server:
+  port: 18080
+app:
+  moderation:
+    required: false
+    openai:
+      api-key: ""
+  curriculum-rag:
+    enabled: false
+  ai:
+    gemini:
+      game-generation:
+        enabled: false
+  cors:
+    allowed-origins: http://localhost:15173
+  # Tính năng thử nghiệm có thể đang bật trong backend/.env của máy dev: tắt để e2e chạy như CI.
+  assets:
+    meaning-check:
+      enabled: false
+    shortlist:
+      enabled: false
+  generation:
+    wording-review:
+      enabled: false
+media:
+  storage:
+    local-dir: target/e2e-media
+    base-url: http://localhost:18080/media

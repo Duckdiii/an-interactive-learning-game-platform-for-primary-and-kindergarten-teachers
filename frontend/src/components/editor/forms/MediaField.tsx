@@ -7,12 +7,14 @@ import { uploadErrorMessage } from '../../../utils/mediaErrors'
 import { checkMediaFile, formatFileSize } from '../../../utils/mediaFile'
 import type { MediaKind } from '../../../utils/mediaFile'
 import Button from '../../Button'
+import Dialog from '../../ui/Dialog'
 import Icon from '../../ui/Icon'
 import MockBadge from '../../ui/MockBadge'
 import { setMediaUrl } from './commonEditing'
 import type { MediaUrlField } from './commonEditing'
 import type { QuestionFormProps } from './formTypes'
 import OperationStatus from './OperationStatus'
+import ImagePickerModal from '../ImagePickerModal'
 import { useCancellableOperation } from '../../../hooks/useCancellableOperation'
 
 const text = viText.editor.media
@@ -70,6 +72,8 @@ export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: Med
   const [canceled, setCanceled] = useState(false)
   const [activity, setActivity] = useState<Activity>('upload')
   const [brokenUrl, setBrokenUrl] = useState<string | null>(null)
+  const [showPexelsModal, setShowPexelsModal] = useState(false)
+  const [zoomed, setZoomed] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const previewRef = useRef<string | null>(null)
   const checkRef = useRef(0)
@@ -222,12 +226,19 @@ export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: Med
                 {text.imageBroken}
               </p>
             ) : (
-              <img
-                src={url}
-                alt={text.currentImageAlt}
-                onError={() => setBrokenUrl(url)}
-                className="h-24 w-24 rounded-xl border-2 border-ink/10 bg-paper object-contain"
-              />
+              <button
+                type="button"
+                onClick={() => setZoomed(true)}
+                aria-label={text.zoomImage}
+                className="rounded-xl transition hover:ring-2 hover:ring-brand/50"
+              >
+                <img
+                  src={url}
+                  alt={text.currentImageAlt}
+                  onError={() => setBrokenUrl(url)}
+                  className="h-24 w-24 cursor-zoom-in rounded-xl border-2 border-ink/10 bg-paper object-contain"
+                />
+              </button>
             )
           ) : (
             // Âm thanh của giáo viên: để trình duyệt hiện bộ điều khiển có sẵn (phát, tạm dừng, thanh tua), đã có bàn phím và nhãn.
@@ -273,6 +284,17 @@ export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: Med
             <Icon name="upload" className="mr-2 h-5 w-5" />
             {url ? (isImage ? text.replaceImage : text.replaceAudio) : isImage ? text.uploadImage : text.uploadAudio}
           </Button>
+          {isImage ? (
+            <Button
+              id={`${id}-pexels`}
+              type="button"
+              variant="secondary"
+              onClick={() => setShowPexelsModal(true)}
+              disabled={op.busy}
+            >
+              Đổi ảnh từ Pexels
+            </Button>
+          ) : null}
           {url ? (
             <Button type="button" variant="secondary" onClick={() => {
                 apply(undefined)
@@ -318,6 +340,17 @@ export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: Med
         ) : null}
       </div>
 
+      {zoomed && url && isImage ? (
+        <Dialog title={text.zoomTitle} onEscape={() => setZoomed(false)} wide>
+          <img src={url} alt={text.currentImageAlt} className="mx-auto max-h-[70vh] w-auto rounded-xl bg-paper object-contain" />
+          <div className="mt-4 flex justify-end">
+            <Button type="button" variant="secondary" onClick={() => setZoomed(false)}>
+              {text.zoomClose}
+            </Button>
+          </div>
+        </Dialog>
+      ) : null}
+
       {tools
         ? tools({
             op,
@@ -328,6 +361,15 @@ export default function MediaField({ kind, idPrefix, url, onUpdate, tools }: Med
             disabled: op.busy,
           })
         : null}
+
+      {showPexelsModal ? (
+        <ImagePickerModal
+          onSelect={(newUrl) => {
+            apply(newUrl)
+          }}
+          onClose={() => setShowPexelsModal(false)}
+        />
+      ) : null}
     </fieldset>
   )
 }

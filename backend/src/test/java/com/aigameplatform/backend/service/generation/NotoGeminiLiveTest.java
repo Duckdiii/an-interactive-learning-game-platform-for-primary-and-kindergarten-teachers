@@ -40,13 +40,13 @@ class NotoGeminiLiveTest {
         var mapper = JsonMapper.builder().build();
         var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(mapper));
         var beans = new DefaultListableBeanFactory();
-        beans.registerSingleton("generator", new GeminiGameContentGenerator(model, strategies));
+        beans.registerSingleton("generator", new GeminiGameContentGenerator(model, strategies, com.aigameplatform.backend.service.testsupport.GameAssetCatalogFixture.ASSETS, new com.aigameplatform.backend.service.asset.KeywordAssetRetriever(com.aigameplatform.backend.service.testsupport.GameAssetCatalogFixture.ASSETS), false, new com.aigameplatform.backend.service.media.NotoEmojiCatalog()));
         var service = new GameGenerationService(beans.getBeanProvider(GameContentGenerator.class),
                 beans.getBeanProvider(PilotQuizContentVerifier.class), strategies, new AiOutputValidator(mapper),
                 GameTestFixtures.factoryRegistry(new Random(7)), GameTestFixtures.schemaAndBusinessRuleValidation(mapper),
                 mapper, beans.getBeanProvider(CurriculumContextProvider.class), beans.getBeanProvider(CurriculumCatalog.class),
-                beans.getBeanProvider(CurriculumMetrics.class), false, 1);
-        service.setGeneratedContentReviewer(new GeminiGeneratedContentReviewer(model, mapper, modelName));
+                beans.getBeanProvider(CurriculumMetrics.class), false, 1, beans.getBeanProvider(WordingReviewer.class), false, new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
+        service.setGeneratedContentReviewer(new GeminiGeneratedContentReviewer(model, mapper, modelName, new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog()));
         var resolver = new com.aigameplatform.backend.service.media.SystemPublicAddressResolver();
         var imageLoader = new com.aigameplatform.backend.service.media.SceneImageLoader(resolver,
                 new com.aigameplatform.backend.service.media.PinnedHttpsSceneImageTransport(),

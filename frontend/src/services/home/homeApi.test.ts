@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import * as gamesApi from '../../api/gamesApi'
 import { setMockScenario } from '../mock/mockRuntime'
 import { HomeApiNotSupportedError } from './HomeApi'
 import { getHomeApi } from './index'
@@ -8,12 +9,49 @@ import { RealHomeApi } from './realHomeApi'
 afterEach(() => vi.unstubAllEnvs())
 
 describe('RealHomeApi', () => {
-  it('cả ba endpoint còn đề xuất nên reject HomeApiNotSupportedError', async () => {
+  it('danh sách phiên đang diễn ra còn đề xuất nên reject HomeApiNotSupportedError', async () => {
+    await expect(new RealHomeApi().listLiveSessions()).rejects.toBeInstanceOf(HomeApiNotSupportedError)
+  })
+
+  it('listReviewNeeded và getQuestionInsights chuyển tham số sang lời gọi API thật', async () => {
+    const reviewSpy = vi.spyOn(gamesApi, 'fetchReviewNeeded').mockResolvedValue([])
+    const detailSpy = vi.spyOn(gamesApi, 'fetchQuestionInsights').mockResolvedValue({
+      questionId: 'q1',
+      order: 1,
+      text: 'MẸ',
+      answeredCount: 0,
+      correctRate: 0,
+      needsReview: false,
+      distribution: [],
+      otherCount: 0,
+      noAnswerCount: 0,
+    })
     const api = new RealHomeApi()
 
-    await expect(api.listLiveSessions()).rejects.toBeInstanceOf(HomeApiNotSupportedError)
-    await expect(api.listReviewNeeded()).rejects.toBeInstanceOf(HomeApiNotSupportedError)
-    await expect(api.getGameInsights()).rejects.toBeInstanceOf(HomeApiNotSupportedError)
+    await api.listReviewNeeded(3)
+    await api.getQuestionInsights('g1', 'q1', 'TEAM', { from: '2026-11-01' })
+
+    expect(reviewSpy).toHaveBeenCalledWith(3)
+    expect(detailSpy).toHaveBeenCalledWith('g1', 'q1', 'TEAM', { from: '2026-11-01' })
+    reviewSpy.mockRestore()
+    detailSpy.mockRestore()
+  })
+
+  it('getGameInsights chuyển gameId và sessionType sang lời gọi API thật', async () => {
+    const fetchSpy = vi.spyOn(gamesApi, 'fetchGameInsights').mockResolvedValue({
+      playCount: 0,
+      correctRate: 0,
+      avgAttemptsPerQuestion: 0,
+      completionRate: 0,
+      lowSample: false,
+      avgScore: 0,
+      questions: [],
+    })
+    const api = new RealHomeApi()
+
+    await api.getGameInsights('g1', 'TEAM')
+    expect(fetchSpy).toHaveBeenCalledWith('g1', 'TEAM', undefined)
+    fetchSpy.mockRestore()
   })
 })
 

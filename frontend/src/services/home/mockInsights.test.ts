@@ -24,6 +24,6 @@ describe('buildMockInsights', () => {
   })
 
   it('game không có trong kho mô phỏng thì chưa có lượt chơi', () => {
-    expect(buildMockInsights('khong-co')).toEqual({ playCount: 0, correctRate: 0, avgAttemptsPerQuestion: 0, questions: [] })
+    expect(buildMockInsights('khong-co')).toEqual({ playCount: 0, correctRate: 0, avgAttemptsPerQuestion: 0, completionRate: 0, avgScore: 0, lowSample: false, questions: [] })
   })
 })

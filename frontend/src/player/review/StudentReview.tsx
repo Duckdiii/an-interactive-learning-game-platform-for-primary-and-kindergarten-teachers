@@ -9,7 +9,7 @@ const text = viText.player.review
 interface StudentReviewProps {
   items: ReviewItem[]
   onBack: () => void
-  onReplay: () => void
+  onReplay?: () => void
 }
 
 const filterClass = (active: boolean) =>
@@ -70,9 +70,9 @@ export default function StudentReview({ items, onBack, onReplay }: StudentReview
           <PlayButton className="w-full md:w-auto" onClick={onBack}>
             {text.back}
           </PlayButton>
-          <PlayButton className="w-full md:w-auto" onClick={onReplay}>
+          {onReplay ? <PlayButton className="w-full md:w-auto" onClick={onReplay}>
             {viText.player.replay}
-          </PlayButton>
+          </PlayButton> : null}
         </div>
       </section>
     </main>

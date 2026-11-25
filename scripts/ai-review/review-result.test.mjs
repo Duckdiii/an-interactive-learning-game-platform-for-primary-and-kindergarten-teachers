@@ -72,6 +72,12 @@ test("prompt.md nhắc mọi category, severity và mode có trong schema", () =
   for (const m of schema.properties.mode.enum) assert.ok(prompt.includes(`| ${m} |`), `prompt thiếu mode ${m}`);
 });
 
+test("mô tả status trong schema (agent đọc qua --json-schema) không mâu thuẫn với chế độ chia phần của prompt", () => {
+  // Lỗi đã gặp ở lần chạy thử PR #83: schema bảo "hết các file thay đổi" nên mọi phần đều tự báo incomplete.
+  assert.match(schema.properties.status.description, /SHARD/);
+  assert.match(prompt, /SHARD_FILES_FILE/);
+});
+
 test("round chỉ nhận 1 hoặc 2", () => {
   for (const ok of [1, 2]) assert.deepEqual(errs(result({ round: ok })), []);
   assert.ok(errs(result({ round: 3 })).length > 0);
@@ -90,7 +96,7 @@ test("previous_findings: ref, trạng thái và căn cứ được kiểm tra", 
 test("prompt.md nhắc các trạng thái của vòng 2 và các dòng đầu vào", () => {
   const statuses = schema.properties.previous_findings.items.properties.status.enum;
   for (const s of statuses) assert.ok(prompt.includes(`\`${s}\``), `prompt thiếu trạng thái ${s}`);
-  for (const k of ["ROUND: 2", "PREVIOUS_FINDINGS_FILE", "INCREMENTAL_DIFF_FILE", "BASE_SHA"]) assert.ok(prompt.includes(k), `prompt thiếu ${k}`);
+  for (const k of ["ROUND: 2", "PREVIOUS_FINDINGS_FILE", "SHARD_DIFF_FILE", "SHARD_FILES_FILE", "BASE_SHA"]) assert.ok(prompt.includes(k), `prompt thiếu ${k}`);
 });
 
 test("fix tối đa 400 ký tự và impact tối đa 300 ký tự (hướng giải quyết ngắn, không phải bài văn)", () => {

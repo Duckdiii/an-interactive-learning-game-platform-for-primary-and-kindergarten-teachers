@@ -2,8 +2,12 @@ import { useEffect } from 'react'
 import { Group, Image as KonvaImage, Rect, Text } from 'react-konva'
 import useImage from 'use-image'
 import type { PairSide } from '../../types/game-dsl.types'
-import type { Palette } from '../common/palette'
+import { bob, burstParticle, easeOutBack, progress, wiggle } from '../common/motion'
+import { quantityPicture } from '../common/optionVisual'
+import { OPTION_OBJECT_FILLS, type Palette } from '../common/palette'
 import { useGamePalette } from '../common/useGamePalette'
+import { usePresentation } from '../../player/theme/PresentationContext'
+import { cardStyleOf } from '../../utils/presentation'
 import { CARD_FONT_SIZE, CARD_IMAGE_SIZE, CARD_PADDING, cardTextWidth } from './matchingLayout'
 import { sideDisplay } from './matchingView'
 
@@ -28,6 +32,13 @@ interface MatchingCardProps {
    * dài hơn chỗ đã chừa cho ảnh. Có thể được gọi lặp lại; người nhận cần bỏ qua lần trùng.
    */
   onImageFailed?: () => void
+  /** Màu "thẻ đồ chơi" (viền và bóng) theo thứ tự thẻ. */
+  colorIndex?: number
+  /** Đồng hồ hoạt ảnh (giây) và lúc chấm xong; 0 và null thì vẽ tĩnh. */
+  time?: number
+  reactedAt?: number | null
+  /** Giây trễ trước khi thẻ bật vào (thẻ xuất hiện lần lượt); null thì hiện ngay (xem lại, giảm chuyển động). */
+  appearDelay?: number | null
 }
 
 const fillOf = (palette: Palette): Record<MatchingCardState, string> => ({
@@ -38,9 +49,12 @@ const fillOf = (palette: Palette): Record<MatchingCardState, string> => ({
   wrong: palette.wrongFill,
 })
 
+const BURST = 6
+
 /**
- * Một thẻ ở cột trái hoặc phải: chữ và/hoặc ảnh (ảnh bên trái, chữ bên phải). Cả thẻ là vùng chạm. Là
- * component riêng vì `useImage` là hook, không gọi được trong vòng lặp của renderer.
+ * Một thẻ ở cột trái hoặc phải, vẽ như thẻ đồ chơi: viền và bóng màu kẹo, ảnh nhấp nhô nhẹ ("3 con vịt" vẽ 3 con vịt nhỏ).
+ * Thẻ chỉ nhô/nảy/lắc vài px trong lúc chọn hoặc ngay sau khi chấm (đường nối lệch tối đa khoảng 6px, rồi khớp lại); ảnh bên trong nhấp nhô nhẹ.
+ * Là component riêng vì `useImage` là hook, không gọi được trong vòng lặp của renderer.
  */
 export default function MatchingCard({
   x,
@@ -52,8 +66,13 @@ export default function MatchingCard({
   accent,
   onPress,
   onImageFailed,
+  colorIndex = 0,
+  time = 0,
+  reactedAt = null,
+  appearDelay = null,
 }: MatchingCardProps) {
   const palette = useGamePalette()
+  const cardStyle = cardStyleOf(usePresentation()?.world)
   const [image, imageStatus] = useImage(content.imageUrl ?? '')
   const imageFailed = imageStatus === 'failed'
   // Ảnh lỗi thì chữ dự phòng thay chỗ ảnh (xem `sideDisplay`) và báo renderer tính lại bố cục.
@@ -63,31 +82,65 @@ export default function MatchingCard({
     if (imageFailed) onImageFailed?.()
   }, [imageFailed, onImageFailed])
 
+  const toy = OPTION_OBJECT_FILLS[colorIndex % OPTION_OBJECT_FILLS.length]
   const emphasised = state === 'selected' || state === 'linked'
   const textWidth = cardTextWidth(hasImage)
   const textX = hasImage ? CARD_PADDING + CARD_IMAGE_SIZE + CARD_PADDING : CARD_PADDING
 
+  const elapsed = reactedAt === null ? -1 : time - reactedAt
+  const pop = state === 'correct' ? easeOutBack(progress(elapsed, 0.5)) : 0
+  const shake = state === 'wrong' ? wiggle(elapsed, 0.9, 6) : 0
+  // Thẻ đang chọn nhô lên một chút để trẻ thấy mình đã chọn ô nào.
+  const lift = state === 'selected' ? -6 : -4 * pop
+  const appear = appearDelay === null ? 1 : easeOutBack(progress(time - appearDelay, 0.4))
+  const bursting = state === 'correct' && elapsed > 0 && elapsed < 0.9
+
+  // Chỉ nhân bản ảnh khi ảnh là hình tự động của "N con X"; ảnh giáo viên tự đặt luôn vẽ một lần.
+  const quantity = text ? quantityPicture(text) : null
+  const count = quantity && quantity.imageUrl === content.imageUrl ? Math.min(quantity.count, 9) : 1
+  const perRow = count > 4 ? 3 : count > 1 ? 2 : 1
+  const mini = count > 1 ? Math.floor((CARD_IMAGE_SIZE - (perRow - 1) * 3) / perRow) : CARD_IMAGE_SIZE
+  const rows = Math.ceil(count / perRow)
+  // Căn giữa khối hình nhỏ theo chiều dọc trong ô ảnh.
+  const imageTop = (height - CARD_IMAGE_SIZE) / 2 + (count > 1 ? (CARD_IMAGE_SIZE - rows * (mini + 3) + 3) / 2 : 0) + bob(time, colorIndex * 1.4, 3)
+
   return (
-    <Group x={x} y={y} onClick={onPress} onTap={onPress}>
+    // Phóng to quanh tâm thẻ để thẻ "bật" vào chỗ, không trượt lệch đường nối.
+    <Group
+      x={x + shake + width / 2}
+      y={y + lift + height / 2}
+      offsetX={width / 2}
+      offsetY={height / 2}
+      scaleX={appear}
+      scaleY={appear}
+      opacity={Math.min(1, appear)}
+      onClick={onPress}
+      onTap={onPress}
+    >
+      {/* Bóng dưới thẻ mang màu thế giới; viền giữ màu kẹo theo thứ tự thẻ. */}
+      <Rect width={width} height={height} y={6} cornerRadius={cardStyle.radius} fill={cardStyle.backTo} listening={false} />
       <Rect
         width={width}
         height={height}
-        cornerRadius={20}
+        cornerRadius={cardStyle.radius}
         fill={fillOf(palette)[state]}
-        stroke={emphasised ? (accent ?? palette.outline) : palette.outline}
-        strokeWidth={emphasised ? 8 : 3}
+        stroke={emphasised ? (accent ?? toy) : toy}
+        strokeWidth={emphasised ? 8 : 5}
       />
-      {hasImage && image && (
-        <KonvaImage
-          image={image}
-          width={CARD_IMAGE_SIZE}
-          height={CARD_IMAGE_SIZE}
-          x={CARD_PADDING}
-          y={(height - CARD_IMAGE_SIZE) / 2}
-          cornerRadius={12}
-          listening={false}
-        />
-      )}
+      {hasImage && image
+        ? Array.from({ length: count }, (_, i) => (
+            <KonvaImage
+              key={i}
+              image={image}
+              width={mini}
+              height={mini}
+              x={CARD_PADDING + (i % perRow) * (mini + 3)}
+              y={imageTop + Math.floor(i / perRow) * (mini + 3)}
+              cornerRadius={count > 1 ? 4 : 12}
+              listening={false}
+            />
+          ))
+        : null}
       {text && (
         <Text
           text={text}
@@ -99,9 +152,30 @@ export default function MatchingCard({
           height={height - 2 * CARD_PADDING}
           align={hasImage ? 'left' : 'center'}
           verticalAlign="middle"
+          fill={palette.ink}
+          wrap="word"
           listening={false}
         />
       )}
+      {bursting
+        ? Array.from({ length: BURST }, (_, i) => {
+            const p = burstParticle(i, BURST, elapsed, 0.9, 70)
+            return (
+              <Rect
+                key={`burst-${i}`}
+                x={width / 2 + p.x}
+                y={height / 2 + p.y}
+                width={12}
+                height={12}
+                cornerRadius={3}
+                rotation={p.rotation}
+                fill={OPTION_OBJECT_FILLS[i % OPTION_OBJECT_FILLS.length]}
+                opacity={p.opacity}
+                listening={false}
+              />
+            )
+          })
+        : null}
     </Group>
   )
 }

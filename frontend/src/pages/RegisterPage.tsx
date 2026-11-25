@@ -6,16 +6,17 @@ import Button from '../components/Button'
 import ErrorNotice from '../components/ui/ErrorNotice'
 import FormField from '../components/ui/FormField'
 import PasswordInput from '../components/ui/PasswordInput'
+import PasswordStrengthMeter from '../components/ui/PasswordStrengthMeter'
 import { describedBy, inputClass } from '../components/ui/formStyles'
 import { AUTH_FEATURES } from '../config/authFeatures'
 import { viText } from '../constants/viText'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { ROUTES } from '../routes/paths'
 import { parseApiError } from '../utils/apiError'
-import { passwordStrength } from '../utils/passwordStrength'
 
 interface RegisterForm {
   fullName: string
+  school: string
   email: string
   password: string
   confirmPassword: string
@@ -27,6 +28,7 @@ type FieldErrors = Partial<Record<FieldKey | 'form', string>>
 const FIELD_ORDER: ReadonlyArray<FieldKey> = [
   'fullName',
   'email',
+  'school',
   'password',
   'confirmPassword',
 ]
@@ -34,6 +36,7 @@ const FIELD_ORDER: ReadonlyArray<FieldKey> = [
 const initialForm: RegisterForm = {
   fullName: '',
   email: '',
+  school: '',
   password: '',
   confirmPassword: '',
 }
@@ -71,30 +74,6 @@ function focusFirstError(errors: FieldErrors) {
   if (first) document.getElementById(fieldId(first))?.focus()
 }
 
-// Thanh 3 vạch + nhãn đọc to khi đổi; theo đúng luật Backend (xem passwordStrength) nhưng chỉ gợi ý, không chặn nộp. Không dùng đỏ: mức thấp là vàng.
-function StrengthMeter({ password }: { password: string }) {
-  const { level, label } = passwordStrength(password)
-
-  return (
-    <div className="mt-2">
-      <div aria-hidden="true" className="flex gap-1.5">
-        {[1, 2, 3].map((bar) => (
-          <span
-            key={bar}
-            className={`h-2 flex-1 rounded-full ${
-              bar > level ? 'bg-line' : level === 3 ? 'bg-brand' : 'bg-sun'
-            }`}
-          />
-        ))}
-      </div>
-      <p aria-live="polite" className="mt-1 text-sm font-semibold text-ink-soft">
-        <span className="sr-only">{viText.auth.strengthLabel}: </span>
-        {label}
-      </p>
-    </div>
-  )
-}
-
 export default function RegisterPage() {
   usePageTitle('Đăng ký')
   const [form, setForm] = useState(initialForm)
@@ -130,6 +109,7 @@ export default function RegisterPage() {
         fullName: form.fullName.trim(),
         email: form.email.trim(),
         password: form.password,
+        ...(form.school.trim() ? { school: form.school.trim() } : {}),
       })
       navigate(ROUTES.login, {
         replace: true,
@@ -146,7 +126,7 @@ export default function RegisterPage() {
       }
 
       if (Object.keys(knownFieldErrors).length === 0) {
-        knownFieldErrors.form = parsedError.message
+        knownFieldErrors.form = parsedError.code === 'UNSAFE_CONTENT' ? viText.classrooms.unsafe : parsedError.message
       }
 
       showErrors(knownFieldErrors)
@@ -156,7 +136,7 @@ export default function RegisterPage() {
   }
 
   const textField = (
-    field: 'fullName' | 'email',
+    field: 'fullName' | 'email' | 'school',
     label: string,
     autoComplete: string,
     placeholder: string,
@@ -168,6 +148,7 @@ export default function RegisterPage() {
         name={field}
         type={type}
         value={form[field]}
+        maxLength={field === 'school' ? 255 : undefined}
         onChange={(event) => updateField(field, event.target.value)}
         autoComplete={autoComplete}
         placeholder={placeholder}
@@ -196,6 +177,7 @@ export default function RegisterPage() {
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
         {textField('fullName', 'Họ và tên', 'name', 'Nguyễn Văn An', 'text')}
         {textField('email', 'Email', 'email', viText.auth.emailPlaceholder, 'email')}
+        {textField('school', 'Trường (không bắt buộc)', 'organization', 'Ví dụ Trường Tiểu học Hoa Mai', 'text')}
 
         <FormField
           id={fieldId('password')}
@@ -216,7 +198,7 @@ export default function RegisterPage() {
             })}
           />
           {/* Ô còn trống thì chưa chấm: không chê khi giáo viên chưa gõ gì. */}
-          {form.password ? <StrengthMeter password={form.password} /> : null}
+          {form.password ? <PasswordStrengthMeter password={form.password} /> : null}
         </FormField>
 
         <FormField

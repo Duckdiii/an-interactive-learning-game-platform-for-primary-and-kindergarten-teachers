@@ -22,8 +22,8 @@ public abstract class TeacherSession extends GameSession {
     @Column(name = "is_locked", nullable = false)
     private boolean isLocked;
 
-    // Aggregation: phiên diễn ra cho một Classroom. Không cascade.
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    // Aggregation: phiên diễn ra cho một Classroom. Không cascade; optional với phiên Live Arena tự do.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "classroom_id")
     private Classroom classroom;
 }

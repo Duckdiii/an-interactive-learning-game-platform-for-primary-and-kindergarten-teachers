@@ -10,7 +10,7 @@ const wrapper = ({ children }: { children: ReactNode }) => <AuthProvider>{childr
 
 const identityOf = (user: Partial<AuthUser> | null) => {
   localStorage.clear()
-  if (user) storeSession(user as AuthUser, 'token', 'refresh')
+  if (user) storeSession(user as AuthUser, 'token')
 
   return renderHook(() => useTeacherIdentity(), { wrapper }).result.current
 }

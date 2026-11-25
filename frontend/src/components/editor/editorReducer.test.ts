@@ -22,6 +22,19 @@ describe('editorReducer', () => {
     expect(start.draft.metadata.title).toBe(quiz().metadata.title)
   })
 
+  it('đổi cách trình bày: gộp với phần đã có, là thay đổi cần lưu; bỏ hết thì xóa hẳn presentation', () => {
+    const start = createEditorState(quiz())
+    const world = editorReducer(start, { type: 'setPresentation', presentation: { world: 'ocean' } })
+    const both = editorReducer(world, { type: 'setPresentation', presentation: { carrier: 'fish' } })
+    const cleared = editorReducer(both, { type: 'setPresentation', presentation: { world: undefined, carrier: undefined } })
+
+    expect(both.draft.metadata.presentation).toEqual({ world: 'ocean', carrier: 'fish' })
+    expect(isDirty(both)).toBe(true)
+    expect(start.draft.metadata.presentation).toBeUndefined()
+    expect('presentation' in cleared.draft.metadata).toBe(false)
+    expect(isDirty(cleared)).toBe(false)
+  })
+
   it('sửa rồi gõ lại đúng như cũ thì hết "chưa lưu"', () => {
     const start = createEditorState(quiz())
     const edited = editorReducer(start, { type: 'setTitle', title: 'Khác' })
@@ -131,6 +144,15 @@ describe('editorReducer: AI làm lại một câu và hoàn tác', () => {
     expect(editorReducer(undone, { type: 'undoRegenerated', index: 0, questionId: 'q1' })).toBe(undone)
   })
 
+  it('hoàn tác lần sinh thứ hai vẫn giữ yêu cầu lưu thủ công của câu AI trước đó', () => {
+    const start = createEditorState(quiz())
+    const first = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
+    const second = editorReducer(first, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(first, 'Câu thứ hai') })
+    const undone = editorReducer(second, { type: 'undoRegenerated', index: 0, questionId: 'q1' })
+    expect(undone.draft.questions[0]).toBe(first.draft.questions[0])
+    expect(undone.manualSave?.has('q1')).toBe(true)
+  })
+
   it('sửa tiếp CHÍNH câu đó thì mất khả năng hoàn tác; sửa câu khác thì còn', () => {
     const start = createEditorState(quiz())
     const applied = editorReducer(start, { type: 'applyRegenerated', index: 0, questionId: 'q1', question: regenerated(start) })
@@ -205,5 +227,21 @@ describe('editorReducer: AI làm lại một câu và hoàn tác', () => {
     expect(undoFirst.draft.questions[0]).toBe(start.draft.questions[0])
     expect((undoFirst.draft.questions[1] as { questionText: string }).questionText).toBe('Câu 2 do AI')
     expect(Object.keys(undoFirst.undo)).toEqual(['q2'])
+  })
+
+  it('áp game AI sửa qua chat: thay cả bản nháp, hoàn tác được một bước khi chưa sửa thêm', () => {
+    const start = createEditorState(quiz())
+    const revised = { ...quiz(), metadata: { ...quiz().metadata, title: 'Bản AI sửa' } }
+    const applied = editorReducer(start, { type: 'applyChatRevision', content: revised })
+
+    expect(applied.draft).toBe(revised)
+    expect(isDirty(applied)).toBe(true)
+    expect(editorReducer(applied, { type: 'undoChatRevision' }).draft).toBe(start.draft)
+
+    // Đã sửa tay sau khi áp: hoàn tác không ghi đè phần sửa tay, chỉ bỏ khả năng hoàn tác.
+    const edited = editorReducer(applied, { type: 'setTitle', title: 'Cô tự sửa' })
+    const undone = editorReducer(edited, { type: 'undoChatRevision' })
+    expect(undone.draft.metadata.title).toBe('Cô tự sửa')
+    expect(undone.chatUndo).toBeNull()
   })
 })

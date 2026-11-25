@@ -4,22 +4,26 @@ import { ROUTES } from '../routes/paths'
 import {
   clearStoredSession,
   getStoredAccessToken,
-  getStoredRefreshToken,
-  storeTokens,
+  storeAccessToken,
 } from '../utils/authStorage'
 
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api'
 
-const axiosInstance = axios.create({ baseURL })
+// withCredentials: Backend khác origin, phải bật thì trình duyệt mới nhận Set-Cookie refresh_token khi đăng nhập
+// và gửi lại cookie đó (Path=/api/auth) khi làm mới/đăng xuất.
+const axiosInstance = axios.create({ baseURL, withCredentials: true })
+
+// Refresh treo thì mọi request đang chờ nó (kể cả đăng xuất) treo theo; hết giờ thì các request đó bị từ chối.
+export const REFRESH_TIMEOUT_MS = 10_000
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
 }
 
+// Refresh token mới không nằm trong body: Backend xoay vòng nó qua Set-Cookie.
 interface RefreshResponse {
   data: {
     accessToken: string
-    refreshToken: string
   }
 }
 
@@ -31,7 +35,7 @@ interface PendingRequest {
 let isRefreshing = false
 let pendingQueue: PendingRequest[] = []
 
-const publicAuthEndpoints = ['/auth/login', '/auth/register']
+const publicAuthEndpoints = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password']
 
 function isPublicAuthRequest(config: InternalAxiosRequestConfig) {
   return publicAuthEndpoints.some((endpoint) => config.url?.endsWith(endpoint))
@@ -104,30 +108,26 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    const refreshToken = getStoredRefreshToken()
-
-    if (!refreshToken) {
-      expireSession()
-      return Promise.reject(error)
-    }
-
     isRefreshing = true
 
     try {
+      // Không có body và không gửi Authorization: Backend chỉ đọc cookie refresh_token.
       const response = await axios.post<RefreshResponse>(
         `${baseURL}/auth/refresh`,
-        { refreshToken },
+        undefined,
+        { withCredentials: true, timeout: REFRESH_TIMEOUT_MS },
       )
-      const {
-        accessToken,
-        refreshToken: rotatedRefreshToken,
-      } = response.data.data
+      const { accessToken } = response.data.data
 
-      if (!accessToken || !rotatedRefreshToken) {
-        throw new Error('Refresh response did not include both tokens')
+      if (!accessToken) {
+        throw new Error('Refresh response did not include an access token')
+      }
+      // Giáo viên đã đăng xuất trong lúc chờ refresh: không ghi lại token vào máy dùng chung và không gửi lại request.
+      if (!getStoredAccessToken()) {
+        throw new Error('Session ended while refreshing')
       }
 
-      storeTokens(accessToken, rotatedRefreshToken)
+      storeAccessToken(accessToken)
       resolvePendingRequests(accessToken)
       setAuthorizationHeader(originalRequest, accessToken)
 

@@ -4,6 +4,7 @@ import {
   filterToSessionType,
   formatDecimalVi,
   isLowRate,
+  parseDateParam,
   parseResultsFilter,
   pickReviewQuestion,
   resultsLink,
@@ -56,7 +57,7 @@ describe('định dạng và ánh xạ', () => {
   it('chip lọc <-> sessionType; giá trị lạ trên URL coi là Tất cả', () => {
     expect(parseResultsFilter('TEAM')).toBe('TEAM')
     expect(parseResultsFilter('SELF')).toBe('SELF')
-    expect(parseResultsFilter('SOLO')).toBe('ALL')
+    expect(parseResultsFilter('SOLO')).toBe('SOLO')
     expect(parseResultsFilter(null)).toBe('ALL')
     expect(filterToSessionType('ALL')).toBeUndefined()
     expect(filterToSessionType('TEAM')).toBe('TEAM')
@@ -64,5 +65,21 @@ describe('định dạng và ánh xạ', () => {
 
   it('liên kết kết quả mã hóa gameId', () => {
     expect(resultsLink('a/b')).toBe('/results?gameId=a%2Fb')
+  })
+})
+
+describe('parseDateParam', () => {
+  it('nhận ngày có thật dạng YYYY-MM-DD, kể cả 29/2 năm nhuận', () => {
+    expect(parseDateParam('2026-11-22')).toBe('2026-11-22')
+    expect(parseDateParam('2028-02-29')).toBe('2028-02-29')
+  })
+
+  it('bỏ qua ngày không có thật hoặc sai dạng (không để Date.parse tự cuộn ngày)', () => {
+    expect(parseDateParam(null)).toBeUndefined()
+    expect(parseDateParam('2026-02-31')).toBeUndefined()
+    expect(parseDateParam('2027-02-29')).toBeUndefined()
+    expect(parseDateParam('2026-13-45')).toBeUndefined()
+    expect(parseDateParam('22/11/2026')).toBeUndefined()
+    expect(parseDateParam('hom-qua')).toBeUndefined()
   })
 })

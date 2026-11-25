@@ -1,9 +1,9 @@
 # Góp ý của Thầy Thanh và 8 Vấn đề Cốt lõi
 
 > **Nguồn tài liệu gốc**:  
-> - Biên bản tổng hợp: `docs/research/3a22128e-bfdb-4a56-aae3-93fe723482d7_Vn__tm_thy_-_13102026.md`  
+> - Biên bản tổng hợp: [Nhận xét Thầy Thanh ngày 13-10-2026](<../Vấn đề tìm thấy sau khi được góp ý/00. Nhận xét Thầy Thanh - 13-10-2026 (Tổng quan 8 vấn đề).md>)
 > - Băng ghi âm cuộc họp: `docs/transcript.md`  
-> - Trọn bộ 8 file phân tích chuyên sâu tại: `docs/research/`  
+> - Trọn bộ 8 file phân tích chuyên sâu tại: [Vấn đề tìm thấy sau khi được góp ý](<../Vấn đề tìm thấy sau khi được góp ý/>)
 > **Cập nhật**: 2026-11-04  
 > **Liên kết liên quan**: [[Tổng quan đề tài]], [[So sánh với web tool]], [[Cơ sở khoa học và GamED-AI]], [[Kế hoạch và việc còn lại]], [[Sơ đồ hệ thống]], [[index]]
 

@@ -23,6 +23,7 @@ import java.util.concurrent.TimeoutException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Fetches one caller-supplied scene while pinning each HTTPS connection to a checked public address. */
@@ -39,12 +40,20 @@ public class SceneImageLoader {
     private final SceneImageTransport transport;
     private final SceneImagePolicy policy;
     private final Semaphore loadSlots;
+    private final LocalMediaStorageService localStorage;
 
     public SceneImageLoader(PublicAddressResolver resolver, SceneImageTransport transport, SceneImagePolicy policy) {
+        this(resolver, transport, policy, null);
+    }
+
+    @Autowired
+    public SceneImageLoader(PublicAddressResolver resolver, SceneImageTransport transport, SceneImagePolicy policy,
+            LocalMediaStorageService localStorage) {
         this.resolver = resolver;
         this.transport = transport;
         this.policy = policy;
         this.loadSlots = new Semaphore(policy.maxConcurrentLoads());
+        this.localStorage = localStorage;
     }
 
     public LoadedSceneImage load(URI source) {
@@ -71,6 +80,17 @@ public class SceneImageLoader {
     }
 
     private LoadedSceneImage loadWithPermit(URI source, long deadlineNanos, String browserOrigin) {
+        if (source != null && localStorage != null) {
+            var uploaded = localStorage.ownUploadedImage(source);
+            if (uploaded.isPresent()) {
+                try (var stream = uploaded.get().resource().getInputStream()) {
+                    byte[] bytes = stream.readNBytes((int) Math.min(policy.maxBytes(), Integer.MAX_VALUE - 1L) + 1);
+                    return decode(bytes, uploaded.get().contentType(), deadlineNanos);
+                } catch (IOException ex) {
+                    throw new SceneImageUnavailableException("Could not read uploaded image", ex);
+                }
+            }
+        }
         URI current = validateUri(source);
         for (int redirect = 0; ; redirect++) {
             List<InetAddress> addresses = resolveAndValidate(current.getHost(), deadlineNanos);
@@ -110,17 +130,19 @@ public class SceneImageLoader {
                 throw new InvalidSceneImageException("Scene image does not allow browser rendering through CORS");
             }
 
-            byte[] bytes = response.body();
-            if (bytes.length == 0 || bytes.length > policy.maxBytes()) {
-                throw new InvalidSceneImageException("Scene image size is invalid");
-            }
-            String mediaType = mediaType(response.header("content-type"));
-            if (!ACCEPTED_MEDIA_TYPES.contains(mediaType)) {
-                throw new InvalidSceneImageException("Scene image must be PNG, JPEG, GIF, or BMP");
-            }
-            int[] dimensions = decodeDimensions(bytes, mediaType, policy, deadlineNanos);
-            return new LoadedSceneImage(bytes, mediaType, dimensions[0], dimensions[1]);
+            return decode(response.body(), mediaType(response.header("content-type")), deadlineNanos);
         }
+    }
+
+    private LoadedSceneImage decode(byte[] bytes, String mediaType, long deadlineNanos) {
+        if (bytes.length == 0 || bytes.length > policy.maxBytes()) {
+            throw new InvalidSceneImageException("Scene image size is invalid");
+        }
+        if (!ACCEPTED_MEDIA_TYPES.contains(mediaType)) {
+            throw new InvalidSceneImageException("Scene image must be PNG, JPEG, GIF, or BMP");
+        }
+        int[] dimensions = decodeDimensions(bytes, mediaType, policy, deadlineNanos);
+        return new LoadedSceneImage(bytes, mediaType, dimensions[0], dimensions[1]);
     }
 
     private static void validateOrigin(String value) {

@@ -11,15 +11,28 @@ const Dashboard = lazy(() => import('./pages/Dashboard'))
 const CreateGamePage = lazy(() => import('./pages/CreateGamePage'))
 const MyGamesPage = lazy(() => import('./pages/MyGamesPage'))
 const ResultsPage = lazy(() => import('./pages/ResultsPage'))
+const ClassroomsPage = lazy(() => import('./pages/ClassroomsPage'))
+const TeacherProfilePage = lazy(() => import('./pages/TeacherProfilePage'))
 const WorkspaceEditor = lazy(() => import('./pages/WorkspaceEditor'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const PlayPage = lazy(() => import('./player/pages/PlayPage'))
 const JoinPage = lazy(() => import('./player/pages/JoinPage'))
 const PresentPage = lazy(() => import('./player/pages/PresentPage'))
 const RoomHostPage = lazy(() => import('./player/pages/RoomHostPage'))
 const RoomJoinPage = lazy(() => import('./player/pages/RoomJoinPage'))
 const PresentationScreen = lazy(() => import('./player/presentation/PresentationScreen'))
+const TeacherControlPanel = lazy(() =>
+  import('./teacher/TeacherControlPanel').then((m) => ({ default: m.TeacherControlPanel })),
+)
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'))
+const AdminProtectedRoute = lazy(() => import('./components/AdminProtectedRoute'))
+const TeacherManagementPage = lazy(() => import('./pages/admin/TeacherManagementPage'))
+const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'))
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
+const AIConfigPage = lazy(() => import('./pages/admin/AIConfigPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const CanvasSandbox = lazy(() => import('./pages/dev/CanvasSandbox'))
 const UiKit = lazy(() => import('./pages/dev/UiKit'))
@@ -52,6 +65,8 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path={ROUTES.login} element={<LoginPage />} />
           <Route path={ROUTES.register} element={<RegisterPage />} />
+          <Route path={ROUTES.forgotPassword} element={<ForgotPasswordPage />} />
+          <Route path={ROUTES.resetPassword} element={<ResetPasswordPage />} />
         </Route>
 
         {/* Học sinh vào bằng mã, không cần tài khoản: nằm ngoài ProtectedRoute. */}
@@ -84,6 +99,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={ROUTES.liveArenaTeacherControl}
+          element={
+            <ProtectedRoute>
+              <TeacherControlPanel />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           element={
@@ -97,6 +120,24 @@ function App() {
           <Route path={ROUTES.workspace} element={<MyGamesPage />} />
           <Route path={ROUTES.workspaceEditor} element={<WorkspaceEditor />} />
           <Route path={ROUTES.results} element={<ResultsPage />} />
+          <Route path={ROUTES.classrooms} element={<ClassroomsPage />} />
+          <Route path={ROUTES.teacherProfile} element={<TeacherProfilePage />} />
+        </Route>
+
+        {/* Phân hệ Quản trị viên (Admin Portal - FR-12, FR-13, FR-14) */}
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to={ROUTES.adminTeachers} replace />} />
+          <Route path="teachers" element={<TeacherManagementPage />} />
+          <Route path="audit-logs" element={<AuditLogPage />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="ai-config" element={<AIConfigPage />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

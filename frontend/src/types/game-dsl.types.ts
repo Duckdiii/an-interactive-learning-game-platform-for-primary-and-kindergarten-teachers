@@ -36,6 +36,18 @@ export interface GameMetadata {
   gradeLevel: GradeLevel
   /** 1 đến 200 ký tự. */
   topic: string
+  /** Cách trình bày; trường nào thiếu thì frontend tự chọn (xem utils/presentation.ts). */
+  presentation?: GamePresentation
+}
+
+export type PresentationWorld = 'farm' | 'ocean' | 'jungle' | 'space'
+export type PresentationCarrier = 'balloon' | 'bubble' | 'planet' | 'fruit' | 'card' | 'fish' | 'flower'
+export type PresentationLayout = 'scatter' | 'row' | 'arc'
+
+export interface GamePresentation {
+  world?: PresentationWorld
+  carrier?: PresentationCarrier
+  layout?: PresentationLayout
 }
 
 export interface GameplaySettings {
@@ -243,7 +255,7 @@ export type DragDropGame = GameEnvelope<'DRAG_DROP', DragDropQuestion>
 export type OrderingGame = GameEnvelope<'ORDERING', OrderingQuestion>
 export type VisualClozeTextGame = GameEnvelope<'VISUAL_CLOZE', VisualClozeQuestion> & { mode?: 'TEXT' }
 export interface VisualClozeImageGame {
-  schemaVersion: '1.1.0'
+  schemaVersion: '1.1.0' | '1.2.0'
   gameType: 'VISUAL_CLOZE'
   mode: 'IMAGE'
   metadata: GameMetadata

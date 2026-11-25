@@ -41,10 +41,12 @@ class StudentPlayServiceTest {
     private static final String SALT = "test-session-salt";
     private final GameRepository games = mock(GameRepository.class);
     private final SelfSessionRepository sessions = mock(SelfSessionRepository.class);
+    private final com.aigameplatform.backend.repository.GameSessionRepository liveSessions = mock(com.aigameplatform.backend.repository.GameSessionRepository.class);
+    private final com.aigameplatform.backend.repository.ParticipantRepository participantRepo = mock(com.aigameplatform.backend.repository.ParticipantRepository.class);
     private final GameContentStrategyRegistry strategies = mock(GameContentStrategyRegistry.class);
     private final JsonMapper mapper = JsonMapper.builder().build();
     private final GameContentStrategy strategy = mock(GameContentStrategy.class);
-    private final StudentPlayService service = new StudentPlayService(games, sessions, strategies, mapper);
+    private final StudentPlayService service = StudentPlayTestSupport.service(games, sessions, liveSessions, participantRepo, strategies, mapper);
     private SelfSession session;
     private Participant participant;
     private VisualClozeQuestion question;
@@ -131,6 +133,10 @@ class StudentPlayServiceTest {
         var retried = service.interact("session", "participant", mapper.readTree("""
                 {"questionId":"q1","timeSpentMs":1000,"placements":[{"blankId":"%s","optionId":"%s"}]}
                 """.formatted(blank, correct)));
+        var stored = mapper.readTree(participant.getPlayInteractionDetails().getFirst().getAnswerJson());
+        assertThat(stored.path("firstWrongPlacement").path("optionId").asString()).isEqualTo(wrong);
+        assertThat(stored.path("placements").get(0).path("optionId").asString()).isEqualTo(correct);
+        assertThat(retried.toString()).doesNotContain("firstWrongPlacement");
         assertThat(retried.get("status")).isEqualTo("CORRECT");
         assertThat(retried.get("correctAnswer").toString()).contains(correct).contains(blank);
         assertThat(((Number) retried.get("totalScore")).intValue()).isGreaterThan(0);

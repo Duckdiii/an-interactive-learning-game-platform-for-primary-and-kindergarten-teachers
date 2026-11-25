@@ -139,7 +139,8 @@ export interface StudentQuestionByType {
 }
 
 type StudentEnvelope<T extends GameType> = {
-  schemaVersion: T extends 'VISUAL_CLOZE' | 'ODD_ONE_OUT' ? '1.0.0' | '1.1.0' : '1.0.0'
+  schemaVersion: T extends 'VISUAL_CLOZE' ? '1.0.0' | '1.1.0' | '1.2.0'
+    : T extends 'ODD_ONE_OUT' ? '1.0.0' | '1.1.0' : '1.0.0'
   gameType: T
   mode?: T extends 'VISUAL_CLOZE' | 'ODD_ONE_OUT' ? 'TEXT' | 'IMAGE' : never
   metadata: GameMetadata
@@ -161,7 +162,7 @@ export interface AnswerByType {
   SPOT_THE_TARGET: { x: number; y: number }
   WORD_SCRAMBLE: { word: string }
   MATCHING: { matches: { leftPairId: string; rightPairId: string }[] }
-  MEMORY_CARD: { matchedPairIds: string[]; flips: number }
+  MEMORY_CARD: { matchedPairIds: string[]; flips: number; wrongPairs?: [string, string][] }
   DRAG_DROP: { placements: { itemId: string; zoneId: string }[] }
   ORDERING: { order: string[] }
   VISUAL_CLOZE: { answer: string } | { placements: StudentVisualClozeImagePlacement[] }
@@ -210,7 +211,7 @@ export interface PlayerSession {
   sessionId: string
   participantId: string
   nickname: string
-  sessionType: 'SELF'
+  sessionType: 'SELF' | 'SOLO' | 'TEAM'
   status: 'ACTIVE'
   expiresAt: string
 }

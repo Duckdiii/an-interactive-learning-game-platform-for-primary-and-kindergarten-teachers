@@ -21,6 +21,8 @@ export interface Palette {
   wrongFill: string
   audioFill: string
   audioStroke: string
+  audioPlayActive: string
+  audioPlayInactive: string
   /** Màu đường nối theo thứ tự cặp; không có đỏ và xanh lá. */
   linkColors: readonly string[]
   correctLine: string
@@ -68,6 +70,8 @@ export const DEFAULT_PALETTE: Palette = {
   wrongFill: '#FFE082',
   audioFill: '#E0F2FE',
   audioStroke: '#0284C7',
+  audioPlayActive: '#FFD54F',
+  audioPlayInactive: '#4FC3F7',
   linkColors: ['#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#92400E', '#64748B'],
   correctLine: '#43A047',
   wrongLine: '#F59E0B',
@@ -92,6 +96,41 @@ export const DEFAULT_PALETTE: Palette = {
   streakInk: '#14532D',
 }
 
+/** Màu sắc hoạt hình ngọt ngào dùng cho hiệu ứng pháo hoa giấy Confetti & Star Burst */
+export const CELEBRATION_CONFETTI_COLORS: readonly string[] = [
+  DEFAULT_PALETTE.dotYellow,
+  DEFAULT_PALETTE.dotPink,
+  DEFAULT_PALETTE.dotBlue,
+  DEFAULT_PALETTE.dotGreen,
+  DEFAULT_PALETTE.dotOrange,
+  DEFAULT_PALETTE.dotPurple,
+  DEFAULT_PALETTE.accent,
+]
+
+/** Màu nội dung khi đáp án là tên màu (vẽ vật đúng màu đó). Là nội dung bài học, không phải phản hồi đúng/sai, nên có cả đỏ. */
+export type ColorWord = 'red' | 'blue' | 'green' | 'yellow' | 'orange' | 'purple' | 'pink' | 'brown' | 'black' | 'white'
+export const COLOR_WORD_FILLS: Readonly<Record<ColorWord, string>> = {
+  red: '#EF4444',
+  blue: '#3B82F6',
+  green: '#22C55E',
+  yellow: '#FACC15',
+  orange: '#FB923C',
+  purple: '#A855F7',
+  pink: '#F472B6',
+  brown: '#A16207',
+  black: '#1F2937',
+  white: '#FFFFFF',
+}
+
+/** Màu vật lựa chọn khi không phải câu về màu: xoay vòng các màu kẹo, không có đỏ (đỏ dễ gợi "sai"). */
+export const OPTION_OBJECT_FILLS: readonly string[] = [
+  DEFAULT_PALETTE.dotPink,
+  DEFAULT_PALETTE.dotBlue,
+  DEFAULT_PALETTE.dotYellow,
+  DEFAULT_PALETTE.dotGreen,
+  DEFAULT_PALETTE.dotOrange,
+  DEFAULT_PALETTE.dotPurple,
+]
 /** Bảng màu chuyên biệt cho game Sắp xếp thứ tự (Ordering) theo yêu cầu thiết kế ô vị trí và bước đã khoá */
 export const ORDERING_SLOT_FILL = '#F3E5F5'
 export const ORDERING_SLOT_STROKE = '#7B1FA2'
@@ -99,6 +138,10 @@ export const ORDERING_SLOT_INK = '#7B1FA2'
 export const ORDERING_SLOT_EMPTY_INK = '#9C27B0'
 export const ORDERING_STEP_LOCKED_FILL = '#E8F5E9'
 export const ORDERING_STEP_LOCKED_STROKE = '#2E7D32'
+
+/** Bảng màu chuyên biệt cho nút AudioPlayButton */
+export const AUDIO_PLAY_ACTIVE_FILL = '#FFD54F'
+export const AUDIO_PLAY_INACTIVE_FILL = '#4FC3F7'
 
 /** `fooBar` -> `foo-bar`, cho tên biến CSS. */
 const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)

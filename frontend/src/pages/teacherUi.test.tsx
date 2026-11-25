@@ -7,6 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import { loginAsTeacher, makeGame, renderWithProviders } from '../test/renderWithApp'
 
 vi.mock('../api/gamesApi', () => ({ getGames: vi.fn() }))
+vi.mock('../api/authApi', () => ({ logoutTeacher: vi.fn().mockResolvedValue(undefined) }))
 // Sandbox Canvas (chỉ có ở bản dev) kéo theo react-konva, không cần cho test giao diện giáo viên.
 vi.mock('./dev/CanvasSandbox', () => ({ default: () => null }))
 
@@ -64,7 +65,7 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
     await waitFor(() => expect(document.title).toBe(`${title} · AI Game Platform`))
   })
 
-  it('cả thanh bên (máy tính) và thanh dưới (điện thoại) đều có đúng 4 mục', async () => {
+  it('cả thanh bên (máy tính) và thanh dưới (điện thoại) đều có mục Hồ sơ của tôi trong 6 mục', async () => {
     renderApp('/workspace')
     await waitForPage('Kệ trò chơi của cô')
 
@@ -76,12 +77,16 @@ describe('giao diện giáo viên bằng tiếng Việt', () => {
         'Trang chủ',
         'Trò chơi của tôi',
         'Kết quả',
+        'Lớp học',
+        'Hồ sơ của tôi',
         'Tạo game mới',
       ])
       expect(links.map((link) => link.getAttribute('href'))).toEqual([
         '/dashboard',
         '/workspace',
         '/results',
+        '/classrooms',
+        '/profile',
         '/games/new',
       ])
     }

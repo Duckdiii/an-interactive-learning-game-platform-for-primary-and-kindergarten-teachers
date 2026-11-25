@@ -98,7 +98,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   useEffect(() => unmarkNewGame(game.gameId), [game.gameId])
   const [selected, setSelected] = useState(0)
   const [pane, setPane] = useState<EditorPane>('list')
-  const [playing, setPlaying] = useState(false)
+  const [playing, setPlaying] = useState(() => new URLSearchParams(window.location.search).get('play') === '1')
   const [questionNarrations, setQuestionNarrations] = useState<Record<string, PlayTestQuestionNarration>>({})
   const setQuestionNarration = useCallback((questionId: string, narration?: PlayTestQuestionNarration) => {
     setQuestionNarrations((currentNarrations) => {
@@ -394,7 +394,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
               </div>
             }
           >
-            <PlayTestPanel game={editor.draft} gameId={game.gameId} questionNarrations={playableNarrations} onExit={exitPlay} />
+            <PlayTestPanel game={editor.draft} seed={game.gameId} gameId={game.gameId} questionNarrations={playableNarrations} onExit={exitPlay} />
           </Suspense>
         </PlayTestBoundary>
       ) : (

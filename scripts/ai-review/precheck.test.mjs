@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { decide, DEFAULT_MAX_RUNS, MAX_INCREMENTAL_CHARS, previousFileContent } from "./precheck.mjs";
+import { backtestRound2, decide, DEFAULT_MAX_RUNS, MAX_INCREMENTAL_CHARS, previousFileContent } from "./precheck.mjs";
 import { GithubError } from "./github.mjs";
 import { renderStateMarkers, toRecord } from "./state.mjs";
 
@@ -115,4 +115,15 @@ test("previousFileContent chỉ gồm các trường cần thiết và dùng ref
   assert.equal(j.base_sha, BASE);
   assert.deepEqual(Object.keys(j.findings[0]).sort(), ["category", "code", "file", "message", "ref", "severity"]);
   assert.equal(j.findings[0].ref, "0123456789abcdef");
+});
+
+test("backtest vòng 2 chạy được với commit tổ tiên và từ chối SHA khác nhánh", async () => {
+  const github = fakeGithub();
+  const backtest = await backtestRound2({ github, baseSha: BASE, headSha: HEAD, mode: "C" });
+  assert.equal(backtest.round, 2);
+  assert.equal(backtest.baseSha, BASE);
+  assert.deepEqual(backtest.previous, []);
+  await assert.rejects(backtestRound2({
+    github: fakeGithub({ compare: { status: "diverged" } }), baseSha: BASE, headSha: HEAD, mode: "C",
+  }), /commit trước head/);
 });

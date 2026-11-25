@@ -4,6 +4,7 @@ import { viText } from '../../constants/viText'
 import type { PlayerSession, PublishInfo, StudentGame } from '../../types/game-student.types'
 import { getPlayerApi } from '../api'
 import type { PlayerApi } from '../api'
+import { RealPlayerApi } from '../api/realPlayerApi'
 import { isAudioLocked, resumeAudioContext, unlockAudio } from '../audio/audioLock'
 import TapToStart from '../audio/TapToStart'
 import { ERROR_SCREENS } from '../errors'
@@ -27,6 +28,8 @@ import type { StoredProgress, StoredSession } from './sessionStore'
 interface PlayControllerProps {
   shareCode: string
   info: PublishInfo
+  covered?: boolean
+  room?: { session: PlayerSession; game: StudentGame; progress?: StoredProgress }
 }
 
 // Biệt danh tự sinh cho khung không hỏi biệt danh: không tên thật, 1 đến 20 ký tự.
@@ -50,15 +53,17 @@ const isSessionGone = (error: unknown) => axios.isAxiosError(error) && [404, 409
 const sessionFromStored = (stored: StoredSession): PlayerSession => ({ ...stored, sessionType: 'SELF', status: 'ACTIVE', expiresAt: '' })
 
 /** Nối PlayerApi với renderer: biệt danh, màn vào theo khung, vào chơi (tạo phiên, tải câu hỏi), từng câu, màn xong. Chạy bên trong UiProfileProvider. */
-export default function PlayController({ shareCode, info }: PlayControllerProps) {
+export default function PlayController({ shareCode, info, room, covered = false }: PlayControllerProps) {
   const profile = useUiProfile()
-  const [state, dispatch] = useReducer(playReducer, initialPlayState)
+  const [state, dispatch] = useReducer(playReducer, room, (joined) => joined
+    ? playReducer({ phase: 'starting' }, { type: 'STARTED', ...joined })
+    : initialPlayState)
   const Renderer = getPlayableRenderer(info.gameType)
-  const [api, setApi] = useState<PlayerApi>()
+  const [api, setApi] = useState<PlayerApi | undefined>(() => room ? new RealPlayerApi(room.session.participantId) : undefined)
   const { askNickname } = profile.interaction
   // null = chưa có biệt danh (khung hỏi biệt danh); khung kia dùng biệt danh tự sinh.
   // Có phiên đã lưu (tải lại trang giữa chừng) thì dùng lại biệt danh đó, không hỏi lại.
-  const [nickname, setNickname] = useState<string | null>(() => loadSession(shareCode)?.nickname ?? (askNickname ? null : autoNickname()))
+  const [nickname, setNickname] = useState<string | null>(() => room?.session.nickname ?? loadSession(shareCode)?.nickname ?? (askNickname ? null : autoNickname()))
   const [startError, setStartError] = useState<unknown>(null)
   const [draft, setDraft] = useState('')
   const [nicknameError, setNicknameError] = useState<string | null>(null)
@@ -215,14 +220,14 @@ export default function PlayController({ shareCode, info }: PlayControllerProps)
           total={state.total}
           score={state.score}
           bestStreak={state.bestStreak}
-          onReplay={replay}
+          onReplay={room ? undefined : replay}
           // Không có gì để xem lại (tiếp tục phiên đã nộp hết từ trước khi tải lại trang) thì không mở màn xem lại.
           onReview={state.history.length > 0 ? () => dispatch({ type: 'OPEN_REVIEW' }) : undefined}
         />
       )
     }
     case 'review':
-      return <StudentReview items={buildReviewItems(state.game, state.history)} onBack={() => dispatch({ type: 'CLOSE_REVIEW' })} onReplay={replay} />
+      return <StudentReview items={buildReviewItems(state.game, state.history)} onBack={() => dispatch({ type: 'CLOSE_REVIEW' })} onReplay={room ? undefined : replay} />
     case 'playing': {
       if (!api) return <PlayStarting />
 
@@ -242,11 +247,11 @@ export default function PlayController({ shareCode, info }: PlayControllerProps)
       // Nhắc xoay máy là lớp phủ, không thay câu: lỡ xoay dọc giữa câu không mất cặp đã nối hay lần nộp đang chờ.
       return (
         <>
-        {needsRotate ? <RotatePrompt onStayPortrait={() => setStayPortrait(true)} /> : null}
+        {needsRotate && !covered ? <RotatePrompt onStayPortrait={() => setStayPortrait(true)} /> : null}
         <QuestionStage
           gameType={info.gameType}
           subject={info.metadata.subject}
-          covered={needsRotate}
+          covered={needsRotate || covered}
           key={question.id}
           api={api}
           sessionId={state.session.sessionId}

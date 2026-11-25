@@ -9,12 +9,14 @@ const INVALID_FILE =
 const UNSAFE_FILE = 'Tệp tải lên không đáp ứng tiêu chuẩn an toàn nội dung dành cho môi trường giáo dục. Vui lòng chọn tệp khác.'
 
 describe('uploadErrorMessage', () => {
-  it('422 FILE_TOO_LARGE_OR_INVALID_FORMAT dùng đúng câu 3a của SRS (không dùng câu chung của bảng mã lỗi)', () => {
-    expect(uploadErrorMessage(mockApiError(422, 'FILE_TOO_LARGE_OR_INVALID_FORMAT', 'Tệp không hợp lệ'))).toBe(INVALID_FILE)
+  it('422 FILE_TOO_LARGE_OR_INVALID_FORMAT giữ lời hướng dẫn cụ thể từ API để cô biết sửa gì', () => {
+    const message = 'Không nhận diện được lời đọc trong tệp MP3. Vui lòng chọn bản ghi có lời đọc rõ hơn.'
+    expect(uploadErrorMessage(mockApiError(422, 'FILE_TOO_LARGE_OR_INVALID_FORMAT', message))).toBe(message)
+    expect(uploadErrorMessage(mockApiError(422, 'FILE_TOO_LARGE_OR_INVALID_FORMAT', ''))).toBe(INVALID_FILE)
   })
 
-  it('422 UNSAFE_CONTENT dùng đúng câu 3b của SRS', () => {
-    expect(uploadErrorMessage(mockApiError(422, 'UNSAFE_CONTENT', 'Unsafe'))).toBe(UNSAFE_FILE)
+  it('422 UNSAFE_CONTENT dùng câu 3b của SRS khi thiếu thông báo từ API', () => {
+    expect(uploadErrorMessage(mockApiError(422, 'UNSAFE_CONTENT', ''))).toBe(UNSAFE_FILE)
   })
 
   it('lỗi khác đi qua parseApiError: mất mạng, quá hạn, 500; lỗi lạ thì dùng câu dự phòng', () => {

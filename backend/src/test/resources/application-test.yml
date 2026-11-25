@@ -11,6 +11,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
 app:
   jwt:
     secret: test-only-signing-key-not-valid-for-any-deployment
+  moderation:
+    openai:
+      # CI truyền secret OPENAI_API_KEY vào job backend: để rỗng để test profile test không gọi OpenAI Moderation thật
+      # (phụ thuộc mạng, key); Layer 3 chỉ dùng danh sách từ cấm. Phần gọi OpenAI có test mock riêng.
+      api-key: ""

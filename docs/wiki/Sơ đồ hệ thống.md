@@ -1,13 +1,16 @@
 # Sơ đồ hệ thống
 
 Nguồn: `docs/diagrams/`, cập nhật toàn bộ từ `raw/` ngày 2026-11-04.
-Cập nhật: 2026-11-04
+Cập nhật: 2026-11-07
 
 Sơ đồ giúp hiểu luồng và cấu trúc. **Khi viết code, field, endpoint hay mã lỗi, tin contract và code, không tin tên trong sơ đồ.** Tên trang, service, repository trong sơ đồ tuần tự là tên thiết kế, có thể khác code (ví dụ `GameCreationPage`, `UserRepository`).
 
 ## 1. Sơ đồ Pipeline Tạo Trò chơi AI (Mới nhất)
 
-* **File nguồn**: `docs/diagrams/Pipeline_Tao_Tro_Choi_AI.drawio`
+* **File nguồn**: `docs/diagrams/Pipeline_Tao_Tro_Choi_AI.drawio` (chưa đối chiếu bản `.drawio` với sơ đồ Mermaid dưới đây sau khi Mermaid tách 5a Preset / 5b CPF; nội dung `.drawio` nén nên không dò chữ được)
+
+> [!WARNING] Đây là sơ đồ THIẾT KẾ, chưa phải hiện trạng code
+> Đối chiếu nhánh `dev` ngày 2026-11-07: các bước 1–5 chưa gọi AI (định tuyến bằng regex, 3 cơ chế CPF viết sẵn), 3 cổng kiểm định không nằm trên luồng giáo viên dùng, và học sinh chơi bản sinh lại chứ không phải bản đã duyệt. Chi tiết và đề xuất sửa ở `docs/superpowers/specs/2026-11-07-pipeline-v2-design.md` (đã duyệt hướng 2026-11-07).
 
 ```mermaid
 flowchart TD
@@ -28,49 +31,63 @@ flowchart TD
     subgraph S2 ["2. KẾ HOẠCH & TỔ HỢP CƠ CHẾ"]
         PatBank[("NGÂN HÀNG MẪU CƠ CHẾ<br/>(Pattern Bank 10+14)")]
         AgeProf[("HỒ SƠ LỨA TUỔI<br/>Luật <=15 từ & Vùng chạm >=56px")]
-        Planner["3. Lập kế hoạch trò chơi (AI Game Planner)<br/>Nguyên tắc: Tích hợp nội tại (Học = Chơi)"]
-        Prop["4. Đề xuất 5 tựa game & Giải trình sư phạm<br/>(Bloom Taxonomy Rationale)"]
-        CPF["COMPOSABLE PRIMITIVES FRAMEWORK (CPF)<br/>• 20 Khối Nguyên tử & 4 Module"]
-        ContentGen["5. Sinh nội dung bài học (Content Generator)<br/>• JSON DSL v1.0.0 Best-of-N"]
-        Assets[("KHO THEME & ASSET ĐỒ HỌA<br/>SVG Vector & Audio CC0")]
+        Planner["3. Lập kế hoạch trò chơi (AI Game Planner)<br/>Nguyên tắc: Tích hợp nội tại (Học = Chơi)<br/>• Suy luận tựa game sư phạm & cách chơi"]
+        Prop["4. Đề xuất Tựa game & Giải trình sư phạm (Giáo viên duyệt)<br/>• Hiển thị tên game & luật chơi thân thiện<br/>• 0% thuật ngữ kỹ thuật (Preset & Ngoài mẫu)"]
+        Creator["5. Agent Tạo Game (Content & Scene Generator)<br/>Nhận Game Plan chi tiết sau khi giáo viên duyệt"]
+        PresetBranch["5a. Nhánh Preset: Sinh Preset DSL v1.0.0<br/>(Mẫu bài tập chuẩn)"]
+        CPFBranch["5b. Nhánh Ngoài danh mục: Lắp ráp bằng CPF Engine<br/>(SceneGraph AST động)"]
     end
 
     DecIntent -- "Đủ dữ kiện" --> Planner
     PatBank -.->|"Khớp cơ chế"| Planner
     AgeProf -.->|"Luật lứa tuổi"| Planner
-    Planner -- "Khớp 24 mẫu" --> Prop
-    Prop -->|"Giáo viên duyệt"| ContentGen
-    Prop -.->|"Đổi 5 ý tưởng khác"| Planner
-    Planner -- "Ngoài danh mục (Bắn cung, Đua xe...)" --> CPF
-    CPF -->|"JSON DSL Custom"| ContentGen
-    Assets -.->|"Ghép Assets"| ContentGen
+    Planner -->|"Kế hoạch sư phạm (Preset & Ngoài mẫu)"| Prop
+    Prop -->|"Giáo viên chọn 'Dùng kiểu này'"| Creator
+    Prop -.->|"Đổi ý tưởng khác"| Planner
+    Creator -->|"Nhánh ngầm Preset"| PresetBranch
+    Creator -->|"Nhánh ngầm Ngoài danh mục"| CPFBranch
 
-    subgraph S3 ["3. BỘ 3 LỚP KIỂM TRA TỰ ĐỘNG (QUALITY GATES)"]
-        Gate1["CỔNG 1: KIỂM TRA CÚ PHÁP<br/>JSON Schema Validation"]
-        Gate2["CỔNG 2: MÁY TÍNH TỰ GIẢI TOÁN (0% AI)<br/>Code Java tự tính lại 100% & Dò từ điển TV"]
-        Gate3["CỔNG 3: THẢ BOT CHƠI THỬ TRÌNH DUYỆT<br/>Playwright Headless giả lập Click/Drag (0 crash)"]
-        Gate1 -->|"Cú pháp OK"| Gate2
-        Gate2 -->|"Toán chuẩn"| Gate3
+    subgraph S25 ["2.5. BỘ ĐIỀU PHỐI ĐỒ HỌA, ASSETS & GIAO DIỆN (ASSET & THEME DRESSING)"]
+        ThemeRes["6a. Theme Resolver<br/>Tự động gán thế giới game (Nông trại, Biển, Vũ trụ, Rừng)"]
+        AssetBind["6b. Visual Asset Binder (Kho Asset Lai 80/20)<br/>• 80% Kho SVG Vector K-5 chuẩn<br/>• 20% Safe Web Image / Fallback"]
+        AudioSynth["6c. Audio & Narration Pipeline<br/>• Edge-TTS đọc to đề bài cho bé K-1<br/>• SoundBus Web Audio (Pop, Bounce, Jingles)"]
+        Juiciness["6d. Mascot & Juiciness Injector<br/>Mascot thở nhẹ, Squash & Stretch, Confetti"]
+        AssetBank[("KHO THEME & ASSET ĐỒ HỌA<br/>SVG Vector & Audio CC0")]
     end
 
-    ContentGen -->|"Ứng viên DSL"| Gate1
+    PresetBranch -->|"DSL Thô"| ThemeRes
+    CPFBranch -->|"SceneGraph Thô"| ThemeRes
+    AssetBank -.->|"Tra cứu Theme/SVG"| AssetBind
+    AssetBank -.->|"Sound FX/Audio"| AudioSynth
+    ThemeRes --> AssetBind
+    AssetBind --> AudioSynth
+    AudioSynth --> Juiciness
+    Juiciness -->|"Dressed Game DSL<br/>(Đầy đủ Assets, Theme, TTS)"| Gate1
+
+    subgraph S3 ["3. BỘ 3 LỚP KIỂM TRA TỰ ĐỘNG (QUALITY GATES)"]
+        Gate1["CỔNG 1: KIỂM TRA CÚ PHÁP & ASSET SCHEMA<br/>JSON Schema & Kiểm tra tồn tại Asset"]
+        Gate2["CỔNG 2: MÁY TÍNH TỰ GIẢI TOÁN (0% AI)<br/>Code Java tự tính lại 100% & Dò từ điển TV"]
+        Gate3["CỔNG 3: THẢ BOT CHƠI THỬ TRÌNH DUYỆT<br/>Playwright Headless giả lập Click/Drag (Bounds >= 64px, 0 crash)"]
+        Gate1 -->|"Cú pháp & Asset OK"| Gate2
+        Gate2 -->|"Toán chuẩn"| Gate3
+    end
 
     subgraph S4 ["4. THẨM ĐỊNH & PHẢN HỒI"]
         DecAll{"Cả 3 Cổng<br/>đều đạt?"}
         Repair["BỘ PHẢN HỒI LỖI (FEEDBACK ENGINE)<br/>Gói lỗi cho AI sửa (Tối đa 3 lần)"]
-        Fallback["DỰ PHÒNG AN TOÀN (SAFE FALLBACK)<br/>Chuyển sang Generic Hotspot"]
-        Certified["KỊCH BẢN CHỨNG THỰC (CERTIFIED DSL)<br/>Chuẩn 100% cú pháp, toán học & 0 crash"]
+        Fallback["DỰ PHÒNG AN TOÀN (SAFE FALLBACK)<br/>Chuyển sang Generic Hotspot / Fallback Asset"]
+        Certified["KỊCH BẢN CHỨNG THỰC (CERTIFIED DSL)<br/>Chuẩn 100% cú pháp, toán học, đồ họa & 0 crash"]
     end
 
     Gate3 --> DecAll
     DecAll -- "Có lỗi" --> Repair
-    Repair -->|"Repair Loop (<= 3 lần)"| ContentGen
+    Repair -->|"Repair Loop (<= 3 lần)"| Creator
     Repair -- "Quá 3 lần" --> Fallback
     Fallback --> Certified
     DecAll -- "Đạt 100%" --> Certified
 
     subgraph S5 ["5. TRÌNH DIỄN & XUẤT BẢN"]
-        Engine["7. Trình hiển thị Đa năng (Hybrid Konva Engine)<br/>• Preset: Render 24 mẫu có sẵn<br/>• Custom: Vận hành CPF Runtime 60 FPS"]
+        Engine["7. Trình hiển thị Đa năng (Hybrid Konva Engine)<br/>• Preset: Render 24 mẫu có sẵn với Theme/Sprites<br/>• Custom: Vận hành CPF Runtime 60 FPS"]
         Preview["8. Chơi thử & Tùy biến 1-Click (Playable Preview)"]
         Publish["9. XUẤT BẢN GAME CHO HỌC SINH<br/>• Phòng Live Arena (Mã PIN)<br/>• Tự luyện ở nhà (Mã QR / ShareCode)"]
     end
@@ -78,10 +95,20 @@ flowchart TD
     Certified --> Engine
     Engine --> Preview
     Preview --> Publish
+```
+
+> [!IMPORTANT] Ý Nghĩa Sư Phạm & Kỹ Thuật Của Chặng 2.5 (Asset & Theme Dressing)
+> - **Xóa bỏ định kiến "App thi trắc nghiệm giả danh Game"**: Trẻ mầm non và học sinh tiểu học (K-5) tư duy bằng trực quan hình tượng. Nếu AI chỉ sinh câu hỏi chữ và nút bấm A/B/C/D, trẻ chưa đọc thạo sẽ không thể học được. Chặng 2.5 biến kịch bản văn bản thô thành một **thế giới trò chơi sống động (Living Game World)**.
+> - **4 Module chuyên trách**:
+>   1. **Theme Resolver**: Tự động gán bối cảnh đồ họa (Nông trại, Đại dương, Vũ trụ, Rừng xanh, Kẹo ngọt) với bảng màu Pastel Candy Palette (`#FFFBEB`, `#E0F7FA`), đường viền đậm $3-4\text{px}$, bo góc an toàn.
+>   2. **Visual Asset Binder (Chiến lược Lai 80/20)**: Quét `visualPrompt` và từ khóa câu hỏi, map **80%** vào kho Vector SVG chuẩn K-5 nội bộ (hoa quả, động vật, dụng cụ học tập) và **20%** gọi API ảnh an toàn (Pexels SafeSearch) hoặc Fallback Asset. Gán trực tiếp `imageUrl` thay vì để giá trị rỗng `null`.
+>   3. **Audio & Narration Pipeline**: Tự động sinh giọng đọc giáo viên (TTS) đọc to đề bài bằng tiếng Việt chuẩn cho trẻ mầm non & K-1; kích hoạt hệ thống Web Audio SoundBus phát hiệu ứng âm thanh nảy kẹo, bóng vỡ (Pop), chuông leng keng không trễ ($0\text{ms}$).
+>   4. **Mascot & Juiciness Injector**: Gắn linh vật hoạt hình đồng hành (Thỏ con, Ong vàng, Cú mèo) với animation thở nhẹ (Idle Breathing $2-3\%$), nảy lò xo (Squash & Stretch) và hiệu ứng pháo hoa giấy (Confetti) khi hoàn thành.
+> - **Liên kết chặt chẽ với Cổng Kiểm Tra Quality Gates**: Cổng 1 (Syntax) kiểm tra hợp lệ của Asset Schema; Cổng 3 (Playability) kiểm tra kích thước hiển thị của Sprite ($\ge 64\text{px}$) và đảm bảo toàn bộ `imageUrl` đều tải thành công trước khi xuất bản.
 
 ## 2. Kiến trúc Tổng thể N-Tier
 
-* **File**: `docs/diagrams/kien-truc-n-tier.jpg` & `docs/diagrams/AI-Native Game Platform - System Architecture.jpg`
+* **File**: `docs/diagrams/AI-Native Game Platform - System Architecture.jpg`
 * Bốn tầng: Presentation (Teacher Portal, Student Runtime, Admin Portal), Business Logic (Security Gateway, Auth, Game Management, Arena, Curriculum RAG, Content Generator, Validation Engine, Rate Limiter, Prompt Versioning, Media Asset Binder), Data (PostgreSQL, AWS S3), External (Gemini, OpenAI Moderation, Pexels, Google TTS).
 
 ## 3. Sơ đồ Tổng quát
@@ -97,25 +124,25 @@ flowchart TD
 
 Đọc cùng ca sử dụng tương ứng trong `docs/srs/`.
 
-| Ca sử dụng | File Diagram |
+| Ca sử dụng | Nơi có sơ đồ |
 |---|---|
-| UC-01 Đăng ký | `docs/diagrams/sequence/UC-01_Register_SequenceDiagram.drawio` |
-| UC-02 Gửi mô tả trò chơi | `docs/diagrams/sequence/UC-02_Submit_Game_Description_SequenceDiagram.drawio` |
-| UC-03 Chơi thử | `docs/diagrams/sequence/UC-03_TrialPlay_SequenceDiagram.drawio` |
-| UC-04 Chỉnh sửa trò chơi | `docs/diagrams/sequence/UC-04_Edit_Game_WorkspaceEditor_SequenceDiagram.drawio` |
-| UC-05 Chỉnh sửa thủ công | `docs/diagrams/sequence/UC-05_Manual_Edit_SequenceDiagram.drawio` |
-| UC-06 AI làm lại | `docs/diagrams/sequence/UC-06_AI_Regenerate_SequenceDiagram.drawio` |
-| UC-07 Lưu và xuất bản | `docs/diagrams/sequence/UC-07_SaveAndPublishGame_SequenceDiagram.drawio` |
-| UC-08 Tự luyện | `docs/diagrams/sequence/UC-08_SelfPractice_SequenceDiagram.drawio` |
-| UC-09 Tham gia phòng | `docs/diagrams/sequence/UC-09_JoinGame_SequenceDiagram.drawio` |
-| UC-11 Giọng đọc | `docs/diagrams/sequence/UC-11_NarrationAudio_SequenceDiagram.drawio` |
-| UC-12 Theo dõi chi phí | `docs/diagrams/sequence/UC-12_CostMonitoring_SequenceDiagram.drawio` |
-| UC-13 Quản lý giáo viên | `docs/diagrams/sequence/UC-13_TeacherManagement_SequenceDiagram.drawio` |
-| UC-14 Cài đặt AI | `docs/diagrams/sequence/UC-14_AIBrainConfig_SequenceDiagram.drawio` |
-| UC-15 Đăng nhập | `docs/diagrams/sequence/UC-15_Login_SequenceDiagram.drawio` |
-| **UC-16 Quản lý hồ sơ lớp học** | `docs/diagrams/sequence/UC-16_ProfileClassManagement_SequenceDiagram.drawio` |
-| **UC-17 Quản lý kho trò chơi** | `docs/diagrams/sequence/UC-17_GameLibraryManagement_SequenceDiagram.drawio` |
-| **UC-18 Thống kê kết quả lớp** | `docs/diagrams/sequence/UC-18_ClassResultsStatistics_SequenceDiagram.drawio` |
+| UC-01 Đăng ký | `docs/srs/UC-01.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-02 Gửi mô tả trò chơi | `docs/srs/UC-02.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-03 Chơi thử | `docs/srs/UC-03.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-04 Chỉnh sửa trò chơi | `docs/srs/UC-04.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-05 Chỉnh sửa thủ công | `docs/srs/UC-05.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-06 AI làm lại | `docs/srs/UC-06.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-07 Lưu và xuất bản | `docs/srs/UC-07.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-08 Tự luyện | `docs/srs/UC-08.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-09 Tham gia phòng | `docs/srs/UC-09.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-11 Giọng đọc | `docs/srs/UC-11.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-12 Theo dõi chi phí | `docs/srs/UC-12.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-13 Quản lý giáo viên | `docs/srs/UC-13.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-14 Cài đặt AI | `docs/srs/UC-14.md` (mục Sơ đồ Tuần tự, mermaid) |
+| UC-15 Đăng nhập | `docs/srs/UC-15.md` (mục Sơ đồ Tuần tự, mermaid) |
+| **UC-16 Quản lý hồ sơ lớp học** | `docs/srs/UC-16.md` (mục Sơ đồ Tuần tự, mermaid) |
+| **UC-17 Quản lý kho trò chơi** | `docs/srs/UC-17.md` (mục Sơ đồ Tuần tự, mermaid) |
+| **UC-18 Thống kê kết quả lớp** | `docs/srs/UC-18.md` (mục Sơ đồ Tuần tự, mermaid) |
 
 ## Liên kết liên quan
 - [[Kiến trúc và công nghệ]]

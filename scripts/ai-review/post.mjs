@@ -52,7 +52,8 @@ const ownBy = (c, bot) => c.user?.login === bot;
  * @param {string} [o.expectPromptVersion] version prompt job analyze đã dùng; kết quả không khớp thì bị từ chối
  * @param {number} [o.expectRuns] số lần đã chạy mà precheck đọc được; nếu trạng thái trong comment đã khác thì không đăng
  */
-export async function run({ result, schema, github, pr, analyzedSha, dryRun = false, force = false, bot = BOT, round = 1, baseSha = "", expectMode, expectPromptVersion, expectRuns, log = () => {} }) {
+export async function run({ result, schema, github, pr, analyzedSha, dryRun = false, force = false, bot = BOT, round = 1, baseSha = "", expectMode, expectPromptVersion, expectRuns, backtest = false, log = () => {} }) {
+  if (backtest && (!dryRun || round !== 2)) throw new PostError("Backtest vòng 2 chỉ hỗ trợ dry run.");
   const [pull, diffText, reviewComments, issueComments] = await Promise.all([
     github.getPull(pr), github.getDiff(pr), github.listReviewComments(pr), github.listIssueComments(pr),
   ]);
@@ -62,17 +63,17 @@ export async function run({ result, schema, github, pr, analyzedSha, dryRun = fa
   const headSha = pull.head.sha;
   const existingSummary = findSummary(issueComments, bot);
   const state = existingSummary ? parseState(existingSummary.body) : null;
-  if (!force && state && state.sha === analyzedSha && state.prompt === result.prompt_version && state.mode === result.mode) {
+  if (!backtest && !force && state && state.sha === analyzedSha && state.prompt === result.prompt_version && state.mode === result.mode) {
     log("Đã có kết quả cho cùng commit, prompt và chế độ; bỏ qua (dùng --force để chạy lại).");
     return { skipped: true };
   }
 
   // Chống hai lần chạy ghi đè trạng thái của nhau: kết quả này được tạo từ danh sách vấn đề mà precheck đã đọc, nên
   // nếu trạng thái trong comment đã đổi từ lúc đó (số lần chạy khác, hoặc mốc commit khác ở vòng 2) thì không đăng.
-  if (expectRuns !== undefined && (state?.runs ?? 0) !== expectRuns) {
+  if (!backtest && expectRuns !== undefined && (state?.runs ?? 0) !== expectRuns) {
     throw new PostError(`Trạng thái trong comment tổng kết đã thay đổi từ lúc phân tích (số lần chạy ${state?.runs ?? 0}, dự kiến ${expectRuns}); có thể một lần chạy khác đang ghi cùng lúc. Không đăng để tránh ghi đè; hãy chạy lại.`);
   }
-  if (round === 2 && state?.sha !== baseSha) {
+  if (!backtest && round === 2 && state?.sha !== baseSha) {
     throw new PostError(`Vòng 2 so với commit ${baseSha.slice(0, 7)} nhưng trạng thái hiện tại ghi commit ${state?.sha?.slice(0, 7) ?? "(không có)"}; không đăng. Hãy chạy lại.`);
   }
 
@@ -83,7 +84,7 @@ export async function run({ result, schema, github, pr, analyzedSha, dryRun = fa
   }
 
   // Danh sách vấn đề còn mở của lần trước chỉ dùng ở vòng 2; dữ liệu đọc ra đã được kiểm tra schema.
-  const previous = round === 2 && existingSummary ? parseOpenFindings(existingSummary.body) : null;
+  const previous = backtest ? [] : round === 2 && existingSummary ? parseOpenFindings(existingSummary.body) : null;
   const common = { result, diff, postedFps, headSha, analyzedSha, repo: github.repo, previous, round, baseSha, runs: state?.runs ?? 0 };
   let plan = buildPlan(common);
   if (dryRun) return { dryRun: true, plan };
@@ -116,7 +117,7 @@ function parseArgs(argv) {
   const out = { flags: new Set() };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--dry-run" || a === "--force") out.flags.add(a.slice(2));
+    if (a === "--dry-run" || a === "--force" || a === "--backtest") out.flags.add(a.slice(2));
     else if (a.startsWith("--")) out[a.slice(2)] = argv[++i];
     else throw new Error(`Đối số lạ: ${a}`);
   }
@@ -132,7 +133,7 @@ async function main() {
   const out = await run({
     result, schema, github, pr: Number(args.pr), analyzedSha: args["analyzed-sha"],
     dryRun: args.flags.has("dry-run"), force: args.flags.has("force"), round: args.round === "2" ? 2 : 1, baseSha: args["base-sha"] ?? "",
-    expectMode: args["expect-mode"], expectPromptVersion: args["expect-prompt"],
+    backtest: args.flags.has("backtest"), expectMode: args["expect-mode"], expectPromptVersion: args["expect-prompt"],
     expectRuns: args["expect-runs"] === undefined ? undefined : Number(args["expect-runs"]),
     log: (m) => console.log(m),
   });

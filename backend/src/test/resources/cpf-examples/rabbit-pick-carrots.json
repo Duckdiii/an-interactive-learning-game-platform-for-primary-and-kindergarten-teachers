@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "2.0.0",
+  "kind": "CPF",
+  "metadata": { "title": "Thỏ nhặt cà rốt", "subject": "MATH", "gradeLevel": "KINDERGARTEN", "topic": "Nhận biết số trong phạm vi 5" },
+  "world": { "backgroundId": "bg.farm", "mascotId": "mascot.mimi" },
+  "content": {
+    "instruction": "Bé chạm vào củ cà rốt để thỏ chạy tới nhặt nhé!",
+    "rounds": [
+      {
+        "id": "r1",
+        "task": "PICK_ONE",
+        "prompt": "Thỏ nhặt củ cà rốt có số 3",
+        "choices": [
+          { "id": "c1", "label": "1" },
+          { "id": "c2", "label": "3" },
+          { "id": "c3", "label": "5" }
+        ]
+      },
+      {
+        "id": "r2",
+        "task": "PICK_ONE",
+        "prompt": "Thỏ nhặt củ cà rốt có số 4",
+        "choices": [
+          { "id": "c1", "label": "4" },
+          { "id": "c2", "label": "2" },
+          { "id": "c3", "label": "5" }
+        ]
+      },
+      {
+        "id": "r3",
+        "task": "PICK_ONE",
+        "prompt": "Thỏ nhặt củ cà rốt có số 2",
+        "choices": [
+          { "id": "c1", "label": "1" },
+          { "id": "c2", "label": "3" },
+          { "id": "c3", "label": "2" }
+        ]
+      }
+    ]
+  },
+  "answerKey": {
+    "rounds": [
+      { "roundId": "r1", "correctChoiceIds": ["c2"] },
+      { "roundId": "r2", "correctChoiceIds": ["c1"] },
+      { "roundId": "r3", "correctChoiceIds": ["c3"] }
+    ]
+  },
+  "entities": [
+    {
+      "id": "carrots",
+      "assetId": "farm.carrot",
+      "bindTo": "choices",
+      "placement": { "region": "TOP", "arrangement": "SCATTER" },
+      "motion": { "type": "BOB", "speed": "SLOW" }
+    },
+    {
+      "id": "rabbit",
+      "assetId": "animal.rabbit",
+      "placement": { "region": "BOTTOM", "arrangement": "SINGLE" },
+      "control": "TAP_MOVE"
+    }
+  ],
+  "rules": [
+    {
+      "on": { "type": "COLLIDE", "a": "rabbit", "b": "carrots" },
+      "do": [
+        {
+          "type": "CHECK",
+          "onCorrect": [
+            { "type": "EFFECT", "name": "STARS", "at": "$subject" },
+            { "type": "SOUND", "name": "CORRECT" },
+            { "type": "REMOVE", "subject": "$subject" }
+          ],
+          "onWrong": [
+            { "type": "EFFECT", "name": "WIGGLE", "at": "$subject" },
+            { "type": "SOUND", "name": "GENTLE_WRONG" }
+          ]
+        }
+      ]
+    }
+  ]
+}

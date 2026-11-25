@@ -16,13 +16,15 @@ import type { PlayTestQuestionNarration } from './usePlayTestNarrationAudio'
 interface PlayTestPanelProps {
   // Bản đang soạn (kể cả phần chưa lưu): chơi thử đúng thứ giáo viên thấy trên màn hình.
   game: GameDsl
+  /** Dùng game id để giữ cách trình bày ổn định nếu game chưa lưu lựa chọn. */
+  seed?: string
   gameId?: string
   questionNarrations?: Readonly<Record<string, PlayTestQuestionNarration>>
   onExit: () => void
 }
 
 // PlayTest uses real renderers in `preview` mode. It may fetch narration URLs only; it never creates or stores sessions, answers, scores, or results.
-export default function PlayTestPanel({ game, gameId, questionNarrations, onExit }: PlayTestPanelProps) {
+export default function PlayTestPanel({ game, seed, gameId, questionNarrations, onExit }: PlayTestPanelProps) {
   const text = viText.editor.play
   const Player = PLAY_TEST_RENDERERS[game.gameType]
   const total = game.questions.length
@@ -87,6 +89,9 @@ export default function PlayTestPanel({ game, gameId, questionNarrations, onExit
     && !narrationAudio.questionAudioAvailable
 
   return (
+    <UiProfileProvider profile={resolveUiProfile({ gradeLevel: game.metadata.gradeLevel })}>
+    <ThemeProvider theme={theme}>
+    <PresentationProvider presentation={presentation}>
     <section ref={panelRef} tabIndex={-1} aria-label={text.panelLabel} className="space-y-4 focus:outline-none">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-ink/10 bg-white p-3 sm:p-4">
         <p className="text-lg font-extrabold" aria-live="polite">
@@ -166,5 +171,8 @@ export default function PlayTestPanel({ game, gameId, questionNarrations, onExit
         </div>
       ) : null}
     </section>
+    </PresentationProvider>
+    </ThemeProvider>
+    </UiProfileProvider>
   )
 }

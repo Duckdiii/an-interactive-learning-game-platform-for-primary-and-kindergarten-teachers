@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { viText } from '../../../constants/viText'
 import { checkTextSafety } from '../../../services/safetyService'
+import { parseApiError } from '../../../utils/apiError'
 import type { Range } from '../../../utils/questionSpecs'
 import Button from '../../Button'
 import { usePendingEdits } from './PendingEditsContext'
@@ -26,7 +27,7 @@ interface CheckedTextFieldProps {
   onCommit: (text: string) => void
 }
 
-type Verdict = 'idle' | 'checking' | 'unsafe' | 'unavailable'
+type Verdict = 'idle' | 'checking' | 'unsafe' | 'unavailable' | 'rate-limited'
 
 // Thời gian chờ sau lần gõ cuối rồi mới áp nội dung vào game (để màn xem cập nhật ngay mà không kiểm tra từng phím).
 const COMMIT_DELAY_MS = 350
@@ -80,12 +81,18 @@ export default function CheckedTextField({ id, label, value, limits, error, inva
         onCommit(next)
         setTyped(null)
         setVerdict('idle')
-      } catch {
-        if (request === requestRef.current) {
-          // Chưa kiểm tra được: cho phép rời ô lần sau thử lại (không chỉ nút "Kiểm tra lại").
-          submittedRef.current = null
-          setVerdict('unavailable')
+      } catch (error) {
+        if (request !== requestRef.current) return
+
+        if (parseApiError(error, '').code === 'RATE_LIMITED') {
+          setVerdict('rate-limited')
+
+          return
         }
+
+        // Lỗi kết nối: cho phép thử lại khi rời ô hoặc bấm nút "Kiểm tra lại".
+        submittedRef.current = null
+        setVerdict('unavailable')
       }
     },
     [value, onCommit],
@@ -97,6 +104,10 @@ export default function CheckedTextField({ id, label, value, limits, error, inva
   useEffect(() => {
     commitRef.current = commit
   })
+
+  useEffect(() => () => {
+    requestRef.current += 1
+  }, [])
 
   useEffect(() => {
     if (typed === null) return
@@ -127,8 +138,13 @@ export default function CheckedTextField({ id, label, value, limits, error, inva
   }
 
   const size = [...shown.trim().normalize('NFC')].length
-  const safetyMessage =
-    verdict === 'unsafe' ? `${text.unsafe} ${text.unsafeKept}` : verdict === 'unavailable' ? text.safetyUnavailable : undefined
+  const safetyMessage = {
+    idle: undefined,
+    checking: undefined,
+    unsafe: `${text.unsafe} ${text.unsafeKept}`,
+    unavailable: text.safetyUnavailable,
+    'rate-limited': text.safetyRateLimited,
+  }[verdict]
   const shownError = safetyMessage ?? error
   const isInvalid = Boolean(shownError) || invalid
   const common = {
@@ -164,7 +180,7 @@ export default function CheckedTextField({ id, label, value, limits, error, inva
       <p role="status" className="sr-only">
         {verdict === 'checking' ? text.checking : (safetyMessage ?? '')}
       </p>
-      {verdict === 'unavailable' && typed !== null ? (
+      {(verdict === 'unavailable' || verdict === 'rate-limited') && typed !== null ? (
         <Button type="button" variant="secondary" className="mt-2" onClick={() => void commit(typed)}>
           {text.recheck}
         </Button>

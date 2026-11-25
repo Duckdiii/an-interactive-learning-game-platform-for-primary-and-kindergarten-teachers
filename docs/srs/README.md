@@ -1,19 +1,18 @@
-# SRS đã trích (dùng cho AI review)
+# Tra cứu SRS theo mục
 
-> Sinh tự động từ `docs/SRS.docx` bằng `scripts/ai-review/extract-srs.mjs`. **Không sửa tay**: sửa `SRS.docx` rồi chạy lại script.
-> Sơ đồ và ảnh trong SRS không chuyển sang chữ được, chỉ còn dòng `[hình ảnh]`; xem bản `.docx` khi cần.
+> [SRS v3 gốc](../SRS-full.md) là bản chuyển từ Word trong bộ tài liệu TLCN/KLTN. Các trang dưới đây theo danh mục FR/UC của project và có ghi chú triển khai. Kiểm tra code và test để xác nhận hiện trạng.
 
 ## Use Case
 - [UC-01](UC-01.md)
 - [UC-02](UC-02.md)
 - [UC-03](UC-03.md)
-- [UC-04](UC-04.md)
+- [UC-04](UC-04.md) · [Ghi chú triển khai Workspace Editor](UC-04-implementation.md)
 - [UC-05](UC-05.md)
 - [UC-06](UC-06.md)
 - [UC-07](UC-07.md)
 - [UC-08](UC-08.md)
 - [UC-09](UC-09.md)
-- [UC-10](UC-10.md)
+- [UC-10](UC-10.md) · giữ trong danh mục của project
 - [UC-11](UC-11.md)
 - [UC-12](UC-12.md)
 - [UC-13](UC-13.md)
@@ -28,7 +27,7 @@
 - [FR-summary.md](FR-summary.md)
 - [FLD.md](FLD.md)
 - [KPI.md](KPI.md)
-## Tài liệu SRS Gốc
-- [[srs/SRS-full|Toàn văn Đặc tả SRS v3 (SRS-full.md)]]
-- [[srs/Dinh_huong_de_tai|Định hướng đề tài v10 (Dinh_huong_de_tai.md)]]
+## Tài liệu đầy đủ
+- [SRS v3 gốc](../SRS-full.md)
+- [Định hướng đề tài v10](../Dinh_huong_de_tai.md)
 

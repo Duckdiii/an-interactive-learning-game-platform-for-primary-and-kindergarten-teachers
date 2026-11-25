@@ -6,7 +6,8 @@ import PlayerLoading from '../components/PlayerLoading'
 import NicknameScreen from '../intro/NicknameScreen'
 import { PROFILES } from '../profile/profiles'
 import { UiProfileProvider } from '../profile/UiProfileContext'
-import { getRoomApi } from '../room/getRoomApi'
+import { getRoomApi, usesMockRoom } from '../room/getRoomApi'
+import LiveRoomJoin from '../room/LiveRoomJoin'
 import { RoomJoinError } from '../room/RoomClient'
 import type { RoomJoinErrorCode } from '../room/RoomClient'
 import type { FoundRoom, JoinedRoom } from '../room/RoomApi'
@@ -17,10 +18,13 @@ type Lookup = { pin: string; room: FoundRoom | null }
 
 /** Vào phòng bằng PIN: tra phòng, đặt biệt danh, rồi chơi theo lệnh của cô. */
 export default function RoomJoinPage() {
-  usePlayerRootStyle(PROFILES.hocSinh)
-  usePageTitle(viText.player.join.pageTitle)
-
   const { pin = '' } = useParams()
+  usePageTitle(viText.player.join.pageTitle)
+  return usesMockRoom() ? <MockRoomJoin key={pin} pin={pin} /> : <LiveRoomJoin key={pin} pin={pin} />
+}
+
+function MockRoomJoin({ pin }: { pin: string }) {
+  usePlayerRootStyle(PROFILES.hocSinh)
   const [lookup, setLookup] = useState<Lookup | null>(null)
   const [joined, setJoined] = useState<(JoinedRoom & { nickname: string }) | null>(null)
   const [error, setError] = useState<RoomJoinErrorCode | null>(null)

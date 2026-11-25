@@ -20,11 +20,38 @@ export interface GenerateForm {
   voiceRegion: string
   voiceGender: string
   hasFile: boolean
+  theme?: string
   visualClozeMode?: 'TEXT' | 'IMAGE'
   oddOneOutMode?: 'TEXT' | 'IMAGE'
   sceneImageUrl?: string
   optionImages?: { imageUrl: string; visualPrompt: string }[]
+  /** Game ôn tập: các câu của game cũ cần ôn lại (Backend tự đưa số liệu lớp làm sai vào lời nhắc AI). */
+  reviewFrom?: ReviewFrom
+  classroomId?: string
 }
+
+export interface ReviewFrom {
+  gameId: string
+  questionIds: string[]
+}
+
+const REVIEW_MAX_QUESTIONS = 10
+const REVIEW_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/
+
+/** Dựng `reviewFrom` từ địa chỉ trang tạo game (?reviewGame=&reviewQ=a,b); giá trị lạ thì bỏ qua cả khối. */
+export function parseReviewFrom(gameId: string | null, questionIds: string | null): ReviewFrom | undefined {
+  if (!gameId || !REVIEW_ID_PATTERN.test(gameId) || !questionIds) return undefined
+  const ids = questionIds.split(',')
+  if (ids.length > REVIEW_MAX_QUESTIONS || ids.some((id) => !REVIEW_ID_PATTERN.test(id))) return undefined
+
+  return { gameId, questionIds: ids }
+}
+
+/** Liên kết sang trang tạo game ôn tập, mang theo game và các câu cần ôn (chỉ mã, không có dữ liệu học sinh). */
+export const reviewSeedParams = (gameId: string, questionIds: ReadonlyArray<string>) => ({
+  reviewGame: gameId,
+  reviewQ: questionIds.slice(0, REVIEW_MAX_QUESTIONS).join(','),
+})
 
 export interface GenerateGameRequest {
   subject?: string
@@ -39,6 +66,9 @@ export interface GenerateGameRequest {
   /** Caller-supplied option assets; required when gameType=VISUAL_CLOZE and mode=IMAGE. */
   optionImages?: { imageUrl: string; visualPrompt: string }[]
   voice: { region: string; gender: string }
+  theme?: string
+  reviewFrom?: ReviewFrom
+  classroomId?: string
 }
 
 export type GenerateProblem = 'needIdea'
@@ -66,6 +96,11 @@ export function buildGenerateRequest(
 
   if (form.subject) request.subject = form.subject
   if (form.gradeLevel) request.gradeLevel = form.gradeLevel
+  if (gameType) request.gameType = gameType
+  if (form.theme && form.theme !== 'AUTO') request.theme = form.theme
+  if (form.reviewFrom) request.reviewFrom = form.reviewFrom
+  if (form.classroomId) request.classroomId = form.classroomId
+
   if (mode === 'random') request.randomTopic = true
   else if (hasValidIdea(form.idea)) request.idea = form.idea.trim()
 
