@@ -71,7 +71,7 @@ export interface GenerateGameRequest {
   classroomId?: string
 }
 
-export type GenerateProblem = 'needIdea'
+export type GenerateProblem = 'needIdea' | 'ideaTooShortWithFile'
 
 export const hasValidIdea = (idea: string) => idea.trim().length >= IDEA_MIN_LENGTH
 
@@ -79,6 +79,9 @@ export function checkGenerate(
   form: Pick<GenerateForm, 'idea' | 'hasFile'>,
   mode: 'idea' | 'random',
 ): GenerateProblem | null {
+  if (mode === 'idea' && form.hasFile && form.idea.trim().length > 0 && form.idea.trim().length < IDEA_MIN_LENGTH) {
+    return 'ideaTooShortWithFile'
+  }
   if (mode === 'idea' && !hasValidIdea(form.idea) && !form.hasFile) return 'needIdea'
 
   return null

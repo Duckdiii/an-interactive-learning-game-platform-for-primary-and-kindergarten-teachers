@@ -73,6 +73,23 @@ it('AVM tiếng Việt không có audioUrl thì dùng ngôn ngữ tiếng Việt
   })
 })
 
+it('Memory Card exposes a replay control for the saved question narration', () => {
+  audio.auto.mockClear()
+  audio.hook.mockClear()
+  audio.replay.mockClear()
+  const Renderer = (() => <div />) as AnyPlayableRenderer
+  render(<QuestionStage gameType="MEMORY_CARD" api={{} as PlayerApi} sessionId="s" title="test"
+    question={{ id: 'q', timeLimitSeconds: 30, points: 10, audioText: 'Lật thẻ tìm cặp giống nhau.',
+      audioUrl: '/memory-card.mp3', pairs: [] }}
+    Renderer={Renderer} progress={{ current: 1, total: 1 }} score={0} streak={0} result={null} isLast
+    onAnswered={() => undefined} onNext={() => undefined} autoRead={false} />)
+
+  expect(audio.auto).toHaveBeenCalledWith('/memory-card.mp3', false)
+  expect(screen.getByRole('button', { name: 'Nghe lại câu hỏi' })).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Nghe lại câu hỏi' }))
+  expect(audio.replay).toHaveBeenCalledTimes(1)
+})
+
 it('AVM khóa các lựa chọn ngay khi hết giờ trong lúc chờ máy chủ', () => {
   audio.remaining = 0
   const Renderer = (({ answerDisabled, playAudio }: { answerDisabled?: boolean; playAudio?: () => void }) =>

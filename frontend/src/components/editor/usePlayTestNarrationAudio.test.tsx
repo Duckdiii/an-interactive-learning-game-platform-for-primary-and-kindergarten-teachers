@@ -1,11 +1,15 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { postGenerateNarrationFeedback } from '../../api/gamesApi'
+import { postGenerateNarrationFeedback, postGenerateNarrationPreview } from '../../api/gamesApi'
 import { usePlayTestNarrationAudio } from './usePlayTestNarrationAudio'
 
-vi.mock('../../api/gamesApi', () => ({ postGenerateNarrationFeedback: vi.fn() }))
+vi.mock('../../api/gamesApi', () => ({
+  postGenerateNarrationFeedback: vi.fn(),
+  postGenerateNarrationPreview: vi.fn(),
+}))
 
 const getFeedback = vi.mocked(postGenerateNarrationFeedback)
+const getQuestionNarration = vi.mocked(postGenerateNarrationPreview)
 const audioInstances: MockAudio[] = []
 
 class MockAudio {
@@ -13,6 +17,7 @@ class MockAudio {
   onended: (() => void) | null = null
   onerror: (() => void) | null = null
   currentTime = 0
+  playbackRate = 1
   play = vi.fn(async (): Promise<void> => undefined)
   pause = vi.fn()
 
@@ -41,6 +46,7 @@ describe('usePlayTestNarrationAudio', () => {
   beforeEach(() => {
     audioInstances.length = 0
     getFeedback.mockReset()
+    getQuestionNarration.mockReset()
     vi.stubGlobal('Audio', MockAudio)
   })
 
@@ -51,6 +57,25 @@ describe('usePlayTestNarrationAudio', () => {
     const { result } = renderHook(() => usePlayTestNarrationAudio(options))
 
     await waitFor(() => expect(audioInstances.map((audio) => audio.src)).toContain(options.narration?.audioUrl))
+    expect(result.current.questionAudioAvailable).toBe(true)
+  })
+
+  it('uses the saved TTS URL instead of a legacy Quiz mock URL', async () => {
+    const savedUrl = 'https://storage.test/saved-quiz-question.mp3'
+    getFeedback.mockResolvedValue(urls)
+    getQuestionNarration.mockResolvedValue({
+      questionId: 'q1', audioUrl: savedUrl, bytes: 1200, durationMillis: 1400,
+    })
+
+    const { result } = renderHook(() => usePlayTestNarrationAudio({
+      ...options,
+      question: { ...options.question!, audioUrl: '/mock/q1.wav', saved: true },
+      narration: undefined,
+    }))
+
+    await waitFor(() => expect(getQuestionNarration).toHaveBeenCalledWith('game-1', 'q1', expect.anything()))
+    await waitFor(() => expect(audioInstances.map((audio) => audio.src)).toContain(savedUrl))
+    expect(audioInstances.map((audio) => audio.src)).not.toContain('/mock/q1.wav')
     expect(result.current.questionAudioAvailable).toBe(true)
   })
 
@@ -83,10 +108,23 @@ describe('usePlayTestNarrationAudio', () => {
     expect(audioInstances.at(-2)?.pause).toHaveBeenCalled()
   })
 
+  it('keeps English TTS feedback at its previous normal playback speed', async () => {
+    getFeedback.mockResolvedValue(urls)
+    const englishOptions = { ...options, subject: 'ENGLISH' as const }
+    const { rerender } = renderHook((props) => usePlayTestNarrationAudio(props), { initialProps: englishOptions })
+    await waitFor(() => expect(getFeedback).toHaveBeenCalledTimes(1))
+
+    rerender({ ...englishOptions, answered: true, isCorrect: true })
+
+    await waitFor(() => expect(audioInstances.at(-1)?.src).toBe(urls.correctAudioUrl))
+    expect(audioInstances.at(-1)?.playbackRate).toBe(0.85)
+  })
+
   it('loads feedback audio once for a PlayTest entry and reuses the URLs across questions', async () => {
     getFeedback.mockResolvedValue(urls)
     const { rerender } = renderHook((props) => usePlayTestNarrationAudio(props), { initialProps: options })
     await waitFor(() => expect(getFeedback).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(audioInstances).toHaveLength(1))
 
     rerender({ ...options, questionKey: 'q2:0', question: { id: 'q2', audioText: 'Question two.' }, narration: undefined })
 

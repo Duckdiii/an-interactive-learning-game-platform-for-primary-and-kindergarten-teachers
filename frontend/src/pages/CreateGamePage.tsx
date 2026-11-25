@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
@@ -32,6 +32,7 @@ import { isMock } from '../config/mockMode'
 import { ROUTES } from '../routes/paths'
 import { useCreateGames } from '../hooks/useCreateGames'
 import { useGameTypeSuggestions } from '../hooks/useGameTypeSuggestions'
+import { usePrepareLesson } from '../hooks/usePrepareLesson'
 import { useLessonContext } from '../hooks/useLessonContext'
 import { useClassrooms } from '../hooks/useClassrooms'
 import { useSavedSuggestions, useTeacherProfile } from '../hooks/useTeacherProfile'
@@ -99,6 +100,9 @@ export default function CreateGamePage() {
   ])
   const navigate = useNavigate()
   const creation = useCreateGames()
+  const preparation = usePrepareLesson()
+  const [reviewIdea, setReviewIdea] = useState('')
+  const [preparationMessage, setPreparationMessage] = useState('')
   const progressRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
   const wasCreating = useRef(false)
@@ -141,7 +145,12 @@ export default function CreateGamePage() {
   }, [params, initialIdea, profile.isFetching, profile.data, requestSuggestion])
 
   // Đổi ý tưởng hoặc lựa chọn thì kết quả tạo trước đó không còn đúng nữa (game đã tạo vẫn còn trong danh sách, chỉ không dùng lại cho lần tạo mới).
-  const touch = () => creation.reset()
+  const touch = () => {
+    creation.reset()
+    preparation.reset()
+    setReviewIdea('')
+    setPreparationMessage('')
+  }
 
   // Chọn nhóm "Lớp 2–5" mà chưa chọn lớp cụ thể: giữ nhóm mở nhưng khối vẫn là "chưa xác định".
   const [upperOpen, setUpperOpen] = useState(false)
@@ -202,56 +211,63 @@ export default function CreateGamePage() {
     suggestionsMutation.mutate(lastInput.current)
   }
 
-  const proceedToSuggest = (finalIdea: string, nextMode: Mode) => {
+  const beginSuggestions = (nextMode: Mode, nextIdea: string) => {
     setMode(nextMode)
     setSelectedTypes([])
     lastInput.current = {
-      idea: nextMode === 'random' ? '' : finalIdea.trim(),
+      idea: nextMode === 'random' ? '' : nextIdea.trim(),
       gradeLevel: lesson.gradeLevel,
       subject: lesson.subject,
     }
     setStep('suggest')
     requestSuggestions()
+    // Về đầu trang để thấy cả thanh các bước, rồi mới chuyển tiêu điểm.
     setTimeout(() => {
       window.scrollTo({ top: 0 })
       stepHeadingRef.current?.focus({ preventScroll: true })
     }, 0)
   }
 
-  const submit = (nextMode: Mode) => {
+  const submit = async (nextMode: Mode) => {
     const problem = checkGenerate({ idea, hasFile: file !== null }, nextMode)
-
-    setErrors(problem ? { idea: text.errorNeedIdea } : {})
+    const ideaError = problem === 'ideaTooShortWithFile' ? text.errorShortOptionalIdeaWithFile : text.errorNeedIdea
+    setErrors(problem ? { idea: ideaError } : {})
     touch()
-
     if (problem) {
       setTimeout(() => document.getElementById('create-idea')?.focus(), 0)
       return
     }
 
-    // Tạo ngẫu nhiên và luồng có giáo án vẫn qua bước AI đề xuất kiểu chơi (có giáo án thì đề xuất theo cả mô tả nếu có).
-    if (nextMode === 'random' || file !== null) {
-      proceedToSuggest(idea, nextMode)
+    if (nextMode === 'idea' && file && !isMock('ai')) {
+      if (!lesson.subject || !lesson.gradeLevel) {
+        setPreparationMessage(text.needLessonForServer)
+        return
+      }
+      const prepared = await preparation.prepare({
+        subject: lesson.subject,
+        gradeLevel: lesson.gradeLevel,
+        idea: idea.trim().length >= 10 ? idea.trim() : undefined,
+        file,
+      })
+      if (prepared) setReviewIdea(prepared.idea)
       return
     }
 
-    // Trợ lý cần môn và khối để hiểu đúng bài (openapi: bắt buộc ở POST /games/understand).
+    if (nextMode === 'random' || file) {
+      beginSuggestions(nextMode, nextMode === 'random' ? '' : idea)
+      return
+    }
+
     if (!lesson.subject || !lesson.gradeLevel) {
       setErrors({ idea: text.needLessonForChat })
       setTimeout(() => document.getElementById(lesson.gradeLevel ? 'create-idea' : 'create-grade')?.focus(), 0)
       return
     }
-
-    // Mô tả là tin nhắn đầu tiên của cuộc trò chuyện; mỗi lần bấm là một cuộc mới.
     setMode('idea')
     setSelectedTypes([])
     chat.reset()
     chat.send(idea)
     setStep('chat')
-    setTimeout(() => {
-      window.scrollTo({ top: 0 })
-      stepHeadingRef.current?.focus({ preventScroll: true })
-    }, 0)
   }
 
   // Giáo viên xác nhận thẻ: ghép thẻ thành ý tưởng rồi tạo đúng kiểu chơi đang chọn trên thẻ.
@@ -261,6 +277,19 @@ export default function CreateGamePage() {
     lastInput.current = { idea: composeIdea(card, idea), gradeLevel: lesson.gradeLevel, subject: lesson.subject }
     setSelectedTypes([card.gameType])
     void createSelected([card.gameType])
+  }
+
+  const confirmPreparedIdea = () => {
+    if (reviewIdea.trim().length < 10) {
+      setPreparationMessage(text.preparedIdeaTooShort)
+      return
+    }
+    const confirmed = reviewIdea.trim().slice(0, IDEA_MAX_LENGTH)
+    setIdea(confirmed)
+    setPreparationMessage('')
+    preparation.reset()
+    setReviewIdea('')
+    beginSuggestions('idea', confirmed)
   }
 
   const backToDescribe = () => {
@@ -475,6 +504,45 @@ export default function CreateGamePage() {
                   </select>
                 </FormField>
               ) : null}
+              {preparation.status === 'pending' ? (
+                <p role="status" className="rounded-2xl bg-brand-soft p-4 text-sm font-semibold text-ink">
+                  {text.preparingLesson}
+                </p>
+              ) : null}
+              {preparation.status === 'error' ? (
+                <p role="alert" className="rounded-2xl bg-warn-soft p-4 text-sm font-semibold text-warn-ink">
+                  {parseApiError(preparation.error, text.prepareLessonError).message}
+                </p>
+              ) : null}
+              {preparationMessage ? (
+                <p role="alert" className="rounded-2xl bg-warn-soft p-4 text-sm font-semibold text-warn-ink">
+                  {preparationMessage}
+                </p>
+              ) : null}
+              {preparation.status === 'success' ? (
+                <section aria-labelledby="prepared-lesson-heading" className="space-y-4 rounded-2xl border-2 border-brand/30 bg-brand-soft/40 p-4">
+                  <div>
+                    <h2 id="prepared-lesson-heading" className="font-bold text-ink">{text.reviewPreparedLesson}</h2>
+                    <p className="mt-1 text-sm text-ink-soft">{text.reviewPreparedLessonHint}</p>
+                  </div>
+                  <FormField id="prepared-lesson-idea" label={text.preparedIdeaLabel}>
+                    <textarea
+                      id="prepared-lesson-idea"
+                      value={reviewIdea}
+                      maxLength={IDEA_MAX_LENGTH}
+                      onChange={(event) => {
+                        setReviewIdea(event.target.value)
+                        setPreparationMessage('')
+                      }}
+                      className={textareaClass()}
+                    />
+                  </FormField>
+                  <Button type="button" size="lg" onClick={confirmPreparedIdea}>
+                    {text.confirmPreparedLesson}
+                  </Button>
+                </section>
+              ) : null}
+
               <FormField
                 id="create-file"
                 label={text.fileLabel}
@@ -532,9 +600,9 @@ export default function CreateGamePage() {
               </details>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Button type="submit" size="lg" className="gap-2">
+                <Button type="submit" size="lg" className="gap-2" disabled={preparation.status === 'pending'}>
                   <Icon name="sparkles" />
-                  {text.submit}
+                  {file && !isMock('ai') ? text.prepareLesson : text.submit}
                 </Button>
                 <Button
                   type="button"
@@ -621,7 +689,7 @@ export default function CreateGamePage() {
             onCreate={() => { setOddSetupOpen(false); void createSelected(['ODD_ONE_OUT']) }}
             onCancel={() => { setOddSetupOpen(false); setSelectedTypes([]) }} /> : null}
 
-          {step === 'suggest' && file !== null ? (
+          {step === 'suggest' && file !== null && isMock('ai') ? (
             <p className="flex items-start gap-2 text-sm text-ink-soft">
               <Icon name="info" className="mt-0.5 h-4 w-4 shrink-0" />
               {text.fileNotUsed}

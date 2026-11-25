@@ -34,6 +34,7 @@ class GameNarrationServiceTest {
         SupabaseNarrationStorage storage = mock(SupabaseNarrationStorage.class);
         Game game = gameWithAudioText("Chào các em");
         QuizQuestion question = (QuizQuestion) game.getQuestions().getFirst();
+        question.setAudioUrl("/mock/q1.wav");
         when(games.findByIdAndAuthor_IdForUpdate("game-1", "teacher-1")).thenReturn(Optional.of(game));
         when(assets.findByGame_IdAndQuestion_Id("game-1", question.getId())).thenReturn(Optional.empty());
         when(assets.findAllByGame_Id("game-1")).thenReturn(List.of());
@@ -50,6 +51,23 @@ class GameNarrationServiceTest {
         assertThat(result.bytes()).isEqualTo(3);
         verify(storage).upload(any(String.class), any(byte[].class));
         verify(assets).saveAndFlush(any(GameNarrationAsset.class));
+    }
+
+    @Test
+    void stillRejectsRealTeacherSuppliedSourceAudio() {
+        GameRepository games = mock(GameRepository.class);
+        Game game = gameWithAudioText("ChÃ o cÃ¡c em");
+        QuizQuestion question = (QuizQuestion) game.getQuestions().getFirst();
+        question.setAudioUrl("https://storage.example/teacher-recording.mp3");
+        when(games.findByIdAndAuthor_IdForUpdate("game-1", "teacher-1")).thenReturn(Optional.of(game));
+
+        assertThatThrownBy(() -> new GameNarrationService(games, mock(GameNarrationAssetRepository.class),
+                mock(ViettelTtsClient.class), mock(ElevenLabsTtsClient.class), mock(SupabaseNarrationStorage.class))
+                .generate("game-1", "q1", new AuthenticatedTeacher("teacher-1", "teacher@test", "session")))
+                .isInstanceOfSatisfying(ApiException.class, error -> {
+                    assertThat(error.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR);
+                    assertThat(error.getMessage()).contains("already uses source audio");
+                });
     }
 
     @Test

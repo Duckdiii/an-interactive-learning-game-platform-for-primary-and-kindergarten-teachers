@@ -48,16 +48,15 @@ public class QuizGameDslFactory
             }
         }
 
-        // Chặng 2.5: Gắn tài nguyên hình ảnh trực quan và âm thanh giọng đọc
+        // Chặng 2.5: Gắn tài nguyên hình ảnh trực quan. audioUrl chỉ được gắn khi đã có tệp TTS thật.
         String imageUrl = imageOf(ai.asset());
-        String audioUrl = resolveAudioUrl(ai.audioText());
 
         return new QuizQuestionDsl(
                 base.id(),
                 base.timeLimitSeconds(),
                 base.points(),
                 ai.audioText(),
-                audioUrl,
+                null,
                 ai.visualPrompt(),
                 imageUrl,
                 ai.text(),
@@ -70,13 +69,4 @@ public class QuizGameDslFactory
         return new QuizGameDsl(schemaVersion(), supportedType(), metadata, settings, questions);
     }
 
-    /**
-     * Chặng 2.5: Ánh xạ âm thanh giọng đọc nếu đề bài có audioText.
-     */
-    static String resolveAudioUrl(String audioText) {
-        if (audioText != null && !audioText.isBlank()) {
-            return "/mock/q1.wav";
-        }
-        return null;
-    }
 }

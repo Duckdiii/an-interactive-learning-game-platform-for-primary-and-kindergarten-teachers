@@ -4,6 +4,10 @@ import type { GameDsl } from '../../types/game-dsl.types'
 import { resolveUiProfile } from '../../player/profile/resolveUiProfile'
 import { UiProfileProvider } from '../../player/profile/UiProfileContext'
 import { summarizeQuestions } from '../../utils/questionSummary'
+import { resolveTheme } from '../../player/theme/resolveTheme'
+import { ThemeProvider } from '../../player/theme/ThemeContext'
+import { PresentationProvider } from '../../player/theme/PresentationContext'
+import { resolvePresentation } from '../../utils/presentation'
 import Button from '../Button'
 import Icon from '../ui/Icon'
 import { PLAY_TEST_RENDERERS } from './play/playTestRegistry'
@@ -11,6 +15,7 @@ import PlayTestSummary from './PlayTestSummary'
 import { createPlayTestState, playTestReducer } from './playTestReducer'
 import UnsupportedPlayTest from './UnsupportedPlayTest'
 import { usePlayTestNarrationAudio } from './usePlayTestNarrationAudio'
+import { CloudFeedbackContext } from '../../games/common/useAnswerAudio'
 import type { PlayTestQuestionNarration } from './usePlayTestNarrationAudio'
 
 interface PlayTestPanelProps {
@@ -20,11 +25,12 @@ interface PlayTestPanelProps {
   seed?: string
   gameId?: string
   questionNarrations?: Readonly<Record<string, PlayTestQuestionNarration>>
+  savedQuestionIds?: ReadonlySet<string>
   onExit: () => void
 }
 
 // PlayTest uses real renderers in `preview` mode. It may fetch narration URLs only; it never creates or stores sessions, answers, scores, or results.
-export default function PlayTestPanel({ game, seed, gameId, questionNarrations, onExit }: PlayTestPanelProps) {
+export default function PlayTestPanel({ game, seed, gameId, questionNarrations, savedQuestionIds, onExit }: PlayTestPanelProps) {
   const text = viText.editor.play
   const Player = PLAY_TEST_RENDERERS[game.gameType]
   const total = game.questions.length
@@ -38,12 +44,21 @@ export default function PlayTestPanel({ game, seed, gameId, questionNarrations, 
   const narrationAudio = usePlayTestNarrationAudio({
     enabled: Boolean(Player) && !state.finished,
     gameId,
+    subject: game.metadata.subject,
     questionKey: question ? `${question.id}:${state.attempt}` : 'empty',
-    question: question ? { id: question.id, audioText: question.audioText } : undefined,
+    question: question ? { id: question.id, audioText: question.audioText, audioUrl: question.audioUrl,
+      saved: savedQuestionIds?.has(question.id) } : undefined,
     narration: questionNarration,
     answered: state.answered,
     isCorrect: state.answered ? lastResult : null,
   })
+  const theme = resolveTheme({
+    themeId: game.metadata.presentation?.world,
+    subject: game.metadata.subject,
+    gameType: game.gameType,
+    topic: game.metadata.topic,
+  })
+  const presentation = resolvePresentation(game.metadata.presentation, theme.id, seed ?? game.metadata.title)
 
   // Mở màn chơi thử, sang câu khác hoặc thử lại câu: đưa tiêu điểm về đầu màn (nút vừa bấm đã bị gỡ khỏi trang nên nếu không
   // người dùng bàn phím và trình đọc màn hình sẽ rơi về đầu trang). Không cuộn để câu hỏi giữ nguyên chỗ.
@@ -105,13 +120,16 @@ export default function PlayTestPanel({ game, seed, gameId, questionNarrations, 
       {/* Dựng lại renderer từ đầu khi sang câu khác hoặc thử lại câu này. */}
       <div className="mx-auto w-full max-w-3xl rounded-2xl bg-white sm:border-2 sm:border-ink/10 sm:p-4">
         <UiProfileProvider profile={resolveUiProfile({ gradeLevel: game.metadata.gradeLevel })}>
+          <CloudFeedbackContext.Provider value={narrationAudio.feedbackAvailable}>
           <Player
             key={`${state.index}-${state.attempt}`}
             question={question}
             subject={game.metadata.subject}
             onResult={(isCorrect) => dispatch({ type: 'answered', isCorrect })}
             playQuestionAudio={playQuestionAudio}
+            playPairFeedback={narrationAudio.feedbackAvailable ? narrationAudio.playPairFeedback : undefined}
           />
+          </CloudFeedbackContext.Provider>
         </UiProfileProvider>
       </div>
 
@@ -124,7 +142,7 @@ export default function PlayTestPanel({ game, seed, gameId, questionNarrations, 
       ) : null}
       {needsGeneratedNarration ? (
         <p role="note" className="text-center text-sm text-ink-soft">
-          Chưa có giọng đọc cho câu hỏi này. Hãy tạo giọng đọc trong phần chỉnh sửa để nghe câu hỏi.
+          {narrationAudio.questionStatus ?? 'Chưa có giọng đọc cho câu hỏi này. Hãy tạo giọng đọc trong phần chỉnh sửa để nghe câu hỏi.'}
         </p>
       ) : null}
       {feedbackAudioStatus ? (

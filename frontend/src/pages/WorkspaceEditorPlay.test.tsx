@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from '../api/axiosInstance'
-import { getMockGame, resetMockGames } from '../services/mock/mockGames'
+import { getMockGame, resetMockGames, saveMockGame } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
@@ -170,6 +170,16 @@ describe('trình soạn thảo: tải màn chơi thử bị lỗi (UC-03 3b)', (
 })
 
 describe('FR-11 PlayTest narration integration', () => {
+  it('offers narration generation when a legacy Quiz has only a mock audio URL', async () => {
+    const game = getMockGame(QUIZ_ID)
+    game.questions[0].audioUrl = '/mock/q1.wav'
+    saveMockGame(QUIZ_ID, game)
+
+    await openLoaded(QUIZ_ID)
+
+    expect(await screen.findByRole('button', { name: /Tạo giọng đọc/ })).toBeEnabled()
+  })
+
   it('passes a generated saved-question URL into PlayTest and requests only fixed feedback audio', async () => {
     const user = userEvent.setup()
     const questionId = getMockGame(QUIZ_ID).questions[0].id

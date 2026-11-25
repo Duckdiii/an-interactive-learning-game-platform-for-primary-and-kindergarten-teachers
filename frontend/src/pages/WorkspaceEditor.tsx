@@ -23,9 +23,11 @@ import QuestionList from '../components/editor/QuestionList'
 import EditorTopBar from '../components/editor/EditorTopBar'
 import PublishDialog from '../components/editor/PublishDialog'
 import NarrationPreviewControl from '../components/editor/NarrationPreviewControl'
+import CpfWorkspace from '../components/editor/CpfWorkspace'
 import type { PlayTestQuestionNarration } from '../components/editor/usePlayTestNarrationAudio'
 import ErrorNotice from '../components/ui/ErrorNotice'
 import LetterTiles from '../components/ui/LetterTiles'
+import { hasSourceAudio } from '../utils/audioUrl'
 import MockBadge from '../components/ui/MockBadge'
 import { MIXED_TILES } from '../components/ui/tileSets'
 import { viText } from '../constants/viText'
@@ -119,7 +121,8 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const pendingApi = useMemo(() => ({ begin: beginEdit, pending: applying }), [beginEdit, applying])
   // Giọng đọc đang chọn cho các lần tạo giọng đọc (FLD-12): giữ ở đây để đổi sang câu khác vẫn còn nguyên.
   const [voice, setVoice] = useState<VoiceGender>('FEMALE')
-  const voiceApi = useMemo(() => ({ voice, setVoice }), [voice])
+  const language = draft.metadata.subject === 'ENGLISH' ? 'en-US' as const : 'vi-VN' as const
+  const voiceApi = useMemo(() => ({ voice, setVoice, language }), [voice, language])
   // `lazy` ghi nhớ cả lần tải LỖI: muốn thử lại sau khi mạng ổn lại phải dựng `lazy` mới, nên tạo lại mỗi lần thoát khỏi màn chơi thử.
   const [PlayTestPanel, setPlayTestPanel] = useState(() => lazy(loadPlayTestPanel))
   // Đã bấm "Chơi thử" mà dữ liệu chưa đủ: lỗi được tính lại theo từng lần sửa để sửa xong là hết.
@@ -128,7 +131,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const playableNarrations = useMemo(() => Object.fromEntries(draft.questions.flatMap((question) => {
     const narration = questionNarrations[question.id]
     if (!narration || narration.gameId !== game.gameId || narration.audioText !== question.audioText
-        || question.audioUrl?.trim()) return []
+        || hasSourceAudio(question.audioUrl)) return []
     return [[question.id, narration] as const]
   })), [draft.questions, game.gameId, questionNarrations])
   // Câu nào còn lỗi (tính trực tiếp, không đợi bấm Lưu) thì danh sách đánh dấu "Cần sửa".
@@ -306,6 +309,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
               index={index}
               questionId={draft.questions[index].id}
               saved={editor.savedQuestionIds.has(draft.questions[index].id)}
+              sourceStale={editor.dirty}
               getQuestion={(position, questionId) => (draft.questions[position]?.id === questionId ? draft.questions[position] : undefined)}
               applyRegenerated={editor.applyRegenerated}
               restorePending={Boolean(editor.pendingRestore)}
@@ -322,7 +326,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
             audioText={draft.questions[index].audioText}
           subject={draft.metadata.subject}
           onAudioReady={setQuestionNarration}
-          hasSourceAudio={Boolean(draft.questions[index].audioUrl?.trim())}
+          hasSourceAudio={hasSourceAudio(draft.questions[index].audioUrl)}
           saved={editor.savedQuestionIds.has(draft.questions[index].id) && editor.autosave === 'saved'}
         />
       ) : null}
@@ -394,7 +398,8 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
               </div>
             }
           >
-            <PlayTestPanel game={editor.draft} seed={game.gameId} gameId={game.gameId} questionNarrations={playableNarrations} onExit={exitPlay} />
+            <PlayTestPanel game={editor.draft} seed={game.gameId} gameId={game.gameId} questionNarrations={playableNarrations}
+              savedQuestionIds={editor.autosave === 'saved' ? editor.savedQuestionIds : undefined} onExit={exitPlay} />
           </Suspense>
         </PlayTestBoundary>
       ) : (
@@ -563,5 +568,9 @@ export default function WorkspaceEditor() {
   }
 
   // `key` theo gameId: đổi sang game khác thì câu đang chọn và khung đang xem được đặt lại.
+  if (query.data.gameType === 'CUSTOM') {
+    return <CpfWorkspace key={query.data.gameId} game={query.data} />
+  }
+
   return <EditorWorkspace key={query.data.gameId} game={query.data} />
 }

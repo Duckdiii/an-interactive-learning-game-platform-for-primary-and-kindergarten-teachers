@@ -5,8 +5,8 @@ spring:
     name: aigame-backend
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 11MB
+      max-file-size: ${LESSON_MAX_FILE_SIZE:10MB}
+      max-request-size: ${LESSON_MAX_REQUEST_SIZE:11MB}
 
   # SMTP cho thư đặt lại mật khẩu; chỉ dùng khi app.mail.enabled=true (MAIL_ENABLED).
   mail:
@@ -163,6 +163,11 @@ app:
       model: ${GEMINI_MODEL:gemini-3-flash-preview}
       game-generation:
         enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
+      lesson-preparation:
+        timeout-seconds: ${LESSON_INTENT_TIMEOUT_SECONDS:30}
+  lesson:
+    parser-timeout-ms: ${LESSON_PARSER_TIMEOUT_MS:5000}
+    parser-workers: ${LESSON_PARSER_WORKERS:2}
   generation:
     # Rà chính tả bằng AI sau khi sinh game: thêm tới 2 lần gọi Gemini mỗi game (tốn hạn mức theo ngày của gói Gemini), nên tắt mặc định.
     wording-review:

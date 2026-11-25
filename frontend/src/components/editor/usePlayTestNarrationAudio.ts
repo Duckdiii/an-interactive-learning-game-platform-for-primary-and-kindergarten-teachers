@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { postGenerateNarrationFeedback } from '../../api/gamesApi'
+import { postGenerateNarrationFeedback, postGenerateNarrationPreview } from '../../api/gamesApi'
+import type { Subject } from '../../types/game-dsl.types'
+import { hasSourceAudio } from '../../utils/audioUrl'
 
 export interface PlayTestQuestionNarration {
   gameId: string
@@ -10,11 +12,14 @@ export interface PlayTestQuestionNarration {
 export interface PlayTestNarrationQuestion {
   id: string
   audioText?: string
+  audioUrl?: string
+  saved?: boolean
 }
 
 interface UsePlayTestNarrationAudioOptions {
   enabled: boolean
   gameId?: string
+  subject?: Subject
   questionKey: string
   question?: PlayTestNarrationQuestion
   narration?: PlayTestQuestionNarration
@@ -24,15 +29,21 @@ interface UsePlayTestNarrationAudioOptions {
 
 const FEEDBACK_LOAD_ERROR = 'Không tải được giọng đọc phản hồi. Kết quả vẫn hiển thị bằng chữ.'
 const PLAYBACK_ERROR = 'Không phát được lời đọc. Trò chơi vẫn dùng được; bạn có thể chọn nghe lại.'
+// The correct-answer chime lasts 539 ms. Leave its tail clear of the first syllable.
+const CORRECT_CHIME_MS = 550
+const ENGLISH_CORRECT_SPEECH_RATE = 0.85
+const QUESTION_AUDIO_START_DELAY_MS = 500
 
-export function usePlayTestNarrationAudio({ enabled, gameId, questionKey, question, narration, answered,
+export function usePlayTestNarrationAudio({ enabled, gameId, subject = 'VIETNAMESE', questionKey, question, narration, answered,
   isCorrect }: UsePlayTestNarrationAudioOptions) {
   const [feedbackUrls, setFeedbackUrls] = useState<{ correctAudioUrl: string; wrongAudioUrl: string }>()
   const [feedbackLoading, setFeedbackLoading] = useState(false)
   const [feedbackError, setFeedbackError] = useState<string>()
   const [playbackError, setPlaybackError] = useState<string>()
   const [retryVersion, setRetryVersion] = useState(0)
+  const correctSpeechRate = subject === 'ENGLISH' ? ENGLISH_CORRECT_SPEECH_RATE : 1
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const requestRef = useRef<{ key: string; promise: ReturnType<typeof postGenerateNarrationFeedback> } | null>(null)
 
   const stopCurrentAudio = useCallback(() => {
@@ -45,10 +56,11 @@ export function usePlayTestNarrationAudio({ enabled, gameId, questionKey, questi
     audio.currentTime = 0
   }, [])
 
-  const playUrl = useCallback(async (url: string) => {
+  const playUrl = useCallback(async (url: string, rate = 1) => {
     stopCurrentAudio()
     setPlaybackError(undefined)
     const audio = new Audio(url)
+    audio.playbackRate = rate
     audioRef.current = audio
     audio.onended = () => {
       if (audioRef.current !== audio) return
@@ -100,17 +112,41 @@ export function usePlayTestNarrationAudio({ enabled, gameId, questionKey, questi
     return () => { active = false }
   }, [enabled, gameId, retryVersion])
 
-  const questionAudioUrl = question && narration
+  const localUrl = question && narration
       && narration.gameId === gameId
       && narration.audioText === question.audioText
       && Boolean(question.audioText?.trim())
     ? narration.audioUrl
     : undefined
 
+  const id = question?.id
+  const text = question?.audioText
+  const sourceUrl = hasSourceAudio(question?.audioUrl) ? question?.audioUrl?.trim() : undefined
+  const requestKey = enabled && !answered && gameId && id && text?.trim() && question?.saved && !sourceUrl && !localUrl
+    ? JSON.stringify([gameId, id, text]) : undefined
+  const [loaded, setLoaded] = useState<{ key: string; url?: string }>()
+  useEffect(() => {
+    if (!requestKey || !gameId || !id) return
+    const controller = new AbortController()
+    postGenerateNarrationPreview(gameId, id, controller.signal).then(({ audioUrl }) => {
+      if (!controller.signal.aborted) setLoaded({ key: requestKey, url: audioUrl })
+    }).catch(() => {
+      if (!controller.signal.aborted) setLoaded({ key: requestKey })
+    })
+    return () => controller.abort()
+  }, [requestKey, gameId, id])
+  const questionAudioUrl = sourceUrl || localUrl || (loaded?.key === requestKey ? loaded?.url : undefined)
+  const questionStatus = requestKey && !questionAudioUrl
+    ? loaded?.key === requestKey ? 'Không tải được giọng đọc câu hỏi. Hãy mở lại Chơi thử để thử lại.' : 'Đang tải giọng đọc câu hỏi…'
+    : undefined
+
   useEffect(() => {
     if (!enabled || answered || !questionAudioUrl) return
-    void playUrl(questionAudioUrl)
-    return stopCurrentAudio
+    const timeout = setTimeout(() => void playUrl(questionAudioUrl), QUESTION_AUDIO_START_DELAY_MS)
+    return () => {
+      clearTimeout(timeout)
+      stopCurrentAudio()
+    }
   }, [enabled, questionKey, answered, questionAudioUrl, playUrl, stopCurrentAudio])
 
   const feedbackUrl = answered && isCorrect !== null
@@ -119,9 +155,16 @@ export function usePlayTestNarrationAudio({ enabled, gameId, questionKey, questi
 
   useEffect(() => {
     if (!enabled || !feedbackUrl) return
-    void playUrl(feedbackUrl)
-    return stopCurrentAudio
-  }, [enabled, questionKey, answered, isCorrect, feedbackUrl, playUrl, stopCurrentAudio])
+    if (isCorrect) {
+      feedbackTimer.current = setTimeout(() => void playUrl(feedbackUrl, correctSpeechRate), CORRECT_CHIME_MS)
+    } else {
+      void playUrl(feedbackUrl)
+    }
+    return () => {
+      clearTimeout(feedbackTimer.current)
+      stopCurrentAudio()
+    }
+  }, [enabled, questionKey, answered, isCorrect, feedbackUrl, correctSpeechRate, playUrl, stopCurrentAudio])
 
   useEffect(() => () => stopCurrentAudio(), [stopCurrentAudio])
 
@@ -130,12 +173,18 @@ export function usePlayTestNarrationAudio({ enabled, gameId, questionKey, questi
   }, [questionAudioUrl, playUrl])
 
   const replayFeedback = useCallback(() => {
-    if (feedbackUrl) void playUrl(feedbackUrl)
-  }, [feedbackUrl, playUrl])
+    clearTimeout(feedbackTimer.current)
+    if (feedbackUrl) void playUrl(feedbackUrl, isCorrect ? correctSpeechRate : 1)
+  }, [feedbackUrl, isCorrect, correctSpeechRate, playUrl])
 
   const retryFeedback = useCallback(() => setRetryVersion((version) => version + 1), [])
 
   return {
+    playPairFeedback: (correct: boolean) => {
+      if (feedbackUrls) void playUrl(correct ? feedbackUrls.correctAudioUrl : feedbackUrls.wrongAudioUrl,
+        correct ? correctSpeechRate : 1)
+    },
+    questionStatus,
     questionAudioAvailable: Boolean(questionAudioUrl),
     feedbackAvailable: Boolean(feedbackUrls),
     feedbackLoading,

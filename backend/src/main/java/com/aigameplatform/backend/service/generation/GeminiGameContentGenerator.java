@@ -1,14 +1,21 @@
 package com.aigameplatform.backend.service.generation;
 
+import com.aigameplatform.backend.dto.admin.AiConfigVersionDto;
+import com.aigameplatform.backend.service.asset.AssetRetriever;
+import com.aigameplatform.backend.service.factory.GameAssetCatalog;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.service.admin.AiConfigService;
+import com.aigameplatform.backend.service.curriculum.CurriculumConstraints;
+import com.aigameplatform.backend.service.curriculum.CurriculumTopicParser;
 import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
-import com.aigameplatform.backend.service.curriculum.CurriculumTopicParser;
-import com.aigameplatform.backend.service.curriculum.CurriculumConstraints;
-import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -17,10 +24,11 @@ import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import java.util.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import java.util.Base64;
 
 /** Gemini adapter that delegates content instructions and schema to the selected game strategy. */
 @Component
@@ -28,15 +36,6 @@ import java.util.Base64;
 public class GeminiGameContentGenerator implements GameContentGenerator {
 
     private static final tools.jackson.databind.json.JsonMapper SCHEMA_MAPPER = new tools.jackson.databind.json.JsonMapper();
-
-    private static final String STUDENT_TEXT_PUNCTUATION_GUIDANCE = """
-            QUY TẮC DẤU CÂU CHO CÂU HỎI VÀ GIỌNG ĐỌC:
-            Với các trường text, questionText, sentenceTemplate và audioText, nếu nội dung là câu hỏi, câu hướng dẫn,
-            hoặc câu nói hoàn chỉnh thì phải đặt dấu kết thúc phù hợp với ngữ điệu: dấu hỏi (?) cho câu hỏi, dấu chấm (.)
-            cho câu kể/hướng dẫn, hoặc dấu chấm than (!) khi nội dung thực sự cần nhấn mạnh. Ví dụ: "Hãy lật thẻ để tìm các cặp phép tính và kết quả đúng trong phạm vi 100." Giữ dấu câu ở cuối câu, kể cả câu có chỗ trống.
-            Không thêm dấu câu vào từ vựng đứng riêng, nhãn, phương án trả lời, tên thẻ, hoặc biểu thức toán học chỉ để
-            làm đẹp. Không đổi nội dung, đáp án, cấu trúc DSL hay luật chơi; chỉ trình bày dấu câu phù hợp.
-            """;
 
     private static final String VERIFIED_ARITHMETIC_FORMAT = """
             ĐỊNH DẠNG KIỂM CHỨNG CHO PHÉP CỘNG/TRỪ CỦA PILOT:
@@ -47,14 +46,68 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
             không được đổi chủ đề, kỹ năng, giới hạn số hoặc thêm phép tính.
             """;
 
+    private static final int SHORTLIST_SIZE = 12;
+
+    private static final String STUDENT_TEXT_PUNCTUATION_GUIDANCE = """
+            QUY TẮC DẤU CÂU CHO CÂU HỎI VÀ GIỌNG ĐỌC:
+            Với các trường text, questionText, sentenceTemplate và audioText, nếu nội dung là câu hỏi, câu hướng dẫn,
+            hoặc câu nói hoàn chỉnh thì phải đặt dấu kết thúc phù hợp với ngữ điệu: dấu hỏi (?) cho câu hỏi, dấu chấm (.)
+            cho câu kể/hướng dẫn, hoặc dấu chấm than (!) khi nội dung thực sự cần nhấn mạnh. Ví dụ: "Hãy lật thẻ để tìm
+            các cặp phép tính và kết quả đúng trong phạm vi 100." Giữ dấu câu ở cuối câu, kể cả câu có chỗ trống.
+            Không thêm dấu câu vào từ vựng đứng riêng, nhãn, phương án trả lời, tên thẻ, hoặc biểu thức toán học chỉ để
+            làm đẹp. Không đổi nội dung, đáp án, cấu trúc DSL hay luật chơi; chỉ trình bày dấu câu phù hợp.
+            """;
+
+    private static final String ASSET_RULES = """
+            HÌNH MINH HỌA (trường asset): ở mỗi chỗ có visualPrompt, đặt asset là id trong DANH MỤC HÌNH dưới đây khi có
+            hình đúng NGHĨA của chữ trong ngữ cảnh (ví dụ "bóng bay" là fluent-object-balloon, không phải quả bóng đá).
+            Không có hình đúng nghĩa thì BỎ HẲN trường asset (không để chuỗi rỗng); TUYỆT ĐỐI không chọn hình khác nghĩa chỉ để có hình
+            (ví dụ "bàn" không phải quyển sách, "khăn" không phải cái ô, từ vô nghĩa không có hình). Chỉ dùng đúng id có trong danh mục.
+            Câu đếm số lượng ("3 con vịt"): asset là hình VẬT được đếm (con vịt), KHÔNG chọn hình thẻ số vì thẻ số lộ đáp án và
+            không có gì để đếm.
+            Mô tả hình (visualPrompt) của câu đếm viết bằng chữ số, ví dụ "3 con vịt" (không viết "ba con vịt"), và số đó phải
+            bằng đáp án đúng.
+            DANH MỤC HÌNH (id: tên):
+            """;
+
     private final ChatModel model;
+    private final ChatModel regenerationModel;
     private final GameContentStrategyRegistry strategies;
+    private final AiConfigService aiConfigService;
+    private final GameAssetCatalog assets;
     private final CurriculumTopicParser topicParser = new CurriculumTopicParser();
+    private final AssetRetriever retriever;
+    private final boolean shortlistEnabled;
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog;
 
     public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
-            GameContentStrategyRegistry strategies) {
+            GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
+            boolean shortlistEnabled, com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        this(model, model, strategies, assets, retriever, shortlistEnabled, notoCatalog, null);
+    }
+
+    @Autowired
+    public GeminiGameContentGenerator(@Qualifier("gameGenerationChatModel") ChatModel model,
+            @Qualifier("questionRegenerationChatModel") ChatModel regenerationModel, GameContentStrategyRegistry strategies, GameAssetCatalog assets, AssetRetriever retriever,
+            @Value("${app.assets.shortlist.enabled:false}") boolean shortlistEnabled,
+            com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog,
+            @Autowired(required = false) AiConfigService aiConfigService) {
+        this.notoCatalog = notoCatalog;
         this.model = model;
+        this.regenerationModel = regenerationModel;
         this.strategies = strategies;
+        this.assets = assets;
+        this.retriever = retriever;
+        this.shortlistEnabled = shortlistEnabled;
+        this.aiConfigService = aiConfigService;
+    }
+
+    /** Hình có từ khóa trong yêu cầu của giáo viên, đưa lên đầu danh mục để AI chọn đúng hình (thử nghiệm, sau cờ). */
+    private String shortlist(String topic) {
+        if (!shortlistEnabled) return "";
+        String lines = retriever.match(topic).stream().limit(SHORTLIST_SIZE).map(match -> assets.find(match.assetId()))
+                .filter(Objects::nonNull).map(entry -> entry.id() + ": " + entry.label()).collect(Collectors.joining("\n"));
+        return lines.isEmpty() ? "" : "HÌNH LIÊN QUAN TỚI YÊU CẦU (ưu tiên chọn nếu đúng nghĩa):\n" + lines + "\n\n";
     }
 
     @Override
@@ -75,7 +128,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                     attempt.curriculumContext());
         }
         if (attempt.oddImageMode()) {
-            String catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog().assets().stream()
+            String catalog = notoCatalog.assets().stream()
                     .map(asset -> asset.id() + " | " + asset.label() + " | " + asset.group())
                     .collect(java.util.stream.Collectors.joining("\n"));
             systemPrompt += "\n\n" + """
@@ -87,7 +140,7 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                     """ + catalog;
         }
         if (attempt.avmCatalogMode()) {
-            String catalog = new com.aigameplatform.backend.service.media.NotoEmojiCatalog().assets().stream()
+            String catalog = notoCatalog.assets().stream()
                     .map(asset -> asset.id() + " | " + asset.label() + " | " + asset.group())
                     .collect(java.util.stream.Collectors.joining("\n"));
             systemPrompt += "\n\n" + """
@@ -97,6 +150,12 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
                     Nếu catalog không hỗ trợ chủ đề, không bịa mã hoặc tự đổi chủ đề.
                     CATALOG (mã | nhãn đã biên tập | nhóm):
                     """ + catalog;
+        }
+        // Chỉ loại game có trường asset trong schema đầu ra mới cần danh mục (tránh prompt dài vô ích); các chế độ hình
+        // ảnh có danh mục/ảnh riêng nên không thêm, tránh hai chỉ dẫn chọn hình mâu thuẫn nhau.
+        boolean imageMode = attempt.imageInput() != null || attempt.oddImageMode() || attempt.avmCatalogMode();
+        if (strategy.hasAssetField() && !imageMode) {
+            systemPrompt += "\n\n" + ASSET_RULES + shortlist(attempt.topic()) + assets.promptList();
         }
         String arithmeticInstruction = explicitArithmeticInstruction(attempt);
         if (arithmeticInstruction != null) systemPrompt += "\n\n" + arithmeticInstruction;
@@ -116,13 +175,26 @@ public class GeminiGameContentGenerator implements GameContentGenerator {
         ResponseFormat schemaFormat = ResponseFormat.builder().type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder().rootElement(JsonRawSchema.builder()
                         .schema(decoderSchema(attempt.structuredSchema())).build()).build()).build();
-        ChatRequestParameters parameters = ChatRequestParameters.builder().responseFormat(schemaFormat).build();
+        var paramBuilder = ChatRequestParameters.builder().responseFormat(schemaFormat);
+        if (aiConfigService != null) {
+            AiConfigVersionDto activeConfig = aiConfigService.getActiveConfig();
+            if (activeConfig != null) {
+                systemPrompt = activeConfig.systemPrompt() + "\n\n" + systemPrompt;
+                if (activeConfig.temperature() != null) {
+                    paramBuilder.temperature(activeConfig.temperature());
+                }
+                if (activeConfig.maxTokens() != null) {
+                    paramBuilder.maxOutputTokens(activeConfig.maxTokens());
+                }
+            }
+        }
+        ChatRequestParameters parameters = paramBuilder.build();
         try {
             UserMessage userMessage = attempt.imageInput() == null ? UserMessage.from(userPrompt)
                     : UserMessage.from(userPrompt, ImageContent.from(
                             Base64.getEncoder().encodeToString(attempt.imageInput().sceneImage().bytes()),
                             attempt.imageInput().sceneImage().mediaType()));
-            var response = model.chat(ChatRequest.builder()
+            var response = (singleQuestion ? regenerationModel : model).chat(ChatRequest.builder()
                     .messages(SystemMessage.from(systemPrompt), userMessage)
                     .parameters(parameters).build());
             if (response == null || response.aiMessage() == null || response.aiMessage().text() == null) {

@@ -25,12 +25,14 @@ import com.aigameplatform.backend.entity.session.Participant;
 import com.aigameplatform.backend.entity.session.SelfSession;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.SelfSessionRepository;
+import com.aigameplatform.backend.service.narration.GameNarrationService;
 import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,9 +46,11 @@ class StudentPlayServiceTest {
     private final com.aigameplatform.backend.repository.GameSessionRepository liveSessions = mock(com.aigameplatform.backend.repository.GameSessionRepository.class);
     private final com.aigameplatform.backend.repository.ParticipantRepository participantRepo = mock(com.aigameplatform.backend.repository.ParticipantRepository.class);
     private final GameContentStrategyRegistry strategies = mock(GameContentStrategyRegistry.class);
+    private final GameNarrationService narration = mock(GameNarrationService.class);
     private final JsonMapper mapper = JsonMapper.builder().build();
     private final GameContentStrategy strategy = mock(GameContentStrategy.class);
-    private final StudentPlayService service = StudentPlayTestSupport.service(games, sessions, liveSessions, participantRepo, strategies, mapper);
+    private final StudentPlayService service = StudentPlayTestSupport.service(games, sessions, liveSessions,
+            participantRepo, strategies, mapper, narration);
     private SelfSession session;
     private Participant participant;
     private VisualClozeQuestion question;
@@ -54,6 +58,7 @@ class StudentPlayServiceTest {
     @BeforeEach
     void setUp() {
         when(strategies.get(GameType.VISUAL_CLOZE)).thenReturn(strategy);
+        when(narration.signedUrlsForStudentPlay("game")).thenReturn(Map.of());
         question = new VisualClozeQuestion();
         question.setId("db-question");
         question.setItemIndex(0);
@@ -93,7 +98,7 @@ class StudentPlayServiceTest {
         when(sessions.findByIdForUpdate("session")).thenReturn(java.util.Optional.of(session));
         when(sessions.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var qdsl = new VisualClozeQuestionDsl("q1", 30, 100, null, null, null, null, null, null, null,
+        var qdsl = new VisualClozeQuestionDsl("q1", 30, 100, null, "/mock/q1.wav", null, null, null, null, null,
                 "Find the cat", "https://scene.example/scene.png", 1000, 800,
                 List.of(new VisualClozeBlankDsl("blank1", 200, 200, "cat")),
                 List.of(new VisualClozeImageOptionDsl("cat", "cat", "https://images.example/cat.png"),
@@ -112,6 +117,27 @@ class StudentPlayServiceTest {
         assertThat(body.get("questions").get(0).get("blanks").get(0).get("id").asString()).startsWith("x");
         assertThat(body.get("questions").get(0).get("options").get(0).get("id").asString()).startsWith("x");
         assertThat(body.get("answeredQuestionIds").isArray()).isTrue();
+    }
+
+    @Test
+    void studentQuestionIncludesTheSavedNarrationUrl() {
+        when(narration.signedUrlsForStudentPlay("game"))
+                .thenReturn(Map.of("q1", "https://storage.example/memory-card-question.mp3"));
+
+        var body = service.questions("session", "participant");
+
+        assertThat(body.get("questions").get(0).get("audioUrl").asString())
+                .isEqualTo("https://storage.example/memory-card-question.mp3");
+    }
+
+    @Test
+    void narrationSigningFailureDoesNotBlockStudentQuestions() {
+        when(narration.signedUrlsForStudentPlay("game")).thenThrow(new IllegalStateException("Storage unavailable"));
+
+        var body = service.questions("session", "participant");
+
+        assertThat(body.get("questions").get(0).get("audioUrl").isNull()).isTrue();
+        assertThat(body.get("questions").get(0).get("options").size()).isEqualTo(2);
     }
 
     @Test

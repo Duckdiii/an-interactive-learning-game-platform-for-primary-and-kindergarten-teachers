@@ -26,6 +26,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class GameNarrationService {
     private static final int MAX_GAME_FILES = 20;
     private static final int MAX_GAME_BYTES = 5 * 1024 * 1024;
+    private static final int SIGNED_URL_TTL_SECONDS = 600;
+    private static final int STUDENT_PLAY_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
     private final GameRepository games;
     private final GameNarrationAssetRepository assets;
     private final ViettelTtsClient tts;
@@ -51,7 +53,7 @@ public class GameNarrationService {
         String text = question.getAudioText();
         if (text == null || text.isBlank())
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "This question has no narration text");
-        if (question.getAudioUrl() != null && !question.getAudioUrl().isBlank())
+        if (hasSourceAudio(question.getAudioUrl()))
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "This question already uses source audio");
         String normalizedText = Normalizer.normalize(text.trim(), Normalizer.Form.NFC);
         if (normalizedText.codePointCount(0, normalizedText.length()) > ViettelTtsClient.MAX_TEXT_CODEPOINTS)
@@ -116,14 +118,23 @@ public class GameNarrationService {
 
     @Transactional(readOnly = true)
     public Map<String, String> signedUrls(String gameId) {
+        return signedUrls(gameId, SIGNED_URL_TTL_SECONDS);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, String> signedUrlsForStudentPlay(String gameId) {
+        return signedUrls(gameId, STUDENT_PLAY_SIGNED_URL_TTL_SECONDS);
+    }
+
+    private Map<String, String> signedUrls(String gameId, int expiresInSeconds) {
         Map<String, String> result = new LinkedHashMap<>();
         for (GameNarrationAsset asset : assets.findAllByGame_Id(gameId)) {
             String audioText = asset.getQuestion().getAudioText();
             if (audioText == null || audioText.isBlank()
                     || !asset.getContentSha256().equals(fingerprint(asset.getGame(), audioText))) continue;
             try {
-                result.put("q" + (asset.getQuestion().getItemIndex() + 1),
-                        storage.createSignedUrl(asset.getStoragePath(), 600));
+                result.put("q" + (asset.getQuestion().getItemIndex() + 1), storage.createSignedUrl(
+                        asset.getStoragePath(), expiresInSeconds));
             } catch (RuntimeException ignored) {
                 // Audio is optional. A signing or Storage outage must leave the question playable.
             }
@@ -157,6 +168,14 @@ public class GameNarrationService {
     private static ApiException narrationUnavailable(RuntimeException cause) {
         return new ApiException(ErrorCode.NARRATION_UNAVAILABLE,
                 "Chưa tạo hoặc tải được bản đọc lúc này. Hãy thử lại sau.", cause);
+    }
+
+    public static boolean isMockAudioUrl(String audioUrl) {
+        return audioUrl != null && audioUrl.startsWith("/mock/");
+    }
+
+    private static boolean hasSourceAudio(String audioUrl) {
+        return audioUrl != null && !audioUrl.isBlank() && !isMockAudioUrl(audioUrl);
     }
 
     private static int questionIndex(String id, int questionCount) {

@@ -19,6 +19,7 @@ export interface PlayTestProps {
   onResult: (isCorrect: boolean) => void
   /** Audio đã được PlayTest quản lý để tránh trình duyệt đọc chồng lên MP3 TTS. */
   playQuestionAudio?: () => void
+  playPairFeedback?: (correct: boolean) => void
 }
 
 // Bảng loại game đến bộ chơi thử: Hỗ trợ đầy đủ 10/10 cơ chế game trong Workspace Editor

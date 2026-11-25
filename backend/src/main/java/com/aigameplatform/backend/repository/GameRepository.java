@@ -14,6 +14,10 @@ public interface GameRepository extends JpaRepository<Game, String> {
     Optional<Game> findByShareCode(String shareCode);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select g from Game g where g.id = :gameId and g.author.id = :authorId")
+    Optional<Game> findByIdAndAuthor_IdForUpdate(@Param("gameId") String gameId, @Param("authorId") String authorId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select g from Game g where g.id = :id")
     Optional<Game> findByIdForUpdate(@Param("id") String id);
 
