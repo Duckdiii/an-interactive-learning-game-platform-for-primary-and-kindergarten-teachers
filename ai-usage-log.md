@@ -55,6 +55,8 @@
 
 | 289 | 2026-11-25 | Nguyễn Đức Duy | GPT-6 (Codex) | Sửa - refactor | PR #96 — luồng narration, editor, kiểm thử tự luyện, FEATURE-MAP và OpenAPI | **Bối cảnh:** CI và review của PR tích hợp năm FR còn lỗi.<br>**Mục tiêu:** hoàn thiện bản sửa và kiểm tra lại.<br>**Ràng buộc:** giữ luật chơi của 10 loại game.<br>**Cách làm việc:** đọc session.md, đối chiếu với main và log CI, sửa transaction, editor, test và hợp đồng API.<br>**Kiểm chứng:** chạy kiểm tra frontend, backend, migration và tài liệu. | TODO | Chờ sinh viên review bản sửa. | Codex chạy build frontend, lint, depcruise, kiểm tra Flyway, Gitleaks và đối chiếu 75 endpoint. Maven 1.573 đạt, 34 bỏ qua, JaCoCo 86,93%. Suite xuất bản frontend đạt 13/13. Bộ test script đạt 334, bỏ qua 4. Test Supabase thật trên V31/V32 chưa chạy. | Review tự động dựa trên commit cũ báo trùng V23 và mất cấu hình Gemini. Đã kiểm tra migration và diff với main trước khi kết luận. |
 
+| 290 | 2026-11-25 | Nguyễn Đức Duy | GPT-6 (Codex) | Sửa - refactor | Test tự luyện — `backend/src/test/resources/dsl-examples/odd-one-out-image.json` | **Bối cảnh:** CI thiếu fixture hình ảnh.<br>**Mục tiêu:** Chạy được kiểm thử chấm điểm và ẩn đáp án trên checkout sạch.<br>**Ràng buộc:** Giữ luật chơi.<br>**Cách làm:** Bổ sung fixture local bị bỏ sót vào Git.<br>**Kiểm chứng:** Đối chiếu danh sách 10 fixture với cây commit. | TODO | Chờ sinh viên review. | Codex kiểm tra Git và đối chiếu log Maven local với CI. | Lần trước chỉ stage file đang được theo dõi nên bỏ sót fixture mới, làm hai test trên CI lỗi. |
+
 ## Case study lỗi / ảo giác của AI
 
 Chỉ điền khi gặp trường hợp thật. Sao chép khung dưới đây cho mỗi case.
