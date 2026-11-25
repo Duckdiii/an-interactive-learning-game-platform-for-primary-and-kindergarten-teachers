@@ -1,11 +1,12 @@
-// Kiểm liên kết của kho tài liệu: [[...]] trỏ tới file có thật trong docs/, đường dẫn `docs/...` tồn tại, mọi trang wiki có trong mục lục.
+// Kiểm liên kết của kho tài liệu: [[...]] trỏ tới file có thật trong docs/, đường dẫn `docs/...` tồn tại, mọi trang wiki có trong mục lục. Kiểm cả liên kết Markdown nội bộ trên tuyến tra cứu.
 // Dùng: node scripts/wiki/check-links.mjs [gốc-repo]
-import { readFileSync, readdirSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const INDEX = "index.md";
 const WIKI_PREFIX = "wiki/";
+const NAVIGATION = ["AGENTS.md", "CLAUDE.md", "README.md", "docs/README.md", "docs/FEATURE-MAP.md", "docs/srs/README.md"];
 // Mẫu chung như `docs/srs/UC-xx.md` không phải đường dẫn thật.
 const isPattern = (path) => /-xx\b|[<*]/.test(path);
 const stripCode = (text) => text.replace(/`[^`\n]*`/g, "");
@@ -58,6 +59,26 @@ export function checkWiki(pages, entries) {
   return errors;
 }
 
+// Tuyến tra cứu dùng liên kết nội tuyến, với <...> cho đường dẫn có dấu cách hoặc ngoặc.
+function localLinks(text) {
+  return [...stripCode(text).matchAll(/\]\((?:<([^>\n]+)>|([^\s)]+))\)/g)]
+    .map((match) => match[1] ?? match[2])
+    .filter((target) => !/^(?:[a-z][a-z\d+.-]*:|#|\/\/)/i.test(target));
+}
+
+function linkExists(root, source, target) {
+  let pathname;
+  try {
+    pathname = decodeURIComponent(target.split(/[?#]/, 1)[0]);
+  } catch {
+    return false;
+  }
+  if (isAbsolute(pathname)) return false;
+  const dest = resolve(root, dirname(source), pathname);
+  const fromRoot = relative(root, dest);
+  return fromRoot !== ".." && !fromRoot.startsWith(`..${sep}`) && !isAbsolute(fromRoot) && existsSync(dest);
+}
+
 function listEntries(dir, prefix = "") {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     if (entry.name.startsWith(".")) return [];
@@ -73,7 +94,18 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const wikiDir = join(root, "docs", "wiki");
   const pages = new Map(readdirSync(wikiDir).filter((n) => n.endsWith(".md")).map((n) => [n, readFileSync(join(wikiDir, n), "utf8")]));
   const errors = checkWiki(pages, listEntries(join(root, "docs")));
-  const checked = [...pages.values()].reduce((n, text) => n + wikiLinks(text).length + docPaths(text).length, 0);
+  let checked = [...pages.values()].reduce((n, text) => n + wikiLinks(text).length + docPaths(text).length, 0);
+  for (const file of [...NAVIGATION, ...[...pages.keys()].map((name) => `docs/wiki/${name}`)]) {
+    const source = join(root, file);
+    if (!existsSync(source)) {
+      errors.push(`thiếu tài liệu điều hướng ${file}`);
+      continue;
+    }
+    for (const target of localLinks(readFileSync(source, "utf8"))) {
+      checked++;
+      if (!linkExists(root, file, target)) errors.push(`${file}: liên kết Markdown hỏng (${target})`);
+    }
+  }
   const total = `Tổng: ${pages.size} trang, ${checked} liên kết và đường dẫn đã kiểm, ${errors.length} lỗi.`;
 
   if (errors.length > 0) {

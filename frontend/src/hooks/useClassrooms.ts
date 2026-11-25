@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createClassroom, deleteClassroom, fetchClassrooms } from '../api/classroomsApi'
+import { createClassroom, deleteClassroom, fetchClassrooms, updateClassroom } from '../api/classroomsApi'
 import type { ClassroomInput } from '../types/classroom.types'
 import { useTeacherIdentity } from './useTeacherIdentity'
 
@@ -24,6 +24,10 @@ export function useClassroomActions() {
 
   return {
     create: useMutation({ mutationFn: (input: ClassroomInput) => createClassroom(input), onSuccess: refresh }),
+    update: useMutation({
+      mutationFn: ({ classroomId, input }: { classroomId: string; input: ClassroomInput }) => updateClassroom(classroomId, input),
+      onSuccess: refresh,
+    }),
     remove: useMutation({ mutationFn: (classroomId: string) => deleteClassroom(classroomId), onSuccess: refresh }),
   }
 }

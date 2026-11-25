@@ -119,6 +119,9 @@ public class CpfPromptBuilder {
         // Controller đã chặn idea > 2000 ký tự (openapi); cắt thêm ở đây để mỗi lần thử không gửi lặp chuỗi quá dài.
         if (idea.length() > MAX_IDEA_LENGTH) idea = idea.substring(0, MAX_IDEA_LENGTH);
         String request = "YÊU CẦU CỦA GIÁO VIÊN (dữ liệu):\n<<<\n" + idea + "\n>>>";
+        if (attempt.classroomContext() != null) {
+            request += "\n\n" + PromptData.classroomContext(attempt.classroomContext());
+        }
         if (!attempt.isRetry()) {
             return attempt.revision() != null
                     ? request + "\n\n" + attempt.revision().promptSection() + "\nChỉ trả về JSON."

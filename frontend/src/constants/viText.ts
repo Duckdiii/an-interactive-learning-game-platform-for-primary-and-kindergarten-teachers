@@ -44,6 +44,7 @@ export const viText = {
     createGame: 'Tạo game mới',
     results: 'Kết quả',
     classrooms: 'Lớp học',
+    teacherProfile: 'Hồ sơ của tôi',
   },
 
   auth: {

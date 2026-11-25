@@ -12,6 +12,7 @@ const CreateGamePage = lazy(() => import('./pages/CreateGamePage'))
 const MyGamesPage = lazy(() => import('./pages/MyGamesPage'))
 const ResultsPage = lazy(() => import('./pages/ResultsPage'))
 const ClassroomsPage = lazy(() => import('./pages/ClassroomsPage'))
+const TeacherProfilePage = lazy(() => import('./pages/TeacherProfilePage'))
 const WorkspaceEditor = lazy(() => import('./pages/WorkspaceEditor'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
@@ -120,6 +121,7 @@ function App() {
           <Route path={ROUTES.workspaceEditor} element={<WorkspaceEditor />} />
           <Route path={ROUTES.results} element={<ResultsPage />} />
           <Route path={ROUTES.classrooms} element={<ClassroomsPage />} />
+          <Route path={ROUTES.teacherProfile} element={<TeacherProfilePage />} />
         </Route>
 
         {/* Phân hệ Quản trị viên (Admin Portal - FR-12, FR-13, FR-14) */}

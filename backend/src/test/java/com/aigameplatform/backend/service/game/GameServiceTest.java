@@ -25,6 +25,7 @@ import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
+import com.aigameplatform.backend.service.classroom.ClassroomService;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
 import com.aigameplatform.backend.service.generation.GenerationResult;
 import com.aigameplatform.backend.service.lesson.GameInputGuard;
@@ -56,6 +57,7 @@ class GameServiceTest {
             mock(com.aigameplatform.backend.repository.GameSessionRepository.class);
     private final com.aigameplatform.backend.repository.EditLogRepository editLogs =
             mock(com.aigameplatform.backend.repository.EditLogRepository.class);
+    private final ClassroomService classrooms = mock(ClassroomService.class);
     private final GameInputGuard inputGuard = mock(GameInputGuard.class);
     private GameService service;
 
@@ -74,7 +76,7 @@ class GameServiceTest {
         when(teachers.getReferenceById(anyString())).thenAnswer(inv -> teacher(inv.getArgument(0)));
         when(curriculumReviews.saveEditedGame(any(), anyString())).thenAnswer(inv -> inv.getArgument(0));
         service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews, catalogs, new java.util.Random(7), null, sessions, null, editLogs, inputGuard);
+                curriculumReviews, catalogs, new java.util.Random(7), null, sessions, null, editLogs, classrooms, inputGuard);
     }
 
     private static Teacher teacher(String id) {
@@ -121,6 +123,29 @@ class GameServiceTest {
     }
 
     @Test
+    void classroomContextDoesNotReplaceTheTopicAndSelectedVoiceReachesAudio() {
+        var audio = mock(com.aigameplatform.backend.service.media.GameAudioEnricher.class);
+        var audioProvider = new org.springframework.beans.factory.support.StaticListableBeanFactory();
+        audioProvider.addBean("testAudio", audio);
+        service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction(),
+                curriculumReviews, catalogs, new java.util.Random(7), audioProvider.getBeanProvider(
+                        com.aigameplatform.backend.service.media.GameAudioEnricher.class), sessions, null, editLogs, classrooms, inputGuard);
+        var request = new GenerateGameRequest(Subject.MATH, GradeLevel.GRADE_1, "Đếm số con mèo", false, GameType.QUIZ,
+                null, null, null, MAPPER.createObjectNode().put("gender", "MALE"), null, "class-1");
+        String context = "Phạm vi đã học: Đếm đến 5";
+        when(classrooms.generationContext(OWNER, "class-1", GradeLevel.GRADE_1)).thenReturn(context);
+        when(dsl.generate(GameType.QUIZ, "Đếm số con mèo", request, context)).thenReturn(
+                new GameContentHandler.GeneratedContent("Đếm mèo", "1.0.0", List.of(), null));
+
+        service.generate(OWNER, request);
+
+        var order = org.mockito.Mockito.inOrder(inputGuard, dsl);
+        order.verify(inputGuard).requireSafe("Đếm số con mèo", null);
+        order.verify(dsl).generate(GameType.QUIZ, "Đếm số con mèo", request, context);
+        verify(audio).enrichAllQuestionsWithAudio(List.of(), com.aigameplatform.backend.dto.media.SpeechVoice.MALE);
+    }
+
+    @Test
     void customGameNeedsAnIdea() {
         assertThatThrownBy(() -> service.generate(OWNER, request(null, true, GameType.CUSTOM)))
                 .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR));
@@ -144,7 +169,7 @@ class GameServiceTest {
     void inputGuardIsRequiredAtConstruction() {
         assertThatThrownBy(() -> new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter,
                 TransactionOperations.withoutTransaction(), curriculumReviews, catalogs, new java.util.Random(7),
-                null, sessions, null, editLogs, null))
+                null, sessions, null, editLogs, classrooms, null))
                 .isInstanceOf(NullPointerException.class);
     }
 
@@ -379,7 +404,7 @@ class GameServiceTest {
     void aFailedRevisionFreesTheTeachersSlotForTheNextOne() {
         var realLimiter = new AiRequestRateLimiter(java.time.Clock.systemUTC());
         var withLimiter = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, realLimiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews, catalogs, new java.util.Random(7), null, sessions, null, editLogs, inputGuard);
+                curriculumReviews, catalogs, new java.util.Random(7), null, sessions, null, editLogs, classrooms, inputGuard);
         when(games.findById("g1")).thenReturn(Optional.of(game("g1", OWNER, GameType.QUIZ)));
         when(dsl.revise(any(), any(), any())).thenThrow(new ApiException(ErrorCode.UNSAFE_CONTENT, "x"))
                 .thenReturn(MAPPER.createObjectNode().put("gameType", "QUIZ"));

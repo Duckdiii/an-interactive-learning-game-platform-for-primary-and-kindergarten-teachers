@@ -38,6 +38,8 @@ tags:
       Toàn bộ nhóm này **chưa cài** ở Backend (`x-status: planned`).
   - name: Media
     description: Tải lên ảnh/âm thanh riêng cho thẻ câu hỏi (UC-05).
+  - name: TeacherProfile
+    description: Hồ sơ giảng dạy và gợi ý của giáo viên (UC-16).
   - name: Classrooms
     description: 'Lớp học của giáo viên (UC-16, phần lớp): thêm, sửa, xóa, dùng để lọc thống kê (UC-18).'
   - name: Sessions
@@ -81,7 +83,8 @@ paths:
         Tài khoản đăng ký luôn là `ROLE_TEACHER`. Tài khoản quản trị viên do hệ thống
         cấp sẵn từ biến môi trường `ADMIN_EMAIL` và `ADMIN_PASSWORD`, không đăng ký qua API này.
 
-        Phần mở rộng chưa cài ở Backend: `school` và `acceptedPolicy` (UC-01 4c).
+        Tên trường tùy chọn được dùng để điền hồ sơ giảng dạy (UC-16). Tên trường không an toàn trả 422.
+        Phần mở rộng chưa cài ở Backend là `acceptedPolicy` (UC-01 4c).
       x-status: extended-pending
       security: []
       requestBody:
@@ -104,6 +107,8 @@ paths:
                     $ref: '#/components/schemas/RegisterResult'
         '400':
           $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -395,6 +400,8 @@ paths:
         Giáo án được xử lý riêng qua `POST /games/prepare`; chỉ gửi ý tưởng đã được giáo viên xem và xác nhận.
         `metadata.topic` và `metadata.title` do hệ thống rút ra từ ý tưởng.
 
+        Khi có `voice.gender`, dùng giọng TTS nam hoặc nữ nếu khả dụng. Vùng giọng đọc chưa áp dụng.
+
         Kết quả là `GameResponse` với `status: DRAFT` (đã lưu vào kho học liệu), đã qua pipeline kiểm tra hiện có,
         media được gắn khi dịch vụ tương ứng khả dụng.
 
@@ -413,7 +420,7 @@ paths:
         nằm ngoài 10 loại (`suggest-game-types` trả `CUSTOM`); client gửi `gameType: CUSTOM` khi giáo viên
         chấp nhận đề xuất đó, giao diện không có `CUSTOM` trong danh sách chọn tay. Backend không phân
         biệt hai đường này. Với `CUSTOM`, `idea` là bắt buộc (thiếu thì 400).
-      x-status: extended-pending  # JSON đồng bộ đã có; SSE, giọng đọc và giới hạn 429 còn pending
+      x-status: extended-pending  # JSON đồng bộ đã có; SSE và chọn vùng giọng đọc còn pending
       security:
         - bearerAuth: []
       requestBody:
@@ -1372,6 +1379,192 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /teacher/profile:
+    get:
+      tags: [TeacherProfile]
+      operationId: getTeacherProfile
+      summary: Xem hồ sơ giảng dạy
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thao tác thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/TeacherProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [TeacherProfile]
+      operationId: saveTeacherProfile
+      summary: Lưu hồ sơ giảng dạy
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeacherProfile'
+      responses:
+        '200':
+          description: Thao tác thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/TeacherProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [TeacherProfile]
+      operationId: deleteTeacherProfile
+      summary: Xóa thông tin giảng dạy và gợi ý đã ghi nhớ
+      description: Không xóa tài khoản, trường lúc đăng ký, lớp học hay trò chơi.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Đã xóa.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /teacher/suggestions:
+    get:
+      tags: [TeacherProfile]
+      operationId: listTeacherSuggestions
+      summary: Xem gợi ý đã ghi nhớ
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thao tác thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SavedSuggestion'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [TeacherProfile]
+      operationId: rememberTeacherSuggestion
+      summary: Chủ động ghi nhớ một chủ đề
+      description: Tối đa 20 chủ đề mỗi giáo viên. Ghi nhớ lại cùng nội dung trả về mục hiện có.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RememberSuggestion'
+      responses:
+        '200':
+          description: Thao tác thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { const: true }
+                  data:
+                    $ref: '#/components/schemas/SavedSuggestion'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [TeacherProfile]
+      operationId: clearTeacherSuggestions
+      summary: Xóa tất cả gợi ý đã ghi nhớ
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Đã xóa.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /teacher/suggestions/{suggestionId}:
+    parameters:
+      - name: suggestionId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    delete:
+      tags: [TeacherProfile]
+      operationId: deleteTeacherSuggestion
+      summary: Xóa một gợi ý đã ghi nhớ
+      description: Chỉ xóa gợi ý của giáo viên hiện tại. Mục đã xóa hoặc không thuộc giáo viên cũng trả 204.
+      x-status: implemented
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Đã xóa.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /classrooms:
     get:
       tags: [Classrooms]
@@ -1445,7 +1638,9 @@ paths:
       tags: [Classrooms]
       operationId: updateClassroom
       summary: Sửa lớp học
-      description: Lớp của giáo viên khác trả `404` như lớp không tồn tại.
+      description: |
+        Lớp của giáo viên khác trả `404` như lớp không tồn tại. Bỏ qua hoặc truyền null
+        cho learningProfile để giữ dữ liệu hiện có. Truyền object rỗng để xóa các trường của hồ sơ lớp.
       x-status: implemented
       security:
         - bearerAuth: []
@@ -3140,7 +3335,9 @@ components:
         school:
           type: string
           maxLength: 255
-          description: Tuỳ chọn (chờ nhóm xác nhận; entity `Teacher` chưa có trường này).
+          description: |
+            Tên trường tùy chọn, dùng để điền sẵn hồ sơ giảng dạy.
+            Vượt quá 255 ký tự trả 400 với lỗi ở trường school.
           examples: [Trường Tiểu học ABC]
         acceptedPolicy:
           type: boolean
@@ -3297,6 +3494,13 @@ components:
               visualPrompt: { type: string, minLength: 1, maxLength: 255 }
         voice:
           $ref: '#/components/schemas/Voice'
+        classroomId:
+          type: string
+          maxLength: 64
+          description: |
+            Mã lớp tùy chọn, dùng làm ngữ cảnh sư phạm bổ sung.
+            Khi truyền mã lớp, subject và gradeLevel vẫn bắt buộc. Thiếu gradeLevel trả 400 với lỗi ở trường gradeLevel.
+            Nếu lớp đã khai báo khối, gradeLevel phải khớp. Lớp của giáo viên khác trả 404.
         reviewFrom:
           type: object
           description: |
@@ -3817,6 +4021,11 @@ components:
         schoolName:
           type: [string, 'null']
           maxLength: 100
+        learningProfile:
+          description: Tùy chọn. Khi sửa lớp, bỏ trường này hoặc gửi null để giữ hồ sơ lớp hiện có.
+          oneOf:
+            - $ref: '#/components/schemas/ClassroomLearningProfile'
+            - type: 'null'
 
     Classroom:
       type: object
@@ -3830,6 +4039,52 @@ components:
           type: [string, 'null']
         schoolName:
           type: [string, 'null']
+        learningProfile:
+          $ref: '#/components/schemas/ClassroomLearningProfile'
+
+    ClassroomLearningProfile:
+      type: object
+      description: Chỉ mô tả chung về lớp. Không nhập dữ liệu cá nhân của học sinh.
+      properties:
+        gradeLevel:
+          oneOf:
+            - $ref: '#/components/schemas/GradeLevel'
+            - type: 'null'
+        studentCount:
+          type: [integer, 'null']
+          minimum: 1
+          maximum: 200
+        knowledgeScope: { type: [string, 'null'], maxLength: 250 }
+        characteristics: { type: [string, 'null'], maxLength: 250 }
+        favoriteTopics: { type: [string, 'null'], maxLength: 250 }
+
+    TeacherProfile:
+      type: object
+      properties:
+        school: { type: [string, 'null'], maxLength: 255 }
+        textbook: { type: [string, 'null'], maxLength: 100 }
+        voice: { type: [string, 'null'], enum: [FEMALE, MALE, null] }
+        subject:
+          oneOf:
+            - $ref: '#/components/schemas/Subject'
+            - type: 'null'
+        gradeLevel:
+          oneOf:
+            - $ref: '#/components/schemas/GradeLevel'
+            - type: 'null'
+
+    RememberSuggestion:
+      type: object
+      required: [topic]
+      properties:
+        topic: { type: string, minLength: 1, maxLength: 200 }
+
+    SavedSuggestion:
+      type: object
+      required: [id, topic]
+      properties:
+        id: { type: string, format: uuid }
+        topic: { type: string, minLength: 1, maxLength: 200 }
 
     CreateSessionResult:
       type: object

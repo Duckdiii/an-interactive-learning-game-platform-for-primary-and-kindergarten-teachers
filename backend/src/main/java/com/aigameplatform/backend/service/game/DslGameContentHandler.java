@@ -85,10 +85,17 @@ public class DslGameContentHandler implements GameContentHandler {
 
     @Override
     public GeneratedContent generate(GameType type, String idea, GenerateGameRequest input) {
+        return generate(type, idea, input, null);
+    }
+
+    @Override
+    public GeneratedContent generate(GameType type, String idea, GenerateGameRequest input, String classroomContext) {
         VisualClozeMode mode = input.effectiveMode();
         requireSupportedImageMode(type, mode, input);
-        GenerationResult result = generation.generateResult(type, new GameDslRequest(idea, input.subject(),
-                input.gradeLevel(), null, null, mode, input.sceneImageUrl(), input.optionImages()));
+        var request = new GameDslRequest(idea, input.subject(), input.gradeLevel(), null, null, mode,
+                input.sceneImageUrl(), input.optionImages());
+        GenerationResult result = classroomContext == null ? generation.generateResult(type, request)
+                : generation.generateWithClassroom(type, request, classroomContext);
         GameDsl dsl = result.game();
         return new GeneratedContent(dsl.metadata().title(), dsl.schemaVersion(), strategies.get(type).parseToQuestions(dsl),
                 PresentationDsl.toEntity(dsl.metadata().presentation()), result, dsl.metadata().topic(),

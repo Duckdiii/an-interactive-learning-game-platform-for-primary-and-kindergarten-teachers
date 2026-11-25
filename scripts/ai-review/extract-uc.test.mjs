@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractUc, declaredSection } from "./extract-uc.mjs";
@@ -72,8 +72,12 @@ test("chịu được CRLF và tiêu đề khác cấp", () => {
 });
 
 test("quy tắc FR-nn ↔ UC-nn khớp với bảng trong docs/srs/FR-summary.md", () => {
-  const rows = readFileSync(resolve(root, "docs", "srs", "FR-summary.md"), "utf8").split("\n").filter((l) => /^\| FR-\d{2} \|/.test(l));
-  assert.equal(rows.length, 15);
+  const srs = resolve(root, "docs", "srs");
+  const rows = readFileSync(resolve(srs, "FR-summary.md"), "utf8").split("\n").filter((l) => /^\| FR-\d{2} \|/.test(l));
+  const ids = rows.map((row) => row.split("|")[3].trim()).sort();
+  const files = readdirSync(srs).filter((name) => /^UC-\d{2}\.md$/.test(name)).map((name) => name.slice(0, -3)).sort();
+  assert.ok(files.length > 0);
+  assert.deepEqual(ids, files, "FR-summary phải có đúng một dòng cho mỗi file UC");
   for (const row of rows) {
     const cells = row.split("|").map((c) => c.trim());
     assert.equal(cells[1].replace("FR-", ""), cells[3].replace("UC-", ""), `FR/UC lệch: ${cells[1]} → ${cells[3]}`);

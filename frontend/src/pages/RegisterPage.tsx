@@ -16,6 +16,7 @@ import { parseApiError } from '../utils/apiError'
 
 interface RegisterForm {
   fullName: string
+  school: string
   email: string
   password: string
   confirmPassword: string
@@ -27,6 +28,7 @@ type FieldErrors = Partial<Record<FieldKey | 'form', string>>
 const FIELD_ORDER: ReadonlyArray<FieldKey> = [
   'fullName',
   'email',
+  'school',
   'password',
   'confirmPassword',
 ]
@@ -34,6 +36,7 @@ const FIELD_ORDER: ReadonlyArray<FieldKey> = [
 const initialForm: RegisterForm = {
   fullName: '',
   email: '',
+  school: '',
   password: '',
   confirmPassword: '',
 }
@@ -106,6 +109,7 @@ export default function RegisterPage() {
         fullName: form.fullName.trim(),
         email: form.email.trim(),
         password: form.password,
+        ...(form.school.trim() ? { school: form.school.trim() } : {}),
       })
       navigate(ROUTES.login, {
         replace: true,
@@ -122,7 +126,7 @@ export default function RegisterPage() {
       }
 
       if (Object.keys(knownFieldErrors).length === 0) {
-        knownFieldErrors.form = parsedError.message
+        knownFieldErrors.form = parsedError.code === 'UNSAFE_CONTENT' ? viText.classrooms.unsafe : parsedError.message
       }
 
       showErrors(knownFieldErrors)
@@ -132,7 +136,7 @@ export default function RegisterPage() {
   }
 
   const textField = (
-    field: 'fullName' | 'email',
+    field: 'fullName' | 'email' | 'school',
     label: string,
     autoComplete: string,
     placeholder: string,
@@ -144,6 +148,7 @@ export default function RegisterPage() {
         name={field}
         type={type}
         value={form[field]}
+        maxLength={field === 'school' ? 255 : undefined}
         onChange={(event) => updateField(field, event.target.value)}
         autoComplete={autoComplete}
         placeholder={placeholder}
@@ -172,6 +177,7 @@ export default function RegisterPage() {
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
         {textField('fullName', 'Họ và tên', 'name', 'Nguyễn Văn An', 'text')}
         {textField('email', 'Email', 'email', viText.auth.emailPlaceholder, 'email')}
+        {textField('school', 'Trường (không bắt buộc)', 'organization', 'Ví dụ Trường Tiểu học Hoa Mai', 'text')}
 
         <FormField
           id={fieldId('password')}

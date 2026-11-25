@@ -16,5 +16,12 @@ public record RegisterRequest(
         String email,
 
         @StrongPassword
-        String password) {
+        String password,
+
+        @Size(max = 255, message = "Tên trường tối đa 255 ký tự")
+        String school) {
+
+    public RegisterRequest(String fullName, String email, String password) {
+        this(fullName, email, password, null);
+    }
 }

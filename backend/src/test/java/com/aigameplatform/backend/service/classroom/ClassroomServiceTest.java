@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.aigameplatform.backend.dto.classroom.ClassroomRequest;
 import com.aigameplatform.backend.entity.Classroom;
 import com.aigameplatform.backend.entity.Teacher;
+import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.exception.UnsafeContentException;
@@ -130,6 +131,24 @@ class ClassroomServiceTest {
 
         assertThatThrownBy(() -> service.update("teacher-1", "c9", new ClassroomRequest("Lớp xấu", null, null)))
                 .isInstanceOfSatisfying(ApiException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND));
+    }
+
+    @Test
+    void generationContextDistinguishesMissingGradeFromMismatchedGrade() {
+        Classroom existing = classroom("c1", "1A");
+        existing.setGradeLevel(GradeLevel.GRADE_1);
+        when(classrooms.findByIdAndTeacherId("c1", "teacher-1")).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> service.generationContext("teacher-1", "c1", null))
+                .isInstanceOfSatisfying(ApiException.class, error -> {
+                    assertThat(error.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR);
+                    assertThat(error).hasMessage("Vui lòng chọn khối lớp");
+                });
+        assertThatThrownBy(() -> service.generationContext("teacher-1", "c1", GradeLevel.GRADE_2))
+                .isInstanceOfSatisfying(ApiException.class, error -> {
+                    assertThat(error.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR);
+                    assertThat(error).hasMessage("Khối lớp đã chọn không khớp với lớp học");
+                });
     }
 
     @Test

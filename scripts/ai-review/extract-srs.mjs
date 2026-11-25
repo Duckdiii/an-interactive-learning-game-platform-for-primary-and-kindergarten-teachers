@@ -1,11 +1,10 @@
-// Trích docs/SRS.docx thành các file Markdown nhỏ trong docs/srs/ để agent chỉ nạp phần cần dùng.
-// Dùng: node scripts/ai-review/extract-srs.mjs [đường-dẫn-docx] [thư-mục-ra]
+// Trích một bản SRS Word bên ngoài repo thành các file Markdown theo mục.
+// Dùng: node scripts/ai-review/extract-srs.mjs <đường-dẫn-docx> <thư-mục-ra>
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { docxToBlocks, blocksToMarkdown } from "./docx-to-markdown.mjs";
 
-export const WHOLE_DOCUMENTS = [["SRS.docx", "SRS-full.md"], ["Dinh_huong_de_tai.docx", "Dinh_huong_de_tai.md"]];
 const UC_HEADING = /^4\.2\.\d+\.\s.*\b(UC-\d{2})\b/;
 
 /** Cắt các khối thuộc một heading (đến heading cùng cấp hoặc cao hơn kế tiếp). */
@@ -66,8 +65,8 @@ function indexMarkdown(files) {
   return [
     "# SRS đã trích (dùng cho AI review)",
     "",
-    "> Sinh tự động từ `docs/SRS.docx` bằng `scripts/ai-review/extract-srs.mjs`. **Không sửa tay**: sửa `SRS.docx` rồi chạy lại script.",
-    "> Sơ đồ và ảnh trong SRS không chuyển sang chữ được, chỉ còn dòng `[hình ảnh]`; xem bản `.docx` khi cần.",
+    "> Bản trích tự động từ tài liệu SRS Word được cung cấp cho script.",
+    "> Sơ đồ và ảnh trong SRS không chuyển sang chữ được, chỉ còn dòng `[hình ảnh]`; xem bản Word đầu vào khi cần.",
     "",
     "## Use Case",
     ...ucs.map((n) => `- [${n.replace(".md", "")}](${n})`),
@@ -79,15 +78,16 @@ function indexMarkdown(files) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-  const input = resolve(process.argv[2] ?? join(root, "docs", "SRS.docx"));
-  const outDir = resolve(process.argv[3] ?? join(root, "docs", "srs"));
+  const [, , inputPath, outputPath] = process.argv;
+  if (!inputPath || !outputPath) {
+    console.error("Dùng: node scripts/ai-review/extract-srs.mjs <đường-dẫn-docx> <thư-mục-ra>");
+    process.exit(1);
+  }
+  const input = resolve(inputPath);
+  const outDir = resolve(outputPath);
   const files = splitSrs(docxToBlocks(readFileSync(input)));
-  // Chỉ sinh bản đầy đủ khi chạy mặc định; có tham số là đang trích thử ra chỗ khác. Đọc trước khi ghi để thiếu file Word thì không ghi dở dang.
-  const whole = process.argv[2] === undefined ? WHOLE_DOCUMENTS.map(([from, to]) => [to, wholeDocument(docxToBlocks(readFileSync(join(root, "docs", from))))]) : [];
   mkdirSync(outDir, { recursive: true });
   for (const [name, content] of files) writeFileSync(join(outDir, name), content);
   writeFileSync(join(outDir, "README.md"), indexMarkdown(files));
   console.log(`Đã ghi ${files.size + 1} file vào ${outDir}`);
-  for (const [to, content] of whole) writeFileSync(join(root, "docs", to), content);
 }

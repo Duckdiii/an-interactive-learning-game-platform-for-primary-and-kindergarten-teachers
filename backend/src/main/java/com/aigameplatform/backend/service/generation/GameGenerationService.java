@@ -132,6 +132,10 @@ public class GameGenerationService {
         return generateResult(type, request, null);
     }
 
+    public GenerationResult generateWithClassroom(GameType type, GameDslRequest request, String classroomContext) {
+        return generateResult(type, request, null, PromptData.classroomContext(classroomContext));
+    }
+
     public QuestionDsl regenerateQuestion(GameType type, GameDslRequest request, QuestionDsl currentQuestion,
             String feedback, String targetQuestionId, GameDsl baseGameDsl) {
         GameContentGenerator generator = generatorProvider.getIfAvailable();

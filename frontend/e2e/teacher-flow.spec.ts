@@ -277,3 +277,86 @@ test('giáo viên đăng ký, sinh game, sửa bằng trò chuyện và thấy g
   }
 
 })
+
+test('UC-16 lưu hồ sơ, sửa lớp và dùng thông tin lớp khi tạo game', async ({ page }) => {
+  const teacher = newTeacher()
+  const school = 'Trường Tiểu học Hoa Mai'
+  const topic = 'Bé đếm số con vật từ 1 đến 5'
+
+  await test.step('đăng ký với tên trường rồi đăng nhập', async () => {
+    await page.goto('/register')
+    await page.getByLabel('Họ và tên').fill(teacher.name)
+    await page.getByLabel('Email', { exact: true }).fill(teacher.email)
+    await page.getByLabel('Trường (không bắt buộc)').fill(school)
+    await page.getByLabel('Mật khẩu', { exact: true }).fill(teacher.password)
+    await page.getByPlaceholder('Nhập lại mật khẩu').fill(teacher.password)
+    await page.getByRole('button', { name: 'Tạo tài khoản', exact: true }).click()
+    await expect(page).toHaveURL(/\/login$/)
+    await page.getByPlaceholder('giaovien@example.com').fill(teacher.email)
+    await page.getByPlaceholder('Nhập mật khẩu').fill(teacher.password)
+    await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click()
+    await expect(page).toHaveURL(/\/dashboard$/)
+  })
+
+  await test.step('lưu hồ sơ, sửa thông tin lớp và ghi nhớ chủ đề', async () => {
+    await page.getByRole('link', { name: 'Hồ sơ của tôi' }).click()
+    const profile = page.getByRole('region', { name: 'Thông tin giảng dạy' })
+    await expect(profile.getByLabel('Trường')).toHaveValue(school)
+    await profile.getByLabel('Bộ sách giáo khoa').fill('Cánh diều')
+    await profile.getByLabel('Môn đang dạy').selectOption('MATH')
+    await profile.getByLabel('Khối đang dạy').selectOption('KINDERGARTEN')
+    await profile.getByLabel('Giọng đọc mặc định').selectOption('MALE')
+    await profile.getByRole('button', { name: 'Lưu hồ sơ' }).click()
+    await expect(page.getByText('Đã lưu hồ sơ.', { exact: true })).toBeVisible()
+
+    const add = page.getByRole('region', { name: 'Thêm lớp mới' })
+    await add.getByRole('textbox', { name: /Tên lớp/ }).fill('Lớp 1A')
+    await add.getByLabel('Khối lớp').selectOption('GRADE_1')
+    await add.getByRole('button', { name: 'Thêm lớp', exact: true }).click()
+    await page.getByRole('button', { name: 'Sửa lớp Lớp 1A' }).click()
+    const edit = page.getByRole('region', { name: 'Sửa lớp học' })
+    await edit.getByLabel('Sĩ số').fill('24')
+    await edit.getByLabel('Phạm vi kiến thức đã học').fill('Đếm đến 5')
+    await edit.getByRole('button', { name: 'Lưu lớp' }).click()
+    await expect(page.getByText('Lớp 1 · 24 học sinh')).toBeVisible()
+
+    await page.getByLabel('Chủ đề muốn ghi nhớ').fill(topic)
+    await page.getByRole('button', { name: 'Ghi nhớ chủ đề' }).click()
+    await expect(page.getByText(topic, { exact: true })).toBeVisible()
+  })
+
+  await test.step('tạo game với mặc định của hồ sơ và khối của lớp đã chọn', async () => {
+    const classrooms = await api(page, '/classrooms')
+    const [classroom] = classrooms.body.data
+    expect(classroom.learningProfile).toMatchObject({ gradeLevel: 'GRADE_1', studentCount: 24, knowledgeScope: 'Đếm đến 5' })
+
+    await page.goto('/games/new')
+    await expect(page.getByRole('button', { name: 'Toán', pressed: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Mầm non', pressed: true })).toBeVisible()
+    await page.getByLabel('Lớp học', { exact: true }).selectOption(classroom.classroomId)
+    await expect(page.getByRole('button', { name: 'Lớp 1', pressed: true })).toBeVisible()
+    await page.getByLabel('Dùng gợi ý đã ghi nhớ').selectOption({ label: topic })
+    await expect(page.getByLabel('Ý tưởng bài học')).toHaveValue(topic)
+    await page.getByRole('button', { name: 'Để AI soạn giúp' }).click()
+    const generated = page.waitForResponse((response) =>
+      response.url() === API + '/games/generate' && response.request().method() === 'POST')
+    await page.getByRole('button', { name: 'Đúng rồi, tạo game' }).click()
+    const response = await generated
+    expect(response.request().postDataJSON()).toMatchObject({
+      classroomId: classroom.classroomId, gradeLevel: 'GRADE_1', subject: 'MATH', voice: { gender: 'MALE' },
+    })
+    expect(response.status()).toBe(200)
+    await expect(page).toHaveURL(/\/workspace\/editor\?gameId=/)
+  })
+
+  await test.step('xóa hồ sơ và gợi ý, giữ thông tin đăng ký, lớp và game', async () => {
+    await page.getByRole('link', { name: 'Hồ sơ của tôi' }).click()
+    await page.getByRole('button', { name: 'Xóa hồ sơ', exact: true }).click()
+    await page.getByRole('button', { name: 'Xác nhận xóa hồ sơ' }).click()
+    await expect(page.getByText('Đã xóa hồ sơ giảng dạy.')).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Thông tin giảng dạy' }).getByLabel('Trường')).toHaveValue(school)
+    await expect(page.getByText('Chưa có chủ đề nào được ghi nhớ.')).toBeVisible()
+    await expect(page.getByText('Lớp 1A', { exact: true })).toBeVisible()
+    expect((await api(page, '/games')).body.data).toHaveLength(1)
+  })
+})

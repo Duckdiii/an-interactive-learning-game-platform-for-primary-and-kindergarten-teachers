@@ -108,7 +108,7 @@ flowchart TD
 
 ## 2. Kiến trúc Tổng thể N-Tier
 
-* **File**: `docs/diagrams/kien-truc-n-tier.jpg` & `docs/diagrams/AI-Native Game Platform - System Architecture.jpg`
+* **File**: `docs/diagrams/AI-Native Game Platform - System Architecture.jpg`
 * Bốn tầng: Presentation (Teacher Portal, Student Runtime, Admin Portal), Business Logic (Security Gateway, Auth, Game Management, Arena, Curriculum RAG, Content Generator, Validation Engine, Rate Limiter, Prompt Versioning, Media Asset Binder), Data (PostgreSQL, AWS S3), External (Gemini, OpenAI Moderation, Pexels, Google TTS).
 
 ## 3. Sơ đồ Tổng quát

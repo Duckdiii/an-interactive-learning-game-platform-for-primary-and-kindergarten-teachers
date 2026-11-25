@@ -3,6 +3,7 @@ export const ROUTES = {
   createGame: '/games/new',
   results: '/results',
   classrooms: '/classrooms',
+  teacherProfile: '/profile',
   login: '/login',
   register: '/register',
   // Quên/đặt lại mật khẩu (UC-15 luồng 2a); trang đặt lại nhận ?token=... từ liên kết trong email.

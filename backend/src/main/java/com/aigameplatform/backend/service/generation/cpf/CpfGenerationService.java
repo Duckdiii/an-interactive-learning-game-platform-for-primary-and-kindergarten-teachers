@@ -54,13 +54,21 @@ public class CpfGenerationService {
 
     /** Như {@link #generate(String, Subject, GradeLevel)}; có {@code revision} thì AI sửa game hiện tại thay vì làm mới. */
     public JsonNode generate(String idea, Subject subject, GradeLevel gradeLevel, Revision revision) {
+        return generate(idea, subject, gradeLevel, revision, null);
+    }
+
+    public JsonNode generateWithClassroom(String idea, Subject subject, GradeLevel gradeLevel, String classroomContext) {
+        return generate(idea, subject, gradeLevel, null, classroomContext);
+    }
+
+    private JsonNode generate(String idea, Subject subject, GradeLevel gradeLevel, Revision revision, String classroomContext) {
         CpfContentGenerator generator = generatorProvider.getIfAvailable();
         if (generator == null) throw new AiGenerationTimeoutException("Chưa cấu hình dịch vụ AI để sinh game");
 
         String previousOutput = null;
         List<ValidationError> previousErrors = List.of();
         for (int attempt = 1; attempt <= maxRetries + 1; attempt++) {
-            String raw = callAi(generator, new CpfGenerationAttempt(idea, subject, gradeLevel, attempt, previousOutput, previousErrors, revision));
+            String raw = callAi(generator, new CpfGenerationAttempt(idea, subject, gradeLevel, attempt, previousOutput, previousErrors, revision, classroomContext));
             CpfValidationReport report = validate(raw, subject, gradeLevel);
             if (report.valid()) return report.game();
             if (report.unsafe()) {
