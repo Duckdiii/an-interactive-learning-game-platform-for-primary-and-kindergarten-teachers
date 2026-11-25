@@ -32,6 +32,7 @@ import { isMock } from '../config/mockMode'
 import { ROUTES } from '../routes/paths'
 import { useCreateGames } from '../hooks/useCreateGames'
 import { useGameTypeSuggestions } from '../hooks/useGameTypeSuggestions'
+import { usePrepareLesson } from '../hooks/usePrepareLesson'
 import { useLessonContext } from '../hooks/useLessonContext'
 import { useClassrooms } from '../hooks/useClassrooms'
 import { useSavedSuggestions, useTeacherProfile } from '../hooks/useTeacherProfile'
@@ -41,14 +42,15 @@ import {
   IDEA_MAX_LENGTH,
   buildGenerateRequest,
   checkGenerate,
+  hasValidIdea,
   parseReviewFrom,
 } from '../utils/generateRequest'
 import { ideaPlaceholderFor } from '../utils/ideaPlaceholder'
 import { LESSON_FILE_MAX_BYTES, checkLessonFile } from '../utils/lessonFile'
 
 type Mode = 'idea' | 'random'
-// 'chat': trao đổi với trợ lý rồi xác nhận thẻ (đường mô tả); 'suggest': AI đề xuất kiểu chơi (tạo ngẫu nhiên, hoặc có giáo án).
-type Step = 'describe' | 'chat' | 'suggest'
+// 'review': giáo viên xác nhận ý tưởng Gemini chuẩn bị từ file trước khi đề xuất kiểu chơi.
+type Step = 'describe' | 'review' | 'chat' | 'suggest'
 type FieldErrors = Partial<Record<'idea' | 'file', string>>
 
 const DEFAULT_VOICE = { voiceRegion: 'NORTH', voiceGender: 'FEMALE' }
@@ -99,6 +101,9 @@ export default function CreateGamePage() {
   ])
   const navigate = useNavigate()
   const creation = useCreateGames()
+  const preparation = usePrepareLesson()
+  const [preparedIdea, setPreparedIdea] = useState('')
+  const [preparationMessage, setPreparationMessage] = useState('')
   const progressRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
   const wasCreating = useRef(false)
@@ -116,7 +121,10 @@ export default function CreateGamePage() {
   const requestSuggestion = suggestionsMutation.mutate
   const deepLinkStarted = useRef<URLSearchParams | null>(null)
   const lastInput = useRef({ idea: '', gradeLevel: '', subject: '' })
+  const preparationController = useRef<AbortController | null>(null)
   const chat = useRequestChat({ subject: lesson.subject, gradeLevel: lesson.gradeLevel })
+
+  useEffect(() => () => preparationController.current?.abort(), [])
 
   // "Tạo ngẫu nhiên" ở Trang chủ dẫn tới đây: đưa tiêu điểm vào ô khối lớp, ô đầu tiên của luồng này.
   useEffect(() => {
@@ -141,7 +149,14 @@ export default function CreateGamePage() {
   }, [params, initialIdea, profile.isFetching, profile.data, requestSuggestion])
 
   // Đổi ý tưởng hoặc lựa chọn thì kết quả tạo trước đó không còn đúng nữa (game đã tạo vẫn còn trong danh sách, chỉ không dùng lại cho lần tạo mới).
-  const touch = () => creation.reset()
+  const touch = () => {
+    preparationController.current?.abort()
+    preparationController.current = null
+    creation.reset()
+    preparation.reset()
+    setPreparedIdea('')
+    setPreparationMessage('')
+  }
 
   // Chọn nhóm "Lớp 2–5" mà chưa chọn lớp cụ thể: giữ nhóm mở nhưng khối vẫn là "chưa xác định".
   const [upperOpen, setUpperOpen] = useState(false)
@@ -218,20 +233,62 @@ export default function CreateGamePage() {
     }, 0)
   }
 
-  const submit = (nextMode: Mode) => {
-    const problem = checkGenerate({ idea, hasFile: file !== null }, nextMode)
+  const submit = async (nextMode: Mode) => {
+    // Keep a second form submission from aborting and replacing an in-flight lesson parse.
+    if (preparationController.current !== null) return
 
-    setErrors(problem ? { idea: text.errorNeedIdea } : {})
+    const problem = checkGenerate({ idea, hasFile: file !== null }, nextMode)
+    const shortIdeaWithFile = nextMode === 'idea' && file !== null && idea.trim() !== '' && !hasValidIdea(idea)
+
+    setErrors(problem || shortIdeaWithFile
+      ? { idea: shortIdeaWithFile ? text.errorShortOptionalIdeaWithFile : text.errorNeedIdea }
+      : {})
     touch()
 
-    if (problem) {
+    if (problem || shortIdeaWithFile) {
       setTimeout(() => document.getElementById('create-idea')?.focus(), 0)
       return
     }
 
-    // Tạo ngẫu nhiên và luồng có giáo án vẫn qua bước AI đề xuất kiểu chơi (có giáo án thì đề xuất theo cả mô tả nếu có).
-    if (nextMode === 'random' || file !== null) {
+    if (nextMode === 'random') {
       proceedToSuggest(idea, nextMode)
+      return
+    }
+
+    if (file !== null && isMock('ai')) {
+      // Giữ luồng mô phỏng tương thích; môi trường thật luôn đọc file qua backend trước khi đề xuất.
+      proceedToSuggest(idea, nextMode)
+      return
+    }
+
+    if (file !== null) {
+      if (!lesson.subject || !lesson.gradeLevel) {
+        setPreparationMessage(text.needLessonForServer)
+        setTimeout(() => document.getElementById(!lesson.gradeLevel ? 'create-grade' : 'create-idea')?.focus(), 0)
+        return
+      }
+      const controller = new AbortController()
+      preparationController.current = controller
+      try {
+        const prepared = await preparation.prepare({
+          subject: lesson.subject,
+          gradeLevel: lesson.gradeLevel,
+          idea: hasValidIdea(idea) ? idea.trim() : undefined,
+          file,
+        }, controller.signal)
+        if (controller.signal.aborted) return
+        setMode('idea')
+        setPreparedIdea(prepared.idea)
+        setStep('review')
+        setTimeout(() => {
+          window.scrollTo({ top: 0 })
+          stepHeadingRef.current?.focus({ preventScroll: true })
+        }, 0)
+      } catch (error) {
+        if (!controller.signal.aborted) setPreparationMessage(parseApiError(error, text.prepareLessonError).message)
+      } finally {
+        if (preparationController.current === controller) preparationController.current = null
+      }
       return
     }
 
@@ -261,6 +318,17 @@ export default function CreateGamePage() {
     lastInput.current = { idea: composeIdea(card, idea), gradeLevel: lesson.gradeLevel, subject: lesson.subject }
     setSelectedTypes([card.gameType])
     void createSelected([card.gameType])
+  }
+
+  const confirmPreparedIdea = () => {
+    const confirmed = preparedIdea.trim()
+    if (!hasValidIdea(confirmed) || confirmed.length > IDEA_MAX_LENGTH) {
+      setPreparationMessage(text.preparedIdeaTooShort)
+      return
+    }
+    setPreparationMessage('')
+    setIdea(confirmed)
+    proceedToSuggest(confirmed, 'idea')
   }
 
   const backToDescribe = () => {
@@ -377,7 +445,7 @@ export default function CreateGamePage() {
           <li aria-hidden="true" className="h-0.5 w-6 bg-ink/20" />
           <StepMarker
             number={2}
-            label={step === 'chat' ? text.stepChat : text.stepPick}
+            label={step === 'review' ? text.stepReview : step === 'chat' ? text.stepChat : text.stepPick}
             current={step !== 'describe' && !creation.creating}
             done={step !== 'describe' && creation.creating}
           />
@@ -385,7 +453,7 @@ export default function CreateGamePage() {
           <StepMarker number={3} label={text.stepCompose} current={step !== 'describe' && creation.creating} done={false} />
         </ol>
         <h1 ref={stepHeadingRef} tabIndex={-1} className="font-display text-3xl font-extrabold outline-none sm:text-4xl">
-          {step === 'describe' ? text.heading : step === 'chat' ? text.chatStepTitle : text.suggestStepTitle}
+          {step === 'describe' ? text.heading : step === 'review' ? text.reviewPreparedTitle : step === 'chat' ? text.chatStepTitle : text.suggestStepTitle}
         </h1>
       </header>
 
@@ -494,6 +562,8 @@ export default function CreateGamePage() {
                 />
               </FormField>
 
+              {preparationMessage ? <p role="alert" className="text-sm font-semibold text-rose-800">{preparationMessage}</p> : null}
+
               <details className="group rounded-2xl border-2 border-ink/10 px-4 py-1">
                 <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 text-base font-bold">
                   {text.advancedTitle}
@@ -532,9 +602,9 @@ export default function CreateGamePage() {
               </details>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Button type="submit" size="lg" className="gap-2">
+                <Button type="submit" size="lg" className="gap-2" disabled={preparation.preparing}>
                   <Icon name="sparkles" />
-                  {text.submit}
+                  {preparation.preparing ? text.preparingLesson : text.submit}
                 </Button>
                 <Button
                   type="button"
@@ -552,6 +622,35 @@ export default function CreateGamePage() {
                 {randomBlocked ? text.randomBlockedHint : text.randomHint}
               </p>
             </form>
+          ) : step === 'review' ? (
+            <section aria-labelledby="prepared-lesson-heading" className="space-y-4 rounded-2xl border-2 border-brand/30 bg-brand-soft/40 p-4">
+              <div>
+                <h2 id="prepared-lesson-heading" className="font-bold text-ink">{text.reviewPreparedTitle}</h2>
+                <p className="mt-1 text-sm text-ink-soft">{text.reviewPreparedIntro}</p>
+              </div>
+              <FormField id="prepared-lesson-idea" label={text.preparedIdeaLabel} error={preparationMessage || undefined}>
+                <textarea
+                  id="prepared-lesson-idea"
+                  value={preparedIdea}
+                  maxLength={IDEA_MAX_LENGTH}
+                  onChange={(event) => {
+                    setPreparedIdea(event.target.value)
+                    setPreparationMessage('')
+                  }}
+                  aria-invalid={Boolean(preparationMessage) || undefined}
+                  className={textareaClass(Boolean(preparationMessage))}
+                />
+              </FormField>
+              <p className="text-sm text-ink-soft">{text.filePreparedNote}</p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button type="button" size="lg" onClick={confirmPreparedIdea} disabled={preparation.preparing}>
+                  {text.confirmPreparedIdea}
+                </Button>
+                <Button type="button" variant="ghost" onClick={backToDescribe}>
+                  {text.editLessonSource}
+                </Button>
+              </div>
+            </section>
           ) : step === 'chat' ? (
             <RequestChat
               messages={chat.messages}
@@ -621,14 +720,14 @@ export default function CreateGamePage() {
             onCreate={() => { setOddSetupOpen(false); void createSelected(['ODD_ONE_OUT']) }}
             onCancel={() => { setOddSetupOpen(false); setSelectedTypes([]) }} /> : null}
 
-          {step === 'suggest' && file !== null ? (
+          {step === 'suggest' && file !== null && isMock('ai') ? (
             <p className="flex items-start gap-2 text-sm text-ink-soft">
               <Icon name="info" className="mt-0.5 h-4 w-4 shrink-0" />
               {text.fileNotUsed}
             </p>
           ) : null}
 
-          {step !== 'describe' && !visualClozeSetupOpen && !oddSetupOpen ? (
+          {step !== 'describe' && step !== 'review' && !visualClozeSetupOpen && !oddSetupOpen ? (
             <CreateGamesProgress
               ref={progressRef}
               types={selectedTypes}

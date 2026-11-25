@@ -1,6 +1,6 @@
 // Dựng nội dung yêu cầu tạo game theo GenerateGameRequest trong docs/openapi/openapi.yaml (POST /games/generate).
 // Chưa gọi API vì endpoint còn `planned`; hàm này gom luật một chỗ để khi nối API chỉ việc dùng lại:
-//   - cần ít nhất một trong: idea (10 đến 2000 ký tự), tệp giáo án, randomTopic;
+//   - requires at least one of idea (10–2000 chars) or randomTopic; lesson files are prepared separately before generation.
 //   - mỗi yêu cầu sinh MỘT game; giáo viên chọn nhiều loại thì gửi nhiều yêu cầu, mỗi yêu cầu một gameType;
 //   - voice mặc định Bắc/Nữ.
 // LỆCH CONTRACT CÓ CHỦ ĐÍCH (chờ nhóm quyết định): openapi.yaml hiện BẮT BUỘC subject và gradeLevel, còn giao diện đã

@@ -32,6 +32,7 @@ import com.aigameplatform.backend.entity.enums.SessionStatus;
 import com.aigameplatform.backend.repository.GameSessionRepository;
 import com.aigameplatform.backend.service.admin.CostMonitoringService;
 import com.aigameplatform.backend.service.media.GameAudioEnricher;
+import com.aigameplatform.backend.service.lesson.GameInputGuard;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -67,30 +68,15 @@ public class GameService {
     private final ObjectProvider<GameAudioEnricher> audioEnrichers;
     private final GameSessionRepository sessions;
     private final ObjectProvider<CostMonitoringService> costMonitoring;
-
-    public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
-            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
-            GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
-            RandomGenerator random) {
-        this(games, teachers, handlers, jsonMapper, rateLimiter, transactions, curriculumReviews, curriculumCatalog,
-                random, null, null, null, null);
-    }
-
-    public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
-            JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
-            GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
-            RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
-            ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs) {
-        this(games, teachers, handlers, jsonMapper, rateLimiter, transactions, curriculumReviews, curriculumCatalog,
-                random, audioEnrichers, sessions, costMonitoring, editLogs, null);
-    }
+    private final GameInputGuard gameInputGuard;
 
     @Autowired
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
             GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
             RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
-            ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs, ClassroomService classrooms) {
+            ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs,
+            ClassroomService classrooms, GameInputGuard gameInputGuard) {
         this.classrooms = classrooms;
         this.editLogs = editLogs;
         this.costMonitoring = costMonitoring;
@@ -105,6 +91,7 @@ public class GameService {
         this.rateLimiter = rateLimiter;
         this.transactions = transactions;
         this.curriculumReviews = curriculumReviews;
+        this.gameInputGuard = java.util.Objects.requireNonNull(gameInputGuard, "gameInputGuard");
     }
 
     /**
@@ -119,6 +106,10 @@ public class GameService {
         String context = request.classroomId() == null ? null
                 : classrooms.generationContext(teacherId, request.classroomId(), request.gradeLevel());
         String idea = ideaOf(request, type);
+        String[] visualPrompts = request.optionImages() == null ? new String[0]
+                : request.optionImages().stream().filter(java.util.Objects::nonNull)
+                        .map(GenerateGameRequest.OptionImage::visualPrompt).toArray(String[]::new);
+        gameInputGuard.requireSafe(idea, null, visualPrompts);
 
         GameContentHandler handler = handlerFor(type);
         GameContentHandler.GeneratedContent content = context == null

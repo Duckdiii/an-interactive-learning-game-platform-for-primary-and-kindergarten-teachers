@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<tika.version>3.3.3</tika.version>
 		<jjwt.version>0.13.0</jjwt.version>
 		<json-schema-validator.version>3.0.7</json-schema-validator.version>
 		<springdoc.version>3.1.1</springdoc.version>
@@ -37,6 +38,22 @@
 		<pitest-junit5.version>1.2.3</pitest-junit5.version>
 	</properties>
 	<dependencies>
+		<!-- PDF and DOCX text extraction for lesson plans; OCR is intentionally not included. -->
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>${tika.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parser-pdf-module</artifactId>
+			<version>${tika.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parser-microsoft-module</artifactId>
+			<version>${tika.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>
