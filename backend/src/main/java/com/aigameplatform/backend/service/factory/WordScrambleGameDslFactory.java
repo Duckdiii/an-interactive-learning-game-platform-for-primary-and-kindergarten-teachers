@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 public class WordScrambleGameDslFactory extends AbstractGameDslFactory<WordScrambleAiOutput,
         WordScrambleAiQuestion, WordScrambleQuestionDsl, WordScrambleGameDsl> {
 
-    public WordScrambleGameDslFactory(RandomGenerator random) {
-        super(GameType.WORD_SCRAMBLE, WordScrambleAiOutput.class, random);
+    public WordScrambleGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+        super(GameType.WORD_SCRAMBLE, WordScrambleAiOutput.class, random, assets);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class WordScrambleGameDslFactory extends AbstractGameDslFactory<WordScram
         String word = Normalizer.normalize(ai.correctWord(), Normalizer.Form.NFC);
         List<String> letters = word.codePoints().mapToObj(Character::toString).collect(Collectors.toList());
         return new WordScrambleQuestionDsl(base.id(), base.timeLimitSeconds(), base.points(), ai.audioText(), null,
-                ai.visualPrompt(), null, word, ShuffleSupport.shuffledValuesNotEqual(letters, random));
+                ai.visualPrompt(), imageOf(ai.asset()), word, ShuffleSupport.shuffledValuesNotEqual(letters, random));
     }
 
     @Override

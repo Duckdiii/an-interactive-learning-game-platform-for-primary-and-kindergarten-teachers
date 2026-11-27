@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { getHomeApi, HomeApiNotSupportedError } from '../services/home'
-import type { GameInsights, HomeApi, InsightsSessionType, LiveSession, ReviewNeeded } from '../services/home'
+import type {
+  GameInsights,
+  HomeApi,
+  InsightsRange,
+  InsightsSessionType,
+  LiveSession,
+  ReviewNeeded,
+} from '../services/home'
 import { useTeacherIdentity } from './useTeacherIdentity'
 
 export const REVIEW_LIMIT = 3
@@ -53,22 +60,51 @@ export interface InsightsResult {
   isSample: boolean
 }
 
-export function useGameInsights(gameId: string | null, sessionType?: InsightsSessionType) {
+// Chỉ truyền khoảng ngày khi có, để lời gọi không mang thêm đối số rỗng.
+const hasRange = (range?: InsightsRange): range is InsightsRange =>
+  Boolean(range?.from || range?.to || range?.classroomId)
+
+export function useGameInsights(gameId: string | null, sessionType?: InsightsSessionType, range?: InsightsRange) {
   const { cacheOwner } = useTeacherIdentity()
 
   return useQuery({
-    queryKey: ['results', 'insights', cacheOwner ?? '', gameId ?? '', sessionType ?? 'ALL'],
+    queryKey: ['results', 'insights', cacheOwner ?? '', gameId ?? '', sessionType ?? 'ALL', range?.from ?? '', range?.to ?? '', range?.classroomId ?? ''],
     queryFn: async (): Promise<InsightsResult> => {
       const { api, isSample } = await getHomeApi('results')
 
       try {
-        return { insights: await api.getGameInsights(gameId ?? '', sessionType), isSample }
+        const insights = hasRange(range)
+          ? await api.getGameInsights(gameId ?? '', sessionType, range)
+          : await api.getGameInsights(gameId ?? '', sessionType)
+
+        return { insights, isSample }
       } catch (error) {
         if (error instanceof HomeApiNotSupportedError) return { insights: null, isSample }
         throw error
       }
     },
     enabled: cacheOwner !== null && gameId !== null,
+    retry: 1,
+  })
+}
+
+/** Chi tiết một câu (phân bố đáp án); chỉ tải khi cô chọn một câu. */
+export function useQuestionInsights(
+  gameId: string,
+  questionId: string | null,
+  sessionType?: InsightsSessionType,
+  range?: InsightsRange,
+) {
+  const { cacheOwner } = useTeacherIdentity()
+
+  return useQuery({
+    queryKey: ['results', 'question', cacheOwner ?? '', gameId, questionId ?? '', sessionType ?? 'ALL', range?.from ?? '', range?.to ?? '', range?.classroomId ?? ''],
+    queryFn: async () => {
+      const { api } = await getHomeApi('results')
+
+      return api.getQuestionInsights(gameId, questionId ?? '', sessionType, range)
+    },
+    enabled: cacheOwner !== null && questionId !== null,
     retry: 1,
   })
 }

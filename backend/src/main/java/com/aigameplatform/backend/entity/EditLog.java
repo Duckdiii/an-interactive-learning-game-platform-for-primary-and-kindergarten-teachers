@@ -26,8 +26,19 @@ public class EditLog {
     @Column(nullable = false)
     private LocalDateTime editedAt;
 
-    // Association: EditLog 0..* - 1 QuestionGame.
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    // Các bản ghi cũ có thể tham chiếu một câu. Bản ghi mới ghi đường dẫn ở cấp game.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
     private QuestionGame question;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+    @Column(name = "editor_teacher_id")
+    private String editorTeacherId;
+
+    /** JSON array of changed JSON Pointer paths. No field values are retained. */
+    @Column(name = "changed_paths", nullable = false, columnDefinition = "text")
+    private String changedPaths;
 }

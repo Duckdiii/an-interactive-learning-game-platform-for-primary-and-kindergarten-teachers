@@ -17,6 +17,7 @@ function jobBlock(name) {
   for (let i = start + 1; i < lines.length; i++) if (/^  [\w-]+:/.test(lines[i])) { end = i; break; }
   return lines.slice(start, end).join("\n");
 }
+const prepare = jobBlock("prepare");
 const analyze = jobBlock("analyze");
 const post = jobBlock("post");
 
@@ -45,11 +46,36 @@ test("mọi action đều pin theo SHA 40 ký tự", () => {
   for (const l of uses) assert.match(l, /uses: [\w.-]+\/[\w.-]+@[0-9a-f]{40}\b/, `chưa pin SHA: ${l.trim()}`);
 });
 
-test("job analyze chỉ có quyền đọc", () => {
-  assert.match(analyze, /contents: read/);
-  assert.match(analyze, /pull-requests: read/);
-  const noComments = analyze.split("\n").filter((l) => !l.trim().startsWith("#")).join("\n");
-  assert.doesNotMatch(noComments, /: write/);
+test("job prepare và analyze chỉ có quyền đọc; prepare không có OAuth token", () => {
+  for (const job of [prepare, analyze]) {
+    assert.match(job, /contents: read/);
+    assert.match(job, /pull-requests: read/);
+    const noComments = job.split("\n").filter((l) => !l.trim().startsWith("#")).join("\n");
+    assert.doesNotMatch(noComments, /: write/);
+  }
+  assert.doesNotMatch(prepare, /CLAUDE_CODE_OAUTH_TOKEN|claude-code-action/);
+});
+
+test("analyze chạy theo ma trận các phần do prepare chia; một phần lỗi không hủy phần khác; artifact mỗi phần một tên", () => {
+  assert.match(analyze, /needs: prepare/);
+  assert.match(analyze, /if: needs\.prepare\.outputs\.run == 'true'/);
+  assert.match(analyze, /fail-fast: false/);
+  assert.match(analyze, /matrix: \$\{\{ fromJSON\(needs\.prepare\.outputs\.matrix\) \}\}/);
+  assert.match(analyze, /name: ai-review-\$\{\{ github\.run_id \}\}-\$\{\{ matrix\.shard \}\}/);
+  assert.match(analyze, /--shard "\$SHARD"/);
+  assert.match(prepare, /id: shard/);
+  assert.match(prepare, /shard\.mjs/);
+  assert.match(prepare, /matrix: \$\{\{ steps\.shard\.outputs\.matrix \}\}/);
+});
+
+test("job post gộp kết quả các phần trước khi đăng, chỉ tải artifact của các phần (không lẫn input/post)", () => {
+  assert.match(post, /needs: \[prepare, analyze\]/);
+  assert.match(analyze, /path: \$\{\{ runner\.temp \}\}\/review-coverage\/coverage-\$\{\{ matrix\.shard \}\}\.json/);
+  assert.match(post, /merge-multiple: true/);
+  assert.match(post, /pattern: ai-review-\$\{\{ github\.run_id \}\}-\*/);
+  assert.ok(post.indexOf("coverage.mjs") > 0 && post.indexOf("coverage.mjs") < post.indexOf("post.mjs"), "gộp phải đứng trước đăng");
+  assert.match(prepare, /name: ai-review-input-\$\{\{ github\.run_id \}\}/);
+  assert.match(analyze, /name: ai-review-input-\$\{\{ github\.run_id \}\}/);
 });
 
 test("job post có pull-requests: write nhưng không chạy agent và không có token Claude", () => {
@@ -58,8 +84,8 @@ test("job post có pull-requests: write nhưng không chạy agent và không c�
   assert.doesNotMatch(post, /CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY/);
 });
 
-test("OAuth token chỉ xuất hiện đúng một lần, trong job analyze", () => {
-  assert.equal((text.match(/secrets\.CLAUDE_CODE_OAUTH_TOKEN/g) ?? []).length, 1);
+test("OAuth token chỉ dùng cho hai lần thử trong job analyze", () => {
+  assert.equal((text.match(/secrets\.CLAUDE_CODE_OAUTH_TOKEN/g) ?? []).length, 2);
   assert.match(analyze, /secrets\.CLAUDE_CODE_OAUTH_TOKEN/);
 });
 
@@ -75,9 +101,9 @@ test("mọi checkout đều tắt persist-credentials", () => {
 });
 
 test("script/prompt/schema lấy từ thư mục trusted (base), checkout từ base.sha hoặc ref chạy workflow", () => {
-  assert.equal((text.match(/path: trusted/g) ?? []).length, 2, "cả hai job đều checkout trusted");
-  // hai checkout trusted (analyze, post) và bước boot kiểm tra cùng một ref bằng API
-  assert.equal((text.match(/github\.event\.pull_request\.base\.sha \|\| github\.sha/g) ?? []).length, 3);
+  assert.equal((text.match(/path: trusted/g) ?? []).length, 3, "cả ba job đều checkout trusted");
+  // ba checkout trusted (prepare, analyze, post) và bước boot kiểm tra cùng một ref bằng API
+  assert.equal((text.match(/github\.event\.pull_request\.base\.sha \|\| github\.sha/g) ?? []).length, 4);
   for (const b of runBlocks()) {
     for (const m of b.matchAll(/\bnode\s+(?!-e\b)(\S+)/g)) assert.match(m[1], /^trusted\/scripts\/ai-review\//, `chạy script ngoài trusted: ${m[1]}`);
   }
@@ -94,8 +120,8 @@ test("concurrency tách theo label và run_id để label khác/chạy lặp kh�
   assert.match(g, /pr_number|pull_request\.number/);
 });
 
-test("điều kiện job analyze: label ai-review, không draft, không fork, không dependabot", () => {
-  const cond = /if: >-\n([\s\S]*?)\n    runs-on/.exec(analyze)[1];
+test("điều kiện job prepare: label ai-review, không draft, không fork, không dependabot", () => {
+  const cond = /if: >-\n([\s\S]*?)\n    runs-on/.exec(prepare)[1];
   assert.match(cond, /label\.name == 'ai-review'/);
   assert.match(cond, /draft == false/);
   assert.match(cond, /head\.repo\.full_name == github\.repository/);
@@ -104,15 +130,14 @@ test("điều kiện job analyze: label ai-review, không draft, không fork, kh
 
 test("PR đã đóng chỉ được chạy dry_run; kết quả phải hợp lệ JSON trước khi đăng", () => {
   assert.match(text, /PR không còn mở: chỉ được chạy với dry_run=true/);
-  assert.match(text, /structured_output không phải JSON hợp lệ/);
-  assert.match(text, /Agent không trả structured_output/);
+  assert.match(analyze, /coverage\.mjs attempt/);
+  assert.match(post, /if: steps\.collect\.outputs\.ready/);
 });
 
-test("job post chỉ chạy khi analyze thành công, và có timeout", () => {
-  assert.match(post, /needs: analyze/);
-  assert.match(post, /needs\.analyze\.result == 'success'/);
-  assert.match(analyze, /timeout-minutes:/);
-  assert.match(post, /timeout-minutes:/);
+test("job post chẩn đoán cả phần thất bại và các job đều có timeout", () => {
+  assert.match(post, /needs: \[prepare, analyze\]/);
+  assert.match(post, /!cancelled\(\) && needs\.prepare\.result == 'success'/);
+  for (const job of [prepare, analyze, post]) assert.match(job, /timeout-minutes:/);
 });
 
 test("tự chạy khi mở/mở lại/ready/có commit mới, và có label ai-review để chạy tiếp", () => {
@@ -121,37 +146,41 @@ test("tự chạy khi mở/mở lại/ready/có commit mới, và có label ai-r
 });
 
 test("commit mới được chờ gom push, và lần chạy bị thay thế thì các bước tốn kém bị bỏ qua", () => {
-  assert.match(analyze, /id: wait/);
-  assert.match(analyze, /ACTION" = "synchronize"/);
-  assert.match(analyze, /sleep "\$DEBOUNCE_SECONDS"/);
-  assert.match(analyze, /DEBOUNCE_SECONDS: "\d+"/);
-  // checkout và bước precheck chỉ chạy khi chưa bị commit mới hơn thay thế
-  const gated = analyze.split("\n").filter((l) => l.includes("steps.wait.outputs.superseded != 'true'")).length;
-  assert.ok(gated >= 3, "hai checkout và precheck phải có điều kiện superseded");
+  assert.match(prepare, /id: wait/);
+  assert.match(prepare, /ACTION" = "synchronize"/);
+  assert.match(prepare, /sleep "\$DEBOUNCE_SECONDS"/);
+  assert.match(prepare, /DEBOUNCE_SECONDS: "\d+"/);
+  // checkout trusted và bước precheck chỉ chạy khi chưa bị commit mới hơn thay thế
+  const gated = prepare.split("\n").filter((l) => l.includes("steps.wait.outputs.superseded != 'true'")).length;
+  assert.ok(gated >= 2, "checkout trusted và precheck phải có điều kiện superseded");
 });
 
 test("precheck chạy trước agent; mọi bước tốn token chỉ chạy khi precheck cho phép", () => {
-  const iPre = analyze.indexOf("id: pre");
-  const iClaude = analyze.indexOf("id: claude");
-  assert.ok(iPre > 0 && iClaude > iPre, "precheck phải đứng trước agent");
-  for (const id of ["uc", "prep", "claude"]) {
-    const block = analyze.slice(analyze.indexOf(`id: ${id}`), analyze.indexOf(`id: ${id}`) + 160);
+  // precheck và chia phần nằm ở job prepare; job analyze (có agent) chỉ chạy khi prepare cho phép (if: ...run == 'true')
+  const iPre = prepare.indexOf("id: pre");
+  const iShard = prepare.indexOf("id: shard");
+  assert.ok(iPre > 0 && iShard > iPre, "precheck phải đứng trước bước chia phần");
+  for (const id of ["uc", "prep", "shard"]) {
+    const block = prepare.slice(prepare.indexOf(`id: ${id}`), prepare.indexOf(`id: ${id}`) + 160);
     assert.match(block, /steps\.pre\.outputs\.run == 'true'/, `bước ${id} phải có điều kiện run`);
   }
-  assert.match(analyze, /precheck\.mjs/);
+  assert.match(prepare, /precheck\.mjs/);
+  assert.match(analyze, /if: needs\.prepare\.outputs\.run == 'true'/);
+  assert.doesNotMatch(prepare, /id: claude/, "agent chỉ chạy ở job analyze");
 });
 
 test("job post chỉ chạy khi precheck quyết định chạy, và nhận vòng và mốc commit từ precheck (không từ agent)", () => {
-  assert.match(post, /needs\.analyze\.outputs\.run == 'true'/);
-  assert.match(post, /ROUND: \$\{\{ needs\.analyze\.outputs\.round \}\}/);
-  assert.match(post, /BASE_SHA: \$\{\{ needs\.analyze\.outputs\.base_sha \}\}/);
+  assert.match(post, /needs.prepare.outputs\.run == 'true'/);
+  assert.match(post, /ROUND: \$\{\{ needs.prepare.outputs\.round \}\}/);
+  assert.match(post, /BASE_SHA: \$\{\{ needs.prepare.outputs\.base_sha \}\}/);
   assert.ok(post.includes('[ "$ROUND" = "2" ] && args+=(--round 2 --base-sha "$BASE_SHA")'));
 });
 
 test("giới hạn số lần tự động và quyết định vòng nằm trong precheck (code), có timeout đủ cho thời gian chờ", () => {
-  const timeout = Number(/timeout-minutes: (\d+)/.exec(analyze)[1]);
-  const debounce = Number(/DEBOUNCE_SECONDS: "(\d+)"/.exec(analyze)[1]);
-  assert.ok(timeout * 60 > debounce + 20 * 60, "timeout phải lớn hơn thời gian chờ cộng thời gian chạy agent");
+  const timeout = Number(/timeout-minutes: (\d+)/.exec(prepare)[1]);
+  const debounce = Number(/DEBOUNCE_SECONDS: "(\d+)"/.exec(prepare)[1]);
+  assert.ok(timeout * 60 > debounce + 5 * 60, "timeout của prepare phải lớn hơn thời gian chờ cộng thời gian chuẩn bị");
+  assert.ok(Number(/timeout-minutes: (\d+)/.exec(analyze)[1]) >= 20, "mỗi phần cần đủ thời gian cho agent");
 });
 
 test("bỏ qua PR chỉ đụng tài liệu bằng paths-ignore", () => {
@@ -159,7 +188,7 @@ test("bỏ qua PR chỉ đụng tài liệu bằng paths-ignore", () => {
 });
 
 test("sự kiện labeled chỉ chạy với label ai-review", () => {
-  const cond = /if: >-\n([\s\S]*?)\n    runs-on/.exec(analyze)[1];
+  const cond = /if: >-\n([\s\S]*?)\n    runs-on/.exec(prepare)[1];
   assert.match(cond, /github\.event\.action != 'labeled' \|\| github\.event\.label\.name == 'ai-review'/);
 });
 
@@ -169,24 +198,24 @@ test("khi bỏ qua vì đã có kết quả, job summary ghi rõ lý do thay vì
 });
 
 test("nhánh base chưa có hệ thống thì bỏ qua nhẹ nhàng: kiểm tra bằng API trước mọi bước tốn kém, không báo lỗi đỏ", () => {
-  assert.match(analyze, /id: boot/);
-  // kiểm tra đủ ba file cần có ở nhánh base
-  for (const f of ["scripts/ai-review/precheck.mjs", ".github/ai-review/prompt.md", ".github/ai-review/review-result.schema.json"]) {
-    assert.ok(analyze.includes(f), `boot phải kiểm tra ${f}`);
+  assert.match(prepare, /id: boot/);
+  // kiểm tra đủ các file (script và prompt) cần có ở nhánh base
+  for (const f of ["scripts/ai-review/precheck.mjs", "scripts/ai-review/shard.mjs", "scripts/ai-review/coverage.mjs", ".github/ai-review/prompt.md", ".github/ai-review/review-result.schema.json"]) {
+    assert.ok(prepare.includes(f), `boot phải kiểm tra ${f}`);
   }
   // boot đứng trước bước chờ, hai checkout và precheck; các bước đó chỉ chạy khi ready
-  const iBoot = analyze.indexOf("id: boot");
+  const iBoot = prepare.indexOf("id: boot");
   for (const id of ["wait", "pre"]) {
-    const at = analyze.indexOf(`id: ${id}`);
+    const at = prepare.indexOf(`id: ${id}`);
     assert.ok(at > iBoot, `${id} phải đứng sau boot`);
-    assert.match(analyze.slice(at, at + 200), /steps\.boot\.outputs\.ready == 'true'/, `bước ${id} phải có điều kiện ready`);
+    assert.match(prepare.slice(at, at + 200), /steps\.boot\.outputs\.ready == 'true'/, `bước ${id} phải có điều kiện ready`);
   }
-  const gatedCheckouts = analyze.split("\n").filter((l) => l.includes("steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'")).length;
-  assert.ok(gatedCheckouts >= 3, "hai checkout và precheck phải có điều kiện ready và superseded");
+  const gatedCheckouts = prepare.split("\n").filter((l) => l.includes("steps.boot.outputs.ready == 'true' && steps.wait.outputs.superseded != 'true'")).length;
+  assert.ok(gatedCheckouts >= 2, "checkout trusted và precheck phải có điều kiện ready và superseded");
   // bước boot không được làm job thất bại và phải để lại lời giải thích
-  assert.ok(analyze.slice(iBoot, analyze.indexOf("id: wait")).includes("Bỏ qua:"));
+  assert.ok(prepare.slice(iBoot, prepare.indexOf("id: wait")).includes("Bỏ qua:"));
   // chỉ 404 mới là "chưa có hệ thống"; lỗi khác (xác thực, giới hạn tốc độ, 5xx) phải làm job thất bại để chạy lại
-  const boot = analyze.slice(iBoot, analyze.indexOf("id: wait"));
+  const boot = prepare.slice(iBoot, prepare.indexOf("id: wait"));
   assert.ok(boot.includes('grep -q "HTTP 404"'), "phải phân biệt 404");
   assert.ok(boot.includes("lỗi không phải 404"));
   const after404 = boot.slice(boot.indexOf('grep -q "HTTP 404"'), boot.indexOf("else", boot.indexOf('grep -q "HTTP 404"')));
@@ -197,16 +226,16 @@ test("nhánh base chưa có hệ thống thì bỏ qua nhẹ nhàng: kiểm tra 
 test("dependabot được xác định theo tác giả PR (user.login), không theo người kích hoạt (github.actor)", () => {
   const noComments = text.split("\n").filter((l) => !l.trim().startsWith("#")).join("\n");
   assert.doesNotMatch(noComments, /github\.actor/, "github.actor là người gắn label, không phải tác giả PR");
-  const cond = /if: >-\n([\s\S]*?)\n    runs-on/.exec(analyze)[1];
+  const cond = /if: >-\n([\s\S]*?)\n    runs-on/.exec(prepare)[1];
   assert.match(cond, /github\.event\.pull_request\.user\.login != 'dependabot\[bot\]'/);
   // chạy tay không đi qua điều kiện job, nên bước ctx và boot phải kiểm tra lại tác giả
-  assert.match(analyze, /\.user\.login/);
-  assert.match(analyze, /author_ok/);
-  assert.match(analyze, /AUTHOR_OK/);
+  assert.match(prepare, /\.user\.login/);
+  assert.match(prepare, /author_ok/);
+  assert.match(prepare, /AUTHOR_OK/);
 });
 
 test("chạy thật bằng workflow_dispatch chỉ được từ nhánh mặc định (chỉ dry_run mới được từ nhánh khác)", () => {
-  const ctx = analyze.slice(analyze.indexOf("id: ctx"), analyze.indexOf("id: boot"));
+  const ctx = prepare.slice(prepare.indexOf("id: ctx"), prepare.indexOf("id: boot"));
   assert.match(ctx, /DEFAULT_BRANCH: \$\{\{ github\.event\.repository\.default_branch \}\}/);
   assert.match(ctx, /REF: \$\{\{ github\.ref \}\}/);
   assert.ok(ctx.includes('"$EVENT" = "workflow_dispatch"') && ctx.includes('"$DRY_RUN" != "true"') && ctx.includes('refs/heads/${DEFAULT_BRANCH}'));
@@ -217,10 +246,10 @@ test("mọi lần chạy có ghi lên PR dùng chung nhóm concurrency; chỉ dr
   assert.match(g, /github\.event_name == 'workflow_dispatch' && inputs\.dry_run && github\.run_id/);
 });
 
-test("job post truyền chế độ, version prompt và số lần chạy do job analyze quyết định", () => {
+test("job post truyền chế độ, version prompt và số lần chạy do job prepare quyết định", () => {
   for (const k of ["--expect-mode", "--expect-prompt", "--expect-runs"]) assert.ok(post.includes(k), `post thiếu ${k}`);
-  assert.match(analyze, /runs: \$\{\{ steps\.pre\.outputs\.runs \}\}/);
-  assert.match(post, /EXPECT_RUNS: \$\{\{ needs\.analyze\.outputs\.runs \}\}/);
+  assert.match(prepare, /runs: \$\{\{ steps\.pre\.outputs\.runs \}\}/);
+  assert.match(post, /EXPECT_RUNS: \$\{\{ needs.prepare.outputs\.runs \}\}/);
 });
 
 // ---- Chạy THẬT đoạn lệnh của bước boot bằng bash -e (giống GitHub), với hàm gh giả ----
@@ -293,7 +322,7 @@ test("boot chạy thật: lỗi khác 404 (5xx, hết giới hạn tốc độ) 
   }
 });
 
-test("boot chạy thật: đủ ba file ở nhánh base thì ready=true và không ghi lời bỏ qua", skipBash, () => {
+test("boot chạy thật: đủ các file cần có ở nhánh base thì ready=true và không ghi lời bỏ qua", skipBash, () => {
   const r = runBoot({ gh: GH_OK });
   assert.equal(r.status, 0);
   assert.match(r.output, /ready=true/);
@@ -306,4 +335,10 @@ test("boot chạy thật: PR của dependabot thì bỏ qua ngay mà không gọ
   assert.match(r.output, /ready=false/);
   assert.match(r.summary, /dependabot/);
   assert.doesNotMatch(r.stderr, /KHÔNG ĐƯỢC GỌI/);
+});
+
+test("giữ review tự động tắt trong lúc kiểm chứng bằng dry run", () => {
+  assert.match(prepare, /workflow_dispatch' && inputs\.dry_run/);
+  assert.match(prepare, /vars\.AI_REVIEW_ENABLED == 'true'/);
+  assert.match(analyze, /if: steps\.coverage\.outputs\.retry == 'true'/);
 });

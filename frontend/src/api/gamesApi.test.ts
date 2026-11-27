@@ -1,3 +1,4 @@
+import { REGENERATE_IMAGE_QUESTION_TIMEOUT_MS } from '../constants/aiLimits'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from './axiosInstance'
 import {
@@ -9,6 +10,9 @@ import {
   GAME_REQUEST_TIMEOUT_MS,
   REGENERATE_QUESTION_TIMEOUT_MS,
   fetchGame,
+  fetchGameInsights,
+  fetchQuestionInsights,
+  fetchReviewNeeded,
   getGames,
   postRegenerateQuestion,
   saveGame,
@@ -102,6 +106,14 @@ describe('postRegenerateQuestion', () => {
     )
   })
 
+  it('cho phép đợi lâu hơn khi cần tải và kiểm tra ảnh, giữ nguyên thân request', async () => {
+    await postRegenerateQuestion('g1', 'q1', { feedback: 'Đổi vị trí', withImageReview: true })
+
+    expect(axiosInstance.post).toHaveBeenCalledWith('/games/g1/questions/q1/regenerate', { feedback: 'Đổi vị trí' },
+      { timeout: REGENERATE_IMAGE_QUESTION_TIMEOUT_MS, signal: undefined })
+    expect(REGENERATE_IMAGE_QUESTION_TIMEOUT_MS).toBeGreaterThan(REGENERATE_QUESTION_TIMEOUT_MS)
+  })
+
   it('không có gợi ý (trống hoặc toàn khoảng trắng) thì không gửi thân yêu cầu', async () => {
     await postRegenerateQuestion('g1', 'q1')
     await postRegenerateQuestion('g1', 'q1', { feedback: '   ' })
@@ -125,5 +137,33 @@ describe('postGenerateGame', () => {
     expect(game).toEqual({ gameId: 'g1', status: 'DRAFT' })
     expect(mockedPost).toHaveBeenCalledWith('/games/generate', request, { timeout: GENERATE_GAME_TIMEOUT_MS, signal: controller.signal })
     expect(GENERATE_GAME_TIMEOUT_MS).toBeGreaterThan(REGENERATE_QUESTION_TIMEOUT_MS)
+  })
+
+  it('GET /games/{id}/insights chỉ gửi sessionType khi có', async () => {
+    const data = { playCount: 0, correctRate: 0, avgAttemptsPerQuestion: 0, completionRate: 0, avgScore: 0, lowSample: false, questions: [] }
+    mockedGet.mockResolvedValue({ data: { success: true, data } })
+
+    expect(await fetchGameInsights('g 1', 'TEAM')).toEqual(data)
+    expect(mockedGet).toHaveBeenLastCalledWith('/games/g%201/insights', { params: { sessionType: 'TEAM' } })
+
+    await fetchGameInsights('g1')
+    expect(mockedGet).toHaveBeenLastCalledWith('/games/g1/insights', { params: undefined })
+
+    await fetchGameInsights('g1', undefined, { from: '2026-11-01', to: '2026-11-20' })
+    expect(mockedGet).toHaveBeenLastCalledWith('/games/g1/insights', {
+      params: { from: '2026-11-01', to: '2026-11-20' },
+    })
+  })
+
+  it('GET chi tiết một câu và review-needed gọi đúng đường dẫn và tham số', async () => {
+    mockedGet.mockResolvedValue({ data: { success: true, data: [] } })
+
+    await fetchQuestionInsights('g 1', 'q/4', 'SELF', { to: '2026-11-20' })
+    expect(mockedGet).toHaveBeenLastCalledWith('/games/g%201/questions/q%2F4/insights', {
+      params: { sessionType: 'SELF', to: '2026-11-20' },
+    })
+
+    expect(await fetchReviewNeeded(3)).toEqual([])
+    expect(mockedGet).toHaveBeenLastCalledWith('/insights/review-needed', { params: { limit: 3 } })
   })
 })

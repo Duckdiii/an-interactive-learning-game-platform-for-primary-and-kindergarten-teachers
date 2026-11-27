@@ -1,10 +1,11 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import PublishDialog from '../components/editor/PublishDialog'
 import { getMockGame, resetMockGames, setMockGameLocked } from '../services/mock/mockGames'
 import { getMockPublishCalls, resetMockPublish, setMockPublishFailure } from '../services/mock/mockPublish'
 import { setMockScenario } from '../services/mock/mockRuntime'
+import * as publishService from '../services/publishService'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import WorkspaceEditor from './WorkspaceEditor'
 
@@ -87,9 +88,16 @@ describe('xuất bản từ trình soạn thảo', () => {
     const user = userEvent.setup()
 
     await openLoaded(DRAFT_ID)
-    vi.stubEnv('VITE_MOCK_LATENCY_MS', '80')
+    let finishPublish!: () => void
+    const pending = new Promise<void>((resolve) => { finishPublish = resolve })
+    const publish = vi.spyOn(publishService, 'publishGame').mockImplementationOnce(async () => {
+      await pending
+      return { gameId: DRAFT_ID, status: 'PUBLISHED', shareCode: 'A3F9K2', shareUrl: 'https://example.test/play/A3F9K2' }
+    })
     await user.click(publishButton())
+    expect(publish).toHaveBeenCalledOnce()
     await user.type(titleBox(), ' thêm')
+    await act(async () => { finishPublish() })
 
     const dialog = await screen.findByRole('dialog')
 

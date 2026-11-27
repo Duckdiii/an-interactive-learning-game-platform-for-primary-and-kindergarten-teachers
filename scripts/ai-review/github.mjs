@@ -60,12 +60,14 @@ export class Github {
       // PR quá 300 file: GitHub trả 406 cho dạng diff. Dựng lại diff từ /files (tối đa 3000 file, 30 trang);
       // file không có `patch` (nhị phân, quá lớn) bị bỏ qua, nghĩa là không gắn comment inline được ở file đó.
       if (!(e instanceof GithubError) || e.status !== 406) throw e;
-      const files = await this.#paginate(`/pulls/${n}/files`, 30);
+      const files = await this.listPullFiles(n);
       return files.filter((f) => f.patch).map((f) =>
         `diff --git a/${f.filename} b/${f.filename}\n+++ ${f.status === "removed" ? "/dev/null" : `b/${f.filename}`}\n${f.patch}\n`,
       ).join("");
     }
   }
+  /** Danh sách file của PR (có phân trang; GitHub trả tối đa 3000 file). */
+  listPullFiles(n) { return this.#paginate(`/pulls/${n}/files`, 30); }
   listReviewComments(n) { return this.#paginate(`/pulls/${n}/comments`); }
   listIssueComments(n) { return this.#paginate(`/issues/${n}/comments`); }
   createReview(n, payload) { return this.#request("POST", `/pulls/${n}/reviews`, { body: payload }); }

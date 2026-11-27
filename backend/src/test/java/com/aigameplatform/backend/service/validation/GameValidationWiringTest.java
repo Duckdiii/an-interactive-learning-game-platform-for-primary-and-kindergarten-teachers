@@ -2,6 +2,7 @@ package com.aigameplatform.backend.service.validation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.aigameplatform.backend.service.admin.AiConfigService;
 import com.aigameplatform.backend.service.validation.rule.AudioVisualMatchRule;
 import com.aigameplatform.backend.service.validation.rule.DragDropRule;
 import com.aigameplatform.backend.service.validation.rule.MatchingRule;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
@@ -28,8 +30,8 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
  * Không cấu hình API key nên Layer 3 chỉ dùng danh sách từ cấm và không gọi OpenAI.
  */
 @SpringJUnitConfig({GameDslSchemaRegistry.class, SchemaGameValidator.class, BusinessRuleGameValidator.class,
-        SafetyGameValidator.class, BlockedWordList.class, OpenAiModerationClient.class, GameValidationService.class,
-        QuizRule.class, AudioVisualMatchRule.class, OddOneOutRule.class, WordScrambleRule.class, MatchingRule.class,
+        SafetyGameValidator.class, com.aigameplatform.backend.service.validation.ContentSafetyCheck.class, BlockedWordList.class, OpenAiModerationClient.class, GameValidationService.class,
+        QuizRule.class, AudioVisualMatchRule.class, OddOneOutRule.class, com.aigameplatform.backend.service.media.NotoEmojiCatalog.class, WordScrambleRule.class, MatchingRule.class,
         MemoryCardRule.class, DragDropRule.class, OrderingRule.class, VisualClozeRule.class})
 @ImportAutoConfiguration(JacksonAutoConfiguration.class)
 @TestPropertySource(properties = {
@@ -41,6 +43,9 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
         "app.moderation.openai.timeout-seconds=1"
 })
 class GameValidationWiringTest {
+
+    @MockitoBean
+    private AiConfigService aiConfigService;
 
     @Autowired
     private GameValidationService service;

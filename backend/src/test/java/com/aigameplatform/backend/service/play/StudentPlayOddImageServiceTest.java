@@ -29,9 +29,11 @@ import tools.jackson.databind.json.JsonMapper;
 class StudentPlayOddImageServiceTest {
     private final GameRepository games = mock(GameRepository.class);
     private final SelfSessionRepository sessions = mock(SelfSessionRepository.class);
+    private final com.aigameplatform.backend.repository.GameSessionRepository liveSessions = mock(com.aigameplatform.backend.repository.GameSessionRepository.class);
+    private final com.aigameplatform.backend.repository.ParticipantRepository participantRepo = mock(com.aigameplatform.backend.repository.ParticipantRepository.class);
     private final GameContentStrategyRegistry strategies = mock(GameContentStrategyRegistry.class);
     private final JsonMapper mapper = JsonMapper.builder().build();
-    private final StudentPlayService service = new StudentPlayService(games, sessions, strategies, mapper);
+    private final StudentPlayService service = StudentPlayTestSupport.service(games, sessions, liveSessions, participantRepo, strategies, mapper);
     private Participant participant;
 
     @BeforeEach

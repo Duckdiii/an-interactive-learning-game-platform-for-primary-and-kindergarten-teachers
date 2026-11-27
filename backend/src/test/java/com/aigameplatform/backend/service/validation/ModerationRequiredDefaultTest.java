@@ -2,6 +2,7 @@ package com.aigameplatform.backend.service.validation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.aigameplatform.backend.service.admin.AiConfigService;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.service.validation.safety.OpenAiModerationClient;
 import java.io.IOException;
@@ -21,7 +22,8 @@ class ModerationRequiredDefaultTest {
     private static final String REQUIRED_KEY = "app.moderation.required";
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withUserConfiguration(SafetyGameValidator.class, BlockedWordList.class, OpenAiModerationClient.class)
+            .withBean(AiConfigService.class, () -> org.mockito.Mockito.mock(AiConfigService.class))
+            .withUserConfiguration(SafetyGameValidator.class, com.aigameplatform.backend.service.validation.ContentSafetyCheck.class, BlockedWordList.class, OpenAiModerationClient.class)
             .withPropertyValues(
                     "app.moderation.blocked-words-location=classpath:moderation/blocked-words-vi.txt",
                     "app.moderation.openai.base-url=https://api.openai.com",

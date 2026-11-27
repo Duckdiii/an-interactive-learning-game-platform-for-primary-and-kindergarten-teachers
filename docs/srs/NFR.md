@@ -1,6 +1,6 @@
 # 3.3. Non-Functional Requirements (Yêu cầu Phi Chức năng - NFR)
 
-> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[srs/SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
+> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
 
 
 

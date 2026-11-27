@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.strategy;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.GameMetadata;
 import com.aigameplatform.backend.dto.dsl.GameplaySettings;
+import com.aigameplatform.backend.dto.dsl.PresentationDsl;
 import com.aigameplatform.backend.dto.dsl.QuestionDsl;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
@@ -30,6 +31,29 @@ import tools.jackson.databind.json.JsonMapper;
 @Getter
 @Setter
 public abstract class GameContentStrategy<D extends QuestionDsl, E extends QuestionGame> {
+
+    // Rút từ lỗi thật khi chạy 12 kịch bản đầu (docs/Kịch bản/Kịch bản tạo game): tên game chép nguyên câu, câu lặp,
+    // mọi màn cùng đáp án, lộ đáp án trong lời dẫn. Luật Lớp 2 (RuleSupport) bắt lại các lỗi kiểm được bằng máy.
+    static final String COMMON_CONTENT_RULES = """
+            Quy tắc chung:
+            - title: tên game ngắn 2-8 từ, hấp dẫn với trẻ, đặt lại từ chủ đề; không chép nguyên câu yêu cầu của giáo viên.
+              title chỉ nhắc vật, nhân vật, bối cảnh thật sự có trong các câu của game.
+            - presentation: chọn cách trình bày hợp với nội dung bài, mỗi trường lấy đúng một giá trị trong danh sách:
+              world (farm, ocean, jungle, space), carrier là vật mang đáp án (balloon, bubble, planet, fruit, card, fish,
+              flower), layout (scatter, row, arc). Ví dụ bài về biển: ocean + fish; về cây trái: farm + fruit; về vũ trụ:
+              space + planet. Không có gì gợi ý thì chọn tự do để các game không giống hệt nhau.
+            - Các câu (màn) không được trùng nhau, kể cả khi chỉ đổi động từ ("Tìm..."/"Chạm...").
+            - Với game mỗi câu có một đáp án đúng: đáp án đúng phải thay đổi giữa các câu, không để mọi câu cùng một đáp án.
+            - Câu điền khuyết: dùng "..." thay chỗ cần điền, không viết lại từ hoàn chỉnh ở bất kỳ đâu trong câu.
+            - Không viết đáp án, hoặc từ hoàn chỉnh chứa đáp án, ngay trong lời dẫn câu hỏi.
+            - Chỉ dùng từ có thật, viết đúng chính tả (tiếng Việt; nội dung tiếng Anh cần học thì đúng chính tả tiếng Anh).
+            - Ngôn ngữ: title, câu hỏi, lời dẫn, câu mẫu và mô tả hình (visualPrompt) luôn viết bằng tiếng Việt, \
+            kể cả khi giáo viên viết yêu cầu bằng tiếng Anh. Riêng môn Tiếng Anh: nội dung trẻ cần học (lựa chọn, \
+            vế nối, từ cần xếp, đáp án) viết bằng tiếng Anh; lời dẫn tiếng Việt được chèn từ tiếng Anh cần học, \
+            ví dụ câu hỏi "Bé chọn quả bóng màu red", lựa chọn "red", "blue".""";
+
+    static final String KINDERGARTEN_LABEL_RULE =
+            "- Mầm non: mỗi lựa chọn/vế chỉ 1-3 từ hoặc 1 chữ cái/chữ số (ví dụ 'ă', 'Con cá'), không viết câu mô tả như 'Chữ A in hoa'.";
 
     protected String id;
 
@@ -78,7 +102,9 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
         }
         String scope = "Phạm vi yêu cầu:\nMôn: " + (subject == null ? "không cung cấp" : subject.name())
                 + "\nLớp/độ tuổi: " + grade + "\nChủ đề giáo viên: " + topic
-                + "\nGiữ đúng môn, lớp/độ tuổi, kỹ năng và phạm vi được yêu cầu; không tự đổi sang môn hoặc lớp khác.";
+                + "\nGiữ đúng môn, lớp/độ tuổi, kỹ năng và phạm vi được yêu cầu; không tự đổi sang môn hoặc lớp khác."
+                + "\n\n" + COMMON_CONTENT_RULES
+                + (grade == GradeLevel.KINDERGARTEN && hasShortChoiceLabels() ? "\n" + KINDERGARTEN_LABEL_RULE : "");
         String prompt = promptTemplate + "\n\n" + scope + "\n\n" + buildTypeSpecificInstruction(topic, grade);
         return appendCurriculumContext(prompt, curriculumContext);
     }
@@ -103,7 +129,28 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
         return jsonSchemaDefinition;
     }
 
+    /**
+     * Đầu ra AI của loại game này có trường {@code asset} (hình chọn từ danh mục) hay không: có thì prompt phải kèm danh mục hình. Đọc từ
+     * chính schema đầu ra (dạng cây JSON, không dò chuỗi) nên thêm/bớt {@code asset} trong schema là đủ.
+     */
+    public boolean hasAssetField() {
+        return containsAssetProperty(jsonMapper.readTree(getStructuredSchema()));
+    }
+
+    private static boolean containsAssetProperty(tools.jackson.databind.JsonNode node) {
+        if (node.isObject() && node.path("properties").has("asset")) return true;
+        for (tools.jackson.databind.JsonNode child : node) {
+            if (containsAssetProperty(child)) return true;
+        }
+        return false;
+    }
+
     protected abstract String buildTypeSpecificInstruction(String topic, GradeLevel grade);
+
+    /** Loại game mà trẻ chọn giữa các nhãn ngắn (lựa chọn, vế cặp): Mầm non thì nhãn phải rất ngắn. */
+    protected boolean hasShortChoiceLabels() {
+        return false;
+    }
 
     public abstract GameType getSupportedType();
 
@@ -153,7 +200,8 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     public GameDsl toGameDsl(Game game) {
         requireSupportedType(game.getGameType());
         GameMetadata metadata = new GameMetadata(game.getTitle(), game.getSubject(), game.getGrade(),
-                game.getTopic() == null || game.getTopic().isBlank() ? game.getTitle() : game.getTopic());
+                game.getTopic() == null || game.getTopic().isBlank() ? game.getTitle() : game.getTopic(),
+                PresentationDsl.fromEntity(game.getPresentation()));
         GameplaySettings settings = new GameplaySettings(GameDefaults.hitboxScale(game.getGrade()));
         return assemble(game, metadata, settings, toQuestionDsls(game.getQuestions()));
     }
@@ -172,6 +220,14 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
         return result;
     }
 
+    public D toQuestionDsl(QuestionGame question, String questionId) {
+        if (!entityType.isInstance(question)) {
+            throw new IllegalArgumentException("Game " + getSupportedType() + " cần câu hỏi kiểu "
+                    + entityType.getSimpleName() + ", nhưng nhận được " + question.getClass().getSimpleName());
+        }
+        return toDsl(entityType.cast(question), questionId);
+    }
+
     protected abstract E toEntity(D dsl);
 
     /** Dựng màn chơi DSL từ entity; các trường chung (thời gian, điểm, media) đọc thẳng từ entity. */
@@ -182,6 +238,17 @@ public abstract class GameContentStrategy<D extends QuestionDsl, E extends Quest
     }
 
     protected abstract GameDsl assemble(GameMetadata metadata, GameplaySettings settings, List<D> questions);
+
+    public GameDsl assembleGame(GameMetadata metadata, GameplaySettings settings, List<? extends QuestionDsl> questions) {
+        List<D> typed = new ArrayList<>();
+        for (QuestionDsl q : questions) {
+            if (!dslType.isInstance(q)) {
+                throw new IllegalArgumentException("Question must be of type " + dslType.getSimpleName());
+            }
+            typed.add(dslType.cast(q));
+        }
+        return assemble(metadata, settings, typed);
+    }
 
     /** Allows a strategy to restore persisted envelope metadata while preserving existing implementations. */
     protected GameDsl assemble(Game game, GameMetadata metadata, GameplaySettings settings, List<D> questions) {

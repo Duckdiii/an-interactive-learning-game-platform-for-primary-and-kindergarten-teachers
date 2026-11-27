@@ -59,7 +59,7 @@ public class AiOutputValidator {
         SchemaRegistry registry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12,
                 builder -> builder.schemaRegistryConfig(
                         SchemaRegistryConfig.builder().pathType(PathType.JSON_PATH).build()));
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             schemas.put(type, registry.getSchema(AiOutputSchemas.rawJson(type), InputFormat.JSON));
         }
         visualClozeImageSchema = registry.getSchema(AiOutputSchemas.visualClozeImageRawJson(), InputFormat.JSON);
@@ -85,6 +85,9 @@ public class AiOutputValidator {
             return failed("Image mode is not supported for this game type");
         }
         Schema schema = imageMode ? (type == GameType.ODD_ONE_OUT ? oddImageSchema : visualClozeImageSchema) : schemas.get(type);
+        if (schema == null) {
+            return failed("Loại game " + type + " không có dạng đầu ra AI theo DSL v1.0.0");
+        }
         List<Error> schemaErrors = schema.validate(json);
         if (!schemaErrors.isEmpty()) {
             return new AiOutputReport(schemaErrors.stream()
@@ -100,6 +103,7 @@ public class AiOutputValidator {
         }
 
         List<ValidationError> problems = new ArrayList<>();
+        problems.addAll(sentencePunctuationProblems(type, json));
         List<? extends AiQuestion> questions = output.questions();
         for (int i = 0; i < questions.size(); i++) {
             for (String problem : questions.get(i).problems()) {
@@ -107,6 +111,45 @@ public class AiOutputValidator {
             }
         }
         return new AiOutputReport(problems, problems.isEmpty() ? output : null);
+    }
+
+    /** Checks complete student-facing sentences without changing word-level content or answer labels. */
+    private static List<ValidationError> sentencePunctuationProblems(GameType type, JsonNode json) {
+        List<ValidationError> problems = new ArrayList<>();
+        JsonNode questions = json.path("questions");
+        for (int i = 0; i < questions.size(); i++) {
+            JsonNode question = questions.get(i);
+            for (String field : List.of("text", "questionText", "sentenceTemplate")) {
+                addPunctuationProblem(problems, question, i, field);
+            }
+
+            // AUDIO_VISUAL_MATCH uses audioText for isolated vocabulary such as "cat" or "Quả táo".
+            if (type != GameType.AUDIO_VISUAL_MATCH) {
+                addPunctuationProblem(problems, question, i, "audioText");
+            }
+        }
+        return problems;
+    }
+
+    private static void addPunctuationProblem(List<ValidationError> problems, JsonNode question, int index,
+            String field) {
+        JsonNode value = question.get(field);
+        if (value == null || !value.isString() || value.asString().isBlank()) return;
+        if (!endsWithSentencePunctuation(value.asString())) {
+            problems.add(new ValidationError("$.questions[" + index + "]." + field,
+                    "Câu hỏi hoặc lời đọc hoàn chỉnh phải kết thúc bằng dấu câu phù hợp"));
+        }
+    }
+
+    private static boolean endsWithSentencePunctuation(String source) {
+        String text = source.stripTrailing();
+        int index = text.length() - 1;
+        while (index >= 0 && isClosingDelimiter(text.charAt(index))) index--;
+        return index >= 0 && ".?!…。？！".indexOf(text.charAt(index)) >= 0;
+    }
+
+    private static boolean isClosingDelimiter(char value) {
+        return "\"'’”»)]}".indexOf(value) >= 0;
     }
 
     private static AiOutputReport failed(String message) {

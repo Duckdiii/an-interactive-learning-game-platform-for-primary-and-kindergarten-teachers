@@ -7,9 +7,12 @@ import com.aigameplatform.backend.dto.response.RegisterResponse;
 import com.aigameplatform.backend.dto.response.TeacherInfo;
 import com.aigameplatform.backend.entity.RefreshToken;
 import com.aigameplatform.backend.entity.Teacher;
+import com.aigameplatform.backend.entity.enums.TeacherStatus;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.exception.LoginTemporarilyLockedException;
+import com.aigameplatform.backend.exception.UnsafeContentException;
+import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
 import com.aigameplatform.backend.repository.RefreshTokenRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.security.JwtService;
@@ -41,6 +44,7 @@ public class AuthService {
     static final Duration LOGIN_LOCK_DURATION = Duration.ofMinutes(15);
 
     private final TeacherRepository teacherRepository;
+    private final BlockedWordList blockedWords;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -58,6 +62,7 @@ public class AuthService {
             JwtService jwtService,
             RefreshTokenCodec refreshTokenCodec,
             Clock clock,
+            BlockedWordList blockedWords,
             @Value("${app.jwt.refresh-token-ttl-hours}") long refreshTtlHours,
             @Value("${app.jwt.remember-me-refresh-token-ttl-days}") long rememberMeTtlDays) {
         this.teacherRepository = teacherRepository;
@@ -66,6 +71,7 @@ public class AuthService {
         this.jwtService = jwtService;
         this.refreshTokenCodec = refreshTokenCodec;
         this.clock = clock;
+        this.blockedWords = blockedWords;
         this.refreshTtlHours = refreshTtlHours;
         this.rememberMeTtlDays = rememberMeTtlDays;
         this.dummyPasswordHash = passwordEncoder.encode(UUID.randomUUID().toString());
@@ -77,7 +83,12 @@ public class AuthService {
         if (teacherRepository.existsByEmail(email)) {
             throw emailAlreadyRegistered();
         }
+        String school = request.school() == null ? "" : request.school().strip();
+        if (blockedWords.findIn(school).isPresent()) {
+            throw new UnsafeContentException("Nội dung chưa đạt chuẩn an toàn dành cho học sinh. Vui lòng điều chỉnh lại.");
+        }
         Teacher teacher = new Teacher();
+        teacher.setSchool(school.isEmpty() ? null : school);
         teacher.setFullName(request.fullName().trim());
         teacher.setEmail(email);
         teacher.setPasswordHash(passwordEncoder.encode(request.password()));
@@ -157,6 +168,10 @@ public class AuthService {
             refreshTokenRepository.revokeFamily(stored.getFamilyId(), now);
             throw new ApiException(ErrorCode.ACCOUNT_LOCKED, ACCOUNT_LOCKED);
         }
+        if (stored.getSessionVersion() != teacher.getSessionVersion()) {
+            refreshTokenRepository.revokeFamily(stored.getFamilyId(), now);
+            throw new ApiException(ErrorCode.UNAUTHORIZED, INVALID_REFRESH_TOKEN);
+        }
 
         stored.revoke(now);
         // "Ghi nhớ đăng nhập" có hạn tuyệt đối 30 ngày tính từ lúc đăng nhập: xoay vòng giữ nguyên hạn cũ, không gia
@@ -188,17 +203,19 @@ public class AuthService {
         token.setTeacher(teacher);
         token.setTokenHash(refreshTokenCodec.hash(rawRefreshToken));
         token.setFamilyId(familyId);
+        token.setSessionVersion(teacher.getSessionVersion());
         token.setCreatedAt(now);
         token.setRememberMe(rememberMe);
         token.setExpiresAt(expiresAt);
         refreshTokenRepository.save(token);
 
-        String accessToken = jwtService.generateAccessToken(teacher.getId(), teacher.getEmail(), familyId);
+        String accessToken = jwtService.generateAccessToken(
+                teacher.getId(), teacher.getEmail(), familyId, teacher.getRole().name(), teacher.getSessionVersion());
         AuthResponse response = new AuthResponse(
                 accessToken,
                 jwtService.getAccessTokenTtlSeconds(),
-                new TeacherInfo(teacher.getId(), teacher.getFullName(), teacher.getEmail()));
-        return new AuthResult(response, rawRefreshToken, rememberMe);
+                new TeacherInfo(teacher.getId(), teacher.getFullName(), teacher.getEmail(), teacher.getRole()));
+        return new AuthResult(response, rawRefreshToken, rememberMe, Duration.between(now, expiresAt));
     }
 
     // Dùng chung với PasswordResetService để email được so khớp giống hệt lúc đăng ký/đăng nhập.

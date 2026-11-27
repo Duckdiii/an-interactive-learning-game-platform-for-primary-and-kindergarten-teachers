@@ -8,6 +8,18 @@ import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import { saveDraft } from '../utils/draftStorage'
 import { toContent } from '../utils/gameContent'
 import WorkspaceEditor from './WorkspaceEditor'
+
+vi.mock('react-konva', () => ({
+  Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => <div onClick={onClick}>{children}</div>,
+  Rect: () => null,
+  Text: ({ text }: { text?: string }) => <span>{text}</span>,
+  Image: () => null,
+}))
+vi.mock('use-image', () => ({
+  default: () => [undefined],
+}))
 import { autosaved } from '../test/autosave'
 import { timingBox } from '../test/editorTiming'
 
@@ -119,14 +131,14 @@ describe('thành công và hoàn tác', () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument(), SLOW)
     expect(within(notice()).getByText(SUCCESS)).toBeInTheDocument()
-    expect(within(notice()).getByText('Câu mới sẽ được tự lưu sau ít giây.')).toBeInTheDocument()
+    expect(within(notice()).getByText('Câu mới sẽ được lưu khi bạn bấm Lưu bản nháp.')).toBeInTheDocument()
     expect(notice()).toHaveFocus()
 
     const after = listButtons().map((button) => button.textContent)
 
     expect(after[0]).not.toBe(before[0])
     expect(after.slice(1)).toEqual(before.slice(1))
-    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
+    expect(screen.getByText('Đang xem bản AI · Chưa lưu')).toBeInTheDocument()
     // Máy chủ KHÔNG đổi: câu mới chỉ nằm trong bản đang soạn.
     expect(getMockGame(QUIZ_ID).questions[0]).toEqual(serverBefore.questions[0])
     // Ảnh và âm thanh là của câu mới (kèm giọng đã chọn), không phải của câu cũ.
@@ -170,7 +182,7 @@ describe('thành công và hoàn tác', () => {
     await waitFor(() => expect(within(notice()).queryByRole('button', { name: 'Hoàn tác' })).not.toBeInTheDocument())
   })
 
-  it('tự lưu đưa câu mới lên máy chủ nhưng vẫn giữ nút Hoàn tác; bấm Hoàn tác thì câu cũ được tự lưu lại', async () => {
+  it('chỉ gửi câu mới lên máy chủ khi bấm Lưu bản nháp và vẫn có thể hoàn tác', async () => {
     const user = userEvent.setup()
 
     await openEditor()
@@ -179,6 +191,8 @@ describe('thành công và hoàn tác', () => {
     await user.click(within(dialog()).getByRole('button', { name: 'Xác nhận tạo lại' }))
     await within(notice()).findByText(SUCCESS, {}, SLOW)
 
+    expect(getMockGame(QUIZ_ID).questions[0]).toEqual(serverBefore.questions[0])
+    await user.click(screen.getByRole('button', { name: 'Lưu bản nháp' }))
     await autosaved()
 
     // Máy chủ nhận câu MỚI do AI làm lại (khác câu cũ), đúng thẻ q1.
@@ -186,13 +200,13 @@ describe('thành công và hoàn tác', () => {
     expect(getMockGame(QUIZ_ID).questions[0]).not.toEqual(serverBefore.questions[0])
     expect(listButtons()[0].textContent).toContain((getMockGame(QUIZ_ID).questions[0] as { questionText: string }).questionText)
 
-    // Tự lưu không lấy mất Hoàn tác: bấm thì câu cũ quay lại và được tự lưu lên máy chủ.
+    // Lưu không lấy mất Hoàn tác. Câu cũ quay lại và được tự lưu sau khi hoàn tác.
     await user.click(within(notice()).getByRole('button', { name: 'Hoàn tác' }))
     await autosaved()
     expect(getMockGame(QUIZ_ID).questions[0]).toEqual(serverBefore.questions[0])
   })
 
-  it('trong lúc AI làm việc: nút Lưu bị khóa và hiện "Đang áp dụng chỉnh sửa..."; xong thì mở lại', async () => {
+  it('trong lúc AI làm việc hiện trạng thái chờ, rồi chỉ bật Xuất bản sau khi lưu bản nháp', async () => {
     vi.stubEnv('VITE_MOCK_LATENCY_MS', '300')
 
     const user = userEvent.setup()
@@ -206,6 +220,9 @@ describe('thành công và hoàn tác', () => {
     expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeDisabled()
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument(), { timeout: 10000 })
+    expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: 'Lưu bản nháp' }))
+    await autosaved()
     expect(screen.getByRole('button', { name: /^Xuất bản/ })).toBeEnabled()
   })
 })

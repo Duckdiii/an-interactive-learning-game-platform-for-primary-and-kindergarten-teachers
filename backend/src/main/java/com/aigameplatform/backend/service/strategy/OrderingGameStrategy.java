@@ -38,8 +38,7 @@ public class OrderingGameStrategy extends GameContentStrategy<OrderingQuestionDs
     }
 
     /**
-     * OrderStep là aggregation (không cascade): các bước dựng ra ở đây chưa có id và phải được lưu riêng trước khi
-     * lưu câu hỏi. Entity chỉ giữ thứ tự đúng (correctPosition), không giữ thứ tự hiển thị của DSL.
+     * Entity giữ thứ tự đúng (correctPosition). Các bước mới được lưu cùng câu hỏi.
      */
     @Override
     protected OrderingQuestion toEntity(OrderingQuestionDsl dsl) {

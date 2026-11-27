@@ -26,7 +26,7 @@ class GameContentStrategyRegistryTest {
 
     @Test
     void springWiresOneStrategyForEveryGameType() {
-        for (GameType type : GameType.values()) {
+        for (GameType type : GameType.dslTypes()) {
             assertThat(registry.get(type).getSupportedType()).isEqualTo(type);
         }
     }

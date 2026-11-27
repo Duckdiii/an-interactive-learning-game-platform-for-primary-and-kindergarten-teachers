@@ -2,6 +2,8 @@ export const ROUTES = {
   dashboard: '/dashboard',
   createGame: '/games/new',
   results: '/results',
+  classrooms: '/classrooms',
+  teacherProfile: '/profile',
   login: '/login',
   register: '/register',
   // Quên/đặt lại mật khẩu (UC-15 luồng 2a); trang đặt lại nhận ?token=... từ liên kết trong email.
@@ -19,6 +21,13 @@ export const ROUTES = {
   roomHost: '/rooms/host/:gameId',
   // Màn hình trình chiếu Live Arena lớn trên máy chiếu / tivi
   liveArenaPresentation: '/presentation/:sessionId',
+  // Màn hình điều khiển Live Arena của giáo viên (quản lý học sinh, kick, chuyển câu)
+  liveArenaTeacherControl: '/rooms/:sessionId/control',
+  // Phân hệ Quản trị viên (Admin Portal)
+  adminDashboard: '/admin/dashboard',
+  adminTeachers: '/admin/teachers',
+  adminAuditLogs: '/admin/audit-logs',
+  adminAiConfig: '/admin/ai-config',
 } as const
 
 export const presentPath = (gameId: string) => `/present/${encodeURIComponent(gameId)}`
@@ -26,5 +35,7 @@ export const roomHostPath = (gameId: string) => `/rooms/host/${encodeURIComponen
 export const roomJoinPath = (pin: string) => `/join/${encodeURIComponent(pin)}`
 export const liveArenaPresentationPath = (sessionId: string) =>
   `/presentation/${encodeURIComponent(sessionId)}`
+export const liveArenaTeacherControlPath = (sessionId: string) =>
+  `/rooms/${encodeURIComponent(sessionId)}/control`
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]

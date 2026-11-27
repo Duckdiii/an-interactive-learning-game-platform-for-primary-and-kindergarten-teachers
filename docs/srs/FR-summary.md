@@ -1,6 +1,6 @@
 # 3.1.3. Danh mục Yêu cầu Chức năng Chi tiết (Functional Requirements Summary - FR-01 đến FR-15)
 
-> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[srs/SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
+> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
 
 
 

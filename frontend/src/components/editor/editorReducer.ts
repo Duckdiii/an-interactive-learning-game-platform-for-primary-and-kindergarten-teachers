@@ -1,4 +1,4 @@
-import type { GameDsl, QuestionDsl } from '../../types/game-dsl.types'
+import type { GameDsl, GamePresentation, QuestionDsl } from '../../types/game-dsl.types'
 import { deepEqual, trimContent } from '../../utils/gameContent'
 import { applyGameDefault } from '../../utils/gameDefaults'
 import type { DefaultField } from '../../utils/gameDefaults'
@@ -11,37 +11,47 @@ import type { DefaultField } from '../../utils/gameDefaults'
 export interface RegenerateUndo {
   previous: QuestionDsl
   applied: QuestionDsl
+  previousManual: boolean
 }
 
 export interface EditorState {
+  manualSave: ReadonlySet<string> | null
   baseline: GameDsl
   draft: GameDsl
   // Theo mã thẻ câu. Một mục biến mất khi giáo viên sửa tiếp CHÍNH câu đó, khi câu đó ĐÃ ĐƯỢC LƯU thành công, hoặc khi khôi phục bản sao lưu.
   // (Bấm Lưu mà lưu lỗi thì chưa mất: bản nháp vẫn chứa câu AI và chưa lưu.)
   undo: Readonly<Record<string, RegenerateUndo>>
+  // Bản nháp trước khi áp game AI sửa qua chat (`previous`) và game vừa áp (`applied`): "Hoàn tác" một bước, chỉ khi giáo viên chưa sửa gì thêm.
+  chatUndo: { previous: GameDsl; applied: GameDsl } | null
 }
 
 export type EditorAction =
   | { type: 'setTitle'; title: string }
   | { type: 'setTopic'; topic: string }
+  // Đổi một phần cách trình bày (thế giới, vật mang đáp án, bố cục); undefined thì bỏ phần đó để frontend tự chọn.
+  | { type: 'setPresentation'; presentation: GamePresentation }
   // Áp một bản vá (hàm thuần trong `forms/*Editing`) lên câu HIỆN HÀNH ở vị trí `index`. Bản vá chạy trên trạng thái mới nhất nên
   // một lần kiểm tra từ ngữ về muộn không ghi đè các sửa đổi khác; `questionId` phải còn khớp (đã đổi câu/khôi phục thì bỏ qua).
   | { type: 'updateQuestion'; index: number; questionId: string; update: (question: QuestionDsl) => QuestionDsl }
   // Đưa câu do AI làm lại vào đúng thẻ (`questionId` phải còn khớp, nếu không thì bỏ qua) và nhớ câu cũ để hoàn tác.
-  | { type: 'applyRegenerated'; index: number; questionId: string; question: QuestionDsl }
+  | { type: 'applyRegenerated'; index: number; questionId: string; question: QuestionDsl; schemaVersion?: '1.2.0' }
   // Trả câu cũ về, chỉ khi thẻ vẫn đang đúng là câu AI vừa đưa vào.
   | { type: 'undoRegenerated'; index: number; questionId: string }
   // Đổi thời gian/điểm mặc định của game: mọi câu đang theo mặc định cũ đổi theo (xem utils/gameDefaults).
   | { type: 'setGameDefault'; field: DefaultField; value: number }
+  // Áp game AI đã sửa theo chat (POST /games/{id}/revise) thay cả bản nháp, nhớ bản cũ để hoàn tác.
+  | { type: 'applyChatRevision' | 'applyRegeneratedGame'; content: GameDsl }
+  // Trả bản nháp về trước lần áp gần nhất, chỉ khi bản nháp vẫn đúng là game AI vừa đưa vào.
+  | { type: 'undoChatRevision' }
   // Thay cả bản nháp bằng bản sao lưu trong trình duyệt (giáo viên chọn "Khôi phục").
-  | { type: 'restore'; content: GameDsl }
+  | { type: 'restore'; content: GameDsl; manualSave?: boolean }
   // Lưu thành công: `snapshot` là đúng nội dung đã gửi. Nếu giáo viên gõ thêm trong lúc chờ thì `draft` vẫn giữ phần mới đó.
-  | { type: 'saved'; snapshot: GameDsl }
+  | { type: 'saved'; snapshot: GameDsl; manualSave?: EditorState['manualSave'] }
   // Cắt khoảng trắng hai đầu của mọi chuỗi nội dung (bản này cũng là bản được gửi lên, nên đã cắt từ trước khi gửi).
   | { type: 'normalize' }
 
 export function createEditorState(content: GameDsl): EditorState {
-  return { baseline: content, draft: content, undo: {} }
+  return { baseline: content, draft: content, undo: {}, chatUndo: null, manualSave: null }
 }
 
 const without = (undo: EditorState['undo'], questionId: string): EditorState['undo'] => {
@@ -60,6 +70,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, draft: { ...state.draft, metadata: { ...state.draft.metadata, title: action.title } } }
     case 'setTopic':
       return { ...state, draft: { ...state.draft, metadata: { ...state.draft.metadata, topic: action.topic } } }
+    case 'setPresentation': {
+      const merged = { ...state.draft.metadata.presentation, ...action.presentation }
+      const presentation = Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== undefined)) as GamePresentation
+      const { presentation: _previous, ...base } = state.draft.metadata
+      const metadata = Object.keys(presentation).length === 0 ? base : { ...base, presentation }
+      return { ...state, draft: { ...state.draft, metadata } }
+    }
     case 'setGameDefault': {
       const questions = applyGameDefault(state.draft.questions as QuestionDsl[], action.field, action.value)
       // Câu nào bị đổi theo thì hết hoàn tác, như khi sửa tay câu đó.
@@ -91,8 +108,11 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
 
       return {
         ...state,
-        draft: { ...state.draft, questions } as GameDsl,
-        undo: { ...state.undo, [action.questionId]: { previous: current, applied: action.question } },
+        draft: { ...state.draft, questions, schemaVersion: action.schemaVersion ?? state.draft.schemaVersion } as GameDsl,
+        manualSave: new Set([...(state.manualSave ?? []), action.questionId]),
+        undo: { ...state.undo, [action.questionId]: {
+          previous: current, applied: action.question, previousManual: state.manualSave?.has(action.questionId) ?? false,
+        } },
       }
     }
     case 'undoRegenerated': {
@@ -106,13 +126,34 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
 
       const questions = state.draft.questions.map((question, position) => (position === action.index ? entry.previous : question))
 
-      return { ...state, draft: { ...state.draft, questions } as GameDsl, undo: without(state.undo, action.questionId) }
+      const schemaVersion = state.draft.schemaVersion === '1.2.0' && state.baseline.schemaVersion === '1.1.0'
+        && questions.every((question) => !question.audioUrl) ? '1.1.0' : state.draft.schemaVersion
+      const remaining = state.manualSave ? new Set(state.manualSave) : null
+      if (!entry.previousManual) remaining?.delete(action.questionId)
+      return {
+        ...state,
+        draft: { ...state.draft, questions, schemaVersion } as GameDsl,
+        undo: without(state.undo, action.questionId),
+        manualSave: remaining?.size ? remaining : null,
+      }
     }
+    case 'applyRegeneratedGame':
+    case 'applyChatRevision':
+      return {
+        ...state,
+        draft: action.content,
+        undo: {},
+        chatUndo: { previous: state.draft, applied: action.content },
+        manualSave: action.type === 'applyRegeneratedGame' ? new Set(['*']) : state.manualSave,
+      }
+    case 'undoChatRevision':
+      if (!state.chatUndo || !deepEqual(state.draft, state.chatUndo.applied)) return { ...state, chatUndo: null }
+      return { ...state, draft: state.chatUndo.previous, chatUndo: null,
+        manualSave: state.manualSave?.has('*') ? null : state.manualSave }
     case 'restore':
-      return { ...state, draft: action.content, undo: {} }
+      return { ...state, draft: action.content, undo: {}, chatUndo: null, manualSave: action.manualSave === true ? new Set(['*']) : null }
     case 'saved':
-      // Tự lưu chạy vài giây sau mỗi lần sửa, nên lưu xong vẫn giữ "Hoàn tác" của câu AI làm lại: hoàn tác chỉ đưa câu cũ về bản nháp rồi lại được tự lưu.
-      return { ...state, baseline: action.snapshot }
+      return { ...state, baseline: action.snapshot, manualSave: action.manualSave === state.manualSave ? null : state.manualSave }
     case 'normalize': {
       // Chuẩn bị lưu: cắt khoảng trắng bản nháp. Hoàn tác giữ nguyên (lưu lỗi thì câu AI vẫn chưa lưu), chỉ cập nhật "câu đang hiện" theo bản đã cắt để hoàn tác vẫn nhận ra thẻ chưa bị sửa.
       const draft = trimContent(state.draft)

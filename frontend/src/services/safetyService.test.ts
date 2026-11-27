@@ -1,9 +1,12 @@
+import { AxiosError } from 'axios'
+import axiosInstance from '../api/axiosInstance'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { setMockScenario } from './mock/mockRuntime'
 import { mockCheckSafety } from './mock/safetyCheck'
 import { checkTextSafety } from './safetyService'
 
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.stubEnv('VITE_USE_MOCK', 'none')
   setMockScenario('normal')
 })
@@ -33,10 +36,26 @@ describe('checkTextSafety', () => {
     await expect(checkTextSafety(['con mèo'])).resolves.toEqual({ safe: true })
   })
 
-  it('dùng API thật thì không có điểm kiểm tra riêng: coi là an toàn, Backend kiểm duyệt khi lưu', async () => {
+  it('gửi chữ tới backend và chỉ chấp nhận phản hồi xác nhận đã kiểm tra', async () => {
     vi.stubEnv('VITE_USE_MOCK', 'none')
+    const post = vi.spyOn(axiosInstance, 'post').mockResolvedValueOnce({ data: { success: true, data: { safe: true } } })
+      .mockResolvedValueOnce({ data: { success: true } })
 
-    await expect(checkTextSafety(['cảnh máu me'])).resolves.toEqual({ safe: true })
+    await expect(checkTextSafety(['con mèo'])).resolves.toEqual({ safe: true })
+    expect(post).toHaveBeenCalledWith('/games/validate-text', { texts: ['con mèo'] })
+    await expect(checkTextSafety(['con cá'])).rejects.toThrow()
+  })
+
+  it('phân biệt chữ bị từ chối với lỗi dịch vụ kiểm duyệt', async () => {
+    vi.stubEnv('VITE_USE_MOCK', 'none')
+    const unsafe = Object.assign(new AxiosError('unsafe'), {
+      response: { status: 422, data: { error: { code: 'UNSAFE_CONTENT' } } },
+    })
+    const unavailable = new Error('Không khả dụng')
+    vi.spyOn(axiosInstance, 'post').mockRejectedValueOnce(unsafe).mockRejectedValueOnce(unavailable)
+
+    await expect(checkTextSafety(['cảnh máu me'])).resolves.toEqual({ safe: false })
+    await expect(checkTextSafety(['con mèo'])).rejects.toBe(unavailable)
   })
 
   it('kịch bản lỗi mạng của mô phỏng thì ném lỗi để giao diện báo "chưa kiểm tra được"', async () => {

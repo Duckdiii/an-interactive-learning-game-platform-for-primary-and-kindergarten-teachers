@@ -3,6 +3,10 @@ spring:
     import: optional:file:./.env[.properties]
   application:
     name: aigame-backend
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
 
   # SMTP cho thư đặt lại mật khẩu; chỉ dùng khi app.mail.enabled=true (MAIL_ENABLED).
   mail:
@@ -30,6 +34,9 @@ spring:
       maximum-pool-size: 5
       # Supabase installs pgvector in the extensions schema; LangChain4j needs it on the search path.
       connection-init-sql: SET search_path TO public, extensions
+      data-source-properties:
+        # Driver gộp các lệnh insert cùng loại trong một lô thành một câu multi-row: ít lượt đi về Supabase hơn.
+        reWriteBatchedInserts: true
 
   jpa:
     hibernate:
@@ -38,6 +45,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Mỗi lượt đi về Supabase mất hàng trăm ms: lưu một game (xóa rồi ghi lại mọi câu, bảng JOINED, danh sách lựa chọn) từng
+        # tốn khoảng 100 câu lệnh lẻ. Gộp insert/update/delete theo lô và đọc các danh sách con theo lô thay vì từng câu một.
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        default_batch_fetch_size: 50
     open-in-view: false
 
   flyway:
@@ -47,9 +61,17 @@ spring:
     # baseline-version 0 makes sure V1 and V2 are still applied.
     baseline-on-migrate: true
     baseline-version: 0
+    # Mặc định của Flyway là *:future. DB dùng chung đã áp V12–V16 của nhánh feature chưa merge (nay là V23–V27),
+    # nên ở máy cá nhân đặt FLYWAY_IGNORE_MIGRATION_PATTERNS=*:missing,*:future (KNOWN-GAPS #26).
+    ignore-migration-patterns: ${FLYWAY_IGNORE_MIGRATION_PATTERNS:*:future}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
+
+media:
+  storage:
+    local-dir: ${MEDIA_STORAGE_LOCAL_DIR:target/media-storage}
+    base-url: ${MEDIA_STORAGE_BASE_URL:http://localhost:${server.port}/media}
 
 # Swagger UI (/swagger-ui.html) và spec sinh từ controller (/v3/api-docs). Mặc định bật để dev xem;
 # môi trường triển khai thật đặt SWAGGER_ENABLED=false.
@@ -61,6 +83,12 @@ springdoc:
     operations-sorter: method
 
 app:
+  admin:
+    email: ${APP_ADMIN_EMAIL:admin@aigame.local}
+    # Không có mặc định. Trống thì không tạo tài khoản admin; profile prod bắt buộc (application-prod.yml).
+    password: ${APP_ADMIN_PASSWORD:}
+  pexels:
+    api-key: ${PEXELS_API_KEY:}
   cors:
     # Nhiều origin thì ngăn bằng dấu phẩy. Profile prod bắt buộc CORS_ALLOWED_ORIGINS (application-prod.yml).
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
@@ -69,6 +97,20 @@ app:
     # Profile prod bắt buộc PLAYER_ORIGIN + PLAYER_SHARE_BASE_URL, không có mặc định localhost.
     browser-origin: ${PLAYER_ORIGIN:http://localhost:5173}
     share-base-url: ${PLAYER_SHARE_BASE_URL:http://localhost:5173/play}
+  narration:
+    feedback-cache-version: ${TTS_FEEDBACK_CACHE_VERSION:1}
+    viettel:
+      token: ${VIETTEL_TTS_TOKEN:}
+    elevenlabs:
+      api-key: ${ELEVENLABS_API_KEY:}
+      voice-id: ${ELEVENLABS_VOICE_ID:JBFqnCBsd6RMkjVDRZzb}
+      model-id: ${ELEVENLABS_MODEL_ID:eleven_flash_v2_5}
+      connect-timeout-seconds: ${ELEVENLABS_CONNECT_TIMEOUT_SECONDS:5}
+      read-timeout-seconds: ${ELEVENLABS_READ_TIMEOUT_SECONDS:25}
+    storage:
+      url: ${SUPABASE_URL:}
+      service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
+      bucket: ${TTS_STORAGE_BUCKET:game-narration}
   jwt:
     # HS256 signing key, at least 32 bytes. Provide it via the JWT_SECRET environment variable.
     secret: ${JWT_SECRET}
@@ -91,6 +133,20 @@ app:
     # Profile prod luôn bật (application-prod.yml).
     enabled: ${MAIL_ENABLED:false}
     from: ${MAIL_FROM:no-reply@localhost}
+  assets:
+    # Thử nghiệm: chữ nói tới hình A mà gắn hình B thì báo lỗi Layer 2 để AI sinh lại (retrieval + luật).
+    meaning-check:
+      enabled: ${ASSET_MEANING_CHECK_ENABLED:false}
+    # Thử nghiệm: đưa các hình có từ khóa trong yêu cầu lên đầu danh mục trong prompt.
+    shortlist:
+      enabled: ${ASSET_SHORTLIST_ENABLED:false}
+    # Tách bước gán hình riêng sau Gemini (bản đầu: tra nhãn, đồ thị khái niệm, khóa họ phong cách).
+    binder:
+      enabled: ${ASSET_BINDER_ENABLED:false}
+      mode: ${ASSET_BINDER_MODE:fill-empty}               # fill-empty | override
+      style-lock:
+        enabled: ${ASSET_STYLE_LOCK_ENABLED:true}
+        min-coverage: ${ASSET_STYLE_LOCK_MIN_COVERAGE:0.5}
   moderation:
     # Mặc định true: app từ chối khởi động nếu chưa có OPENAI_API_KEY, để không lỡ chạy với kiểm duyệt yếu.
     # Chỉ đặt MODERATION_REQUIRED=false khi chạy thử ở máy cá nhân (khi đó chỉ dùng danh sách từ cấm).
@@ -104,9 +160,18 @@ app:
   ai:
     gemini:
       api-key: ${GEMINI_API_KEY:}
-      model: ${GEMINI_MODEL:gemini-2.5-flash}
+      model: ${GEMINI_MODEL:gemini-3-flash-preview}
       game-generation:
         enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
+      lesson-preparation:
+        timeout-seconds: ${LESSON_INTENT_TIMEOUT_SECONDS:30}
+  lesson:
+    parser-timeout-ms: ${LESSON_PARSER_TIMEOUT_MS:5000}
+    parser-workers: ${LESSON_PARSER_WORKERS:2}
+  generation:
+    # Rà chính tả bằng AI sau khi sinh game: thêm tới 2 lần gọi Gemini mỗi game (tốn hạn mức theo ngày của gói Gemini), nên tắt mặc định.
+    wording-review:
+      enabled: ${WORDING_REVIEW_ENABLED:false}
   curriculum-rag:
     constraints-approved-sha256: ${CURRICULUM_CONSTRAINTS_APPROVED_SHA256:}
     enabled: ${CURRICULUM_RAG_ENABLED:false}

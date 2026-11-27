@@ -9,6 +9,11 @@ import type { PlayerApi } from './PlayerApi'
 export const PLAYER_REQUEST_TIMEOUT_MS = 10_000
 
 export class RealPlayerApi implements PlayerApi {
+  private readonly roomParticipantId?: string
+
+  constructor(roomParticipantId?: string) {
+    this.roomParticipantId = roomParticipantId
+  }
   async getPublishInfo(shareCode: string): Promise<PublishInfo> {
     const response = await axiosInstance.get<ApiSuccessResponse<PublishInfo>>(
       `/games/shared/${encodeURIComponent(shareCode)}`,
@@ -48,6 +53,7 @@ export class RealPlayerApi implements PlayerApi {
   }
 
   private participantId(sessionId: string): string {
+    if (this.roomParticipantId) return this.roomParticipantId
     for (let index = 0; index < window.sessionStorage.length; index++) {
       const key = window.sessionStorage.key(index)
       if (!key?.startsWith('player:session:')) continue

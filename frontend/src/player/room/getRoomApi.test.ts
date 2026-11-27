@@ -1,21 +1,19 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { getRoomApi, isRoomAvailable } from './getRoomApi'
+import { afterEach, expect, it, vi } from 'vitest'
+import { getRoomApi, usesMockRoom } from './getRoomApi'
 
 afterEach(() => vi.unstubAllEnvs())
 
-describe('getRoomApi', () => {
-  it('bản dev: phòng chạy được', () => {
-    expect(isRoomAvailable()).toBe(true)
-  })
+it('the sessions mock flag enables the two-tab room only outside production', async () => {
+  vi.stubEnv('VITE_USE_MOCK', 'sessions')
+  expect(usesMockRoom()).toBe(true)
+  expect(await getRoomApi()).toHaveProperty('open')
 
-  it('bản build thật: phòng khóa, không có phòng nào để tìm, không mở hay vào được', async () => {
-    vi.stubEnv('PROD', true)
+  vi.stubEnv('PROD', true)
+  expect(usesMockRoom()).toBe(false)
+  await expect(getRoomApi()).rejects.toThrow()
+})
 
-    const api = await getRoomApi()
-
-    expect(isRoomAvailable()).toBe(false)
-    await expect(api.findByPin('482913')).resolves.toBeNull()
-    await expect(api.join('482913', 'A')).rejects.toThrow()
-    await expect(api.open({} as never)).rejects.toThrow()
-  })
+it('the dev server can reach real rooms with mocks disabled', () => {
+  vi.stubEnv('VITE_USE_MOCK', 'none')
+  expect(usesMockRoom()).toBe(false)
 })

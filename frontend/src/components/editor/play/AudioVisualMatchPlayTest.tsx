@@ -5,7 +5,7 @@ import type { AnswerResult, StudentAudioVisualMatchQuestion } from '../../../typ
 import type { PlayTestProps } from './playTestRegistry'
 
 /** Chấm AVM trong trình duyệt để giáo viên thử renderer và âm báo mà không tạo session hoặc gọi API. */
-export default function AudioVisualMatchPlayTest({ question, subject, onResult }: PlayTestProps) {
+export default function AudioVisualMatchPlayTest({ question, subject, onResult, playQuestionAudio }: PlayTestProps) {
   const avm = question as AudioVisualMatchQuestion
   const choices = seededShuffle([
     { visualPrompt: avm.correct.visualPrompt, imageUrl: avm.correct.imageUrl, correct: true },
@@ -36,6 +36,6 @@ export default function AudioVisualMatchPlayTest({ question, subject, onResult }
     }
   }
 
-  return <AudioVisualMatchRenderer question={studentQuestion} onSubmit={onSubmit}
+  return <AudioVisualMatchRenderer question={studentQuestion} onSubmit={onSubmit} playAudio={playQuestionAudio}
     ttsLanguage={subject === 'ENGLISH' ? 'en-US' : 'vi-VN'} />
 }

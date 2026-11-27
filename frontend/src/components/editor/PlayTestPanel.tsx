@@ -4,22 +4,33 @@ import type { GameDsl } from '../../types/game-dsl.types'
 import { resolveUiProfile } from '../../player/profile/resolveUiProfile'
 import { UiProfileProvider } from '../../player/profile/UiProfileContext'
 import { summarizeQuestions } from '../../utils/questionSummary'
+import { resolveTheme } from '../../player/theme/resolveTheme'
+import { ThemeProvider } from '../../player/theme/ThemeContext'
+import { PresentationProvider } from '../../player/theme/PresentationContext'
+import { resolvePresentation } from '../../utils/presentation'
 import Button from '../Button'
 import Icon from '../ui/Icon'
 import { PLAY_TEST_RENDERERS } from './play/playTestRegistry'
 import PlayTestSummary from './PlayTestSummary'
 import { createPlayTestState, playTestReducer } from './playTestReducer'
 import UnsupportedPlayTest from './UnsupportedPlayTest'
+import { usePlayTestNarrationAudio } from './usePlayTestNarrationAudio'
+import { CloudFeedbackContext } from '../../games/common/useAnswerAudio'
+import type { PlayTestQuestionNarration } from './usePlayTestNarrationAudio'
 
 interface PlayTestPanelProps {
   // Bản đang soạn (kể cả phần chưa lưu): chơi thử đúng thứ giáo viên thấy trên màn hình.
   game: GameDsl
+  /** Dùng game id để giữ cách trình bày ổn định nếu game chưa lưu lựa chọn. */
+  seed?: string
+  gameId?: string
+  questionNarrations?: Readonly<Record<string, PlayTestQuestionNarration>>
+  savedQuestionIds?: ReadonlySet<string>
   onExit: () => void
 }
 
-// Màn chơi thử (UC-03). Dùng renderer thật ở mode `preview` nên trông giống màn học sinh, nhưng KHÔNG gọi API nào: không tạo
-// phiên chơi, không ghi điểm, không lưu kết quả; kết quả chỉ sống trong bộ nhớ của màn hình này (xem `playTestReducer`).
-export default function PlayTestPanel({ game, onExit }: PlayTestPanelProps) {
+// PlayTest uses real renderers in `preview` mode. It may fetch narration URLs only; it never creates or stores sessions, answers, scores, or results.
+export default function PlayTestPanel({ game, seed, gameId, questionNarrations, savedQuestionIds, onExit }: PlayTestPanelProps) {
   const text = viText.editor.play
   const Player = PLAY_TEST_RENDERERS[game.gameType]
   const total = game.questions.length
@@ -27,6 +38,27 @@ export default function PlayTestPanel({ game, onExit }: PlayTestPanelProps) {
   const summaries = useMemo(() => summarizeQuestions(game), [game])
   const feedbackRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
+  const question = game.questions[state.index]
+  const lastResult = state.results[state.index]
+  const questionNarration = question ? questionNarrations?.[question.id] : undefined
+  const narrationAudio = usePlayTestNarrationAudio({
+    enabled: Boolean(Player) && !state.finished,
+    gameId,
+    subject: game.metadata.subject,
+    questionKey: question ? `${question.id}:${state.attempt}` : 'empty',
+    question: question ? { id: question.id, audioText: question.audioText, audioUrl: question.audioUrl,
+      saved: savedQuestionIds?.has(question.id) } : undefined,
+    narration: questionNarration,
+    answered: state.answered,
+    isCorrect: state.answered ? lastResult : null,
+  })
+  const theme = resolveTheme({
+    themeId: game.metadata.presentation?.world,
+    subject: game.metadata.subject,
+    gameType: game.gameType,
+    topic: game.metadata.topic,
+  })
+  const presentation = resolvePresentation(game.metadata.presentation, theme.id, seed ?? game.metadata.title)
 
   // Mở màn chơi thử, sang câu khác hoặc thử lại câu: đưa tiêu điểm về đầu màn (nút vừa bấm đã bị gỡ khỏi trang nên nếu không
   // người dùng bàn phím và trình đọc màn hình sẽ rơi về đầu trang). Không cuộn để câu hỏi giữ nguyên chỗ.
@@ -58,11 +90,23 @@ export default function PlayTestPanel({ game, onExit }: PlayTestPanelProps) {
     )
   }
 
-  const question = game.questions[state.index]
   const isLast = state.index + 1 >= total
-  const lastResult = state.results[state.index]
+  const feedbackAudioStatus = narrationAudio.playbackError
+    ?? (state.answered
+      ? narrationAudio.feedbackError
+        ?? (narrationAudio.feedbackLoading ? 'Đang tải giọng đọc phản hồi…' : undefined)
+      : undefined)
+  const playQuestionAudio = narrationAudio.questionAudioAvailable
+    ? narrationAudio.replayQuestion
+    : question?.audioUrl?.trim() ? undefined : () => undefined
+  const needsGeneratedNarration = Boolean(question?.audioText?.trim())
+    && !question?.audioUrl?.trim()
+    && !narrationAudio.questionAudioAvailable
 
   return (
+    <UiProfileProvider profile={resolveUiProfile({ gradeLevel: game.metadata.gradeLevel })}>
+    <ThemeProvider theme={theme}>
+    <PresentationProvider presentation={presentation}>
     <section ref={panelRef} tabIndex={-1} aria-label={text.panelLabel} className="space-y-4 focus:outline-none">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-ink/10 bg-white p-3 sm:p-4">
         <p className="text-lg font-extrabold" aria-live="polite">
@@ -73,17 +117,48 @@ export default function PlayTestPanel({ game, onExit }: PlayTestPanelProps) {
         </Button>
       </div>
 
-      {/* Dựng lại renderer từ đầu khi sang câu khác hoặc thử lại câu này. */}
-      <div className="mx-auto w-full max-w-3xl rounded-2xl bg-white sm:border-2 sm:border-ink/10 sm:p-4">
-        <UiProfileProvider profile={resolveUiProfile({ gradeLevel: game.metadata.gradeLevel })}>
-          <Player
-            key={`${state.index}-${state.attempt}`}
-            question={question}
-            subject={game.metadata.subject}
-            onResult={(isCorrect) => dispatch({ type: 'answered', isCorrect })}
-          />
-        </UiProfileProvider>
-      </div>
+          {/* Dựng lại renderer từ đầu khi sang câu khác hoặc thử lại câu này trong khung thế giới game */}
+          <div
+            className="relative mx-auto w-full max-w-3xl overflow-hidden rounded-3xl border-4 border-amber-900/15 bg-cover bg-center p-3 sm:p-5 shadow-xl"
+            style={{ backgroundImage: theme.bgUrl ? `url(${theme.bgUrl})` : undefined }}
+          >
+            {/* key ở khung: sang câu khác hoặc thử lại thì khung dựng lại nên hiệu ứng question-in chạy lại. */}
+            <div key={`${state.index}-${state.attempt}`} className="question-in relative z-10 rounded-2xl bg-white/95 p-3 sm:p-4 shadow-sm backdrop-blur-xs">
+              <CloudFeedbackContext.Provider value={narrationAudio.feedbackAvailable}>
+                <Player
+                question={question}
+                subject={game.metadata.subject}
+                onResult={(isCorrect) => dispatch({ type: 'answered', isCorrect })}
+                  playQuestionAudio={playQuestionAudio}
+                  playPairFeedback={narrationAudio.feedbackAvailable ? narrationAudio.playPairFeedback : undefined}
+                />
+              </CloudFeedbackContext.Provider>
+            </div>
+
+            {theme.mascotAvatar ? (
+              <div aria-hidden="true" className="pointer-events-none absolute bottom-2 right-2 z-20 select-none animate-mascot-idle">
+                <img src={theme.mascotAvatar} alt="" className="h-14 w-14 drop-shadow-md" />
+              </div>
+            ) : null}
+          </div>
+
+      {narrationAudio.questionAudioAvailable ? (
+        <div className="flex justify-center">
+          <Button type="button" variant="secondary" onClick={narrationAudio.replayQuestion}>
+            Nghe lại câu hỏi
+          </Button>
+        </div>
+      ) : null}
+      {needsGeneratedNarration ? (
+        <p role="note" className="text-center text-sm text-ink-soft">
+          {narrationAudio.questionStatus ?? 'Chưa có giọng đọc cho câu hỏi này. Hãy tạo giọng đọc trong phần chỉnh sửa để nghe câu hỏi.'}
+        </p>
+      ) : null}
+      {feedbackAudioStatus ? (
+        <p aria-live="polite" className="rounded-xl bg-paper px-4 py-2 text-sm text-ink-soft">
+          {feedbackAudioStatus}
+        </p>
+      ) : null}
 
       {state.answered ? (
         <div
@@ -99,6 +174,19 @@ export default function PlayTestPanel({ game, onExit }: PlayTestPanelProps) {
             <Icon name={lastResult ? 'check' : 'info'} className="mt-1 h-5 w-5 shrink-0" />
             <span>{lastResult ? text.correct : text.wrong}</span>
           </p>
+          {lastResult !== null ? (
+            <div className="flex flex-wrap gap-3">
+              <Button type="button" variant="secondary" disabled={!narrationAudio.feedbackAvailable}
+                onClick={narrationAudio.replayFeedback}>
+                Nghe lại phản hồi
+              </Button>
+              {narrationAudio.feedbackError || narrationAudio.playbackError ? (
+                <Button type="button" variant="secondary" onClick={narrationAudio.retryFeedback}>
+                  Thử tải lời đọc lại
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button type="button" onClick={() => dispatch({ type: 'next' })}>
               {isLast ? text.showResult : text.nextQuestion}
@@ -110,5 +198,8 @@ export default function PlayTestPanel({ game, onExit }: PlayTestPanelProps) {
         </div>
       ) : null}
     </section>
+    </PresentationProvider>
+    </ThemeProvider>
+    </UiProfileProvider>
   )
 }

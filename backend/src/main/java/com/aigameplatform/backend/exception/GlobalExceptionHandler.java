@@ -1,6 +1,9 @@
 package com.aigameplatform.backend.exception;
 
+import com.aigameplatform.backend.dto.response.ApiError;
 import com.aigameplatform.backend.dto.response.ApiResponse;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /** Chuyển mọi lỗi thành envelope {success:false, error:{code, message}} theo contract. */
@@ -34,11 +38,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(ApiResponse.fail(code.name(), ex.getMessage()));
     }
 
+    /** Khóa dòng quá thời gian chờ (hai lần nộp sát nhau của cùng một em): báo xung đột để thử lại, không phải lỗi hệ thống. */
+    @ExceptionHandler(org.springframework.dao.PessimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLockTimeout(org.springframework.dao.PessimisticLockingFailureException ex) {
+        log.warn("Khóa dòng quá thời gian chờ", ex);
+        return ResponseEntity.status(ErrorCode.CONFLICT.getStatus())
+                .body(ApiResponse.fail(ErrorCode.CONFLICT.name(), "Thao tác đang được xử lý, vui lòng thử lại"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception ex) {
         log.error("Lỗi không xác định", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail(ErrorCode.INTERNAL_ERROR.name(), "Lỗi hệ thống, vui lòng thử lại sau"));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ErrorCode code = ErrorCode.FILE_TOO_LARGE_OR_INVALID_FORMAT;
+        return ResponseEntity.status(code.getStatus()).headers(headers)
+                .body(ApiResponse.fail(code.name(), "Tệp vượt quá dung lượng tải lên cho phép."));
     }
 
     @Override
@@ -48,8 +68,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String message = fieldError != null && fieldError.getDefaultMessage() != null
                 ? fieldError.getDefaultMessage()
                 : "Dữ liệu không hợp lệ";
+        Map<String, String> details = new LinkedHashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            if (error.getDefaultMessage() != null) details.putIfAbsent(error.getField(), error.getDefaultMessage());
+        }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(ErrorCode.VALIDATION_ERROR.name(), message));
+                .body(new ApiResponse<>(false, null, new ApiError(ErrorCode.VALIDATION_ERROR.name(), message, details)));
     }
 
     // Các lỗi MVC chuẩn (sai JSON, sai method, không tìm thấy đường dẫn...) cũng đi qua envelope.

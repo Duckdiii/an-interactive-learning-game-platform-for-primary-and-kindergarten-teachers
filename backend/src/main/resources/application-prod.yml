@@ -5,6 +5,9 @@
 #
 # Kích hoạt bằng SPRING_PROFILES_ACTIVE=prod.
 app:
+  admin:
+    # Mật khẩu tài khoản quản trị viên đầu tiên; thiếu thì dừng khởi động như các biến khác.
+    password: ${APP_ADMIN_PASSWORD}
   cors:
     # Danh sách origin được phép gọi API, ngăn cách bằng dấu phẩy.
     allowed-origins: ${CORS_ALLOWED_ORIGINS}

@@ -28,12 +28,32 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<tika.version>3.3.3</tika.version>
 		<jjwt.version>0.13.0</jjwt.version>
 		<json-schema-validator.version>3.0.7</json-schema-validator.version>
 		<springdoc.version>3.1.1</springdoc.version>
 		<jacoco.version>0.8.12</jacoco.version>
+		<archunit.version>1.5.1</archunit.version>
+		<pitest.version>1.30.2</pitest.version>
+		<pitest-junit5.version>1.2.3</pitest-junit5.version>
 	</properties>
 	<dependencies>
+		<!-- PDF and DOCX text extraction for lesson plans; OCR is intentionally not included. -->
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>${tika.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parser-pdf-module</artifactId>
+			<version>${tika.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parser-microsoft-module</artifactId>
+			<version>${tika.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>
@@ -50,9 +70,19 @@
 			<version>3.0.8</version>
 		</dependency>
 		<dependency>
+			<groupId>com.twelvemonkeys.imageio</groupId>
+			<artifactId>imageio-webp</artifactId>
+			<version>3.15.3</version>
+		</dependency>
+		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-google-ai-gemini</artifactId>
 			<version>1.20.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-texttospeech</artifactId>
+			<version>2.58.0</version>
 		</dependency>
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
@@ -82,6 +112,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
@@ -159,6 +193,29 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Quy tắc phân tầng chạy như unit test (ArchitectureRulesTest) thay cho review bằng agent. -->
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5</artifactId>
+			<version>${archunit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Test trên PostgreSQL thật (Docker) để kiểm migration Flyway và kiểu jsonb mà H2 không kiểm được. Phiên bản do BOM Spring Boot quản. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-postgresql</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -256,6 +313,37 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- Mutation testing (PIT): đo test có bắt được lỗi cố ý chèn vào code không. Không gắn vào phase nào nên
+				`mvn test`/CI không chạy; chạy tay: `./mvnw test-compile org.pitest:pitest-maven:mutationCoverage`,
+				báo cáo ở target/pit-reports/index.html. Phạm vi: các module kiểm duyệt game (Layer 2, đầu ra AI, Layer 3). -->
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>${pitest.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-junit5-plugin</artifactId>
+						<version>${pitest-junit5.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<targetClasses>
+						<param>com.aigameplatform.backend.service.validation.rule.*</param>
+						<param>com.aigameplatform.backend.service.validation.ai.*</param>
+						<param>com.aigameplatform.backend.service.validation.safety.*</param>
+					</targetClasses>
+					<targetTests>
+						<param>com.aigameplatform.backend.service.validation.*</param>
+					</targetTests>
+					<outputFormats>
+						<param>HTML</param>
+						<param>XML</param>
+					</outputFormats>
+					<timestampedReports>false</timestampedReports>
+					<threads>4</threads>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

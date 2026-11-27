@@ -3,7 +3,8 @@ import type { ComponentProps } from 'react'
 import { viText } from '../../constants/viText'
 import { toPreviewStudentQuestion } from '../../components/editor/preview/previewModel'
 import { usePreviewGrader } from '../../components/editor/preview/usePreviewGrader'
-import { useQuestionAudio } from '../../games/common/useQuestionAudio'
+import { usePlayTestNarrationAudio } from '../../components/editor/usePlayTestNarrationAudio'
+import { CloudFeedbackContext } from '../../games/common/useAnswerAudio'
 import type { AnswerPayload, AnswerResult } from '../../types/game-student.types'
 import type { GameResponse } from '../../types/game-response.types'
 import { feedbackRules } from '../policies/feedback'
@@ -46,14 +47,17 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
   const grade = usePreviewGrader(game.gameType, question, `${state.phase}:${state.attempt}`)
   const Renderer = getPlayableRenderer(game.gameType)
   const isAudioVisual = game.gameType === 'AUDIO_VISUAL_MATCH'
-  const replay = useQuestionAudio(isAudioVisual && state.phase !== 'play' ? undefined : question?.audioUrl, {
-    autoPlayOnMount: isAudioVisual && state.phase === 'play',
-    html5: isAudioVisual,
-    questionId: isAudioVisual ? `${question?.id}-${state.attempt}` : undefined,
-    ...(isAudioVisual && state.phase === 'play' && !question?.audioUrl ? { ttsText: question?.audioText,
-      ttsLanguage: game.metadata.subject === 'ENGLISH' ? 'en-US' : 'vi-VN' } : {}),
-  })
   const record = recordOf(state, currentId(state))
+  const narrationAudio = usePlayTestNarrationAudio({
+    enabled: Boolean(Renderer && question) && state.phase === 'play' && !state.paused,
+    gameId: game.gameId,
+    subject: game.metadata.subject,
+    questionKey: question ? `${question.id}:${state.attempt}` : 'empty',
+    question: question ? { id: question.id, audioText: question.audioText, audioUrl: question.audioUrl, saved: true } : undefined,
+    answered: record.answered,
+    isCorrect: record.answered ? record.lastCorrect : null,
+  })
+  const replay = narrationAudio.replayQuestion
   const result = record.answered ? verdict(record.lastCorrect) : null
   const last = isLastQuestion(state)
   const canAct = Renderer !== undefined && !state.paused
@@ -168,7 +172,12 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
               </div>
             ) : Renderer && question ? (
               <FitToHeight key={`${question.id}-${state.attempt}`}>
-                <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile} onSubmit={onSubmit} playAudio={isAudioVisual ? replay : undefined} />
+                <div className="question-in h-full w-full">
+                  <CloudFeedbackContext.Provider value={narrationAudio.feedbackAvailable}>
+                    <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile}
+                      subject={game.metadata.subject} onSubmit={onSubmit} playAudio={isAudioVisual ? replay : undefined} />
+                  </CloudFeedbackContext.Provider>
+                </div>
               </FitToHeight>
             ) : (
               <div className="grid h-full place-items-center text-center">

@@ -1,6 +1,7 @@
 import type { VisualClozeImageQuestionDsl } from '../../../types/game-dsl.types'
 import type { QuestionDsl } from '../../../types/game-dsl.types'
 import FormField from '../../ui/FormField'
+import ListenPreviewButton from './ListenPreviewButton'
 import { inputClass, textareaClass } from '../../ui/formStyles'
 import type { QuestionFormProps } from './formTypes'
 
@@ -20,6 +21,7 @@ export default function VisualClozeImageForm({ question: raw, onUpdate }: Questi
           rows={2}
         />
       </FormField>
+      <ListenPreviewButton id="cloze-image-listen" text={question.audioText ?? question.questionText} />
       <FormField id="cloze-image-scene" label="URL ảnh cảnh" hint={`${question.sceneWidth} × ${question.sceneHeight} px`}>
         <input
           id="cloze-image-scene"

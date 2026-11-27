@@ -16,6 +16,7 @@ import com.aigameplatform.backend.entity.RefreshToken;
 import com.aigameplatform.backend.entity.Teacher;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.entity.enums.TeacherStatus;
+import com.aigameplatform.backend.entity.enums.UserRole;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.exception.LoginTemporarilyLockedException;
 import com.aigameplatform.backend.repository.RefreshTokenRepository;
@@ -66,7 +67,8 @@ class AuthServiceTest {
     private AuthService serviceAt(Instant instant) {
         Clock clock = Clock.fixed(instant, ZoneOffset.UTC);
         jwtService = new JwtService(SECRET, 15, clock);
-        return new AuthService(teacherRepository, refreshTokenRepository, passwordEncoder, jwtService, codec, clock, 24, 30);
+        return new AuthService(teacherRepository, refreshTokenRepository, passwordEncoder, jwtService, codec, clock,
+                new com.aigameplatform.backend.service.validation.safety.BlockedWordList(java.util.List.of()), 24, 30);
     }
 
     private Teacher teacherWithPassword(String rawPassword) {
@@ -107,13 +109,14 @@ class AuthServiceTest {
         });
 
         RegisterResponse response = service.register(
-                new RegisterRequest("  Nguyễn Văn A ", "  A@School.edu.VN ", "Abcdef1!"));
+                new RegisterRequest("  Nguyễn Văn A ", "  A@School.edu.VN ", "Abcdef1!", "  Trường Hoa Mai  "));
 
         ArgumentCaptor<Teacher> captor = ArgumentCaptor.forClass(Teacher.class);
         verify(teacherRepository).saveAndFlush(captor.capture());
         Teacher saved = captor.getValue();
         assertThat(saved.getEmail()).isEqualTo("a@school.edu.vn");
         assertThat(saved.getFullName()).isEqualTo("Nguyễn Văn A");
+        assertThat(saved.getSchool()).isEqualTo("Trường Hoa Mai");
         assertThat(saved.getPassword()).isNull();
         assertThat(saved.getPasswordHash()).isNotEqualTo("Abcdef1!");
         assertThat(passwordEncoder.matches("Abcdef1!", saved.getPasswordHash())).isTrue();
@@ -160,6 +163,18 @@ class AuthServiceTest {
         assertThat(claims.sessionId()).isEqualTo(saved.getFamilyId());
         assertThat(result.response().expiresIn()).isEqualTo(900);
         assertThat(result.response().teacher().email()).isEqualTo("a@school.edu.vn");
+        assertThat(result.response().teacher().role()).isEqualTo(UserRole.ROLE_TEACHER);
+    }
+
+    @Test
+    void loginReturnsTheRoleStoredOnTheTeacher() {
+        Teacher admin = teacherWithPassword("Abcdef1!");
+        admin.setRole(UserRole.ROLE_ADMIN);
+        when(teacherRepository.findByEmail("a@school.edu.vn")).thenReturn(Optional.of(admin));
+
+        AuthResult result = service.login(new LoginRequest("a@school.edu.vn", "Abcdef1!"));
+
+        assertThat(result.response().teacher().role()).isEqualTo(UserRole.ROLE_ADMIN);
     }
 
     @Test
@@ -223,6 +238,21 @@ class AuthServiceTest {
         InOrder order = inOrder(refreshTokenRepository);
         order.verify(refreshTokenRepository).lockFamily("family-1");
         order.verify(refreshTokenRepository).revokeFamily("family-1", nowUtc());
+    }
+
+    @Test
+    void refreshRejectsAnUnrevokedTokenFromBeforeAnAdminLock() {
+        RefreshToken stored = storedToken("old-token", "family-1", nowUtc().plusHours(1), false);
+        stored.getTeacher().setSessionVersion(1);
+        String tokenHash = codec.hash("old-token");
+        when(refreshTokenRepository.findFamilyIdByTokenHash(tokenHash)).thenReturn(Optional.of("family-1"));
+        when(refreshTokenRepository.findByTokenHash(tokenHash)).thenReturn(Optional.of(stored));
+
+        assertThatThrownBy(() -> service.refresh("old-token"))
+                .isInstanceOfSatisfying(ApiException.class,
+                        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
+        verify(refreshTokenRepository).revokeFamily("family-1", nowUtc());
+        verify(refreshTokenRepository, never()).save(any());
     }
 
     @Test
@@ -406,6 +436,24 @@ class AuthServiceTest {
         assertThat(rotated.rememberMe()).isTrue();
         verify(refreshTokenRepository, org.mockito.Mockito.times(2)).save(saved.capture());
         assertThat(saved.getValue().getExpiresAt()).isEqualTo(nowUtc().plusDays(30));
+    }
+
+    @Test
+    void rotatedRememberMeTokenReportsOnlyTheTimeItHasLeft() {
+        when(teacherRepository.findByEmail(anyString())).thenReturn(Optional.of(teacherWithPassword("Abcdef1!")));
+        AuthResult result = service.login(new LoginRequest("a@school.edu.vn", "Abcdef1!", true));
+        assertThat(result.refreshTtl()).isEqualTo(java.time.Duration.ofDays(30));
+
+        ArgumentCaptor<RefreshToken> saved = ArgumentCaptor.forClass(RefreshToken.class);
+        verify(refreshTokenRepository).save(saved.capture());
+        RefreshToken stored = saved.getValue();
+        stored.setExpiresAt(nowUtc().plusDays(10));
+        when(refreshTokenRepository.findFamilyIdByTokenHash(stored.getTokenHash())).thenReturn(Optional.of(stored.getFamilyId()));
+        when(refreshTokenRepository.findByTokenHash(stored.getTokenHash())).thenReturn(Optional.of(stored));
+
+        AuthResult rotated = service.refresh(result.refreshToken());
+
+        assertThat(rotated.refreshTtl()).isEqualTo(java.time.Duration.ofDays(10));
     }
 
     @Test

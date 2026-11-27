@@ -1,6 +1,6 @@
 # Cơ sở khoa học và Mô hình GamED.AI
 
-Nguồn: `docs/Co_so_khoa_hoc.md`, `raw/Co_so_khoa_hoc_va_Dan_chung_Kien_truc_De_tai_Chuan_Dai_Hoc.docx`
+Nguồn: [Cơ sở khoa học và Dẫn chứng Kiến trúc](<../Cơ sở khoa học và Dẫn chứng Kiến trúc.md>). Bản Word gốc lưu bên TLCN/KLTN.
 Cập nhật: 2026-11-04
 
 Tài liệu xác lập nền tảng học thuật quốc tế và căn cứ kỹ thuật tối cao cho đồ án, giải quyết tận gốc câu hỏi về tính khoa học và giải pháp chống ảo giác của Thầy Thanh và Hội đồng.

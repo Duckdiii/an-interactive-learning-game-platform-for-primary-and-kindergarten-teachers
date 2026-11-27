@@ -29,4 +29,9 @@ public class OddOneOutQuestion extends QuestionGame {
     @CollectionTable(name = "odd_one_out_image_items", joinColumns = @JoinColumn(name = "question_id"))
     @OrderColumn(name = "item_order")
     private List<com.aigameplatform.backend.entity.question.embedded.OddOneOutImageItem> imageItems = new ArrayList<>();
+
+    @Override
+    public String insightLabel() {
+        return labelOrDefault(questionText);
+    }
 }

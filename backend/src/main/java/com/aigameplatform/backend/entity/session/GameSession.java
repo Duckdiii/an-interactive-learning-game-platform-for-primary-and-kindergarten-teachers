@@ -3,6 +3,7 @@ package com.aigameplatform.backend.entity.session;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.SessionStatus;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -31,7 +32,10 @@ public abstract class GameSession {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SessionStatus status = SessionStatus.ACTIVE;
+    private SessionStatus status = SessionStatus.WAITING;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // Aggregation: GameSession gắn vào Game. Không cascade, Game có vòng đời độc lập.
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

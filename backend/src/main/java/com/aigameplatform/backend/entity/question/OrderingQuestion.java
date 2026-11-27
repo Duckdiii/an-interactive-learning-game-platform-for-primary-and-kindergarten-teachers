@@ -14,8 +14,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderingQuestion extends QuestionGame {
 
-    // Aggregation: OrderingQuestion ◇ 2..* OrderStep. Không cascade, OrderStep có vòng đời độc lập.
-    @OneToMany(fetch = FetchType.LAZY)
+    // Persist new steps with their question. Removing a question does not delete its independent steps.
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "question_id")
     @OrderBy("correctPosition ASC")
     private List<OrderStep> steps = new ArrayList<>();

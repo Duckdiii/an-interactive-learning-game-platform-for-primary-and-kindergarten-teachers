@@ -44,7 +44,7 @@ class SafetyGameValidatorTest {
 
     private SafetyGameValidator validator(boolean configured) {
         when(client.isConfigured()).thenReturn(configured);
-        return new SafetyGameValidator(blockedWords, client, false);
+        return new SafetyGameValidator(new ContentSafetyCheck(blockedWords, client, configured));
     }
 
     private static List<ModerationResult> allClean(int count) {
@@ -138,6 +138,16 @@ class SafetyGameValidatorTest {
     }
 
     @Test
+    void optionalModerationStillRunsWhenTheClientIsConfigured() throws IOException {
+        when(client.isConfigured()).thenReturn(true);
+        when(client.moderate(anyList())).thenAnswer(inv -> allClean(((List<?>) inv.getArgument(0)).size()));
+        SafetyGameValidator validator = new SafetyGameValidator(new ContentSafetyCheck(blockedWords, client, false));
+
+        assertThat(validator.validate(new GameValidationContext(quiz()))).isEmpty();
+        verify(client).moderate(anyList());
+    }
+
+    @Test
     void blockedWordsStillWorkWithoutAKey() throws IOException {
         SafetyGameValidator validator = validator(false);
         ObjectNode json = quiz();
@@ -150,7 +160,7 @@ class SafetyGameValidatorTest {
     void refusesToStartWhenModerationIsRequiredButNotConfigured() {
         when(client.isConfigured()).thenReturn(false);
 
-        assertThatThrownBy(() -> new SafetyGameValidator(blockedWords, client, true))
+        assertThatThrownBy(() -> new ContentSafetyCheck(blockedWords, client, true))
                 .isInstanceOf(IllegalStateException.class);
     }
 

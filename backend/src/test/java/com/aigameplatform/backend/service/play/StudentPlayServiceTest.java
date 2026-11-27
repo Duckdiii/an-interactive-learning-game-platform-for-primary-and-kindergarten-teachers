@@ -25,12 +25,14 @@ import com.aigameplatform.backend.entity.session.Participant;
 import com.aigameplatform.backend.entity.session.SelfSession;
 import com.aigameplatform.backend.repository.GameRepository;
 import com.aigameplatform.backend.repository.SelfSessionRepository;
+import com.aigameplatform.backend.service.narration.GameNarrationService;
 import com.aigameplatform.backend.service.strategy.GameContentStrategy;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +43,14 @@ class StudentPlayServiceTest {
     private static final String SALT = "test-session-salt";
     private final GameRepository games = mock(GameRepository.class);
     private final SelfSessionRepository sessions = mock(SelfSessionRepository.class);
+    private final com.aigameplatform.backend.repository.GameSessionRepository liveSessions = mock(com.aigameplatform.backend.repository.GameSessionRepository.class);
+    private final com.aigameplatform.backend.repository.ParticipantRepository participantRepo = mock(com.aigameplatform.backend.repository.ParticipantRepository.class);
     private final GameContentStrategyRegistry strategies = mock(GameContentStrategyRegistry.class);
+    private final GameNarrationService narration = mock(GameNarrationService.class);
     private final JsonMapper mapper = JsonMapper.builder().build();
     private final GameContentStrategy strategy = mock(GameContentStrategy.class);
-    private final StudentPlayService service = new StudentPlayService(games, sessions, strategies, mapper);
+    private final StudentPlayService service = StudentPlayTestSupport.service(games, sessions, liveSessions,
+            participantRepo, strategies, mapper, narration);
     private SelfSession session;
     private Participant participant;
     private VisualClozeQuestion question;
@@ -52,6 +58,7 @@ class StudentPlayServiceTest {
     @BeforeEach
     void setUp() {
         when(strategies.get(GameType.VISUAL_CLOZE)).thenReturn(strategy);
+        when(narration.signedUrlsForStudentPlay("game")).thenReturn(Map.of());
         question = new VisualClozeQuestion();
         question.setId("db-question");
         question.setItemIndex(0);
@@ -91,7 +98,7 @@ class StudentPlayServiceTest {
         when(sessions.findByIdForUpdate("session")).thenReturn(java.util.Optional.of(session));
         when(sessions.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var qdsl = new VisualClozeQuestionDsl("q1", 30, 100, null, null, null, null, null, null, null,
+        var qdsl = new VisualClozeQuestionDsl("q1", 30, 100, null, "/mock/q1.wav", null, null, null, null, null,
                 "Find the cat", "https://scene.example/scene.png", 1000, 800,
                 List.of(new VisualClozeBlankDsl("blank1", 200, 200, "cat")),
                 List.of(new VisualClozeImageOptionDsl("cat", "cat", "https://images.example/cat.png"),
@@ -113,6 +120,27 @@ class StudentPlayServiceTest {
     }
 
     @Test
+    void studentQuestionIncludesTheSavedNarrationUrl() {
+        when(narration.signedUrlsForStudentPlay("game"))
+                .thenReturn(Map.of("q1", "https://storage.example/memory-card-question.mp3"));
+
+        var body = service.questions("session", "participant");
+
+        assertThat(body.get("questions").get(0).get("audioUrl").asString())
+                .isEqualTo("https://storage.example/memory-card-question.mp3");
+    }
+
+    @Test
+    void narrationSigningFailureDoesNotBlockStudentQuestions() {
+        when(narration.signedUrlsForStudentPlay("game")).thenThrow(new IllegalStateException("Storage unavailable"));
+
+        var body = service.questions("session", "participant");
+
+        assertThat(body.get("questions").get(0).get("audioUrl").isNull()).isTrue();
+        assertThat(body.get("questions").get(0).get("options").size()).isEqualTo(2);
+    }
+
+    @Test
     void wrongImagePlacementDoesNotRevealAnswerAndAllowsRetry() throws Exception {
         String blank = opaque("blank:blank1");
         String correct = opaque("option:cat");
@@ -131,6 +159,10 @@ class StudentPlayServiceTest {
         var retried = service.interact("session", "participant", mapper.readTree("""
                 {"questionId":"q1","timeSpentMs":1000,"placements":[{"blankId":"%s","optionId":"%s"}]}
                 """.formatted(blank, correct)));
+        var stored = mapper.readTree(participant.getPlayInteractionDetails().getFirst().getAnswerJson());
+        assertThat(stored.path("firstWrongPlacement").path("optionId").asString()).isEqualTo(wrong);
+        assertThat(stored.path("placements").get(0).path("optionId").asString()).isEqualTo(correct);
+        assertThat(retried.toString()).doesNotContain("firstWrongPlacement");
         assertThat(retried.get("status")).isEqualTo("CORRECT");
         assertThat(retried.get("correctAnswer").toString()).contains(correct).contains(blank);
         assertThat(((Number) retried.get("totalScore")).intValue()).isGreaterThan(0);

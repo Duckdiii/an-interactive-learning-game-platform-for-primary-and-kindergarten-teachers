@@ -22,8 +22,8 @@ export function LeaderboardDisplayView({ entries }: LeaderboardDisplayViewProps)
         <div className="divide-y divide-slate-700">
           {entries.map((entry) => (
             <div
-              key={entry.rank}
-              className={`flex justify-between items-center text-2xl py-3.5 px-4 rounded-xl my-1 transition-colors ${
+              key={entry.participantId || entry.name || entry.rank}
+              className={`flex justify-between items-center text-2xl py-3.5 px-4 rounded-xl my-1 transition-all duration-300 ease-in-out ${
                 entry.rank === 1
                   ? 'bg-amber-500/20 text-amber-300 font-extrabold'
                   : entry.rank === 2

@@ -1,5 +1,6 @@
 import type { MatchingQuestion, PairSide } from '../../types/game-dsl.types'
 import type { MatchingStudentQuestion } from '../../types/game-student.types'
+import { quantityPicture, singlePicture } from '../common/optionVisual'
 import { seededDerangement } from '../common/seededDerangement'
 import type { MatchingItem, MatchingView, PairLink } from './matchingTypes'
 
@@ -27,6 +28,35 @@ export function fromStudentQuestion(question: MatchingStudentQuestion): Matching
     content,
   })
   return { leftItems: question.leftItems.map(toItem), rightItems: question.rightItems.map(toItem) }
+}
+
+/**
+ * Phía chưa có ảnh nhưng chữ nói rõ một vật trong kho ("Con cá", "3 con vịt") thì gắn sẵn ảnh đó, để thẻ có hình thay vì chỉ có chữ
+ * (không đổi contract DSL: chỉ là cách hiển thị). Bố cục đọc `imageUrl` nên tự chừa chỗ cho ảnh.
+ */
+export function withAutoPicture(content: PairSide): PairSide {
+  if (content.imageUrl || !content.text) return content
+  const imageUrl = quantityPicture(content.text)?.imageUrl ?? singlePicture(content.text)
+  return imageUrl ? { ...content, imageUrl } : content
+}
+
+/**
+ * Chỉ gắn hình tự động khi không làm bài dễ đi: giáo viên đã đặt ảnh ở bất kỳ thẻ nào (bài chữ ↔ hình) thì giữ nguyên; hai cột
+ * ra cùng một hình ("Con cá" ↔ "fish") thì cũng giữ nguyên, nếu không trẻ chỉ việc nối hình giống hình mà không phải đọc.
+ */
+function pictured(view: MatchingView): MatchingView {
+  const all = [...view.leftItems, ...view.rightItems]
+  if (all.some((item) => item.content.imageUrl)) return view
+  const left = view.leftItems.map((item) => ({ ...item, content: withAutoPicture(item.content) }))
+  const right = view.rightItems.map((item) => ({ ...item, content: withAutoPicture(item.content) }))
+  const leftUrls = new Set(left.map((item) => item.content.imageUrl).filter(Boolean))
+  if (right.some((item) => item.content.imageUrl && leftUrls.has(item.content.imageUrl))) return view
+  return { leftItems: left, rightItems: right }
+}
+
+/** Dựng hai cột từ câu hỏi (dạng giáo viên hoặc học sinh) rồi gắn hình tự động. */
+export function viewOf(question: MatchingQuestion | MatchingStudentQuestion): MatchingView {
+  return pictured('leftItems' in question ? fromStudentQuestion(question) : fromTeacherQuestion(question))
 }
 
 /**

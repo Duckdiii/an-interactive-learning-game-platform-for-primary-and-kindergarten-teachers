@@ -1,6 +1,6 @@
 # 3.1.4. Ma trận Đặc tả Trường Giao diện Tương tác (Interface Field Specs - FLD-01 đến FLD-53)
 
-> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[srs/SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
+> **Điều hướng SRS**: [[srs/README|Mục lục SRS]] | [[SRS-full|Toàn văn SRS]] | [[Ca sử dụng|18 Ca sử dụng]]
 
 
 

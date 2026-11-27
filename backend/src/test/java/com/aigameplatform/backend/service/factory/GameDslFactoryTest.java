@@ -22,6 +22,7 @@ import com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl;
 import com.aigameplatform.backend.dto.dsl.WordScrambleGameDsl;
 import com.aigameplatform.backend.dto.dsl.ai.AiGameOutput;
 import com.aigameplatform.backend.dto.dsl.ai.DragDropAiOutput;
+import com.aigameplatform.backend.dto.dsl.ai.MatchingAiOutput;
 import com.aigameplatform.backend.dto.dsl.ai.OddOneOutAiOutput;
 import com.aigameplatform.backend.dto.dsl.ai.OrderingAiOutput;
 import com.aigameplatform.backend.dto.dsl.ai.QuizAiOutput;
@@ -32,6 +33,7 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.KindergartenAgeBand;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.service.validation.GameValidationService;
+import com.aigameplatform.backend.service.testsupport.GameAssetCatalogFixture;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
 import com.aigameplatform.backend.service.validation.ValidationReport;
 import com.aigameplatform.backend.service.validation.ai.AiOutputValidator;
@@ -76,7 +78,7 @@ class GameDslFactoryTest {
     // ---- kết quả luôn hợp lệ ----
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
+    @EnumSource(value = GameType.class, mode = EnumSource.Mode.EXCLUDE, names = "CUSTOM")
     void everyExampleBecomesAValidGameForManyRandomShuffles(GameType type) throws IOException {
         AiGameOutput output = aiOutput(type);
         for (long seed = 0; seed < SEEDS; seed++) {
@@ -107,12 +109,50 @@ class GameDslFactoryTest {
     }
 
     @Test
-    void doesNotInventMediaUrls() throws IOException {
-        for (GameType type : GameType.values()) {
+    void thePresentationChosenByTheAiGoesIntoTheMetadataWithoutUnknownValues() throws IOException {
+        var withPresentation = MAPPER.readValue("""
+                {"title": "Cá con", "presentation": {"world": "ocean", "carrier": "submarine", "layout": "arc"},
+                 "questions": [{"text": "Có mấy con cá?", "options": ["1", "2"], "correctIndex": 1}]}""", QuizAiOutput.class);
+        var withoutPresentation = MAPPER.readValue("""
+                {"questions": [{"text": "Có mấy con cá?", "options": ["1", "2"], "correctIndex": 1}]}""", QuizAiOutput.class);
+
+        var metadata = registry(new Random(1)).create(GameType.QUIZ, withPresentation, REQUEST).metadata();
+
+        assertThat(metadata.presentation()).isEqualTo(new com.aigameplatform.backend.dto.dsl.PresentationDsl("ocean", null, "arc"));
+        assertThat(registry(new Random(1)).create(GameType.QUIZ, withoutPresentation, REQUEST).metadata().presentation()).isNull();
+        assertThat(MAPPER.valueToTree(registry(new Random(1)).create(GameType.QUIZ, withoutPresentation, REQUEST)).toString())
+                .doesNotContain("presentation");
+    }
+
+    @Test
+    void doesNotInventImageUrlsWithoutAnAssetChosenByTheAi() throws IOException {
+        // Các ví dụ không có trường asset: không được tự đoán hình theo chữ (trước đây "cho bé" ra hình con chó).
+        for (GameType type : GameType.dslTypes()) {
             JsonNode json = MAPPER.valueToTree(create(type, 1));
 
-            assertThat(json.toString()).as(type.name()).doesNotContain("audioUrl").doesNotContain("imageUrl");
+            assertThat(json.toString()).as(type.name()).doesNotContain("imageUrl");
+            if (type != GameType.QUIZ) assertThat(json.toString()).as(type.name()).doesNotContain("audioUrl");
         }
+    }
+
+    @Test
+    void anAssetFromTheCatalogBecomesTheImageUrlAndAnUnknownOneIsDropped() throws IOException {
+        var matching = MAPPER.readValue("""
+                {"title": "Nối hình", "questions": [{"pairs": [
+                  {"left": {"text": "bóng bay"}, "right": {"text": "balloon", "visualPrompt": "quả bóng bay đỏ", "asset": "fluent-object-balloon"}},
+                  {"left": {"text": "mèo"}, "right": {"text": "cat", "visualPrompt": "con mèo", "asset": "khong-co-hinh-nay"}},
+                  {"left": {"text": "cá"}, "right": {"text": "fish"}}]}]}""", MatchingAiOutput.class);
+        var quiz = MAPPER.readValue("""
+                {"title": "Đếm", "questions": [{"text": "Có mấy quả bóng bay?", "options": ["1", "2"], "correctIndex": 1,
+                  "visualPrompt": "hai quả bóng bay", "asset": "fluent-object-balloon"}]}""", QuizAiOutput.class);
+
+        var pairs = ((MatchingGameDsl) registry(new Random(1)).create(GameType.MATCHING, matching, REQUEST)).questions().get(0).pairs();
+        var quizQuestion = ((QuizGameDsl) registry(new Random(1)).create(GameType.QUIZ, quiz, REQUEST)).questions().get(0);
+
+        assertThat(pairs.get(0).right().imageUrl()).isEqualTo("/assets/fluent/object-balloon.svg");
+        assertThat(pairs.get(1).right().imageUrl()).isNull();
+        assertThat(pairs.get(2).right().imageUrl()).isNull();
+        assertThat(quizQuestion.imageUrl()).isEqualTo("/assets/fluent/object-balloon.svg");
     }
 
     @Test
@@ -204,6 +244,7 @@ class GameDslFactoryTest {
         assertThat(question.questionText()).isEqualTo("Có mấy con mèo?");
         assertThat(question.visualPrompt()).isEqualTo("three cats");
         assertThat(question.audioText()).isEqualTo("Có mấy con mèo?");
+        assertThat(question.audioUrl()).isNull();
     }
 
     // ---- ODD_ONE_OUT ----
@@ -243,7 +284,7 @@ class GameDslFactoryTest {
     @Test
     void vietnameseLettersWithDiacriticsStayWhole() {
         String decomposed = Normalizer.normalize("Bò", Normalizer.Form.NFD);
-        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion(decomposed, null, null)));
+        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion(decomposed, null, null, null)), null, null);
 
         WordScrambleGameDsl game = (WordScrambleGameDsl) registry(new Random(1))
                 .create(GameType.WORD_SCRAMBLE, output, REQUEST);
@@ -254,7 +295,7 @@ class GameDslFactoryTest {
 
     @Test
     void aWordOfIdenticalLettersIsLeftAsIs() {
-        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion("AA", null, null)));
+        WordScrambleAiOutput output = new WordScrambleAiOutput(List.of(new WordScrambleAiQuestion("AA", null, null, null)), null, null);
 
         WordScrambleGameDsl game = (WordScrambleGameDsl) registry(new Random(1))
                 .create(GameType.WORD_SCRAMBLE, output, REQUEST);
@@ -359,9 +400,22 @@ class GameDslFactoryTest {
         Random random = new Random(1);
 
         assertThatThrownBy(() -> new GameDslFactoryRegistry(List.of(
-                new QuizGameDslFactory(random), new QuizGameDslFactory(random))))
+                new QuizGameDslFactory(random, GameAssetCatalogFixture.ASSETS), new QuizGameDslFactory(random, GameAssetCatalogFixture.ASSETS))))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("hơn một");
-        assertThatThrownBy(() -> new GameDslFactoryRegistry(List.of(new QuizGameDslFactory(random))))
+        assertThatThrownBy(() -> new GameDslFactoryRegistry(List.of(new QuizGameDslFactory(random, GameAssetCatalogFixture.ASSETS))))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("Chưa có factory");
+    }
+
+    @Test
+    void usesTheShortTitleChosenByTheAi() {
+        assertThat(AbstractGameDslFactory.titleOf("  Bé đếm vịt  ", "Tạo game cho bé đếm số con vịt")).isEqualTo("Bé đếm vịt");
+    }
+
+    @Test
+    void longTopicWithoutAiTitleIsCutAtAWordBoundaryWithEllipsis() {
+        String topic = "Tạo trò chơi giúp học sinh lớp một luyện tập so sánh hai số trong phạm vi mười bằng các dấu lớn hơn bé hơn và bằng nhau";
+        String title = AbstractGameDslFactory.titleOf(null, topic);
+        assertThat(title).endsWith("…").hasSizeLessThanOrEqualTo(100);
+        assertThat(topic).startsWith(title.substring(0, title.length() - 1) + " ");
     }
 }

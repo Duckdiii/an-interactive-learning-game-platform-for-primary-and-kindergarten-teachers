@@ -49,14 +49,15 @@ export default function LoginPage() {
     try {
       const { teacher, accessToken } = await loginTeacher(form)
       login(teacher, accessToken)
-      navigate(ROUTES.dashboard, { replace: true })
+      navigate(teacher.role === 'ROLE_ADMIN' ? ROUTES.adminTeachers : ROUTES.dashboard, { replace: true })
     } catch (error) {
       const isAuthFailure =
         axios.isAxiosError(error) && error.response?.status === 401
       setErrorMessage(
         isAuthFailure
-          ? 'Email hoặc mật khẩu không đúng'
-          : parseApiError(error, 'Không thể đăng nhập lúc này').message,
+          ? 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.'
+          : parseApiError(error, 'Không thể đăng nhập vào lúc này. Vui lòng thử lại sau.')
+              .message,
       )
     } finally {
       setIsSubmitting(false)

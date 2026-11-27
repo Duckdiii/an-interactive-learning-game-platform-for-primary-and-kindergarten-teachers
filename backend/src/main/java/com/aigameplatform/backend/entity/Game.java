@@ -6,8 +6,6 @@ import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.entity.enums.OddOneOutMode;
-import org.hibernate.annotations.UpdateTimestamp;
-import java.time.LocalDateTime;
 import com.aigameplatform.backend.entity.question.QuestionGame;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -63,19 +61,48 @@ public class Game {
     @Column(name = "odd_one_out_mode", length = 16)
     private OddOneOutMode oddOneOutMode;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GameStatus status = GameStatus.DRAFT;
+
+    // Ba cột null cùng lúc thì Hibernate trả null (game chưa có cách trình bày riêng).
+    @Embedded
+    private GamePresentation presentation;
+
+    // Hibernate tự đặt khi thêm và mỗi lần sửa; trả ra API là updatedAt.
+    @org.hibernate.annotations.UpdateTimestamp
+    @Column(nullable = false)
+    private java.time.Instant updatedAt;
 
     // Composition: Game ◆ 1..* QuestionGame. Câu hỏi chết theo Game.
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "game_id", nullable = false)
     @OrderBy("itemIndex ASC")
     private List<QuestionGame> questions = new ArrayList<>();
+
+    public List<QuestionGame> getQuestions() {
+        return questions.stream().filter(question -> !question.isRetired()).toList();
+    }
+
+    public void setQuestions(List<QuestionGame> questions) {
+        this.questions = new ArrayList<>(questions);
+    }
+
+    public void replaceQuestions(List<? extends QuestionGame> replacement) {
+        // Kết quả phiên đã đóng vẫn trỏ tới phiên bản câu mà học sinh đã chơi.
+        if (status == GameStatus.PUBLISHED) {
+            questions.stream().filter(question -> !replacement.contains(question)).forEach(q -> q.setRetired(true));
+        } else {
+            questions.removeIf(question -> !replacement.contains(question));
+        }
+        for (int index = 0; index < replacement.size(); index++) {
+            QuestionGame question = replacement.get(index);
+            question.setItemIndex(index);
+            if (!questions.contains(question)) questions.add(question);
+        }
+        questions.sort(java.util.Comparator.comparingInt(QuestionGame::getItemIndex));
+        questionNum = replacement.size();
+    }
 
     // Aggregation: Teacher tạo ra Game. Không cascade, Game không sở hữu Teacher.
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
