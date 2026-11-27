@@ -39,9 +39,9 @@ export class Github {
     return accept.includes("diff") ? res.text() : res.status === 204 ? null : res.json();
   }
 
-  async #paginate(path) {
+  async #paginate(path, maxPages = 20) {
     const all = [];
-    for (let page = 1; page <= 20; page++) {
+    for (let page = 1; page <= maxPages; page++) {
       const items = await this.#request("GET", `${path}${path.includes("?") ? "&" : "?"}per_page=100&page=${page}`);
       all.push(...items);
       if (items.length < 100) break;
@@ -53,9 +53,21 @@ export class Github {
   /** So sánh hai commit: status là "ahead" khi head nằm sau base trên cùng một nhánh (không bị force-push/rebase). */
   compare(base, head) { return this.#request("GET", `/compare/${base}...${head}?per_page=1`); }
   getCompareDiff(base, head) { return this.#request("GET", `/compare/${base}...${head}`, { accept: "application/vnd.github.diff" }); }
-  getDiff(n) { return this.#request("GET", `/pulls/${n}`, { accept: "application/vnd.github.diff" }); }
+  async getDiff(n) {
+    try {
+      return await this.#request("GET", `/pulls/${n}`, { accept: "application/vnd.github.diff" });
+    } catch (e) {
+      // PR quá 300 file: GitHub trả 406 cho dạng diff. Dựng lại diff từ /files (tối đa 3000 file, 30 trang);
+      // file không có `patch` (nhị phân, quá lớn) bị bỏ qua, nghĩa là không gắn comment inline được ở file đó.
+      if (!(e instanceof GithubError) || e.status !== 406) throw e;
+      const files = await this.listPullFiles(n);
+      return files.filter((f) => f.patch).map((f) =>
+        `diff --git a/${f.filename} b/${f.filename}\n+++ ${f.status === "removed" ? "/dev/null" : `b/${f.filename}`}\n${f.patch}\n`,
+      ).join("");
+    }
+  }
   /** Danh sách file của PR (có phân trang; GitHub trả tối đa 3000 file). */
-  listPullFiles(n) { return this.#paginate(`/pulls/${n}/files`); }
+  listPullFiles(n) { return this.#paginate(`/pulls/${n}/files`, 30); }
   listReviewComments(n) { return this.#paginate(`/pulls/${n}/comments`); }
   listIssueComments(n) { return this.#paginate(`/issues/${n}/comments`); }
   createReview(n, payload) { return this.#request("POST", `/pulls/${n}/reviews`, { body: payload }); }
