@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { resetMockGames } from '../services/mock/mockGames'
+import { getMockGame, resetMockGames } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import WorkspaceEditor from './WorkspaceEditor'
@@ -22,7 +22,7 @@ vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload 
 // Form sửa câu SPOT_THE_TARGET (mock-game-7).
 // Câu 1: visualPrompt: farm yard, targetDescription: chú gà trống, hitRegion: {x: 0.3, y: 0.55, radius: 0.12}
 // Câu 2: targetDescription: con bò
-// Câu 3: targetDescription: ngôi nhà gỗ màu đỏ, hitRegion: undefined
+// Câu 3: targetDescription: ngôi nhà gỗ màu đỏ
 const SPOT_ID = 'mock-game-7'
 
 const targetDescBox = () => screen.getByLabelText(/Mô tả đối tượng cần tìm/)
@@ -77,8 +77,12 @@ describe('form sửa câu SPOT_THE_TARGET (WorkspaceEditor)', () => {
     expect(timingBox(/^Điểm/)).toHaveValue('10')
   })
 
-  it('chọn câu 3 chưa có hitRegion thì hiện thông báo nhắc chọn', async () => {
+  it('quay lại câu 3 đã xóa hitRegion thì hiện thông báo nhắc chọn', async () => {
     await openLoaded()
+    fireEvent.click(listItems()[2])
+    fireEvent.click(screen.getByRole('button', { name: /Xóa vùng đã chọn/ }))
+    fireEvent.click(listItems()[0])
+    expect(hitCircle()).toBeInTheDocument()
     fireEvent.click(listItems()[2])
 
     expect(screen.getByRole('heading', { name: 'Sửa câu 3' })).toBeInTheDocument()
@@ -91,7 +95,10 @@ describe('form sửa câu SPOT_THE_TARGET (WorkspaceEditor)', () => {
     await openLoaded()
     type(targetDescBox(), 'chú vịt vàng')
 
-    await waitFor(() => expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument())
+    await waitFor(() => {
+      const saved = getMockGame(SPOT_ID)
+      expect(saved.questions[0]).toMatchObject({ targetDescription: 'chú vịt vàng' })
+    }, { timeout: 10_000 })
   })
 
   it('nhấp vào ảnh để đặt tâm mục tiêu mới và điều chỉnh bán kính', async () => {

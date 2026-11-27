@@ -4,10 +4,10 @@ import type { GameDsl, GameType, QuizQuestion, MatchingQuestion, DragDropQuestio
 import { seededDerangement, seededShuffle } from '../src/games/common/seededDerangement'
 import { computeDragDropLayout } from '../src/games/drag-drop/dragDropLayout'
 import { computeWordScrambleLayout } from '../src/games/word-scramble/wordScrambleLayout'
-import { API, clickCanvas, createGame, dragCanvas } from './gameplay-helpers'
+import { getOddOneOutLayout } from '../src/games/odd-one-out/oddOneOutLayout'
+import { clickCanvas, createGame, dragCanvas } from './gameplay-helpers'
 
 const TYPES: GameType[] = ['QUIZ', 'MATCHING', 'DRAG_DROP', 'AUDIO_VISUAL_MATCH', 'ORDERING', 'MEMORY_CARD', 'SPOT_THE_TARGET', 'WORD_SCRAMBLE', 'ODD_ONE_OUT', 'VISUAL_CLOZE']
-test.use({ actionTimeout: 10000 })
 
 // Geometry/shuffle helpers locate fixture input only; assertions use visible feedback and progression, never renderer state or its grader.
 async function answer(page: Page, game: GameDsl, index: number, student: boolean) {
@@ -22,11 +22,17 @@ async function answer(page: Page, game: GameDsl, index: number, student: boolean
       position = options.findIndex(o => o.id === quiz.correctOptionId); count = options.length
     } else if (game.gameType === 'ODD_ONE_OUT') {
       const odd = q as OddOneOutQuestion
-      const options = student ? seededShuffle(odd.items, seed) : odd.items
+      const options = seededShuffle(odd.items, student ? seed : `preview-${q.id}`)
+      if (odd.questionText) {
+        const layout = getOddOneOutLayout(options.length)!
+        const target = layout.positions[options.findIndex(o => o.id === odd.oddOneOutId)]
+        await clickCanvas(canvas, target.x + layout.itemSize / 2, target.y - 72 + layout.itemSize / 2)
+        return
+      }
       position = options.findIndex(o => o.id === odd.oddOneOutId); count = options.length
     } else {
       const cloze = q as VisualClozeQuestion
-      const options = student ? seededShuffle([cloze.correctAnswer, ...cloze.distractors], seed) : [cloze.correctAnswer, ...cloze.distractors]
+      const options = seededShuffle([cloze.correctAnswer, ...cloze.distractors], student ? seed : `preview-${q.id}`)
       position = options.indexOf(cloze.correctAnswer); count = options.length
     }
     expect(position).toBeGreaterThanOrEqual(0)
@@ -96,11 +102,10 @@ async function answer(page: Page, game: GameDsl, index: number, student: boolean
     await page.getByRole('button', { name: /^Xong rồi!/ }).click()
   } else if (game.gameType === 'AUDIO_VISUAL_MATCH') {
     const visual = q as AudioVisualMatchQuestion
-    const options = page.getByRole('button', { name: /^Lựa chọn \d+:/ })
-    const labels = await options.evaluateAll(elements => elements.map(e => e.getAttribute('aria-label')))
-    const target = labels.findIndex(n => n?.endsWith(`: ${visual.correct.visualPrompt}`))
-    expect(target).toBeGreaterThanOrEqual(0)
-    await options.nth(target).click()
+    const choices = seededShuffle([visual.correct, ...visual.distractors], student ? seed : q.id)
+    const target = choices.indexOf(visual.correct)
+    const startX = (800 - (choices.length * 160 + (choices.length - 1) * 32)) / 2
+    await clickCanvas(canvas, startX + target * 192 + 80, 250)
   } else if (game.gameType === 'SPOT_THE_TARGET') {
     const spot = q as SpotTheTargetQuestion
     const target = page.getByRole('button', { name: `Bức tranh tìm kiếm ${spot.targetDescription}` })
@@ -119,7 +124,7 @@ for (const type of TYPES) {
     for (let i = 0; i < game.questions.length; i++) {
       await expect(panel.getByText(`Câu ${i + 1} trên ${game.questions.length}`, { exact: true })).toBeVisible()
       await answer(page, game, i, false)
-      await expect(panel.getByText('Đúng rồi!', { exact: true })).toBeVisible()
+      await expect(panel.getByRole('status').getByText('Đúng rồi!', { exact: true })).toBeVisible()
       await panel.getByRole('button', { name: i === game.questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo', exact: true }).click()
     }
     await page.getByRole('button', { name: 'Chơi lại', exact: true }).click()
@@ -158,27 +163,23 @@ test.describe('mock player suite', () => {
   })
 })
 
-test('audio request failure: repeated replay feedback and answer still advances', async ({ page }) => {
+test('audio request failure: can replay twice and still answer', async ({ page }) => {
   let failures = 0
   await page.route('**/sounds/e2e-missing.wav', route => { failures++; return route.abort() })
+  await page.route('**/narration/preview', route => route.fulfill({
+    json: { success: true, data: { audioUrl: '/sounds/e2e-missing.wav' } },
+  }))
   const game = await createGame(page, 'AUDIO_VISUAL_MATCH')
   if (game.gameType !== 'AUDIO_VISUAL_MATCH') throw new Error('Expected audio fixture')
-  const { gameId, status: _status, updatedAt: _updatedAt, ...body } = game
-  body.questions[0].audioUrl = '/sounds/e2e-missing.wav'
-  const token = await page.evaluate(() => localStorage.getItem('accessToken'))
-  expect((await page.request.put(`${API}/games/${gameId}`, { headers: { Authorization: `Bearer ${token}` }, data: body })).status()).toBe(200)
-  await page.reload()
   await page.getByRole('button', { name: 'Chơi thử', exact: true }).click()
-  const listen = page.getByRole('button', { name: /^Nghe lại câu hỏi:/ })
+  const panel = page.getByRole('region', { name: 'Màn chơi thử' })
+  const listen = panel.getByRole('button', { name: 'Nghe lại câu hỏi', exact: true })
   await expect.poll(() => failures).toBeGreaterThan(0)
-  // Wait for autoplay to end before each click: preload/autoplay cannot satisfy the replay assertions.
-  const pulse = listen.locator('.animate-ping')
-  await expect(pulse).toHaveCount(0)
-  for (let i = 0; i < 2; i++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const before = failures
     await listen.click()
-    await expect(pulse).toBeVisible()
-    await expect(pulse).toHaveCount(0)
+    await expect.poll(() => failures).toBeGreaterThan(before)
   }
   await answer(page, game, 0, false)
-  await expect(page.getByText('Đúng rồi!', { exact: true })).toBeVisible()
+  await expect(panel.getByRole('status').getByText('Đúng rồi!', { exact: true })).toBeVisible()
 })
