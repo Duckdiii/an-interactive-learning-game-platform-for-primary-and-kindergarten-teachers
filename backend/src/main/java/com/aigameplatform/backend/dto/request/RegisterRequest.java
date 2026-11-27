@@ -1,9 +1,8 @@
 package com.aigameplatform.backend.dto.request;
 
-import com.aigameplatform.backend.dto.request.validation.MaxUtf8Bytes;
+import com.aigameplatform.backend.dto.request.validation.StrongPassword;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record RegisterRequest(
@@ -16,12 +15,13 @@ public record RegisterRequest(
         @Size(max = 255, message = "Email tối đa 255 ký tự")
         String email,
 
-        // @Pattern giới hạn 72 theo số ký tự; BCryptPasswordEncoder lại từ chối theo số byte UTF-8, nên một mật
-        // khẩu có dấu hoặc emoji vẫn có thể qua @Pattern nhưng vượt 72 byte. @MaxUtf8Bytes chặn đúng giới hạn đó.
-        @NotBlank(message = "Mật khẩu không được để trống")
-        @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,72}$",
-                message = "Mật khẩu phải có từ 8 đến 72 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt")
-        @MaxUtf8Bytes(value = 72, message = "Mật khẩu tối đa 72 byte khi mã hóa UTF-8")
-        String password) {
+        @StrongPassword
+        String password,
+
+        @Size(max = 255, message = "Tên trường tối đa 255 ký tự")
+        String school) {
+
+    public RegisterRequest(String fullName, String email, String password) {
+        this(fullName, email, password, null);
+    }
 }

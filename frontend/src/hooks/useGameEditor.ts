@@ -24,7 +24,7 @@ const BACKUP_DELAY_MS = 500
 // Sau lần sửa cuối đợi chừng này rồi mới tự lưu (mỗi lần lưu tốn một lượt kiểm duyệt AI ở Backend).
 export const AUTOSAVE_DELAY_MS = 2000
 
-export type AutosaveStatus = 'saved' | 'pending' | 'saving' | 'blocked' | 'error' | 'waitingRestore'
+export type AutosaveStatus = 'saved' | 'pending' | 'saving' | 'blocked' | 'error' | 'waitingRestore' | 'manualSave'
 
 interface GameEditorOptions {
   // Còn chữ gõ chưa vào bản nháp: hoãn tự lưu để không lưu bản cũ.
@@ -77,13 +77,13 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
   const [conflictHold, setConflictHold] = useState(false)
 
   const mutation = useMutation({
-    mutationFn: (snapshot: GameDsl) => updateGame(game.gameId, snapshot),
+    mutationFn: ({ snapshot }: { snapshot: GameDsl; manualSave?: ReadonlySet<string> | null }) => updateGame(game.gameId, snapshot),
     onError: (error) => {
       if (parseApiError(error, '').code === 'CONFLICT') setConflictHold(true)
     },
-    onSuccess: (response, snapshot) => {
+    onSuccess: (response, { snapshot, manualSave }) => {
       setConflictHold(false)
-      dispatch({ type: 'saved', snapshot })
+      dispatch({ type: 'saved', snapshot, manualSave })
       setBaseUpdatedAt(response.updatedAt)
       clearDraft(owner, game.gameId)
       setAttempted(false)
@@ -113,7 +113,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
       // Chưa biết mốc thật của máy chủ: tạm dùng giờ máy để bản sao lưu sau đó không bị coi là cũ hơn bản vừa xuất bản; lấy lại được thì thay bằng mốc thật.
       setBaseUpdatedAt(new Date().toISOString())
       // Kết quả xuất bản không có `updatedAt`: đặt trạng thái ngay để tiêu đề đổi tức thì, rồi lấy bản thật để mốc thời gian khớp máy chủ.
-      queryClient.setQueryData<GameResponse>(key, (old) => (old ? { ...old, ...snapshot, status: result.status } : old))
+      queryClient.setQueryData<GameResponse>(key, (old) => (old ? { ...old, ...snapshot, status: result.status } as GameResponse : old))
       void queryClient.invalidateQueries({ queryKey: gamesQueryKey(queryOwner) })
 
       try {
@@ -127,10 +127,10 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
   })
 
   // Giá trị mới nhất cho các nơi cần ghi sao lưu ngay (rời trang, đóng tab) mà không bị dính giá trị cũ của lần vẽ trước.
-  const latest = useRef({ dirty, pendingRestore, draft: state.draft, baseline: state.baseline, baseUpdatedAt })
+  const latest = useRef({ dirty, pendingRestore, draft: state.draft, baseline: state.baseline, baseUpdatedAt, manualSave: state.manualSave })
 
   useEffect(() => {
-    latest.current = { dirty, pendingRestore, draft: state.draft, baseline: state.baseline, baseUpdatedAt }
+    latest.current = { dirty, pendingRestore, draft: state.draft, baseline: state.baseline, baseUpdatedAt, manualSave: state.manualSave }
   })
 
   // Sao lưu sau mỗi lần sửa (đợi ngừng gõ một chút). Tạm dừng khi còn đang hỏi khôi phục để không ghi đè bản sao lưu cũ.
@@ -146,11 +146,11 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
     }
 
     const timer = setTimeout(() => {
-      if (sessionActive()) saveDraft(owner, game.gameId, stripTransientMedia(state.draft, state.baseline), baseUpdatedAt)
+      if (sessionActive()) saveDraft(owner, game.gameId, stripTransientMedia(state.draft, state.baseline), baseUpdatedAt, undefined, state.manualSave !== null)
     }, BACKUP_DELAY_MS)
 
     return () => clearTimeout(timer)
-  }, [dirty, pendingRestore, owner, game.gameId, baseUpdatedAt, state.draft, state.baseline])
+  }, [dirty, pendingRestore, owner, game.gameId, baseUpdatedAt, state.draft, state.baseline, state.manualSave])
 
   // Rời trang hoặc đóng tab trong lúc chờ 0,5 giây: ghi ngay phần vừa gõ.
   useEffect(() => {
@@ -158,7 +158,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
       const current = latest.current
 
       if (current.dirty && !current.pendingRestore && sessionActive()) {
-        saveDraft(owner, game.gameId, stripTransientMedia(current.draft, current.baseline), current.baseUpdatedAt)
+        saveDraft(owner, game.gameId, stripTransientMedia(current.draft, current.baseline), current.baseUpdatedAt, undefined, current.manualSave !== null)
       }
     }
 
@@ -186,6 +186,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
   // Riêng xung đột 409 (game đang có phòng chơi) thì sửa tiếp cũng vẫn bị từ chối: giữ chặn tới khi tải lại hoặc lưu thủ công được.
   const autosaveReady =
     dirty &&
+    state.manualSave === null &&
     !paused &&
     !pendingRestore &&
     !conflictHold &&
@@ -199,7 +200,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
   useEffect(() => {
     if (!autosaveReady) return
 
-    const timer = setTimeout(() => mutateSave(trimmedDraft), AUTOSAVE_DELAY_MS)
+    const timer = setTimeout(() => mutateSave({ snapshot: trimmedDraft }), AUTOSAVE_DELAY_MS)
 
     return () => clearTimeout(timer)
   }, [autosaveReady, trimmedDraft, mutateSave])
@@ -214,9 +215,11 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
           ? 'blocked'
           : pendingRestore
             ? 'waitingRestore'
-            : 'pending'
+            : state.manualSave !== null ? 'manualSave' : 'pending'
 
   const savedQuestionIds = useMemo(() => new Set(state.baseline.questions.map((question) => question.id)), [state.baseline])
+  const imageRegeneration = trimmedDraft.gameType === 'AUDIO_VISUAL_MATCH'
+    || ('mode' in trimmedDraft && trimmedDraft.mode === 'IMAGE')
 
   // Sau lần bấm Xuất bản đầu tiên, lỗi dữ liệu tính lại theo từng lần sửa (kiểm tra theo chế độ XUẤT BẢN, chặt hơn Lưu).
   const publishIssues = useMemo(
@@ -234,7 +237,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
   /** Trả về các lỗi tìm thấy (rỗng nghĩa là đã gửi đi), để trang đưa tiêu điểm tới ô lỗi đầu tiên. */
   const save = (): ValidationIssue[] => {
     // Đang xuất bản (đã gồm lưu) thì không gửi thêm bản lưu chồng lên.
-    if (publishMutation.isPending) return []
+    if (mutation.isPending || publishMutation.isPending) return []
 
     setAttempted(true)
     mutation.reset()
@@ -247,7 +250,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
 
     // Gửi bản đã cắt khoảng trắng hai đầu; bản đang soạn cũng được cắt để không còn "chưa lưu" chỉ vì dấu cách thừa.
     dispatch({ type: 'normalize' })
-    mutation.mutate(trimContent(state.draft))
+    mutation.mutate({ snapshot: trimContent(state.draft), manualSave: state.manualSave })
 
     return []
   }
@@ -257,7 +260,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
    * Đang lưu hoặc đang xuất bản thì bỏ qua (chống bấm đúp, và không gửi hai bản chồng nhau).
    */
   const publish = (): ValidationIssue[] => {
-    if (mutation.isPending || publishMutation.isPending) return []
+    if (mutation.isPending || publishMutation.isPending || (dirty && state.manualSave !== null)) return []
 
     setPublishAttempted(true)
     setPublishResult(null)
@@ -282,6 +285,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
     dirty,
     saving: mutation.isPending,
     autosave,
+    manualSaveRequired: dirty && state.manualSave !== null,
     issues,
     liveIssues,
     readinessIssues,
@@ -297,30 +301,52 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
       edit({ type: 'updateQuestion', index, questionId, update }),
     /** Mã các thẻ câu vừa được AI làm lại và còn hoàn tác được. */
     regeneratedIds: Object.keys(state.undo),
-    /** Mã các câu đã có trên máy chủ (theo bản đã lưu gần nhất): chỉ những câu này AI làm lại được. */
+    /** Mã các câu đã có trên máy chủ: AI lấy nội dung từ bản đã lưu. */
     savedQuestionIds,
+    // Câu ảnh cần dùng đúng ảnh giáo viên đang xem: chờ lưu nếu nguồn hình hoặc nội dung vừa đổi.
+    isRegenerationSourceStale: (index: number) => imageRegeneration && (
+      trimmedDraft.metadata.topic !== state.baseline.metadata.topic
+      || !deepEqual(trimmedDraft.questions[index], state.baseline.questions[index])
+    ),
     /**
      * Đưa câu AI làm lại vào đúng thẻ, áp lên bản đang soạn HIỆN HÀNH (các thẻ khác và sửa tay chưa lưu giữ nguyên). Câu mới phải qua bộ kiểm tra
      * như lúc lưu (kèm bản đã lưu làm mốc); không hợp lệ thì KHÔNG áp, câu cũ giữ nguyên. `stale`: thẻ đã đổi chỗ hoặc không còn.
      */
-    applyRegenerated: (index: number, questionId: string, question: QuestionDsl): ApplyRegeneratedResult => {
+    applyRegenerated: (index: number, questionId: string, question: QuestionDsl, schemaVersion?: '1.2.0'): ApplyRegeneratedResult => {
       const { draft, baseline } = latest.current
       const target = draft.questions[index]
 
       if (!target || target.id !== questionId || question.id !== questionId) return { ok: false, reason: 'stale' }
 
-      const candidate = { ...draft, questions: draft.questions.map((item, position) => (position === index ? question : item)) } as GameDsl
+      // Một kết quả sai chế độ từ API không được đổi loại thẻ hoặc làm mất ảnh đã chọn.
+      if (draft.gameType === 'VISUAL_CLOZE' && draft.mode === 'IMAGE' && (
+        !('sceneImageUrl' in target) || !('sceneImageUrl' in question)
+        || question.sceneImageUrl !== target.sceneImageUrl
+        || !Array.isArray(target.options) || !Array.isArray(question.options) || question.options.length !== target.options.length
+        || !target.options.every((asset) => question.options.some((option) =>
+          option?.imageUrl === asset.imageUrl && option.visualPrompt === asset.visualPrompt))
+      )) return { ok: false, reason: 'invalid' }
+      if (draft.gameType === 'ODD_ONE_OUT' && draft.mode === 'IMAGE' && (
+        !('items' in question) || !Array.isArray(question.items)
+        || !question.items.every((item) => item && typeof item === 'object' && 'assetId' in item && item.assetId)
+      )) return { ok: false, reason: 'invalid' }
+
+      const candidate = { ...draft, schemaVersion: schemaVersion ?? draft.schemaVersion, questions: draft.questions.map((item, position) => (position === index ? question : item)) } as GameDsl
       const invalid = validateGame(candidate, 'save', { baseline }).some((issue) => issue.questionIndex === index)
 
       if (invalid) return { ok: false, reason: 'invalid' }
 
-      edit({ type: 'applyRegenerated', index, questionId, question })
+      edit({ type: 'applyRegenerated', index, questionId, question, schemaVersion })
       // Các ô nhập giữ chữ gõ dở thì dựng lại để hiện đúng nội dung mới.
       setRevision((value) => value + 1)
 
       return { ok: true }
     },
-    /** Áp game AI đã sửa theo chat vào bản nháp (tự lưu như sửa tay); hoàn tác được một bước bằng `undoChatRevision`. */
+    applyRegeneratedGame: (content: GameDsl) => {
+      edit({ type: 'applyRegeneratedGame', content })
+      setRevision((value) => value + 1)
+    },
+    /** Bản sửa qua chat vẫn dùng cơ chế tự lưu của editor. */
     applyChatRevision: (content: GameDsl) => {
       edit({ type: 'applyChatRevision', content })
       setRevision((value) => value + 1)
@@ -348,7 +374,7 @@ export function useGameEditor(game: GameResponse, { paused = false }: GameEditor
     restore: () => {
       if (!pendingRestore) return
 
-      edit({ type: 'restore', content: pendingRestore.content })
+      edit({ type: 'restore', content: pendingRestore.content, manualSave: pendingRestore.manualSave })
       setRevision((value) => value + 1)
       setPendingRestore(null)
     },

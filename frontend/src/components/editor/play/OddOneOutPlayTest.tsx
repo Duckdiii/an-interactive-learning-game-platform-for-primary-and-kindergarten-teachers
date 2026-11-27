@@ -1,21 +1,20 @@
-import { viText } from '../../../constants/viText'
-import QuizRenderer from '../../../games/quiz/QuizRenderer'
-import type { OddOneOutQuestion } from '../../../types/game-dsl.types'
+import OddOneOutPlayable from '../../../player/renderers/OddOneOutPlayable'
+import { useUiProfile } from '../../../player/profile/useUiProfile'
+import type { StudentOddOneOutQuestion } from '../../../types/game-student.types'
+import { toPreviewStudentQuestion } from '../preview/previewModel'
+import { usePreviewGrader } from '../preview/usePreviewGrader'
 import type { PlayTestProps } from './playTestRegistry'
 
-export default function OddOneOutPlayTest({ question, onResult }: PlayTestProps) {
-  const odd = question as OddOneOutQuestion
-
-  return (
-    <QuizRenderer
-      mode="preview"
-      question={{
-        ...odd,
-        questionText: viText.player.oddOneOutPrompt,
-        options: odd.items,
-        correctOptionId: odd.oddOneOutId,
-      }}
-      onAnswered={(optionId) => onResult(optionId === odd.oddOneOutId)}
-    />
-  )
+export default function OddOneOutPlayTest({ question, subject, onResult }: PlayTestProps) {
+  const profile = useUiProfile()
+  const grade = usePreviewGrader('ODD_ONE_OUT', question, 0)
+  return <OddOneOutPlayable
+    question={toPreviewStudentQuestion('ODD_ONE_OUT', question) as StudentOddOneOutQuestion}
+    profile={profile} subject={subject}
+    onSubmit={async (answer) => {
+      const result = grade(answer)
+      onResult(result.isCorrect)
+      return result
+    }}
+  />
 }

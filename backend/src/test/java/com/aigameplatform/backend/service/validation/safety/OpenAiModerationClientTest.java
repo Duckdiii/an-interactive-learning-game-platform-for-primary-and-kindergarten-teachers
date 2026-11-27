@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.validation.safety;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -25,7 +26,7 @@ import org.springframework.web.client.RestClient;
 class OpenAiModerationClientTest {
 
     private static final String URL = "https://api.openai.com/v1/moderations";
-    private static final String CLEAN = "{\"flagged\":false,\"categories\":{\"violence\":false,\"sexual\":false}}";
+    private static final String CLEAN = "{\"flagged\":false,\"categories\":{\"violence\":false,\"sexual\":false},\"category_scores\":{\"violence\":0.6,\"sexual\":0.01}}";
 
     private final RestClient.Builder builder = RestClient.builder().baseUrl("https://api.openai.com");
     private final MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
@@ -52,6 +53,68 @@ class OpenAiModerationClientTest {
         List<ModerationResult> results = client.moderate(List.of("Con mèo kêu meo meo", "Hôm nay trời đẹp"));
 
         assertThat(results).hasSize(2);
+        server.verify();
+    }
+
+    @Test
+    void sendsImageBytesAsStructuredInputAndRejectsMissingFlag() {
+        server.expect(requestTo(URL))
+                .andExpect(jsonPath("$.input[0].type").value("image_url"))
+                .andExpect(jsonPath("$.input[0].image_url.url").value("data:image/png;base64,AQI="))
+                .andRespond(withSuccess(response("{\"categories\":{}}"), MediaType.APPLICATION_JSON));
+
+        assertThatThrownBy(() -> client.moderateImage(new byte[] {1, 2}, "image/png"))
+                .isInstanceOf(ModerationUnavailableException.class);
+        server.verify();
+    }
+
+    @Test
+    void imageReadsOnlyScoresThatApplyToImages() {
+        server.expect(requestTo(URL)).andRespond(withSuccess(response("""
+                {"flagged":false,"category_scores":{"violence":0.6,"harassment":0},
+                 "category_applied_input_types":{"violence":["image"],"harassment":[]}}
+                """), MediaType.APPLICATION_JSON));
+
+        assertThat(client.moderateImage(new byte[] {1, 2}, "image/png").categoryScores())
+                .containsOnlyKeys("violence").containsEntry("violence", 0.6);
+        server.verify();
+    }
+
+    @Test
+    void imageWithoutApplicableScoresOrTranscriptWithoutScoresIsUnavailable() {
+        server.expect(requestTo(URL)).andRespond(withSuccess(response("""
+                {"flagged":false,"category_scores":{"harassment":0},
+                 "category_applied_input_types":{"harassment":[]}}
+                """), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(URL)).andRespond(withSuccess(response("""
+                {"flagged":false,"categories":{"violence":false}}
+                """), MediaType.APPLICATION_JSON));
+
+        assertThatThrownBy(() -> client.moderateImage(new byte[] {1, 2}, "image/png"))
+                .isInstanceOf(ModerationUnavailableException.class);
+        assertThatThrownBy(() -> client.moderateTranscript("Con mèo."))
+                .isInstanceOf(ModerationUnavailableException.class);
+        server.verify();
+    }
+
+    @Test
+    void postsNamedMp3ToTranscriptionsAndModeratesItWithoutCache() {
+        server.expect(requestTo("https://api.openai.com/v1/audio/transcriptions"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Authorization", "Bearer test-key"))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(content().string(org.hamcrest.Matchers.allOf(
+                        org.hamcrest.Matchers.containsString("filename=\"speech.mp3\""),
+                        org.hamcrest.Matchers.containsString("gpt-transcribe"))))
+                .andRespond(withSuccess("{\"text\":\"Con mèo.\"}", MediaType.APPLICATION_JSON));
+        for (int request = 0; request < 2; request++) {
+            server.expect(requestTo(URL)).andExpect(jsonPath("$.input[0]").value("Con mèo."))
+                    .andRespond(withSuccess(cleanResults(1), MediaType.APPLICATION_JSON));
+        }
+
+        String transcript = client.transcribeMp3(new byte[] {1, 2});
+        assertThat(client.moderateTranscript(transcript).categoryScores()).containsEntry("violence", 0.6);
+        assertThat(client.moderateTranscript(transcript).flagged()).isFalse();
         server.verify();
     }
 
@@ -98,6 +161,7 @@ class OpenAiModerationClientTest {
         List<ModerationResult> second = client.moderate(List.of("Con mèo", "bạo lực", "câu mới", "Con mèo", "câu mới"));
 
         assertThat(second).extracting(ModerationResult::flagged).containsExactly(false, true, false, false, false);
+        assertThat(second.getFirst().categoryScores()).containsEntry("violence", 0.6);
         server.verify();
         assertThat(client.moderate(List.of("Con mèo", "câu mới"))).extracting(ModerationResult::flagged).containsExactly(false, false);
     }
@@ -123,6 +187,15 @@ class OpenAiModerationClientTest {
         server.expect(requestTo(URL)).andRespond(withSuccess(cleanResults(1), MediaType.APPLICATION_JSON));
 
         assertThatThrownBy(() -> client.moderate(List.of("a", "b"))).isInstanceOf(ModerationUnavailableException.class);
+    }
+
+    @Test
+    void unflaggedTextWithoutScoresBecomesUnavailable() {
+        server.expect(requestTo(URL)).andRespond(withSuccess(response("""
+                {"flagged":false,"categories":{"violence":false}}
+                """), MediaType.APPLICATION_JSON));
+
+        assertThatThrownBy(() -> client.moderate(List.of("x"))).isInstanceOf(ModerationUnavailableException.class);
     }
 
     @Test

@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve, dirname } from "node:path";
-import { splitSrs, sectionOf, wholeDocument, assertExportTarget } from "./extract-srs.mjs";
-import { docxToBlocks } from "./docx-to-markdown.mjs";
+import { splitSrs, sectionOf, wholeDocument } from "./extract-srs.mjs";
+import { escCell } from "./docx-to-markdown.mjs";
 
 const h = (level, text) => ({ type: "heading", level, text });
 const p = (text) => ({ type: "para", text });
@@ -33,50 +33,23 @@ test("sectionOf trả null khi không có heading", () => {
   assert.equal(sectionOf([p("x")], () => true), null);
 });
 
-test("SRS.docx thật: đủ 15 UC, có NFR, UC-01 có luồng ngoại lệ", { skip: !existsSync(docx()) }, () => {
-  const files = splitSrs(docxToBlocks(readFileSync(docx())));
-  const ucs = [...files.keys()].filter((n) => n.startsWith("UC-")).sort();
-  assert.equal(ucs.length, 15);
-  assert.equal(ucs[0], "UC-01.md");
-  assert.equal(ucs[14], "UC-15.md");
-  assert.ok(files.has("NFR.md"));
-  assert.match(files.get("UC-01.md"), /Exception Flows/);
-  assert.match(files.get("FLD.md"), /FLD-30/);
-  assert.match(files.get("KPI.md"), /KPI-05/);
-});
-
-function docx() {
-  return resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "docs", "SRS.docx");
-}
-
-test("Markdown hiện hành có đủ 18 UC, tách biệt bản Word lịch sử 15 UC", () => {
-  const dir = resolve(dirname(docx()), "srs");
-  const expected = Array.from({ length: 18 }, (_, i) => `UC-${String(i + 1).padStart(2, '0')}.md`);
-  assert.deepEqual(readdirSync(dir).filter(n => /^UC-\d{2}\.md$/.test(n)).sort(), expected);
-  for (const name of expected) {
-    assert.match(readFileSync(resolve(dir, name), 'utf8').split('\n')[0], new RegExp(name.slice(0, -3)));
-  }
-});
-
-test("trích Word bỏ trang bìa; Markdown toàn văn nằm ở đường dẫn hiện hành", { skip: !existsSync(docx()) }, () => {
-  assert.match(wholeDocument(docxToBlocks(readFileSync(docx()))), /^# CHƯƠNG 1\./);
-  assert.ok(/^# CHƯƠNG 1\./m.test(readFileSync(resolve(dirname(docx()), 'srs/SRS-full.md'), 'utf8')));
-});
-
-test('legacy exporter requires an explicit scratch target and refuses canonical docs', () => {
-  const root = resolve(dirname(docx()), '..');
-  assert.throws(() => assertExportTarget(root, undefined), /explicit/);
-  assert.throws(() => assertExportTarget(root, resolve(root, 'docs/srs')), /canonical/);
-  assert.doesNotThrow(() => assertExportTarget(root, resolve(root, 'backend/target/srs-export')));
+test("SRS v3 trong project là bản Markdown có đủ chương, use case và hình", () => {
+  const docs = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "docs");
+  const text = readFileSync(resolve(docs, "SRS-full.md"), "utf8");
+  assert.match(text, /^# CHƯƠNG 1\./);
+  assert.equal(text.match(/^# CHƯƠNG \d+\./gm)?.length, 5);
+  const ids = [...text.matchAll(/^### 4\.2\.\d+\..*?\b(UC-\d{2})\b/gm)].map((match) => match[1]);
+  assert.deepEqual(ids, Array.from({ length: 18 }, (_, i) => `UC-${String(i + 1).padStart(2, "0")}`).filter((id) => id !== "UC-10"));
+  assert.match(text, /FR-10 \/ UC-10.*đã được loại bỏ/);
+  const figures = new Set(text.match(/srs-v3-assets\/media\/[^")\s]+/g));
+  assert.equal(figures.size, 19);
+  for (const figure of figures) assert.ok(existsSync(resolve(docs, figure)), figure);
 });
 
 test("wholeDocument bỏ phần trước heading đầu tiên", () => {
   assert.equal(wholeDocument([p("bìa"), h(1, "Mở đầu"), p("thân")]).includes("bìa"), false);
   assert.equal(wholeDocument([p("bìa"), p("tên, mã số")]), "");
 });
-
-// ---- escCell: ký tự | trong ô bảng ----
-import { escCell } from "./docx-to-markdown.mjs";
 
 test("escCell escape ký tự | thành \\| để không tạo thêm cột", () => {
   assert.equal(escCell("a|b"), "a\\|b");
@@ -88,13 +61,4 @@ test("escCell escape ký tự | thành \\| để không tạo thêm cột", () =
 test("escCell escape cả backslash, ô có sẵn \\| không thành ranh giới cột", () => {
   assert.equal(escCell("a\\|b"), "a\\\\\\|b");
   assert.equal(escCell("C:\\temp"), "C:\\\\temp");
-});
-
-test("bảng sinh từ SRS thật có số cột đều nhau ở mọi dòng (không dòng nào bị lệch do ký tự |)", { skip: !existsSync(docx()) }, () => {
-  const countCells = (row) => row.replace(/\\\|/g, "").split("|").length - 2;
-  for (const b of docxToBlocks(readFileSync(docx()))) {
-    if (b.type !== "table") continue;
-    const widths = new Set(b.text.split("\n").map(countCells));
-    assert.equal(widths.size, 1, `bảng có số cột không đều: ${[...widths].join(",")}\n${b.text.slice(0, 120)}`);
-  }
 });

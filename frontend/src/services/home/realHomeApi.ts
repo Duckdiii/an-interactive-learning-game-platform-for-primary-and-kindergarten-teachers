@@ -1,17 +1,34 @@
+import { fetchGameInsights, fetchQuestionInsights, fetchReviewNeeded } from '../../api/gamesApi'
 import { HomeApiNotSupportedError } from './HomeApi'
-import type { HomeApi } from './HomeApi'
+import type {
+  GameInsights,
+  HomeApi,
+  InsightsRange,
+  InsightsSessionType,
+  QuestionInsightDetail,
+  ReviewNeeded,
+} from './HomeApi'
 
-// Cả ba endpoint còn đề xuất (API-CONTRACT 2.10, 2.8). Khi Backend cài xong, thay bằng lời gọi axiosInstance.
+// Số liệu kết quả đã có endpoint thật; danh sách phiên đang diễn ra còn ở mức đề xuất (API-CONTRACT 2.10).
 export class RealHomeApi implements HomeApi {
   listLiveSessions(): Promise<never> {
     return Promise.reject(new HomeApiNotSupportedError('GET /sessions'))
   }
 
-  listReviewNeeded(): Promise<never> {
-    return Promise.reject(new HomeApiNotSupportedError('GET /insights/review-needed'))
+  listReviewNeeded(limit: number): Promise<ReviewNeeded[]> {
+    return fetchReviewNeeded(limit)
   }
 
-  getGameInsights(): Promise<never> {
-    return Promise.reject(new HomeApiNotSupportedError('GET /games/{gameId}/insights'))
+  getGameInsights(gameId: string, sessionType?: InsightsSessionType, range?: InsightsRange): Promise<GameInsights> {
+    return fetchGameInsights(gameId, sessionType, range)
+  }
+
+  getQuestionInsights(
+    gameId: string,
+    questionId: string,
+    sessionType?: InsightsSessionType,
+    range?: InsightsRange,
+  ): Promise<QuestionInsightDetail> {
+    return fetchQuestionInsights(gameId, questionId, sessionType, range)
   }
 }

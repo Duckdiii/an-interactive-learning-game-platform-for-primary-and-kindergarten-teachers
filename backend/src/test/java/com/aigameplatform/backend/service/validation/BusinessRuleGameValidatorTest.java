@@ -34,7 +34,7 @@ class BusinessRuleGameValidatorTest {
     private static final GameDslSchemaRegistry REGISTRY = new GameDslSchemaRegistry();
 
     private static List<AbstractGameRule<?, ?>> allRules() {
-        return List.of(new QuizRule(), new AudioVisualMatchRule(), new OddOneOutRule(), new WordScrambleRule(),
+        return List.of(new QuizRule(), new AudioVisualMatchRule(), new OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new WordScrambleRule(),
                 new MatchingRule(), new MemoryCardRule(), new DragDropRule(), new OrderingRule(), new VisualClozeRule());
     }
 
@@ -44,6 +44,13 @@ class BusinessRuleGameValidatorTest {
     private static ObjectNode example(GameType type) throws IOException {
         String file = type.name().toLowerCase(Locale.ROOT).replace('_', '-');
         try (InputStream in = BusinessRuleGameValidatorTest.class.getResourceAsStream("/dsl-examples/" + file + ".json")) {
+            return (ObjectNode) MAPPER.readTree(in);
+        }
+    }
+
+    private static ObjectNode imageExample() throws IOException {
+        try (InputStream in = BusinessRuleGameValidatorTest.class.getResourceAsStream(
+                "/dsl-examples/visual-cloze-image-v1.1.json")) {
             return (ObjectNode) MAPPER.readTree(in);
         }
     }
@@ -643,6 +650,38 @@ class BusinessRuleGameValidatorTest {
         assertThat(errorPaths(GameType.VISUAL_CLOZE, g ->
                 ((ArrayNode) question(g, 0).get("distractors")).set(0, MAPPER.getNodeFactory().stringNode("Mèo"))))
                 .containsExactly("$.questions[0].distractors[0]");
+    }
+
+    @Test
+    void acceptsValidImageModeCloze() throws IOException {
+        assertThat(service.validate(imageExample()).valid()).isTrue();
+    }
+
+    @Test
+    void imageModeRejectsRepeatedOptionImageUrlsWithinOneQuestion() throws IOException {
+        ObjectNode json = imageExample();
+        element(question(json, 0), "options", 1).put("imageUrl",
+                element(question(json, 0), "options", 0).get("imageUrl").asString());
+        assertThat(service.validate(json).errors()).extracting(ValidationError::path)
+                .contains("$.questions[0].options[1].imageUrl");
+    }
+
+    @Test
+    void imageModeAllowsCaseDistinctImagePaths() throws IOException {
+        ObjectNode json = imageExample();
+        element(question(json, 0), "options", 1).put("imageUrl", "https://images.example.com/Circle.png");
+        assertThat(service.validate(json).errors()).isEmpty();
+    }
+
+    @Test
+    void imageModeBlankMustRespectTheSceneInset() throws IOException {
+        ObjectNode json = imageExample();
+        element(question(json, 0), "blanks", 0).put("x", 25);
+
+        ValidationReport report = service.validate(json);
+
+        assertThat(report.errors()).extracting(ValidationError::path)
+                .contains("$.questions[0].blanks[0].x");
     }
 
     // ---- validator ----

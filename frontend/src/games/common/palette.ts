@@ -1,7 +1,7 @@
 /**
  * Bảng màu của phần chơi: NGUỒN DUY NHẤT cho cả DOM (biến CSS `--play-*`, xem `player/theme/usePlayerRootStyle.ts`) lẫn Konva (đọc qua
  * `useGamePalette`). Muốn đổi màu phía học sinh (SPEC mục 1: sẽ chuyển sang hệ màu giáo viên) chỉ sửa ở đây.
- * Quy ước UX: không dùng đỏ cho trả lời sai (`wrongFill`, `wrongLine` là vàng nhẹ); xanh lá dành cho «đúng».
+ * Quy ước UX chung: trả lời sai dùng vàng nhẹ; riêng Audio-Visual Match dùng viền đỏ nhạt theo task được duyệt.
  */
 export interface Palette {
   page: string
@@ -21,10 +21,15 @@ export interface Palette {
   wrongFill: string
   audioFill: string
   audioStroke: string
+  audioPlayActive: string
+  audioPlayInactive: string
   /** Màu đường nối theo thứ tự cặp; không có đỏ và xanh lá. */
   linkColors: readonly string[]
   correctLine: string
   wrongLine: string
+  /** Viền đáp án của Audio-Visual Match theo yêu cầu riêng của loại game. */
+  audioVisualCorrectLine: string
+  audioVisualWrongLine: string
   /** Nền xanh đêm của phòng thi đấu và các màu trên nền đó. */
   night: string
   nightPanel: string
@@ -65,9 +70,13 @@ export const DEFAULT_PALETTE: Palette = {
   wrongFill: '#FFE082',
   audioFill: '#E0F2FE',
   audioStroke: '#0284C7',
+  audioPlayActive: '#FFD54F',
+  audioPlayInactive: '#4FC3F7',
   linkColors: ['#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#92400E', '#64748B'],
   correctLine: '#43A047',
   wrongLine: '#F59E0B',
+  audioVisualCorrectLine: '#66BB6A',
+  audioVisualWrongLine: '#EF9A9A',
   night: '#13306B',
   nightPanel: '#1F3F84',
   nightTrack: '#2A4C93',
@@ -122,6 +131,17 @@ export const OPTION_OBJECT_FILLS: readonly string[] = [
   DEFAULT_PALETTE.dotOrange,
   DEFAULT_PALETTE.dotPurple,
 ]
+/** Bảng màu chuyên biệt cho game Sắp xếp thứ tự (Ordering) theo yêu cầu thiết kế ô vị trí và bước đã khoá */
+export const ORDERING_SLOT_FILL = '#F3E5F5'
+export const ORDERING_SLOT_STROKE = '#7B1FA2'
+export const ORDERING_SLOT_INK = '#7B1FA2'
+export const ORDERING_SLOT_EMPTY_INK = '#9C27B0'
+export const ORDERING_STEP_LOCKED_FILL = '#E8F5E9'
+export const ORDERING_STEP_LOCKED_STROKE = '#2E7D32'
+
+/** Bảng màu chuyên biệt cho nút AudioPlayButton */
+export const AUDIO_PLAY_ACTIVE_FILL = '#FFD54F'
+export const AUDIO_PLAY_INACTIVE_FILL = '#4FC3F7'
 
 /** `fooBar` -> `foo-bar`, cho tên biến CSS. */
 const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)

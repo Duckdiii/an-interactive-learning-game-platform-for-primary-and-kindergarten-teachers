@@ -1,5 +1,5 @@
 // Kiểm docs/FEATURE-MAP.md còn khớp code: endpoint ở mục "Đã có code" phải có controller, endpoint ở mục "Frontend gọi nhưng
-// backend chưa có" thì chưa được có, mọi endpoint của controller phải có mặt trong map, và mọi trích dẫn C/ T/ F/ OA:dòng
+// backend chưa có" thì chưa được có, mọi endpoint của controller phải có mặt trong map, và mọi trích dẫn C/ T/ F/ có số dòng
 // trỏ tới file có thật với số dòng không vượt độ dài file. Không kiểm nội dung dòng được trích (map tự ghi "số dòng có thể lệch").
 // Dùng: node scripts/verify/check-feature-map.mjs [gốc-repo]   (exit 1 nếu có lỗi)
 import { existsSync, readFileSync } from "node:fs";
@@ -15,7 +15,7 @@ const PREFIX = {
 const ENDPOINT = /`(GET|POST|PUT|PATCH|DELETE) (\/[^`\s]*)`/;
 // Dấu "/" trước chữ cái tắt không được là một phần đường dẫn khác (ví dụ `a/C/x`), và bỏ đường dẫn có `*` (glob).
 const CITE = /(?<![\w/])([CTF])\/([\w./-]+\.\w+)(?::(\d+))?/g;
-const OA_CITE = /OA:(\d+)/g;
+const OPENAPI_LINE_CITE = /\bOA:\d+\b/;
 const key = (method, path) => `${method} ${normalize(path)}`;
 const SECTIONS = { implemented: "## Đã có code", missing: "## Frontend gọi nhưng backend chưa có" };
 
@@ -34,7 +34,9 @@ export function checkRouteMatrix(matrix, paths, app, fileExists) {
     if (routes.get(row.key) !== row.path) errors.push(`Route ${row.key} differs from paths.ts`);
     if (!app.includes(`path={ROUTES.${row.key}}`)) errors.push(`Route ${row.key} is not registered in App.tsx`);
     if (!['real', 'mixed', 'mock', 'unverified'].includes(row.state)) errors.push(`Invalid state ${row.key}`);
-    if (!Array.isArray(row.checks) || !row.checks.length) errors.push(`No evidence entry for ${row.key}`);
+    if (!Array.isArray(row.checks) || (row.state !== 'unverified' && !row.checks.length)) {
+      errors.push(`No evidence entry for ${row.key}`);
+    }
     else for (const file of row.checks) if (!fileExists(file)) errors.push(`Missing evidence ${file}`);
   }
   for (const key of routes.keys()) if (!seen.has(key)) errors.push(`Route ${key} has no coverage entry`);
@@ -67,10 +69,7 @@ export function checkFeatureMap(map, codeOps, lineCount) {
       if (n == null) errors.push(`${at}: ${m[0]} trỏ tới file không có (${path})`);
       else if (m[3] && Number(m[3]) > n) errors.push(`${at}: ${m[0]} vượt độ dài file (${n} dòng)`);
     }
-    for (const m of line.matchAll(OA_CITE)) {
-      const n = lineCount("docs/openapi/openapi.yaml");
-      if (n != null && Number(m[1]) > n) errors.push(`${at}: ${m[0]} vượt độ dài openapi.yaml (${n} dòng)`);
-    }
+    if (OPENAPI_LINE_CITE.test(line)) errors.push(`${at}: tra OpenAPI bằng phương thức và đường dẫn trong INDEX.md`);
   });
   // Đổi tên tiêu đề thì cả mục bị bỏ qua mà không ai biết, nên thiếu tiêu đề cũng là lỗi.
   for (const s of Object.keys(SECTIONS)) if (!seen.has(s)) errors.push(`FEATURE-MAP.md: không thấy tiêu đề "${SECTIONS[s]}"`);

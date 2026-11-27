@@ -9,7 +9,7 @@ import { loginAsTeacher } from '../test/renderWithApp'
 import type { QuestionDsl, QuizQuestion } from '../types/game-dsl.types'
 import { loadDraft } from '../utils/draftStorage'
 import { toContent } from '../utils/gameContent'
-import { useGameEditor } from './useGameEditor'
+import { AUTOSAVE_DELAY_MS, useGameEditor } from './useGameEditor'
 
 // A6.2: đưa câu AI làm lại vào bản đang soạn (kiểm tra trước khi áp, bản vá trên trạng thái hiện hành, hoàn tác, sao lưu).
 // mock-game-1 là QUIZ có 3 câu q1, q2, q3.
@@ -184,13 +184,17 @@ describe('useGameEditor: hoàn tác', () => {
     expect(quizText(result.current.draft.questions[0])).toBe('Con hãy đếm các con vật trong hình')
   })
 
-  it('lưu THÀNH CÔNG vẫn giữ hoàn tác (tự lưu chạy sau vài giây); hoàn tác xong thì câu cũ lại thành chưa lưu', async () => {
-    const { result, replacement } = setup()
+  it('chỉ lưu câu AI khi bấm Lưu bản nháp và vẫn giữ hoàn tác', async () => {
+    const { result, replacement, original } = setup()
 
     act(() => {
       result.current.applyRegenerated(0, 'q1', replacement)
     })
     expect(result.current.regeneratedIds).toEqual(['q1'])
+    expect(result.current.autosave).toBe('manualSave')
+
+    await new Promise((resolve) => setTimeout(resolve, AUTOSAVE_DELAY_MS + 50))
+    expect(getMockGame(GAME_ID).questions[0]).toEqual(original)
 
     act(() => {
       result.current.save()
@@ -283,5 +287,6 @@ describe('useGameEditor: bản sao lưu không chứa câu cũ', () => {
 
     expect(quizText(reopened.result.current.draft.questions[0])).toBe('Con hãy đếm các con vật trong hình')
     expect(reopened.result.current.regeneratedIds).toEqual([])
+    expect(reopened.result.current.autosave).toBe('manualSave')
   })
 })

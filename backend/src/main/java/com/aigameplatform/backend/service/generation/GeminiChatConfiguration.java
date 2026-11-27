@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.generation;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import java.time.Duration;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,19 +18,40 @@ public class GeminiChatConfiguration {
     @Bean
     ChatModel gameGenerationChatModel(@Value("${app.ai.gemini.api-key:}") String apiKey,
                                       @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName) {
+        return modelBuilder(apiKey, modelName).build();
+    }
+
+    @Bean
+    ChatModel questionRegenerationChatModel(@Value("${app.ai.gemini.api-key:}") String apiKey,
+                                            @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName) {
+        return modelBuilder(apiKey, modelName).timeout(Duration.ofSeconds(5)).build();
+    }
+
+    @Bean
+    @org.springframework.beans.factory.annotation.Qualifier("lessonPreparationChatModel")
+    ChatModel lessonPreparationChatModel(@Value("${app.ai.gemini.api-key:}") String apiKey,
+            @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName,
+            @Value("${app.ai.gemini.lesson-preparation.timeout-seconds:30}") long timeoutSeconds) {
+        if (timeoutSeconds <= 0) throw new IllegalArgumentException("Lesson preparation timeout must be positive");
+        return modelBuilder(apiKey, modelName).timeout(Duration.ofSeconds(timeoutSeconds))
+                .logRequestsAndResponses(false).build();
+    }
+
+    private static GoogleAiGeminiChatModel.GoogleAiGeminiChatModelBuilder modelBuilder(String apiKey, String modelName) {
         if (apiKey.isBlank()) {
             throw new IllegalStateException("GEMINI_API_KEY is required when Gemini game generation is enabled");
         }
         return GoogleAiGeminiChatModel.builder().apiKey(apiKey).modelName(modelName)
-                .supportedCapabilities(Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA))
-                .maxRetries(0).build();
+                .supportedCapabilities(Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA)).maxRetries(0);
     }
 
     @Bean
     GeneratedContentReviewer generatedContentReviewer(
             @org.springframework.beans.factory.annotation.Qualifier("gameGenerationChatModel") ChatModel gameGenerationChatModel,
             tools.jackson.databind.json.JsonMapper mapper,
-            @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName) {
-        return new GeminiGeneratedContentReviewer(gameGenerationChatModel, mapper, modelName);
+            @Value("${app.ai.gemini.model:gemini-3-flash-preview}") String modelName,
+            com.aigameplatform.backend.service.validation.rule.OddOneOutRule oddOneOutRule,
+            com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
+        return new GeminiGeneratedContentReviewer(gameGenerationChatModel, mapper, modelName, oddOneOutRule, notoCatalog);
     }
 }

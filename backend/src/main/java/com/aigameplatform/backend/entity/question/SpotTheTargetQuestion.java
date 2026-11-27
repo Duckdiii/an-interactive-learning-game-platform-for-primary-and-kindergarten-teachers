@@ -26,4 +26,9 @@ public class SpotTheTargetQuestion extends QuestionGame {
 
     @Column(name = "hit_region_radius")
     private Double hitRegionRadius;
+
+    @Override
+    public String insightLabel() {
+        return labelOrDefault(targetDescription);
+    }
 }

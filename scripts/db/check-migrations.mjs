@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 export const MIGRATION_DIR = "backend/src/main/resources/db/migration";
 export const RESOURCES_DIR = "backend/src/main/resources";
 const NAME = /^V(\d+)__[a-z0-9_]+\.sql$/;
+
 const versionOf = (file) => Number(NAME.exec(file)?.[1]);
 const base = (path) => path.split("/").pop();
 

@@ -66,6 +66,8 @@ class CurriculumRagConfigurationTest {
                     com.aigameplatform.backend.service.generation.GeminiChatConfiguration.class,
                     com.aigameplatform.backend.service.generation.GeminiGameContentGenerator.class,
                     com.aigameplatform.backend.service.factory.GameAssetCatalog.class,
+                    com.aigameplatform.backend.service.validation.rule.OddOneOutRule.class,
+                    com.aigameplatform.backend.service.media.NotoEmojiCatalog.class,
                     com.aigameplatform.backend.service.asset.KeywordAssetRetriever.class);
             assertThatCode(context::refresh).doesNotThrowAnyException();
             assertThat(context.getBean("gameGenerationChatModel"))
@@ -99,6 +101,8 @@ class CurriculumRagConfigurationTest {
                     com.aigameplatform.backend.service.asset.binding.ConceptGraphResolver.class,
                     com.aigameplatform.backend.service.asset.concept.ConceptGraph.class,
                     com.aigameplatform.backend.service.factory.GameAssetCatalog.class,
+                    com.aigameplatform.backend.service.validation.rule.OddOneOutRule.class,
+                    com.aigameplatform.backend.service.media.NotoEmojiCatalog.class,
                     com.aigameplatform.backend.service.asset.KeywordAssetRetriever.class);
             assertThatCode(context::refresh).doesNotThrowAnyException();
             assertThat(context.getBean(com.aigameplatform.backend.service.generation.GameContentGenerator.class))

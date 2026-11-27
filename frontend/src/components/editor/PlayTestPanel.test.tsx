@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from '../../api/axiosInstance'
@@ -6,23 +6,45 @@ import { buildMockGameContents } from '../../services/mock/gameFixtures'
 import { GAME_TYPES, type GameDsl, type GameType } from '../../types/game-dsl.types'
 import { PLAY_TEST_RENDERERS } from './play/playTestRegistry'
 import PlayTestPanel from './PlayTestPanel'
+import { buildImageClozeMock } from '../../services/mock/imageGameFixtures'
+
+const canvas = vi.hoisted(() => ({ loaded: false, audioOptions: [] as unknown[] }))
+const playedAudioUrls: string[] = []
+
+class TestHtmlAudio {
+  readonly src: string
+  onended: (() => void) | null = null
+  onerror: (() => void) | null = null
+  currentTime = 0
+  play = vi.fn(async () => undefined)
+  pause = vi.fn()
+
+  constructor(src: string) { this.src = src; playedAudioUrls.push(src) }
+}
 
 // react-konva vẽ lên <canvas> thật mà jsdom không có: mock thành DOM thường để test hành vi (chọn, nối, chấm, sang câu), không
 // kiểm màu hay tọa độ (đã xem bằng mắt trên trình duyệt thật). Cùng cách với test của renderer.
 vi.mock('react-konva', () => ({
   Stage: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-  Group: ({ children, onClick }: { children?: React.ReactNode; onClick?: () => void }) => (
+  Group: ({ children, onClick, name }: { children?: React.ReactNode; onClick?: () => void; name?: string }) => (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div onClick={onClick}>{children}</div>
+    <div data-testid={name} onClick={onClick}>{children}</div>
   ),
   Rect: () => null,
   Text: ({ text }: { text?: string }) => <span>{text}</span>,
   Image: () => null,
   Line: ({ dash }: { dash?: number[] }) => <i data-testid="line" data-dashed={dash ? 'yes' : 'no'} />,
 }))
-vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
+vi.mock('use-image', () => ({ default: () => canvas.loaded ? [{ width: 800, height: 480 }, 'loaded'] : [undefined, 'loading'] }))
 vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() } }))
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
+vi.mock('../../games/common/useQuestionAudio', () => ({
+  useQuestionAudio: (_url: string | undefined, options: unknown) => {
+    canvas.audioOptions.push(options)
+    return vi.fn()
+  },
+}))
 vi.mock('../../games/common/measureText', () => ({ measureWrappedTextHeight: () => null }))
 vi.mock('../../games/common/useFeedback', () => ({ useFeedback: () => ({ showFeedback: vi.fn() }) }))
 vi.mock('../../games/common/sound', () => ({ playSound: vi.fn() }))
@@ -41,7 +63,111 @@ const fetchSpy = vi.fn()
 const xhrOpenSpy = vi.spyOn(XMLHttpRequest.prototype, 'open')
 
 beforeEach(() => {
+  canvas.loaded = false
+  canvas.audioOptions = []
+  playedAudioUrls.length = 0
+  vi.stubGlobal('Audio', TestHtmlAudio)
   vi.stubGlobal('fetch', fetchSpy)
+})
+
+describe('PlayTestPanel: AVM TTS language', () => {
+  it('does not fall back to browser speech when the cloud narration is not supplied', () => {
+    const game = gameOf('AUDIO_VISUAL_MATCH')
+    game.metadata.subject = 'ENGLISH'
+    Object.assign(game.questions[0], { audioText: 'Cat', audioUrl: undefined })
+
+    render(<PlayTestPanel game={game} onExit={vi.fn()} />)
+
+    expect(canvas.audioOptions).not.toContainEqual(expect.objectContaining({ ttsText: 'Cat', ttsLanguage: 'en-US' }))
+    expectNoRequests()
+  })
+
+  it('autoplays the exact saved cloud narration and offers replay without persisting answers', async () => {
+    const game = gameOf('QUIZ')
+    const question = game.questions[0]
+    const audioUrl = 'https://storage.test/saved-question.mp3'
+    vi.mocked(axiosInstance.post).mockResolvedValue({ data: { success: true, data: {
+      correctAudioUrl: 'https://storage.test/correct.mp3', wrongAudioUrl: 'https://storage.test/wrong.mp3',
+    } } } as never)
+
+    render(<PlayTestPanel game={game} gameId="game-1" questionNarrations={{
+      [question.id]: { gameId: 'game-1', audioText: question.audioText ?? '', audioUrl },
+    }} onExit={vi.fn()} />)
+
+    await waitFor(() => expect(playedAudioUrls).toContain(audioUrl))
+    expect(screen.getByRole('button', { name: 'Nghe lại câu hỏi' })).toBeInTheDocument()
+    click('3')
+    await waitFor(() => expect(playedAudioUrls).toContain('https://storage.test/correct.mp3'))
+    expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!')
+    expect(screen.getByRole('button', { name: 'Nghe lại phản hồi' })).toBeInTheDocument()
+    expect(axiosInstance.post).toHaveBeenCalledTimes(1)
+    expect(axiosInstance.post).toHaveBeenCalledWith('/games/game-1/narration/feedback', undefined, expect.any(Object))
+    expect(vi.mocked(axiosInstance.post).mock.calls[0][2]).toMatchObject({ timeout: 65_000 })
+  })
+
+  it('keeps the visible result when the TTS service is unavailable and offers a retry', async () => {
+    vi.mocked(axiosInstance.post).mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({
+      data: { success: true, data: { correctAudioUrl: 'correct.mp3', wrongAudioUrl: 'wrong.mp3' } },
+    } as never)
+    render(<PlayTestPanel game={gameOf('QUIZ')} gameId="game-1" onExit={vi.fn()} />)
+
+    click('3')
+    expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!')
+    await waitFor(() => expect(screen.getByText(/Không tải được giọng đọc phản hồi/)).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Thử tải lời đọc lại' }))
+    await waitFor(() => expect(axiosInstance.post).toHaveBeenCalledTimes(2))
+  })
+
+  it('does not play a URL generated from an older question-text snapshot', () => {
+    const game = gameOf('QUIZ')
+    const question = game.questions[0]
+
+    render(<PlayTestPanel game={game} questionNarrations={{
+      [question.id]: { gameId: 'game-1', audioText: 'Old question text', audioUrl: 'https://storage.test/stale.mp3' },
+    }} onExit={vi.fn()} />)
+
+    expect(playedAudioUrls).not.toContain('https://storage.test/stale.mp3')
+    expect(screen.queryByRole('button', { name: 'Nghe lại câu hỏi' })).not.toBeInTheDocument()
+    expect(screen.getByRole('note')).toHaveTextContent('Hãy tạo giọng đọc trong phần chỉnh sửa')
+  })
+})
+
+it('shows the background and mascot of the world selected in the draft', () => {
+  const game = gameOf('QUIZ')
+  const draft = { ...game, metadata: { ...game.metadata, presentation: { world: 'ocean' as const } } }
+  const { container } = render(<PlayTestPanel game={draft} onExit={vi.fn()} />)
+
+  expect(container.querySelector('[style*="bg-ocean.svg"]')).toBeInTheDocument()
+  expect(container.querySelector('img[src="/assets/mascots/sam.svg"]')).toBeInTheDocument()
+})
+
+describe('PlayTestPanel: VISUAL_CLOZE', () => {
+  it('plays legacy TEXT and reports its result locally', async () => {
+    render(<PlayTestPanel game={gameOf('VISUAL_CLOZE')} onExit={vi.fn()} />)
+    click('ngủ')
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
+    expectNoRequests()
+  })
+
+  it('IMAGE waits for both blanks, lets a wrong image be replaced, and finishes without any API', async () => {
+    canvas.loaded = true
+    const width = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800)
+    try {
+      render(<PlayTestPanel game={buildImageClozeMock()} onExit={vi.fn()} />)
+      fireEvent.click(button('Con bướm'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b1'))
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'Con bướm' })).not.toBeInTheDocument())
+      expect(screen.queryByRole('button', { name: 'Xem kết quả' })).not.toBeInTheDocument()
+      fireEvent.click(button('Bọ rùa'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b2'))
+      await waitFor(() => expect(button('Bọ rùa')).not.toBeDisabled())
+      expect(screen.queryByRole('button', { name: 'Thử gửi lại' })).not.toBeInTheDocument()
+      fireEvent.click(button('Con ong'))
+      fireEvent.click(screen.getByTestId('visual-cloze-blank-b2'))
+      await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
+      expectNoRequests()
+    } finally { width.mockRestore() }
+  })
 })
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -247,5 +373,31 @@ describe('PlayTestPanel: fallback khi loại game chưa có renderer', () => {
     } finally {
       (PLAY_TEST_RENDERERS as Record<string, unknown>).QUIZ = original
     }
+  })
+})
+
+describe('PlayTestPanel: ODD_ONE_OUT', () => {
+  it('plays legacy text locally', async () => {
+    render(<PlayTestPanel game={gameOf('ODD_ONE_OUT')} onExit={vi.fn()} />)
+    fireEvent.click(screen.getByText('Hình vuông'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
+    expectNoRequests()
+  })
+  it('plays image choice once, then starts fresh on retry and single-question replay', async () => {
+    const question = { id: 'odd-image', timeLimitSeconds: 30, points: 10, renderMode: 'IMAGE' as const, oddOneOutId: '1',
+      items: ['Mèo', 'Chó', 'Mèo', 'Mèo'].map((text, i) => ({ id: String(i), text, imageUrl: '/mock/cat.png' })) }
+    render(<PlayTestPanel game={{ ...gameOf('ODD_ONE_OUT'), questions: [question] } as GameDsl} onExit={vi.fn()} />)
+    fireEvent.click(screen.getByTestId('avm-option-0'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Chưa đúng'))
+    fireEvent.click(screen.getByTestId('avm-option-1'))
+    expect(screen.getByRole('status')).toHaveTextContent('Chưa đúng')
+    fireEvent.click(button('Thử lại câu này'))
+    fireEvent.click(screen.getByTestId('avm-option-1'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đúng rồi!'))
+    fireEvent.click(button('Xem kết quả'))
+    fireEvent.click(button('Chơi lại'))
+    fireEvent.click(screen.getByTestId('avm-option-0'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Chưa đúng'))
+    expectNoRequests()
   })
 })

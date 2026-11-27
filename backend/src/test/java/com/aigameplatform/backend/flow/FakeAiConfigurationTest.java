@@ -52,10 +52,10 @@ class FakeAiConfigurationTest {
 
     @Test void revisionUsesTheCurrentGameAndLeavesUnmentionedQuestionUntouched() throws Exception {
         ObjectNode current = (ObjectNode) json.readTree(game());
-        ((ObjectNode) current.path("questions").get(0)).put("questionText", "Câu đầu đã được giáo viên chỉnh");
+        ((ObjectNode) current.path("questions").get(0)).put("questionText", "Câu đầu đã được giáo viên chỉnh.");
         String output = generate(json.writeValueAsString(current), "Đổi con chó thành con gà", List.of());
         assertThat(json.readTree(output).path("questions").get(0).path("text").asString())
-                .isEqualTo("Câu đầu đã được giáo viên chỉnh");
+                .isEqualTo("Câu đầu đã được giáo viên chỉnh.");
         assertThat(output).contains("con gà");
     }
 

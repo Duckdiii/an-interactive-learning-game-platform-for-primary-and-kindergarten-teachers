@@ -22,12 +22,21 @@ vi.mock('react-konva', () => ({
   Line: () => null,
 }))
 vi.mock('use-image', () => ({ default: () => [undefined, 'loading'] }))
-vi.mock('howler', () => ({ Howl: class { play = vi.fn(); stop = vi.fn(); unload = vi.fn() }, Howler: { ctx: undefined } }))
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
+const feedbackClips = vi.hoisted(() => new Map<string, ReturnType<typeof vi.fn>>())
+vi.mock('howler', () => ({ Howl: class {
+  play = vi.fn()
+  stop = vi.fn()
+  unload = vi.fn()
+  constructor(options: { src: string[] }) { feedbackClips.set(options.src[0], this.play) }
+}, Howler: { ctx: undefined } }))
 vi.mock('../../games/common/measureText', () => ({ measureWrappedTextHeight: () => null }))
 vi.mock('../../games/common/sound', () => ({ playSound: vi.fn() }))
 vi.mock('../../games/common/useFeedback', () => ({ useFeedback: () => ({ showFeedback: vi.fn() }) }))
 vi.mock('../../games/common/OptionButton', () => ({
-  default: ({ option, onClick }: { option: { text: string }; onClick: () => void }) => <button onClick={onClick}>{option.text}</button>,
+  default: ({ option, locked, onClick }: { option: { text: string }; locked: boolean; onClick: () => void }) => (
+    <button disabled={locked} onClick={onClick}>{option.text}</button>
+  ),
 }))
 
 function openPlay(code: string) {
@@ -70,6 +79,90 @@ afterEach(() => {
   vi.restoreAllMocks()
   vi.useRealTimers()
   vi.stubEnv('VITE_PLAYER_API', '')
+})
+
+it('AUDIO_VISUAL_MATCH: trẻ chọn hình và nhận phản hồi từ phiên chơi mô phỏng', async () => {
+  openPlay('MOCK03')
+  await start()
+
+  fireEvent.click(await screen.findByText(/a cute cat/))
+  expect(await screen.findByRole('button', { name: 'Câu tiếp theo' })).toBeInTheDocument()
+  expect(screen.queryByText(/chưa hỗ trợ/i)).not.toBeInTheDocument()
+})
+
+it('MOCK03 đọc audioText bằng TTS và cho nghe lại khi thiếu audioUrl', async () => {
+  const speech = { speak: vi.fn(), cancel: vi.fn() }
+  vi.stubGlobal('speechSynthesis', speech)
+  vi.stubGlobal('SpeechSynthesisUtterance', class {
+    text: string
+    lang = ''
+    constructor(text: string) { this.text = text }
+  })
+  const view = openPlay('MOCK03')
+  try {
+    await start()
+    await waitFor(() => expect(speech.speak).toHaveBeenCalledTimes(1))
+    expect(speech.speak.mock.calls[0][0]).toMatchObject({ text: 'Cat', lang: 'en-US' })
+    fireEvent.click(screen.getByText('🔊 Nghe lại'))
+    expect(speech.speak).toHaveBeenCalledTimes(2)
+  } finally {
+    view.unmount()
+    vi.unstubAllGlobals()
+  }
+})
+
+it('MOCK03 phát file phản hồi đúng khi chọn đúng', async () => {
+  const speech = { speak: vi.fn(), cancel: vi.fn() }
+  vi.stubGlobal('speechSynthesis', speech)
+  vi.stubGlobal('SpeechSynthesisUtterance', class {
+    text: string
+    lang = ''
+    constructor(text: string) { this.text = text }
+  })
+  const view = openPlay('MOCK03')
+  try {
+    await start()
+    await waitFor(() => expect(speech.speak).toHaveBeenCalledTimes(1))
+    fireEvent.click(await screen.findByText(/a cute cat/))
+    await waitFor(() => expect(feedbackClips.get('/sounds/feedback/correct.mp3')).toHaveBeenCalled(), { timeout: 1500 })
+  } finally {
+    view.unmount()
+    vi.unstubAllGlobals()
+  }
+})
+
+it('MOCK03 không đọc “Đúng rồi!” khi chọn sai', async () => {
+  const speech = { speak: vi.fn(), cancel: vi.fn() }
+  vi.stubGlobal('speechSynthesis', speech)
+  vi.stubGlobal('SpeechSynthesisUtterance', class {
+    text: string
+    lang = ''
+    constructor(text: string) { this.text = text }
+  })
+  const view = openPlay('MOCK03')
+  try {
+    await start()
+    await waitFor(() => expect(speech.speak).toHaveBeenCalledTimes(1))
+    fireEvent.click(await screen.findByText(/a brown dog/))
+    await screen.findByRole('button', { name: 'Câu tiếp theo' })
+    expect(speech.speak).toHaveBeenCalledTimes(1)
+    expect(speech.speak.mock.calls[0][0]).toMatchObject({ text: 'Cat', lang: 'en-US' })
+  } finally {
+    view.unmount()
+    vi.unstubAllGlobals()
+  }
+})
+
+it('AUDIO_VISUAL_MATCH: mặc định bật tự đọc trong khung Học sinh', async () => {
+  vi.spyOn(MockPlayerApi.prototype, 'getPublishInfo').mockResolvedValue({
+    gameTitle: 'Nghe và chọn hình', gameType: 'AUDIO_VISUAL_MATCH', questionCount: 3,
+    metadata: { subject: 'ENGLISH', gradeLevel: 'KINDERGARTEN', topic: 'con vật' },
+    uiOverride: 'HOC_SINH', themeId: null,
+  })
+  openPlay('MOCK03')
+  await screen.findByLabelText('Biệt danh')
+  await submitNickname('Sao Băng')
+  expect(await screen.findByRole('switch', { name: 'Tự đọc đề bài' })).toBeChecked()
 })
 
 // Đáp án đúng của 3 câu QUIZ mẫu: "3", "5", "9". Chọn đúng câu 1, sai câu 2 ("4"), đúng câu 3.
@@ -334,8 +427,11 @@ describe('trang chơi, các tình huống khác', () => {
     tap('3')
     expect(await screen.findByText('Chưa gửi được câu trả lời. Con thử lại nhé.')).toBeInTheDocument()
 
-    tap('3')
+    const answer = screen.getByRole('button', { name: '3' })
+    await waitFor(() => expect(answer).toBeEnabled())
+    fireEvent.click(answer)
     expect(await screen.findByText('Giỏi quá!')).toBeInTheDocument()
+    expect(submit).toHaveBeenCalledTimes(2)
     expect(screen.queryByText('Chưa gửi được câu trả lời. Con thử lại nhé.')).not.toBeInTheDocument()
     submit.mockRestore()
   })
@@ -541,6 +637,18 @@ describe('lỗi và mất mạng (P2.5)', () => {
     expect(await screen.findByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
     expect(created).toHaveBeenCalledTimes(1)
     expect(sessionStorage.getItem('player:session:MOCK00')).not.toContain('mock-session-gone')
+  })
+
+  it('phiên đã lưu hết hạn (409): bỏ phiên cũ, tạo phiên mới', async () => {
+    sessionStorage.setItem('player:session:MOCK00', JSON.stringify({ sessionId: 'mock-session-expired', participantId: 'p', nickname: 'Bạn nhỏ 1111' }))
+    vi.spyOn(MockPlayerApi.prototype, 'getGameForStudent').mockRejectedValueOnce(mockApiError(409, 'CONFLICT', 'Session is closed or expired'))
+    const created = vi.spyOn(MockPlayerApi.prototype, 'createSession')
+    openPlay('MOCK00')
+    await start()
+
+    expect(await screen.findByRole('img', { name: 'Câu 1/3' })).toBeInTheDocument()
+    expect(created).toHaveBeenCalledTimes(1)
+    expect(sessionStorage.getItem('player:session:MOCK00')).not.toContain('mock-session-expired')
   })
 
   it('Chơi lại xóa phiên đã lưu: lượt sau là phiên mới', async () => {

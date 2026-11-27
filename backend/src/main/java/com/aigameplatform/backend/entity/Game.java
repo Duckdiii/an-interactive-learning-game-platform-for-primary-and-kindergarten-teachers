@@ -4,6 +4,8 @@ import com.aigameplatform.backend.entity.enums.GameStatus;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.entity.enums.VisualClozeMode;
+import com.aigameplatform.backend.entity.enums.OddOneOutMode;
 import com.aigameplatform.backend.entity.question.QuestionGame;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -26,6 +28,9 @@ public class Game {
     @Column(nullable = false)
     private String title;
 
+    @Column(length = 200)
+    private String topic;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GameType gameType;
@@ -47,6 +52,15 @@ public class Game {
     @Column(nullable = false, length = 20)
     private String schemaVersion = "1.0.0";
 
+    /** Null preserves legacy TEXT semantics for existing Visual Cloze rows. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visual_cloze_mode", length = 16)
+    private VisualClozeMode visualClozeMode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "odd_one_out_mode", length = 16)
+    private OddOneOutMode oddOneOutMode;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GameStatus status = GameStatus.DRAFT;
@@ -66,8 +80,36 @@ public class Game {
     @OrderBy("itemIndex ASC")
     private List<QuestionGame> questions = new ArrayList<>();
 
+    public List<QuestionGame> getQuestions() {
+        return questions.stream().filter(question -> !question.isRetired()).toList();
+    }
+
+    public void setQuestions(List<QuestionGame> questions) {
+        this.questions = new ArrayList<>(questions);
+    }
+
+    public void replaceQuestions(List<? extends QuestionGame> replacement) {
+        // Kết quả phiên đã đóng vẫn trỏ tới phiên bản câu mà học sinh đã chơi.
+        if (status == GameStatus.PUBLISHED) {
+            questions.stream().filter(question -> !replacement.contains(question)).forEach(q -> q.setRetired(true));
+        } else {
+            questions.removeIf(question -> !replacement.contains(question));
+        }
+        for (int index = 0; index < replacement.size(); index++) {
+            QuestionGame question = replacement.get(index);
+            question.setItemIndex(index);
+            if (!questions.contains(question)) questions.add(question);
+        }
+        questions.sort(java.util.Comparator.comparingInt(QuestionGame::getItemIndex));
+        questionNum = replacement.size();
+    }
+
     // Aggregation: Teacher tạo ra Game. Không cascade, Game không sở hữu Teacher.
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id")
     private Teacher author;
+
+    public VisualClozeMode effectiveVisualClozeMode() {
+        return visualClozeMode == null ? VisualClozeMode.TEXT : visualClozeMode;
+    }
 }

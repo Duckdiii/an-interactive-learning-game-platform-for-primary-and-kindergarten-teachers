@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type { GameType, QuestionDsl } from '../../../types/game-dsl.types'
+import type { GameType, QuestionDsl, Subject } from '../../../types/game-dsl.types'
 import AudioVisualMatchPlayTest from './AudioVisualMatchPlayTest'
 import DragDropPlayTest from './DragDropPlayTest'
 import MatchingPlayTest from './MatchingPlayTest'
@@ -11,11 +11,15 @@ import SpotTheTargetPlayTest from './SpotTheTargetPlayTest'
 import VisualClozePlayTest from './VisualClozePlayTest'
 import WordScramblePlayTest from './WordScramblePlayTest'
 
-/** Mọi bộ chơi thử nhận đúng hai prop này; renderer thật nằm trong từng bộ, nên panel không cần biết loại game. */
+/** Renderer thật nằm trong từng bộ, nên panel không cần biết chi tiết loại game. */
 export interface PlayTestProps {
   question: QuestionDsl
+  subject: Subject
   /** Báo kết quả (đúng/sai) ngay sau khi giáo viên trả lời xong câu. */
   onResult: (isCorrect: boolean) => void
+  /** Audio đã được PlayTest quản lý để tránh trình duyệt đọc chồng lên MP3 TTS. */
+  playQuestionAudio?: () => void
+  playPairFeedback?: (correct: boolean) => void
 }
 
 // Bảng loại game đến bộ chơi thử: Hỗ trợ đầy đủ 10/10 cơ chế game trong Workspace Editor

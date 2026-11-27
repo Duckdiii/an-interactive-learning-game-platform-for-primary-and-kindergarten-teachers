@@ -1,0 +1,4 @@
+Noto Emoji 2D SVG artwork
+Source: https://github.com/googlefonts/noto-emoji/tree/main/2D/svg
+Licensed under the Apache License, Version 2.0; see LICENSE in this directory.
+The files here are a curated subset used by the learning games.

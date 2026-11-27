@@ -10,6 +10,7 @@ import { extractSemantics } from '../pipeline/semanticExtractor'
 import { parsePedagogicalConstraints } from '../pipeline/constraintParser'
 import { generateMathQuestions } from '../pipeline/dynamicMathGenerator'
 import { generateLanguagePairs } from '../pipeline/dynamicLanguageGenerator'
+import { buildImageClozeMock } from './imageGameFixtures'
 import { conflictError, mockApiError, notFoundError } from './mockErrors'
 
 // Kho game trong bộ nhớ cho các nhóm mô phỏng `games` và `editor`: 10 game mẫu (đủ 10 loại) có nội dung DSL đầy đủ; danh
@@ -162,6 +163,9 @@ export interface MockGeneratedInfo {
   subject?: string
   gradeLevel?: string
   idea?: string
+  mode?: 'TEXT' | 'IMAGE'
+  sceneImageUrl?: string
+  optionImages?: { imageUrl: string; visualPrompt: string }[]
 }
 
 /**
@@ -169,13 +173,19 @@ export interface MockGeneratedInfo {
  * KHÔNG khớp mô tả của giáo viên; chỉ tên, chủ đề, môn và khối lớp theo yêu cầu. Giao diện luôn nhắc điều này (`isMockGenerated`).
  */
 export function createMockGame(info: MockGeneratedInfo, now: number = Date.now()): GameResponse {
-  let template = buildMockGameContents().find((content) => content.gameType === info.gameType) ?? buildMockGameContents()[0]
+  const imageMode = info.gameType === 'VISUAL_CLOZE' && info.mode === 'IMAGE'
+  if (imageMode && (!info.sceneImageUrl || !/^https:\/\//i.test(info.sceneImageUrl) || !info.optionImages || info.optionImages.length < 2 || info.optionImages.length > 8 ||
+    info.optionImages.some((option) => !/^https:\/\//i.test(option.imageUrl) || !option.visualPrompt?.trim())))
+    throw mockApiError(400, 'VALIDATION_ERROR', 'IMAGE cần URL HTTPS ảnh cảnh và 2–8 ảnh lựa chọn có mô tả.')
+  let template = imageMode ? buildImageClozeMock({ sceneImageUrl: info.sceneImageUrl!, optionImages: info.optionImages! }) :
+    buildMockGameContents().find((content) => content.gameType === info.gameType) ?? buildMockGameContents()[0]
   const idea = info.idea?.trim() ?? ''
   const isMath = info.subject === 'MATH' || idea.toLowerCase().includes('đếm') || idea.toLowerCase().includes('toán') || idea.toLowerCase().includes('số')
 
-  if (info.gameType === 'MATCHING' && isMath) {
+  // Game ảnh dùng đúng ảnh giáo viên đưa, không thay bằng mẫu toán.
+  if (!imageMode && info.gameType === 'MATCHING' && isMath) {
     template = mathMatching
-  } else if (info.gameType === 'MEMORY_CARD' && isMath) {
+  } else if (!imageMode && info.gameType === 'MEMORY_CARD' && isMath) {
     template = mathMemory
   }
   const content = structuredClone(template)

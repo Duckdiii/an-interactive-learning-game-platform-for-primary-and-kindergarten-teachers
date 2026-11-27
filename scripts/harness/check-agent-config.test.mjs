@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { generatedAgent, checkAgentConfig, codexHooks } from './check-agent-config.mjs';
+import { generatedAgent, checkAgentConfig, codexHooks, verifyGeneratedAgentConfig } from './check-agent-config.mjs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -48,5 +48,21 @@ test('missing/stale adapters and missing rule files fail rather than silently pa
     writeFileSync(join(root, '.codex/hooks.json'), JSON.stringify(codexHooks()));
     writeFileSync(join(root, '.codex/agents/reviewer.toml'), readFileSync(join(root, '.codex/agents/reviewer.toml'), 'utf8') + '\n# drift');
     assert.ok(checkAgentConfig(root).some(e => e.includes('stale')));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('CI validates its generated adapters without installing local Codex config', () => {
+  const root = mkdtempSync(join(tmpdir(), 'agent-config-ci-'));
+  try {
+    mkdirSync(join(root, '.claude/agents'), { recursive: true });
+    const source = '---\nname: reviewer\ndescription: Review\n---\nRead .claude/rules/backend.md.';
+    writeFileSync(join(root, '.claude/agents/reviewer.md'), source);
+    assert.ok(verifyGeneratedAgentConfig(root).some(e => e.includes('backend.md')));
+    mkdirSync(join(root, '.claude/rules'));
+    writeFileSync(join(root, '.claude/rules/backend.md'), '# Rules');
+    assert.deepEqual(verifyGeneratedAgentConfig(root), []);
+    assert.equal(existsSync(join(root, '.codex')), false);
+    writeFileSync(join(root, '.claude/agents/reviewer.md'), 'malformed source');
+    assert.throws(() => verifyGeneratedAgentConfig(root), /Invalid agent frontmatter/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });

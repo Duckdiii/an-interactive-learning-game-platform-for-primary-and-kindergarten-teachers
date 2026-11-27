@@ -1,5 +1,5 @@
 // Chuẩn bị đầu vào cho bước claude-code-action từ file prompt/schema ở thư mục tin cậy (checkout nhánh base).
-// Dùng: node prepare-run.mjs --mode C --trusted trusted --repo owner/name --pr 12 [--max-turns 15] [--uc UC-04,UC-05] [--round 2 --base-sha <sha>]
+// Dùng: node prepare-run.mjs --mode C --trusted trusted --repo owner/name --pr 12 [--max-turns 15] [--uc UC-04,UC-05] [--round 2 --base-sha <sha>] [--shard 2]
 // Ghi ra $GITHUB_OUTPUT: prompt, claude_args, prompt_version, mode (nhiều dòng dùng dấu phân cách ngẫu nhiên).
 import { appendFileSync, readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
@@ -7,20 +7,25 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 
-const GH_READ = ["Bash(gh pr view:*)", "Bash(gh pr diff:*)"];
+const DIFF_READ = ["Read(./ai-review-input/**)"];
 const REPO_TOOLS = ["Read", "Grep", "Glob"];
 // Chế độ A chỉ thấy diff; B và C được đọc repo. Khác biệt B/C (có SRS hay không) do prompt quy định.
-const TOOLS = { A: GH_READ, B: [...GH_READ, ...REPO_TOOLS], C: [...GH_READ, ...REPO_TOOLS] };
+const TOOLS = { A: DIFF_READ, B: REPO_TOOLS, C: REPO_TOOLS };
 const DEFAULT_TURNS = { A: 6, B: 15, C: 15 };
 // Thư mục trong workspace chứa file đầu vào của vòng 2 (do precheck.mjs ghi); agent đọc bằng Read.
 export const INPUT_DIR = "ai-review-input";
 
 function roundHeader(round, baseSha) {
   if (round === 1) return "ROUND: 1";
-  return ["ROUND: 2", `BASE_SHA: ${baseSha}`, `PREVIOUS_FINDINGS_FILE: ${INPUT_DIR}/previous.json`, `INCREMENTAL_DIFF_FILE: ${INPUT_DIR}/incremental.diff`].join("\n");
+  return ["ROUND: 2", `BASE_SHA: ${baseSha}`, `PREVIOUS_FINDINGS_FILE: ${INPUT_DIR}/previous.json`].join("\n");
 }
 
-export function buildRunInputs({ mode, promptText, schema, repo, pr, maxTurns, uc = "", round = 1, baseSha = "" }) {
+function shardHeader(shard) {
+  if (!shard) return "";
+  if (!/^[1-9][0-9]?$/.test(String(shard))) throw new Error("shard phải là số phần từ 1 đến 99");
+  return `\nSHARD_FILES_FILE: ${INPUT_DIR}/shard-${shard}.json\nSHARD_DIFF_FILE: ${INPUT_DIR}/shard-${shard}.diff`;
+}
+export function buildRunInputs({ mode, promptText, schema, repo, pr, maxTurns, uc = "", round = 1, baseSha = "", shard = "" }) {
   if (!["A", "B", "C"].includes(mode)) throw new Error(`mode phải là A, B hoặc C (nhận: ${mode})`);
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error("repo phải có dạng owner/name");
   if (!/^[0-9]+$/.test(String(pr))) throw new Error("pr phải là số");
@@ -30,7 +35,9 @@ export function buildRunInputs({ mode, promptText, schema, repo, pr, maxTurns, u
   if (round === 2) {
     if (!/^[0-9a-f]{40}$/.test(baseSha)) throw new Error("vòng 2 cần base-sha hợp lệ");
     if (mode === "A") throw new Error("chế độ A không có công cụ Read nên không chạy được vòng 2");
+
   }
+
   const turns = maxTurns === undefined || maxTurns === "" ? DEFAULT_TURNS[mode] : Number(maxTurns);
   if (!Number.isInteger(turns) || turns < 1 || turns > 40) throw new Error("max-turns phải là số nguyên từ 1 đến 40");
   const version = /^prompt_version: (\d+\.\d+\.\d+)\r?\n/.exec(promptText)?.[1];
@@ -42,8 +49,8 @@ export function buildRunInputs({ mode, promptText, schema, repo, pr, maxTurns, u
     promptVersion: version,
     mode,
     round,
-    prompt: `MODE: ${mode}\nREPO: ${repo}\nPR NUMBER: ${pr}\nUC: ${uc ? uc.split(",").join(", ") : "(không khai báo)"}\n${roundHeader(round, baseSha)}\n\n${promptText}`,
-    claudeArgs: [`--allowedTools "${TOOLS[mode].join(",")}"`, `--max-turns ${turns}`, `--json-schema '${compact}'`].join("\n"),
+    prompt: `MODE: ${mode}\nREPO: ${repo}\nPR NUMBER: ${pr}\nUC: ${uc ? uc.split(",").join(", ") : "(không khai báo)"}\n${roundHeader(round, baseSha)}${shardHeader(shard)}\n\n${promptText}`,
+    claudeArgs: [`--tools "${mode === "A" ? "Read" : REPO_TOOLS.join(",")}"`, `--allowedTools "${TOOLS[mode].join(",")}"`, `--max-turns ${turns}`, `--json-schema '${compact}'`].join("\n"),
   };
 }
 
@@ -74,6 +81,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       uc: arg(a, "uc") ?? "",
       round: arg(a, "round") === "2" ? 2 : 1,
       baseSha: arg(a, "base-sha") ?? "",
+      shard: arg(a, "shard") ?? "",
       promptText: readFileSync(join(dir, "prompt.md"), "utf8"),
       schema: JSON.parse(readFileSync(join(dir, "review-result.schema.json"), "utf8")),
     });

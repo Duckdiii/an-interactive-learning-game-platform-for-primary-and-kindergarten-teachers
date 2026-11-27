@@ -25,9 +25,9 @@ export default function StudentResult({ nickname, correctCount, total, score, be
             {viText.player.review.open}
           </PlayButton>
         ) : null}
-        <PlayButton className="w-full" onClick={onReplay}>
+        {onReplay ? <PlayButton className="w-full" onClick={onReplay}>
           {viText.player.replay}
-        </PlayButton>
+        </PlayButton> : null}
       </section>
     </main>
   )

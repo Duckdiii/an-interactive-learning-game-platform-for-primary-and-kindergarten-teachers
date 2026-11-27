@@ -1,15 +1,20 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { postRegenerateGame } from '../api/gamesApi'
 import { regenerateQuestion } from '../services/aiService'
 import { buildMockGameContents } from '../services/mock/gameFixtures'
 import { mockApiError } from '../services/mock/mockErrors'
-import { getMockGame, resetMockGames } from '../services/mock/mockGames'
+import { createMockGame, getMockGame, resetMockGames } from '../services/mock/mockGames'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
-import type { QuestionDsl } from '../types/game-dsl.types'
+import type { QuestionDsl, VisualClozeImageQuestionDsl } from '../types/game-dsl.types'
 import WorkspaceEditor from './WorkspaceEditor'
 
 // A6.3: hộp thoại làm việc với dịch vụ AI do test điều khiển (kết quả không hợp lệ, hủy, Esc, không tự thử lại, khóa khi còn chữ chưa áp).
+vi.mock('../api/gamesApi', async (importOriginal) => ({
+  ...await importOriginal<typeof import('../api/gamesApi')>(),
+  postRegenerateGame: vi.fn(),
+}))
 vi.mock('../services/aiService', () => ({ regenerateQuestion: vi.fn() }))
 
 const mockedRegenerate = vi.mocked(regenerateQuestion)
@@ -54,6 +59,26 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
+it('xem trước toàn bộ game và chỉ lưu khi nhấn Lưu bản nháp', async () => {
+  vi.stubEnv('VITE_USE_MOCK', 'editor')
+  const original = getMockGame(GAME_ID)
+  vi.mocked(postRegenerateGame).mockResolvedValue({
+    ...original,
+    metadata: { ...original.metadata, title: 'Bản AI xem trước' },
+  })
+  const user = userEvent.setup()
+  renderWithProviders(<WorkspaceEditor />, `/workspace/editor?gameId=${GAME_ID}`)
+  await user.click(await screen.findByRole('button', { name: 'Tạo lại toàn bộ trò chơi' }, SLOW))
+  const confirmation = screen.getByRole('dialog', { name: 'Tạo lại toàn bộ trò chơi' })
+  await user.selectOptions(within(confirmation).getByRole('combobox', { name: 'Giọng đọc' }), 'MALE')
+  await user.click(within(confirmation).getByRole('button', { name: 'Xác nhận làm lại tất cả' }))
+  await screen.findByRole('heading', { name: 'Bản AI xem trước' }, SLOW)
+  expect(postRegenerateGame).toHaveBeenCalledWith(GAME_ID, '', 'MALE', expect.any(AbortSignal))
+  expect(getMockGame(GAME_ID).metadata.title).toBe(original.metadata.title)
+  await user.click(screen.getByRole('button', { name: 'Lưu bản nháp' }))
+  await waitFor(() => expect(getMockGame(GAME_ID).metadata.title).toBe('Bản AI xem trước'))
+})
+
 describe('yêu cầu gửi đi', () => {
   it('gửi mã game, mã thẻ, loại game, câu hiện hành, gợi ý đúng như đã gõ và giọng đã chọn; KHÔNG tự gọi lại', async () => {
     const user = userEvent.setup()
@@ -85,6 +110,39 @@ describe('yêu cầu gửi đi', () => {
     await within(notice()).findByText('Điều chỉnh trò chơi thành công.', {}, SLOW)
     expect(mockedRegenerate).toHaveBeenCalledTimes(2)
   })
+})
+
+it('Điền hình: đợi ảnh mới được lưu trước khi làm lại, giữ chế độ và các ảnh gốc sau khi áp', async () => {
+  const user = userEvent.setup()
+  const game = createMockGame({
+    gameType: 'VISUAL_CLOZE',
+    mode: 'IMAGE',
+    sceneImageUrl: 'https://example.com/scene.png',
+    optionImages: [
+      { imageUrl: 'https://example.com/cat.png', visualPrompt: 'Mèo' },
+      { imageUrl: 'https://example.com/dog.png', visualPrompt: 'Chó' },
+    ],
+  })
+  renderWithProviders(<WorkspaceEditor />, `/workspace/editor?gameId=${game.gameId}`)
+  const scene = await screen.findByRole('textbox', { name: 'URL ảnh cảnh' }, SLOW)
+  fireEvent.change(scene, { target: { value: 'https://example.com/updated-scene.png' } })
+  expect(trigger()).toHaveAttribute('aria-disabled', 'true')
+  await waitFor(() => expect(trigger()).not.toHaveAttribute('aria-disabled'), { timeout: 6000 })
+
+  const saved = getMockGame(game.gameId).questions[0] as VisualClozeImageQuestionDsl
+  expect(saved.sceneImageUrl).toBe('https://example.com/updated-scene.png')
+  const question = { ...saved, questionText: 'Thả từng con vật vào ô tương ứng.' }
+  mockedRegenerate.mockResolvedValueOnce({ question: { ...question, sceneImageUrl: 'https://example.com/other.png' }, gameType: 'VISUAL_CLOZE' })
+  mockedRegenerate.mockResolvedValue({ question, gameType: 'VISUAL_CLOZE' })
+  await user.click(trigger())
+  await user.click(confirm())
+  expect(await within(dialog()).findByRole('alert', {}, SLOW)).toHaveTextContent(INVALID)
+  expect(scene).toHaveValue(saved.sceneImageUrl)
+  await user.click(within(dialog()).getByRole('button', { name: 'Thử lại' }))
+  expect(await screen.findByDisplayValue(question.questionText, {}, SLOW)).toBeInTheDocument()
+  expect(screen.getByRole('textbox', { name: 'URL ảnh cảnh' })).toHaveValue(saved.sceneImageUrl)
+  expect(screen.getByRole('textbox', { name: 'URL ảnh 1' })).toHaveValue(saved.options[0].imageUrl)
+  expect(screen.getByRole('textbox', { name: 'URL ảnh 2' })).toHaveValue(saved.options[1].imageUrl)
 })
 
 describe('câu AI trả về không hợp lệ', () => {

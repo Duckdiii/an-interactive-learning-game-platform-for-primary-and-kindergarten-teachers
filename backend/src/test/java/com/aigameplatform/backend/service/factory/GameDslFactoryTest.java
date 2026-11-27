@@ -244,6 +244,7 @@ class GameDslFactoryTest {
         assertThat(question.questionText()).isEqualTo("Có mấy con mèo?");
         assertThat(question.visualPrompt()).isEqualTo("three cats");
         assertThat(question.audioText()).isEqualTo("Có mấy con mèo?");
+        assertThat(question.audioUrl()).isNull();
     }
 
     // ---- ODD_ONE_OUT ----

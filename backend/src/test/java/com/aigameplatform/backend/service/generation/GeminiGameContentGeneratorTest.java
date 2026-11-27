@@ -1,20 +1,29 @@
 package com.aigameplatform.backend.service.generation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import com.aigameplatform.backend.dto.admin.AiConfigVersionDto;
 
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
+import com.aigameplatform.backend.service.admin.AiConfigService;
+import com.aigameplatform.backend.service.asset.KeywordAssetRetriever;
+import com.aigameplatform.backend.service.media.NotoEmojiCatalog;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import com.aigameplatform.backend.service.strategy.QuizGameStrategy;
 import com.aigameplatform.backend.service.testsupport.GameTestFixtures;
 import com.aigameplatform.backend.service.validation.ValidationError;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -26,7 +35,7 @@ class GeminiGameContentGeneratorTest {
     private static GeminiGameContentGenerator generatorOf(ChatModel model, GameContentStrategyRegistry strategies,
             com.aigameplatform.backend.service.factory.GameAssetCatalog assets) {
         return new GeminiGameContentGenerator(model, strategies, assets,
-                new com.aigameplatform.backend.service.asset.KeywordAssetRetriever(assets), false);
+                new com.aigameplatform.backend.service.asset.KeywordAssetRetriever(assets), false, new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
     }
 
     private static final com.aigameplatform.backend.service.factory.GameAssetCatalog ASSETS =
@@ -86,9 +95,9 @@ class GeminiGameContentGeneratorTest {
         var attempt = new GenerationAttempt(GameType.MATCHING, "Nối con voi và cái trống với hình", Subject.ENGLISH,
                 GradeLevel.GRADE_2, strategies.get(GameType.MATCHING).getStructuredSchema(), null, 1, null, List.of());
 
-        new GeminiGameContentGenerator(modelCapturing(sent), strategies, ASSETS, retriever, true).generate(attempt);
+        new GeminiGameContentGenerator(modelCapturing(sent), strategies, ASSETS, retriever, true, new com.aigameplatform.backend.service.media.NotoEmojiCatalog()).generate(attempt);
         String on = ((SystemMessage) sent.get().messages().get(0)).text();
-        new GeminiGameContentGenerator(modelCapturing(sent), strategies, ASSETS, retriever, false).generate(attempt);
+        new GeminiGameContentGenerator(modelCapturing(sent), strategies, ASSETS, retriever, false, new com.aigameplatform.backend.service.media.NotoEmojiCatalog()).generate(attempt);
         String off = ((SystemMessage) sent.get().messages().get(0)).text();
 
         assertThat(on).contains("HÌNH LIÊN QUAN TỚI YÊU CẦU")
@@ -98,7 +107,53 @@ class GeminiGameContentGeneratorTest {
     }
 
     @Test
-    void sdkWireRequestUsesJsonSchemaWithBoundedArrayCountersRemoved() throws Exception {
+    void regenerationRetriesWithoutPreviousOutputUseTheSingleQuestionPromptAndDedicatedModel() {
+        var normal = new AtomicReference<ChatRequest>();
+        var regeneration = new AtomicReference<ChatRequest>();
+        var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
+        var generator = new GeminiGameContentGenerator(modelCapturing(normal), modelCapturing(regeneration),
+                strategies, ASSETS, new com.aigameplatform.backend.service.asset.KeywordAssetRetriever(ASSETS),
+                false, new com.aigameplatform.backend.service.media.NotoEmojiCatalog(), null);
+
+        generator.generate(new GenerationAttempt(GameType.QUIZ, "Toán", Subject.MATH, GradeLevel.GRADE_1,
+                strategies.get(GameType.QUIZ).getStructuredSchema(), null, 2, null, List.of(),
+                null, false, false, "Làm lại một câu"));
+
+        assertThat(normal).hasValue(null);
+        assertThat(UserMessage.findLast(regeneration.get().messages()).orElseThrow().singleText())
+                .contains("Tạo đúng 1 câu hỏi").doesNotContain("JSON lần trước");
+    }
+
+    @Test
+    void imageModeSendsTheValidatedSceneBytesAsImageContent() {
+        AtomicReference<ChatRequest> sent = new AtomicReference<>();
+        var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
+        byte[] bytes = new byte[] {1, 2, 3, 4};
+        var scene = new com.aigameplatform.backend.service.media.LoadedSceneImage(bytes, "image/png", 640, 480);
+        var input = new VisualClozeImageGenerationInput("https://images.example.edu/scene.png", scene, List.of(
+                new VisualClozeOptionImageInput("https://assets.example.edu/cat.png", "cat",
+                        new com.aigameplatform.backend.service.media.LoadedSceneImage(bytes, "image/png", 64, 64)),
+                new VisualClozeOptionImageInput("https://assets.example.edu/dog.png", "dog",
+                        new com.aigameplatform.backend.service.media.LoadedSceneImage(bytes, "image/png", 64, 64))));
+        var attempt = new GenerationAttempt(GameType.VISUAL_CLOZE, "animals", Subject.ENGLISH,
+                GradeLevel.GRADE_1, com.aigameplatform.backend.service.validation.ai.AiOutputSchemas.visualClozeImageForLlm(),
+                "[en-g1-001] Identify familiar animals", 1, null, List.of(), input);
+
+        generatorOf(modelCapturing(sent), strategies, ASSETS).generate(attempt);
+
+        var userMessage = UserMessage.findLast(sent.get().messages()).orElseThrow();
+        var image = userMessage.contents().stream().filter(ImageContent.class::isInstance)
+                .map(ImageContent.class::cast).findFirst().orElseThrow();
+        assertThat(image.image().base64Data()).isEqualTo(java.util.Base64.getEncoder().encodeToString(bytes));
+        assertThat(image.image().mimeType()).isEqualTo("image/png");
+        assertThat(sent.get().parameters().responseFormat().jsonSchema()).isNotNull();
+        assertThat(SystemMessage.findFirst(sent.get().messages()).orElseThrow().text())
+                .contains("actual scene image attached", "640 by 480", "https://assets.example.edu/cat.png", "cat",
+                        "https://assets.example.edu/dog.png", "dog", "Do not invent URLs or create images");
+    }
+
+    @Test
+    void sdkWireRequestUsesActiveConfigAndJsonSchemaWithBoundedArrayCountersRemoved() throws Exception {
         var body = new AtomicReference<String>();
         var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {
@@ -117,14 +172,23 @@ class GeminiGameContentGeneratorTest {
                     .maxOutputTokens(1800).supportedCapabilities(java.util.Set.of(
                             dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA)).build();
             var strategies = new GameContentStrategyRegistry(GameTestFixtures.strategies(MAPPER));
-            generatorOf(model, strategies, ASSETS).generate(new GenerationAttempt(GameType.MATCHING,
+            var active = mock(AiConfigService.class);
+            when(active.getActiveConfig()).thenReturn(new AiConfigVersionDto("test-version", "Hướng dẫn đang áp dụng.",
+                    0.55, 2400, 0.85, null, false, true, "test-hash", Instant.EPOCH, "admin"));
+            var generator = new GeminiGameContentGenerator(model, model, strategies, ASSETS,
+                    new KeywordAssetRetriever(ASSETS), false, new NotoEmojiCatalog(), active);
+            generator.generate(new GenerationAttempt(GameType.MATCHING,
                     "Ghép từ", Subject.ENGLISH, GradeLevel.GRADE_3, strategies.get(GameType.MATCHING).getStructuredSchema(),
                     "[en-g3-010] Đọc hiểu nghĩa từ", 1, null, List.of()));
-            var config = MAPPER.readTree(body.get()).path("generationConfig");
+            var request = MAPPER.readTree(body.get());
+            assertThat(request.path("systemInstruction").path("parts").get(0).path("text").asString())
+                    .startsWith("Hướng dẫn đang áp dụng.\n\n").contains("Ghép từ");
+            var config = request.path("generationConfig");
             assertThat(config.path("responseMimeType").asString()).isEqualTo("application/json");
             assertThat(config.path("responseJsonSchema").path("type").asString()).isEqualTo("object");
             assertThat(config.has("responseSchema")).isFalse();
-            assertThat(config.path("maxOutputTokens").asInt()).isEqualTo(1800);
+            assertThat(config.path("maxOutputTokens").asInt()).isEqualTo(2400);
+            assertThat(config.path("temperature").asDouble()).isEqualTo(0.55);
             assertThat(config.path("responseJsonSchema").toString()).doesNotContain("maxItems", "minItems");
         } finally { server.stop(0); }
     }

@@ -9,6 +9,7 @@ import com.aigameplatform.backend.service.curriculum.CurriculumRAGService;
 import com.aigameplatform.backend.service.curriculum.CurriculumSource;
 import com.aigameplatform.backend.service.curriculum.review.CurriculumEvidence;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
@@ -24,11 +25,95 @@ class GeminiGeneratedContentReviewerTest {
             """;
 
     @Test
+    void oddImageWithoutCurriculumReviewsLabelsWithoutClaimingVisualOrCurriculumInspection() {
+        var captured = new AtomicReference<ChatRequest>();
+        var question = new OddOneOutQuestionDsl("q1", 30, 10, null, null, null, null,
+                List.of(new TextChoiceDsl("a", "Táo", "apple", "/assets/noto/emoji_u1f34e.svg"),
+                        new TextChoiceDsl("b", "Chuối", "banana", "/assets/noto/emoji_u1f34c.svg"),
+                        new TextChoiceDsl("c", "Nho", "grapes", "/assets/noto/emoji_u1f347.svg"),
+                        new TextChoiceDsl("d", "Cà rốt", "carrot", "/assets/noto/emoji_u1f955.svg")),
+                "d", "Hình nào không phải trái cây?");
+        var game = new OddOneOutGameDsl("1.1.0", GameType.ODD_ONE_OUT, OddOneOutMode.IMAGE,
+                new GameMetadata("Trái cây", Subject.VIETNAMESE, GradeLevel.GRADE_1, "Trái cây"),
+                new GameplaySettings(1), List.of(question));
+        String response = """
+                {"questions":[{"questionId":"q1","answerCorrect":true,"matchesTeacherRequest":true,
+                "uniqueCorrectAnswer":true,"supportedByCurriculum":false,"supportingChunkIds":[],"reason":"Catalog labels"}]}
+                """;
+        var result = new GeminiGeneratedContentReviewer(model(captured, response), MAPPER, "fixture", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog())
+                .review(game, "Trái cây", CurriculumEvidence.empty());
+        assertThat(result.accepted()).isTrue();
+        assertThat(result.review().status()).isEqualTo(
+                com.aigameplatform.backend.entity.enums.CurriculumReviewStatus.UNAVAILABLE);
+        String instruction = dev.langchain4j.data.message.SystemMessage.findFirst(captured.get().messages()).orElseThrow().text();
+        assertThat(instruction).contains("curated Noto catalog", "do not claim that you visually inspected", "no curriculum chunks");
+    }
+
+    @Test
+    void imageModeReviewerReceivesTheSameValidatedSceneBytes() {
+        var captured = new AtomicReference<ChatRequest>();
+        var image = new com.aigameplatform.backend.service.media.LoadedSceneImage(
+                new byte[] {9, 8, 7}, "image/png", 320, 240);
+        var optionImages = java.util.Map.of(
+                "q1/o1", new com.aigameplatform.backend.service.media.LoadedSceneImage(new byte[] {1, 2}, "image/png", 32, 32),
+                "q1/o2", new com.aigameplatform.backend.service.media.LoadedSceneImage(new byte[] {3, 4}, "image/jpeg", 32, 32));
+        var game = new VisualClozeGameDsl("1.1.0", GameType.VISUAL_CLOZE, VisualClozeMode.IMAGE,
+                new GameMetadata("Animals", Subject.ENGLISH, GradeLevel.GRADE_1, "Identify an animal"),
+                new GameplaySettings(1.0), List.of(new VisualClozeQuestionDsl("q1", 30, 10, null, null,
+                        null, null, null, null, null, "Which animal is shown?", "https://images.example.edu/scene.png",
+                        320, 240, List.of(new VisualClozeBlankDsl("b1", 100, 90, "o1")),
+                        List.of(new VisualClozeImageOptionDsl("o1", "cat", "https://images.example.edu/cat.png"),
+                                new VisualClozeImageOptionDsl("o2", "dog", "https://images.example.edu/dog.png")))));
+        var reviewer = new GeminiGeneratedContentReviewer(model(captured, REVIEW), MAPPER, "fixture", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
+
+        assertThat(reviewer.review(game, "Identify an animal", evidence(), image, optionImages).accepted()).isTrue();
+
+        var userMessage = dev.langchain4j.data.message.UserMessage.findLast(captured.get().messages()).orElseThrow();
+        var actualImages = userMessage.contents().stream().filter(ImageContent.class::isInstance)
+                .map(ImageContent.class::cast).toList();
+        assertThat(actualImages).hasSize(3);
+        var actual = actualImages.getFirst();
+        assertThat(actual.image().base64Data()).isEqualTo(java.util.Base64.getEncoder().encodeToString(image.bytes()));
+        assertThat(actual.image().mimeType()).isEqualTo("image/png");
+        assertThat(actualImages.get(1).image().base64Data()).isEqualTo(java.util.Base64.getEncoder().encodeToString(optionImages.get("q1/o1").bytes()));
+        assertThat(actualImages.get(2).image().base64Data()).isEqualTo(java.util.Base64.getEncoder().encodeToString(optionImages.get("q1/o2").bytes()));
+        assertThat(actualImages.get(2).image().mimeType()).isEqualTo("image/jpeg");
+        assertThat(userMessage.toString()).contains("sceneImageUrl", "optionImageAssets", "q1/o1", "q1/o2");
+    }
+
+    @Test
+    void imageModeReviewerFailsClosedWhenAnyOptionImageBytesAreMissing() {
+        var imageGame = imageGame();
+        var scene = new com.aigameplatform.backend.service.media.LoadedSceneImage(new byte[] {9}, "image/png", 320, 240);
+        assertThatThrownBy(() -> new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), REVIEW), MAPPER, "fixture", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog())
+                .review(imageGame, "Identify an animal", evidence(), scene, java.util.Map.of("q1/o1", scene)))
+                .isInstanceOf(AiServiceUnavailableException.class);
+    }
+
+    @Test
+    void imageModeReviewerFailsClosedWhenSceneBytesAreMissing() {
+        var imageGame = imageGame();
+        assertThatThrownBy(() -> new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), REVIEW), MAPPER, "fixture", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog())
+                .review(imageGame, "Identify an animal", evidence()))
+                .isInstanceOf(AiServiceUnavailableException.class);
+    }
+
+    private static VisualClozeGameDsl imageGame() {
+        return new VisualClozeGameDsl("1.1.0", GameType.VISUAL_CLOZE, VisualClozeMode.IMAGE,
+                new GameMetadata("Animals", Subject.ENGLISH, GradeLevel.GRADE_1, "Identify an animal"),
+                new GameplaySettings(1.0), List.of(new VisualClozeQuestionDsl("q1", 30, 10, null, null,
+                        null, null, null, null, null, "Which animal is shown?", "https://images.example.edu/scene.png",
+                        320, 240, List.of(new VisualClozeBlankDsl("b1", 100, 90, "o1")),
+                        List.of(new VisualClozeImageOptionDsl("o1", "cat", "https://images.example.edu/cat.png"),
+                                new VisualClozeImageOptionDsl("o2", "dog", "https://images.example.edu/dog.png")))));
+    }
+
+    @Test
     void savedOrderingDraftIsPresentedInSolutionOrderWithoutMutatingTheDisplayedGame() throws Exception {
         var game = savedOrderingGame();
         var captured = new AtomicReference<ChatRequest>();
         var reviewer = new GeminiGeneratedContentReviewer(model(captured,
-                orderingReview(true, true)), MAPPER, "fixture");
+                orderingReview(true, true)), MAPPER, "fixture", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
         assertThat(reviewer.review(game, game.metadata().topic(), orderingEvidence()).accepted()).isTrue();
         var input = MAPPER.readTree(dev.langchain4j.data.message.UserMessage.findLast(captured.get().messages())
                 .orElseThrow().singleText());
@@ -43,7 +128,7 @@ class GeminiGeneratedContentReviewerTest {
     @Test
     void correctOrderingProjectionCannotOverrideMissingGroundingOrAnIncorrectSolutionVerdict() {
         for (var response : List.of(orderingReview(true, false), orderingReview(false, true))) {
-            var reviewer = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), response), MAPPER, "fixture");
+            var reviewer = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), response), MAPPER, "fixture", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
             assertThat(reviewer.review(savedOrderingGame(), savedOrderingGame().metadata().topic(), orderingEvidence()).accepted()).isFalse();
         }
     }
@@ -67,7 +152,7 @@ class GeminiGeneratedContentReviewerTest {
                 source.curriculumVersion(),"LANGUAGE","LISTENING|VOCABULARY","AGE_4_5")));
         var captured = new AtomicReference<ChatRequest>();
         String response = "{\"questions\":[{\"questionId\":\"q1\",\"answerCorrect\":false,\"supportedByCurriculum\":true,\"supportingChunkIds\":[\"kg-lang-vocabulary-45\"],\"reason\":\"Material not stated\"},{\"questionId\":\"q5\",\"answerCorrect\":false,\"supportedByCurriculum\":true,\"supportingChunkIds\":[\"kg-lang-vocabulary-45\"],\"reason\":\"Material not stated\"}]}";
-        var reviewer = new GeminiGeneratedContentReviewer(model(captured,response),MAPPER,"fixture");
+        var reviewer = new GeminiGeneratedContentReviewer(model(captured,response),MAPPER,"fixture", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
         assertThat(reviewer.review(game,game.metadata().topic(),evidence).accepted()).isFalse();
         String system=dev.langchain4j.data.message.SystemMessage.findFirst(captured.get().messages()).orElseThrow().text();
         assertThat(system).contains("material", "not necessarily wooden", "answerCorrect", "category", "teacher reads");
@@ -98,7 +183,7 @@ class GeminiGeneratedContentReviewerTest {
     @Test
     void acceptsOnlyACompleteReviewCitingRetrievedEvidence() {
         AtomicReference<ChatRequest> request = new AtomicReference<>();
-        var reviewer = new GeminiGeneratedContentReviewer(model(request, REVIEW), MAPPER, "review-model");
+        var reviewer = new GeminiGeneratedContentReviewer(model(request, REVIEW), MAPPER, "review-model", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
 
         var result = reviewer.review(game(), "count to five", evidence());
 
@@ -113,7 +198,7 @@ class GeminiGeneratedContentReviewerTest {
     @Test
     void reviewerExplainsGameSpecificAnswerStructuresAndDoesNotAssumeMediaWasCreated() {
         AtomicReference<ChatRequest> request = new AtomicReference<>();
-        var reviewer = new GeminiGeneratedContentReviewer(model(request, REVIEW), MAPPER, "review-model");
+        var reviewer = new GeminiGeneratedContentReviewer(model(request, REVIEW), MAPPER, "review-model", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
 
         reviewer.review(game(), "count to five", evidence());
 
@@ -128,7 +213,7 @@ class GeminiGeneratedContentReviewerTest {
     @Test
     void rejectsReviewThatCitesAChunkOutsideTheRetrievedEvidence() {
         String inventedChunk = REVIEW.replace("math-g1-001", "math-g2-001");
-        var reviewer = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), inventedChunk), MAPPER, "review-model");
+        var reviewer = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), inventedChunk), MAPPER, "review-model", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
 
         var result = reviewer.review(game(), "count to five", evidence());
 
@@ -138,7 +223,7 @@ class GeminiGeneratedContentReviewerTest {
 
     @Test
     void failsClosedWhenReviewerOmitsAQuestion() {
-        var reviewer = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), "{\"questions\":[]}"), MAPPER, "review-model");
+        var reviewer = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), "{\"questions\":[]}"), MAPPER, "review-model", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog());
 
         assertThatThrownBy(() -> reviewer.review(game(), "count to five", evidence()))
                 .isInstanceOf(AiServiceUnavailableException.class);
@@ -148,7 +233,7 @@ class GeminiGeneratedContentReviewerTest {
     void rejectsSkillDriftAndNonUniqueAnswersEvenWhenOutcomeAndAnswerAreMarkedSupported() {
         for (String field : List.of("matchesTeacherRequest", "uniqueCorrectAnswer")) {
             String output = REVIEW.replace("\"" + field + "\":true", "\"" + field + "\":false");
-            var result = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), output), MAPPER, "fixture")
+            var result = new GeminiGeneratedContentReviewer(model(new AtomicReference<>(), output), MAPPER, "fixture", new com.aigameplatform.backend.service.validation.rule.OddOneOutRule(new com.aigameplatform.backend.service.media.NotoEmojiCatalog()), new com.aigameplatform.backend.service.media.NotoEmojiCatalog())
                     .review(game(), "count to five", evidence());
             assertThat(result.accepted()).as(field).isFalse();
         }

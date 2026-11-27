@@ -34,18 +34,22 @@ public class SchemaGameValidator extends AbstractGameValidator {
         }
 
         JsonNode version = json.get("schemaVersion");
-        if (version == null || !version.isString() || !GameDslSchemaRegistry.SUPPORTED_VERSION.equals(version.asString())) {
+        if (version == null || !version.isString()) {
             return List.of(new ValidationError("$.schemaVersion",
-                    "schemaVersion phải là \"" + GameDslSchemaRegistry.SUPPORTED_VERSION + "\""));
+                    "schemaVersion thiếu hoặc không phải chuỗi"));
         }
 
         GameType type = gameTypeOf(json);
         // CUSTOM là game CPF, không có schema DSL: coi như loại không hỗ trợ ở chuỗi DSL.
-        Schema schema = type == null ? null : schemaRegistry.schemaFor(type);
-        if (schema == null) {
+        if (type == null || schemaRegistry.schemaFor(type) == null) {
             return List.of(new ValidationError("$.gameType", "gameType thiếu hoặc không thuộc các loại game được hỗ trợ"));
         }
 
+        Schema schema = schemaRegistry.schemaFor(version.asString(), type);
+        if (schema == null) {
+            return List.of(new ValidationError("$.schemaVersion",
+                    "Không hỗ trợ schemaVersion " + version.asString() + " cho gameType " + type));
+        }
         List<Error> schemaErrors = schema.validate(json);
         if (!schemaErrors.isEmpty()) {
             return schemaErrors.stream()

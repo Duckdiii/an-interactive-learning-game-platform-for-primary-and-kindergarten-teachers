@@ -3,6 +3,7 @@ package com.aigameplatform.backend.service.factory;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
 import com.aigameplatform.backend.dto.dsl.ai.AiGameOutput;
 import com.aigameplatform.backend.entity.enums.GameType;
+import com.aigameplatform.backend.service.generation.VisualClozeImageGenerationInput;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -29,5 +30,16 @@ public class GameDslFactoryRegistry {
 
     public GameDsl create(GameType type, AiGameOutput output, GameDslRequest request) {
         return factories.get(type).create(output, request);
+    }
+
+    public GameDsl create(GameType type, AiGameOutput output, GameDslRequest request,
+            VisualClozeImageGenerationInput imageInput) {
+        if (type == GameType.ODD_ONE_OUT
+                && request.effectiveVisualClozeMode() == com.aigameplatform.backend.entity.enums.VisualClozeMode.IMAGE)
+            return ((OddOneOutGameDslFactory) factories.get(type)).createImage(output, request);
+        if (type == GameType.AUDIO_VISUAL_MATCH
+                && request.effectiveVisualClozeMode() == com.aigameplatform.backend.entity.enums.VisualClozeMode.IMAGE)
+            return ((AudioVisualMatchGameDslFactory) factories.get(type)).createCatalog(output, request);
+        return factories.get(type).create(output, request, imageInput);
     }
 }

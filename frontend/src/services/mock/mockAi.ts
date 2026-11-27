@@ -14,8 +14,7 @@ import { mockNetworkError, mockTotalDelayMs, mockWait, getMockScenario } from '.
 import { mockCheckSafety } from './safetyCheck'
 import { isMock } from '../../config/mockMode'
 
-// AI MÔ PHỎNG cho UC-06 (làm lại một câu), nhóm `ai` của cờ VITE_USE_MOCK. Backend thật chưa có điểm cuối này nên kết quả luôn là DỮ LIỆU
-// MÔ PHỎNG: giao diện gắn nhãn. Mô phỏng đúng những gì Backend làm, kể cả việc Backend tự gọi lại dịch vụ AI tối đa 2 lần (tổng 1 + 2 lần),
+// AI MÔ PHỎNG cho UC-06 (làm lại một câu), nhóm `ai` của cờ VITE_USE_MOCK. Khi bật nhóm này, kết quả là DỮ LIỆU MÔ PHỎNG: giao diện gắn nhãn. Mô phỏng đúng những gì Backend làm, kể cả việc Backend tự gọi lại dịch vụ AI tối đa 2 lần (tổng 1 + 2 lần),
 // để giao diện thử được các nhánh 5a (không an toàn) và 5b (quá tải) mà không cần dịch vụ AI.
 
 export interface MockRegenerateRequest {
@@ -111,6 +110,14 @@ function pickReplacement(request: MockRegenerateRequest): QuestionDsl {
     }
   }
 
+  const current = request.current
+  if ('sceneImageUrl' in current) {
+    return { ...current, questionText: 'Chọn từng hình để đặt vào ô trống.', audioText: 'Chọn hình phù hợp cho từng ô.' }
+  }
+  if (request.gameType === 'ODD_ONE_OUT' && 'items' in current && current.items.some((item) => 'assetId' in item)) {
+    return { ...current, questionText: 'Hình nào khác nhóm?', audioText: 'Con hãy chọn hình khác nhóm.' }
+  }
+
   const pool = buildMockGameContents().find((game) => game.gameType === request.gameType)?.questions ?? []
   const different = pool.filter((question) => !deepEqual(contentOf(question), contentOf(request.current)))
   const candidates = different.length > 0 ? different : pool
@@ -143,7 +150,7 @@ function decorate(question: QuestionDsl, voice: VoiceGender): QuestionDsl {
   const image = question.visualPrompt ? findMockImages(question.visualPrompt)[0] : undefined
 
   if (image && !next.imageUrl) next.imageUrl = image.url
-  if (question.audioText) next.audioUrl = `/mock/q1.wav?voice=${voice}`
+  if (question.audioText && !('sceneImageUrl' in question)) next.audioUrl = `/mock/q1.wav?voice=${voice}`
 
   return next
 }

@@ -22,6 +22,9 @@ public abstract class QuestionGame {
 
     protected int itemIndex;
 
+    @Column(nullable = false)
+    protected boolean retired;
+
     protected int timeLimit;
 
     protected int point;
@@ -41,4 +44,13 @@ public abstract class QuestionGame {
     // Association: QuestionGame 1 - 0..* EditLog. EditLog giữ khóa ngoại (mappedBy), không cascade.
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     protected List<EditLog> editLogs = new ArrayList<>();
+
+    /** Nhãn ngắn của câu cho giáo viên xem thống kê; loại game có nội dung chữ thì ghi đè. */
+    public String insightLabel() {
+        return "Câu " + (itemIndex + 1);
+    }
+
+    protected String labelOrDefault(String text) {
+        return text == null || text.isBlank() ? "Câu " + (itemIndex + 1) : text;
+    }
 }

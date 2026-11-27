@@ -1,13 +1,15 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { viText } from '../../constants/viText'
 import CpfRenderer from '../../games/cpf/CpfRenderer'
+import { useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard'
 import { ROUTES } from '../../routes/paths'
 import { saveCpfGame } from '../../services/reviseService'
 import { isCpfGameResponse, type CpfGameResponse } from '../../types/game-response.types'
 import { parseApiError } from '../../utils/apiError'
 import Button from '../Button'
 import ButtonLink from '../ButtonLink'
+import RegenerateGameButton from './RegenerateGameButton'
 import ReviseChatPanel from './ReviseChatPanel'
 
 const reviseText = viText.reviseChat
@@ -20,11 +22,13 @@ export default function CpfWorkspace({ game }: { game: CpfGameResponse }) {
   // Đổi key để chơi lại từ đầu mà không giữ trạng thái màn cũ.
   const [run, setRun] = useState(0)
   const [revised, setRevised] = useState<CpfGameResponse | null>(null)
+  const previewPending = useRef(false)
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const shown = revised ?? game
   const { cpf } = shown
+  useUnsavedChangesGuard(Boolean(revised), viText.editor.save.leaveConfirm)
 
   const keep = async () => {
     if (!revised) return
@@ -33,6 +37,7 @@ export default function CpfWorkspace({ game }: { game: CpfGameResponse }) {
       await saveCpfGame(game.gameId, revised.cpf)
       // Làm mới cả game đang mở và danh sách (tên game có thể đã đổi).
       await Promise.all([queryClient.invalidateQueries({ queryKey: ['game'] }), queryClient.invalidateQueries({ queryKey: ['games'] })])
+      previewPending.current = false
       setRevised(null)
       setNotice(viText.reviseChat.kept)
     } catch (error) {
@@ -50,6 +55,16 @@ export default function CpfWorkspace({ game }: { game: CpfGameResponse }) {
           <h1 className="text-3xl font-extrabold sm:text-4xl">{cpf.metadata.title}</h1>
         </div>
         <div className="flex flex-wrap gap-3">
+          <RegenerateGameButton gameId={game.gameId} gameType="CUSTOM" disabled={saving || Boolean(revised)}
+            onPreview={(preview) => {
+              if (!isCpfGameResponse(preview) || previewPending.current) return false
+              previewPending.current = true
+              setRevised(preview)
+              setNotice(null)
+              setRun((n) => n + 1)
+              return true
+            }}
+          />
           <Button type="button" variant="secondary" onClick={() => setRun((n) => n + 1)}>
             Chơi lại từ đầu
           </Button>
@@ -66,7 +81,8 @@ export default function CpfWorkspace({ game }: { game: CpfGameResponse }) {
         gameId={game.gameId}
         blockedReason={revised ? reviseText.cpfDecideFirst : null}
         onRevised={(next) => {
-          if (!isCpfGameResponse(next)) return reviseText.errorFallback
+          if (!isCpfGameResponse(next) || previewPending.current) return reviseText.errorFallback
+          previewPending.current = true
           setRevised(next)
           setNotice(null)
           return reviseText.cpfApplied
@@ -76,9 +92,9 @@ export default function CpfWorkspace({ game }: { game: CpfGameResponse }) {
             {revised ? (
               <div className="flex flex-wrap gap-3">
                 <Button type="button" onClick={() => void keep()} disabled={saving}>
-                  {saving ? reviseText.cpfSaving : reviseText.cpfKeep}
+                  {saving ? reviseText.cpfSaving : 'Lưu bản nháp'}
                 </Button>
-                <Button type="button" variant="secondary" disabled={saving} onClick={() => setRevised(null)}>
+                <Button type="button" variant="secondary" disabled={saving} onClick={() => { previewPending.current = false; setRevised(null) }}>
                   {reviseText.cpfDiscard}
                 </Button>
               </div>

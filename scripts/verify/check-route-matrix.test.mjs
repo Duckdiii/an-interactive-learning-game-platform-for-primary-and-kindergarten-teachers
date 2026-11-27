@@ -10,6 +10,8 @@ test('route rename, missing registration and unsupported claims fail', () => {
   assert.ok(checkRouteMatrix(matrix, paths, '', () => true).length);
   assert.ok(checkRouteMatrix(matrix, paths, 'path={ROUTES.login}', () => false).length);
   assert.ok(checkRouteMatrix([{ ...matrix[0], state: 'mock', checks: [] }], paths, 'path={ROUTES.login}', () => true).length);
+  assert.deepEqual(checkRouteMatrix([{ ...matrix[0], state: 'unverified', checks: [] }],
+    paths, 'path={ROUTES.login}', () => true), []);
 });
 
 test('new routes need a coverage entry and duplicate entries fail', () => {

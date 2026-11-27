@@ -367,7 +367,7 @@ describe('trình soạn thảo: máy dùng chung ở trường', () => {
   it('phiên chưa có mã giáo viên thì KHÔNG sao lưu và không hỏi khôi phục, nhưng vẫn sửa và lưu được', async () => {
     const user = userEvent.setup()
 
-    storeSession({ email: 'lan@truong.edu.vn', fullName: 'Lan' }, 'token', 'refresh')
+    storeSession({ email: 'lan@truong.edu.vn', fullName: 'Lan' }, 'token')
     // Dù có sẵn một bản sao lưu cùng khóa theo email, cũng không được dùng tới.
     localStorage.setItem(`ai-game:editor-draft:lan@truong.edu.vn:${DRAFT_ID}`, 'x')
     await openLoaded(DRAFT_ID)

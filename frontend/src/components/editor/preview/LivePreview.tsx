@@ -6,7 +6,7 @@ import { UiProfileProvider } from '../../../player/profile/UiProfileContext'
 import { getPlayableRenderer } from '../../../player/renderers'
 import { playerRootVars } from '../../../player/theme/playerRootVars'
 import { ThemeProvider } from '../../../player/theme/ThemeContext'
-import type { GamePresentation, GameType, PresentationCarrier, PresentationWorld, QuestionDsl } from '../../../types/game-dsl.types'
+import type { GamePresentation, GameType, PresentationCarrier, PresentationWorld, QuestionDsl, Subject } from '../../../types/game-dsl.types'
 import { PresentationProvider } from '../../../player/theme/PresentationContext'
 import { editorPresentation } from './editorPresentation'
 import GameTypeCover from '../../ui/GameTypeCover'
@@ -23,7 +23,7 @@ interface LivePreviewProps {
   index: number
   total: number
   gradeLevel: string
-  subject: string
+  subject: Subject
   topic?: string
   /** Câu đang chọn còn lỗi kiểm tra: không dựng renderer vì dữ liệu dở có thể làm nó vỡ. */
   hasIssues: boolean
@@ -188,7 +188,7 @@ export default function LivePreview({
           <UiProfileProvider profile={profile}>
             <ThemeProvider theme={resolvedTheme}>
               <PresentationProvider presentation={resolved}>
-                <PreviewStage gameType={gameType} Renderer={Renderer} question={question} title={title} index={index} total={total} />
+                <PreviewStage gameType={gameType} Renderer={Renderer} question={question} subject={subject} title={title} index={index} total={total} />
               </PresentationProvider>
             </ThemeProvider>
           </UiProfileProvider>

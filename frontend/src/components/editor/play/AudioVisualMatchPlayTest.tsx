@@ -1,22 +1,41 @@
-import { useUiProfile } from '../../../player/profile/useUiProfile'
-import AudioVisualMatchPlayable from '../../../player/renderers/AudioVisualMatchPlayable'
-import type { StudentAudioVisualMatchQuestion } from '../../../types/game-student.types'
-import { gradePreviewAnswer, toPreviewStudentQuestion } from '../preview/previewModel'
+import AudioVisualMatchRenderer from '../../../games/audio-visual-match/AudioVisualMatchRenderer'
+import { seededShuffle } from '../../../games/common/seededDerangement'
+import type { AudioVisualMatchQuestion } from '../../../types/game-dsl.types'
+import type { AnswerResult, StudentAudioVisualMatchQuestion } from '../../../types/game-student.types'
 import type { PlayTestProps } from './playTestRegistry'
 
-export default function AudioVisualMatchPlayTest({ question, onResult }: PlayTestProps) {
-  const profile = useUiProfile()
-  const studentQ = toPreviewStudentQuestion('AUDIO_VISUAL_MATCH', question) as StudentAudioVisualMatchQuestion
+/** Chấm AVM trong trình duyệt để giáo viên thử renderer và âm báo mà không tạo session hoặc gọi API. */
+export default function AudioVisualMatchPlayTest({ question, subject, onResult, playQuestionAudio }: PlayTestProps) {
+  const avm = question as AudioVisualMatchQuestion
+  const choices = seededShuffle([
+    { visualPrompt: avm.correct.visualPrompt, imageUrl: avm.correct.imageUrl, correct: true },
+    ...avm.distractors.map((choice) => ({ ...choice, correct: false })),
+  ], avm.id)
+  const options = choices.map((choice, index) => ({
+    id: String.fromCharCode(97 + index),
+    visualPrompt: choice.visualPrompt,
+    ...(choice.imageUrl ? { imageUrl: choice.imageUrl } : {}),
+  }))
+  const correctIndex = choices.findIndex((choice) => choice.correct)
+  const studentQuestion: StudentAudioVisualMatchQuestion = {
+    ...avm,
+    audioText: avm.audioText,
+    options,
+  }
+  const correctOptionId = options[correctIndex]?.id
 
-  return (
-    <AudioVisualMatchPlayable
-      question={studentQ}
-      profile={profile}
-      onSubmit={async (answer) => {
-        const graded = gradePreviewAnswer('AUDIO_VISUAL_MATCH', question, answer)
-        onResult(graded.isCorrect)
-        return graded
-      }}
-    />
-  )
+  const onSubmit = async ({ selectedOptionId }: { selectedOptionId: string }): Promise<AnswerResult> => {
+    const isCorrect = selectedOptionId === correctOptionId
+    onResult(isCorrect)
+    return {
+      status: isCorrect ? 'CORRECT' : 'INCORRECT',
+      isCorrect,
+      pointsEarned: isCorrect ? avm.points : 0,
+      totalScore: isCorrect ? avm.points : 0,
+      correctAnswer: { selectedOptionId: correctOptionId },
+    }
+  }
+
+  return <AudioVisualMatchRenderer question={studentQuestion} onSubmit={onSubmit} playAudio={playQuestionAudio}
+    ttsLanguage={subject === 'ENGLISH' ? 'en-US' : 'vi-VN'} />
 }

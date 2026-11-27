@@ -1,18 +1,29 @@
-import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS, UNDERSTAND_TIMEOUT_MS } from '../constants/aiLimits'
+import { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_IMAGE_QUESTION_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS, UNDERSTAND_TIMEOUT_MS } from '../constants/aiLimits'
 import axiosInstance from './axiosInstance'
 import type { ApiSuccessResponse } from '../types/api'
 import type { PublishResult } from '../types/publish.types'
+import type { VoiceGender } from '../services/mediaService'
 import type { RegeneratedQuestion } from '../types/regenerate.types'
 import type { ChatTurn, GameUnderstandingResponse, UnderstandGameRequest } from '../types/understanding.types'
 import type { GenerateGameRequest } from '../utils/generateRequest'
 import type { AnyGameResponse, GameEnvelopeBody, GameResponse } from '../types/game-response.types'
 import type { GameFilters, GameSummary } from '../types/game-summary.types'
+import type {
+  GameInsights,
+  InsightsRange,
+  InsightsSessionType,
+  QuestionInsightDetail,
+  ReviewNeeded,
+} from '../services/home/HomeApi'
 
 // Chỉ áp cho lệnh đọc danh sách: nếu máy chủ treo thì báo lỗi sau 10 giây thay vì quay vô hạn.
 // Không đặt timeout chung trên axiosInstance vì các lệnh khác (ví dụ sinh game bằng AI) có thể chạy lâu hơn.
 export const GAMES_REQUEST_TIMEOUT_MS = 10_000
 // Mở và lưu một game: nội dung lớn hơn danh sách nên cho dài hơn một chút.
 export const GAME_REQUEST_TIMEOUT_MS = 15_000
+export const NARRATION_REQUEST_TIMEOUT_MS = 30_000
+// A cache miss can synthesize two fixed clips sequentially (up to two provider read timeouts).
+export const NARRATION_FEEDBACK_REQUEST_TIMEOUT_MS = 65_000
 
 // Hằng số thời gian chờ của lời gọi AI nằm ở `constants/aiLimits.ts` (dùng chung với AI mô phỏng); xuất lại ở đây cho nơi dùng API.
 export { AI_ATTEMPT_TIMEOUT_MS, AI_BACKEND_ATTEMPTS, GENERATE_GAME_TIMEOUT_MS, PUBLISH_REQUEST_TIMEOUT_MS, REGENERATE_QUESTION_TIMEOUT_MS }
@@ -29,6 +40,52 @@ export async function getGames(filters: GameFilters) {
       },
     },
   )
+
+  return response.data.data
+}
+
+// Chỉ gửi tham số có giá trị (tránh `?sessionType=undefined`).
+function insightParams(sessionType?: InsightsSessionType, range?: InsightsRange) {
+  const params = {
+    ...(sessionType ? { sessionType } : {}),
+    ...(range?.from ? { from: range.from } : {}),
+    ...(range?.to ? { to: range.to } : {}),
+    ...(range?.classroomId ? { classroomId: range.classroomId } : {}),
+  }
+
+  return Object.keys(params).length > 0 ? params : undefined
+}
+
+/** GET /games/{gameId}/insights: thống kê theo câu (UC-18); bỏ `sessionType` là tất cả loại lượt chơi. */
+export async function fetchGameInsights(gameId: string, sessionType?: InsightsSessionType, range?: InsightsRange) {
+  const response = await axiosInstance.get<ApiSuccessResponse<GameInsights>>(
+    `/games/${encodeURIComponent(gameId)}/insights`,
+    { params: insightParams(sessionType, range) },
+  )
+
+  return response.data.data
+}
+
+/** GET /games/{gameId}/questions/{questionId}/insights: chi tiết một câu (UC-18 bước 5). */
+export async function fetchQuestionInsights(
+  gameId: string,
+  questionId: string,
+  sessionType?: InsightsSessionType,
+  range?: InsightsRange,
+) {
+  const response = await axiosInstance.get<ApiSuccessResponse<QuestionInsightDetail>>(
+    `/games/${encodeURIComponent(gameId)}/questions/${encodeURIComponent(questionId)}/insights`,
+    { params: insightParams(sessionType, range) },
+  )
+
+  return response.data.data
+}
+
+/** GET /insights/review-needed: các câu lớp cần ôn lại (trang chủ). */
+export async function fetchReviewNeeded(limit: number) {
+  const response = await axiosInstance.get<ApiSuccessResponse<ReviewNeeded[]>>('/insights/review-needed', {
+    params: { limit },
+  })
 
   return response.data.data
 }
@@ -54,10 +111,21 @@ export async function saveGame(gameId: string, body: GameEnvelopeBody) {
   return response.data.data
 }
 
+export async function postRegenerateGame(gameId: string, feedback: string, voice: VoiceGender, signal?: AbortSignal) {
+  const response = await axiosInstance.post<ApiSuccessResponse<AnyGameResponse>>(
+    `/games/${encodeURIComponent(gameId)}/regenerate`,
+    { feedback: feedback.trim(), voice },
+    { timeout: REGENERATE_IMAGE_QUESTION_TIMEOUT_MS, signal },
+  )
+  return response.data.data
+}
+
 export interface RegenerateQuestionOptions {
+  voice?: VoiceGender
   // Gợi ý điều chỉnh của giáo viên (tối đa 500 ký tự); trống thì không gửi thân yêu cầu.
   feedback?: string
   signal?: AbortSignal
+  withImageReview?: boolean
 }
 
 /**
@@ -68,8 +136,11 @@ export async function postRegenerateQuestion(gameId: string, questionId: string,
   const feedback = options.feedback?.trim()
   const response = await axiosInstance.post<ApiSuccessResponse<RegeneratedQuestion>>(
     `/games/${encodeURIComponent(gameId)}/questions/${encodeURIComponent(questionId)}/regenerate`,
-    feedback ? { feedback } : undefined,
-    { timeout: REGENERATE_QUESTION_TIMEOUT_MS, signal: options.signal },
+    feedback || options.voice ? { feedback: feedback || undefined, voice: options.voice } : undefined,
+    {
+      timeout: options.withImageReview ? REGENERATE_IMAGE_QUESTION_TIMEOUT_MS : REGENERATE_QUESTION_TIMEOUT_MS,
+      signal: options.signal,
+    },
   )
 
   return response.data.data
@@ -122,6 +193,40 @@ export async function postPublishGame(gameId: string, body: GameEnvelopeBody, si
     `/games/${encodeURIComponent(gameId)}/publish`,
     body,
     { timeout: PUBLISH_REQUEST_TIMEOUT_MS, signal },
+  )
+
+  return response.data.data
+}
+
+export interface NarrationPreview {
+  questionId: string
+  audioUrl: string
+  bytes: number
+  durationMillis: number
+}
+
+/** POST /games/{gameId}/narration/preview: synthesize the server-owned audioText and return a temporary preview URL. */
+export async function postGenerateNarrationPreview(gameId: string, questionId: string, signal?: AbortSignal) {
+  const response = await axiosInstance.post<ApiSuccessResponse<NarrationPreview>>(
+    `/games/${encodeURIComponent(gameId)}/narration/preview`,
+    { questionId },
+    { timeout: NARRATION_REQUEST_TIMEOUT_MS, signal },
+  )
+
+  return response.data.data
+}
+
+export interface NarrationFeedbackAudioUrls {
+  correctAudioUrl: string
+  wrongAudioUrl: string
+}
+
+/** POST /games/{gameId}/narration/feedback: returns the fixed correct/wrong clips for this game's subject. */
+export async function postGenerateNarrationFeedback(gameId: string, signal?: AbortSignal) {
+  const response = await axiosInstance.post<ApiSuccessResponse<NarrationFeedbackAudioUrls>>(
+    `/games/${encodeURIComponent(gameId)}/narration/feedback`,
+    undefined,
+    { timeout: NARRATION_FEEDBACK_REQUEST_TIMEOUT_MS, signal },
   )
 
   return response.data.data

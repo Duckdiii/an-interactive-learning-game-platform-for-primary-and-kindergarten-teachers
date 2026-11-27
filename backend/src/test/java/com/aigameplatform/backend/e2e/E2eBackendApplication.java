@@ -2,7 +2,13 @@ package com.aigameplatform.backend.e2e;
 
 import com.aigameplatform.backend.AigameBackendApplication;
 import com.aigameplatform.backend.db.AbstractPostgresTest;
+import com.aigameplatform.backend.service.validation.safety.ModerationResult;
+import com.aigameplatform.backend.service.validation.safety.OpenAiModerationClient;
+import java.util.List;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -18,11 +24,25 @@ public final class E2eBackendApplication {
     }
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(AigameBackendApplication.class, AbstractPostgresTest.Containers.class)
+        new SpringApplicationBuilder(AigameBackendApplication.class, AbstractPostgresTest.Containers.class, MediaStub.class)
                 .profiles("e2e", "verify-flow")
                 .initializers(context -> context.getBeanFactory()
                         .registerSingleton(TestClassExcludeFilter.class.getName(), new TestClassExcludeFilter()))
                 .run(args);
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class MediaStub {
+        @Bean
+        @Primary
+        OpenAiModerationClient e2eMediaModeration() {
+            return new OpenAiModerationClient("http://localhost", "", "e2e", 1) {
+                @Override
+                public ModerationResult moderateImage(byte[] bytes, String mimeType) {
+                    return new ModerationResult(false, List.of());
+                }
+            };
+        }
     }
 
     /**

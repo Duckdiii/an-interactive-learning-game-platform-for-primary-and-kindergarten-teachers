@@ -44,7 +44,7 @@ Claude Code tự nạp các file này khi đọc file khớp `paths`. Lập kế
 ## Contract đã freeze — mọi thay đổi field/endpoint phải đồng bộ cả Backend, Frontend và doc
 
 - JSON DSL Schema v1.0.0 (cấu trúc field `QuestionGame` cho từng loại game). Đặc tả: `docs/game-json-dsl-v1.0.0.md`; JSON Schema: `backend/src/main/resources/schema/game-dsl/1.0.0/*.schema.json` (mỗi loại game một file, tự chứa); record Java: `dto/dsl`. Kiểu TypeScript: `frontend/src/types/game-dsl.types.ts`. Sửa DSL phải sửa đồng bộ cả bốn nơi và cập nhật test `GameDslSchemaTest`. "Dạng đầu ra của AI" (đơn giản hơn, dùng làm Structured Outputs): schema `backend/src/main/resources/schema/game-ai-output/1.0.0/*.schema.json`, record `dto/dsl/ai`, kiểm tra bằng `service/validation/ai/AiOutputValidator`; sửa thì cập nhật test `AiOutputValidatorTest`.
-- REST API Contract v1.1.0 (endpoint, response envelope `{success, data}` / `{success, error}`, error code). Nguồn sự thật: `docs/openapi/openapi.yaml` (OpenAPI 3.1, thiết kế trước, code theo sau). Mỗi operation có `x-status`: `implemented` (đã cài), `extended-pending` (đã có nhưng phần mở rộng chưa cài), `planned` (chưa cài, code theo đúng spec). Sửa endpoint/field/mã lỗi phải sửa file này trước, rồi kiểm tra bằng `npx @redocly/cli lint docs/openapi/openapi.yaml` (chỉ để kiểm tra cú pháp spec, không phải để xem). **Đọc spec lớn (~4000 dòng): mở `docs/openapi/INDEX.md` trước** (operation/schema nằm ở dòng nào), rồi `Read` đúng đoạn bằng `offset`/`limit`; không nạp cả file. Sửa `openapi.yaml` xong chạy `node scripts/openapi/build-index.mjs` để làm mới INDEX (test `build-index.test.mjs` sẽ đỏ nếu quên). Xem API trực tiếp: chạy Backend rồi mở `http://localhost:8080/swagger-ui.html` (springdoc, sinh từ controller đã cài nên chỉ thấy endpoint đã có code, có nút Try it; tắt khi triển khai bằng `SWAGGER_ENABLED=false`). Code Frontend auth hiện còn theo contract cũ (refreshToken trong body, `AuthUser.id`), cần chuyển sang cookie và `teacherId`.
+- REST API Contract v1.1.0 (endpoint, response envelope `{success, data}` / `{success, error}`, error code). Nguồn sự thật: `docs/openapi/openapi.yaml` (OpenAPI 3.1, thiết kế trước, code theo sau). Mỗi operation có `x-status`: `implemented` (đã cài), `extended-pending` (đã có nhưng phần mở rộng chưa cài), `planned` (chưa cài, code theo đúng spec). Sửa endpoint/field/mã lỗi phải sửa file này trước, rồi kiểm tra bằng `npx @redocly/cli lint docs/openapi/openapi.yaml` (chỉ để kiểm tra cú pháp spec, không phải để xem). **Đọc spec lớn (~4000 dòng): mở `docs/openapi/INDEX.md` trước** (operation/schema nằm ở dòng nào), rồi `Read` đúng đoạn bằng `offset`/`limit`; không nạp cả file. Sửa `openapi.yaml` xong chạy `node scripts/openapi/build-index.mjs` để làm mới INDEX (test `build-index.test.mjs` sẽ đỏ nếu quên). Xem API trực tiếp: chạy Backend rồi mở `http://localhost:8080/swagger-ui.html` (springdoc, sinh từ controller đã cài nên chỉ thấy endpoint đã có code, có nút Try it; tắt khi triển khai bằng `SWAGGER_ENABLED=false`).
 - WebSocket Message Format v1.0.0 (`/topic/session/{sessionId}/...`, `/app/session/{sessionId}/...`)
 
 Link doc: DSL ở `docs/game-json-dsl-v1.0.0.md`, REST ở `docs/openapi/openapi.yaml`; tài liệu WebSocket Message Format riêng chưa viết (TODO, tạm xem tag `Realtime` trong `openapi.yaml`). Trước khi sinh code liên quan đến field JSON, endpoint mới hay message WebSocket mới, đọc đúng doc tương ứng; không tự đặt tên field/endpoint khác đi.
@@ -122,22 +122,9 @@ Bảng chỉ còn agent cho việc cần phán đoán; luật nào đã có scri
 
 Chỉ chạy agent đúng với phần đã đổi; thay đổi chỉ trong `*.md` hay docs không cần `test-verifier`.
 
-## Wiki kiến thức (`docs/wiki/`)
+## Tra cứu tài liệu
 
-`docs/wiki/index.md` là cửa vào của kho tài liệu (vault Obsidian là `docs/`). Wiki chỉ để định hướng: tóm tắt, nối các tài liệu lại với nhau, có thể chậm hơn nguồn. **Trước khi viết code hay test phải đọc nguồn gốc theo bảng dưới; wiki khác nguồn thì tin nguồn.** Phiên chính ghi wiki khi người dùng yêu cầu, theo `docs/wiki/README.md`; subagent chỉ đọc.
-
-| Cần biết | Đọc |
-|---|---|
-| Tổng quan, trạng thái, lý do quyết định, điểm lệch | `docs/wiki/index.md` |
-| Luồng đầy đủ của một ca sử dụng | `docs/srs/UC-xx.md` |
-| Yêu cầu chức năng, phi chức năng | `docs/srs/FR-summary.md`, `docs/srs/NFR.md` |
-| Trường FLD, KPI | `docs/srs/FLD.md`, `docs/srs/KPI.md` |
-| Các mục SRS khác | `docs/srs/SRS-full.md`; hình trong SRS ở `docs/SRS.docx` |
-| Sơ đồ kiến trúc, use case, class, tuần tự | `docs/wiki/Sơ đồ hệ thống.md`, `docs/diagrams/` (chỉ lấy nhãn, không đọc nguyên file `.drawio`) |
-| Định hướng đề tài | `docs/Dinh_huong_de_tai.md` |
-| Field DSL | `docs/game-json-dsl-v1.0.0.md` |
-| Endpoint, mã lỗi | `docs/openapi/openapi.yaml` |
-| Thiết kế màn hình | `docs/ui/SPEC.md`, `docs/ui/wireframes/` |
+Bắt đầu ở [mục lục tài liệu](docs/README.md). Đọc đúng UC, hợp đồng hoặc schema liên quan và đối chiếu code cùng test trước khi sửa. [Wiki](docs/wiki/index.md) tóm tắt bối cảnh. Quy tắc cập nhật nằm trong [hướng dẫn wiki](docs/wiki/README.md).
 
 ## Học từ lỗi của agent
 

@@ -10,8 +10,9 @@ import { isCpfGameResponse, type GameResponse } from '../../types/game-response.
 import PlayerLoading from '../components/PlayerLoading'
 import { PROFILES } from '../profile/profiles'
 import { getPlayableRenderer } from '../renderers'
-import { getRoomApi, isRoomAvailable } from '../room/getRoomApi'
+import { getRoomApi, usesMockRoom } from '../room/getRoomApi'
 import type { HostedRoom } from '../room/RoomApi'
+import LiveRoomHost from '../room/LiveRoomHost'
 import RoomTeacherScreen from '../room/RoomTeacherScreen'
 import { usePlayerRootStyle } from '../theme/usePlayerRootStyle'
 
@@ -97,10 +98,13 @@ export default function RoomHostPage() {
   const { gameId = '' } = useParams()
   const query = useGame(gameId)
 
-  if (!isRoomAvailable()) return <Message title={text.unavailable} />
   if (query.isPending) return <PlayerLoading />
   if (!query.data) return <Message title={viText.present.notFound} />
   if (isCpfGameResponse(query.data) || !getPlayableRenderer(query.data.gameType)) return <Message title={viText.editor.publish.cards.room.unsupported} />
 
-  return <HostedRoomScreen key={query.data.gameId} game={query.data} />
+  if (usesMockRoom()) return <HostedRoomScreen key={query.data.gameId} game={query.data} />
+  if (query.data.gameType === 'ODD_ONE_OUT' && query.data.mode !== 'IMAGE') {
+    return <Message title={viText.editor.publish.cards.room.unsupported} />
+  }
+  return <LiveRoomHost key={query.data.gameId} game={query.data} />
 }

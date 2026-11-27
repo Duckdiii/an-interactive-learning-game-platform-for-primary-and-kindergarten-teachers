@@ -1,7 +1,7 @@
 {
   "questions": [
     {
-      "audioText": "Tìm các thẻ giống nhau",
+      "audioText": "Tìm các thẻ giống nhau.",
       "pairs": [
         {
           "visualPrompt": "apple"

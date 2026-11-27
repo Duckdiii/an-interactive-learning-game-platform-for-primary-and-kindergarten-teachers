@@ -294,7 +294,7 @@ class BindingReplayEvalTest {
                 {
                   "questions": [
                     {
-                      "audioText": "Nối tên loài vật với hình tương ứng",
+                      "audioText": "Nối tên loài vật với hình tương ứng.",
                       "pairs": [
                         {
                           "left": {
@@ -352,7 +352,7 @@ class BindingReplayEvalTest {
                 {
                   "questions": [
                     {
-                      "audioText": "Nối tên quả với đặc điểm",
+                      "audioText": "Nối tên quả với đặc điểm.",
                       "pairs": [
                         {
                           "left": {
@@ -400,7 +400,7 @@ class BindingReplayEvalTest {
                 {
                   "questions": [
                     {
-                      "audioText": "Tìm các cặp thẻ con vật giống nhau",
+                      "audioText": "Tìm các cặp thẻ con vật giống nhau.",
                       "pairs": [
                         {
                           "visualPrompt": "con vịt",
@@ -438,7 +438,7 @@ class BindingReplayEvalTest {
                 {
                   "questions": [
                     {
-                      "audioText": "Lật tìm cặp thẻ hình quả giống nhau",
+                      "audioText": "Lật tìm cặp thẻ hình quả giống nhau.",
                       "pairs": [
                         {
                           "visualPrompt": "quả táo",

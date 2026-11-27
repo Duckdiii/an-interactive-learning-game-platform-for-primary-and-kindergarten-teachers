@@ -36,9 +36,9 @@ export default function BeResult({ info, correctCount, total, onReplay }: Result
               </span>
             ))}
           </p>
-          <PlayButton className="min-h-[calc(var(--play-min-touch)*1.5)] w-full max-w-md text-2xl [@media(max-height:500px)]:min-h-[var(--play-min-touch)]" onClick={onReplay}>
+          {onReplay ? <PlayButton className="min-h-[calc(var(--play-min-touch)*1.5)] w-full max-w-md text-2xl [@media(max-height:500px)]:min-h-[var(--play-min-touch)]" onClick={onReplay}>
             {viText.player.replay}
-          </PlayButton>
+          </PlayButton> : null}
           <ParentGate message={message} />
         </div>
       </div>

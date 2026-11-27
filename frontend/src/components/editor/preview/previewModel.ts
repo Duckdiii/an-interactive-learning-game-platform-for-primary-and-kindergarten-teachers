@@ -1,5 +1,6 @@
 import type { GameType, QuestionDsl } from '../../../types/game-dsl.types'
-import type { AnswerPayload, AnswerResult } from '../../../types/game-student.types'
+import type { AnswerPayload, AnswerResult, StudentVisualClozeImagePlacement } from '../../../types/game-student.types'
+import { gradeImagePlacement } from '../../../games/visual-cloze-image/gradeImagePlacement'
 // Chấm cục bộ trong trình soạn thảo (chế độ xem trước): không có phiên chơi, không gọi API. Chỉ dùng phần chấm THUẦN của mock
 // (`MOCK_HANDLERS`), không kéo theo `mockPlayerApi`. Nó nằm trong bản build thật vì đó là logic, không phải dữ liệu mẫu.
 import { MOCK_HANDLERS } from '../../../player/api/mockPlayerHandlers'
@@ -29,6 +30,8 @@ export const toPreviewStudentQuestion = (gameType: GameType, question: QuestionD
 export const previewCorrectAnswer = (gameType: GameType, question: QuestionDsl) => MOCK_HANDLERS[gameType].correct(question, previewSeed(question))
 
 export function gradePreviewAnswer(gameType: GameType, question: QuestionDsl, answer: AnswerPayload): AnswerResult {
+  if (gameType === 'VISUAL_CLOZE' && 'sceneImageUrl' in question)
+    return gradeImagePlacement(question, answer, []).result
   const handler = MOCK_HANDLERS[gameType]
   const seed = previewSeed(question)
   const isCorrect = 'outcome' in answer ? false : handler.isCorrect(question, seed, answer)
@@ -39,5 +42,22 @@ export function gradePreviewAnswer(gameType: GameType, question: QuestionDsl, an
     pointsEarned: isCorrect ? question.points : 0,
     totalScore: isCorrect ? question.points : 0,
     correctAnswer: previewCorrectAnswer(gameType, question),
+  }
+}
+
+/** One question/attempt owns its accepted placements; no global preview state. */
+export function createPreviewGrader(gameType: GameType, question: QuestionDsl) {
+  let accepted: StudentVisualClozeImagePlacement[] = []
+  let terminal: AnswerResult | null = null
+  return (answer: AnswerPayload): AnswerResult => {
+    if (terminal) return terminal
+    let result: AnswerResult
+    if (gameType === 'VISUAL_CLOZE' && 'sceneImageUrl' in question) {
+      const grade = gradeImagePlacement(question, answer, accepted)
+      accepted = grade.acceptedPlacements
+      result = grade.result
+    } else result = gradePreviewAnswer(gameType, question, answer)
+    if (!result.retryable) terminal = result
+    return result
   }
 }

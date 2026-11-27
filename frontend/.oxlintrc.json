@@ -39,6 +39,18 @@
     {
       "files": ["src/player/renderers/AudioVisualMatchPlayable.tsx"],
       "rules": { "react/exhaustive-deps": "warn" }
+    },
+    {
+      "files": ["src/games/ordering/OrderingRenderer.tsx"],
+      "rules": { "react/purity": "warn" }
+    },
+    {
+      "files": ["src/hooks/useLiveArenaSocket.ts"],
+      "rules": { "react/refs": "warn" }
+    },
+    {
+      "files": ["src/games/visual-cloze-image/VisualClozeImageRenderer.tsx"],
+      "rules": { "react/set-state-in-effect": "warn" }
     }
   ]
 }

@@ -1,5 +1,11 @@
 [
   {
+    "filename": "src/components/editor/LivePreviewPanel.tsx",
+    "code": "react(only-export-components)",
+    "source": "export { LivePreviewPanel, default } from './preview/LivePreviewPanel'",
+    "count": 1
+  },
+  {
     "filename": "src/games/common/ConfettiEffect.tsx",
     "code": "react(refs)",
     "source": "onCompleteRef.current = onComplete",
@@ -12,21 +18,33 @@
     "count": 1
   },
   {
-    "filename": "src/pages/CreateGamePage.tsx",
-    "code": "react-hooks(exhaustive-deps)",
-    "source": "suggestionsMutation.mutate(lastInput.current)",
+    "filename": "src/games/ordering/OrderingRenderer.tsx",
+    "code": "react(purity)",
+    "source": "const [now, setNow] = useState(Date.now())",
     "count": 1
+  },
+  {
+    "filename": "src/games/visual-cloze-image/VisualClozeImageRenderer.tsx",
+    "code": "react(set-state-in-effect)",
+    "source": "setShakeOffset(offsets[step])",
+    "count": 1
+  },
+  {
+    "filename": "src/hooks/useLiveArenaSocket.ts",
+    "code": "react(refs)",
+    "source": "handlersRef.current = handlers",
+    "count": 1
+  },
+  {
+    "filename": "src/hooks/useLiveArenaSocket.ts",
+    "code": "react(refs)",
+    "source": "return { connected, client: clientRef.current }",
+    "count": 2
   },
   {
     "filename": "src/pages/CreateGamePage.tsx",
     "code": "react(set-state-in-effect)",
     "source": "setMode('idea')",
-    "count": 1
-  },
-  {
-    "filename": "src/player/renderers/AudioVisualMatchPlayable.tsx",
-    "code": "react-hooks(exhaustive-deps)",
-    "source": "playPromptAudio()",
     "count": 1
   },
   {

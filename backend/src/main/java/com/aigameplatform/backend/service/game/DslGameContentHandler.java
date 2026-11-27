@@ -1,7 +1,18 @@
 package com.aigameplatform.backend.service.game;
 
+import com.aigameplatform.backend.dto.dsl.AudioVisualMatchQuestionDsl;
 import com.aigameplatform.backend.dto.dsl.GameDsl;
+import com.aigameplatform.backend.dto.dsl.OddOneOutGameDsl;
+import com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl;
+import com.aigameplatform.backend.dto.dsl.VisualClozeQuestionDsl;
+import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
+import com.aigameplatform.backend.service.media.RegenerationIllustrations;
+import com.aigameplatform.backend.dto.media.SpeechVoice;
+import com.aigameplatform.backend.service.validation.GameDslSchemaRegistry;
 import com.aigameplatform.backend.dto.understanding.ChatTurn;
+import com.aigameplatform.backend.entity.enums.OddOneOutMode;
+import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.dto.dsl.PresentationDsl;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
@@ -16,7 +27,19 @@ import com.aigameplatform.backend.service.generation.Revision;
 import com.aigameplatform.backend.service.strategy.GameContentStrategyRegistry;
 import com.aigameplatform.backend.service.validation.GameValidationService;
 import com.aigameplatform.backend.service.validation.ValidationReport;
+import com.aigameplatform.backend.dto.dsl.QuestionDsl;
+import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
+import com.aigameplatform.backend.entity.question.QuestionGame;
+import com.aigameplatform.backend.service.media.GameAudioEnricher;
+import com.aigameplatform.backend.service.strategy.GameContentStrategy;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Stream;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -30,9 +53,25 @@ public class DslGameContentHandler implements GameContentHandler {
     private final GameValidationService validation;
     private final GameContentStrategyRegistry strategies;
     private final JsonMapper jsonMapper;
+    private final ObjectProvider<GameAudioEnricher> audioEnrichers;
+    private final RegenerationIllustrations illustrations;
 
     public DslGameContentHandler(GameGenerationService generation, GameValidationService validation,
             GameContentStrategyRegistry strategies, JsonMapper jsonMapper) {
+        this(generation, validation, strategies, jsonMapper, null);
+    }
+
+    public DslGameContentHandler(GameGenerationService generation, GameValidationService validation,
+            GameContentStrategyRegistry strategies, JsonMapper jsonMapper, ObjectProvider<GameAudioEnricher> audioEnrichers) {
+        this(generation, validation, strategies, jsonMapper, audioEnrichers, null);
+    }
+
+    @Autowired
+    public DslGameContentHandler(GameGenerationService generation, GameValidationService validation,
+            GameContentStrategyRegistry strategies, JsonMapper jsonMapper, ObjectProvider<GameAudioEnricher> audioEnrichers,
+            RegenerationIllustrations illustrations) {
+        this.illustrations = illustrations;
+        this.audioEnrichers = audioEnrichers;
         this.generation = generation;
         this.validation = validation;
         this.strategies = strategies;
@@ -45,11 +84,52 @@ public class DslGameContentHandler implements GameContentHandler {
     }
 
     @Override
-    public GeneratedContent generate(GameType type, String idea, Subject subject, GradeLevel gradeLevel) {
-        GenerationResult result = generation.generateResult(type, new GameDslRequest(idea, subject, gradeLevel));
+    public GeneratedContent generate(GameType type, String idea, GenerateGameRequest input) {
+        return generate(type, idea, input, null);
+    }
+
+    @Override
+    public GeneratedContent generate(GameType type, String idea, GenerateGameRequest input, String classroomContext) {
+        VisualClozeMode mode = input.effectiveMode();
+        requireSupportedImageMode(type, mode, input);
+        var request = new GameDslRequest(idea, input.subject(), input.gradeLevel(), null, null, mode,
+                input.sceneImageUrl(), input.optionImages());
+        GenerationResult result = classroomContext == null ? generation.generateResult(type, request)
+                : generation.generateWithClassroom(type, request, classroomContext);
         GameDsl dsl = result.game();
         return new GeneratedContent(dsl.metadata().title(), dsl.schemaVersion(), strategies.get(type).parseToQuestions(dsl),
-                PresentationDsl.toEntity(dsl.metadata().presentation()), result);
+                PresentationDsl.toEntity(dsl.metadata().presentation()), result, dsl.metadata().topic(),
+                visualClozeModeOf(dsl), oddOneOutModeOf(dsl));
+    }
+
+    /** Chế độ IMAGE chỉ có ở VISUAL_CLOZE (cần ảnh cảnh và 2–8 ảnh lựa chọn), ODD_ONE_OUT và AUDIO_VISUAL_MATCH. */
+    private static void requireSupportedImageMode(GameType type, VisualClozeMode mode, GenerateGameRequest input) {
+        if (mode == VisualClozeMode.TEXT) return;
+        if (type != GameType.VISUAL_CLOZE && type != GameType.ODD_ONE_OUT && type != GameType.AUDIO_VISUAL_MATCH) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Loại trò chơi này chưa hỗ trợ chế độ hình ảnh");
+        }
+        if (type != GameType.VISUAL_CLOZE) return;
+        if (input.sceneImageUrl() == null || input.sceneImageUrl().isBlank()) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chế độ hình ảnh cần sceneImageUrl");
+        }
+        List<GenerateGameRequest.OptionImage> options = input.optionImages();
+        if (options == null || options.size() < 2 || options.size() > 8 || options.stream().anyMatch(option -> option == null
+                || option.imageUrl() == null || option.imageUrl().isBlank()
+                || option.visualPrompt() == null || option.visualPrompt().isBlank())) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chế độ hình ảnh cần 2 đến 8 ảnh lựa chọn do giáo viên cung cấp");
+        }
+        if (options.stream().map(GenerateGameRequest.OptionImage::imageUrl).distinct().count() != options.size()) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Các ảnh lựa chọn phải có imageUrl khác nhau");
+        }
+    }
+
+    private static VisualClozeMode visualClozeModeOf(GameDsl dsl) {
+        return dsl instanceof VisualClozeGameDsl visual && visual.effectiveMode() == VisualClozeMode.IMAGE
+                ? VisualClozeMode.IMAGE : null;
+    }
+
+    private static OddOneOutMode oddOneOutModeOf(GameDsl dsl) {
+        return dsl instanceof OddOneOutGameDsl odd && odd.effectiveMode() == OddOneOutMode.IMAGE ? OddOneOutMode.IMAGE : null;
     }
 
     @Override
@@ -61,18 +141,48 @@ public class DslGameContentHandler implements GameContentHandler {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Không đổi được loại game (" + game.getGameType() + ")");
         }
         game.setTitle(dsl.metadata().title());
+        game.setTopic(dsl.metadata().topic());
         game.setSubject(dsl.metadata().subject());
         game.setGrade(dsl.metadata().gradeLevel());
+        game.setSchemaVersion(dsl.schemaVersion());
+        game.setVisualClozeMode(visualClozeModeOf(dsl));
+        game.setOddOneOutMode(oddOneOutModeOf(dsl));
         game.setPresentation(PresentationDsl.toEntity(dsl.metadata().presentation()));
-        game.getQuestions().clear();
-        game.getQuestions().addAll(strategies.get(dsl.gameType()).parseToQuestions(dsl));
-        game.setQuestionNum(game.getQuestions().size());
+        var strategy = strategies.get(dsl.gameType());
+        var existing = game.getQuestions();
+        var replacements = new ArrayList<>(strategy.parseToQuestions(dsl));
+        var reused = new HashSet<QuestionGame>();
+        // IDs in the DSL are positional. Compare content with a fixed ID to retain rows when questions move.
+        for (int index = 0; index < Math.min(existing.size(), replacements.size()); index++) {
+            var oldQuestion = existing.get(index);
+            if (strategy.toQuestionDsl(oldQuestion, "q1").equals(strategy.toQuestionDsl(replacements.get(index), "q1"))) {
+                replacements.set(index, oldQuestion);
+                reused.add(oldQuestion);
+            }
+        }
+        var remaining = new HashMap<QuestionDsl, ArrayDeque<QuestionGame>>();
+        for (var question : existing) {
+            if (!reused.contains(question)) {
+                remaining.computeIfAbsent(strategy.toQuestionDsl(question, "q1"), ignored -> new ArrayDeque<>()).add(question);
+            }
+        }
+        for (int index = 0; index < replacements.size(); index++) {
+            var replacement = replacements.get(index);
+            if (reused.contains(replacement)) continue;
+            var matches = remaining.get(strategy.toQuestionDsl(replacement, "q1"));
+            if (matches != null && !matches.isEmpty()) replacements.set(index, matches.removeFirst());
+        }
+        game.replaceQuestions(replacements);
     }
 
     @Override
     public ObjectNode revise(ObjectNode current, String instruction, List<ChatTurn> history) {
         ObjectNode content = current.deepCopy();
         content.remove(GameReports.MANAGEMENT_FIELDS);
+        // Bộ sinh lại chỉ có dạng chữ: cho AI sửa game ảnh sẽ trả game chữ và mất ảnh cảnh, ô trống (KNOWN-GAPS #27).
+        if ("IMAGE".equals(content.path("mode").asString(null))) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Chưa hỗ trợ sửa bằng trò chuyện cho trò chơi chế độ hình ảnh");
+        }
         GameType type = GameType.valueOf(content.path("gameType").asString());
         JsonNode metadata = content.path("metadata");
         Revision revision = new Revision(jsonMapper.writeValueAsString(content), instruction, history, Revision.DSL_FORMAT);
@@ -87,6 +197,91 @@ public class DslGameContentHandler implements GameContentHandler {
             ((ObjectNode) revised.get("metadata")).set("presentation", metadata.get("presentation"));
         }
         return revised;
+    }
+
+    @Override
+    public ObjectNode regenerate(ObjectNode current, RegenerateGameRequest request) {
+        ObjectNode content = current.deepCopy();
+        content.remove(GameReports.MANAGEMENT_FIELDS);
+        GameDsl base = jsonMapper.treeToValue(content, GameDsl.class);
+        GameDslRequest source = regenerationRequest(base, base.questions().getFirst());
+        String topic = request.idea() == null ? source.topic() : request.idea().strip();
+        GameDslRequest input = new GameDslRequest(topic, source.subject(), source.gradeLevel(), null, null,
+                source.effectiveVisualClozeMode(), source.sceneImageUrl(), source.optionImages());
+        GameDsl generated = generation.regenerateGame(base.gameType(), input, request.feedback());
+        var strategy = strategies.get(base.gameType());
+        List<QuestionGame> entities = strategy.parseToQuestions(generated);
+        enrichRegeneration(entities, request.voice());
+        var questions = java.util.stream.IntStream.range(0, entities.size())
+                .mapToObj(index -> strategy.toQuestionDsl(entities.get(index), generated.questions().get(index).id()))
+                .toList();
+        ObjectNode preview = jsonMapper.valueToTree(generated);
+        preview.set("questions", jsonMapper.valueToTree(questions));
+        if (visualImage(generated) && entities.stream().anyMatch(q -> q.getAudioUrl() != null)) {
+            preview.put("schemaVersion", GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_AUDIO_VERSION);
+        }
+        return preview;
+    }
+
+    @Override
+    public RegeneratedQuestionDto regenerateQuestion(ObjectNode current, String questionId, String feedback) {
+        return regenerateQuestion(current, questionId, feedback, null);
+    }
+
+    @Override
+    public RegeneratedQuestionDto regenerateQuestion(ObjectNode current, String questionId, String feedback,
+            SpeechVoice voice) {
+        ObjectNode content = current.deepCopy();
+        content.remove(GameReports.MANAGEMENT_FIELDS);
+        GameDsl base = jsonMapper.treeToValue(content, GameDsl.class);
+        QuestionDsl currentQuestion = base.questions().stream().filter(q -> questionId.equals(q.id())).findFirst()
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy câu hỏi " + questionId));
+        var metadata = base.metadata();
+        QuestionDsl candidate = generation.regenerateQuestion(base.gameType(),
+                regenerationRequest(base, currentQuestion), currentQuestion, feedback, questionId, base);
+        // Đi qua entity để gắn giọng đọc TTS giống lúc sinh game, rồi dựng lại DSL với đúng id của câu bị thay.
+        GameContentStrategy<?, ?> strategy = strategies.get(base.gameType());
+        List<QuestionGame> entities = strategy.parseToQuestions(
+                strategy.assembleGame(metadata, base.gameplaySettings(), List.of(candidate)));
+        enrichRegeneration(entities, voice);
+        String version = visualImage(base) && entities.getFirst().getAudioUrl() != null
+                ? GameDslSchemaRegistry.VISUAL_CLOZE_IMAGE_AUDIO_VERSION : null;
+        return new RegeneratedQuestionDto(strategy.toQuestionDsl(entities.getFirst(), questionId), base.gameType(), version);
+    }
+
+    private static boolean visualImage(GameDsl game) {
+        return game instanceof VisualClozeGameDsl visual && visual.effectiveMode() == VisualClozeMode.IMAGE;
+    }
+
+    private void enrichRegeneration(List<QuestionGame> questions, SpeechVoice voice) {
+        if (illustrations != null) illustrations.enrich(questions);
+        GameAudioEnricher enricher = audioEnrichers == null ? null : audioEnrichers.getIfAvailable();
+        if (enricher == null) return;
+        enricher.enrichAllQuestionsWithAudio(questions, voice == null ? SpeechVoice.FEMALE : voice);
+    }
+
+    private static GameDslRequest regenerationRequest(GameDsl game, QuestionDsl question) {
+        var metadata = game.metadata();
+        if (game instanceof VisualClozeGameDsl visual && visual.effectiveMode() == VisualClozeMode.IMAGE
+                && question instanceof VisualClozeQuestionDsl scene) {
+            if (scene.sceneImageUrl() == null || scene.sceneImageUrl().isBlank() || scene.options() == null
+                    || scene.options().stream().anyMatch(option -> option.imageUrl() == null || option.imageUrl().isBlank()
+                            || option.visualPrompt() == null || option.visualPrompt().isBlank())) {
+                throw new ApiException(ErrorCode.VALIDATION_ERROR, "Hãy bổ sung ảnh cảnh và ảnh lựa chọn trước khi làm lại câu hỏi");
+            }
+            var options = scene.options().stream()
+                    .map(option -> new GenerateGameRequest.OptionImage(option.imageUrl(), option.visualPrompt())).toList();
+            return new GameDslRequest(metadata.topic(), metadata.subject(), metadata.gradeLevel(), null, null,
+                    VisualClozeMode.IMAGE, scene.sceneImageUrl(), options);
+        }
+        boolean catalogMode = game instanceof OddOneOutGameDsl odd && odd.effectiveMode() == OddOneOutMode.IMAGE
+                || question instanceof AudioVisualMatchQuestionDsl avm && avm.correct() != null
+                        && avm.distractors() != null && !avm.distractors().isEmpty()
+                        && Stream.concat(Stream.of(avm.correct()), avm.distractors().stream())
+                                .allMatch(choice -> choice != null && choice.imageUrl() != null
+                                        && choice.imageUrl().startsWith("/assets/noto/"));
+        return new GameDslRequest(metadata.topic(), metadata.subject(), metadata.gradeLevel(), null, null,
+                catalogMode ? VisualClozeMode.IMAGE : VisualClozeMode.TEXT, null);
     }
 
     @Override

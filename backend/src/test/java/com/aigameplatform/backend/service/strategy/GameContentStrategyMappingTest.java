@@ -43,6 +43,19 @@ import tools.jackson.databind.json.JsonMapper;
 
 /** Ánh xạ hai chiều Game DSL và entity của 10 loại game, không cần DB. */
 class GameContentStrategyMappingTest {
+    @Test
+    void restoredGameKeepsItsTopicDistinctFromTitle() {
+        var game = new Game();
+        game.setGameType(GameType.ODD_ONE_OUT);
+        game.setTitle("Trò chơi số một");
+        game.setTopic("Phân loại trái cây");
+        game.setSubject(Subject.VIETNAMESE);
+        game.setGrade(GradeLevel.GRADE_1);
+        game.setQuestions(List.of());
+        var restored = new OddOneOutGameStrategy(MAPPER).toGameDsl(game);
+        assertThat(restored.metadata().title()).isEqualTo("Trò chơi số một");
+        assertThat(restored.metadata().topic()).isEqualTo("Phân loại trái cây");
+    }
 
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
     private static final GameDslRequest REQUEST = new GameDslRequest("Chủ đề mẫu", Subject.MATH, GradeLevel.GRADE_2);
@@ -115,6 +128,50 @@ class GameContentStrategyMappingTest {
 
         assertThat(question.getCorrectIndex()).isEqualTo(1);
         assertThat(question.getOptions()).hasSizeGreaterThan(1);
+    }
+
+    @Test
+    void visualClozeImageDslPersistsAndRoundTripsSceneDimensionsBlanksAndOptions() throws Exception {
+        String json = java.nio.file.Files.readString(java.nio.file.Path.of(
+                "src/test/resources/dsl-examples/visual-cloze-image-v1.1.json"));
+        var dsl = MAPPER.readValue(json, com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl.class);
+        var strategy = (VisualClozeGameStrategy) STRATEGIES.get(GameType.VISUAL_CLOZE);
+
+        List<QuestionGame> questions = strategy.parseToQuestions(dsl);
+        var entity = (com.aigameplatform.backend.entity.question.VisualClozeQuestion) questions.getFirst();
+        Game game = gameOf(GameType.VISUAL_CLOZE, questions);
+        game.setSchemaVersion(dsl.schemaVersion());
+        game.setVisualClozeMode(dsl.effectiveMode());
+        var roundTrip = (com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl) strategy.toGameDsl(game);
+
+        assertThat(entity.getImageUrl()).isEqualTo(dsl.questions().getFirst().sceneImageUrl());
+        assertThat(entity.getSceneWidth()).isEqualTo(1200);
+        assertThat(entity.getSceneHeight()).isEqualTo(800);
+        assertThat(entity.getBlanks()).hasSize(1);
+        assertThat(entity.getBlanks().getFirst().getCorrectOptionId()).isEqualTo("o1");
+        assertThat(entity.getOptions()).hasSize(2);
+        assertThat(roundTrip.schemaVersion()).isEqualTo("1.1.0");
+        assertThat(roundTrip.effectiveMode()).isEqualTo(com.aigameplatform.backend.entity.enums.VisualClozeMode.IMAGE);
+        assertThat(roundTrip.questions().getFirst().blanks().getFirst().x()).isEqualTo(420.0);
+        assertThat(roundTrip.questions().getFirst().options().get(1).imageUrl()).isEqualTo("https://images.example.com/square.png");
+    }
+
+    @Test
+    void visualClozeV11TextModeRetainsItsPersistedSchemaVersionAndMode() throws Exception {
+        String json = resource("/dsl-examples/", GameType.VISUAL_CLOZE)
+                .replace("\"schemaVersion\": \"1.0.0\"", "\"schemaVersion\": \"1.1.0\"")
+                .replace("\"gameType\": \"VISUAL_CLOZE\",", "\"gameType\": \"VISUAL_CLOZE\",\n  \"mode\": \"TEXT\",");
+        var dsl = MAPPER.readValue(json, com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl.class);
+        var strategy = (VisualClozeGameStrategy) STRATEGIES.get(GameType.VISUAL_CLOZE);
+        Game game = gameOf(GameType.VISUAL_CLOZE, strategy.parseToQuestions(dsl));
+        game.setSchemaVersion(dsl.schemaVersion());
+        game.setVisualClozeMode(dsl.effectiveMode());
+
+        var roundTrip = (com.aigameplatform.backend.dto.dsl.VisualClozeGameDsl) strategy.toGameDsl(game);
+
+        assertThat(roundTrip.schemaVersion()).isEqualTo("1.1.0");
+        assertThat(roundTrip.effectiveMode()).isEqualTo(com.aigameplatform.backend.entity.enums.VisualClozeMode.TEXT);
+        assertThat(roundTrip.questions().getFirst().sentenceTemplate()).isNotBlank();
     }
 
     @Test

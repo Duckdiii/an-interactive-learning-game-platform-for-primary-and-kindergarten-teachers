@@ -9,7 +9,7 @@ import JoinPage from './JoinPage'
 
 const findByPin = vi.hoisted(() => vi.fn())
 
-vi.mock('../room/getRoomApi', () => ({ getRoomApi: async () => ({ findByPin }), isRoomAvailable: () => true }))
+vi.mock('../room/getRoomApi', () => ({ getRoomApi: async () => ({ findByPin }), usesMockRoom: () => true }))
 
 function PlayStub() {
   return <p>đã sang {useParams().shareCode}</p>

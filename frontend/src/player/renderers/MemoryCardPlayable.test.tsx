@@ -56,8 +56,51 @@ describe('MemoryCardPlayable', () => {
       expect(onSubmit).toHaveBeenCalledWith({
         matchedPairIds: ['p1'],
         flips: 2,
+        wrongPairs: [],
       })
     })
+  })
+
+  it('includes a distinct wrong pair when the student completes the question', async () => {
+    const onSubmit = vi.fn().mockResolvedValue({ status: 'CORRECT', isCorrect: true, pointsEarned: 10, totalScore: 10 })
+    const twoPairs = { ...question, pairs: [...question.pairs, { pairId: 'p2', content: { text: 'dog' } }] }
+    render(<MemoryCardPlayable question={twoPairs} profile={PROFILES.be} onSubmit={onSubmit} />)
+
+    const [first, second, third, fourth] = screen.getAllByRole('button')
+    fireEvent.click(first)
+    fireEvent.click(second)
+    await waitFor(() => expect(first).toBeEnabled(), { timeout: 1500 })
+    fireEvent.click(first)
+    fireEvent.click(third)
+    fireEvent.click(second)
+    fireEvent.click(fourth)
+    expect(onSubmit).toHaveBeenCalledWith({ matchedPairIds: ['p1', 'p2'], flips: 6, wrongPairs: [['p1', 'p2']] })
+  })
+
+  it('cho gửi lại cùng đáp án và giữ nguyên thẻ đã ghép khi lần nộp đầu bị lỗi', async () => {
+    const onSubmit = vi.fn()
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ status: 'CORRECT', isCorrect: true, pointsEarned: 10, totalScore: 10 })
+    const twoPairs = { ...question, pairs: [...question.pairs, { pairId: 'p2', content: { text: 'dog' } }] }
+    render(<MemoryCardPlayable question={twoPairs} profile={PROFILES.be} onSubmit={onSubmit} />)
+
+    const [first, second, third, fourth] = screen.getAllByRole('button')
+    fireEvent.click(first)
+    fireEvent.click(second)
+    await waitFor(() => expect(first).toBeEnabled(), { timeout: 1500 })
+    fireEvent.click(first)
+    fireEvent.click(third)
+    fireEvent.click(second)
+    fireEvent.click(fourth)
+    const answer = { matchedPairIds: ['p1', 'p2'], flips: 6, wrongPairs: [['p1', 'p2']] }
+    const retry = await screen.findByRole('button', { name: 'Gửi lại' })
+    expect(first).toBeDisabled()
+    expect(fourth).toBeDisabled()
+    expect(screen.getByText('Số lần lật:')).toHaveTextContent('6')
+    fireEvent.click(retry)
+
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Gửi lại' })).not.toBeInTheDocument())
+    expect(onSubmit.mock.calls).toEqual([[answer], [answer]])
   })
 
   it('thẻ úp không có hình hay chữ đáp án trong DOM', () => {

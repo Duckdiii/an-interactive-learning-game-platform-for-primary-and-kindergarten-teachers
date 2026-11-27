@@ -28,7 +28,7 @@ afterEach(() => {
 })
 
 describe('regenerateQuestion', () => {
-  it('nhóm ai KHÔNG mô phỏng: gọi API thật với mã game, mã câu, gợi ý và tín hiệu hủy; không gửi giọng đọc (contract chưa có) hay câu hiện tại', async () => {
+  it('nhóm ai KHÔNG mô phỏng: gọi API thật với mã game, mã câu, gợi ý, giọng đọc và tín hiệu hủy; không gửi câu hiện tại', async () => {
     mockedPost.mockResolvedValue({ question: current, gameType: 'QUIZ' })
 
     const signal = new AbortController().signal
@@ -36,7 +36,7 @@ describe('regenerateQuestion', () => {
 
     expect(result).toEqual({ question: current, gameType: 'QUIZ' })
     expect(mockedPost).toHaveBeenCalledTimes(1)
-    expect(mockedPost).toHaveBeenCalledWith('g1', 'q1', { feedback: ' dễ hơn ', signal })
+    expect(mockedPost).toHaveBeenCalledWith('g1', 'q1', { feedback: ' dễ hơn ', signal, voice: 'MALE' })
   })
 
   it('lỗi từ API thật được ném nguyên vẹn và KHÔNG thử lại (Backend đã thử lại 2 lần)', async () => {

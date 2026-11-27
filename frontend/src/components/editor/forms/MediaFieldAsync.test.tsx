@@ -196,21 +196,23 @@ describe('tải tệp đang chạy', () => {
     expect(store.get().points).toBe(99)
   })
 
-  it('lỗi 422 từ máy chủ thật: FILE_TOO_LARGE_OR_INVALID_FORMAT ra câu 3a, UNSAFE_CONTENT ra câu 3b, mở khóa và giữ ảnh cũ', async () => {
+  it('lỗi 422 giữ thông báo từ máy chủ, mở khóa và giữ ảnh cũ', async () => {
     const user = newUser()
+    const invalidFile = 'Tệp vượt quá dung lượng tải lên cho phép.'
+    const unsafeFile = 'Tệp tải lên không đáp ứng tiêu chuẩn an toàn nội dung dành cho môi trường giáo dục.'
 
     renderForm({ imageUrl: '/mock/dog.png' })
     await startUpload(user)
-    upload.done.reject(mockApiError(422, 'FILE_TOO_LARGE_OR_INVALID_FORMAT', 'x'))
+    upload.done.reject(mockApiError(422, 'FILE_TOO_LARGE_OR_INVALID_FORMAT', invalidFile))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Tệp tải lên không đúng định dạng hỗ trợ (Ảnh cần là dạng PNG/JPG/WebP dưới 5MB')
+    expect(await screen.findByRole('alert')).toHaveTextContent(invalidFile)
     expect(pending.active).toBe(0)
 
     await user.click(screen.getByRole('button', { name: 'Xác nhận tải lên' }))
     await waitFor(() => expect(mockedUpload).toHaveBeenCalledTimes(2))
-    upload.done.reject(mockApiError(422, 'UNSAFE_CONTENT', 'x'))
+    upload.done.reject(mockApiError(422, 'UNSAFE_CONTENT', unsafeFile))
 
-    expect(await screen.findByText(/Tệp tải lên không đáp ứng tiêu chuẩn an toàn nội dung dành cho môi trường giáo dục. Vui lòng chọn tệp khác./)).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(unsafeFile)
     expect(store.get().imageUrl).toBe('/mock/dog.png')
   })
 })

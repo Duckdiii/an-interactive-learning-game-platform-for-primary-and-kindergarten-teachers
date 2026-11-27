@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Game AI Output v1.1.0 - VISUAL_CLOZE IMAGE",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["questions"],
+  "properties": {
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["questionText", "blanks", "options"],
+        "properties": {
+          "questionText": { "type": "string", "minLength": 1, "maxLength": 255 },
+          "blanks": {
+            "type": "array", "minItems": 1, "maxItems": 8,
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["id", "x", "y", "correctOptionId"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+                "x": { "type": "number" },
+                "y": { "type": "number" },
+                "correctOptionId": { "type": "string", "minLength": 1, "maxLength": 64 }
+              }
+            }
+          },
+          "options": {
+            "type": "array", "minItems": 2, "maxItems": 8,
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["id", "visualPrompt", "imageUrl"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+                "visualPrompt": { "type": "string", "minLength": 1, "maxLength": 255 },
+                "imageUrl": { "type": "string", "format": "uri", "pattern": "^https://", "maxLength": 2048 }
+              }
+            }
+          },
+          "audioText": { "type": "string", "minLength": 1, "maxLength": 200 }
+        }
+      }
+    }
+  }
+}

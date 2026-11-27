@@ -1,5 +1,7 @@
 # Quy tắc làm việc trong repository
 
+Bắt đầu ở [mục lục tài liệu](docs/README.md) để tìm UC, hợp đồng, code và test theo tác vụ.
+
 ## Điều phối và kiểm chứng dùng chung
 
 - Đọc `CLAUDE.md` và rule phù hợp trong `.claude/rules/` trước khi sửa; đây là nguồn kiến trúc dùng chung cho Claude Code/Codex, không có bộ `.Codex/rules/` riêng.

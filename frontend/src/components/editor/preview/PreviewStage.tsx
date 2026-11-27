@@ -5,14 +5,16 @@ import { feedbackRules } from '../../../player/policies/feedback'
 import { useUiProfile } from '../../../player/profile/useUiProfile'
 import type { AnyPlayableRenderer } from '../../../player/renderers'
 import PlayerShell from '../../../player/shells/PlayerShell'
-import type { GameType, QuestionDsl } from '../../../types/game-dsl.types'
+import type { GameType, QuestionDsl, Subject } from '../../../types/game-dsl.types'
 import type { AnswerPayload, AnswerResult } from '../../../types/game-student.types'
-import { gradePreviewAnswer, toPreviewStudentQuestion } from './previewModel'
+import { toPreviewStudentQuestion } from './previewModel'
+import { usePreviewGrader } from './usePreviewGrader'
 
 interface PreviewStageProps {
   gameType: GameType
   Renderer: AnyPlayableRenderer
   question: QuestionDsl
+  subject: Subject
   title: string
   index: number
   total: number
@@ -20,15 +22,16 @@ interface PreviewStageProps {
 
 // Khung + renderer thật của phần chơi, nhúng vào khung thiết bị của LivePreview.
 // Không chạy đồng hồ thật: khung Học sinh hiện tĩnh số giây của câu, khung Bé không có đồng hồ.
-export default function PreviewStage({ gameType, Renderer, question, title, index, total }: PreviewStageProps) {
+export default function PreviewStage({ gameType, Renderer, question, subject, title, index, total }: PreviewStageProps) {
   const profile = useUiProfile()
   const [attempt, setAttempt] = useState(0)
   const [result, setResult] = useState<AnswerResult | null>(null)
+  const grade = usePreviewGrader(gameType, question, attempt)
 
   const onSubmit = async (answer: AnswerPayload) => {
-    const graded = gradePreviewAnswer(gameType, question, answer)
+    const graded = grade(answer)
 
-    setResult(graded)
+    if (!graded.retryable) setResult(graded)
 
     return graded
   }
@@ -56,7 +59,7 @@ export default function PreviewStage({ gameType, Renderer, question, title, inde
         ) : undefined
       }
     >
-      <Renderer key={attempt} question={toPreviewStudentQuestion(gameType, question)} profile={profile} onSubmit={onSubmit} />
+      <Renderer key={attempt} question={toPreviewStudentQuestion(gameType, question)} profile={profile} subject={subject} onSubmit={onSubmit} />
     </PlayerShell>
   )
 }

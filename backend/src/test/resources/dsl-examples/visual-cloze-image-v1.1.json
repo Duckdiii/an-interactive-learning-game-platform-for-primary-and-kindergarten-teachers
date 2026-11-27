@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.1.0",
+  "gameType": "VISUAL_CLOZE",
+  "mode": "IMAGE",
+  "metadata": {
+    "title": "Visual Cloze điền hình",
+    "subject": "MATH",
+    "gradeLevel": "GRADE_1",
+    "topic": "Nhận biết hình"
+  },
+  "gameplaySettings": {
+    "hitboxScale": 1.5
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "timeLimitSeconds": 30,
+      "points": 10,
+      "questionText": "Chọn hình còn thiếu trong bức tranh.",
+      "sceneImageUrl": "https://images.example.com/scene.png",
+      "sceneWidth": 1200,
+      "sceneHeight": 800,
+      "blanks": [
+        { "id": "b1", "x": 420, "y": 260, "correctOptionId": "o1" }
+      ],
+      "options": [
+        { "id": "o1", "visualPrompt": "một hình tròn màu đỏ", "imageUrl": "https://images.example.com/circle.png" },
+        { "id": "o2", "visualPrompt": "một hình vuông màu xanh", "imageUrl": "https://images.example.com/square.png" }
+      ]
+    }
+  ]
+}

@@ -5,12 +5,13 @@
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { filePatches, planShards, DEFAULT_MAX_CHARS } from "./shard.mjs";
 import { Github, GithubError } from "./github.mjs";
 import { findSummary, MAX_AUTO_RUNS, parseOpenFindings, parseState } from "./state.mjs";
 
 export const DEFAULT_MAX_RUNS = MAX_AUTO_RUNS;
 // Diff quá lớn thì không đưa riêng cho agent (đằng nào cũng phải đọc nhiều); quay về review toàn bộ.
-export const MAX_INCREMENTAL_CHARS = 300_000;
+export const MAX_INCREMENTAL_CHARS = DEFAULT_MAX_CHARS;
 
 const major = (v) => String(v).split(".")[0];
 const full = (reason, extra = {}) => ({ run: true, round: 1, reason, baseSha: "", runs: 0, previous: null, incrementalDiff: "", ...extra });
@@ -61,12 +62,30 @@ export async function decide({ github, pr, headSha, mode, trigger, promptVersion
   }
   if (cmp.status !== "ahead") return full("lịch sử nhánh đã bị viết lại (force-push hoặc rebase)", { runs });
 
-  const incrementalDiff = await github.getCompareDiff(state.sha, headSha);
+  let incrementalDiff;
+  try {
+    incrementalDiff = await github.getCompareDiff(state.sha, headSha);
+  } catch (e) {
+    // 406: phần mới vượt giới hạn file của dạng diff, cùng nghĩa với "quá lớn để xem riêng".
+    if (e instanceof GithubError && e.status === 406) return full("phần thay đổi mới quá lớn để xem riêng", { runs });
+    throw e;
+  }
   if (!incrementalDiff.trim()) return skip("commit mới không đổi code so với lần review trước", { runs });
   if (incrementalDiff.length > MAX_INCREMENTAL_CHARS) return full("phần thay đổi mới quá lớn để xem riêng", { runs });
+  const { shards, manual } = planShards(filePatches(incrementalDiff));
+  if (shards.length > 1 || manual.length) return full("phần thay đổi mới vượt ngân sách một phần", { runs });
   return { run: true, round: 2, reason: "vòng 2: kiểm tra vấn đề cũ và phần thay đổi mới", baseSha: state.sha, runs, previous, incrementalDiff };
 }
 
+export async function backtestRound2({ github, baseSha, headSha, mode }) {
+  if (mode === "A" || !/^[0-9a-f]{40}$/.test(baseSha)) throw new Error("Backtest vòng 2 cần SHA hợp lệ và chế độ B/C.");
+  const { status } = await github.compare(baseSha, headSha);
+  if (status !== "ahead") throw new Error("Mốc backtest phải là commit trước head của PR.");
+  const incrementalDiff = await github.getCompareDiff(baseSha, headSha);
+  const { shards, manual } = planShards(filePatches(incrementalDiff));
+  if (shards.length !== 1 || manual.length) throw new Error("Backtest vòng 2 cần đúng một gói diff có file review được.");
+  return { run: true, round: 2, baseSha, runs: 0, reason: "backtest vòng 2 với mốc chỉ định, danh sách vấn đề cũ rỗng", previous: [], incrementalDiff };
+}
 /** Nội dung file previous.json đưa cho agent (dữ liệu, không phải chỉ dẫn). */
 export function previousFileContent(baseSha, previous) {
   return JSON.stringify({
@@ -95,7 +114,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const headSha = need("head-sha");
     if (!/^[0-9a-f]{40}$/.test(headSha)) throw new Error("head-sha không hợp lệ");
     const github = new Github({ token: process.env.GITHUB_TOKEN, repo: need("repo") });
-    const d = await decide({
+    const backtestBase = arg(a, "backtest-base");
+    if (backtestBase && trigger !== "dispatch") throw new Error("Backtest chỉ chạy qua workflow_dispatch.");
+    const d = backtestBase ? await backtestRound2({ github, baseSha: backtestBase, headSha, mode }) : await decide({
       github, pr: Number(need("pr")), headSha, mode, trigger, promptVersion,
       force: a.includes("--force"), maxRuns: Number(arg(a, "max-runs") ?? DEFAULT_MAX_RUNS),
     });

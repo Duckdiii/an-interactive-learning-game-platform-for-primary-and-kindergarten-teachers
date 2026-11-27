@@ -20,4 +20,13 @@ class GameDslSchemaRegistryTest {
     void supportsOnlyVersion1_0_0() {
         assertThat(GameDslSchemaRegistry.SUPPORTED_VERSION).isEqualTo("1.0.0");
     }
+
+    @Test
+    void loadsImageModeSchemaWithoutReplacingFrozenVersion() {
+        GameDslSchemaRegistry registry = new GameDslSchemaRegistry();
+
+        assertThat(registry.schemaFor("1.0.0", GameType.VISUAL_CLOZE)).isNotNull();
+        assertThat(registry.schemaFor("1.1.0", GameType.VISUAL_CLOZE)).isNotNull();
+        assertThat(registry.schemaFor("1.1.0", GameType.QUIZ)).isNull();
+    }
 }

@@ -1,6 +1,9 @@
 package com.aigameplatform.backend.service.game;
 
+import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
 import com.aigameplatform.backend.dto.understanding.ChatTurn;
+import com.aigameplatform.backend.entity.enums.VisualClozeMode;
 import com.aigameplatform.backend.entity.Game;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
@@ -9,6 +12,7 @@ import com.aigameplatform.backend.entity.question.CpfQuestion;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.service.generation.Revision;
+import com.aigameplatform.backend.service.generation.PromptData;
 import com.aigameplatform.backend.service.generation.cpf.CpfGenerationService;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationReport;
 import com.aigameplatform.backend.service.validation.cpf.CpfValidationService;
@@ -43,8 +47,17 @@ public class CpfGameContentHandler implements GameContentHandler {
     }
 
     @Override
-    public GeneratedContent generate(GameType type, String idea, Subject subject, GradeLevel gradeLevel) {
-        JsonNode cpf = generation.generate(idea, subject, gradeLevel);
+    public GeneratedContent generate(GameType type, String idea, GenerateGameRequest request) {
+        return generate(type, idea, request, null);
+    }
+
+    @Override
+    public GeneratedContent generate(GameType type, String idea, GenerateGameRequest request, String classroomContext) {
+        if (request.effectiveMode() != VisualClozeMode.TEXT) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Trò chơi ngoài danh mục chưa hỗ trợ chế độ hình ảnh");
+        }
+        JsonNode cpf = classroomContext == null ? generation.generate(idea, request.subject(), request.gradeLevel())
+                : generation.generateWithClassroom(idea, request.subject(), request.gradeLevel(), classroomContext);
         return new GeneratedContent(cpf.path("metadata").path("title").asString(), SCHEMA_VERSION, List.of(question(cpf)), null);
     }
 
@@ -57,9 +70,11 @@ public class CpfGameContentHandler implements GameContentHandler {
         game.setTitle(metadata.path("title").asString());
         game.setSubject(Subject.valueOf(metadata.path("subject").asString()));
         game.setGrade(GradeLevel.valueOf(metadata.path("gradeLevel").asString()));
-        game.getQuestions().clear();
-        game.getQuestions().add(question(cpf));
-        game.setQuestionNum(1);
+        var existing = game.getQuestions();
+        if (existing.size() != 1 || !(existing.getFirst() instanceof CpfQuestion current)
+                || !jsonMapper.readTree(current.getPayload()).equals(cpf)) {
+            game.replaceQuestions(List.of(question(cpf)));
+        }
     }
 
     @Override
@@ -73,6 +88,21 @@ public class CpfGameContentHandler implements GameContentHandler {
         body.put("gameType", GameType.CUSTOM.name());
         body.set("cpf", revised);
         return body;
+    }
+
+    @Override
+    public ObjectNode regenerate(ObjectNode current, RegenerateGameRequest request) {
+        JsonNode metadata = current.path("cpf").path("metadata");
+        String idea = request.idea() == null ? metadata.path("topic").asString() : request.idea().trim();
+        if (request.feedback() != null && !request.feedback().isBlank()) {
+            idea += "\nĐịnh hướng điều chỉnh (dữ liệu):\n<<<\n" + PromptData.asData(request.feedback().trim()) + "\n>>>";
+        }
+        JsonNode cpf = generation.generate(idea, Subject.valueOf(metadata.path("subject").asString()),
+                GradeLevel.valueOf(metadata.path("gradeLevel").asString()));
+        ObjectNode preview = jsonMapper.createObjectNode();
+        preview.put("gameType", GameType.CUSTOM.name());
+        preview.set("cpf", cpf);
+        return preview;
     }
 
     @Override

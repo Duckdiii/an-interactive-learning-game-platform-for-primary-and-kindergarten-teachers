@@ -53,7 +53,7 @@ class TeacherFlowVerificationTest extends AbstractTeacherFlowTest {
         ObjectNode edited = (ObjectNode) call("context-get", "GET", "/api/games/" + gameId, token, null)
                 .body().path("data").deepCopy();
         edited.remove(List.of("gameId", "status", "updatedAt"));
-        ((ObjectNode) edited.path("questions").get(0)).put("questionText", "Câu đầu đã được giáo viên chỉnh");
+        ((ObjectNode) edited.path("questions").get(0)).put("questionText", "Câu đầu đã được giáo viên chỉnh.");
         assertThat(call("context-put", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(edited)).status()).isEqualTo(200);
         Call revised = call("context-revise", "POST", "/api/games/" + gameId + "/revise", token, """
                 {"instruction":"Theo yêu cầu trước, đổi con chó thành con gà",
@@ -61,7 +61,7 @@ class TeacherFlowVerificationTest extends AbstractTeacherFlowTest {
                 """);
         assertThat(revised.status()).isEqualTo(200);
         ObjectNode body = (ObjectNode) revised.body().path("data").deepCopy();
-        assertThat(body.path("questions").get(0).path("questionText").asString()).isEqualTo("Câu đầu đã được giáo viên chỉnh");
+        assertThat(body.path("questions").get(0).path("questionText").asString()).isEqualTo("Câu đầu đã được giáo viên chỉnh.");
         assertThat(optionTexts(body.path("questions").get(0))).isEqualTo(optionTexts(edited.path("questions").get(0)));
         assertThat(correctLabel(body.path("questions").get(0))).isEqualTo(correctLabel(edited.path("questions").get(0)));
         assertThat(body.path("questions").get(1).path("questionText").asString()).contains("con gà");
@@ -102,6 +102,12 @@ class TeacherFlowVerificationTest extends AbstractTeacherFlowTest {
 
         ObjectNode edited = (ObjectNode) call("get", "GET", "/api/games/" + gameId, token, null).body().path("data").deepCopy();
         edited.remove(List.of("gameId", "status", "updatedAt"));
+        assertThat(call("put-unchanged", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(edited)).status())
+                .isEqualTo(200);
+        Call unchanged = call("curriculum-review-unchanged", "GET", "/api/games/" + gameId + "/curriculum-review", token, null);
+        assertThat(unchanged.body().path("data").path("status").asString()).isEqualTo("UNAVAILABLE");
+
+        ((ObjectNode) edited.path("metadata")).put("title", "Đếm con vật sau khi soạn");
         assertThat(call("put", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(edited)).status()).isEqualTo(200);
 
         Call stale = call("curriculum-review-after-put", "GET", "/api/games/" + gameId + "/curriculum-review", token, null);

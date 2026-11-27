@@ -34,7 +34,7 @@ const SUMMARIZERS: { [T in GameType]: (question: QuestionOfType<T>) => string } 
 
     return listed(`${q.steps.length} ${text.steps}`, joined(ordered.map((step) => step.text?.trim() || step.visualPrompt || ''), ' → '))
   },
-  VISUAL_CLOZE: (q) => q.sentenceTemplate,
+  VISUAL_CLOZE: (q) => 'sceneImageUrl' in q ? q.questionText : q.sentenceTemplate,
 }
 
 /** Tóm tắt một dòng cho câu `question` của game loại `gameType`; câu rỗng thì trả câu "chưa có nội dung". */

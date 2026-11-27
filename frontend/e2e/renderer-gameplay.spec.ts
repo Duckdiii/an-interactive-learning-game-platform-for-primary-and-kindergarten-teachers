@@ -127,33 +127,35 @@ for (const type of TYPES) {
   })
 }
 
-for (const [index, game] of buildMockGameContents().entries()) {
-  test(`player mock ${game.gameType}: submitted answers, completion and restart`, async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 1000 })
-    await page.goto(`/play/MOCK${String(index).padStart(2, '0')}`)
-    await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
-    for (let i = 0; i < game.questions.length; i++) {
-      await expect(page.getByRole('img', { name: `Câu ${i + 1}/${game.questions.length}`, exact: true })).toBeVisible()
-      await answer(page, game, i, true)
-      await expect(page.getByText('Giỏi quá!', { exact: true })).toBeVisible()
-      await page.getByRole('button', { name: i === game.questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo', exact: true }).click()
-    }
-    await expect(page.getByText('Chơi lại', { exact: true })).toBeVisible()
-    await page.getByRole('button', { name: 'Chơi lại', exact: true }).click()
-    await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
-    await expect(page.getByRole('img', { name: `Câu 1/${game.questions.length}`, exact: true })).toBeVisible()
-  })
-}
+test.describe('mock player suite', () => {
+  for (const [index, game] of buildMockGameContents().entries()) {
+    test(`player mock ${game.gameType}: submitted answers, completion and restart`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 1000 })
+      await page.goto(`/play/MOCK${String(index).padStart(2, '0')}`)
+      await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
+      for (let i = 0; i < game.questions.length; i++) {
+        await expect(page.getByRole('img', { name: `Câu ${i + 1}/${game.questions.length}`, exact: true })).toBeVisible()
+        await answer(page, game, i, true)
+        await expect(page.getByText('Giỏi quá!', { exact: true })).toBeVisible()
+        await page.getByRole('button', { name: i === game.questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo', exact: true }).click()
+      }
+      await expect(page.getByText('Chơi lại', { exact: true })).toBeVisible()
+      await page.getByRole('button', { name: 'Chơi lại', exact: true }).click()
+      await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
+      await expect(page.getByRole('img', { name: `Câu 1/${game.questions.length}`, exact: true })).toBeVisible()
+    })
+  }
 
-test('landscape renderer: portrait rotate prompt and landscape continuation', async ({ page }) => {
-  await page.setViewportSize({ width: 360, height: 740 })
-  await page.goto('/play/MOCK01')
-  await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
-  await expect(page.getByText('Xoay ngang điện thoại để chơi nhé!', { exact: true })).toBeVisible()
-  await page.setViewportSize({ width: 740, height: 360 })
-  await expect(page.getByText('Xoay ngang điện thoại để chơi nhé!', { exact: true })).toHaveCount(0)
-  await expect(page.getByRole('img', { name: 'Câu 1/3', exact: true })).toBeVisible()
-  await expect(page.locator('canvas').first()).toBeVisible()
+  test('landscape renderer: portrait rotate prompt and landscape continuation', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 })
+    await page.goto('/play/MOCK01')
+    await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
+    await expect(page.getByText('Xoay ngang điện thoại để chơi nhé!', { exact: true })).toBeVisible()
+    await page.setViewportSize({ width: 740, height: 360 })
+    await expect(page.getByText('Xoay ngang điện thoại để chơi nhé!', { exact: true })).toHaveCount(0)
+    await expect(page.getByRole('img', { name: 'Câu 1/3', exact: true })).toBeVisible()
+    await expect(page.locator('canvas').first()).toBeVisible()
+  })
 })
 
 test('audio request failure: repeated replay feedback and answer still advances', async ({ page }) => {

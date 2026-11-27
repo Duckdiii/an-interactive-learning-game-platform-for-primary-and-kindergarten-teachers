@@ -1,21 +1,40 @@
 package com.aigameplatform.backend.service.game;
 
 import com.aigameplatform.backend.dto.request.GenerateGameRequest;
+import com.aigameplatform.backend.dto.request.RegenerateGameRequest;
+import com.aigameplatform.backend.dto.media.SpeechVoice;
 import com.aigameplatform.backend.dto.request.ReviseGameRequest;
 import com.aigameplatform.backend.dto.response.GameSummaryResponse;
+import com.aigameplatform.backend.entity.EditLog;
 import com.aigameplatform.backend.entity.Game;
+import com.aigameplatform.backend.entity.enums.EditorType;
 import com.aigameplatform.backend.entity.enums.GameStatus;
 import com.aigameplatform.backend.entity.enums.GameType;
 import com.aigameplatform.backend.entity.enums.GradeLevel;
 import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
+import com.aigameplatform.backend.repository.EditLogRepository;
 import com.aigameplatform.backend.repository.GameRepository;
-import com.aigameplatform.backend.repository.OrderStepRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
+import com.aigameplatform.backend.service.classroom.ClassroomService;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.List;
+import java.util.random.RandomGenerator;
+import com.aigameplatform.backend.service.curriculum.CurriculumCatalog;
+import com.aigameplatform.backend.service.curriculum.CurriculumChunk;
+import com.aigameplatform.backend.dto.response.RegeneratedQuestionDto;
+import com.aigameplatform.backend.entity.enums.SessionStatus;
+import com.aigameplatform.backend.repository.GameSessionRepository;
+import com.aigameplatform.backend.service.admin.CostMonitoringService;
+import com.aigameplatform.backend.service.media.GameAudioEnricher;
+import com.aigameplatform.backend.service.lesson.GameInputGuard;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,18 +52,38 @@ public class GameService {
 
     static final String RANDOM_TOPIC = "Chủ đề ngẫu nhiên phù hợp lứa tuổi và chương trình của khối lớp";
 
+    private static final List<SessionStatus> UNFINISHED = List.of(SessionStatus.WAITING, SessionStatus.ACTIVE, SessionStatus.PAUSED);
+
     private final GameRepository games;
+    private final ClassroomService classrooms;
+    private final EditLogRepository editLogs;
     private final TeacherRepository teachers;
     private final List<GameContentHandler> handlers;
     private final JsonMapper jsonMapper;
     private final AiRequestRateLimiter rateLimiter;
     private final TransactionOperations transactions;
     private final GameCurriculumReviewService curriculumReviews;
-    private final OrderStepRepository orderSteps;
+    private final ObjectProvider<CurriculumCatalog> curriculumCatalog;
+    private final RandomGenerator random;
+    private final ObjectProvider<GameAudioEnricher> audioEnrichers;
+    private final GameSessionRepository sessions;
+    private final ObjectProvider<CostMonitoringService> costMonitoring;
+    private final GameInputGuard gameInputGuard;
 
+    @Autowired
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
-            GameCurriculumReviewService curriculumReviews, OrderStepRepository orderSteps) {
+            GameCurriculumReviewService curriculumReviews, ObjectProvider<CurriculumCatalog> curriculumCatalog,
+            RandomGenerator random, ObjectProvider<GameAudioEnricher> audioEnrichers, GameSessionRepository sessions,
+            ObjectProvider<CostMonitoringService> costMonitoring, EditLogRepository editLogs,
+            ClassroomService classrooms, GameInputGuard gameInputGuard) {
+        this.classrooms = classrooms;
+        this.editLogs = editLogs;
+        this.costMonitoring = costMonitoring;
+        this.sessions = sessions;
+        this.audioEnrichers = audioEnrichers;
+        this.curriculumCatalog = curriculumCatalog;
+        this.random = random;
         this.games = games;
         this.teachers = teachers;
         this.handlers = handlers;
@@ -52,7 +91,7 @@ public class GameService {
         this.rateLimiter = rateLimiter;
         this.transactions = transactions;
         this.curriculumReviews = curriculumReviews;
-        this.orderSteps = orderSteps;
+        this.gameInputGuard = java.util.Objects.requireNonNull(gameInputGuard, "gameInputGuard");
     }
 
     /**
@@ -62,29 +101,49 @@ public class GameService {
      */
     public ObjectNode generate(String teacherId, GenerateGameRequest request) {
         requireTeacher(teacherId);
+        requireBudgetAvailable();
         GameType type = request.gameType() != null ? request.gameType() : GameType.QUIZ;
+        String context = request.classroomId() == null ? null
+                : classrooms.generationContext(teacherId, request.classroomId(), request.gradeLevel());
         String idea = ideaOf(request, type);
+        String[] visualPrompts = request.optionImages() == null ? new String[0]
+                : request.optionImages().stream().filter(java.util.Objects::nonNull)
+                        .map(GenerateGameRequest.OptionImage::visualPrompt).toArray(String[]::new);
+        gameInputGuard.requireSafe(idea, null, visualPrompts);
 
         GameContentHandler handler = handlerFor(type);
-        GameContentHandler.GeneratedContent content = handler.generate(type, idea, request.subject(), request.gradeLevel());
+        GameContentHandler.GeneratedContent content = context == null
+                ? handler.generate(type, idea, request) : handler.generate(type, idea, request, context);
 
         Game game = new Game();
         game.setAuthor(teachers.getReferenceById(teacherId));
         game.setGameType(type);
         game.setTitle(content.title());
+        game.setTopic(content.topic());
+        game.setVisualClozeMode(content.visualClozeMode());
+        game.setOddOneOutMode(content.oddOneOutMode());
         game.setSubject(request.subject());
         game.setGrade(request.gradeLevel());
         game.setPresentation(content.presentation());
         game.setSchemaVersion(content.schemaVersion());
         game.setStatus(GameStatus.DRAFT);
-        game.getQuestions().addAll(content.questions());
+        // Sinh giọng đọc TTS cho câu hỏi; lỗi dịch vụ ngoài không làm hỏng luồng tạo game (enricher tự nuốt lỗi).
+        GameAudioEnricher enricher = audioEnrichers != null ? audioEnrichers.getIfAvailable() : null;
+        if (enricher != null) {
+            String gender = request.voice() == null ? "" : request.voice().path("gender").asString("");
+            if ("MALE".equals(gender)) {
+                enricher.enrichAllQuestionsWithAudio(content.questions(), SpeechVoice.MALE);
+            } else if ("FEMALE".equals(gender)) {
+                enricher.enrichAllQuestionsWithAudio(content.questions(), SpeechVoice.FEMALE);
+            } else {
+                enricher.enrichAllQuestionsWithAudio(content.questions());
+            }
+        }
+        game.replaceQuestions(content.questions());
         game.setQuestionNum(content.questions().size());
         // Có kết quả đối chiếu chương trình (game DSL) thì lưu game và bản đối chiếu trong cùng một transaction.
-        Game saved = transactions.execute(status -> {
-            orderSteps.saveNewSteps(game);
-            return content.curriculum() == null ? games.saveAndFlush(game)
-                    : curriculumReviews.saveWithGame(game, content.curriculum(), teacherId);
-        });
+        Game saved = content.curriculum() == null ? games.saveAndFlush(game)
+                : curriculumReviews.saveWithGame(game, content.curriculum(), teacherId);
         return toResponse(saved);
     }
 
@@ -108,13 +167,28 @@ public class GameService {
     /** PUT /games/{gameId}: kiểm duyệt lại đủ 3 lớp; game giữ trạng thái và loại. */
     @Transactional
     public ObjectNode update(String teacherId, String gameId, JsonNode body) {
-        Game game = owned(teacherId, gameId);
+        Game game = owned(teacherId, gameId, true);
+        requireNoUnfinishedSession(gameId);
+
+        ObjectNode before = toResponse(game);
         handlerFor(game.getGameType()).replaceContent(game, body);
-        orderSteps.saveNewSteps(game);
-        // Chỉ sửa câu hỏi thì hàng games không "bẩn" nên @UpdateTimestamp không chạy; đặt tường minh để GET /games sắp đúng.
+        ObjectNode after = toResponse(game);
+        before.remove(GameReports.MANAGEMENT_FIELDS);
+        after.remove(GameReports.MANAGEMENT_FIELDS);
+        List<String> changes = new ArrayList<>();
+        diffPaths("", before, after, changes);
+        if (changes.isEmpty()) return toResponse(game);
+
         game.setUpdatedAt(Instant.now());
-        // Lưu qua bước này để bản đối chiếu chương trình (nếu có) chuyển STALE: nội dung đã khác lúc đối chiếu.
-        return toResponse(curriculumReviews.saveEditedGame(game, teacherId));
+        Game saved = curriculumReviews.saveEditedGame(game, teacherId);
+        EditLog log = new EditLog();
+        log.setGame(saved);
+        log.setEditedBy(EditorType.TEACHER);
+        log.setEditorTeacherId(teacherId);
+        log.setEditedAt(LocalDateTime.now());
+        log.setChangedPaths(jsonMapper.writeValueAsString(changes));
+        editLogs.save(log);
+        return toResponse(saved);
     }
 
     /**
@@ -128,10 +202,83 @@ public class GameService {
             return new StoredGame(game.getGameType(), toResponse(game));
         });
         // Kiểm quyền (403/404) trước khi tính vào hạn mức, để lỗi sai game không ăn mất lượt của giáo viên.
+        requireBudgetAvailable();
         try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
             ObjectNode revised = handlerFor(stored.type()).revise(stored.response(), request.instruction().trim(), request.history());
             GameReports.MANAGEMENT_FIELDS.forEach(field -> revised.set(field, stored.response().get(field)));
             return revised;
+        }
+    }
+
+    public ObjectNode regenerate(String teacherId, String gameId, RegenerateGameRequest input) {
+        StoredGame stored = transactions.execute(status -> {
+            Game game = owned(teacherId, gameId);
+            requireNoUnfinishedSession(gameId);
+            return new StoredGame(game.getGameType(), toResponse(game));
+        });
+        RegenerateGameRequest request = input == null ? new RegenerateGameRequest(null, null, null) : input;
+        requireBudgetAvailable();
+        try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
+            ObjectNode preview = handlerFor(stored.type()).regenerate(stored.response(), request);
+            GameReports.MANAGEMENT_FIELDS.forEach(field -> preview.set(field, stored.response().get(field)));
+            return preview;
+        }
+    }
+
+    /**
+     * POST /games/{gameId}/questions/{questionId}/regenerate: AI làm lại một câu, KHÔNG lưu (trình soạn cho giáo viên xem,
+     * hoàn tác, rồi lưu bằng PUT). Cùng khuôn với {@link #revise}: kiểm quyền và phiên đang chạy trong transaction ngắn,
+     * gọi AI ngoài transaction.
+     */
+    public RegeneratedQuestionDto regenerateQuestion(String teacherId, String gameId, String questionId, String feedback) {
+        return regenerateQuestion(teacherId, gameId, questionId, feedback, null);
+    }
+
+    public RegeneratedQuestionDto regenerateQuestion(String teacherId, String gameId, String questionId, String feedback,
+            SpeechVoice voice) {
+        StoredGame stored = transactions.execute(status -> {
+            Game game = owned(teacherId, gameId);
+            requireNoUnfinishedSession(gameId);
+            return new StoredGame(game.getGameType(), toResponse(game));
+        });
+        requireBudgetAvailable();
+        try (AiRequestRateLimiter.Permit permit = rateLimiter.acquire(teacherId)) {
+            GameContentHandler handler = handlerFor(stored.type());
+            return voice == null ? handler.regenerateQuestion(stored.response(), questionId, feedback)
+                    : handler.regenerateQuestion(stored.response(), questionId, feedback, voice);
+        }
+    }
+
+    private void requireNoUnfinishedSession(String gameId) {
+        if (sessions.hasUnfinishedSession(gameId, UNFINISHED, LocalDateTime.now())) {
+            throw new ApiException(ErrorCode.CONFLICT, "Game đang có phiên chơi chưa kết thúc, chưa sửa được");
+        }
+    }
+
+    private static void diffPaths(String path, JsonNode before, JsonNode after, List<String> changes) {
+        if (java.util.Objects.equals(before, after)) return;
+        if (before != null && after != null && before.isObject() && after.isObject()) {
+            var keys = new TreeSet<>(before.propertyNames());
+            keys.addAll(after.propertyNames());
+            for (String key : keys) {
+                String escaped = key.replace("~", "~0").replace("/", "~1");
+                diffPaths(path + "/" + escaped, before.get(key), after.get(key), changes);
+            }
+        } else if (before != null && after != null && before.isArray() && after.isArray()) {
+            for (int index = 0; index < Math.max(before.size(), after.size()); index++) {
+                diffPaths(path + "/" + index, before.get(index), after.get(index), changes);
+            }
+        } else {
+            changes.add(path);
+        }
+    }
+
+    private void requireBudgetAvailable() {
+        // Circuit breaker (FR-12): chạm trần chi phí AI tháng thì ngừng nhận yêu cầu sinh game.
+        CostMonitoringService cost = costMonitoring == null ? null : costMonitoring.getIfAvailable();
+        if (cost != null && cost.isCostCapExceeded()) {
+            throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE,
+                    "Hệ thống AI tạm thời ngưng nhận yêu cầu sinh game do đã chạm trần chi phí tháng. Vui lòng liên hệ Quản trị viên.");
         }
     }
 
@@ -151,8 +298,12 @@ public class GameService {
     }
 
     private Game owned(String teacherId, String gameId) {
+        return owned(teacherId, gameId, false);
+    }
+
+    private Game owned(String teacherId, String gameId, boolean lock) {
         requireTeacher(teacherId);
-        Game game = games.findById(gameId)
+        Game game = (lock ? games.findByIdForUpdate(gameId) : games.findById(gameId))
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Không tìm thấy trò chơi"));
         if (game.getAuthor() == null || !teacherId.equals(game.getAuthor().getId())) {
             throw new ApiException(ErrorCode.FORBIDDEN, "Bạn không có quyền với trò chơi này");
@@ -173,13 +324,28 @@ public class GameService {
                 .orElseThrow(() -> new IllegalStateException("Không có handler cho loại game " + type));
     }
 
-    private static String ideaOf(GenerateGameRequest request, GameType type) {
+    private String ideaOf(GenerateGameRequest request, GameType type) {
         if (request.hasIdea()) return request.idea().trim();
         if (type == GameType.CUSTOM) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Trò chơi ngoài danh mục cần mô tả ý tưởng");
         }
-        if (request.wantsRandomTopic()) return RANDOM_TOPIC;
+        if (request.wantsRandomTopic()) return randomTopic(request);
         throw new ApiException(ErrorCode.VALIDATION_ERROR, "Vui lòng nhập ý tưởng hoặc tải giáo án");
+    }
+
+    /**
+     * Có danh mục chương trình (bật RAG) thì chọn ngẫu nhiên một yêu cầu cần đạt của đúng môn/lớp, để bước truy hồi có căn
+     * cứ thật; không có thì dùng câu chung, AI tự chọn chủ đề.
+     */
+    private String randomTopic(GenerateGameRequest request) {
+        CurriculumCatalog catalog = curriculumCatalog.getIfAvailable();
+        if (catalog == null) return RANDOM_TOPIC;
+        List<CurriculumChunk> outcomes = catalog.requireDataset(request.subject(), request.gradeLevel()).chunks().stream()
+                .filter(chunk -> !chunk.control()).toList();
+        if (outcomes.isEmpty()) {
+            throw new ApiException(ErrorCode.CURRICULUM_EVIDENCE_NOT_FOUND, "Chưa có yêu cầu cần đạt nào cho môn và lớp đã chọn");
+        }
+        return outcomes.get(random.nextInt(outcomes.size())).topic();
     }
 
     private static void requireTeacher(String teacherId) {

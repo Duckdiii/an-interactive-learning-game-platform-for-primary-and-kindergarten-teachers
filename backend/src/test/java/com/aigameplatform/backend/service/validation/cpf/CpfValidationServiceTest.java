@@ -40,6 +40,11 @@ class CpfValidationServiceTest {
     private final CpfValidationService service = new CpfValidationService(new CpfAssetCatalog(MAPPER),
             new ContentSafetyCheck(new BlockedWordList(List.of("cứt")), moderation, false), MAPPER);
 
+    private CpfValidationService moderationRequiredService() {
+        return new CpfValidationService(new CpfAssetCatalog(MAPPER),
+                new ContentSafetyCheck(new BlockedWordList(List.of("cứt")), moderation, true), MAPPER);
+    }
+
     private static ObjectNode example(String name) throws IOException {
         try (InputStream in = CpfValidationServiceTest.class.getResourceAsStream("/cpf-examples/" + name + ".json")) {
             return (ObjectNode) MAPPER.readTree(in);
@@ -329,8 +334,9 @@ class CpfValidationServiceTest {
         when(moderation.isConfigured()).thenReturn(true);
         when(moderation.moderate(anyList())).thenAnswer(inv -> ((List<?>) inv.getArgument(0)).stream()
                 .map(t -> new ModerationResult(false, List.of())).toList());
+        CpfValidationService moderationService = moderationRequiredService();
 
-        assertThat(service.validate(example(SORT)).valid()).isTrue();
+        assertThat(moderationService.validate(example(SORT)).valid()).isTrue();
         verify(moderation).moderate(List.of("Con vật ở đâu?", "Con vật sống trên cạn và dưới nước",
                 "Kéo mỗi con vật về đúng nhà của nó nhé!", "Con nào sống trên cạn, con nào sống dưới nước?",
                 "con mèo", "con cá", "con chó", "con rùa biển", "Trên cạn", "Dưới nước"));
@@ -440,7 +446,7 @@ class CpfValidationServiceTest {
     void moderationOutageIsReportedAsUnavailable() throws IOException {
         when(moderation.isConfigured()).thenReturn(true);
         when(moderation.moderate(anyList())).thenThrow(new ModerationUnavailableException("timeout"));
-        var report = service.validate(example(FISH));
+        var report = moderationRequiredService().validate(example(FISH));
         assertThat(report.unavailable()).isTrue();
         assertThat(report.unsafe()).isFalse();
     }
@@ -453,7 +459,7 @@ class CpfValidationServiceTest {
             return java.util.stream.IntStream.range(0, texts.size())
                     .mapToObj(i -> new ModerationResult(i == 0, i == 0 ? List.of("violence") : List.<String>of())).toList();
         });
-        var report = service.validate(example(FISH));
+        var report = moderationRequiredService().validate(example(FISH));
         assertThat(report.unsafe()).isTrue();
         assertThat(report.errors()).singleElement().satisfies(e -> assertThat(e.path()).isEqualTo("$.metadata.title"));
     }

@@ -20,6 +20,8 @@ const navigationItems: ReadonlyArray<{
   { label: viText.nav.home, to: ROUTES.dashboard, end: true, icon: 'home' },
   { label: viText.nav.myGames, to: ROUTES.workspace, end: false, icon: 'library' },
   { label: viText.nav.results, to: ROUTES.results, end: true, icon: 'chart' },
+  { label: viText.nav.classrooms, to: ROUTES.classrooms, end: true, icon: 'user' },
+  { label: viText.nav.teacherProfile, to: ROUTES.teacherProfile, end: true, icon: 'user' },
   { label: viText.nav.createGame, to: ROUTES.createGame, end: true, icon: 'sparkles' },
 ]
 
@@ -29,8 +31,12 @@ export default function AppLayout() {
   const location = useLocation()
   const mainRef = useRef<HTMLElement>(null)
   // Đăng xuất cũng xóa bộ nhớ đệm truy vấn (danh sách game, game đang mở): máy dùng chung không giữ dữ liệu của người trước.
-  const handleLogout = () => {
-    logout()
+  // Chặn bấm hai lần khi mạng chậm: lần thứ hai sẽ gặp 401 và kéo theo một lượt refresh vô ích.
+  const isLoggingOut = useRef(false)
+  const handleLogout = async () => {
+    if (isLoggingOut.current) return
+    isLoggingOut.current = true
+    await logout()
     queryClient.clear()
   }
   // Người Việt gọi bằng tên (từ cuối): "Nguyễn Thị Lan" -> "Cô Lan". Chưa có họ tên thì dùng email, không thêm "Cô".
@@ -141,7 +147,7 @@ export default function AppLayout() {
         id="main"
         ref={mainRef}
         tabIndex={-1}
-        className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-6 outline-none sm:px-6 sm:pt-8 lg:mx-0 lg:max-w-none lg:px-10 lg:pb-12"
+        className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-[calc(9rem+env(safe-area-inset-bottom))] pt-6 outline-none sm:px-6 sm:pb-28 sm:pt-8 lg:mx-0 lg:max-w-none lg:px-10 lg:pb-12"
       >
         <div
           key={location.pathname}
@@ -157,7 +163,7 @@ export default function AppLayout() {
 
       <nav
         aria-label={viText.layout.navLabelCompact}
-        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-ink/10 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-3 border-t border-ink/10 bg-white pb-[env(safe-area-inset-bottom)] sm:grid-cols-6 lg:hidden"
       >
         {navigationItems.map((item) => (
           <NavLink

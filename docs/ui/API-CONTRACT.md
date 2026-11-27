@@ -234,11 +234,15 @@ Wireframe cần thêm so với spec:
 ```json
 { "success": true, "data": {
   "playCount": 26, "correctRate": 0.72, "avgAttemptsPerQuestion": 1.6,
+  "completionRate": 0.85, "avgScore": 240.5, "lowSample": false,
   "questions": [
     { "questionId": "q4", "order": 4, "text": "CHỊ", "answeredCount": 26, "correctRate": 0.41, "avgAttempts": 2.1,
       "needsReview": true,
-      "commonWrong": [ { "label": "CHI", "count": 9, "answer": { "word": "CHI" } } ] } ] } }
+      "commonWrong": [ { "label": "CHI", "count": 9 } ] } ] } }
 ```
+
+> **Đã cài (UC-18), thêm 2026-11-22:** `GET /games/{gameId}/insights` nhận thêm `from`, `to` (`YYYY-MM-DD`, theo ngày tạo phiên, `to` tính trọn ngày, `from` sau `to` thì 400) và trả `lowSample` (có lượt chơi nhưng dưới 5). `GET /games/{gameId}/questions/{questionId}/insights` trả phân bố đáp án của một câu (`distribution`: chỉ đáp án lặp từ 2 lần, tối đa 6; `otherCount` là phần còn lại; `noAnswerCount` là bỏ qua hoặc hết giờ). `GET /insights/review-needed?limit=` (mặc định 3, tối đa 20) gộp các câu `needsReview` của mọi game đã đăng, câu yếu nhất trước. `GenerateGameRequest.reviewFrom` đã cài: Backend kiểm game thuộc giáo viên (404) và `questionIds` thuộc game (400), rồi nối khối "dữ liệu kết quả lớp" (không tin cậy) vào `idea`. Lọc theo lớp: `classroomId` (query) ở cả hai endpoint thống kê, chỉ giữ phiên gắn đúng lớp (phiên chơi tự do không thuộc lớp nào); lớp tạo ở `/classrooms` (GET, POST, PUT, DELETE, mọi lớp theo giáo viên, lớp của người khác trả 404) và gắn vào phiên bằng `classroomId` trong `CreateSessionRequest`. `commonWrong` có thêm Quiz (nhãn là chữ của lựa chọn) và Word Scramble (từ trẻ đã ghép). `commonWrong` có thêm Ordering ("Vị trí N: bước") , Drag & Drop ("vật → vùng"), Matching ("trái ↔ phải") và Spot the Target (hướng lệch: "Gần đích (lệch sang phải)"; gần là trong 2 lần bán kính). Nhãn chứa email, số điện thoại hoặc đường dẫn bị bỏ. Kênh WebSocket `/participants` và `/answer-status` (có `participantId`) chỉ giáo viên chủ phòng đăng ký được; `POST /games/shared/{code}/play` giới hạn 120 lần mỗi 10 phút theo địa chỉ gọi (429 `RATE_LIMITED`); thời gian làm bài tính bằng số lớn hơn giữa `timeSpentMs` client khai và đồng hồ server. Tỉ lệ hoàn thành (`completionRate`) và điểm trung bình (`avgScore`) tính trên học sinh đã chơi ít nhất một câu. Visual Cloze dạng ảnh đưa lỗi đặt ảnh đầu tiên của mỗi lượt làm câu đã kết thúc vào `commonWrong` nếu ít nhất hai lượt mắc cùng lỗi. Dữ liệu cũ không có lỗi đã lưu. Màn mở phòng thật dùng `POST /games/{gameId}/sessions` để tạo SOLO, truyền lớp đã chọn. Memory Card nộp `wrongPairs` khi hoàn thành câu. Backend kiểm mã cặp và đếm mỗi cặp nhầm tối đa một lần trong một lượt làm câu.
+> **Đã cài (UC-18):** endpoint này có ở Backend (`GameInsightsController`). `needsReview` do Backend tính theo ngưỡng trên. `commonWrong` đã dựng cho Visual Cloze (nhập chữ), Audio-Visual Match, Odd One Out dạng ảnh, Quiz và Word Scramble ở cả phiên `SELF`, `SOLO`, `TEAM` (giải mã mã mờ theo salt của phiên hoặc id theo vị trí, `service/play/insight/*WrongAnswerLabeler`); chỉ nêu đáp án lặp từ 2 lần, tối đa 3, nhãn tối đa 40 ký tự, đã lọc từ cấm. Phiên `SOLO`/`TEAM` nộp đáp án qua cùng `POST /sessions/{id}/interactions` với chơi tự do (phiên phải `ACTIVE`). Loại game khác cho mảng rỗng. Trường `answer` bỏ khỏi hợp đồng.
 
 `label` là chuỗi **đã dựng sẵn ở Backend** cho người đọc (đáp án sai có hình dạng khác nhau theo loại game nên Frontend không tự dựng được). `needsReview` do Backend quyết theo ngưỡng cấu hình (đề xuất: `correctRate < 0.6` và `answeredCount >= 5`). Nếu có phiên thi đấu đã đóng, chỉ giữ số liệu tổng hợp (SPEC mục 1.9).
 
@@ -254,9 +258,9 @@ Wireframe cần thêm so với spec:
 
 Đề xuất bổ sung cho `review-needed`: sắp theo `correctRate` tăng dần (câu yếu nhất trước); `commonWrong` là `null` khi chưa có đáp án sai nào lặp lại từ 2 lần (Frontend khi đó bỏ vế "hay nhầm thành").
 
-> **Frontend đang dùng (P3, 2026-10-28):** trang chủ F1 gọi `GET /insights/review-needed?limit=3` qua `HomeApi.listReviewNeeded` (`frontend/src/services/home/`), hiện chạy bằng adapter mô phỏng (nhóm `results`, có nhãn "dữ liệu mẫu" ở dev); bản thật trả lỗi "chưa hỗ trợ" và khối hiện trạng thái trống. Trong lúc chưa có `reviewFrom`, nút "Tạo game ôn tập" chỉ điền sẵn `idea = "Ôn tập: {gameTitle}"` (tên game của giáo viên), không đưa câu trả lời của học sinh vào.
+> **Frontend đang dùng (P3, 2026-10-28):** trang chủ F1 gọi `GET /insights/review-needed?limit=3` qua `HomeApi.listReviewNeeded` (`frontend/src/services/home/`), dev chạy bằng adapter mô phỏng (nhóm `results`, có nhãn "dữ liệu mẫu"), bản thật gọi API thật. Nút "Tạo game ôn tập" điền sẵn `idea = "Ôn tập: {gameTitle}"` và mang `reviewGame`, `reviewQ` (mã game và mã câu) trên địa chỉ trang tạo game; trang gửi `reviewFrom` cho `POST /games/generate`, không đưa câu trả lời của học sinh qua Frontend.
 
-> **Frontend đang dùng (P3, F8 trang "Kết quả"):** trang `/results` (`frontend/src/pages/ResultsPage.tsx`; không có `?gameId=` thì liệt kê game đã đăng để chọn) gọi `GET /games/{gameId}/insights` qua `HomeApi.getGameInsights(gameId, sessionType?)` (cùng `frontend/src/services/home/`, hook `useGameInsights`). Chip lọc "Tất cả lượt / Phòng thi đấu / Chơi ở nhà" gửi `sessionType` bỏ trống / `TEAM` / `SELF` và giữ trên địa chỉ `?type=`. Hiện chạy bằng adapter mô phỏng nhóm `results` (`mockInsights.ts`: số liệu xác định dựng từ câu hỏi của game mô phỏng, có câu `needsReview` và `commonWrong`; có nhãn "dữ liệu mẫu" ở dev); bản thật trả lỗi "chưa hỗ trợ" và trang hiện "Chưa có số liệu", không báo lỗi. Frontend chỉ dùng `label` của `commonWrong` (đã dựng ở Backend), chưa dùng `answer`. Thẻ "Cần ôn lại" lấy câu `needsReview` có `correctRate` thấp nhất; nút "Tạo game ôn tập" làm đúng như Trang chủ: chỉ điền sẵn `idea = "Ôn tập: {gameTitle}"` cùng `grade`, `subject` của game, không đưa lỗi hay câu trả lời của học sinh vào (chờ `reviewFrom`).
+> **Frontend đang dùng (P3, F8 trang "Kết quả"):** trang `/results` (`frontend/src/pages/ResultsPage.tsx`; không có `?gameId=` thì liệt kê game đã đăng để chọn) gọi `GET /games/{gameId}/insights` qua `HomeApi.getGameInsights(gameId, sessionType?)` (cùng `frontend/src/services/home/`, hook `useGameInsights`). Chip lọc "Tất cả lượt / Thi đấu cá nhân / Thi đấu theo đội / Chơi ở nhà" gửi `sessionType` bỏ trống / `SOLO` / `TEAM` / `SELF` và giữ trên địa chỉ `?type=`. Hiện chạy bằng adapter mô phỏng nhóm `results` (`mockInsights.ts`: số liệu xác định dựng từ câu hỏi của game mô phỏng, có câu `needsReview` và `commonWrong`; có nhãn "dữ liệu mẫu" ở dev); bản thật gọi endpoint thật (`fetchGameInsights`). Chi tiết từng câu hiển thị nhãn và số lần của các lỗi hay gặp. Thẻ "Cần ôn lại" lấy câu `needsReview` có `correctRate` thấp nhất; trang có thêm ô lọc ngày `?from=&to=` (giá trị không hợp lệ bị bỏ qua), cảnh báo `lowSample`, và bấm một câu để xem chi tiết qua `HomeApi.getQuestionInsights`. Nút "Tạo game ôn tập" điền sẵn `idea = "Ôn tập: {gameTitle}"` cùng `grade`, `subject` của game và mang `reviewGame`, `reviewQ` (chỉ mã, không có lỗi hay câu trả lời của học sinh) để trang tạo game gửi `reviewFrom`.
 
 ### 2.9 Tiến trình AI soạn (F4) và đề xuất kiểu chơi (F5)
 
@@ -380,6 +384,35 @@ Frontend không thể tự làm kiểm thử 30 máy; cần Backend cung cấp m
 
 Phía Frontend khi cài `RealPlayerApi`: dùng một axios instance **riêng cho học sinh** (không có interceptor đính token và làm mới token của giáo viên, chỉ gắn `X-Participant-Id`), vì `axiosInstance` hiện tại sẽ đính token giáo viên nếu máy dùng chung còn đăng nhập và đẩy học sinh sang trang đăng nhập khi gặp 401.
 
+### 2.14 Tìm kiếm ảnh Pexels qua Backend Proxy (Workspace Editor WYSIWYG)
+
+**Vấn đề:** Giáo viên khi tinh chỉnh câu hỏi ở màn hình Workspace Editor cần đổi ảnh minh họa từ kho ảnh Pexels nếu ảnh AI sinh chưa ưng ý. Nếu Frontend gọi trực tiếp tới Pexels API sẽ làm lộ `PEXELS_API_KEY` ra Network tab của trình duyệt.
+
+**Giải pháp:** Backend cung cấp proxy endpoint bảo vệ API key:
+* **Endpoint:** `GET /media/pexels-search` (hoặc `/api/media/pexels-search`)
+* **Xác thực:** Yêu cầu giáo viên đã đăng nhập (`Authorization: Bearer <token>`).
+* **Tham số query:**
+  - `query`: chuỗi từ khóa tìm kiếm (ví dụ: `con mèo`, `hình tròn`).
+  - `perPage`: số lượng ảnh tối đa cần lấy (mặc định: `12`).
+* **Response format:**
+```json
+{
+  "success": true,
+  "data": {
+    "images": [
+      {
+        "id": 12345,
+        "url": "https://images.pexels.com/photos/12345/pexels-photo-12345.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "thumbnailUrl": "https://images.pexels.com/photos/12345/pexels-photo-12345.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=280",
+        "alt": "Con mèo dễ thương",
+        "photographer": "Pexels Artist"
+      }
+    ]
+  }
+}
+```
+* **Khả năng chịu lỗi:** Khi chưa cấu hình key `PEXELS_API_KEY` hoặc mạng Pexels lỗi, backend tự động fallback trả về danh sách ảnh mock chất lượng cao để không bao giờ làm gián đoạn trải nghiệm của giáo viên và giữ CI luôn xanh.
+
 ## 3. Tóm tắt những gì Frontend KHÔNG yêu cầu Backend
 
 - Huy hiệu, kỷ lục cá nhân, hình đại diện ở Hs-Nickname/Hs-Result: **không có trong contract**; Frontend chỉ lưu cục bộ trên máy (`localStorage`) hoặc bỏ (PLAN Q6). Không tạo tài khoản học sinh.
@@ -393,3 +426,8 @@ Phía Frontend khi cài `RealPlayerApi`: dùng một axios instance **riêng cho
 - Tiêu chuẩn đồ họa: [[Tiêu chuẩn Đồ họa và Asset Pipeline]]
 - Sơ đồ hệ thống: [[Sơ đồ hệ thống]]
 - Mục lục giao diện: [[ui/SPEC|Đặc tả UI]]
+
+
+## Cập nhật triển khai FR-02 (2026-11-24)
+
+Luồng upload giáo án đã được tách khỏi API sinh game: `POST /games/prepare` nhận multipart gồm môn, khối, đúng một file DOCX/PDF (tối đa 10 MiB) và ý tưởng tùy chọn; backend trích xuất giới hạn bằng Apache Tika, kiểm tra nội dung rồi gọi Gemini để chuẩn bị ý tưởng. Endpoint không lưu file, văn bản trích xuất hay game. Giáo viên phải duyệt/sửa và xác nhận ý tưởng trước khi frontend gọi luồng đề xuất kiểu game và `POST /games/generate`. Các chi tiết request/response và lỗi nằm trong `docs/openapi/openapi.yaml`.

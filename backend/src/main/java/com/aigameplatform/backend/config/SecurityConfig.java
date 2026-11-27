@@ -1,8 +1,8 @@
 package com.aigameplatform.backend.config;
 
 import com.aigameplatform.backend.security.JwtAuthenticationFilter;
-import com.aigameplatform.backend.security.JwtService;
 import com.aigameplatform.backend.security.RestSecurityErrorHandler;
+import com.aigameplatform.backend.security.TeacherAccessAuthenticator;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,11 +28,11 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http, JwtService jwtService, RestSecurityErrorHandler errorHandler) throws Exception {
+            HttpSecurity http, TeacherAccessAuthenticator authenticator, RestSecurityErrorHandler errorHandler) throws Exception {
         http
-            // API xác thực bằng header Authorization (không dựa vào cookie), nên tắt CSRF.
+            // API xác thực bằng header Authorization (không dựa vào cookie), nên bỏ kiểm tra CSRF cho đường dẫn API/WebSocket.
             // Cookie refresh token chỉ gửi tới /api/auth, kèm SameSite=Strict.
-            .csrf(AbstractHttpConfigurer::disable)
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/ws/**"))
             .cors(Customizer.withDefaults())
             // Không lưu session phía server, mỗi request tự mang token.
             .sessionManagement(session ->
@@ -45,12 +44,25 @@ public class SecurityConfig {
                         "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // Logout không nằm trong danh sách này: phải có access token hợp lệ.
                 .requestMatchers(HttpMethod.POST,
-                        "/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
+                        "/api/auth/register", "/api/auth/login", "/api/auth/refresh",
+                        "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+                .requestMatchers("/ws/live-arena/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/games/shared/*", "/api/sessions/*/questions",
+                        "/api/sessions/by-code/*", "/api/sessions/*/leaderboard", "/api/sessions/*/my-result").permitAll()
+                .requestMatchers(HttpMethod.GET, "/media/uploads/*", "/media/tts/*").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/media/uploads/*", "/media/tts/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/media/upload", "/api/games/validate-text").hasAuthority("ROLE_TEACHER")
+                .requestMatchers(HttpMethod.POST, "/api/games/shared/*/play", "/api/sessions/*/join",
+                        "/api/sessions/*/interactions").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/sessions/*/my-team").permitAll()
+                .requestMatchers("/api/teacher/profile", "/api/teacher/suggestions", "/api/teacher/suggestions/**",
+                        "/api/classrooms", "/api/classrooms/**").hasAuthority("ROLE_TEACHER")
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated())
             .exceptionHandling(handling -> handling
                 .authenticationEntryPoint(errorHandler)
                 .accessDeniedHandler(errorHandler))
-            .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtAuthenticationFilter(authenticator), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -63,11 +75,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList(allowedOrigins));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowedMethods(List.of("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Participant-Id"));
         config.setAllowCredentials(true);
 
+        CorsConfiguration publicMedia = new CorsConfiguration();
+        publicMedia.setAllowedOrigins(List.of("*"));
+        publicMedia.setAllowedMethods(List.of("GET", "HEAD", "OPTIONS"));
+        publicMedia.setAllowedHeaders(List.of("Range"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/media/**", publicMedia);
         source.registerCorsConfiguration("/**", config);
         return source;
     }

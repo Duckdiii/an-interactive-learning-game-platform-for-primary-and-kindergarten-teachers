@@ -4,6 +4,8 @@ import { defineConfig, devices } from '@playwright/test'
 // và frontend Vite (cổng 15173). Cổng riêng để không đụng backend/frontend đang chạy dev trên máy. Cần Docker.
 const BACKEND_PORT = 18080
 const FRONTEND_PORT = 15173
+const MOCK_PLAYER_PORT = 15174
+const mockPlayerTests = /mock player suite/
 // Đường dẫn tương đối tường minh: cmd của Windows không tìm thấy `mvnw.cmd` trần khi Playwright đặt cwd.
 const mvnw = process.platform === 'win32' ? '.\\mvnw.cmd' : './mvnw'
 
@@ -22,7 +24,13 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', grepInvert: mockPlayerTests, use: { ...devices['Desktop Chrome'] } },
+    {
+      name: 'chromium-player-mock', grep: mockPlayerTests,
+      use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${MOCK_PLAYER_PORT}` },
+    },
+  ],
   webServer: [
     {
       command: `${mvnw} -q -B spring-boot:test-run -Dspring-boot.run.main-class=com.aigameplatform.backend.e2e.E2eBackendApplication`,
@@ -43,8 +51,16 @@ export default defineConfig({
       // Biến môi trường có sẵn được Vite ưu tiên hơn .env.local của máy dev.
       env: {
         VITE_API_BASE_URL: `http://localhost:${BACKEND_PORT}/api`,
-        VITE_USE_MOCK: 'media,sessions,results',
+        VITE_USE_MOCK: 'none',
+        VITE_PLAYER_API: 'real',
       },
+    },
+    {
+      command: `npm run dev -- --port ${MOCK_PLAYER_PORT} --strictPort`,
+      url: `http://localhost:${MOCK_PLAYER_PORT}`,
+      timeout: 120_000,
+      reuseExistingServer: !process.env.CI,
+      env: { VITE_USE_MOCK: 'none', VITE_PLAYER_API: 'mock' },
     },
   ],
 })

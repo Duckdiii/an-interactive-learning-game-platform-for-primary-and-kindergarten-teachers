@@ -1,8 +1,10 @@
 import { useReducer } from 'react'
 import type { ComponentProps } from 'react'
 import { viText } from '../../constants/viText'
-import { gradePreviewAnswer, toPreviewStudentQuestion } from '../../components/editor/preview/previewModel'
-import { useQuestionAudio } from '../../games/common/useQuestionAudio'
+import { toPreviewStudentQuestion } from '../../components/editor/preview/previewModel'
+import { usePreviewGrader } from '../../components/editor/preview/usePreviewGrader'
+import { usePlayTestNarrationAudio } from '../../components/editor/usePlayTestNarrationAudio'
+import { CloudFeedbackContext } from '../../games/common/useAnswerAudio'
 import type { AnswerPayload, AnswerResult } from '../../types/game-student.types'
 import type { GameResponse } from '../../types/game-response.types'
 import { feedbackRules } from '../policies/feedback'
@@ -42,9 +44,20 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
   const theme = useTheme()
   const [state, dispatch] = useReducer(presentReducer, game.questions, (questions) => initialPresentState(questions.map((question) => question.id)))
   const question = game.questions[state.index]
+  const grade = usePreviewGrader(game.gameType, question, `${state.phase}:${state.attempt}`)
   const Renderer = getPlayableRenderer(game.gameType)
-  const replay = useQuestionAudio(question?.audioUrl)
+  const isAudioVisual = game.gameType === 'AUDIO_VISUAL_MATCH'
   const record = recordOf(state, currentId(state))
+  const narrationAudio = usePlayTestNarrationAudio({
+    enabled: Boolean(Renderer && question) && state.phase === 'play' && !state.paused,
+    gameId: game.gameId,
+    subject: game.metadata.subject,
+    questionKey: question ? `${question.id}:${state.attempt}` : 'empty',
+    question: question ? { id: question.id, audioText: question.audioText, audioUrl: question.audioUrl, saved: true } : undefined,
+    answered: record.answered,
+    isCorrect: record.answered ? record.lastCorrect : null,
+  })
+  const replay = narrationAudio.replayQuestion
   const result = record.answered ? verdict(record.lastCorrect) : null
   const last = isLastQuestion(state)
   const canAct = Renderer !== undefined && !state.paused
@@ -70,9 +83,9 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
   }
 
   const onSubmit = async (answer: AnswerPayload) => {
-    const graded = gradePreviewAnswer(game.gameType, question, answer)
+    const graded = grade(answer)
 
-    dispatch({ type: 'answered', isCorrect: graded.isCorrect })
+    if (!graded.retryable) dispatch({ type: 'answered', isCorrect: graded.isCorrect })
 
     return graded
   }
@@ -151,7 +164,7 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
         </div>
         <div className="flex min-h-0 flex-1 gap-6">
           {/* inert khi đã có kết quả: bé/cô không bấm tiếp được, muốn chơi lại thì "Cho thử lại". */}
-          <div inert={record.answered} className="min-w-0 flex-1 overflow-hidden rounded-3xl bg-play-surface p-4">
+          <div inert={record.answered && !isAudioVisual} className="min-w-0 flex-1 overflow-hidden rounded-3xl bg-play-surface p-4">
             {record.answered && !state.answeredHere ? (
               // Quay lại câu đã trả lời: không dựng lại renderer trống (bé bấm được mà không chấm), chỉ báo và mời "Cho thử lại".
               <div className="grid h-full place-items-center text-center">
@@ -160,7 +173,10 @@ export default function PresentPlay({ game, onLeave }: PresentPlayProps) {
             ) : Renderer && question ? (
               <FitToHeight key={`${question.id}-${state.attempt}`}>
                 <div className="question-in h-full w-full">
-                  <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile} onSubmit={onSubmit} />
+                  <CloudFeedbackContext.Provider value={narrationAudio.feedbackAvailable}>
+                    <PlayableQuestion Renderer={Renderer} question={toPreviewStudentQuestion(game.gameType, question)} profile={profile}
+                      subject={game.metadata.subject} onSubmit={onSubmit} playAudio={isAudioVisual ? replay : undefined} />
+                  </CloudFeedbackContext.Provider>
                 </div>
               </FitToHeight>
             ) : (

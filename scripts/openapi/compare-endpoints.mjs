@@ -4,7 +4,7 @@
 //   implemented/extended-pending mà code không có, spec ghi planned mà code đã có, hoặc có endpoint không đọc được.
 // Không dùng thư viện YAML (bố cục cố định như build-index.mjs: path 2 dấu cách, method 4, thuộc tính 6).
 // shortcut: chỉ đọc @RequestMapping("...") ở mức class và @Get/Post/Put/Patch/DeleteMapping với một đường dẫn chuỗi
-// (hoặc không có đường dẫn); dạng mảng, `value =`, `method =` hay hằng số thì chưa hỗ trợ: báo "không đọc được" để người xem.
+// (hoặc không có đường dẫn), và chuỗi path kèm consumes. Dạng mảng, `value =` hoặc hằng số đường dẫn báo "không đọc được".
 // Annotation viết đủ tên gói (`@org.springframework.web.bind.annotation.GetMapping`) thì bị bỏ qua im lặng, kể cả với --strict.
 // Controller có tiền tố class không đọc được thì bỏ cả các endpoint của nó (tránh báo lệch giả ở hai chiều). Nâng cấp
 // sang parser Java thật nếu số "không đọc được" tăng.
@@ -31,11 +31,19 @@ export function openapiOperations(text) {
     if (/^\S/.test(line)) return void (inPaths = false);
     if (!inPaths) return;
     const p = /^  (\/\S*):\s*$/.exec(line);
-    if (p) return void (path = p[1]);
+    if (p) {
+      path = p[1];
+      current = null;
+      return;
+    }
     const m = METHOD.exec(line);
     if (m && path) return void ops.push((current = { method: m[1].toUpperCase(), path: base + path, status: "", line: i + 1 }));
     const s = /^      x-status:\s*(\S+)/.exec(line);
     if (s && current) current.status = s[1];
+    if (current && /^      servers:\s*$/.test(line)) {
+      const override = /^        - url:\s*(\S+)/.exec(lines[i + 1] ?? "");
+      if (override) current.path = new URL(override[1], "http://x").pathname.replace(/\/$/, "") + path;
+    }
   });
   return ops;
 }
@@ -55,7 +63,8 @@ export function controllerOperations(raw) {
   for (const m of source.matchAll(MAPPING)) {
     const line = source.slice(0, m.index).split("\n").length;
     const args = (m[3] ?? "").trim();
-    const str = /^"([^"]*)"$/.exec(args);
+    const str = /^"([^"]*)"$/.exec(args)
+      ?? (m[1] === "Request" ? null : /^path\s*=\s*"([^"]*)"\s*,\s*consumes\s*=\s*[\w.]+$/.exec(args));
     const atClass = m[1] === "Request" && m.index < classAt;
     if (args && !str) {
       unreadable.push({ line, text: atClass ? `${m[0]} (tiền tố class: bỏ qua mọi endpoint của file này)` : m[0] });

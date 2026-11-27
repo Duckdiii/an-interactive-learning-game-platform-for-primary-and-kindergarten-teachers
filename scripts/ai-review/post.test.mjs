@@ -143,6 +143,27 @@ test("files_reviewed rỗng dù PR có diff bị từ chối (thành công giả
   assert.equal(gh.writes, 0);
 });
 
+test("406 và mọi file thiếu patch: kết quả không review file nào bị từ chối", async () => {
+  const github = new Github({
+    token: "t", repo: "a/b",
+    fetchImpl: async (url) => {
+      if (url.endsWith("/pulls/7")) return { ok: false, status: 406, json: async () => ({}) };
+      assert.ok(url.endsWith("/pulls/7/files?per_page=100&page=1"));
+      return { ok: true, status: 200, json: async () => [{ filename: "logo.png", status: "modified" }] };
+    },
+  });
+  const gh = new FakeGithub();
+  gh.getDiff = (pr) => github.getDiff(pr);
+  gh.getPull = async () => ({ head: { sha: SHA }, changed_files: 1 });
+
+  await assert.rejects(go(gh, { result: result({ files_reviewed: [], findings: [] }) }), /files_reviewed rỗng/);
+  assert.equal(gh.writes, 0);
+
+  await go(gh, { result: result({ files_reviewed: ["logo.png"], findings: [finding({ file: "logo.png" })] }) });
+  assert.equal(gh.reviews.length, 0);
+  assert.match(gh.issueComments[0].body, /Thiếu transaction/);
+});
+
 test("đăng xong mà không xác nhận được comment tổng kết thì lỗi (kiểm tra cuối)", async () => {
   await assert.rejects(go(new FakeGithub({ dropSummary: true })), /Không xác nhận được/);
 });
@@ -185,6 +206,35 @@ test("Github client: phân trang đến khi hết", async () => {
   });
   assert.equal((await gh.listIssueComments(1)).length, 103);
   assert.equal(calls, 2);
+});
+
+test("Github client: PR quá 300 file (406) thì dựng diff từ /files cho parseDiff", async () => {
+  const { parseDiff } = await import("./diff.mjs");
+  const files = [
+    { filename: "Svc.java", status: "modified", patch: "@@ -1,2 +1,3 @@\n class Svc {\n+  repo.save(x);\n }" },
+    { filename: "Old.java", status: "removed", patch: "@@ -1 +0,0 @@\n-x" },
+    { filename: "logo.png", status: "added" }, // nhị phân, không có patch
+    { filename: "docs/a b.md", status: "renamed", previous_filename: "docs/x.md", patch: "@@ -4 +4 @@\n-cũ\n+mới\n\\ No newline at end of file" },
+  ];
+  const urls = [];
+  const gh = new Github({
+    token: "t", repo: "a/b",
+    fetchImpl: async (url, init) => {
+      urls.push(url);
+      if (init.headers.Accept.includes("diff")) return { ok: false, status: 406, json: async () => ({ message: "the diff exceeded the maximum number of files (300)" }) };
+      return { ok: true, status: 200, json: async () => files };
+    },
+  });
+  const diff = parseDiff(await gh.getDiff(7));
+  assert.deepEqual([...diff.keys()], ["Svc.java", "docs/a b.md"]);
+  assert.equal(diff.get("Svc.java").get(2), "  repo.save(x);");
+  assert.deepEqual([...diff.get("docs/a b.md")], [[4, "mới"]]);
+  assert.match(urls[1], /\/pulls\/7\/files\?per_page=100&page=1$/);
+});
+
+test("Github client: lỗi khác 406 của getDiff vẫn được ném ra", async () => {
+  const gh = new Github({ token: "t", repo: "a/b", fetchImpl: async () => ({ ok: false, status: 500, json: async () => ({ message: "boom" }) }) });
+  await assert.rejects(gh.getDiff(7), (e) => e.status === 500);
 });
 
 // ---- Vòng 2 qua toàn bộ luồng đăng ----
@@ -320,4 +370,12 @@ test("bỏ qua vì đã review commit này được xét trước kiểm tra s�
   await go(gh);
   const out = await go(gh, { expectRuns: 0 });
   assert.equal(out.skipped, true);
+});
+
+test("backtest vòng 2 đọc được kết quả khi chưa có comment và không cho đăng", async () => {
+  const gh = new FakeGithub();
+  const args = { round: 2, baseSha: "b".repeat(40), backtest: true };
+  await assert.rejects(go(gh, args), /chỉ hỗ trợ dry run/);
+  const preview = await go(gh, { ...args, dryRun: true });
+  assert.equal(preview.dryRun, true);
 });

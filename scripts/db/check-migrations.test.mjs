@@ -37,3 +37,10 @@ test("parseNameStatus đọc được đổi tên", () => {
   assert.deepEqual(parseNameStatus("M\ta.sql\nR100\tb.sql\tc.sql\n"),
     [{ status: "M", path: "a.sql" }, { status: "R", oldPath: "b.sql", path: "c.sql" }]);
 });
+
+test("hết ngoại lệ một lần sau khi gộp dev vào main: sửa V21 và thêm migration dưới base đều bị chặn", () => {
+  const base = ["V19__allow_in_progress_interactions.sql", "V20__password_reset_tokens.sql", "V21__teacher_login_security.sql"];
+  only(run({ baseFiles: base, currentFiles: base, changes: [{ status: "M", path: "x/V21__teacher_login_security.sql" }] }),
+    /V21__teacher_login_security.*bị sửa/);
+  only(run({ baseFiles: base, currentFiles: [...base, "V17__visual_cloze_image_mode.sql"] }), /V17__visual_cloze_image_mode.*> V21/);
+});

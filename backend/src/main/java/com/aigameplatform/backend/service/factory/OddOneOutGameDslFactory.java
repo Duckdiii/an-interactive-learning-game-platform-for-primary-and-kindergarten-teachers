@@ -17,8 +17,11 @@ import org.springframework.stereotype.Component;
 public class OddOneOutGameDslFactory extends
         AbstractGameDslFactory<OddOneOutAiOutput, OddOneOutAiQuestion, OddOneOutQuestionDsl, OddOneOutGameDsl> {
 
-    public OddOneOutGameDslFactory(RandomGenerator random, GameAssetCatalog assets) {
+    private final com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog;
+
+    public OddOneOutGameDslFactory(RandomGenerator random, GameAssetCatalog assets, com.aigameplatform.backend.service.media.NotoEmojiCatalog notoCatalog) {
         super(GameType.ODD_ONE_OUT, OddOneOutAiOutput.class, random, assets);
+        this.notoCatalog = notoCatalog;
     }
 
     @Override
@@ -47,5 +50,39 @@ public class OddOneOutGameDslFactory extends
     protected OddOneOutGameDsl assemble(
             GameMetadata metadata, GameplaySettings settings, List<OddOneOutQuestionDsl> questions) {
         return new OddOneOutGameDsl(schemaVersion(), supportedType(), metadata, settings, questions);
+    }
+
+    public OddOneOutGameDsl createImage(com.aigameplatform.backend.dto.dsl.ai.AiGameOutput output,
+            GameDslRequest request) {
+        if (!(output instanceof OddOneOutAiOutput odd)) throw new IllegalArgumentException("Odd IMAGE output required");
+        var catalog = notoCatalog;
+        var questions = new ArrayList<OddOneOutQuestionDsl>();
+        for (int number = 0; number < odd.questions().size(); number++) {
+            var source = odd.questions().get(number);
+            var order = ShuffleSupport.shuffledIndices(source.items().size(), random);
+            var items = new ArrayList<TextChoiceDsl>();
+            String oddId = null;
+            for (int pos = 0; pos < order.size(); pos++) {
+                int original = order.get(pos);
+                var asset = catalog.find(source.items().get(original))
+                        .orElseThrow(() -> new IllegalArgumentException("Unknown catalog asset"));
+                String id = Ids.positional(pos);
+                items.add(new TextChoiceDsl(id, asset.label(), asset.id(), asset.imageUrl()));
+                if (original == source.oddOneOutIndex()) oddId = id;
+            }
+            questions.add(new OddOneOutQuestionDsl(Ids.numbered("q", number),
+                    GameDefaults.timeLimitSeconds(GameType.ODD_ONE_OUT, request.gradeLevel()),
+                    GameDefaults.points(GameType.ODD_ONE_OUT), source.audioText(), null, null, null,
+                    items, oddId, source.questionText()));
+        }
+        String topic = request.topic().strip();
+        String title = topic.codePointCount(0, topic.length()) <= 100 ? topic
+                : topic.substring(0, topic.offsetByCodePoints(0, 100)).strip();
+        String limitedTopic = topic.codePointCount(0, topic.length()) <= 200 ? topic
+                : topic.substring(0, topic.offsetByCodePoints(0, 200)).strip();
+        return new OddOneOutGameDsl("1.1.0", GameType.ODD_ONE_OUT,
+                com.aigameplatform.backend.entity.enums.OddOneOutMode.IMAGE,
+                new GameMetadata(title, request.subject(), request.gradeLevel(), limitedTopic),
+                new GameplaySettings(GameDefaults.hitboxScale(request.gradeLevel())), questions);
     }
 }

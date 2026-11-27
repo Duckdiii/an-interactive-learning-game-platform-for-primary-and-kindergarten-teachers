@@ -150,4 +150,4 @@ flowchart LR
 
 ## 9. Tài liệu Nghiên cứu Gốc & Thực nghiệm
 - [[Đồ họa game|Toàn văn nghiên cứu Đồ họa game giáo dục]]
-- [[experiments/results/t10-bee-garden/README|Thực nghiệm Đồ họa Vườn hoa của ong (T10)]]
+- Thực nghiệm đồ họa Vườn hoa của ong (T10) được lưu trong bộ tài liệu TLCN/KLTN, tại mục experiments → results → t10-bee-garden.

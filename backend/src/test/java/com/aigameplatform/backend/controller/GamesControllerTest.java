@@ -46,13 +46,15 @@ class GamesControllerTest {
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     @Mock private GameService games;
+    @Mock private com.aigameplatform.backend.service.GamePublicationService publication;
+    @Mock private com.aigameplatform.backend.service.game.ReviewSeedService reviewSeed;
     private MockMvc mvc;
 
     @BeforeEach
     void setUp() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
-        mvc = MockMvcBuilders.standaloneSetup(new GamesController(games))
+        mvc = MockMvcBuilders.standaloneSetup(new GamesController(games, publication, reviewSeed))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setValidator(validator)
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver()).build();
@@ -83,12 +85,46 @@ class GamesControllerTest {
     }
 
     @Test
+    void generateWithReviewFromPassesTheEnrichedRequestToTheGameService() throws Exception {
+        var enriched = new GenerateGameRequest(Subject.MATH, com.aigameplatform.backend.entity.enums.GradeLevel.GRADE_1,
+                "Ôn tập\n\n[Dữ liệu kết quả lớp]", null, GameType.QUIZ, null);
+        when(reviewSeed.withReviewContext(any(), eq("teacher-1"))).thenReturn(enriched);
+        when(games.generate(eq("teacher-1"), any())).thenReturn(MAPPER.createObjectNode().put("gameId", "g"));
+
+        mvc.perform(post("/api/games/generate").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"subject\":\"MATH\",\"gradeLevel\":\"GRADE_1\",\"gameType\":\"QUIZ\","
+                                + "\"reviewFrom\":{\"gameId\":\"old\",\"questionIds\":[\"q4\"]}}"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<GenerateGameRequest> sent = ArgumentCaptor.forClass(GenerateGameRequest.class);
+        verify(games).generate(eq("teacher-1"), sent.capture());
+        org.assertj.core.api.Assertions.assertThat(sent.getValue()).isSameAs(enriched);
+    }
+
+    @Test
+    void generateWithEmptyReviewQuestionIdsIs400() throws Exception {
+        mvc.perform(post("/api/games/generate").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"subject\":\"MATH\",\"gradeLevel\":\"GRADE_1\",\"idea\":\"Ôn tập phép cộng\","
+                                + "\"reviewFrom\":{\"gameId\":\"old\",\"questionIds\":[]}}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void generateWithoutSubjectIs400() throws Exception {
         mvc.perform(post("/api/games/generate").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"gradeLevel\":\"GRADE_1\",\"idea\":\"Bé hứng táo số chẵn\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void generateWithClassroomButWithoutGradeReportsTheMissingField() throws Exception {
+        mvc.perform(post("/api/games/generate").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"subject\":\"MATH\",\"classroomId\":\"c1\",\"randomTopic\":true}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.details.gradeLevel").value("Vui lòng chọn khối lớp"));
+        org.mockito.Mockito.verifyNoInteractions(games);
     }
 
     @Test

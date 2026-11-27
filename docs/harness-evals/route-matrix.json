@@ -1,14 +1,24 @@
 [
   {"key":"dashboard","path":"/dashboard","state":"mixed","checks":["frontend/e2e/teacher-flow.spec.ts"],"limit":"Creation entry covered; dashboard statistics are not certified."},
   {"key":"createGame","path":"/games/new","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts"],"limit":"Real HTTP, synthetic AI; educational quality not certified."},
-  {"key":"results","path":"/results","state":"mock","checks":["frontend/src/player/api/mockPlayerApi.test.ts"],"limit":"Mock unit boundary only; no live results backend or UI acceptance."},
+  {"key":"results","path":"/results","state":"mock","checks":["frontend/src/pages/ResultsPage.test.tsx"],"limit":"Results UI tested with mocked data. Live acceptance is outside this evidence."},
   {"key":"login","path":"/login","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts"]},
   {"key":"register","path":"/register","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts"]},
   {"key":"workspace","path":"/workspace","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts"],"limit":"Listing/reopen only; not every management action."},
   {"key":"workspaceEditor","path":"/workspace/editor","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts","frontend/e2e/renderer-gameplay.spec.ts","frontend/e2e/cpf-gameplay.spec.ts"],"limit":"Real game persistence/fake AI; preview grading local; final runtime results in verification report."},
-  {"key":"play","path":"/play/:shareCode","state":"mock","checks":["frontend/src/player/play/PlayFlow.test.tsx","frontend/e2e/renderer-gameplay.spec.ts"],"limit":"Browser gameplay uses mock sessions/grading; real shared game/session backend planned."},
+  {"key":"play","path":"/play/:shareCode","state":"mock","checks":["frontend/src/player/play/PlayFlow.test.tsx","frontend/e2e/renderer-gameplay.spec.ts"],"limit":"Browser gameplay uses mock sessions/grading; real shared-game runtime is outside this evidence."},
   {"key":"join","path":"/join","state":"mock","checks":["frontend/src/player/api/mockPlayerApi.test.ts"],"limit":"No live room acceptance."},
-  {"key":"roomJoin","path":"/join/:pin","state":"mock","checks":["frontend/src/player/api/mockPlayerApi.test.ts"],"limit":"No live room backend."},
+  {"key":"roomJoin","path":"/join/:pin","state":"mixed","checks":["frontend/src/player/pages/RoomJoinPage.test.tsx","frontend/e2e/teacher-flow.spec.ts"],"limit":"Mock unit cases and real HTTP Live Arena guest scenarios with synthetic data."},
   {"key":"present","path":"/present/:gameId","state":"mixed","checks":["frontend/src/player/play/PlayFlow.test.tsx"],"limit":"Runtime unit coverage only; presentation UI not live-certified."},
-  {"key":"roomHost","path":"/rooms/host/:gameId","state":"mock","checks":["frontend/src/player/api/mockPlayerApi.test.ts"],"limit":"Same-machine simulation is not a server-backed classroom."}
+  {"key":"roomHost","path":"/rooms/host/:gameId","state":"mixed","checks":["frontend/src/player/pages/RoomHostPage.test.tsx","frontend/e2e/teacher-flow.spec.ts"],"limit":"Mock unit cases and real HTTP Live Arena host scenarios with synthetic data."},
+  {"key":"classrooms","path":"/classrooms","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"teacherProfile","path":"/profile","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"forgotPassword","path":"/forgot-password","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"resetPassword","path":"/reset-password","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"liveArenaPresentation","path":"/presentation/:sessionId","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"liveArenaTeacherControl","path":"/rooms/:sessionId/control","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"adminDashboard","path":"/admin/dashboard","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"adminTeachers","path":"/admin/teachers","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"adminAuditLogs","path":"/admin/audit-logs","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."},
+  {"key":"adminAiConfig","path":"/admin/ai-config","state":"unverified","checks":[],"limit":"Route registered in dev. Behaviour has not been verified by this harness."}
 ]

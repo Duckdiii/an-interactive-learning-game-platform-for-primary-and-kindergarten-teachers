@@ -1,16 +1,26 @@
+import axiosInstance from '../api/axiosInstance'
 import { isMock } from '../config/mockMode'
+import type { ApiSuccessResponse } from '../types/api'
+import { parseApiError } from '../utils/apiError'
 import { mockCheckSafety } from './mock/safetyCheck'
 import type { SafetyVerdict } from './mock/safetyCheck'
 import { runMock } from './mock/mockRuntime'
 
 export type { SafetyVerdict }
 
-/**
- * Kiểm tra sớm từ ngữ giáo viên vừa sửa (UC-05 2a). Nhóm `editor` đang mô phỏng thì dùng bộ lọc giả lập; khi dùng API thật
- * thì KHÔNG có điểm cuối kiểm tra riêng, kiểm duyệt do Backend làm khi lưu (lỗi `UNSAFE_CONTENT`), nên ở đây coi là an toàn.
- */
+/** Kiểm duyệt chữ trước khi đưa vào bản nháp (UC-05 2a). */
 export async function checkTextSafety(texts: ReadonlyArray<string>): Promise<SafetyVerdict> {
-  if (!isMock('editor')) return { safe: true }
+  if (isMock('editor')) return runMock(() => mockCheckSafety(texts))
+  if (texts.every((text) => text.trim() === '')) return { safe: true }
 
-  return runMock(() => mockCheckSafety(texts))
+  try {
+    const { data } = await axiosInstance.post<ApiSuccessResponse<SafetyVerdict>>('/games/validate-text', { texts })
+    if (data.success === true && data.data?.safe === true) return { safe: true }
+
+    throw new Error('Phản hồi kiểm duyệt không hợp lệ')
+  } catch (error) {
+    if (parseApiError(error, '').code === 'UNSAFE_CONTENT') return { safe: false }
+
+    throw error
+  }
 }

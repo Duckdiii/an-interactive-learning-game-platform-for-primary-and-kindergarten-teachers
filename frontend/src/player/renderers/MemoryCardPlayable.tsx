@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { playSound } from '../../games/common/sound'
+import PlayButton from '../components/PlayButton'
 import type { PairSide } from '../../types/game-dsl.types'
 import { cardStyleOf } from '../../utils/presentation'
 import { usePresentation } from '../theme/PresentationContext'
@@ -22,14 +23,15 @@ interface CardItem {
  * - Mặt ngửa là hình vẽ Vector SVG ngộ nghĩnh kèm chữ số/tên gọi to rõ
  * - Tự động phát âm thanh khi tìm đúng cặp và khi hoàn thành
  */
-export default function MemoryCardPlayable({ question, profile, onSubmit }: PlayableRendererProps<'MEMORY_CARD'>) {
+export default function MemoryCardPlayable({ question, profile, onSubmit, answerDisabled }: PlayableRendererProps<'MEMORY_CARD'>) {
   const [flippedCardIds, setFlippedCardIds] = useState<string[]>([])
   // Thẻ đang úp lại: giữ nội dung tới khi xoay xong (khớp thời gian .flip-inner) để trẻ thấy hình đang úp xuống.
   const [hidingCardIds, setHidingCardIds] = useState<string[]>([])
   const [matchedPairIds, setMatchedPairIds] = useState<string[]>([])
   const [flips, setFlips] = useState(0)
+  const [wrongPairs, setWrongPairs] = useState<[string, string][]>([])
   const [isLocked, setIsLocked] = useState(false)
-  const [isCompleted, setIsCompleted] = useState(false)
+  const [submitFailed, setSubmitFailed] = useState(false)
   const cardStyle = cardStyleOf(usePresentation()?.world)
 
   // Nhân đôi các cặp thành 2 thẻ và xáo bài theo id câu hỏi
@@ -61,8 +63,18 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
     return 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6'
   }, [cards.length])
 
+  const submitAnswer = async (matched: string[], flipCount: number) => {
+    setSubmitFailed(false)
+    try {
+      const result = await onSubmit({ matchedPairIds: matched, flips: flipCount, wrongPairs })
+      if (result.isCorrect) playSound('/sounds/correct.wav')
+    } catch {
+      setSubmitFailed(true)
+    }
+  }
+
   const handleCardClick = (card: CardItem) => {
-    if (isLocked || isCompleted) return
+    if (answerDisabled || isLocked) return
     if (matchedPairIds.includes(card.pairId)) return
     if (flippedCardIds.includes(card.id)) return
 
@@ -89,12 +101,14 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
         setFlippedCardIds([])
 
         if (nextMatched.length === question.pairs.length) {
-          setIsCompleted(true)
-          playSound('/sounds/correct.wav')
-          void onSubmit({ matchedPairIds: nextMatched, flips: nextFlips })
+          void submitAnswer(nextMatched, nextFlips)
         }
       } else {
         // Chưa khớp, đợi 800ms để bé nhìn rồi úp lại
+        const pair: [string, string] = firstCard.pairId < card.pairId
+          ? [firstCard.pairId, card.pairId]
+          : [card.pairId, firstCard.pairId]
+        setWrongPairs((current) => current.some(([a, b]) => a === pair[0] && b === pair[1]) ? current : [...current, pair])
         setIsLocked(true)
         setTimeout(() => {
           setFlippedCardIds([])
@@ -129,7 +143,7 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
             <button
               key={card.id}
               type="button"
-              disabled={isMatched || isLocked}
+              disabled={answerDisabled || isMatched || isLocked}
               onClick={() => handleCardClick(card)}
               style={{
                 minWidth: Math.min(profile.tokens.minTouch, 72),
@@ -153,6 +167,11 @@ export default function MemoryCardPlayable({ question, profile, onSubmit }: Play
           )
         })}
       </div>
+      {submitFailed && !answerDisabled ? (
+        <PlayButton type="button" className="mt-4" onClick={() => void submitAnswer(matchedPairIds, flips)}>
+          Gửi lại
+        </PlayButton>
+      ) : null}
     </div>
   )
 }

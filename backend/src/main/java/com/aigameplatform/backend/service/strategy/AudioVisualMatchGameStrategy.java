@@ -27,6 +27,7 @@ public class AudioVisualMatchGameStrategy
                 không khẳng định đã có tệp âm thanh hay hình ảnh. Không biến cơ chế đối chiếu thành bộ câu hỏi trắc nghiệm chữ.
                 Lựa chọn là từ phải là từ tiếng Việt có thật, đúng chính tả; không bịa từ vô nghĩa chỉ để có vần. Lựa chọn chỉ có chữ
                 (không có hình đúng nghĩa) thì visualPrompt viết đúng dạng "Thẻ chữ <từ>" (ví dụ "Thẻ chữ cân"), không thêm chữ khác.
+                Với môn ENGLISH, audioText phải bằng tiếng Anh, phù hợp hình đúng; ví dụ hình con mèo đọc là cat.
                 Chỉ trả JSON theo schema.
                 """);
     }

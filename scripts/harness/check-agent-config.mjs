@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
@@ -24,24 +25,24 @@ export function generatedAgent(name, source) {
     + match[2].trim() + "\n'''\n";
 }
 
-export function checkAgentConfig(root, write = false) {
+export function checkAgentConfig(root, write = false, outputRoot = root) {
   const errors = [];
   const sourceDir = join(root, '.claude/agents');
   if (!existsSync(sourceDir)) return ['Missing .claude/agents'];
-  if (write) mkdirSync(join(root, '.codex/agents'), { recursive: true });
-  const hooksPath = join(root, '.codex/hooks.json');
+  if (write) mkdirSync(join(outputRoot, '.codex/agents'), { recursive: true });
+  const hooksPath = join(outputRoot, '.codex/hooks.json');
   if (write) writeFileSync(hooksPath, JSON.stringify(codexHooks(), null, 2) + '\n');
   try {
     if (!isDeepStrictEqual(JSON.parse(readFileSync(hooksPath, 'utf8')), codexHooks())) errors.push('stale .codex/hooks.json');
   } catch { errors.push('Missing or invalid .codex/hooks.json'); }
-  const targetDir = join(root, '.codex/agents');
+  const targetDir = join(outputRoot, '.codex/agents');
   if (existsSync(targetDir)) for (const file of readdirSync(targetDir).filter(f => f.endsWith('.toml'))) {
     if (!existsSync(join(sourceDir, file.slice(0, -5) + '.md'))) errors.push(`Orphan adapter ${file}`);
   }
   for (const file of readdirSync(sourceDir).filter(f => f.endsWith('.md'))) {
     const source = readFileSync(join(sourceDir, file), 'utf8');
     const name = file.slice(0, -3);
-    const target = join(root, '.codex/agents', name + '.toml');
+    const target = join(targetDir, name + '.toml');
     const expected = generatedAgent(name, source);
     if (write) writeFileSync(target, expected);
     if (!existsSync(target)) errors.push(`Missing ${name}.toml`);
@@ -54,9 +55,21 @@ export function checkAgentConfig(root, write = false) {
   return errors;
 }
 
+export function verifyGeneratedAgentConfig(root) {
+  const output = mkdtempSync(join(tmpdir(), 'harness-agent-config-'));
+  try {
+    const errors = checkAgentConfig(root, true, output);
+    return errors.length ? errors : checkAgentConfig(root, false, output);
+  } finally {
+    rmSync(output, { recursive: true, force: true });
+  }
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-  const errors = checkAgentConfig(root, process.argv.includes('--write'));
+  const errors = process.argv.includes('--verify-generated')
+    ? verifyGeneratedAgentConfig(root)
+    : checkAgentConfig(root, process.argv.includes('--write'));
   errors.forEach(e => console.error(e));
   console.log(`Agent config: ${errors.length ? 'FAIL' : 'PASS'}`);
   process.exitCode = errors.length ? 1 : 0;

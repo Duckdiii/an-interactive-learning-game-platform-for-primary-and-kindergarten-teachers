@@ -5,8 +5,12 @@ import { safeHttpUrl } from '../utils/safeUrl'
 // phụ trách phần học sinh làm (xem docs/decisions.md), nên hiện liên kết chỉ để sao chép.
 
 /** Địa chỉ gốc, không có dấu "/" cuối. Biến trống hoặc không phải http(s) thì dùng chính địa chỉ đang mở ứng dụng. */
-export function studentAppBaseUrl(raw: unknown = import.meta.env.VITE_STUDENT_APP_BASE_URL, fallbackOrigin: string = window.location.origin) {
-  const configured = safeHttpUrl(typeof raw === 'string' ? raw : null)
+export function studentAppBaseUrl(
+  raw?: unknown,
+  fallbackOrigin: string = typeof window !== 'undefined' ? window.location.origin : '',
+) {
+  const envUrl = arguments.length === 0 ? import.meta.env.VITE_STUDENT_APP_BASE_URL : raw
+  const configured = safeHttpUrl(typeof envUrl === 'string' ? envUrl : null)
   const base = configured ?? safeHttpUrl(fallbackOrigin) ?? 'http://localhost'
 
   // Giữ phần đường dẫn nếu có (ví dụ https://truong.edu.vn/hoc-sinh), bỏ dấu "/" thừa ở cuối.

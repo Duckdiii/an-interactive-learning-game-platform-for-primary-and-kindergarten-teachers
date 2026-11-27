@@ -89,7 +89,7 @@ export function stepsFor(root, group, base) {
       ['feature-map', 'scripts/verify/check-feature-map.mjs', []],
       ['openapi', 'scripts/openapi/compare-endpoints.mjs', ['--strict']],
       ['config', 'scripts/hooks/check-config.mjs', ['--tracked']],
-      ['agents', 'scripts/harness/check-agent-config.mjs', []],
+      ['agents', 'scripts/harness/check-agent-config.mjs', ['--verify-generated']],
       ['agent-cases', 'scripts/harness/eval-agents.mjs', ['--validate']],
       ['agent-history', 'scripts/harness/eval-agents.mjs', ['--history', '--validate']],
       ['ai-log', 'scripts/ai-log/check-ai-usage-log.mjs', []],

@@ -1,10 +1,10 @@
 import type { UploadedMedia, UploadOptions } from '../../api/mediaApi'
+import { viText } from '../../constants/viText'
 import type { MediaKind } from '../../utils/mediaFile'
 import { mockApiError } from './mockErrors'
 import { mockNetworkError, mockTimeoutError, mockTotalDelayMs, mockWait, getMockScenario } from './mockRuntime'
 
-// Dịch vụ giả lập cho nhóm `media` (cờ VITE_USE_MOCK): tải tệp, gợi ý ảnh, tạo giọng đọc. Backend chưa có các điểm cuối này nên mọi kết quả
-// ở đây là DỮ LIỆU MÔ PHỎNG (giao diện luôn gắn nhãn). Không có gì được gửi đi đâu cả: tệp chỉ nằm trong bộ nhớ của tab.
+// Nhóm `media` (cờ VITE_USE_MOCK) giả lập tải tệp, gợi ý ảnh và tạo giọng đọc. Tệp giả lập chỉ nằm trong bộ nhớ của tab.
 
 // Số bước tiến trình giả lập của một lần tải; tải tệp lâu hơn lời gọi thường nên tổng thời gian gấp vài lần độ trễ chung.
 const UPLOAD_STEPS = 5
@@ -17,7 +17,7 @@ const UPLOAD_DURATION_FACTOR = 4
 export const MOCK_UNSAFE_FILENAME = /unsafe|khong-an-toan|nsfw/i
 
 export const unsafeContentError = () =>
-  mockApiError(422, 'UNSAFE_CONTENT', 'Tệp tải lên không đáp ứng tiêu chuẩn an toàn nội dung dành cho môi trường giáo dục.')
+  mockApiError(422, 'UNSAFE_CONTENT', viText.editor.media.unsafeFile)
 
 export async function mockUploadMedia(file: File, kind: MediaKind, options: UploadOptions = {}): Promise<UploadedMedia> {
   const stepMs = (mockTotalDelayMs() * UPLOAD_DURATION_FACTOR) / UPLOAD_STEPS

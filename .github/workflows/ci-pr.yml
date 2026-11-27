@@ -115,10 +115,10 @@ jobs:
       - run: node scripts/verify/check-feature-map.mjs
       # Controller và openapi.yaml lệch nhau (endpoint thiếu trong spec, x-status sai) thì đỏ: spec trước, code sau.
       - run: node scripts/openapi/compare-endpoints.mjs --strict
-      # Mọi test script do git theo dõi (test mới tự được chạy; trước đây danh sách viết tay chỉ chạy 5/22 file).
-      - run: >-
-          node --test $(git ls-files 'scripts/*.test.mjs' '.claude/hooks/*.test.mjs')
-      - run: node scripts/harness/check-agent-config.mjs
+      - run: node scripts/wiki/check-links.mjs
+      # Test mới được Git theo dõi tự tham gia CI.
+      - run: node --test $(git ls-files 'scripts/*.test.mjs' '.claude/hooks/*.test.mjs')
+      - run: node scripts/harness/check-agent-config.mjs --verify-generated
 
   secret-scan:
     name: Secret scan (Gitleaks)

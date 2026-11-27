@@ -3,6 +3,24 @@ spring:
     import: optional:file:./.env[.properties]
   application:
     name: aigame-backend
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
+  # SMTP cho thư đặt lại mật khẩu; chỉ dùng khi app.mail.enabled=true (MAIL_ENABLED).
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      # Relay SMTP nội bộ không cần đăng nhập thì đặt MAIL_SMTP_AUTH=false.
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
 
   datasource:
     # Supabase (managed PostgreSQL) — use Session Pooler or Direct Connection.
@@ -43,9 +61,17 @@ spring:
     # baseline-version 0 makes sure V1 and V2 are still applied.
     baseline-on-migrate: true
     baseline-version: 0
+    # Mặc định của Flyway là *:future. DB dùng chung đã áp V12–V16 của nhánh feature chưa merge (nay là V23–V27),
+    # nên ở máy cá nhân đặt FLYWAY_IGNORE_MIGRATION_PATTERNS=*:missing,*:future (KNOWN-GAPS #26).
+    ignore-migration-patterns: ${FLYWAY_IGNORE_MIGRATION_PATTERNS:*:future}
 
 server:
   port: ${SERVER_PORT:8080}
+
+media:
+  storage:
+    local-dir: ${MEDIA_STORAGE_LOCAL_DIR:target/media-storage}
+    base-url: ${MEDIA_STORAGE_BASE_URL:http://localhost:${server.port}/media}
 
 # Swagger UI (/swagger-ui.html) và spec sinh từ controller (/v3/api-docs). Mặc định bật để dev xem;
 # môi trường triển khai thật đặt SWAGGER_ENABLED=false.
@@ -57,13 +83,41 @@ springdoc:
     operations-sorter: method
 
 app:
+  admin:
+    email: ${APP_ADMIN_EMAIL:admin@aigame.local}
+    # Không có mặc định. Trống thì không tạo tài khoản admin; profile prod bắt buộc (application-prod.yml).
+    password: ${APP_ADMIN_PASSWORD:}
+  pexels:
+    api-key: ${PEXELS_API_KEY:}
   cors:
-    allowed-origins: http://localhost:5173
+    # Nhiều origin thì ngăn bằng dấu phẩy. Profile prod bắt buộc CORS_ALLOWED_ORIGINS (application-prod.yml).
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  player:
+    # Origin của trình duyệt, dùng để tải ảnh cảnh (SceneImageLoader) và dựng link chia sẻ gửi phụ huynh.
+    # Profile prod bắt buộc PLAYER_ORIGIN + PLAYER_SHARE_BASE_URL, không có mặc định localhost.
+    browser-origin: ${PLAYER_ORIGIN:http://localhost:5173}
+    share-base-url: ${PLAYER_SHARE_BASE_URL:http://localhost:5173/play}
+  narration:
+    feedback-cache-version: ${TTS_FEEDBACK_CACHE_VERSION:1}
+    viettel:
+      token: ${VIETTEL_TTS_TOKEN:}
+    elevenlabs:
+      api-key: ${ELEVENLABS_API_KEY:}
+      voice-id: ${ELEVENLABS_VOICE_ID:JBFqnCBsd6RMkjVDRZzb}
+      model-id: ${ELEVENLABS_MODEL_ID:eleven_flash_v2_5}
+      connect-timeout-seconds: ${ELEVENLABS_CONNECT_TIMEOUT_SECONDS:5}
+      read-timeout-seconds: ${ELEVENLABS_READ_TIMEOUT_SECONDS:25}
+    storage:
+      url: ${SUPABASE_URL:}
+      service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
+      bucket: ${TTS_STORAGE_BUCKET:game-narration}
   jwt:
     # HS256 signing key, at least 32 bytes. Provide it via the JWT_SECRET environment variable.
     secret: ${JWT_SECRET}
     access-token-ttl-minutes: 15
     refresh-token-ttl-hours: 24
+    # "Ghi nhớ đăng nhập" (UC-15 luồng 3a): refresh token và cookie sống 30 ngày.
+    remember-me-refresh-token-ttl-days: 30
   auth:
     refresh-cookie:
       name: refresh_token
@@ -71,6 +125,14 @@ app:
       same-site: Strict
       # Secure cookies need HTTPS in production; browsers still accept them on http://localhost.
       secure: ${COOKIE_SECURE:true}
+    password-reset:
+      # Trang Frontend nhận ?token=...; profile prod bắt buộc PASSWORD_RESET_URL.
+      url: ${PASSWORD_RESET_URL:http://localhost:5173/reset-password}
+  mail:
+    # false (mặc định khi chạy ở máy): không gửi thư, in liên kết đặt lại mật khẩu ra log.
+    # Profile prod luôn bật (application-prod.yml).
+    enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:no-reply@localhost}
   assets:
     # Thử nghiệm: chữ nói tới hình A mà gắn hình B thì báo lỗi Layer 2 để AI sinh lại (retrieval + luật).
     meaning-check:
@@ -101,6 +163,11 @@ app:
       model: ${GEMINI_MODEL:gemini-3-flash-preview}
       game-generation:
         enabled: ${GEMINI_GAME_GENERATION_ENABLED:false}
+      lesson-preparation:
+        timeout-seconds: ${LESSON_INTENT_TIMEOUT_SECONDS:30}
+  lesson:
+    parser-timeout-ms: ${LESSON_PARSER_TIMEOUT_MS:5000}
+    parser-workers: ${LESSON_PARSER_WORKERS:2}
   generation:
     # Rà chính tả bằng AI sau khi sinh game: thêm tới 2 lần gọi Gemini mỗi game (tốn hạn mức theo ngày của gói Gemini), nên tắt mặc định.
     wording-review:

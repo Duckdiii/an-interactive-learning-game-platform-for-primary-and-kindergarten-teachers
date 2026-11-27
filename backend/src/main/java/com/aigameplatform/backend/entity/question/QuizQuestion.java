@@ -23,4 +23,9 @@ public class QuizQuestion extends QuestionGame {
     private List<String> options = new ArrayList<>();
 
     private int correctIndex;
+
+    @Override
+    public String insightLabel() {
+        return labelOrDefault(text);
+    }
 }

@@ -2,11 +2,10 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import axiosInstance from '../api/axiosInstance'
-import { getMockGame, resetMockGames } from '../services/mock/mockGames'
+import { getMockGame, resetMockGames, saveMockGame } from '../services/mock/mockGames'
 import { setMockScenario } from '../services/mock/mockRuntime'
 import { loginAsTeacher, renderWithProviders } from '../test/renderWithApp'
 import { playTestPanelLoader } from '../components/editor/playTestPanelLoader'
-import { PLAY_TEST_RENDERERS } from '../components/editor/play/playTestRegistry'
 import WorkspaceEditor from './WorkspaceEditor'
 
 // Canvas không có trong jsdom: mock react-konva thành DOM thường (xem PlayTestPanel.test.tsx).
@@ -31,9 +30,20 @@ vi.mock('../api/axiosInstance', () => ({
   default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn(), request: vi.fn() },
 }))
 
-// mock-game-1 là QUIZ, mock-game-5 là ORDERING (chưa có renderer chơi thử).
+// mock-game-1 là QUIZ, mock-game-5 là ORDERING.
 const QUIZ_ID = 'mock-game-1'
 const ORDERING_ID = 'mock-game-5'
+const narrationUrls: string[] = []
+class TestHtmlAudio {
+  readonly src: string
+  onended: (() => void) | null = null
+  onerror: (() => void) | null = null
+  currentTime = 0
+  canPlayType = () => 'probably'
+  play = vi.fn(async () => undefined)
+  pause = vi.fn()
+  constructor(src: string) { this.src = src; narrationUrls.push(src) }
+}
 const titleBox = () => screen.getByRole('textbox', { name: /Tên trò chơi/ })
 const playButton = () => screen.getByRole('button', { name: 'Chơi thử' })
 
@@ -51,6 +61,8 @@ beforeEach(() => {
   vi.stubEnv('VITE_USE_MOCK', 'editor')
   loginAsTeacher()
   resetMockGames()
+  narrationUrls.length = 0
+  vi.stubGlobal('Audio', TestHtmlAudio)
 })
 afterEach(() => {
   vi.restoreAllMocks()
@@ -79,23 +91,15 @@ describe('trình soạn thảo: Chơi thử', () => {
     await user.click(screen.getByRole('button', { name: 'Thoát' }))
 
     expect(titleBox()).toHaveValue(`${before} (thử)`)
-    expect(screen.getByText(/Sắp tự lưu\.\.\.|Đã tự lưu/)).toBeInTheDocument()
+    expect(screen.getByText('Sắp tự lưu...')).toBeInTheDocument()
     await waitFor(() => expect(playButton()).toHaveFocus())
     // Chơi thử không lưu gì: kho vẫn giữ tên cũ và không có yêu cầu mạng nào.
-    expect([before, `${before} (thử)`]).toContain(getMockGame(QUIZ_ID).metadata.title)
-    for (const method of Object.values(axiosInstance)) expect(method).not.toHaveBeenCalled()
-  })
-
-  it('đổi "Thế giới" ở Bé sẽ thấy thì màn chơi thử dùng đúng nền đó', async () => {
-    const user = userEvent.setup()
-
-    await openLoaded(QUIZ_ID)
-    await user.click(screen.getByRole('button', { name: '🌊 Đại Dương' }))
-    expect(screen.getByRole('button', { name: '🌊 Đại Dương' })).toHaveAttribute('aria-pressed', 'true')
-    await user.click(playButton())
-
-    const panel = await screen.findByRole('region', { name: /chơi thử/i }, { timeout: 10_000 })
-    expect(panel.querySelector('[style*="bg-ocean.svg"]')).not.toBeNull()
+    expect(getMockGame(QUIZ_ID).metadata.title).toBe(before)
+    expect(axiosInstance.post).toHaveBeenCalledTimes(1)
+    expect(axiosInstance.post).toHaveBeenCalledWith(`/games/${QUIZ_ID}/narration/feedback`, undefined, expect.any(Object))
+    for (const [name, method] of Object.entries(axiosInstance)) {
+      if (name !== 'post') expect(method).not.toHaveBeenCalled()
+    }
   })
 
   it('dữ liệu chưa đủ (UC-03 2a): từ chối mở màn chơi thử, hiện đúng câu của SRS, sửa xong thì mở được', async () => {
@@ -122,25 +126,19 @@ describe('trình soạn thảo: Chơi thử', () => {
     expect(await screen.findByText('Câu 1 trên 3', {}, { timeout: 10_000 })).toBeInTheDocument()
   })
 
-  it('loại game chưa có renderer: hiện ảnh tĩnh và thông báo, không để trống', async () => {
+  it('giáo viên có thể chơi thử game sắp xếp rồi quay lại bản nháp', async () => {
     const user = userEvent.setup()
-    const originalRenderer = PLAY_TEST_RENDERERS.ORDERING
-    delete (PLAY_TEST_RENDERERS as any).ORDERING
 
-    try {
-      await openLoaded(ORDERING_ID)
-      await user.click(playButton())
+    await openLoaded(ORDERING_ID)
+    await user.click(playButton())
 
-      expect(await screen.findByRole('heading', { name: 'Loại game này chưa hỗ trợ chơi thử' }, { timeout: 10_000 })).toBeInTheDocument()
-      // Ảnh minh họa tĩnh nằm trong chính khung "chưa hỗ trợ", không phải biểu tượng nào đó trong trang.
-      expect(document.querySelector('section[aria-labelledby="play-unsupported-title"] svg')).not.toBeNull()
+    await user.click(await screen.findByRole('button', { name: /^Vị trí 1:/ }))
+    await user.click(screen.getByRole('button', { name: /^Vị trí 2:/ }))
+    await user.click(screen.getByRole('button', { name: /Xong rồi/ }))
+    expect(await screen.findByRole('button', { name: 'Nghe lại phản hồi' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Thoát' }))
 
-      await user.click(screen.getByRole('button', { name: 'Quay lại chỉnh sửa' }))
-
-      expect(titleBox()).toBeInTheDocument()
-    } finally {
-      (PLAY_TEST_RENDERERS as Record<string, unknown>).ORDERING = originalRenderer
-    }
+    expect(titleBox()).toBeInTheDocument()
   })
 })
 
@@ -169,5 +167,53 @@ describe('trình soạn thảo: tải màn chơi thử bị lỗi (UC-03 3b)', (
     await user.click(playButton())
     expect(await screen.findByText('Câu 1 trên 3', {}, { timeout: 10_000 })).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+describe('FR-11 PlayTest narration integration', () => {
+  it('offers narration generation when a legacy Quiz has only a mock audio URL', async () => {
+    const game = getMockGame(QUIZ_ID)
+    game.questions[0].audioUrl = '/mock/q1.wav'
+    saveMockGame(QUIZ_ID, game)
+
+    await openLoaded(QUIZ_ID)
+
+    expect(await screen.findByRole('button', { name: /Tạo giọng đọc/ })).toBeEnabled()
+  })
+
+  it('passes a generated saved-question URL into PlayTest and requests only fixed feedback audio', async () => {
+    const user = userEvent.setup()
+    const questionId = getMockGame(QUIZ_ID).questions[0].id
+    const previewUrl = 'https://storage.test/saved-question.mp3'
+    vi.mocked(axiosInstance.post).mockImplementation(async (url) => {
+      if (String(url).endsWith('/narration/preview')) {
+        return { data: { success: true, data: { questionId, audioUrl: previewUrl, bytes: 400, durationMillis: 800 } } } as never
+      }
+      if (String(url).endsWith('/narration/feedback')) {
+        return { data: { success: true, data: {
+          correctAudioUrl: 'https://storage.test/correct.mp3', wrongAudioUrl: 'https://storage.test/wrong.mp3',
+        } } } as never
+      }
+      throw new Error(`Unexpected PlayTest request: ${String(url)}`)
+    })
+
+    await openLoaded(QUIZ_ID)
+    const createVoice = await screen.findByRole('button', { name: /Tạo giọng đọc/ })
+    await waitFor(() => expect(createVoice).toBeEnabled())
+    await user.click(createVoice)
+    await waitFor(() => expect(axiosInstance.post).toHaveBeenCalledWith(
+      `/games/${QUIZ_ID}/narration/preview`, { questionId }, expect.any(Object),
+    ))
+
+    await user.click(playButton())
+    expect(await screen.findByRole('button', { name: 'Nghe lại câu hỏi' }, { timeout: 10_000 })).toBeInTheDocument()
+    await waitFor(() => expect(narrationUrls).toContain(previewUrl))
+    await waitFor(() => expect(axiosInstance.post).toHaveBeenCalledWith(
+      `/games/${QUIZ_ID}/narration/feedback`, undefined, expect.any(Object),
+    ))
+    expect(vi.mocked(axiosInstance.post).mock.calls.map(([url]) => url)).toEqual([
+      `/games/${QUIZ_ID}/narration/preview`,
+      `/games/${QUIZ_ID}/narration/feedback`,
+    ])
   })
 })

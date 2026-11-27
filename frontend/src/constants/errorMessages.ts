@@ -15,6 +15,10 @@ export const ERROR_MESSAGES = new Map<string, string>([
     'Tệp quá lớn hoặc sai định dạng. Hãy chọn tệp khác.',
   ],
   [
+    'LESSON_CLARIFICATION_REQUIRED',
+    'Chưa xác định được mục tiêu học tập rõ ràng từ giáo án. Hãy bổ sung phạm vi bài học rồi thử lại.',
+  ],
+  [
     'UNSAFE_CONTENT',
     'Nội dung chưa phù hợp với học sinh nhỏ tuổi. Hãy đổi chủ đề hoặc cách diễn đạt rồi thử lại.',
   ],
@@ -25,10 +29,16 @@ export const ERROR_MESSAGES = new Map<string, string>([
     'Nội dung vừa được thay đổi ở nơi khác. Hãy tải lại trang rồi thử lại.',
   ],
   ['RATE_LIMITED', 'Bạn thao tác quá nhanh. Hãy chờ một lúc rồi thử lại.'],
-  ['ACCOUNT_LOCKED', 'Tài khoản này đang bị khóa. Hãy liên hệ quản trị viên.'],
+  ['SERVICE_UNAVAILABLE', 'Tính năng tạo game tạm dừng do hệ thống đã chạm trần chi phí. Hãy thử lại sau hoặc liên hệ quản trị viên.'],
+  ['LESSON_PROCESSING_UNAVAILABLE', 'Chưa đọc hoặc xử lý được giáo án lúc này. Hãy thử lại sau ít phút.'],
+  ['INPUT_SAFETY_UNAVAILABLE', 'Chưa kiểm tra được độ an toàn của nội dung. Hãy thử lại sau ít phút.'],
+  [
+    'ACCOUNT_LOCKED',
+    'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.',
+  ],
   [
     'LOGIN_TEMPORARILY_LOCKED',
-    'Bạn đã nhập sai quá nhiều lần. Hãy thử đăng nhập lại sau 15 phút.',
+    'Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau 15 phút.',
   ],
   [
     'CONTENT_NOT_AGE_APPROPRIATE',

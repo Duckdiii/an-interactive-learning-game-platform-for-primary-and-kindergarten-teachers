@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type { GameType } from '../../types/game-dsl.types'
+import type { GameType, Subject } from '../../types/game-dsl.types'
 import type { AnswerPayload, AnswerResult, StudentQuestionByType } from '../../types/game-student.types'
 import type { UiProfile } from '../profile/types'
 import AudioVisualMatchPlayable from './AudioVisualMatchPlayable'
@@ -20,7 +20,10 @@ export type { PlayableRenderer, PlayableRendererProps } from './types'
 export type AnyPlayableRenderer = ComponentType<{
   question: StudentQuestionByType[GameType]
   profile: UiProfile
+  subject?: Subject
   onSubmit: (answer: AnswerPayload) => Promise<AnswerResult>
+  playAudio?: () => void
+  answerDisabled?: boolean
 }>
 
 // Điểm xóa kiểu duy nhất: mỗi renderer được ràng buộc đúng với loại game của nó khi đăng ký.
@@ -29,6 +32,7 @@ const define = <T extends GameType>(renderer: PlayableRenderer<T>) => renderer a
 // Đầy đủ 10/10 cơ chế game tương tác dành cho mầm non & K-5
 const RENDERERS: ReadonlyMap<GameType, AnyPlayableRenderer> = new Map([
   ['QUIZ', define<'QUIZ'>(QuizPlayable)],
+  ['AUDIO_VISUAL_MATCH', define<'AUDIO_VISUAL_MATCH'>(AudioVisualMatchPlayable)],
   ['ODD_ONE_OUT', define<'ODD_ONE_OUT'>(OddOneOutPlayable)],
   ['MATCHING', define<'MATCHING'>(MatchingPlayable)],
   ['MEMORY_CARD', define<'MEMORY_CARD'>(MemoryCardPlayable)],
@@ -36,11 +40,13 @@ const RENDERERS: ReadonlyMap<GameType, AnyPlayableRenderer> = new Map([
   ['DRAG_DROP', define<'DRAG_DROP'>(DragDropPlayable)],
   ['WORD_SCRAMBLE', define<'WORD_SCRAMBLE'>(WordScramblePlayable)],
   ['ORDERING', define<'ORDERING'>(OrderingPlayable)],
-  ['AUDIO_VISUAL_MATCH', define<'AUDIO_VISUAL_MATCH'>(AudioVisualMatchPlayable)],
   ['SPOT_THE_TARGET', define<'SPOT_THE_TARGET'>(SpotTheTargetPlayable)],
 ])
 
 export const getPlayableRenderer = (gameType: GameType) => RENDERERS.get(gameType)
+
+/** Registry name used by the student self-practice flow. */
+export const getSelfPracticeRenderer = getPlayableRenderer
 
 /** Loại game cần màn ngang để chơi thoải mái (nối cặp, lật thẻ, kéo thả, sắp xếp). Khung Bé trên điện thoại dọc thì nhắc xoay máy (xem `device/RotatePrompt`). */
 export const PLAYABLE_ORIENTATION: Readonly<Record<GameType, 'any' | 'landscape'>> = {
