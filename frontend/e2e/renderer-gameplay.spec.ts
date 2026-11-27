@@ -5,7 +5,7 @@ import { seededDerangement, seededShuffle } from '../src/games/common/seededDera
 import { computeDragDropLayout } from '../src/games/drag-drop/dragDropLayout'
 import { computeWordScrambleLayout } from '../src/games/word-scramble/wordScrambleLayout'
 import { getOddOneOutLayout } from '../src/games/odd-one-out/oddOneOutLayout'
-import { clickCanvas, createGame, dragCanvas } from './gameplay-helpers'
+import { API, clickCanvas, createGame, dragCanvas } from './gameplay-helpers'
 
 const TYPES: GameType[] = ['QUIZ', 'MATCHING', 'DRAG_DROP', 'AUDIO_VISUAL_MATCH', 'ORDERING', 'MEMORY_CARD', 'SPOT_THE_TARGET', 'WORD_SCRAMBLE', 'ODD_ONE_OUT', 'VISUAL_CLOZE']
 
@@ -166,11 +166,16 @@ test.describe('mock player suite', () => {
 test('audio request failure: can replay twice and still answer', async ({ page }) => {
   let failures = 0
   await page.route('**/sounds/e2e-missing.wav', route => { failures++; return route.abort() })
-  await page.route('**/narration/preview', route => route.fulfill({
-    json: { success: true, data: { audioUrl: '/sounds/e2e-missing.wav' } },
-  }))
   const game = await createGame(page, 'AUDIO_VISUAL_MATCH')
   if (game.gameType !== 'AUDIO_VISUAL_MATCH') throw new Error('Expected audio fixture')
+  const { gameId, status: _status, updatedAt: _updatedAt, ...body } = game
+  body.questions[0].audioUrl = '/sounds/e2e-missing.wav'
+  const token = await page.evaluate(() => localStorage.getItem('accessToken'))
+  const saved = await page.request.put(API + '/games/' + gameId, {
+    headers: { Authorization: 'Bearer ' + token }, data: body,
+  })
+  expect(saved.status(), await saved.text()).toBe(200)
+  await page.reload()
   await page.getByRole('button', { name: 'Chơi thử', exact: true }).click()
   const panel = page.getByRole('region', { name: 'Màn chơi thử' })
   const listen = panel.getByRole('button', { name: 'Nghe lại câu hỏi', exact: true })
