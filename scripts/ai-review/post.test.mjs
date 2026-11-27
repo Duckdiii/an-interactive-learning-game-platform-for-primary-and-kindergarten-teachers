@@ -187,6 +187,35 @@ test("Github client: phân trang đến khi hết", async () => {
   assert.equal(calls, 2);
 });
 
+test("Github client: PR quá 300 file (406) thì dựng diff từ /files cho parseDiff", async () => {
+  const { parseDiff } = await import("./diff.mjs");
+  const files = [
+    { filename: "Svc.java", status: "modified", patch: "@@ -1,2 +1,3 @@\n class Svc {\n+  repo.save(x);\n }" },
+    { filename: "Old.java", status: "removed", patch: "@@ -1 +0,0 @@\n-x" },
+    { filename: "logo.png", status: "added" }, // nhị phân, không có patch
+    { filename: "docs/a b.md", status: "renamed", previous_filename: "docs/x.md", patch: "@@ -4 +4 @@\n-cũ\n+mới\n\\ No newline at end of file" },
+  ];
+  const urls = [];
+  const gh = new Github({
+    token: "t", repo: "a/b",
+    fetchImpl: async (url, init) => {
+      urls.push(url);
+      if (init.headers.Accept.includes("diff")) return { ok: false, status: 406, json: async () => ({ message: "the diff exceeded the maximum number of files (300)" }) };
+      return { ok: true, status: 200, json: async () => files };
+    },
+  });
+  const diff = parseDiff(await gh.getDiff(7));
+  assert.deepEqual([...diff.keys()], ["Svc.java", "docs/a b.md"]);
+  assert.equal(diff.get("Svc.java").get(2), "  repo.save(x);");
+  assert.deepEqual([...diff.get("docs/a b.md")], [[4, "mới"]]);
+  assert.match(urls[1], /\/pulls\/7\/files\?per_page=100&page=1$/);
+});
+
+test("Github client: lỗi khác 406 của getDiff vẫn được ném ra", async () => {
+  const gh = new Github({ token: "t", repo: "a/b", fetchImpl: async () => ({ ok: false, status: 500, json: async () => ({ message: "boom" }) }) });
+  await assert.rejects(gh.getDiff(7), (e) => e.status === 500);
+});
+
 // ---- Vòng 2 qua toàn bộ luồng đăng ----
 import { parseOpenFindings, parseState } from "./state.mjs";
 

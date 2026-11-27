@@ -61,7 +61,14 @@ export async function decide({ github, pr, headSha, mode, trigger, promptVersion
   }
   if (cmp.status !== "ahead") return full("lịch sử nhánh đã bị viết lại (force-push hoặc rebase)", { runs });
 
-  const incrementalDiff = await github.getCompareDiff(state.sha, headSha);
+  let incrementalDiff;
+  try {
+    incrementalDiff = await github.getCompareDiff(state.sha, headSha);
+  } catch (e) {
+    // 406: phần mới vượt giới hạn file của dạng diff, cùng nghĩa với "quá lớn để xem riêng".
+    if (e instanceof GithubError && e.status === 406) return full("phần thay đổi mới quá lớn để xem riêng", { runs });
+    throw e;
+  }
   if (!incrementalDiff.trim()) return skip("commit mới không đổi code so với lần review trước", { runs });
   if (incrementalDiff.length > MAX_INCREMENTAL_CHARS) return full("phần thay đổi mới quá lớn để xem riêng", { runs });
   return { run: true, round: 2, reason: "vòng 2: kiểm tra vấn đề cũ và phần thay đổi mới", baseSha: state.sha, runs, previous, incrementalDiff };

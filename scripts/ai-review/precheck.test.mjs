@@ -16,7 +16,7 @@ function fakeGithub({ comments = [], compare = { status: "ahead" }, diff = "diff
     calls,
     listIssueComments: async () => comments,
     compare: async () => { calls.compare++; if (compare instanceof Error) throw compare; return compare; },
-    getCompareDiff: async () => { calls.diff++; return diff; },
+    getCompareDiff: async () => { calls.diff++; if (diff instanceof Error) throw diff; return diff; },
   };
 }
 const go = (gh, over = {}) => decide({ github: gh, pr: 7, headSha: HEAD, mode: "C", trigger: "auto", promptVersion: "2.0.0", ...over });
@@ -107,6 +107,10 @@ test("commit mới không đổi code thì bỏ qua; diff quá lớn thì review
   assert.equal((await go(fakeGithub({ comments, diff: "  \n" }))).run, false);
   const big = await go(fakeGithub({ comments, diff: "x".repeat(MAX_INCREMENTAL_CHARS + 1) }));
   assert.deepEqual([big.run, big.round], [true, 1]);
+  // GitHub từ chối dạng diff khi phần mới quá 300 file (406): cũng review toàn bộ, không làm hỏng job.
+  const tooMany = await go(fakeGithub({ comments, diff: new GithubError(406, "too many files") }));
+  assert.deepEqual([tooMany.run, tooMany.round], [true, 1]);
+  await assert.rejects(go(fakeGithub({ comments, diff: new GithubError(500, "boom") })), /boom/);
 });
 
 test("previousFileContent chỉ gồm các trường cần thiết và dùng ref làm khóa", () => {
