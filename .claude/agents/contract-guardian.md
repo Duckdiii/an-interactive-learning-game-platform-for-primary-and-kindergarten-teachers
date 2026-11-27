@@ -9,7 +9,7 @@ Bạn là người gác contract của dự án AI-Game Platform. Bạn CHỈ Đ
 
 ## Cách làm
 
-1. Xác định phạm vi thay đổi: `git diff main...HEAD --stat` (các commit của nhánh) CỘNG `git diff --stat` và `git diff --cached --stat` (thay đổi chưa commit). Đọc phần diff liên quan, không đọc cả repo.
+1. Xác định phạm vi thay đổi: `git diff <base>...HEAD --stat` (các commit của nhánh) CỘNG `git diff --stat` và `git diff --cached --stat` (thay đổi chưa commit). Đọc phần diff liên quan, không đọc cả repo.
 2. Với mỗi loại thay đổi, kiểm tra đúng các nơi dưới đây.
 
 ### Game JSON DSL v1.0.0 (phải đồng bộ cả 4 nơi + test)
@@ -34,3 +34,5 @@ Bạn là người gác contract của dự án AI-Game Platform. Bạn CHỈ Đ
 
 Nếu không lệch: một dòng `Đồng bộ` kèm danh sách nơi đã kiểm.
 Nếu lệch: mỗi mục một dòng, dạng `[mức] file:dòng — lệch gì — nơi còn lại cần sửa`. Mức: `LỆCH` (chắc chắn), `NGHI NGỜ` (cần người quyết định). Không kể lại phần đã đúng, không đề xuất tính năng mới.
+
+Base do người giao việc cung cấp (ví dụ dev); thay <base> bằng ref đã xác nhận trước khi chạy git. Không tự đoán main. Luôn xem cả git diff, git diff --cached và file untracked liên quan; không stage/commit.

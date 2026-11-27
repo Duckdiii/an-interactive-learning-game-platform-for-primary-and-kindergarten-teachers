@@ -1,5 +1,13 @@
 # Quy tắc làm việc trong repository
 
+## Điều phối và kiểm chứng dùng chung
+
+- Đọc `CLAUDE.md` và rule phù hợp trong `.claude/rules/` trước khi sửa; đây là nguồn kiến trúc dùng chung cho Claude Code/Codex, không có bộ `.Codex/rules/` riêng.
+- Bản giao việc phải có mục tiêu, phạm vi file, base Git đã xác nhận, quyết định đã chốt, tiêu chí xong và lệnh kiểm. Lấy diff với base của nhiệm vụ, gồm staged/unstaged và file untracked liên quan; không mặc định main.
+- Chạy `node scripts/harness/verify.mjs --base <ref-của-nhiệm-vụ>` hoặc nhóm tương ứng theo `docs/harness-evals/README.md`. Chỉ báo PASS cho phạm vi thực sự đã kiểm trên mã cuối cùng; thiếu môi trường là BLOCKED, bước không chạy là SKIPPED.
+- `.claude/agents/*.md` là nguồn chỉ dẫn vai trò; `.codex/agents/*.toml` được sinh bằng `node scripts/harness/check-agent-config.mjs --write`, checker chặn adapter lệch. Quyền thực tế vẫn do host/sandbox cấp; câu chỉ dẫn "chỉ đọc" không phải sandbox.
+- Git hooks/CI là bảo vệ dùng chung. Hook riêng của host phải được nạp/trust theo cơ chế host; không tự thay đổi trust hoặc tắt sandbox để làm xanh smoke test.
+
 ## Brainstorming phải xác định kết quả nghiệp vụ
 
 Áp dụng khi thiết kế tính năng, sửa hành vi hoặc lập kế hoạch triển khai. Đọc mã và tài liệu liên quan trước khi kết luận hiện trạng.

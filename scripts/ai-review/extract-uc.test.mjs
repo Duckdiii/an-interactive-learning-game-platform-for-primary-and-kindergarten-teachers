@@ -73,7 +73,7 @@ test("chịu được CRLF và tiêu đề khác cấp", () => {
 
 test("quy tắc FR-nn ↔ UC-nn khớp với bảng trong docs/srs/FR-summary.md", () => {
   const rows = readFileSync(resolve(root, "docs", "srs", "FR-summary.md"), "utf8").split("\n").filter((l) => /^\| FR-\d{2} \|/.test(l));
-  assert.equal(rows.length, 15);
+  assert.equal(rows.length, 18);
   for (const row of rows) {
     const cells = row.split("|").map((c) => c.trim());
     assert.equal(cells[1].replace("FR-", ""), cells[3].replace("UC-", ""), `FR/UC lệch: ${cells[1]} → ${cells[3]}`);

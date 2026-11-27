@@ -11,6 +11,7 @@ import com.aigameplatform.backend.entity.enums.Subject;
 import com.aigameplatform.backend.exception.ApiException;
 import com.aigameplatform.backend.exception.ErrorCode;
 import com.aigameplatform.backend.repository.GameRepository;
+import com.aigameplatform.backend.repository.OrderStepRepository;
 import com.aigameplatform.backend.repository.TeacherRepository;
 import com.aigameplatform.backend.service.curriculum.review.GameCurriculumReviewService;
 import java.time.Instant;
@@ -39,10 +40,11 @@ public class GameService {
     private final AiRequestRateLimiter rateLimiter;
     private final TransactionOperations transactions;
     private final GameCurriculumReviewService curriculumReviews;
+    private final OrderStepRepository orderSteps;
 
     public GameService(GameRepository games, TeacherRepository teachers, List<GameContentHandler> handlers,
             JsonMapper jsonMapper, AiRequestRateLimiter rateLimiter, TransactionOperations transactions,
-            GameCurriculumReviewService curriculumReviews) {
+            GameCurriculumReviewService curriculumReviews, OrderStepRepository orderSteps) {
         this.games = games;
         this.teachers = teachers;
         this.handlers = handlers;
@@ -50,6 +52,7 @@ public class GameService {
         this.rateLimiter = rateLimiter;
         this.transactions = transactions;
         this.curriculumReviews = curriculumReviews;
+        this.orderSteps = orderSteps;
     }
 
     /**
@@ -77,8 +80,11 @@ public class GameService {
         game.getQuestions().addAll(content.questions());
         game.setQuestionNum(content.questions().size());
         // Có kết quả đối chiếu chương trình (game DSL) thì lưu game và bản đối chiếu trong cùng một transaction.
-        Game saved = content.curriculum() == null ? games.saveAndFlush(game)
-                : curriculumReviews.saveWithGame(game, content.curriculum(), teacherId);
+        Game saved = transactions.execute(status -> {
+            orderSteps.saveNewSteps(game);
+            return content.curriculum() == null ? games.saveAndFlush(game)
+                    : curriculumReviews.saveWithGame(game, content.curriculum(), teacherId);
+        });
         return toResponse(saved);
     }
 
@@ -104,6 +110,7 @@ public class GameService {
     public ObjectNode update(String teacherId, String gameId, JsonNode body) {
         Game game = owned(teacherId, gameId);
         handlerFor(game.getGameType()).replaceContent(game, body);
+        orderSteps.saveNewSteps(game);
         // Chỉ sửa câu hỏi thì hàng games không "bẩn" nên @UpdateTimestamp không chạy; đặt tường minh để GET /games sắp đúng.
         game.setUpdatedAt(Instant.now());
         // Lưu qua bước này để bản đối chiếu chương trình (nếu có) chuyển STALE: nội dung đã khác lúc đối chiếu.

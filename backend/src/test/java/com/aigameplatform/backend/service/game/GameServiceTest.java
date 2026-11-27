@@ -42,6 +42,7 @@ class GameServiceTest {
     private static final String OWNER = "teacher-1";
 
     private final GameRepository games = mock(GameRepository.class);
+    private final com.aigameplatform.backend.repository.OrderStepRepository orderSteps = mock(com.aigameplatform.backend.repository.OrderStepRepository.class);
     private final TeacherRepository teachers = mock(TeacherRepository.class);
     private final GameContentHandler dsl = mock(GameContentHandler.class);
     private final GameContentHandler cpf = mock(GameContentHandler.class);
@@ -64,7 +65,7 @@ class GameServiceTest {
         when(teachers.getReferenceById(anyString())).thenAnswer(inv -> teacher(inv.getArgument(0)));
         when(curriculumReviews.saveEditedGame(any(), anyString())).thenAnswer(inv -> inv.getArgument(0));
         service = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, limiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews);
+                curriculumReviews, orderSteps);
     }
 
     private static Teacher teacher(String id) {
@@ -281,7 +282,7 @@ class GameServiceTest {
     void aFailedRevisionFreesTheTeachersSlotForTheNextOne() {
         var realLimiter = new AiRequestRateLimiter(java.time.Clock.systemUTC());
         var withLimiter = new GameService(games, teachers, List.of(dsl, cpf), MAPPER, realLimiter, TransactionOperations.withoutTransaction(),
-                curriculumReviews);
+                curriculumReviews, orderSteps);
         when(games.findById("g1")).thenReturn(Optional.of(game("g1", OWNER, GameType.QUIZ)));
         when(dsl.revise(any(), any(), any())).thenThrow(new ApiException(ErrorCode.UNSAFE_CONTENT, "x"))
                 .thenReturn(MAPPER.createObjectNode().put("gameType", "QUIZ"));

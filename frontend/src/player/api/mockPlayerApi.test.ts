@@ -4,6 +4,7 @@ import type { GameType } from '../../types/game-dsl.types'
 import type { AnswerPayload, MatchingStudentQuestion, StudentGame } from '../../types/game-student.types'
 import { getPlayerApi, PlayerApiNotSupportedError } from './index'
 import { MockPlayerApi, mockShareCodes } from './mockPlayerApi'
+import { buildMockGameContents } from '../../services/mock/gameFixtures'
 
 // Tên mọi trường [ĐA] của DSL v1.0.0 (docs/game-json-dsl-v1.0.0.md, các mục có ký hiệu [ĐA]) cộng `correctAnswer`, chỉ được có SAU khi chấm.
 const SECRET_KEYS = ['correctOptionId', 'oddOneOutId', 'correct', 'distractors', 'hitRegion', 'correctWord', 'targetZoneId', 'correctPosition', 'correctAnswer']
@@ -45,6 +46,17 @@ async function openByType(api: MockPlayerApi, type: GameType) {
 
   throw new Error(`Không có game mẫu loại ${type}`)
 }
+
+it('every published SPOT fixture has a correct selectable region, including the last question', async () => {
+  const api = new MockPlayerApi()
+  const { sessionId, game } = await openSession(api, 'MOCK06')
+  const fixture = buildMockGameContents().find(g => g.gameType === 'SPOT_THE_TARGET')!
+  for (const [index, question] of fixture.questions.entries()) {
+    expect(question.hitRegion).toBeDefined()
+    await expect(api.submitInteraction(sessionId, game.questions[index].id,
+      { x: question.hitRegion!.x, y: question.hitRegion!.y })).resolves.toMatchObject({ status: 'CORRECT', isCorrect: true })
+  }
+})
 
 // Không dùng vi.unstubAllEnvs(): nó gỡ cả VITE_MOCK_LATENCY_MS=0 của test-setup nên mỗi lời gọi mô phỏng chờ 400 ms.
 afterEach(() => {

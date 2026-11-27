@@ -1,5 +1,7 @@
 # A2: so `/pstack:interrogate` với subagent `reviewer` (2026-11-14)
 
+Tiếp nối Codex ngày17/11: [report mới](agent-eval-codex-2026-11-17.md). Arm phản biện mới là protocol Codex trên nguồn đã đóng băng, không phải lần chạy plugin pstack hoặc phép so sánh chi phí trực tiếp với các số liệu lịch sử dưới đây.
+
 Mục tiêu: đo xem công cụ review nào bắt được lỗi đã biết, với chi phí bao nhiêu, trước khi quyết định giữ, thay hay kết hợp (giai đoạn A của kế hoạch harness theo cách Lauren Tan "go deep first").
 
 ## Cách làm

@@ -23,10 +23,65 @@ import tools.jackson.databind.node.ObjectNode;
 @ActiveProfiles({"test", "verify-flow"})
 class TeacherFlowVerificationTest extends AbstractTeacherFlowTest {
 
+    @Test
+    void orderingGenerationAndEditPersistIndependentSteps() throws Exception {
+        String token = registerAndLogin();
+        Call generated = call("ordering-generate", "POST", "/api/games/generate", token, """
+                {"gameType":"ORDERING","subject":"MATH","gradeLevel":"GRADE_1","idea":"Sắp xếp các bước trồng cây"}
+                """);
+        assertThat(generated.status()).isEqualTo(200);
+        ObjectNode game = (ObjectNode) generated.body().path("data").deepCopy();
+        String gameId = game.path("gameId").asString();
+        assertThat(game.path("questions").get(0).path("steps").size()).isGreaterThanOrEqualTo(2);
+        game.remove(List.of("gameId", "status", "updatedAt"));
+        ((ObjectNode) game.path("questions").get(0).path("steps").get(0)).put("text", "Chuẩn bị hạt giống");
+        assertThat(call("ordering-save", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(game)).status()).isEqualTo(200);
+        var stored = call("ordering-reread", "GET", "/api/games/" + gameId, token, null).body().path("data");
+        assertThat(stored.path("questions")).isEqualTo(game.path("questions"));
+    }
+
     @Override
     void assertRevised(JsonNode revisedGame) {
         // Chuỗi chỉ AI giả trả ở nhánh revise: chứng tỏ kết quả đi qua revise chứ không phải sinh mới.
         assertThat(revisedGame.path("questions").toString()).contains(FakeAiConfiguration.REVISED_MARKER);
+    }
+
+    @Test
+    void contextualRevisionPreservesUntouchedContentAndPersistsThroughTheRealApi() throws Exception {
+        String token = registerAndLogin();
+        String gameId = generateQuiz(token);
+        ObjectNode edited = (ObjectNode) call("context-get", "GET", "/api/games/" + gameId, token, null)
+                .body().path("data").deepCopy();
+        edited.remove(List.of("gameId", "status", "updatedAt"));
+        ((ObjectNode) edited.path("questions").get(0)).put("questionText", "Câu đầu đã được giáo viên chỉnh");
+        assertThat(call("context-put", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(edited)).status()).isEqualTo(200);
+        Call revised = call("context-revise", "POST", "/api/games/" + gameId + "/revise", token, """
+                {"instruction":"Theo yêu cầu trước, đổi con chó thành con gà",
+                 "history":[{"role":"TEACHER","text":"Chỉ sửa câu thứ hai, giữ nguyên câu đầu"}]}
+                """);
+        assertThat(revised.status()).isEqualTo(200);
+        ObjectNode body = (ObjectNode) revised.body().path("data").deepCopy();
+        assertThat(body.path("questions").get(0).path("questionText").asString()).isEqualTo("Câu đầu đã được giáo viên chỉnh");
+        assertThat(optionTexts(body.path("questions").get(0))).isEqualTo(optionTexts(edited.path("questions").get(0)));
+        assertThat(correctLabel(body.path("questions").get(0))).isEqualTo(correctLabel(edited.path("questions").get(0)));
+        assertThat(body.path("questions").get(1).path("questionText").asString()).contains("con gà");
+        body.remove(List.of("gameId", "status", "updatedAt"));
+        assertThat(call("context-save", "PUT", "/api/games/" + gameId, token, json.writeValueAsString(body)).status()).isEqualTo(200);
+        var stored = call("context-reread", "GET", "/api/games/" + gameId, token, null).body().path("data");
+        assertThat(stored.path("questions")).isEqualTo(body.path("questions"));
+    }
+
+    private List<String> optionTexts(JsonNode question) {
+        return java.util.stream.StreamSupport.stream(question.path("options").spliterator(), false)
+                .map(option -> option.path("text").asString()).sorted().toList();
+    }
+
+    private String correctLabel(JsonNode question) {
+        for (var option : question.path("options")) {
+            if (option.path("id").asString().equals(question.path("correctOptionId").asString()))
+                return option.path("text").asString();
+        }
+        throw new AssertionError("Missing correct answer");
     }
 
     /**

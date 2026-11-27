@@ -84,6 +84,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: node ../scripts/harness/check-lint-baseline.mjs
       # Ranh giới import (frontend/.dependency-cruiser.cjs): vòng import, trang chỉ từ App, tầng đáy/dữ liệu không phụ
       # thuộc UI, games/ chỉ là renderer, không import test hay devDependency vào code chạy thật.
       - run: npm run depcruise
@@ -115,10 +116,9 @@ jobs:
       # Controller và openapi.yaml lệch nhau (endpoint thiếu trong spec, x-status sai) thì đỏ: spec trước, code sau.
       - run: node scripts/openapi/compare-endpoints.mjs --strict
       # Mọi test script do git theo dõi (test mới tự được chạy; trước đây danh sách viết tay chỉ chạy 5/22 file).
-      # shortcut: tạm loại extract-srs/extract-uc vì lỗi thời so với docs/srs (KNOWN-GAPS #18), bỏ loại trừ khi sửa xong.
       - run: >-
-          node --test $(git ls-files 'scripts/*.test.mjs' '.claude/hooks/*.test.mjs'
-          | grep -v -e 'ai-review/extract-srs' -e 'ai-review/extract-uc')
+          node --test $(git ls-files 'scripts/*.test.mjs' '.claude/hooks/*.test.mjs')
+      - run: node scripts/harness/check-agent-config.mjs
 
   secret-scan:
     name: Secret scan (Gitleaks)

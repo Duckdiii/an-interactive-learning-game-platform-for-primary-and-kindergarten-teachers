@@ -10,8 +10,9 @@ import { fileURLToPath } from "node:url";
 
 // Chỉ đếm file của lớp được chạy. Luồng chính: register, login, understand, generate, get, put, get-after-put, revise (8).
 // Lớp AI giả có thêm test curriculum-review: register, login, generate, curriculum-review, get, put,
-// curriculum-review-after-put (7). Lớp live chỉ chạy luồng chính.
-export const EXPECTED_STEPS = { fake: 15, live: 8 };
+// curriculum-review-after-put (7), contextual revise (8) và ORDERING register/login/generate/put/get (5).
+// Lớp live chỉ chạy luồng chính.
+export const EXPECTED_STEPS = { fake: 28, live: 8 };
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const backend = join(root, "backend");

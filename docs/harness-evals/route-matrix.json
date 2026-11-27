@@ -1,0 +1,14 @@
+[
+  {"key":"dashboard","path":"/dashboard","state":"mixed","checks":["frontend/e2e/teacher-flow.spec.ts"],"limit":"Creation entry covered; dashboard statistics are not certified."},
+  {"key":"createGame","path":"/games/new","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts"],"limit":"Real HTTP, synthetic AI; educational quality not certified."},
+  {"key":"results","path":"/results","state":"mock","checks":["frontend/src/player/api/mockPlayerApi.test.ts"],"limit":"Mock unit boundary only; no live results backend or UI acceptance."},
+  {"key":"login","path":"/login","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts"]},
+  {"key":"register","path":"/register","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts"]},
+  {"key":"workspace","path":"/workspace","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts"],"limit":"Listing/reopen only; not every management action."},
+  {"key":"workspaceEditor","path":"/workspace/editor","state":"real","checks":["frontend/e2e/teacher-flow.spec.ts","frontend/e2e/renderer-gameplay.spec.ts","frontend/e2e/cpf-gameplay.spec.ts"],"limit":"Real game persistence/fake AI; preview grading local; final runtime results in verification report."},
+  {"key":"play","path":"/play/:shareCode","state":"mock","checks":["frontend/src/player/play/PlayFlow.test.tsx","frontend/e2e/renderer-gameplay.spec.ts"],"limit":"Browser gameplay uses mock sessions/grading; real shared game/session backend planned."},
+  {"key":"join","path":"/join","state":"mock","checks":["frontend/src/player/api/mockPlayerApi.test.ts"],"limit":"No live room acceptance."},
+  {"key":"roomJoin","path":"/join/:pin","state":"mock","checks":["frontend/src/player/api/mockPlayerApi.test.ts"],"limit":"No live room backend."},
+  {"key":"present","path":"/present/:gameId","state":"mixed","checks":["frontend/src/player/play/PlayFlow.test.tsx"],"limit":"Runtime unit coverage only; presentation UI not live-certified."},
+  {"key":"roomHost","path":"/rooms/host/:gameId","state":"mock","checks":["frontend/src/player/api/mockPlayerApi.test.ts"],"limit":"Same-machine simulation is not a server-backed classroom."}
+]

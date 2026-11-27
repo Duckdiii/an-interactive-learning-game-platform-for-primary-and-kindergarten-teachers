@@ -1,4 +1,4 @@
-// Trích docs/SRS.docx thành các file Markdown nhỏ trong docs/srs/ để agent chỉ nạp phần cần dùng.
+// Xuất bản Word lịch sử vào thư mục scratch; không ghi đè SRS Markdown hiện hành.
 // Dùng: node scripts/ai-review/extract-srs.mjs [đường-dẫn-docx] [thư-mục-ra]
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -6,6 +6,12 @@ import { fileURLToPath } from "node:url";
 import { docxToBlocks, blocksToMarkdown } from "./docx-to-markdown.mjs";
 
 export const WHOLE_DOCUMENTS = [["SRS.docx", "SRS-full.md"], ["Dinh_huong_de_tai.docx", "Dinh_huong_de_tai.md"]];
+export function assertExportTarget(root, output) {
+  if (!output) throw new Error('Legacy Word export requires an explicit scratch output directory');
+  const target = resolve(output).replaceAll('\\', '/').toLowerCase();
+  const canonical = resolve(root, 'docs/srs').replaceAll('\\', '/').toLowerCase();
+  if (target === canonical || target.startsWith(canonical + '/')) throw new Error('Refusing to overwrite canonical Markdown SRS');
+}
 const UC_HEADING = /^4\.2\.\d+\.\s.*\b(UC-\d{2})\b/;
 
 /** Cắt các khối thuộc một heading (đến heading cùng cấp hoặc cao hơn kế tiếp). */
@@ -80,14 +86,12 @@ function indexMarkdown(files) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+  assertExportTarget(root, process.argv[3]);
   const input = resolve(process.argv[2] ?? join(root, "docs", "SRS.docx"));
   const outDir = resolve(process.argv[3] ?? join(root, "docs", "srs"));
   const files = splitSrs(docxToBlocks(readFileSync(input)));
-  // Chỉ sinh bản đầy đủ khi chạy mặc định; có tham số là đang trích thử ra chỗ khác. Đọc trước khi ghi để thiếu file Word thì không ghi dở dang.
-  const whole = process.argv[2] === undefined ? WHOLE_DOCUMENTS.map(([from, to]) => [to, wholeDocument(docxToBlocks(readFileSync(join(root, "docs", from))))]) : [];
   mkdirSync(outDir, { recursive: true });
   for (const [name, content] of files) writeFileSync(join(outDir, name), content);
   writeFileSync(join(outDir, "README.md"), indexMarkdown(files));
   console.log(`Đã ghi ${files.size + 1} file vào ${outDir}`);
-  for (const [to, content] of whole) writeFileSync(join(root, "docs", to), content);
 }

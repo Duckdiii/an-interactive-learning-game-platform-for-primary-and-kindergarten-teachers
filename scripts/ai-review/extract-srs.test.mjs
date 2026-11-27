@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve, dirname } from "node:path";
-import { splitSrs, sectionOf, wholeDocument, WHOLE_DOCUMENTS } from "./extract-srs.mjs";
+import { splitSrs, sectionOf, wholeDocument, assertExportTarget } from "./extract-srs.mjs";
 import { docxToBlocks } from "./docx-to-markdown.mjs";
 
 const h = (level, text) => ({ type: "heading", level, text });
@@ -49,26 +49,25 @@ function docx() {
   return resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "docs", "SRS.docx");
 }
 
-test("docs/srs/ khớp với kết quả trích từ docs/SRS.docx (nhắc chạy lại extract-srs.mjs khi sửa SRS)", { skip: !existsSync(docx()) }, () => {
+test("Markdown hiện hành có đủ 18 UC, tách biệt bản Word lịch sử 15 UC", () => {
   const dir = resolve(dirname(docx()), "srs");
-  const expected = splitSrs(docxToBlocks(readFileSync(docx())));
-  const onDisk = readdirSync(dir).filter((n) => n.endsWith(".md") && n !== "README.md").sort();
-  assert.deepEqual(onDisk, [...expected.keys()].sort(), "tập file trong docs/srs/ lệch so với SRS.docx");
-  const norm = (s) => s.replace(/\r\n/g, "\n");
-  for (const [name, content] of expected) {
-    assert.equal(norm(readFileSync(resolve(dir, name), "utf8")), norm(content), `${name} lệch; chạy: node scripts/ai-review/extract-srs.mjs`);
+  const expected = Array.from({ length: 18 }, (_, i) => `UC-${String(i + 1).padStart(2, '0')}.md`);
+  assert.deepEqual(readdirSync(dir).filter(n => /^UC-\d{2}\.md$/.test(n)).sort(), expected);
+  for (const name of expected) {
+    assert.match(readFileSync(resolve(dir, name), 'utf8').split('\n')[0], new RegExp(name.slice(0, -3)));
   }
 });
 
-test("bản đầy đủ khớp file Word và không có trang bìa", { skip: !existsSync(docx()) }, () => {
-  const docs = dirname(docx());
-  const norm = (t) => t.replace(/\r\n/g, "\n");
-  for (const [from, to] of WHOLE_DOCUMENTS) {
-    const text = readFileSync(resolve(docs, to), "utf8");
-    assert.equal(norm(text), norm(wholeDocument(docxToBlocks(readFileSync(resolve(docs, from))))), `${to} lệch; chạy: node scripts/ai-review/extract-srs.mjs`);
-    assert.match(text, /^# /, `${to} phải bắt đầu từ heading, không có trang bìa`);
-  }
-  assert.match(readFileSync(resolve(docs, "SRS-full.md"), "utf8"), /^# CHƯƠNG 1\./);
+test("trích Word bỏ trang bìa; Markdown toàn văn nằm ở đường dẫn hiện hành", { skip: !existsSync(docx()) }, () => {
+  assert.match(wholeDocument(docxToBlocks(readFileSync(docx()))), /^# CHƯƠNG 1\./);
+  assert.ok(/^# CHƯƠNG 1\./m.test(readFileSync(resolve(dirname(docx()), 'srs/SRS-full.md'), 'utf8')));
+});
+
+test('legacy exporter requires an explicit scratch target and refuses canonical docs', () => {
+  const root = resolve(dirname(docx()), '..');
+  assert.throws(() => assertExportTarget(root, undefined), /explicit/);
+  assert.throws(() => assertExportTarget(root, resolve(root, 'docs/srs')), /canonical/);
+  assert.doesNotThrow(() => assertExportTarget(root, resolve(root, 'backend/target/srs-export')));
 });
 
 test("wholeDocument bỏ phần trước heading đầu tiên", () => {

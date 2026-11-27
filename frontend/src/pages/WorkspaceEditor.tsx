@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import ButtonLink from '../components/ButtonLink'
@@ -142,7 +142,7 @@ function EditorWorkspace({ game }: { game: GameResponse }) {
   const [reviseNotice, setReviseNotice] = useState<string | null>(null)
   // Bản nháp mới nhất (đọc trong callback trả về muộn) và bản nháp lúc gửi yêu cầu sửa.
   const draftRef = useRef(draft)
-  draftRef.current = draft
+  useLayoutEffect(() => { draftRef.current = draft }, [draft])
   const sentDraft = useRef(draft)
   const formPresentation = editorPresentation({
     presentation: draft.metadata.presentation,

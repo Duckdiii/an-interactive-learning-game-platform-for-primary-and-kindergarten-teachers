@@ -1,6 +1,6 @@
 # SRS đã trích (dùng cho AI review)
 
-> Sinh tự động từ `docs/SRS.docx` bằng `scripts/ai-review/extract-srs.mjs`. **Không sửa tay**: sửa `SRS.docx` rồi chạy lại script.
+> Markdown tại đây là bản hiện hành với 18 UC. `docs/SRS.docx` là snapshot lịch sử 15 UC, không dùng để tự ghi đè bộ hiện hành. `scripts/ai-review/extract-srs.mjs` chỉ xuất Word ra thư mục scratch được chỉ định rõ; đối chiếu và duyệt thay đổi trước khi cập nhật tài liệu chuẩn.
 > Sơ đồ và ảnh trong SRS không chuyển sang chữ được, chỉ còn dòng `[hình ảnh]`; xem bản `.docx` khi cần.
 
 ## Use Case

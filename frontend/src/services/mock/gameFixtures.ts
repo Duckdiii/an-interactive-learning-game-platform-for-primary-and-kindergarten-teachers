@@ -99,7 +99,7 @@ const spot: SpotTheTargetGame = {
   questions: [
     { ...q(1), audioText: 'Con hãy tìm chú gà trống', visualPrompt: 'a farm yard with a rooster, a cow and a pig', targetDescription: 'chú gà trống', hitRegion: { x: 0.3, y: 0.55, radius: 0.12 } },
     { ...q(2), audioText: 'Con hãy tìm con bò', visualPrompt: 'a farm yard with a rooster, a cow and a pig', targetDescription: 'con bò', hitRegion: { x: 0.65, y: 0.5, radius: 0.15 } },
-    { ...q(3), audioText: 'Con hãy tìm ngôi nhà', visualPrompt: 'a red barn on a green field', targetDescription: 'ngôi nhà gỗ màu đỏ' },
+    { ...q(3), audioText: 'Con hãy tìm ngôi nhà', visualPrompt: 'a red barn on a green field', imageUrl: '/assets/themes/farm/barn.svg', targetDescription: 'ngôi nhà gỗ màu đỏ', hitRegion: { x: 0.5, y: 0.5, radius: 0.2 } },
   ],
 }
 
