@@ -28,6 +28,28 @@ class LocalMediaStorageServiceTest {
     }
 
     @Test
+    @DisplayName("Chỉ tải file đúng loại từ hai thư mục media công khai")
+    void readsOnlySupportedPublicMedia(@TempDir Path tempDir) throws IOException {
+        LocalMediaStorageService storage = new LocalMediaStorageService(tempDir.toString(), "http://localhost/media");
+        String imageName = "12345678-1234-1234-1234-123456789abc.png";
+        String audioName = "12345678-1234-1234-1234-123456789abc.mp3";
+        byte[] content = {1, 2, 3};
+        storage.upload("uploads/" + imageName, content, "image/png");
+        storage.upload("tts/" + audioName, content, "audio/mpeg");
+        storage.upload("tts/" + imageName, content, "image/png");
+        storage.upload("private/" + imageName, content, "image/png");
+
+        var image = storage.getPublicMedia("uploads", imageName).orElseThrow();
+        var audio = storage.getPublicMedia("tts", audioName).orElseThrow();
+        assertThat(image.contentType()).isEqualTo("image/png");
+        assertThat(image.resource().getContentAsByteArray()).isEqualTo(content);
+        assertThat(audio.contentType()).isEqualTo("audio/mpeg");
+        assertThat(audio.resource().getContentAsByteArray()).isEqualTo(content);
+        assertThat(storage.getPublicMedia("tts", imageName)).isEmpty();
+        assertThat(storage.getPublicMedia("private", imageName)).isEmpty();
+    }
+
+    @Test
     @DisplayName("upload ném ngoại lệ nếu tham số null")
     void testUploadNullArguments(@TempDir Path tempDir) {
         LocalMediaStorageService storage = new LocalMediaStorageService(tempDir.toString(), "http://localhost");
