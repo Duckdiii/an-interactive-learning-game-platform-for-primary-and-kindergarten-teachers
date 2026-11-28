@@ -12,6 +12,8 @@
 
 - `prepare` tạo diff từ SHA của PR và đóng gói tối đa 10 file, 55.000 ký tự mỗi phần. File vượt ngân sách hoặc vượt giới hạn 24 phần được liệt kê để review tay. File sinh tự động thuộc danh sách loại trừ được ghi riêng trong artifact.
 - Agent đọc gói được giao. Nếu thiếu file, workflow thử lại đúng phần đó một lần. Vòng 2 giữ các vấn đề cũ cùng phần diff mới trong một gói để kiểm tra đầy đủ.
+- Nếu có file nhị phân hoặc quá lớn cần duyệt tay, chủ repo mở mục **AI review: độ phủ**, kiểm tra từng file được liệt kê rồi đăng mẫu xác nhận ở mục đó dưới dạng comment trực tiếp trên PR. Mẫu gồm dòng lệnh và một mảng JSON chứa đầy đủ đường dẫn. Dán hai dòng ở dạng văn bản thường.
+- Sau khi xác nhận, gắn label **ai-review** để chạy lại. Nếu label đã có, gỡ rồi gắn lại. Xác nhận chỉ áp dụng cho PR đang mở, đúng cả SHA của base và head. Job ghi ID comment và danh sách file được xác nhận trong artifact; các file trong gói AI vẫn phải qua kiểm tra đủ.
 - Bước đăng đối chiếu các artifact với manifest. Mở mục **AI review: độ phủ** và artifact `coverage.json` để xem SHA, vòng, số file đã xác nhận và lý do thiếu.
 - Trong lúc kiểm chứng, chạy `workflow_dispatch` với `dry_run=true` từ nhánh bản sửa. Biến repo `AI_REVIEW_ENABLED=true` bật các lần chạy có ghi lên PR sau khi nghiệm thu.
 - Để thử vòng 2 với một PR lịch sử, đặt `backtest_base` bằng SHA tổ tiên của head. Ca này dùng danh sách vấn đề cũ rỗng. Test tự động bao phủ trường hợp có vấn đề cũ.

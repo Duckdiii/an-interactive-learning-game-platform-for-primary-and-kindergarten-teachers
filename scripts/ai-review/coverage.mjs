@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { filePatches, writePackage } from "./shard.mjs";
 import { mergeResults } from "./merge-shards.mjs";
 import { validate } from "./schema-validate.mjs";
+import { Github } from "./github.mjs";
 
 const schema = JSON.parse(readFileSync(new URL("../../.github/ai-review/review-result.schema.json", import.meta.url), "utf8"));
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
@@ -44,8 +45,38 @@ export function recover(first, retry, files, previous, expected) {
   return { result };
 }
 
-export function collect(manifest, load, expected) {
-  const problems = manifest.manual.length ? [{ reason: "Cần review thủ công", files: manifest.manual }] : [];
+export function findManualApproval(comments, manifest) {
+  const { base, head, manual } = manifest;
+  const sha = /^[a-f0-9]{40}$/;
+  if (!sha.test(base) || !sha.test(head) || !manual.length) return null;
+  const prefix = `/ai-review-manual ${base} ${head}\n`;
+  const paths = new Set(manual);
+  for (const comment of comments.toReversed()) {
+    if (comment.author_association !== "OWNER" || comment.user?.type !== "User" ||
+        !Number.isSafeInteger(comment.id) || typeof comment.body !== "string") continue;
+    const body = comment.body.replaceAll("\r\n", "\n").trim();
+    if (!body.startsWith(prefix)) continue;
+    let files;
+    try { files = JSON.parse(body.slice(prefix.length)); } catch { continue; }
+    if (Array.isArray(files) && files.length === paths.size && new Set(files).size === paths.size &&
+        files.every((file) => paths.has(file))) {
+      return { commentId: comment.id, files: manual };
+    }
+  }
+  return null;
+}
+
+export async function readManualApproval(github, pr, manifest) {
+  if (!manifest.manual.length) return null;
+  const pull = await github.getPull(pr);
+  if (pull.base.sha !== manifest.base || pull.head.sha !== manifest.head || pull.state !== "open") return null;
+  return findManualApproval(await github.listIssueComments(pr), manifest);
+}
+
+export function collect(manifest, load, expected, manualApproval = null) {
+  const problems = manifest.manual.length && !manualApproval
+    ? [{ reason: "Cần review thủ công", files: manifest.manual }]
+    : [];
   const results = [];
   for (const { id, files } of manifest.parts) {
     const entry = load(id);
@@ -61,7 +92,7 @@ export function collect(manifest, load, expected) {
     }
   }
   const merged = !problems.length && results.length ? mergeResults(results) : null;
-  return { problems, merged, reviewed: results.reduce((n, result) => n + result.files_reviewed.length, 0) };
+  return { problems, merged, manualApproval, reviewed: results.reduce((n, result) => n + result.files_reviewed.length, 0) };
 }
 
 function readAttempt(raw, outcome) {
@@ -71,16 +102,20 @@ function readAttempt(raw, outcome) {
   catch { return { reason: "structured_output không phải JSON hợp lệ" }; }
 }
 
-function main() {
+async function main() {
   const [command, input, location] = process.argv.slice(2);
   const manifest = readJson(join(input, "manifest.json"));
   const expected = { mode: process.env.EXPECT_MODE, prompt: process.env.EXPECT_PROMPT, round: manifest.round };
   if (command === "collect") {
     if (manifest.head !== process.env.ANALYZED_SHA) throw new Error("Manifest thuộc commit khác.");
+    const { GITHUB_TOKEN: token, GITHUB_REPOSITORY: repo, PR: pr } = process.env;
+    const manualApproval = manifest.manual.length && token && /^[1-9]\d*$/.test(pr ?? "")
+      ? await readManualApproval(new Github({ token, repo }), pr, manifest)
+      : null;
     const report = collect(manifest, (id) => {
       try { return readJson(join(location, `coverage-${id}.json`)); }
       catch { return null; }
-    }, expected);
+    }, expected, manualApproval);
     mkdirSync("result", { recursive: true });
     writeFileSync("result/coverage.json", JSON.stringify({ ...report, merged: undefined, head: manifest.head, skipped: manifest.skipped }, null, 2));
     if (report.merged) writeFileSync("result/review.json", JSON.stringify(report.merged));
@@ -89,6 +124,12 @@ function main() {
       `SHA: ${manifest.head} · vòng ${manifest.round} · ${report.reviewed}/${manifest.parts.reduce((n, { files }) => n + files.length, 0)} file trong gói đạt · ${manifest.skipped.length} loại trừ theo chính sách`,
       ...report.problems.map(({ id, reason, files }) => `- ${id ? `Phần ${id}: ` : ""}${reason}. File: ${JSON.stringify(files)}`),
     ];
+    if (manualApproval) {
+      lines.push(`- Chủ repo xác nhận review thủ công trong comment #${manualApproval.commentId}: ${JSON.stringify(manualApproval.files)}`);
+    } else if (manifest.manual.length) {
+      lines.push("", "Chủ repo có thể xác nhận sau khi đã kiểm tra tất cả file sau, rồi kích hoạt review lại qua label ai-review:",
+        "", "~~~text", `/ai-review-manual ${manifest.base} ${manifest.head}`, JSON.stringify(manifest.manual), "~~~");
+    }
     const summary = lines.join("\n") + "\n";
     console.log(summary);
     appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
@@ -126,5 +167,5 @@ function main() {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try { main(); } catch (error) { console.error(error.message); process.exitCode = 1; }
+  main().catch((error) => { console.error(error.message); process.exitCode = 1; });
 }
