@@ -213,6 +213,7 @@ test("Github client: PR quá 300 file (406) thì dựng diff từ /files cho par
   const files = [
     { filename: "Svc.java", status: "modified", patch: "@@ -1,2 +1,3 @@\n class Svc {\n+  repo.save(x);\n }" },
     { filename: "Old.java", status: "removed", patch: "@@ -1 +0,0 @@\n-x" },
+    { filename: "New.java", status: "added", patch: "@@ -0,0 +1 @@\n+class New {}" },
     { filename: "logo.png", status: "added" }, // nhị phân, không có patch
     { filename: "docs/a b.md", status: "renamed", previous_filename: "docs/x.md", patch: "@@ -4 +4 @@\n-cũ\n+mới\n\\ No newline at end of file" },
   ];
@@ -225,9 +226,17 @@ test("Github client: PR quá 300 file (406) thì dựng diff từ /files cho par
       return { ok: true, status: 200, json: async () => files };
     },
   });
-  const diff = parseDiff(await gh.getDiff(7));
-  assert.deepEqual([...diff.keys()], ["Svc.java", "docs/a b.md"]);
+  const text = await gh.getDiff(7);
+  assert.deepEqual(text.split("\n").filter((line) => /^(diff --git |--- |\+\+\+ )/.test(line)), [
+    "diff --git a/Svc.java b/Svc.java", "--- a/Svc.java", "+++ b/Svc.java",
+    "diff --git a/Old.java b/Old.java", "--- a/Old.java", "+++ /dev/null",
+    "diff --git a/New.java b/New.java", "--- /dev/null", "+++ b/New.java",
+    "diff --git a/docs/x.md b/docs/a b.md", "--- a/docs/x.md", "+++ b/docs/a b.md",
+  ]);
+  const diff = parseDiff(text);
+  assert.deepEqual([...diff.keys()], ["Svc.java", "New.java", "docs/a b.md"]);
   assert.equal(diff.get("Svc.java").get(2), "  repo.save(x);");
+  assert.deepEqual([...diff.get("New.java")], [[1, "class New {}"]]);
   assert.deepEqual([...diff.get("docs/a b.md")], [[4, "mới"]]);
   assert.match(urls[1], /\/pulls\/7\/files\?per_page=100&page=1$/);
 });

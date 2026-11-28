@@ -61,9 +61,17 @@ export class Github {
       // file không có `patch` (nhị phân, quá lớn) bị bỏ qua, nghĩa là không gắn comment inline được ở file đó.
       if (!(e instanceof GithubError) || e.status !== 406) throw e;
       const files = await this.listPullFiles(n);
-      return files.filter((f) => f.patch).map((f) =>
-        `diff --git a/${f.filename} b/${f.filename}\n+++ ${f.status === "removed" ? "/dev/null" : `b/${f.filename}`}\n${f.patch}\n`,
-      ).join("");
+      return files.filter((file) => file.patch).map((file) => {
+        const oldPath = `a/${file.previous_filename ?? file.filename}`;
+        const newPath = `b/${file.filename}`;
+        return [
+          `diff --git ${oldPath} ${newPath}`,
+          `--- ${file.status === "added" ? "/dev/null" : oldPath}`,
+          `+++ ${file.status === "removed" ? "/dev/null" : newPath}`,
+          file.patch,
+          "",
+        ].join("\n");
+      }).join("");
     }
   }
   /** Danh sách file của PR (có phân trang; GitHub trả tối đa 3000 file). */
