@@ -63,11 +63,19 @@ public class LocalMediaStorageService implements MediaStorageService {
     }
 
     public Optional<StoredMedia> getPublicMedia(String group, String fileName) {
-        if (!group.equals("uploads") && !group.equals("tts")) return Optional.empty();
+        Path groupDirectory = switch (group) {
+            case "uploads" -> storageDirectory.resolve("uploads");
+            case "tts" -> storageDirectory.resolve("tts");
+            default -> null;
+        };
+        if (groupDirectory == null) return Optional.empty();
+
         var match = PUBLIC_FILENAME.matcher(fileName);
         if (!match.matches() || group.equals("tts") && !match.group(1).equals("mp3")) return Optional.empty();
-        Path file = storageDirectory.resolve(group).resolve(fileName);
-        if (Files.isSymbolicLink(file.getParent()) || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
+
+        Path file = groupDirectory.resolve(fileName).normalize();
+        if (!file.startsWith(groupDirectory) || Files.isSymbolicLink(groupDirectory)
+                || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
             return Optional.empty();
         }
         String type = switch (match.group(1)) {
