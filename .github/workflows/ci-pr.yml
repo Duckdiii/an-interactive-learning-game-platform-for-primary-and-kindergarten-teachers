@@ -84,6 +84,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: node ../scripts/harness/check-lint-baseline.mjs
       # Ranh giới import (frontend/.dependency-cruiser.cjs): vòng import, trang chỉ từ App, tầng đáy/dữ liệu không phụ
       # thuộc UI, games/ chỉ là renderer, không import test hay devDependency vào code chạy thật.
       - run: npm run depcruise
@@ -117,6 +118,7 @@ jobs:
       - run: node scripts/wiki/check-links.mjs
       # Test mới được Git theo dõi tự tham gia CI.
       - run: node --test $(git ls-files 'scripts/*.test.mjs' '.claude/hooks/*.test.mjs')
+      - run: node scripts/harness/check-agent-config.mjs --verify-generated
 
   secret-scan:
     name: Secret scan (Gitleaks)

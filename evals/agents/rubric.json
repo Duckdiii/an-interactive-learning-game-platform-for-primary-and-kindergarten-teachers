@@ -1,0 +1,114 @@
+{
+  "r01": {
+    "verdict": "ISSUE",
+    "reason": "Child failure is discarded; probe exitCode is zero.",
+    "severity": "HIGH"
+  },
+  "r02": {
+    "verdict": "CLEAN",
+    "reason": "Probe returns [1,0,1].",
+    "severity": null
+  },
+  "v01": {
+    "verdict": "BLOCKED",
+    "reason": "Required Docker is unavailable, five tests skipped."
+  },
+  "v02": {
+    "verdict": "CLEAN",
+    "reason": "No failure/skip and unchanged source in the supplied report only."
+  },
+  "l01": {
+    "verdict": "ISSUE",
+    "reason": "deadbee is not reachable in the current history."
+  },
+  "l02": {
+    "verdict": "CLEAN",
+    "reason": "Resolved HEAD exists in its own history."
+  },
+  "r03": {
+    "verdict": "ISSUE",
+    "reason": "Old PASS is admitted despite newer failed attempt with unchanged source.",
+    "severity": "HIGH"
+  },
+  "r04": {
+    "verdict": "CLEAN",
+    "reason": "Bounded admission returns [true,false,false]; upstream validation is explicitly outside this function.",
+    "severity": null
+  },
+  "v03": {
+    "verdict": "BLOCKED",
+    "reason": "Required backend evidence for requested all scope is missing."
+  },
+  "v04": {
+    "verdict": "CLEAN",
+    "reason": "All requested frontend steps pass without skip or source change; no whole-repo claim."
+  },
+  "l03": {
+    "verdict": "ISSUE",
+    "reason": "Actual HEAD file metadata does not contain the imaginary declared migration."
+  },
+  "l04": {
+    "verdict": "CLEAN",
+    "reason": "Planning-only uncommitted entry permits TODO and claims no implementation/tests."
+  },
+  "n01": {
+    "verdict": "ISSUE",
+    "severity": "HIGH",
+    "reason": "Different teacher receives private game data without ownership check."
+  },
+  "n02": {
+    "verdict": "CLEAN",
+    "severity": null,
+    "reason": "Owner allowed; other and anonymous callers denied in the bounded helper."
+  },
+  "n03": {
+    "verdict": "ISSUE",
+    "severity": "HIGH",
+    "reason": "Invalid replacement deletes the only stored original before validation, without rollback."
+  },
+  "n04": {
+    "verdict": "ISSUE",
+    "severity": "MEDIUM",
+    "reason": "floor hides a partial final page in an optional list; records are not deleted."
+  },
+  "n05": {
+    "verdict": "ISSUE",
+    "severity": "MEDIUM",
+    "reason": "Only retries calls occur instead of initial+retries, including none at zero; fallback still handles failure."
+  },
+  "n06": {
+    "verdict": "ISSUE",
+    "severity": "LOW",
+    "reason": "Duplicate final punctuation only, no execution/data/status impact."
+  },
+  "n07": {
+    "verdict": "CLEAN",
+    "severity": null,
+    "reason": "Initial+retries calls, early success, correct zero-retry behavior."
+  },
+  "n08": {
+    "verdict": "CLEAN",
+    "severity": null,
+    "reason": "Sorted copy preserves input ordering."
+  },
+  "p01": {
+    "verdict": "ISSUE",
+    "severity": "HIGH",
+    "reason": "Mandatory release decision admits BLOCKED/missing evidence; the boolean is the admission result, no actual deployment needed."
+  },
+  "p02": {
+    "verdict": "ISSUE",
+    "severity": "LOW",
+    "reason": "Single-page label shows First instead of specified Only; cosmetic only."
+  },
+  "p03": {
+    "verdict": "ISSUE",
+    "severity": "MEDIUM",
+    "reason": "Optional diagnostic warning omits the exact threshold; no security/certification/data consequence."
+  },
+  "p04": {
+    "verdict": "CLEAN",
+    "severity": null,
+    "reason": "Only executed PASS admitted; other supplied states denied under upstream-validation scope."
+  }
+}

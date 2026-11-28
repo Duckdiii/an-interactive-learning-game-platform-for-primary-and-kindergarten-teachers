@@ -1,5 +1,27 @@
 # Nhật ký sửa lỗi theo tầng chặn (corrections)
 
+## T06 severity BR-01…06 — 2026-11-17
+
+- V1 nhầm severity với việc caller/commit thật đã chạy → tầng2 grader giữ FAIL4 và tầng4 judge xác nhận causal path/contract đã đủ; không sửa gold. Tầng3 role v2 tách confidence khỏi consequence, có bốn prospective cases audit/freeze trước sửa. Giữ mọi v1 raw failure; model acceptance vòng mới theo fresh trials/judge, không suy ra từ prompt text.
+
+- Grader chỉ so verdict nên nhận sai severity → tầng2: bốn regression RED gồm actual CLI import, bổ sung kiểm severity/impact/reason/CLEAN;20 focused tests GREEN. Legacy scope hiển thị severityRequired=0, không nhận vơ đã chấm severity.
+- Bản sửa đầu bỏ sót reviewer gold thiếu severity làm rơi về verdict-only → reviewer độc lập tái hiện CLI PASS sai; thêm unit/CLI RED, validator chặn thiếu key trước import,20 tests GREEN. Duplicate fixture được sửa để không dương tính giả do lỗi gold trước lớp cần kiểm.
+- Rubric r-k4 HIGH chưa có hậu quả tương xứng → tầng4: audit độc lập source/probe trước chỉnh role, bản mới ghi MEDIUM và lý do; giữ đáp án/source/kết quả cũ, không gọi việc đổi gold là model đã cải thiện. Model eval mới quyết định hiệu quả, không dùng validation thay thế.
+
+## Tiếp nối Codex T05b — 2026-11-16
+
+- ORDERING POST500 do OrderStep transient không cascade → tầng2: HTTP regression đỏ trước sửa; persist riêng trong transaction ngắn giữ aggregation, backend focused34 test xanh. Không thêm REMOVE/orphanRemoval hoặc migration.
+- SPOT mock published thiếu hitRegion câu cuối → tầng2: unit đỏ1/42, bổ sung ảnh/vùng đáp án mẫu, unit42/42 và browser SPOT xanh.
+- Hai assertion ảnh lỗi/audio replay do AI viết quá yếu → reviewer phát hiện; tầng2: kiểm nhãn tại browser fillText và hai chu kỳ UI pulse sau click; targeted browser3/3 xanh, screenshot fallback đã quan sát. Không nhận vơ đã nghe được âm thanh unavailable.
+
+## Lô harness 2026-11-16
+
+- Fake revise cố định → tầng 2: ba ca đỏ về instruction/history/câu được sửa, sau đó 6 test unit/HTTP xanh; giữ nhãn và đáp án theo nghĩa vì pipeline có chủ ý xáo option.
+- Route chỉ có trong tài liệu → tầng 2: checker route registration/path/evidence references, 8 test map/route xanh sau ca rename/missing/duplicate đỏ.
+- Test extractor bị miễn CI → tầng 2: 24 test xanh, CI bỏ exclusion; exporter không tự ghi đè SRS Markdown 18 UC bằng Word lịch sử 15 UC.
+- Render ghi draftRef và vi phạm mới trong file override vẫn chỉ warn → tầng 2: lint đỏ khi gỡ override WorkspaceEditor, chuyển cập nhật ref sang layout effect, 13 test editor/autosave xanh; baseline theo source anchor chặn warning mới.
+- Adapter Codex chứa escape CR/rules hỏng → tầng 2: TOML literal sinh từ Markdown, kiểm đồng bộ và hook deny thật từ thư mục con. Chưa xác nhận host activation do auth/CLI, không ghi đạt phần đó.
+
 Mỗi lần sửa một lỗi có hậu quả hoặc lặp lại, ghi một dòng: lỗi gì, ai/cái gì phát hiện, **đã đẩy cách chặn lên tầng nào**,
 và bằng chứng. Mục tiêu: lỗi lặp lại phải được chặn ở tầng mạnh nhất có thể, không chỉ thêm chữ vào rules hay nhờ agent đọc.
 

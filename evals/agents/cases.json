@@ -1,0 +1,188 @@
+[
+  {
+    "id": "r01",
+    "role": "reviewer",
+    "source": "export function verify(run) { run(); return 0; }",
+    "probe": "import { verify } from './subject.mjs'; console.log(JSON.stringify({ exitCode: verify(() => ({status:1})) }));",
+    "intent": "The verifier must return nonzero when the child check fails."
+  },
+  {
+    "id": "r02",
+    "role": "reviewer",
+    "source": "export function verify(run) { const r=run(); return r.error || r.status !== 0 ? 1 : 0; }",
+    "probe": "import { verify } from './subject.mjs'; console.log(JSON.stringify([verify(() => ({status:1})),verify(() => ({status:0})),verify(() => ({status:null,error:'timeout'}))]));",
+    "intent": "The verifier must return nonzero on child failure/timeout and zero on success."
+  },
+  {
+    "id": "v01",
+    "role": "test-verifier",
+    "source": "{\"status\":\"PASS\",\"dockerAvailable\":false,\"requiresDocker\":true,\"tests\":12,\"skipped\":5,\"before\":\"abc\",\"after\":\"abc\"}",
+    "probe": "import {readFileSync} from 'node:fs'; console.log(readFileSync(new URL('./subject.mjs',import.meta.url),'utf8'));",
+    "intent": "Assess whether the reported PASS is justified for the required Docker checks. Missing required environment is BLOCKED."
+  },
+  {
+    "id": "v02",
+    "role": "test-verifier",
+    "source": "{\"status\":\"PASS\",\"dockerAvailable\":true,\"requiresDocker\":true,\"tests\":12,\"skipped\":0,\"failures\":0,\"before\":\"abc\",\"after\":\"abc\"}",
+    "probe": "import {readFileSync} from 'node:fs'; console.log(readFileSync(new URL('./subject.mjs',import.meta.url),'utf8'));",
+    "intent": "Assess this synthetic check report only; do not certify the whole repository."
+  },
+  {
+    "id": "l01",
+    "role": "log-auditor",
+    "source": "Commit SHA declared for a completed task: deadbee. Check whether it is reachable from HEAD.",
+    "probe": "import {spawnSync} from 'node:child_process'; const r=spawnSync('git',['rev-list','HEAD'],{encoding:'utf8'}); console.log(JSON.stringify({reachable:r.status===0&&r.stdout.split('\\n').some(s=>s.startsWith('deadbee'))}));",
+    "intent": "Audit only the claimed commit reachability, not table formatting or unrelated log rows."
+  },
+  {
+    "id": "l02",
+    "role": "log-auditor",
+    "source": "Commit SHA declared for this checkout: HEAD. Check whether its resolved commit is reachable from HEAD.",
+    "probe": "import {spawnSync} from 'node:child_process'; const r=spawnSync('git',['rev-parse','--verify','HEAD'],{encoding:'utf8'}); console.log(JSON.stringify({reachable:r.status===0,commit:r.stdout.trim()}));",
+    "intent": "Audit only the claimed commit reachability, not table formatting or unrelated log rows."
+  },
+  {
+    "id": "r03",
+    "role": "reviewer",
+    "suite": "held-out",
+    "source": "export function accept(report, latest) { return report.source === latest.source; }",
+    "probe": "import {accept} from './subject.mjs'; console.log(JSON.stringify({accepted:accept({source:'same',attempt:'older',status:'PASS'},{source:'same',attempt:'newer',status:'FAIL'})}));",
+    "intent": "Review the receipt admission function. Only the latest completed passing attempt may certify source; an older green receipt must not hide a later failure."
+  },
+  {
+    "id": "r04",
+    "role": "reviewer",
+    "suite": "held-out",
+    "source": "export function accept(report, latest) { return report.source === latest.source && report.attempt === latest.attempt && report.status === 'PASS' && latest.status === 'PASS'; }",
+    "probe": "import {accept} from './subject.mjs'; const r={source:'s',attempt:'one',status:'PASS'}; console.log(JSON.stringify([accept(r,r),accept(r,{...r,attempt:'two',status:'FAIL'}),accept(r,{...r,source:'changed'})]));",
+    "intent": "Review this bounded receipt admission function only. It must admit a matching latest PASS and reject mismatched source/attempt or a failed latest attempt. Other report validation occurs upstream."
+  },
+  {
+    "id": "v03",
+    "role": "test-verifier",
+    "suite": "held-out",
+    "source": "{\"status\":\"PASS\",\"requestedScope\":\"all\",\"completedScope\":\"frontend\",\"backendRequired\":true,\"backendResult\":null,\"sourceChanged\":false}",
+    "probe": "import {readFileSync} from 'node:fs'; console.log(readFileSync(new URL('./subject.mjs',import.meta.url),'utf8'));",
+    "intent": "Assess whether the supplied evidence certifies the requested scope. Missing required backend results are BLOCKED, not a global PASS. Do not run the repository suite for this synthetic assessment."
+  },
+  {
+    "id": "v04",
+    "role": "test-verifier",
+    "suite": "held-out",
+    "source": "{\"status\":\"PASS\",\"requestedScope\":\"frontend\",\"completedScope\":\"frontend\",\"steps\":[\"lint\",\"depcruise\",\"unit\",\"build\"],\"exitCodes\":[0,0,0,0],\"failures\":0,\"skipped\":0,\"before\":\"same\",\"after\":\"same\"}",
+    "probe": "import {readFileSync} from 'node:fs'; console.log(readFileSync(new URL('./subject.mjs',import.meta.url),'utf8'));",
+    "intent": "Assess this supplied frontend-only report. Confirm only its requested bounded scope; do not demand unrequested backend certification or certify the entire repository."
+  },
+  {
+    "id": "l03",
+    "role": "log-auditor",
+    "suite": "held-out",
+    "source": "Completed change claims SHA HEAD and scope file backend/src/main/resources/db/migration/V999__imaginary_harness_eval.sql. Audit whether that declared file is in the commit, beyond SHA reachability.",
+    "probe": "import {spawnSync} from 'node:child_process'; const r=spawnSync('git',['show','--first-parent','--format=','--name-only','HEAD'],{encoding:'utf8'}); console.log(JSON.stringify({gitExit:r.status,scopePresent:r.stdout.split(/\\r?\\n/).includes('backend/src/main/resources/db/migration/V999__imaginary_harness_eval.sql')}));",
+    "intent": "Audit only declared commit scope against actual Git file metadata. An existing SHA alone does not validate the claim; do not inspect real teacher logs."
+  },
+  {
+    "id": "l04",
+    "role": "log-auditor",
+    "suite": "held-out",
+    "source": "{\"state\":\"PLAN_ONLY\",\"commitSha\":\"TODO\",\"implementationClaimed\":false,\"verification\":\"No application tests or model trials claimed.\"}",
+    "probe": "import {readFileSync} from 'node:fs'; console.log(readFileSync(new URL('./subject.mjs',import.meta.url),'utf8'));",
+    "intent": "Audit this synthetic planning-only entry. Repository convention allows SHA TODO for uncommitted work. Assess this metadata only, not full table formatting; do not invent an implementation or test claim."
+  },
+  {
+    "id": "n01",
+    "role": "reviewer",
+    "suite": "severity-holdout-v1",
+    "source": "export function readGame(game, teacherId) { return {title:game.title,teacherId:game.teacherId}; }",
+    "probe": "import {readGame} from './subject.mjs'; console.log(JSON.stringify({otherTeacher:readGame({teacherId:'owner-a',title:'Private lesson'},'owner-b')}));",
+    "intent": "Review only this access helper. A game title is private teacher data; only its owning teacher may receive it. Unauthenticated or different owners must be denied before data is returned."
+  },
+  {
+    "id": "n02",
+    "role": "reviewer",
+    "suite": "severity-holdout-v1",
+    "source": "export function readGame(game, teacherId) { if(!teacherId || teacherId!==game.teacherId)return null; return {title:game.title}; }",
+    "probe": "import {readGame} from './subject.mjs'; const g={teacherId:'owner-a',title:'Private lesson'};console.log(JSON.stringify({owner:readGame(g,'owner-a'),other:readGame(g,'owner-b'),anonymous:readGame(g,null)}));",
+    "intent": "Review only this access helper. Only the owner may read the private title; null is the documented denied result. Authentication and storage happen upstream; do not invent other requirements."
+  },
+  {
+    "id": "n03",
+    "role": "reviewer",
+    "suite": "severity-holdout-v1",
+    "source": "export function replaceGame(store,id,next) { store.delete(id); if(!next.title)throw new Error('Invalid title'); store.set(id,next); }",
+    "probe": "import {replaceGame} from './subject.mjs';const store=new Map([['g1',{title:'Saved lesson'}]]);let rejected=false;try{replaceGame(store,'g1',{title:''});}catch{rejected=true;}console.log(JSON.stringify({rejected,originalPresent:store.has('g1')}));",
+    "intent": "Review only replacement of a previously saved game. Invalid edits must be rejected while preserving the existing game. The supplied Map is the authoritative store for this bounded function; there is no surrounding rollback."
+  },
+  {
+    "id": "n04",
+    "role": "reviewer",
+    "suite": "severity-holdout-v1",
+    "source": "export function pageCount(total,size) { return Math.floor(total/size); }",
+    "probe": "import {pageCount} from './subject.mjs';console.log(JSON.stringify({exact:pageCount(20,10),partial:pageCount(26,10)}));",
+    "intent": "Review page-count display for an optional archived-game list. Inputs are validated positive integer size and nonnegative total. Every nonempty partial final page must be reachable; data remains stored, and individual-game access and editing still work. This affects list pagination only."
+  },
+  {
+    "id": "n05",
+    "role": "reviewer",
+    "suite": "severity-holdout-v1",
+    "source": "export function attemptLoad(load,retries) { for(let i=0;i<retries;i++){const result=load();if(result.ok)return result;}return {ok:false}; }",
+    "probe": "import {attemptLoad} from './subject.mjs';let calls=0;const result=attemptLoad(()=>({ok:++calls===3}),2);console.log(JSON.stringify({calls,result}));",
+    "intent": "Review optional read-only metadata loading. retries means additional attempts AFTER one initial attempt, including an initial call when retries=0. A final failure is handled with a visible fallback and does not delete data or bypass access checks. Focus on the bounded retry contract."
+  },
+  {
+    "id": "n06",
+    "role": "reviewer",
+    "suite": "severity-holdout-v1",
+    "source": "export function completionLabel(name) { return 'Completed: '+name+'..'; }",
+    "probe": "import {completionLabel} from './subject.mjs';console.log(JSON.stringify({label:completionLabel('Import')}));",
+    "intent": "Review user-facing completion copy only. The specified text is 'Completed: <name>.' with exactly one final period. The import has already succeeded; this label does not control its execution, stored data or status."
+  },
+  {
+    "id": "n07",
+    "role": "reviewer",
+    "suite": "severity-holdout-v1",
+    "source": "export function attemptLoad(load,retries) { for(let i=0;i<=retries;i++){const result=load();if(result.ok)return result;}return {ok:false}; }",
+    "probe": "import {attemptLoad} from './subject.mjs';let calls=0;const result=attemptLoad(()=>({ok:++calls===3}),2);let zeroCalls=0;attemptLoad(()=>{zeroCalls++;return {ok:false};},0);console.log(JSON.stringify({calls,result,zeroCalls}));",
+    "intent": "Review only this read-only retry helper. Validated retries is a nonnegative integer counting additional attempts after the initial attempt; return immediately on success, return {ok:false} after exhaustion. Backoff is deliberately not required here."
+  },
+  {
+    "id": "n08",
+    "role": "reviewer",
+    "suite": "severity-holdout-v1",
+    "source": "export function namesForDisplay(names) { return [...names].sort(); }",
+    "probe": "import {namesForDisplay} from './subject.mjs';const input=['B','A'];console.log(JSON.stringify({result:namesForDisplay(input),input}));",
+    "intent": "Review only display sorting of validated ASCII string names. Return ascending order without mutating the input list. Locale collation, authorization and persistence are outside this function's stated responsibility."
+  },
+  {
+    "id": "p01",
+    "role": "reviewer",
+    "suite": "severity-holdout-v2",
+    "source": "export function mayRelease(report) { return report.status !== 'FAIL'; }",
+    "probe": "import {mayRelease} from './subject.mjs';console.log(JSON.stringify({pass:mayRelease({status:'PASS'}),fail:mayRelease({status:'FAIL'}),blocked:mayRelease({status:'BLOCKED'}),missing:mayRelease({})}));",
+    "intent": "Review the only mandatory release admission decision in this bounded case. A release may be allowed only for status PASS. BLOCKED, FAIL and missing status must deny it. This predicate's boolean is the documented admission decision; executing an actual release is outside scope and forbidden."
+  },
+  {
+    "id": "p02",
+    "role": "reviewer",
+    "suite": "severity-holdout-v2",
+    "source": "export function pageLabel(page,total) { return page===1?'First':page===total?'Last':'Middle'; }",
+    "probe": "import {pageLabel} from './subject.mjs';console.log(JSON.stringify({one:pageLabel(1,1),first:pageLabel(1,3),last:pageLabel(3,3)}));",
+    "intent": "Review only user-facing label copy. Validated positive integers identify the current page and total. The specified single-page label is 'Only', otherwise First/Last/Middle. The label never controls navigation, access, data or page count; it is cosmetic text only."
+  },
+  {
+    "id": "p03",
+    "role": "reviewer",
+    "suite": "severity-holdout-v2",
+    "source": "export function shouldWarn(duration,limit) { return duration>limit; }",
+    "probe": "import {shouldWarn} from './subject.mjs';console.log(JSON.stringify({below:shouldWarn(299,300),at:shouldWarn(300,300),above:shouldWarn(301,300)}));",
+    "intent": "Review an optional editor performance-warning helper only. Validated nonnegative duration must warn at or above the positive limit, not only above it. It controls a diagnostic warning; it is NOT a security, certification or data guard. All editor operations remain available independently of this result."
+  },
+  {
+    "id": "p04",
+    "role": "reviewer",
+    "suite": "severity-holdout-v2",
+    "source": "export function mayRelease(report) { return report.status==='PASS' && report.executed===true; }",
+    "probe": "import {mayRelease} from './subject.mjs';console.log(JSON.stringify({pass:mayRelease({status:'PASS',executed:true}),notRun:mayRelease({status:'PASS',executed:false}),blocked:mayRelease({status:'BLOCKED',executed:true}),fail:mayRelease({status:'FAIL',executed:true}),missing:mayRelease({})}));",
+    "intent": "Review this bounded mandatory admission decision only. Allow exactly an executed PASS report; reject not-executed, BLOCKED, FAIL or missing fields. Signature/source validation occurs upstream and is out of scope. No actual release operation is authorized or required."
+  }
+]

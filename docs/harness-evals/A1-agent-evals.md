@@ -1,5 +1,7 @@
 # A1: eval "mù" cho subagent `reviewer` và `log-auditor` (2026-11-15)
 
+Tiếp nối Codex ngày17/11: [report mới](agent-eval-codex-2026-11-17.md). Số liệu dưới đây là lịch sử; snapshot draft/log gốc không còn đủ để replay nguyên bản. Report mới phân biệt nguồn commit, ca dựng lại và context/model/phương pháp khác.
+
 Mục tiêu: đo hai subagent dùng nhiều nhất bằng các ca có đáp án, sửa prompt ở chỗ bỏ sót, rồi đo lại (giai đoạn A của kế hoạch harness, "unit test cho agent" theo cách Lauren Tan).
 
 ## Cách làm

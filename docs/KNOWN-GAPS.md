@@ -5,6 +5,8 @@ File này **chỉ ghi nhận**, không đề xuất cách sửa; quyết định
 ghi một dòng vào `docs/corrections.md`. Đường dẫn rút gọn như `docs/FEATURE-MAP.md`: `C/` = `backend/src/main/java/com/aigameplatform/backend/`,
 `T/` = `backend/src/test/java/com/aigameplatform/backend/`, `F/` = `frontend/src/`, `OA` = `docs/openapi/openapi.yaml`.
 
+Cập nhật harness 2026-11-16: #16 đã được chặn bằng fake kịch bản hữu hạn và 6 test unit/HTTP (instruction/history/nội dung giữ lại/PUT-GET). #18 đã xử lý: 24 test extractor đạt, bỏ loại trừ CI; Markdown hiện hành 18 UC tách khỏi Word lịch sử 15 UC, exporter không tự ghi đè. #21 còn 102 cảnh báo, giảm một override WorkspaceEditor; checker baseline chặn anchor cảnh báo mới, chưa dọn toàn bộ nợ. Xem `docs/harness-evals/README.md` và `tasks/progress.md`; các hàng lịch sử bên dưới mô tả lúc phát hiện, không phải bằng chứng các mục này vẫn chưa xử lý.
+
 | # | Khoảng trống | Bằng chứng | Trạng thái |
 |---|---|---|---|
 | 1 | `GET /api/games/{id}/curriculum-review` luôn trả 404: `GameCurriculumReviewService.saveWithGame` không được gọi ở đâu trong code main nên không có bản đối chiếu nào được ghi. Endpoint cũng không có trong OA. | Định nghĩa `C/service/curriculum/review/GameCurriculumReviewService.java:38`; `grep -rn saveWithGame backend/src/main` chỉ ra dòng định nghĩa; thông điệp 404 ở `GameCurriculumReviewService.java:92`; test kỳ vọng 200 đang `@Disabled` ở `T/flow/TeacherFlowVerificationTest.java:35` (ép chạy: "expected: 200 but was: 404") | Đã đóng (2026-11-15, người dùng chọn sửa đầy đủ): endpoint vào OA (`getGameCurriculumReview`); `GameService.generate` lưu game DSL qua `saveWithGame`, `update` qua `saveEditedGame` (STALE); test luồng bật lại và kiểm cả STALE |

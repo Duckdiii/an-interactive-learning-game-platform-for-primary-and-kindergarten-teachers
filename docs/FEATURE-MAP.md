@@ -1,5 +1,6 @@
 # FEATURE-MAP: tính năng ↔ endpoint ↔ code ↔ test
 
+Ma trận route và bằng chứng kiểm thử nằm trong [tài liệu harness](harness-evals/verification-matrix.md) và [ma trận route](harness-evals/route-matrix.json). Checker đối chiếu route trong App và paths.
 Bản đồ lập từ code thật ngày 2026-11-14 (nhánh `chore/harness-lauren-tan`, từ `dev` tại `2af3f0e`). Các ô code và test có file:dòng; ô
 "—" nghĩa là đã tìm (grep cả repo) và không có. Nguồn sự thật của contract vẫn là `docs/openapi/openapi.yaml`; file này chỉ
 ghi hiện trạng cài đặt. Đường dẫn rút gọn: `C/` = `backend/src/main/java/com/aigameplatform/backend/`,

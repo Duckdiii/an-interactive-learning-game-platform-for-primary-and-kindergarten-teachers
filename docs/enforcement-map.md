@@ -1,5 +1,14 @@
 # Bản đồ luật → thứ cưỡng chế (2026-11-15)
 
+## Cập nhật thực thi harness 2026-11-16
+
+- L3: PIT đo lại 286/294, thêm job mutation-validation và ngưỡng 97; chưa chạy remote CI.
+- L16/R41: 5 browser test thật đạt, gồm QUIZ 360/768/1280 và CPF TAP tĩnh; không suy rộng sang mọi renderer hay phòng thật.
+- R19: giữ checker endpoint; thêm kiểm named routes và ma trận phân biệt real/mixed/mock, không coi tồn tại endpoint là đúng toàn contract.
+- Nợ React: WorkspaceEditor hết override refs; 102 cảnh báo còn lại được giữ bằng baseline anchor/multiplicity và vẫn phải review ngữ nghĩa.
+- SHA/định dạng log do checker; log-auditor giữ đối chiếu Phạm vi/nội dung với git. Vai trò Codex sinh từ .claude và có checker chống lệch.
+- #16/#18 đã chặn như KNOWN-GAPS cập nhật. Các đề xuất lessons không có bằng chứng đủ vẫn giữ chờ duyệt; không tự biến thành luật chung.
+
 Mỗi luật rút từ `.claude/lessons-inbox.md` (44 mục), `docs/corrections.md` (29 dòng lúc lập, nay 30), `CLAUDE.md` và `.claude/rules/`, kèm tầng hiện tại theo "Thứ tự chặn lỗi" trong `CLAUDE.md`:
 **1** kiến trúc/code, **2** lint/test/CI/hook, **3** chỉ có chữ (rule, prompt, lessons), **4** chỉ có review.
 Tầng 2 chỉ ghi khi đã thấy đoạn kiểm thật (file:dòng); "một phần" là chỉ kiểm được một nhánh của luật.

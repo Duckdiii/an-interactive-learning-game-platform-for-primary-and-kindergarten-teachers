@@ -1,0 +1,66 @@
+{
+  "r-k1": {
+    "verdict": "ISSUE",
+    "reason": "ANSI prefix leaves letter m immediately before ERR, so the boundary misses the real error.",
+    "severity": "HIGH"
+  },
+  "r-k2": {
+    "verdict": "ISSUE",
+    "reason": "Fake game AI does not prevent moderation HTTP calls when CI supplies OPENAI_API_KEY; required=false alone is not an empty API key.",
+    "severity": "HIGH"
+  },
+  "r-k3": {
+    "verdict": "CLEAN",
+    "reason": "Frozen known-clean pinning patch; local probe certifies pin shape only, not current upstream identity.",
+    "severity": null
+  },
+  "r-k4": {
+    "verdict": "ISSUE",
+    "reason": "An unquoted first argument consumes the separator and next node token, hiding a later overlong eval. BR-01 audit: escape-protection parser bypass is demonstrated, but HIGH consequence is not established in this reconstructed case.",
+    "severity": "MEDIUM"
+  },
+  "r-k5": {
+    "verdict": "CLEAN",
+    "reason": "Explicit empty test-profile API key prevents CI key inheritance; live tests remain opt-in.",
+    "severity": null
+  },
+  "l-1": {
+    "verdict": "ISSUE",
+    "reason": "Prepared table has the documented format/reachability defect."
+  },
+  "l-2": {
+    "verdict": "ISSUE",
+    "reason": "Prepared table has the documented format/reachability defect."
+  },
+  "l-3": {
+    "verdict": "ISSUE",
+    "reason": "Prepared table has the documented format/reachability defect."
+  },
+  "l-4": {
+    "verdict": "ISSUE",
+    "reason": "Prepared table has the documented format/reachability defect."
+  },
+  "l-5": {
+    "verdict": "CLEAN",
+    "reason": "Synthetic metadata table is valid for its bounded scope."
+  },
+  "l-6": {
+    "verdict": "CLEAN",
+    "reason": "Synthetic metadata table is valid for its bounded scope."
+  },
+  "a2-adversarial-1": {
+    "verdict": "ISSUE",
+    "reason": "ANSI prefix leaves letter m immediately before ERR, so the boundary misses the real error.",
+    "severity": "HIGH"
+  },
+  "a2-adversarial-2": {
+    "verdict": "ISSUE",
+    "reason": "Fake game AI does not prevent moderation HTTP calls when CI supplies OPENAI_API_KEY; required=false alone is not an empty API key.",
+    "severity": "HIGH"
+  },
+  "a2-adversarial-3": {
+    "verdict": "CLEAN",
+    "reason": "Frozen known-clean pinning patch; local probe certifies pin shape only, not current upstream identity.",
+    "severity": null
+  }
+}
