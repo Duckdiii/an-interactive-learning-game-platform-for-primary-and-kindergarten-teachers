@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
-import { checkCoverage, collect, recover, retryScope } from "./coverage.mjs";
+import { checkCoverage, collect, findManualApproval, readManualApproval, recover, retryScope } from "./coverage.mjs";
 
 const expected = { mode: "C", prompt: "2.3.0", round: 1 };
 const result = (files, fields = {}) => ({
@@ -50,6 +50,48 @@ test("post cần đủ artifact và đủ file từng phần, kể cả khi ph�
   const load = (id) => ({ result: result([id === 1 ? "A.java" : "B.java"]) });
   assert.equal(collect(manifest, load, expected).merged.status, "complete");
   assert.equal(collect({ ...manifest, manual: ["large.java"] }, load, expected).merged, null);
+});
+
+test("chỉ chấp nhận xác nhận của chủ repo cho đủ file, đúng base và head", () => {
+  const base = "a".repeat(40);
+  const head = "b".repeat(40);
+  const manifest = { base, head, manual: ["Large.json", "Duplicate (1).doc"] };
+  const body = ["/ai-review-manual " + base + " " + head, JSON.stringify([...manifest.manual].reverse())].join("\n");
+  const owner = { id: 12, author_association: "OWNER", user: { type: "User" }, body };
+  assert.deepEqual(findManualApproval([owner], manifest), { commentId: 12, files: manifest.manual });
+  assert.deepEqual(findManualApproval([{ ...owner, body: body.replace("\n", "\r\n") }], manifest)?.files, manifest.manual);
+  for (const bad of [
+    { ...owner, author_association: "MEMBER" },
+    { ...owner, user: { type: "Bot" } },
+    { ...owner, body: body.replace(base, "c".repeat(40)) },
+    { ...owner, body: body.replace(head, "c".repeat(40)) },
+    { ...owner, body: body.replace("Large.json", "Another.json") },
+    { ...owner, body: body.replace("Large.json", "Duplicate (1).doc") },
+    { ...owner, body: body.split("\n")[0] + '\n["Large.json"]' },
+    { ...owner, body: body + "\nExtra text" },
+  ]) {
+    assert.equal(findManualApproval([bad], manifest), null);
+  }
+});
+
+test("xác nhận cho PR đang mở không thay thế artifact AI và không dùng cho commit cũ", async () => {
+  const base = "a".repeat(40);
+  const head = "b".repeat(40);
+  const manifest = { base, head, parts: [{ id: 1, files: ["A.java"] }], manual: ["Large.json"], previous: [] };
+  const body = ["/ai-review-manual " + base + " " + head, JSON.stringify(manifest.manual)].join("\n");
+  let pull = { base: { sha: base }, head: { sha: head }, state: "open" };
+  const github = {
+    getPull: async () => pull,
+    listIssueComments: async () => [{ id: 12, author_association: "OWNER", user: { type: "User" }, body }],
+  };
+  const approval = await readManualApproval(github, "100", manifest);
+  const load = () => ({ result: result(["A.java"]) });
+  assert.deepEqual(collect(manifest, load, expected, approval).merged.files_reviewed, ["A.java"]);
+  assert.equal(collect(manifest, () => null, expected, approval).merged, null);
+  pull = { ...pull, head: { sha: "c".repeat(40) } };
+  assert.equal(await readManualApproval(github, "100", manifest), null);
+  pull = { ...pull, head: { sha: head }, state: "closed" };
+  assert.equal(await readManualApproval(github, "100", manifest), null);
 });
 
 test("vòng 2 kiểm đủ cả file mới lẫn vấn đề cũ và retry giữ phạm vi vòng 2", () => {
