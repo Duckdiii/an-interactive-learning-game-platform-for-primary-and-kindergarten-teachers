@@ -134,10 +134,10 @@ function App() {
           }
         >
           <Route index element={<Navigate to={ROUTES.adminTeachers} replace />} />
-          <Route path="teachers" element={<TeacherManagementPage />} />
-          <Route path="audit-logs" element={<AuditLogPage />} />
-          <Route path="dashboard" element={<AdminDashboardPage />} />
-          <Route path="ai-config" element={<AIConfigPage />} />
+          <Route path={ROUTES.adminTeachers} element={<TeacherManagementPage />} />
+          <Route path={ROUTES.adminAuditLogs} element={<AuditLogPage />} />
+          <Route path={ROUTES.adminDashboard} element={<AdminDashboardPage />} />
+          <Route path={ROUTES.adminAiConfig} element={<AIConfigPage />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

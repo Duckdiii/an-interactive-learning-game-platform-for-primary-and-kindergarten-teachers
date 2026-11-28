@@ -30,8 +30,14 @@ describe('game mẫu', () => {
     for (const game of fixtures) expect(validateGame(game, 'save'), game.metadata.title).toEqual([])
   })
 
-  it('khi xuất bản, chỉ SPOT_THE_TARGET còn câu chưa có vùng đúng (câu 3) bị chặn, 9 game còn lại xuất bản được', () => {
-    for (const game of fixtures) {
+  it('cả 10 game mẫu dùng cho player đều có thể xuất bản', () => {
+    for (const game of fixtures) expect(validateGame(game, 'publish'), game.metadata.title).toEqual([])
+  })
+
+  it('khi xuất bản, SPOT_THE_TARGET thiếu vùng đúng ở câu 3 bị chặn, 9 game còn lại xuất bản được', () => {
+    for (const fixture of fixtures) {
+      const game = structuredClone(fixture)
+      if (game.gameType === 'SPOT_THE_TARGET') delete game.questions[2].hitRegion
       const issues = validateGame(game, 'publish')
 
       if (game.gameType === 'SPOT_THE_TARGET') {
@@ -260,7 +266,7 @@ describe('SPOT_THE_TARGET', () => {
 
   it('vùng đúng: x, y trong [0, 1], bán kính trong (0, 1]', () => {
     for (const ok of [{ x: 0, y: 1, radius: 1 }, { x: 0.5, y: 0.5, radius: 0.01 }]) {
-      // Chỉ xét câu 1: câu 3 của game mẫu cố ý chưa có vùng đúng.
+      // Chỉ xét câu 1 để lỗi của ca này không bị dữ liệu ở câu khác che.
       expect(run('SPOT_THE_TARGET', (q) => (q.hitRegion = ok), 'publish').filter((issue) => issue.questionIndex === 0)).toEqual([])
     }
     for (const bad of [{ x: -0.1, y: 0.5, radius: 0.1 }, { x: 0.5, y: 1.2, radius: 0.1 }, { x: 0.5, y: 0.5, radius: 0 }, { x: 0.5, y: 0.5, radius: 1.5 }]) {

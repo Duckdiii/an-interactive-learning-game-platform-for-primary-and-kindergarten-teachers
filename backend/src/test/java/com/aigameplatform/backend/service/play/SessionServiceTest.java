@@ -20,7 +20,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.mock.env.MockEnvironment;
 
 class SessionServiceTest {
 
@@ -48,6 +51,8 @@ class SessionServiceTest {
                 sessions, games, teachers, participants, teams, scores,
                 blockedWordList, liveArenaService, leaderboardRegistry, messagingTemplate, classroomService);
 
+        service.configureJoinBaseUrl("https://play.example.test//join");
+
         author = new Teacher();
         author.setId("teacher-1");
         author.setEmail("teacher@example.com");
@@ -65,6 +70,32 @@ class SessionServiceTest {
     }
 
     @Test
+    void liveArenaJoinUrlFollowsThePlayerOriginAndAllowsAnOverride() throws Exception {
+        var loader = new YamlPropertySourceLoader();
+        var environment = new MockEnvironment();
+        for (var source : loader.load("app", new ClassPathResource("application.yml"))) {
+            environment.getPropertySources().addLast(source);
+        }
+        String key = "app.live-arena.join-base-url";
+        assertThat(environment.getRequiredProperty(key)).isEqualTo("http://localhost:5173/join");
+
+        for (var source : loader.load("prod", new ClassPathResource("application-prod.yml"))) {
+            environment.getPropertySources().addFirst(source);
+        }
+        environment.setProperty("PLAYER_ORIGIN", "https://play.example.test");
+        assertThat(environment.getRequiredProperty(key)).isEqualTo("https://play.example.test/join");
+
+        environment.setProperty("LIVE_ARENA_JOIN_BASE_URL", "https://join.example.test/arena");
+        assertThat(environment.getRequiredProperty(key)).isEqualTo("https://join.example.test/arena");
+    }
+
+    @Test
+    void rejectsBlankOrRelativeJoinUrl() {
+        assertThatThrownBy(() -> service.configureJoinBaseUrl(" ")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.configureJoinBaseUrl("/join")).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void createSessionSoloSuccess() {
         when(sessions.save(any(GameSession.class))).thenAnswer(inv -> {
             GameSession s = inv.getArgument(0);
@@ -79,6 +110,7 @@ class SessionServiceTest {
         assertThat(result.sessionType()).isEqualTo(SessionType.SOLO);
         assertThat(result.status()).isEqualTo(SessionStatus.WAITING);
         assertThat(result.accessCode()).matches("^[0-9]{6}$");
+        assertThat(result.joinUrl()).isEqualTo("https://play.example.test/join?pin=" + result.accessCode());
         verify(liveArenaService).registerHost("session-1", "teacher-1");
     }
 

@@ -45,6 +45,34 @@ Mẫu một mục:
 - Cách chặn: đã sửa và kiểm bằng `tsc`; đề xuất dùng Edit cho thay đổi có toán tử/ký tự đặc biệt, script regex chỉ cho mẫu không có `\`.
 - Trạng thái: CHỜ DUYỆT
 
+### 2026-11-17 — Đồng nhất severity với việc hậu quả đã thực sự xảy ra
+- Lỗi: reviewer v1 tìm đúng bypass mandatory gate nhưng4/40 lần chấm priority đòi chạy caller/commit thật mới xếp HIGH, dù contract đã xác định boolean là quyết định admission.
+- Phát hiện nhờ: machine grader mới FAIL4 và judge độc lập xác nhận đây là under-rating, không phải thiếu fixture/gold.
+- Nguyên nhân gốc: prompt yêu cầu hậu quả có bằng chứng nhưng chưa tách rõ severity theo path/contract khỏi confidence rằng hậu quả ngoài đã xảy ra.
+- Cách chặn: giữ v1 FAIL, không đổi gold; hướng dẫn vòng v2 làm rõ hai khái niệm và không yêu cầu commit/deploy/request phá dữ liệu thật. Bốn ca mới đóng băng/audit trước sửa; evaluator vẫn FAIL sai mức. Hiệu quả model chỉ kết luận sau đủ fresh trials/judge, không suy từ sửa prompt.
+- Trạng thái: CHỜ DUYỆT (sửa role nằm trong BR được user giao, không tự duyệt lesson thành luật chung).
+
+### 2026-11-17 — Gold thiếu trường làm bộ chấm âm thầm giảm phạm vi
+- Lỗi: bản sửa T06 đầu kiểm severity khi gold có trường này nhưng chưa bắt reviewer gold thiếu trường, nên CLI vẫn PASS theo verdict-only.
+- Phát hiện nhờ: reviewer độc lập tạo rubric thiếu severity và import hai lượt sai mức, CLI vẫn exit0.
+- Nguyên nhân gốc: giữ compatibility quá rộng, kiểm thuộc tính tùy chọn mà không xác lập scope bắt buộc theo role; một assertion duplicate còn bị lỗi gold ở lớp trước che mất.
+- Cách chặn: unit/CLI regression đỏ→xanh; validate reviewer gold bắt buộc severity (CLEAN null), legacy chỉ ở scope khác; duplicate test dùng gold hợp lệ và assert đúng lỗi.20 focused tests đạt.
+- Trạng thái: CHỜ DUYỆT (code/test đã sửa, không tự nâng lesson thành rule).
+
+### 2026-11-16 — Test thao tác chưa chứng minh kết quả vẽ hoặc phát lại
+- Lỗi: test CPF ảnh lỗi chỉ click tọa độ rồi hoàn thành, chưa chứng minh nhãn được vẽ; test audio coi request lỗi + button enabled là đủ dù preload/autoplay vẫn tạo request khi onClick hỏng.
+- Phát hiện nhờ: reviewer T05b chỉ ra hai khoảng trống TRUNG BÌNH.
+- Nguyên nhân gốc: dùng tín hiệu chung của flow để kết luận hành vi riêng.
+- Cách chặn: assertion ở API vẽ canvas công khai cho từng nhãn và screenshot; hai chu kỳ pulse sau click khi autoplay đã kết thúc. Targeted browser3/3 đạt, không khẳng định nghe được audio đang lỗi.
+- Trạng thái: CHỜ DUYỆT cho quy tắc tổng quát; assertion thuộc task đã giao đã sửa, không tự nâng thành rule/prompt mới.
+
+### 2026-11-16 — Assertion giữ nguyên option nhầm với giữ ý nghĩa đáp án
+- Lỗi: test mới đòi JSON option giữ nguyên thứ tự khi sửa câu khác, nhưng pipeline có chủ ý xáo option và ánh xạ lại đáp án.
+- Phát hiện nhờ: test HTTP đỏ, output chỉ khác thứ tự nhãn.
+- Nguyên nhân gốc: suy diễn "giữ nguyên nội dung" thành giữ id/vị trí mà chưa đối chiếu biến đổi hợp lệ.
+- Cách chặn: test đã kiểm tập nhãn và nhãn đáp án đúng; vẫn kiểm PUT/GET giữ nguyên JSON sau lưu. Không bỏ assertion nội dung.
+- Trạng thái: CHỜ DUYỆT nguyên tắc chung; bản sửa test đã được thực hiện trong T03 được người dùng giao.
+
 ### 2026-11-15 — Đặt `@EnabledIf` ở lớp test cha, tưởng lớp con kế thừa; ghi "máy không có Docker thì bỏ qua" khi chưa thử nhánh đó
 - Lỗi: `AbstractPostgresTest` gắn `@EnabledIf(dockerAvailableOrCi)`, nhưng annotation này không `@Inherited` nên không có tác dụng ở lớp con. Ép điều kiện thành `false` thì 2 lớp test vẫn chạy. Máy dev không có Docker sẽ đỏ thay vì bỏ qua như comment và `corrections` ghi.
 - Phát hiện nhờ: `reviewer` (đọc javap + `AnnotationUtils`), xác nhận bằng cách ép điều kiện `false` rồi chạy.

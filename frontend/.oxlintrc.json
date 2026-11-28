@@ -25,10 +25,6 @@
       "rules": { "react/refs": "warn", "react/set-state-in-effect": "warn" }
     },
     {
-      "files": ["src/pages/WorkspaceEditor.tsx"],
-      "rules": { "react/refs": "warn" }
-    },
-    {
       "files": ["src/pages/CreateGamePage.tsx"],
       "rules": { "react/set-state-in-effect": "warn", "react/exhaustive-deps": "warn" }
     },

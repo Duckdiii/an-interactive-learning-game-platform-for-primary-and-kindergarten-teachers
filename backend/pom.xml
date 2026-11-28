@@ -315,7 +315,7 @@
 				</executions>
 			</plugin>
 			<!-- Mutation testing (PIT): đo test có bắt được lỗi cố ý chèn vào code không. Không gắn vào phase nào nên
-				`mvn test`/CI không chạy; chạy tay: `./mvnw test-compile org.pitest:pitest-maven:mutationCoverage`,
+				`mvn test` không chạy; workflow mutation gọi riêng, hoặc chạy tay: `./mvnw test-compile org.pitest:pitest-maven:mutationCoverage`,
 				báo cáo ở target/pit-reports/index.html. Phạm vi: các module kiểm duyệt game (Layer 2, đầu ra AI, Layer 3). -->
 			<plugin>
 				<groupId>org.pitest</groupId>
@@ -342,6 +342,7 @@
 						<param>XML</param>
 					</outputFormats>
 					<timestampedReports>false</timestampedReports>
+					<mutationThreshold>89</mutationThreshold>
 					<threads>4</threads>
 				</configuration>
 			</plugin>

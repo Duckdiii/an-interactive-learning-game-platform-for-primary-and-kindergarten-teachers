@@ -7,7 +7,7 @@ import {
   storeAccessToken,
 } from '../utils/authStorage'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api'
+const baseURL = import.meta.env.VITE_API_BASE_URL?.trim() || (import.meta.env.DEV ? 'http://localhost:8080/api' : '/api')
 
 // withCredentials: Backend khác origin, phải bật thì trình duyệt mới nhận Set-Cookie refresh_token khi đăng nhập
 // và gửi lại cookie đó (Path=/api/auth) khi làm mới/đăng xuất.

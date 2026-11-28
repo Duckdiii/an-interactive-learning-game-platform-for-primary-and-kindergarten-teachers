@@ -29,7 +29,7 @@ export function checkResult(result, schema, diff, expect = {}) {
     throw new PostError(`prompt_version trong kết quả (${result.prompt_version}) khác phiên bản prompt đã dùng (${expect.promptVersion}).`);
   }
   if (result.status !== "complete") throw new PostError("Agent báo status=incomplete (chưa review xong), không đăng.");
-  if (diff.size > 0 && result.files_reviewed.length === 0) {
+  if ((expect.changedFiles > 0 || diff.size > 0) && result.files_reviewed.length === 0) {
     throw new PostError("files_reviewed rỗng dù PR có thay đổi: coi là agent chưa làm việc, không đăng.");
   }
 }
@@ -58,7 +58,9 @@ export async function run({ result, schema, github, pr, analyzedSha, dryRun = fa
     github.getPull(pr), github.getDiff(pr), github.listReviewComments(pr), github.listIssueComments(pr),
   ]);
   const diff = parseDiff(diffText);
-  checkResult(result, schema, diff, { mode: expectMode, promptVersion: expectPromptVersion });
+  checkResult(result, schema, diff, {
+    mode: expectMode, promptVersion: expectPromptVersion, changedFiles: pull.changed_files,
+  });
 
   const headSha = pull.head.sha;
   const existingSummary = findSummary(issueComments, bot);

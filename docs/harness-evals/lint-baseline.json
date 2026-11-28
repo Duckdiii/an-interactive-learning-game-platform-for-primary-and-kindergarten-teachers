@@ -1,0 +1,488 @@
+[
+  {
+    "filename": "src/components/editor/LivePreviewPanel.tsx",
+    "code": "react(only-export-components)",
+    "source": "export { LivePreviewPanel, default } from './preview/LivePreviewPanel'",
+    "count": 1
+  },
+  {
+    "filename": "src/games/common/ConfettiEffect.tsx",
+    "code": "react(refs)",
+    "source": "onCompleteRef.current = onComplete",
+    "count": 1
+  },
+  {
+    "filename": "src/games/common/ConfettiEffect.tsx",
+    "code": "react(set-state-in-effect)",
+    "source": "setAnimating(false)",
+    "count": 1
+  },
+  {
+    "filename": "src/games/ordering/OrderingRenderer.tsx",
+    "code": "react(purity)",
+    "source": "const [now, setNow] = useState(Date.now())",
+    "count": 1
+  },
+  {
+    "filename": "src/games/visual-cloze-image/VisualClozeImageRenderer.tsx",
+    "code": "react(set-state-in-effect)",
+    "source": "setShakeOffset(offsets[step])",
+    "count": 1
+  },
+  {
+    "filename": "src/hooks/useLiveArenaSocket.ts",
+    "code": "react(refs)",
+    "source": "handlersRef.current = handlers",
+    "count": 1
+  },
+  {
+    "filename": "src/hooks/useLiveArenaSocket.ts",
+    "code": "react(refs)",
+    "source": "return { connected, client: clientRef.current }",
+    "count": 2
+  },
+  {
+    "filename": "src/pages/CreateGamePage.tsx",
+    "code": "react(set-state-in-effect)",
+    "source": "setMode('idea')",
+    "count": 1
+  },
+  {
+    "filename": "src/player/room/RoomLobby.tsx",
+    "code": "react(only-export-components)",
+    "source": "export const DOT_COLORS =['bg-play-dot-yellow', 'bg-play-dot-pink', 'bg-play-dot-blue', 'bg-play-dot-green', 'bg-play-dot-orange', 'bg-play-dot-purple']",
+    "count": 1
+  },
+  {
+    "filename": "src/player/room/RoomStudentScreen.tsx",
+    "code": "react(static-components)",
+    "source": "<Renderer",
+    "count": 1
+  },
+  {
+    "filename": "src/player/room/useRoomSeconds.ts",
+    "code": "react(purity)",
+    "source": "setNow(Date.now())",
+    "count": 1
+  },
+  {
+    "filename": "src/player/room/useTeacherRoom.ts",
+    "code": "react(set-state-in-effect)",
+    "source": "setActionFailed(false)",
+    "count": 1
+  },
+  {
+    "filename": "src/player/theme/PresentationContext.tsx",
+    "code": "react(only-export-components)",
+    "source": "export const usePresentation = () => useContext(PresentationContextObject)",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react-hooks(exhaustive-deps)",
+    "source": "}, [width, height])",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(purity)",
+    "source": "const lastFpsTimeRef = useRef(performance.now())",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(purity)",
+    "source": "const lastFrameTimeRef = useRef(performance.now())",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "-runtime.basket.width / 2 + 20,",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": ": mechanic === 'FALLING_CATCHER'",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": ": mechanic === 'POP_TAPPER'",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "? runtime.isPulling",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{!runtime.isFlying && !runtime.isPulling && (",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{floatingPopupsRef.current.map((pop) => (",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{hasCompletedRef.current && (",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{hasCompletedRef.current &&",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{mechanic === 'FALLING_CATCHER' && (",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{mechanic === 'PHYSICS_SLING_ARCHERY' && (",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{mechanic === 'POP_TAPPER' && (",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{runtime.balloons.map((b) => {",
+    "count": 6
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{runtime.combo > 1 && (",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{runtime.fallingItems.map((item) => {",
+    "count": 3
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{runtime.messageBanner && (",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "{runtime.particles.map((p) => (",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "} else if (mechanic === 'PHYSICS_SLING_ARCHERY') {",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "<Group x={runtime.bowAnchor.x} y={runtime.bowAnchor.y}>",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "<Group x={runtime.shakeOffset.x} y={runtime.shakeOffset.y}>",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "const launchAngleRad = (runtime.arrowRotation * Math.PI) / 180",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "const launchSpeed = runtime.tensionForce * 0.28",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "const timeSec = timeSecRef.current",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "fill={runtime.messageBanner.color}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "height={runtime.basket.height}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "if (!runtimeRef.current) {",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "if (mechanic === 'FALLING_CATCHER') {",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "if (mechanic === 'PHYSICS_SLING_ARCHERY' && runtime.isPulling && runtime.tensionForce > 25) {",
+    "count": 4
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "mascotX = runtime.basket.x - runtime.basket.width / 2 + 10",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "mascotY = runtime.basket.y - 42",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "mechanic === 'PHYSICS_SLING_ARCHERY'",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "points={[-40, -runtime.basket.height / 2 + 10, -40, runtime.basket.height / 2 - 10]}",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "points={[",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "points={[40, -runtime.basket.height / 2 + 10, 40, runtime.basket.height / 2 - 10]}",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "rotation={runtime.arrowRotation}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "runtime.basket.width / 2 - 20,",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "runtime.bowLowerTip.x,",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "runtime.bowLowerTip.y,",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "runtime.bowUpperTip.x,",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "runtime.bowUpperTip.y,",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "runtime.pullPos.x,",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "runtime.pullPos.y,",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "scaleX={basketSquashRef.current.scaleX}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "scaleY={basketSquashRef.current.scaleY}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "simX += simVx * 1.5",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "simY += simVy * 1.5",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "text={`⭐ ĐIỂM: ${runtime.score}`}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "text={`🔥 COMBO x${runtime.combo}!`}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "text={runtime.messageBanner.text}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "victoryConfettiRef.current.map((c) => (",
+    "count": 2
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "width={runtime.basket.width + 20}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "width={runtime.basket.width}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "x={-runtime.basket.width / 2 - 10}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "x={-runtime.basket.width / 2}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "x={runtime.arrowPos.x}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "x={runtime.basket.x}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "x={runtime.bowAnchor.x - 75}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "y={-runtime.basket.height / 2 - 10}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "y={-runtime.basket.height / 2}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "y={runtime.arrowPos.y}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "y={runtime.basket.y}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/CpfUniversalCanvas.tsx",
+    "code": "react(refs)",
+    "source": "y={runtime.bowAnchor.y - 30}",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/FarmQuizCanvas.tsx",
+    "code": "react(purity)",
+    "source": "const angle = Math.random() * Math.PI * 2",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/FarmQuizCanvas.tsx",
+    "code": "react(purity)",
+    "source": "const lastFpsTimeRef = useRef(performance.now())",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/FarmQuizCanvas.tsx",
+    "code": "react(purity)",
+    "source": "const spd = 3 + Math.random() * 10",
+    "count": 1
+  },
+  {
+    "filename": "src/services/pipeline/renderers/FarmQuizCanvas.tsx",
+    "code": "react(purity)",
+    "source": "radius: 5 + Math.random() * 6,",
+    "count": 1
+  }
+]

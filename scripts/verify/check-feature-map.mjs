@@ -19,6 +19,30 @@ const OPENAPI_LINE_CITE = /\bOA:\d+\b/;
 const key = (method, path) => `${method} ${normalize(path)}`;
 const SECTIONS = { implemented: "## Đã có code", missing: "## Frontend gọi nhưng backend chưa có" };
 
+export function checkRouteMatrix(matrix, paths, app, fileExists) {
+  // Only literal ROUTES references are supported; comments/string examples cannot register a route.
+  const literalsAndComments = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g;
+  paths = paths.replace(literalsAndComments, m => m.startsWith('/') ? ' ' : m);
+  app = app.replace(literalsAndComments, ' ');
+  const routes = new Map([...paths.matchAll(/\b(\w+):\s*['"](\/[^'"]*)['"]/g)].map(m => [m[1], m[2]]));
+  const errors = [];
+  const seen = new Set();
+  if (!routes.size) errors.push('Cannot read ROUTES');
+  for (const row of matrix) {
+    if (seen.has(row.key)) errors.push(`Duplicate route ${row.key}`);
+    seen.add(row.key);
+    if (routes.get(row.key) !== row.path) errors.push(`Route ${row.key} differs from paths.ts`);
+    if (!app.includes(`path={ROUTES.${row.key}}`)) errors.push(`Route ${row.key} is not registered in App.tsx`);
+    if (!['real', 'mixed', 'mock', 'unverified'].includes(row.state)) errors.push(`Invalid state ${row.key}`);
+    if (!Array.isArray(row.checks) || (row.state !== 'unverified' && !row.checks.length)) {
+      errors.push(`No evidence entry for ${row.key}`);
+    }
+    else for (const file of row.checks) if (!fileExists(file)) errors.push(`Missing evidence ${file}`);
+  }
+  for (const key of routes.keys()) if (!seen.has(key)) errors.push(`Route ${key} has no coverage entry`);
+  return errors;
+}
+
 /** Số dòng như `wc -l` cộng dòng cuối không có xuống dòng (file kết thúc bằng "\n" không có thêm dòng rỗng). */
 export const countLines = (text) => (text === "" ? 0 : text.split("\n").length - (text.endsWith("\n") ? 1 : 0));
 
@@ -69,6 +93,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const errors = [
     ...unreadable.map((u) => `${u.file}:${u.line}: không đọc được ${u.text} (viết đường dẫn dạng chuỗi, hoặc nâng cấp compare-endpoints)`),
     ...checkFeatureMap(readFileSync(join(root, "docs/FEATURE-MAP.md"), "utf8"), codeOps, lineCount),
+    ...checkRouteMatrix(JSON.parse(readFileSync(join(root, 'docs/harness-evals/route-matrix.json'), 'utf8')),
+      readFileSync(join(root, 'frontend/src/routes/paths.ts'), 'utf8'),
+      readFileSync(join(root, 'frontend/src/App.tsx'), 'utf8'), path => existsSync(join(root, path))),
   ];
   for (const e of errors) console.error(`[LỖI] ${e}`);
   if (errors.length) process.exit(1);

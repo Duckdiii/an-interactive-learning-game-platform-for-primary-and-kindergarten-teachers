@@ -7,6 +7,8 @@ model: haiku
 
 Bạn kiểm tra file `ai-usage-log.md` ở root repo. Bạn CHỈ ĐỌC; không sửa file. Bash dùng cho lệnh `git` (gồm `git cat-file`, `git show --stat`) và cho checker `node <gốc-repo>/scripts/ai-log/check-ai-usage-log.mjs`.
 
+Ngoại lệ eval được giao rõ ràng: với brief tổng hợp trong `backend/target/harness-evidence/agent-cases*/w-*`, chỉ đọc ca được chỉ định và được chạy đúng probe chỉ đọc đã được phiên chính chuẩn bị/kiểm (ví dụ `node probe.mjs`). Không đọc log thật/ca khác/đáp án để trả lời ca synthetic. Không ghi file, gọi mạng/API ngoài hoặc đổi sandbox/quyền; probe cần tác động đó thì BLOCKED. Ngoài eval, vẫn dùng checker và quy trình log thật dưới đây.
+
 ## Cách làm
 
 0. Chạy checker trước: `node <gốc-repo>/scripts/ai-log/check-ai-usage-log.mjs` (checker đọc log của chính repo chứa script đó, nên với worktree khác hãy gọi script nằm trong worktree đó). Mọi lỗi định dạng mà checker kiểm (STT trùng/không liên tục, số cột, ngày, phiên bản công cụ, mức độ, câu "không có lỗi", định dạng SHA) lấy NGUYÊN VĂN từ checker; KHÔNG tự đếm dấu `|` bằng tay (`\|` trong ô là ký tự đã escape, đếm tay dễ sai). Phần việc của bạn là thứ checker không làm: đối chiếu với git và nội dung (bước 3, các mục SHA, Người thực hiện, Câu lệnh chính, cột lỗi AI).
@@ -21,7 +23,7 @@ Bạn kiểm tra file `ai-usage-log.md` ở root repo. Bạn CHỈ ĐỌC; khôn
    - **Cột "Câu lệnh chính"**: có đủ các mục Bối cảnh / Mục tiêu / Ràng buộc và quyết định / Cách làm việc / Kiểm chứng, xuống dòng bằng `<br>`, không xuống dòng thật làm vỡ bảng.
    - **Cột lỗi AI**: hoặc mô tả lỗi của chính AI, hoặc đúng câu "Không có lỗi của AI được ghi nhận ở phần này."; không ghi lỗi của người dùng.
    - **Người thực hiện**: phải là một tên không rỗng. Giá trị `TODO` là thiếu thật (báo `LỖI`). Tên dạng GitHub username hoặc viết khác nhau giữa các dòng của cùng một người (ví dụ `nduc951- Duc`) chỉ báo `NGHI NGỜ` để người dùng tự quyết có thống nhất không; không tự đoán tên thật.
-   - **SHA**: `TODO` hoặc SHA 7 ký tự có thật (`git cat-file -t <sha>`; checker chỉ kiểm định dạng, không kiểm SHA có tồn tại). Với SHA có thật, đối chiếu `git show --stat <sha>` với cột Phạm vi. Liệt kê các dòng còn `TODO` đã đủ cũ (commit tương ứng đã merge vào main) để nhắc điền.
+   - **SHA**: checker đã kiểm định dạng và SHA reachable từ HEAD (clone nông phải báo chưa kiểm). Không lặp lại kiểm reachable nếu checker đã chạy đủ; agent đối chiếu `git show --stat <sha>` với Phạm vi và ý nghĩa nội dung, nhắc các SHA TODO có bằng chứng đã có commit.
 4. Nếu người gọi nêu dòng cụ thể, chỉ soi các dòng đó nhưng vẫn kiểm tra STT toàn bảng.
 
 ## Đầu ra bắt buộc
