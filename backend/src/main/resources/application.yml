@@ -92,6 +92,8 @@ app:
   cors:
     # Nhiều origin thì ngăn bằng dấu phẩy. Profile prod bắt buộc CORS_ALLOWED_ORIGINS (application-prod.yml).
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  live-arena:
+    join-base-url: ${LIVE_ARENA_JOIN_BASE_URL:${app.player.browser-origin}/join}
   player:
     # Origin của trình duyệt, dùng để tải ảnh cảnh (SceneImageLoader) và dựng link chia sẻ gửi phụ huynh.
     # Profile prod bắt buộc PLAYER_ORIGIN + PLAYER_SHARE_BASE_URL, không có mặc định localhost.

@@ -162,8 +162,9 @@ export function main(args = process.argv.slice(2)) {
       return { status: null, error: { code: 'ENOENT' } };
     }
     const cmd = process.platform === 'win32' && step.command.endsWith('.cmd');
+    const stepEnv = step.id === 'frontend-build' ? { ...env, VITE_API_BASE_URL: '/api' } : env;
     return spawnSync(cmd ? 'cmd.exe' : step.command, cmd ? ['/d', '/c', step.command, ...step.args] : step.args,
-      { cwd: step.cwd, env, encoding: 'utf8', timeout: 20 * 60_000, maxBuffer: 64 * 1024 * 1024 });
+      { cwd: step.cwd, env: stepEnv, encoding: 'utf8', timeout: 20 * 60_000, maxBuffer: 64 * 1024 * 1024 });
   }, { docker });
   for (const [index, r] of results.entries()) {
     const step = steps[index];

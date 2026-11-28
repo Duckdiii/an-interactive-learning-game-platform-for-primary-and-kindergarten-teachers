@@ -17,6 +17,7 @@ import com.aigameplatform.backend.repository.*;
 import com.aigameplatform.backend.security.AuthenticatedTeacher;
 import com.aigameplatform.backend.service.classroom.ClassroomService;
 import com.aigameplatform.backend.service.validation.safety.BlockedWordList;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -43,8 +44,17 @@ public class SessionService {
     private final SimpMessagingTemplate messagingTemplate;
     private final SecureRandom random = new SecureRandom();
 
-    @Value("${app.live-arena.join-base-url:http://localhost:5173/join}")
-    private String joinBaseUrl;
+    private URI joinBaseUrl;
+
+    @Value("${app.live-arena.join-base-url}")
+    void configureJoinBaseUrl(String baseUrl) {
+        URI uri = URI.create(baseUrl.trim()).normalize();
+        if (uri.getHost() == null || !("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()))
+                || uri.getRawQuery() != null || uri.getRawFragment() != null || uri.getRawUserInfo() != null) {
+            throw new IllegalArgumentException("Live Arena join URL must be an HTTP(S) URL without credentials, query or fragment");
+        }
+        joinBaseUrl = uri;
+    }
 
     public SessionService(
             GameSessionRepository sessions,
