@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 const API = 'http://localhost:18080/api'
 
 async function login(page: Page) {
-  const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  const id = `${Date.now()}-${crypto.randomUUID()}`
   const email = `play-${id}@example.test`
   const password = `Play-${id}-Aa1!`
   const registered = await page.request.post(`${API}/auth/register`, { data: { fullName: 'Gameplay fixture', email, password, acceptedPolicy: true } })

@@ -4,7 +4,7 @@ import type { ApiGameType, AnyGameResponse } from '../src/types/game-response.ty
 export const API = 'http://localhost:18080/api'
 
 export async function createGame(page: Page, gameType: ApiGameType, idea = 'Browser fixture', subject = 'MATH', gradeLevel = 'GRADE_1') {
-  const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  const id = `${Date.now()}-${crypto.randomUUID()}`
   const email = `browser-${id}@example.test`
   const password = `Play-${id}-Aa1!`
   expect((await page.request.post(`${API}/auth/register`, { data: { fullName: 'Browser fixture', email, password, acceptedPolicy: true } })).status()).toBe(201)
