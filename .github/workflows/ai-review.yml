@@ -483,6 +483,8 @@ jobs:
           EXPECT_MODE: ${{ needs.prepare.outputs.mode }}
           EXPECT_PROMPT: ${{ needs.prepare.outputs.prompt_version }}
           ANALYZED_SHA: ${{ needs.prepare.outputs.head_sha }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PR: ${{ needs.prepare.outputs.pr }}
         run: node trusted/scripts/ai-review/coverage.mjs collect ai-review-input shards
 
       - name: Đăng kết quả lên PR

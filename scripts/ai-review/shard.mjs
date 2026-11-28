@@ -136,7 +136,7 @@ function main() {
   const parts = shards.map(({ files }, i) => ({ id: i + 1, files }));
   // Một job rỗng giữ cấu trúc matrix hợp lệ. Không gọi model khi không có phần cần review.
   const matrix = { shard: parts.length ? parts.map(({ id }) => id) : [0] };
-  writeFileSync(join(dir, "manifest.json"), JSON.stringify({ round: Number(round), head, parts, skipped, manual, previous }));
+  writeFileSync(join(dir, "manifest.json"), JSON.stringify({ round: Number(round), base, head, parts, skipped, manual, previous }));
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(matrix)}\n`);
   console.log(`Chia review: ${parts.length} phần, ${shards.map(({ files }) => files.length).join("+") || "0"} file; ${skipped.length} loại trừ, ${manual.length} cần review tay.`);
 }
