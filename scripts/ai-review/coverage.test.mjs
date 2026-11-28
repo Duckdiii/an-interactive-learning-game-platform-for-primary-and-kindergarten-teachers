@@ -59,7 +59,7 @@ test("chỉ chấp nhận xác nhận của chủ repo cho đủ file, đúng ba
   const body = ["/ai-review-manual " + base + " " + head, JSON.stringify([...manifest.manual].reverse())].join("\n");
   const owner = { id: 12, author_association: "OWNER", user: { type: "User" }, body };
   assert.deepEqual(findManualApproval([owner], manifest), { commentId: 12, files: manifest.manual });
-  assert.deepEqual(findManualApproval([{ ...owner, body: body.replace("\n", "\r\n") }], manifest)?.files, manifest.manual);
+  assert.deepEqual(findManualApproval([{ ...owner, body: body.replaceAll("\n", "\r\n") }], manifest)?.files, manifest.manual);
   for (const bad of [
     { ...owner, author_association: "MEMBER" },
     { ...owner, user: { type: "Bot" } },
